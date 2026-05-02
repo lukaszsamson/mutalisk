@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# Layered verification harness. See PLAN.md §"The verification harness".
+#
+# Usage:
+#   bin/verify              # run every enabled layer in order
+#   bin/verify <layer>      # run one layer; non-zero exit if not yet enabled
+#
+# Edit ENABLED_LAYERS as milestones complete.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+# Enable layers as their milestone is completed. Order in this list is the
+# execution order for `bin/verify` (no args).
+ENABLED_LAYERS=(
+  lint
+  unit
+)
+
+ALL_LAYERS=(
+  lint
+  unit
+  dialyzer
+  golden_oracle
+  golden_instrument
+  integration_schema
+  integration_fallback
+  e2e_mut
+)
+
+# layer -> milestone that enables it (for skipped messages)
+declare -A LAYER_MILESTONE=(
+  [lint]=M0
+  [unit]=M0
+  [dialyzer]=M1
+  [golden_oracle]=M2
+  [golden_instrument]=M6
+  [integration_schema]=M8
+  [integration_fallback]=M10
+  [e2e_mut]=M13
+)
+
+is_enabled() {
+  local layer="$1"
+  for l in "${ENABLED_LAYERS[@]}"; do
+    [ "$l" = "$layer" ] && return 0
+  done
+  return 1
+}
+
+is_known() {
+  local layer="$1"
+  for l in "${ALL_LAYERS[@]}"; do
+    [ "$l" = "$layer" ] && return 0
+  done
+  return 1
+}
+
+step() { printf '\n==> %s\n' "$1"; }
+skip() { printf '\n--  %s  (skipped: enabled by %s)\n' "$1" "${LAYER_MILESTONE[$1]}"; }
+
+run_lint() {
+  step lint
+  mix format --check-formatted
+  mix compile --warnings-as-errors
+  mix credo --strict
+}
+
+run_unit() {
+  step unit
+  mix test
+  bash scripts/fixture_check.sh
+}
+
+run_dialyzer() {
+  step dialyzer
+  mix dialyzer --halt-exit-status
+}
+
+run_golden_oracle() {
+  step golden_oracle
+  mix test --only golden_oracle
+}
+
+run_golden_instrument() {
+  step golden_instrument
+  mix test --only golden_instrument
+}
+
+run_integration_schema() {
+  step integration_schema
+  mix mut.test_schema
+}
+
+run_integration_fallback() {
+  step integration_fallback
+  mix mut.test_fallback
+}
+
+run_e2e_mut() {
+  step e2e_mut
+  mix mut.e2e
+}
+
+run_layer() {
+  local layer="$1"
+  if is_enabled "$layer"; then
+    "run_${layer}"
+  else
+    skip "$layer"
+  fi
+}
+
+main() {
+  if [ "$#" -gt 0 ]; then
+    local layer="$1"
+    if ! is_known "$layer"; then
+      echo "Unknown layer: $layer" >&2
+      echo "Known: ${ALL_LAYERS[*]}" >&2
+      exit 2
+    fi
+    if ! is_enabled "$layer"; then
+      echo "Layer '$layer' is not yet enabled (milestone ${LAYER_MILESTONE[$layer]})." >&2
+      echo "Add it to ENABLED_LAYERS in bin/verify when its milestone is done." >&2
+      exit 3
+    fi
+    "run_${layer}"
+  else
+    for layer in "${ALL_LAYERS[@]}"; do
+      run_layer "$layer"
+    done
+  fi
+  printf '\nOK\n'
+}
+
+main "$@"

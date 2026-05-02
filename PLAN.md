@@ -24,18 +24,24 @@ Compiler tracer options and module loading do not cross OS process boundaries. M
 The contract:
 
 1. **Working-copy injection.** Mutalisk never operates on the user's source tree. It produces a working copy at `tmp/mut_work/<run_id>/` (oracle and schema phases) or `tmp/mut_sandboxes/<run_id>/<n>/` (workers). The working copy is rooted at the user project's `mix.exs`.
-2. **`mix.exs` overlay.** Mutalisk writes a sibling `mix_mut.exs` into the working copy that:
-   - Imports the original `mix.exs` definitions if possible, or wraps them.
-   - Adds `mutalisk` as a `:path` dependency pointing to the absolute path of the host mutalisk checkout.
-   - Adds `:compilers` registration for `:mut_bootstrap` ahead of `:elixir` (oracle path) or registers no extra compiler (schema path).
-   - The original `mix.exs` is renamed to `mix_user.exs`; `mix_mut.exs` is renamed to `mix.exs` for the duration of the run.
-3. **Bootstrap module.** `Mut.Bootstrap` is a tiny module shipped in `mutalisk` itself. It exposes:
-   - `oracle_compiler/0` — a Mix compiler module (a one-shot before-`elixir` step) that calls `Code.put_compiler_option(:tracers, [Mut.Trace])` and starts `Mut.Trace.Writer`. Registered only in oracle builds.
-   - `runtime_init/0` — sets up `:persistent_term` from the `MUT_ACTIVE` env var. Registered as an `application: [mod: ...]` callback only in schema/fallback builds.
-4. **Worker bootstrap.** Workers run via `elixir -S mix test ...` with `MUT_ACTIVE=<id>` in the environment. The schema build's overlay registers a tiny `Mut.Runtime.Boot` application module whose `start/2` reads `MUT_ACTIVE` and sets `:persistent_term`. **No `MIX_INIT`. No `--eval` injections.** Plain env-var-driven application start.
-5. **Tracer event handoff.** `Mut.Trace.Writer` is a GenServer started by the oracle bootstrap before compile. All tracer callbacks send events to the writer; the writer batches and writes JSONL to `_build/mut_oracle/.mut_oracle.jsonl` with a final `{"event":"end","count":N}` sentinel. Direct file appends from concurrent tracer callbacks are forbidden — `Kernel.ParallelCompiler` runs tracer callbacks in many processes simultaneously and unsynchronized appends interleave or lose events.
+2. **`mix.exs` overlay.** Mutalisk writes a replacement `mix.exs` into the working copy that:
+   - Renames the original `mix.exs` to `mix_user.exs` (preserved verbatim).
+   - `Code.require_file/2`s `mix_user.exs` so the user's `MyApp.MixProject` is defined and pushed via `use Mix.Project`.
+   - Captures the user module via `Mix.Project.get!()` and stashes it through `Application.put_env/3`.
+   - Defines `Mutalisk.WrappedMixProject` which `use Mix.Project` (pushed on top of user's). Its `project/0` delegates to the user module then injects two overrides: append `{:mutalisk, path: System.fetch_env!("MUTALISK_PATH"), only: [:test], runtime: true}` to `:deps`; and (oracle role only) prepend the atom `:mut_oracle` to `:compilers`.
+   - `application/0` delegates to the user module unchanged. **The overlay never replaces the user's `:mod` callback.** Mutalisk's runtime boot runs because `:mutalisk` is a dep, so OTP starts the `:mutalisk` application before the user app.
+3. **Bootstrap modules** (loaded into the child BEAM via the path-dep, NOT referenced from the overlay file):
+   - `Mix.Tasks.Compile.MutOracle` — a `Mix.Task.Compiler` shipped in mutalisk. The atom `:mut_oracle` in `:compilers` resolves to this module via Mix's standard `Mix.Tasks.Compile.<Camelize>` convention. Its `run/1` calls `Code.put_compiler_option(:tracers, [Mut.Trace | existing_tracers])`, starts `Mut.Trace.Writer`, and registers `System.at_exit/1` to flush + write the count sentinel before BEAM shutdown. Returns `{:noop, []}`. `manifests/0` returns `[]`. `clean/0` is a no-op.
+   - `Mut.Application` — mutalisk's own OTP application callback module. Declared in mutalisk's own `mix.exs` as `mod: {Mut.Application, []}`. `start/2` reads `MUT_ACTIVE` from the environment, calls `Mut.Runtime.set_active/1`, then starts a real (childless) `Supervisor.start_link/2` and returns `{:ok, supervisor_pid}`. **Returning `{:ok, self()}` is forbidden** — the Application controller would monitor the calling process, not a supervisor.
+4. **Worker bootstrap.** Workers run via `mix test --no-compile ...` with `MUT_ACTIVE=<id>` in the environment. Because mutalisk is a dep of the working copy, OTP starts `:mutalisk` before the user app, so `Mut.Application.start/2` fires and `:persistent_term` is set before any user code or test runs. **No `MIX_INIT`. No `--eval` injections. No replacement of the user's `:mod` callback.**
+5. **Bootstrap load order.** The `:mut_oracle` compiler atom resolves to a module that lives inside the mutalisk dep. That module is loadable only after deps are compiled. Therefore every host-side child invocation runs deps.compile before compile:
+   ```
+   mix do deps.get + deps.compile, compile --force
+   ```
+   `deps.compile` is targeted by name (`mix deps.compile mutalisk`) when only mutalisk needs building.
+6. **Tracer event handoff.** `Mut.Trace.Writer` is a GenServer started by `Mix.Tasks.Compile.MutOracle.run/1` before `:elixir` runs. All tracer callbacks send events to the writer; the writer batches and writes JSONL to `_build/mut_oracle/.mut_oracle.jsonl`. The final `{"event":"end","count":N}` sentinel is written from a `System.at_exit/1` hook registered in the same `run/1`, so it fires when the child BEAM shuts down (after Mix returns). Direct file appends from concurrent tracer callbacks are forbidden — `Kernel.ParallelCompiler` runs tracer callbacks in many processes simultaneously and unsynchronized appends interleave or lose events.
 
-This contract is implemented in M0 (stub modules) and fully wired in M2.
+This contract is implemented in M0 (stub modules) and fully wired in M2. See `docs/BOOTSTRAP.md` for the concrete overlay template and edge-case test plan.
 
 ### Build-Path Contract
 
@@ -66,7 +72,7 @@ A single shell entry point that the implementing agent runs to prove a milestone
 | Layer | Scope | Added at |
 |---|---|---|
 | `lint` | `mix format --check-formatted`, `mix compile --warnings-as-errors`, `mix credo --strict` | M0 |
-| `unit` | `mix test --include unit` (excludes `:integration` and `:e2e`) | M0 |
+| `unit` | `mix test` with `:integration` and `:e2e` ExUnit tags excluded by `test_helper.exs` | M0 |
 | `dialyzer` | `mix dialyzer` (warnings-as-errors) | M1 |
 | `golden_oracle` | regenerate-and-diff oracle dumps for the fixture app | M2 |
 | `golden_instrument` | regenerate-and-diff instrumented source for the fixture app | M6 |
@@ -126,19 +132,22 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 **Inputs:** Existing `mix.exs`, SPEC, this PLAN (esp. Operational Contracts).
 
 **Deliverables:**
-- `mix.exs`: deps `:credo`, `:dialyxir`, `:jason`, `:ex_doc` (dev-only). Aliases for `lint`, `harness`. Elixir requirement matches SPEC (`>= 1.17`); update from `~> 1.20-rc`.
+- `mix.exs`: deps `:credo`, `:dialyxir`, `:jason`, `:ex_doc` (dev-only). Aliases for `lint`, `harness`. Elixir requirement matches SPEC (`>= 1.17`); update from `~> 1.20-rc`. **`def application` declares `mod: {Mut.Application, []}`** from M0 so dep-ordered boot works the moment any working copy depends on mutalisk.
 - `.formatter.exs`, `.credo.exs` (strict, project-local opts).
-- `bin/verify` shell script implementing `lint` and `unit` layers; later layers print "skipped (M# not yet implemented)".
+- `bin/verify` shell script and `scripts/fixture_check.sh` already drafted in this repo (see `bin/verify`, `scripts/fixture_check.sh`); M0 task is to land the modules and fixture so `bin/verify` (lint + unit) goes green.
 - `test/test_helper.exs`: `ExUnit.start(exclude: [:integration, :e2e])`.
-- Bootstrap stubs (compile-clean, no logic):
-  - `lib/mut/runtime.ex` with `active_key/0` returning `{Mut.Runtime, :active_mutant}`.
-  - `lib/mut/runtime/boot.ex` with `start/2` reading `MUT_ACTIVE` (no-op for now).
-  - `lib/mut/bootstrap.ex` with `oracle_compiler/0` and `runtime_init/0` (raise "not yet implemented").
-  - `lib/mut/trace.ex`, `lib/mut/trace/writer.ex`, `lib/mut/oracle.ex` as compile-clean placeholders.
-  - `lib/mutalisk.ex` re-exports.
-- Fixture skeleton: `test/fixtures/demo_app/{mix.exs,lib,test}` with empty modules and a single passing test per file.
-- `scripts/fixture_check.sh` runs `mix deps.get && mix test` inside the fixture; invoked by `bin/verify unit`.
-- `README.md`: minimal; pointer to SPEC and PLAN.
+- Bootstrap stubs (per `docs/BOOTSTRAP.md`, compile-clean):
+  - `lib/mut/runtime.ex` — working: `active_key/0`, `set_active/1`, `get_active/0`, `clear/0`.
+  - `lib/mut/application.ex` — working stub: reads `MUT_ACTIVE`, calls `set_active/1`, returns `{:ok, supervisor_pid}` from `Supervisor.start_link([], strategy: :one_for_one, name: __MODULE__.Sup)`.
+  - `lib/mut/bootstrap.ex` — working: `role/0` returning `:oracle | :schema | :worker | :fallback | nil`.
+  - `lib/mut/bootstrap/overlay.ex` — skeleton with full API surface (`materialize/2`, `render/1`, `assert_not_umbrella!/1`); raises `RuntimeError, "not yet implemented (M2)"`.
+  - `lib/mut/work_copy.ex` — skeleton; raises (M2).
+  - `lib/mix/tasks/compile/mut_oracle.ex` — skeleton implementing `Mix.Task.Compiler` callbacks; `run/1` raises (M2). Module name is `Mix.Tasks.Compile.MutOracle` so the `:mut_oracle` atom resolves correctly via Mix's `Mix.Tasks.Compile.<Camelize>` convention.
+  - `lib/mix/tasks/mut/recompile.ex` — skeleton (`use Mix.Task`); raises (M10).
+  - `lib/mut/trace.ex`, `lib/mut/trace/writer.ex`, `lib/mut/oracle.ex` — compile-clean placeholders.
+  - `lib/mutalisk.ex` — re-exports.
+- Fixture skeleton: `test/fixtures/demo_app/{mix.exs,lib,test}` with empty modules and a single passing test per file. **Without the fixture, `bin/verify unit` is red** — landing the fixture is part of M0.
+- `README.md`: minimal; pointer to SPEC, PLAN, and `docs/BOOTSTRAP.md`.
 
 **Verification gate:** `bin/verify` runs `lint` + `unit` and exits 0. Fixture compiles and its (placeholder) tests pass.
 
@@ -154,7 +163,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 
 **Deliverables:**
 - `Mut.Runtime`: `active_key/0`, `set_active/1`, `get_active/0`, `clear/0`. Thin `:persistent_term` wrappers.
-- `Mut.Runtime.Boot`: an Application-callback module. `start/2` reads `MUT_ACTIVE` (default 0), calls `Mut.Runtime.set_active/1`, returns `{:ok, self()}`. Tested by setting env var and observing `Mut.Runtime.get_active/0`.
+- `Mut.Application`: an Application-callback module. `start/2` reads `MUT_ACTIVE` (default 0), calls `Mut.Runtime.set_active/1`, then `Supervisor.start_link([], strategy: :one_for_one, name: __MODULE__.Sup)` and returns `{:ok, supervisor_pid}`. Tested by setting env var and observing `Mut.Runtime.get_active/0`. **Never returns `{:ok, self()}`** — that would attach OTP monitoring to the calling process. Mutalisk's own `mix.exs` declares `mod: {Mut.Application, []}` from M0 so dep-ordered boot works correctly the moment any working copy depends on mutalisk.
 - `Mut.SourceSpan`: `%Mut.SourceSpan{file, start_line, start_column, end_line, end_column, start_byte, end_byte}`.
 - `Mut.SourcePatch`: as in SPEC.
 - `Mut.Oracle.DispatchSite`: as in SPEC.
@@ -179,26 +188,35 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 
 **Deliverables:**
 - `Mut.WorkCopy.materialize/2`: takes (user project root, run_id) and produces a working copy at `tmp/mut_work/<run_id>/`. Uses COW (`cp -Rc` on macOS, `cp -R --reflink=auto` on Linux) with plain copy fallback. Symlinks `deps/`. Does not touch the user's tree.
-- `Mut.WorkCopy.install_overlay/2`: renames `mix.exs` → `mix_user.exs`, writes `mix.exs` overlay that adds `mutalisk` as a `:path` dep and registers `Mut.Bootstrap.oracle_compiler/0` in `:compilers`. The overlay must `Code.eval_file("mix_user.exs")` to fetch user defs and merge them; if the user `mix.exs` cannot be merged (unusual), fail loudly.
-- `Mut.Bootstrap`:
-  - `oracle_compiler/0` returns `{:mut_bootstrap, Mut.Compilers.OracleBootstrap}`. The compiler is invoked once per Mix compile cycle. It calls `Code.put_compiler_option(:tracers, [Mut.Trace])` and ensures `Mut.Trace.Writer` is started against `_build/mut_oracle/.mut_oracle.jsonl`. It produces no artifacts; it returns `{:noop, []}` to Mix.
-  - `runtime_init/0` is the application callback wiring (used in M7+).
+- `Mut.WorkCopy.install_overlay/2`: writes the overlay per `docs/BOOTSTRAP.md` template. Renames `mix.exs` → `mix_user.exs`. Asserts not-umbrella and refuses if the user already depends on a different mutalisk source.
+- `Mix.Tasks.Compile.MutOracle`: implements `Mix.Task.Compiler`. Resolved by Mix from the `:mut_oracle` atom in the overlay's `:compilers` list. `run/1`:
+  1. `Code.put_compiler_option(:tracers, [Mut.Trace | Code.get_compiler_option(:tracers) || []])`.
+  2. `{:ok, _} = Mut.Trace.Writer.start_link(jsonl_path: Path.join(Mix.Project.build_path(), ".mut_oracle.jsonl"))`.
+  3. Registers `System.at_exit(fn _ -> Mut.Trace.Writer.close_with_count() end)` so the sentinel is written when the child BEAM shuts down (after `:elixir` has finished and Mix has returned).
+  4. Returns `{:noop, []}`. `manifests/0` returns `[]`. `clean/0` is a no-op.
+- `Mut.Application`: mutalisk's own OTP `Application` callback module. Declared in mutalisk's `mix.exs` as `mod: {Mut.Application, []}`. `start/2` reads `MUT_ACTIVE`, calls `Mut.Runtime.set_active/1`, then `Supervisor.start_link([], strategy: :one_for_one, name: __MODULE__.Sup)` and returns `{:ok, supervisor_pid}`.
 - `Mut.Trace`: implements all SPEC tracer events. Filters per SPEC §Generated-Code Filtering. Sends each accepted event as a `%DispatchSite{}` to `Mut.Trace.Writer` via `cast`.
-- `Mut.Trace.Writer`: GenServer. Buffered async writes to JSONL; `flush/0` and `close_with_count/0` callable from the bootstrap compiler at compile end. Concurrent calls from parallel-compile worker processes are serialized by the GenServer mailbox. Writes a final `{"event":"end","count":N}` sentinel; readers fail if sentinel missing.
+- `Mut.Trace.Writer`: GenServer. Buffered async writes to JSONL; `flush/0` and `close_with_count/0` callable from the at_exit hook. Concurrent casts from parallel-compile worker processes are serialized by the GenServer mailbox. Writes a final `{"event":"end","count":N}` sentinel; readers fail if sentinel missing.
 - `Mut.Oracle`: Agent/ETS store with `start_link/1`, `put_site/1`, `lookup_by_key/1`, `lookup_by_file_line/2`, `dump_json/1`, `load_jsonl/1` (validates sentinel + count). Stable serialization order.
-- `Mut.OracleBuild.run/2`: drives the working copy → overlay → child Mix invocation:
+- `Mut.OracleBuild.run/2`: drives the working copy → overlay → child Mix invocations. Two commands, sequential:
   ```
-  System.cmd("mix", ["compile", "--force", "--no-deps-check"], 
+  # Step 1: ensure mutalisk dep is built so :mut_oracle compiler module is loadable
+  System.cmd("mix", ["deps.compile", "mutalisk"],
     cd: working_copy,
-    env: [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_oracle"}, {"MUTALISK_ROLE", "oracle"}])
+    env: [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_oracle"}, {"MUTALISK_ROLE", "oracle"}, {"MUTALISK_PATH", host_mutalisk_root}])
+
+  # Step 2: project compile with tracer
+  System.cmd("mix", ["compile", "--force"],
+    cd: working_copy,
+    env: same_env)
   ```
-  Reads back the JSONL into `Mut.Oracle`. Fails if sentinel/count don't match received-events count.
+  Reads back the JSONL into `Mut.Oracle`. Fails if sentinel/count don't match received-events count, OR if the JSONL file is missing entirely (indicating the bootstrap compiler did not run).
 - Golden test: oracle JSON dump of the fixture; regenerate-on-demand with `MUT_REGOLD=1`.
-- **Negative DSL test (mandatory):** the fixture's `dsl_def.ex` defines a macro that calls `quote location: :keep do def f, do: 1 + 2 end`. The expansion produces nodes whose `:line` and `:file` metadata point at the user file (because `location: :keep`). The test asserts these expansions are filtered: the operator `+` inside the expanded `def` does NOT appear in the oracle, because `Keyword.get(meta, :generated, false)` is `true` once we strip the `:keep` and let macro expansion run normally. If `:keep` is honored, we still drop because the expansion came from a user macro the tracer marks via the macro-call site itself; the oracle records the macro call site, not the expansion contents. Document the exact filter behavior in the test.
+- **Negative DSL test (calibrated, not over-claimed):** the fixture's `dsl_def.ex` defines a macro using plain `quote do def f(x), do: x + 1 end` (no `location: :keep`). The fixture's `dsl_user.ex` calls that macro. The test asserts: the operator `+` inside the expanded `def` does NOT appear in the oracle, because Elixir's macro expansion sets `generated: true` on the `quote`-emitted nodes' meta and our filter drops them on `Keyword.get(meta, :generated, false) == true`. **The test is calibrated against observed Elixir behavior, not asserted from theory.** If a future Elixir release changes the meta, the test fails and the filter must be revisited. A second test variant using `quote location: :keep` is marked `@tag :known_limitation` and asserts the current behavior (filtered or not) so future changes are visible. The plan does not promise that `:keep` macros are filtered in v1.
 
-**Verification gate:** `bin/verify` enables `golden_oracle`. Oracle JSON for the fixture matches committed golden file. Negative DSL test passes.
+**Verification gate:** `bin/verify` enables `golden_oracle`. Oracle JSON for the fixture matches committed golden file. Negative DSL test passes for the default-quote case.
 
-**Subagent brief:** The oracle bootstrap compiler must run before `:elixir`. Validate by adding a tiny puts-and-fail in the bootstrap compiler and confirming it fires before any module compiles. The JSONL writer GenServer must outlive the compile cycle; tear it down only after Mix compile returns.
+**Subagent brief:** The bootstrap compiler must run before `:elixir`. Validate by adding a temporary `IO.puts` in `Mix.Tasks.Compile.MutOracle.run/1` and confirming it fires before any module of the user app compiles. The two-step `deps.compile mutalisk` then `compile --force` is mandatory — without step 1 the `:mut_oracle` atom resolves at compile-list-evaluation time but the underlying module is missing from the code path.
 
 **Out of scope:** AST candidate walker, matching, mutators.
 
@@ -323,14 +341,14 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 **Deliverables:**
 - `Mut.SchemaBuild.build/2`: `(working_copy_root, plan)` → produces an instrumented build at `<working_copy>/_build/mut_schema/test`. Steps:
   1. Reuse the working copy from oracle phase or materialize a fresh one.
-  2. Reinstall overlay in **schema role**: registers `Mut.Runtime.Boot` as the application start module, does NOT register the oracle bootstrap compiler. The overlay also adds `mutalisk` as a `:path` dep so `Mut.Runtime` and `Mut.Runtime.Boot` are loadable in the working copy's BEAM.
+  2. Reinstall overlay in **schema role**. The overlay differs from oracle role only by NOT prepending `:mut_oracle` to `:compilers`. It still adds `mutalisk` as a `:path` dep. `application/0` is delegated unchanged to the user's module — **the overlay does not replace `:mod`**. `Mut.Application` runs because `:mutalisk` is a dep, OTP starts it before the user's app, and its `start/2` reads `MUT_ACTIVE` into `:persistent_term`.
   3. Write instrumented source files over the working-copy `lib/` (and `test/` is left untouched).
-  4. Run:
+  4. Run, in sequence:
      ```
-     System.cmd("mix", ["compile", "--force"], 
-       cd: working_copy,
-       env: [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_schema"}, {"MUTALISK_ROLE", "schema"}])
+     System.cmd("mix", ["deps.compile", "mutalisk"], cd: working_copy, env: env)
+     System.cmd("mix", ["compile", "--force"],       cd: working_copy, env: env)
      ```
+     where `env = [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_schema"}, {"MUTALISK_ROLE", "schema"}, {"MUTALISK_PATH", host_mutalisk_root}]`.
   5. Snapshot `_build/mut_schema` (recursive list of files + content hashes) for sandbox reset later.
 - `Mut.CompileRollback.run/3`: parses Elixir compiler diagnostics, locates the surrounding instrumented `case` by line/col + `mut_ids` metadata, removes those mutants from the placer plan (transitions them to `:invalid` with diagnostic attached), re-renders the file, and recompiles. Honors `max_rollback_iterations: 3` and `max_invalid_mutants_per_file: max(10, ceil(file_mutants * 0.02))`.
 - `Mut.Mutator.Test.AlwaysWrong` (test-only): emits non-compiling AST. Drives a rollback test asserting budgets are enforced and that good mutants survive.
@@ -343,7 +361,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 
 ## M8 — Sandbox pool + worker (Port-driven `mix test`)
 
-**Goal:** Run isolated `mix test` invocations inside per-worker sandbox copies of the schema build, switching the active mutant via `MUT_ACTIVE` env var (read by `Mut.Runtime.Boot` at app start).
+**Goal:** Run isolated `mix test` invocations inside per-worker sandbox copies of the schema build, switching the active mutant via `MUT_ACTIVE` env var (read by `Mut.Application` at app start).
 
 **Inputs:** SPEC §Sandbox Model, §Phase 3, §Result Classification. Operational Contracts: Build-Path (worker schema row).
 
@@ -360,7 +378,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
     ...
   ])
   ```
-  `Mut.Runtime.Boot` (registered as the working copy's application start module by the schema overlay) reads `MUT_ACTIVE` and sets `:persistent_term`.
+  `Mut.Application` (mutalisk's own OTP application callback, registered in mutalisk's own `mix.exs` via `mod: {Mut.Application, []}`) starts before the user app because `:mutalisk` is a dep of the working copy. Its `start/2` reads `MUT_ACTIVE` and calls `Mut.Runtime.set_active/1` before any user code runs. **The overlay does not modify the user's `application/0` callback or `:mod` spec.**
 - `Mut.Worker.Formatter`: a custom ExUnit formatter writing structured per-test results to stdout in JSONL form for the parent to parse.
 - Result classification per SPEC: `:killed | :survived | :timeout | :error`. `:invalid` comes from rollback (M7), not workers.
 - Single retry for `:error` per SPEC.
@@ -368,7 +386,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 
 **Verification gate:** `bin/verify` enables `integration_schema`. Golden expectation: hand-curated set of ~10 known mutant outcomes against the fixture.
 
-**Subagent brief:** Pre-implementation, manually validate `mix test --no-compile` skips compile after a successful schema build. Validate `MUT_ACTIVE` is observed by `Mut.Runtime.Boot.start/2` by adding a temporary `IO.inspect` and confirming.
+**Subagent brief:** Pre-implementation, manually validate `mix test --no-compile` skips compile after a successful schema build. Validate `MUT_ACTIVE` is observed by `Mut.Application.start/2` by setting `MUT_ACTIVE=42`, running the worker against a one-line test that calls `IO.inspect(Mut.Runtime.get_active())`, and confirming `42` appears.
 
 **Out of scope:** Test selection (runs all fixture tests for now), fallback engine, JSON reporter.
 
@@ -402,14 +420,16 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 - `Mut.FallbackPatch.render/2`: `(mutant, source_text)` → `%Mut.SourcePatch{}`. Renders only the mutated sub-expression with the formatter; computes byte-range splice. Refuses with `:missing_source_span` if the span cannot be computed precisely.
 - `Mut.MixManifest.read/1`: parses `_build/mut_schema/test/lib/<app>/.mix/compile.elixir`. Tolerant of Elixir 1.17+ format variants. Exposes module-to-source and source dependency graph (compile, export, struct, runtime). Has an explicit `version_assertion/1` that fails loudly on unknown shape.
 - `Mut.Recompile.dependents/2`: walks `[:compile, :struct, :export]` edges (transitive `:compile`). Ignores `:runtime`.
-- `Mut.Recompile.recompile/2`: invokes the recompile **as a child Mix process inside the sandbox**, NOT via in-host `Kernel.ParallelCompiler`. Reasoning: the host BEAM does not have the target's deps loaded; calling ParallelCompiler in-host would either fail at link time or pollute the host. Implementation:
+- `Mix.Tasks.Mut.Recompile`: a custom Mix task shipped in mutalisk. Accepts a list of source files plus `--app` and an optional `--ebin <dir>`; resolves the target ebin (defaults to `<MIX_BUILD_PATH>/lib/<app>/ebin`); calls `Kernel.ParallelCompiler.compile_to_path(files, ebin)`. Runs **inside the sandbox's Mix env** so deps are loaded. This is the SPEC-mandated targeted compile — full `mix compile` is forbidden by SPEC §Fallback Engine.
+- `Mut.Recompile.recompile/3`: host-side driver. `(sandbox, mutated_source_files, dependents)` →
   ```
-  System.cmd("mix", ["compile", "--no-deps-check", "--no-archives-check"], 
+  System.cmd("mix", ["mut.recompile", "--app", app] ++ mutated_source_files ++ dependent_source_files,
     cd: sandbox,
-    env: [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_schema"}, {"MUTALISK_ROLE", "fallback"}])
+    env: [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_schema"}, {"MUTALISK_ROLE", "fallback"}, {"MUTALISK_PATH", host_mutalisk_root}])
   ```
-  Mix's incremental compile honors the manifest and only rebuilds modules whose source changed. We rely on Mix's incrementality rather than computing the recompile set ourselves; `Mut.Recompile.dependents/2` is used to validate that Mix's choice matches our expectation (sanity check) and to short-circuit "no fallback needed if dependents set is empty and the patched .beam can be replaced from a pre-built per-mutant beam — deferred optimization).
-  - Fallback also writes the patch to `lib/...` in the sandbox; the next `mix compile` picks it up via mtime + source-content hash.
+  Both lists are absolute paths inside the sandbox. The task itself runs in the sandbox BEAM (via the existing `:mutalisk` path-dep). The host never invokes `Kernel.ParallelCompiler` directly.
+  - Fallback writes the patch to `lib/...` in the sandbox before recompile, so `mix mut.recompile` reads the patched source.
+  - `Mut.Recompile.dependents/2` (manifest walk) is the source of truth for which files to pass; we do NOT delegate to Mix's incremental compile because that would also rebuild unrelated changed files and is forbidden by SPEC.
 - `Mut.Worker.run_fallback/3`: like `run_schema/3` but: (1) apply patch, (2) call `Mut.Recompile.recompile/2`, (3) `mix test --no-compile ...`, (4) call `Mut.Sandbox.reset/1` to restore source + beams + manifests.
 - Tests:
   - Unit: patch `guards.ex`, run recompile against a real schema build, assert only the targeted .beam (and any compile dependents) changed mtime; reset; assert sandbox returned to clean state including manifest contents.
@@ -516,7 +536,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 | Mutant ID stability across re-plans | M5 | SHA-256 input is SPEC-fixed; idempotency test in M5 |
 | Hoist + hygiene collisions | M6 | `Macro.unique_var/2`; round-trip behavior test asserts identical results at id=0 |
 | `--no-compile` not honored by `mix test` | M8 | Pre-implementation manual validation; if broken, fall back to a custom `Mix.Tasks.Mut.Worker` that calls `Mix.Tasks.Test.run/1` directly |
-| `MUT_ACTIVE` not seen by `Mut.Runtime.Boot.start/2` | M8 | Validated in M8 subagent brief; bootstrap module registered as `application: [mod: ...]` in schema overlay |
+| `MUT_ACTIVE` not seen by `Mut.Application.start/2` | M8 | Validated in M8 subagent brief by IO.inspect; mutalisk's own `mix.exs` declares `mod: {Mut.Application, []}` so OTP boot order does the work without overlay manipulation |
 | Mix manifest format changes | M10 | Version assertion; test against ≥ 2 Elixir 1.17+ patch releases in CI |
 | Sandbox COW unsupported on filesystem | M8 | Detect at pool creation; fall back to `File.cp_r!` with logged warning |
 | Sandbox reset misses `.mix` manifest restoration | M10 | Sandbox baseline snapshot includes `_build/mut_schema/**` recursively; reset replays full snapshot, asserted in unit tests |
