@@ -18,6 +18,7 @@ ENABLED_LAYERS=(
   lint
   unit
   dialyzer
+  golden_oracle
 )
 
 ALL_LAYERS=(

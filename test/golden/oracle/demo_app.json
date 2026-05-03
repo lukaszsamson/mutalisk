@@ -1,0 +1,2203 @@
+[
+  {
+    "file": "lib/arith.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 4,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 4,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "score",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 5,
+    "column": 8,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "score",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "+",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        8
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 5,
+    "column": 13,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "score",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "*",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        13
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 5,
+    "column": 18,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "score",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "-",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        18
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 8,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 8,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 8,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "integer_parts",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 9,
+    "column": 6,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "integer_parts",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "div",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        6
+      ]
+    ]
+  },
+  {
+    "file": "lib/arith.ex",
+    "line": 9,
+    "column": 17,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Arith",
+    "function": [
+      "integer_parts",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "rem",
+    "resolved_arity": 2,
+    "event_file": "lib/arith.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        17
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 4,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 6,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        6
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 6,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        6
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 6,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": [
+      "answer_offset",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        6
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 7,
+    "column": 5,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": [
+      "answer_offset",
+      1
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        7
+      ],
+      [
+        "column",
+        5
+      ]
+    ]
+  },
+  {
+    "file": "lib/attrs.ex",
+    "line": 7,
+    "column": 17,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Attrs",
+    "function": [
+      "answer_offset",
+      1
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "+",
+    "resolved_arity": 2,
+    "event_file": "lib/attrs.ex",
+    "meta": [
+      [
+        "line",
+        7
+      ],
+      [
+        "column",
+        17
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 4,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 4,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "strict?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 5,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "strict?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "and",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 5,
+    "column": 11,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "strict?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "not",
+    "resolved_arity": 1,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        11
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 8,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 8,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 8,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "||",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": 12,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "||",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        12
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": 15,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "!",
+    "resolved_arity": 1,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        15
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 4,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 4,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "ordered?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 5,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "ordered?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "<",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 5,
+    "column": 11,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "ordered?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "and",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        11
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 5,
+    "column": 17,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "ordered?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "<=",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ],
+      [
+        "column",
+        17
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 8,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 8,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 8,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": ">",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 11,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "or",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        11
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 16,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": ">=",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        16
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 21,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "or",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        21
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 26,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "==",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        26
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 31,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "or",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        31
+      ]
+    ]
+  },
+  {
+    "file": "lib/cmp.ex",
+    "line": 9,
+    "column": 36,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Cmp",
+    "function": [
+      "distinct_direction?",
+      2
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "!=",
+    "resolved_arity": 2,
+    "event_file": "lib/cmp.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ],
+      [
+        "column",
+        36
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 4,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "defmacro",
+    "resolved_arity": 2,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 4,
+    "column": 12,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": [
+      "defadd",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        12
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 6,
+    "column": 11,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": [
+      "defadd",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_quote",
+    "resolved_name": "shallow_validate_ast",
+    "resolved_arity": 1,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        6
+      ],
+      [
+        "column",
+        11
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 10,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        10
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 10,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "defmacro",
+    "resolved_arity": 2,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        10
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 10,
+    "column": 12,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": [
+      "defadd_keep",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        10
+      ],
+      [
+        "column",
+        12
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_def.ex",
+    "line": 12,
+    "column": 11,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslDef",
+    "function": [
+      "defadd_keep",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_quote",
+    "resolved_name": "shallow_validate_ast",
+    "resolved_arity": 1,
+    "event_file": "lib/dsl_def.ex",
+    "meta": [
+      [
+        "line",
+        12
+      ],
+      [
+        "column",
+        11
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 6,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        6
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 6,
+    "column": 10,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "remote_macro",
+    "resolved_module": "Elixir.DslDef",
+    "resolved_name": "defadd",
+    "resolved_arity": 1,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        6
+      ],
+      [
+        "column",
+        10
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 7,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/dsl_user.ex",
+    "line": 7,
+    "column": 10,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.DslUser",
+    "function": null,
+    "dispatch_kind": "remote_macro",
+    "resolved_module": "Elixir.DslDef",
+    "resolved_name": "defadd_keep",
+    "resolved_arity": 1,
+    "event_file": "lib/dsl_user.ex",
+    "meta": [
+      [
+        "line",
+        7
+      ],
+      [
+        "column",
+        10
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Guards",
+    "function": [
+      "positive?",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "andalso",
+    "resolved_arity": 2,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": [
+      "positive?",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": 25,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Guards",
+    "function": [
+      "positive?",
+      1
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "is_integer",
+    "resolved_arity": 1,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        25
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": 39,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Guards",
+    "function": [
+      "positive?",
+      1
+    ],
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "and",
+    "resolved_arity": 2,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        39
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 4,
+    "column": 45,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Guards",
+    "function": [
+      "positive?",
+      1
+    ],
+    "dispatch_kind": "imported_function",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": ">",
+    "resolved_arity": 2,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        4
+      ],
+      [
+        "column",
+        45
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 8,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 8,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/guards.ex",
+    "line": 8,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Guards",
+    "function": [
+      "positive?",
+      1
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/guards.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  }
+]
