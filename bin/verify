@@ -24,6 +24,7 @@ ENABLED_LAYERS=(
   golden_instrument
   integration_schema
   integration_fallback
+  e2e_mut
 )
 
 ALL_LAYERS=(
