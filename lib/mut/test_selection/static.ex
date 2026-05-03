@@ -23,7 +23,16 @@ defmodule Mut.TestSelection.Static do
     |> Enum.reduce(%{index: %{}, dynamic_dispatch_files: MapSet.new()}, &analyze_file/2)
   end
 
-  @spec covering_tests(analysis(), module(), [Path.t()]) :: [Path.t()]
+  @spec covering_tests(analysis(), module() | nil, [Path.t()]) :: [Path.t()]
+  def covering_tests(
+        %{index: _index, dynamic_dispatch_files: _dynamic_files},
+        nil,
+        all_test_files
+      )
+      when is_list(all_test_files) do
+    Enum.sort(all_test_files)
+  end
+
   def covering_tests(
         %{index: index, dynamic_dispatch_files: dynamic_files},
         module,
@@ -49,25 +58,28 @@ defmodule Mut.TestSelection.Static do
 
   defp analyze_file(file, analysis) do
     {:ok, {ast, _source}} = Mut.SourceParse.parse(file)
+    traverse(ast, analysis, file)
+  end
 
-    {_ast, analysis} =
-      Macro.prewalk(ast, analysis, fn node, acc ->
-        cond do
-          quote_node?(node) ->
-            {:mutalisk_skipped_quote, acc}
+  defp traverse(node, analysis, _file) when is_atom(node) or is_number(node) or is_binary(node),
+    do: analysis
 
-          dynamic_dispatch?(node) ->
-            {node, put_dynamic(acc, file)}
+  defp traverse(node, analysis, file) do
+    if quote_node?(node) do
+      analysis
+    else
+      node
+      |> record_node(analysis, file)
+      |> then(fn analysis -> Enum.reduce(children(node), analysis, &traverse(&1, &2, file)) end)
+    end
+  end
 
-          module = referenced_module(node) ->
-            {node, put_reference(acc, module, file)}
-
-          true ->
-            {node, acc}
-        end
-      end)
-
-    analysis
+  defp record_node(node, analysis, file) do
+    cond do
+      dynamic_dispatch?(node) -> put_dynamic(analysis, file)
+      module = referenced_module(node) -> put_reference(analysis, module, file)
+      true -> analysis
+    end
   end
 
   defp referenced_module({:alias, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
@@ -128,9 +140,9 @@ defmodule Mut.TestSelection.Static do
        when is_atom(ctx),
        do: true
 
-  defp dynamic_dispatch?({:apply, _meta, [_module, _fun, {_var_name, _var_meta, ctx}]})
+  defp dynamic_dispatch?({:apply, _meta, [module, _fun, {_var_name, _var_meta, ctx}]})
        when is_atom(ctx),
-       do: true
+       do: not literal_module?(module)
 
   defp dynamic_dispatch?(
          {{:., _dot_meta, [{:__aliases__, _alias_meta, [:Module]}, :concat]}, _meta, _args}
@@ -145,6 +157,13 @@ defmodule Mut.TestSelection.Static do
 
   defp quote_node?({:quote, _meta, _args}), do: true
   defp quote_node?(_node), do: false
+
+  defp children(node) when is_list(node), do: node
+  defp children(node) when is_tuple(node), do: Tuple.to_list(node)
+  defp children(_node), do: []
+
+  defp literal_module?({:__aliases__, _meta, _parts}), do: true
+  defp literal_module?(_module), do: false
 
   defp put_reference(analysis, module, file) do
     update_in(analysis.index, fn index ->

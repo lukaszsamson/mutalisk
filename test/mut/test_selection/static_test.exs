@@ -92,6 +92,25 @@ defmodule Mut.TestSelection.StaticTest do
            )
   end
 
+  test "analyze does not mark literal module apply with variable args as dynamic" do
+    path =
+      write_test("literal_apply_args", """
+      defmodule LiteralApplyArgsTest do
+        use ExUnit.Case, async: true
+
+        test "literal apply with args variable" do
+          args = []
+          apply(Sample.LiteralApplyArgs, :value, args)
+        end
+      end
+      """)
+
+    analysis = Static.analyze([Path.dirname(path)])
+
+    assert Map.fetch!(analysis.index, Sample.LiteralApplyArgs) == MapSet.new([path])
+    refute MapSet.member?(analysis.dynamic_dispatch_files, path)
+  end
+
   test "analyze skips references inside quote blocks" do
     path =
       write_test("quoted", """
@@ -109,6 +128,7 @@ defmodule Mut.TestSelection.StaticTest do
     analysis = Static.analyze([Path.dirname(path)])
 
     refute Map.has_key?(analysis.index, Sample.Quoted)
+    refute MapSet.member?(analysis.dynamic_dispatch_files, path)
   end
 
   test "covering_tests returns indexed tests for a known module" do
@@ -169,6 +189,17 @@ defmodule Mut.TestSelection.StaticTest do
     analysis = %{index: %{}, dynamic_dispatch_files: MapSet.new()}
 
     assert Static.covering_tests(analysis, Unknown.Module, paths) == paths
+  end
+
+  test "covering_tests falls back to all tests when module is nil" do
+    paths = ["test/a_test.exs", "test/b_test.exs"]
+
+    analysis = %{
+      index: %{Known.Module => MapSet.new(["test/a_test.exs"])},
+      dynamic_dispatch_files: MapSet.new(["test/a_test.exs"])
+    }
+
+    assert Static.covering_tests(analysis, nil, paths) == paths
   end
 
   defp write_test(name, source) do
