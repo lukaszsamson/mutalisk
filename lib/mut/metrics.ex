@@ -14,6 +14,7 @@ defmodule Mut.Metrics do
       :score,
       :by_status,
       :by_engine_status,
+      :fallback_count_pct,
       :wall_clock_ms,
       :rollback_per_file,
       :invalid_by_mutator,
@@ -48,6 +49,7 @@ defmodule Mut.Metrics do
             score: float(),
             by_status: %{Mutant.status() => non_neg_integer()},
             by_engine_status: %{{Mutant.engine(), Mutant.status()} => non_neg_integer()},
+            fallback_count_pct: float(),
             wall_clock_ms: %{
               schema: non_neg_integer(),
               fallback: non_neg_integer(),
@@ -204,6 +206,7 @@ defmodule Mut.Metrics do
       score: score(killed, survived),
       by_status: by_status,
       by_engine_status: state.by_engine_status,
+      fallback_count_pct: fallback_count_pct(state.by_engine_status),
       wall_clock_ms: state.wall_clock_ms,
       rollback_per_file: state.rollback_per_file,
       invalid_by_mutator: state.invalid_by_mutator,
@@ -215,6 +218,22 @@ defmodule Mut.Metrics do
 
   defp score(0, 0), do: 100.0
   defp score(killed, survived), do: killed / (killed + survived) * 100.0
+
+  defp fallback_count_pct(by_engine_status) do
+    schema = engine_count(by_engine_status, :schema)
+    fallback = engine_count(by_engine_status, :fallback)
+
+    case schema + fallback do
+      0 -> 0.0
+      total -> fallback / total * 100.0
+    end
+  end
+
+  defp engine_count(by_engine_status, engine) do
+    by_engine_status
+    |> Enum.filter(fn {{entry_engine, _status}, _count} -> entry_engine == engine end)
+    |> Enum.reduce(0, fn {_key, count}, total -> total + count end)
+  end
 
   defp increment_status(state, status), do: increment_map(state, :by_status, status, 1)
 

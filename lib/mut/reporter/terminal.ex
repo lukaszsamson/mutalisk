@@ -68,7 +68,8 @@ defmodule Mut.Reporter.Terminal do
       count_line("Timeouts", status_count(snapshot, :timeout), ""),
       "\n\n",
       "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
-      "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n"
+      "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
+      "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n"
     ]
   end
 
@@ -144,6 +145,19 @@ defmodule Mut.Reporter.Terminal do
   end
 
   defp fallback_wall_pct(_snapshot), do: "0.0%"
+
+  defp fallback_count_pct(%Snapshot{fallback_count_pct: pct}) when is_number(pct),
+    do: format_pct(pct)
+
+  defp fallback_count_pct(snapshot) do
+    schema = engine_total(snapshot, :schema)
+    fallback = engine_total(snapshot, :fallback)
+
+    case schema + fallback do
+      0 -> "0.0%"
+      total -> format_pct(fallback / total * 100.0)
+    end
+  end
 
   defp format_seconds(ms), do: :erlang.float_to_binary(ms / 1000, decimals: 1) <> "s"
   defp format_pct(value), do: :erlang.float_to_binary(value, decimals: 1) <> "%"

@@ -83,12 +83,12 @@ defmodule Mut.Reporter.StrykerJson do
       "replacement" => replacement(mutant),
       "location" => location(mutant),
       "status" => status(status),
-      "statusReason" => status_reason(mutant, entry, status),
       "killedBy" => killed_by(entry),
       "coveredBy" => covered_by(mutant),
       "duration" => duration(mutant, entry),
       "description" => mutant.description
     }
+    |> put_optional("statusReason", status_reason(mutant, entry, status))
   end
 
   defp mutalisk_extension(%Plan{} = plan, mutants) do
@@ -162,6 +162,9 @@ defmodule Mut.Reporter.StrykerJson do
 
   defp atom_string(nil), do: nil
   defp atom_string(atom) when is_atom(atom), do: Atom.to_string(atom)
+
+  defp put_optional(map, _key, nil), do: map
+  defp put_optional(map, key, value), do: Map.put(map, key, value)
 
   defp ledger_mutant(%{mutant: %Mutant{} = mutant} = entry) do
     %{

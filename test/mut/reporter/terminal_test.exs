@@ -73,6 +73,7 @@ defmodule Mut.Reporter.TerminalTest do
           {:fallback, :survived} => 1
         },
         wall_clock_ms: %{schema: 3000, fallback: 7000, total: 10_000},
+        fallback_count_pct: 50.0,
         skipped_by_reason: %{unsupported_dispatch: 1},
         invalid_by_mutator: %{Mut.Reporter.TerminalTest => 1},
         score: 50.0
@@ -97,6 +98,7 @@ defmodule Mut.Reporter.TerminalTest do
 
            Run time: 10.0s
            Fallback wall-clock: 70.0% of total
+           Fallback mutants: 50.0% of executed
            """
   end
 
@@ -106,6 +108,7 @@ defmodule Mut.Reporter.TerminalTest do
       score: Keyword.get(opts, :score, 100.0),
       by_status: Keyword.get(opts, :by_status, %{}),
       by_engine_status: Keyword.get(opts, :by_engine_status, %{}),
+      fallback_count_pct: Keyword.get(opts, :fallback_count_pct, 0.0),
       wall_clock_ms: Keyword.get(opts, :wall_clock_ms, %{schema: 0, fallback: 0, total: 0}),
       rollback_per_file: %{},
       invalid_by_mutator: Keyword.get(opts, :invalid_by_mutator, %{}),

@@ -67,6 +67,7 @@ defmodule Mut.Reporter.StrykerJsonTest do
       score: 100.0,
       by_status: Enum.frequencies(Enum.map(mutants, & &1.status)),
       by_engine_status: Enum.frequencies(Enum.map(mutants, &{&1.engine, &1.status})),
+      fallback_count_pct: 0.0,
       wall_clock_ms: %{schema: 7, fallback: 0, total: 7},
       rollback_per_file: %{},
       invalid_by_mutator: %{},

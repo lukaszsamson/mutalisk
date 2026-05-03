@@ -28,6 +28,7 @@ defmodule Mut.MetricsTest do
            }
 
     assert snapshot.wall_clock_ms == %{schema: 10, fallback: 35, total: 45}
+    assert_in_delta snapshot.fallback_count_pct, 66.666, 0.001
     assert snapshot.rollback_per_file == %{"lib/a.ex" => 2}
     assert snapshot.test_selection_fanout == %{"a" => 2, "b" => 2, "c" => 2}
     assert Enum.map(snapshot.ledger, & &1.stable_id) == ["a", "b", "c"]

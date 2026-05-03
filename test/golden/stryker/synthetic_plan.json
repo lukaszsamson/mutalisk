@@ -23,8 +23,7 @@
           },
           "mutatorName": "GuardComparisonBoundary",
           "replacement": "value >= 1",
-          "status": "RuntimeError",
-          "statusReason": null
+          "status": "RuntimeError"
         },
         {
           "coveredBy": [
@@ -71,8 +70,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "value - 1",
-          "status": "Killed",
-          "statusReason": null
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -117,8 +115,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "value - 1",
-          "status": "Survived",
-          "statusReason": null
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -140,8 +137,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "value - 1",
-          "status": "Timeout",
-          "statusReason": null
+          "status": "Timeout"
         }
       ],
       "source": "defmodule Synthetic do\n  def value(value), do: value + 1\n  def positive?(value) when value > 1, do: true\nend\n"
