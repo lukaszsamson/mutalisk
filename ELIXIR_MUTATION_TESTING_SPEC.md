@@ -92,6 +92,7 @@ Drop an event when any condition is true:
 
 - `Keyword.get(meta, :generated, false) == true`.
 - `event_file != env.file`, where `event_file = Keyword.get(meta, :file, env.file)`.
+- `Keyword.get(meta, :context)` is present and differs from `env.module`. On Elixir 1.20-rc this is the empirical marker for plain `quote` macro internals emitted by another module when `generated: true` is not present.
 - The event has no usable `:line` metadata.
 
 Dispatch module allowlists are enforced by mutators, not globally by the tracer. For example, arithmetic mutators only accept resolved `Kernel` or `:erlang` arithmetic operators, while a configured function-call mutator may accept project modules. Non-allowlisted dispatch sites remain in the oracle for diagnostics but produce skipped mutants with reason `:unsupported_dispatch`.
