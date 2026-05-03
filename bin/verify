@@ -17,6 +17,7 @@ cd "$ROOT"
 ENABLED_LAYERS=(
   lint
   unit
+  dialyzer
 )
 
 ALL_LAYERS=(

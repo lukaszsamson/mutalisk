@@ -16,7 +16,11 @@ defmodule Mutalisk.MixProject do
       test_ignore_filters: [~r|test/fixtures/|],
       application: application(),
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_add_apps: [:mix, :ex_unit, :jason]
+      ]
     ]
   end
 

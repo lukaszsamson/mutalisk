@@ -24,3 +24,6 @@ mutalisk-*.tar
 
 # Local milestone handoff prompts.
 M*_PROMPT.txt
+
+# Dialyzer PLT cache.
+/priv/plts/
