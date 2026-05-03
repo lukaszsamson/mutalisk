@@ -102,6 +102,7 @@ defmodule Mut.SchemaBuildIntegrationTest do
   test "user code compile failures are not converted to invalid mutants" do
     broken_root = Path.expand("tmp/m7_broken_demo_app")
     File.rm_rf!(broken_root)
+    File.mkdir_p!(Path.dirname(broken_root))
     File.cp_r!(@fixture_root, broken_root)
 
     File.write!(

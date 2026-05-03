@@ -32,10 +32,10 @@ defmodule Mut.OrchestratorTest do
 
     assert length(plan.schema) == 2
     assert [] = plan.fallback
-    assert skip_reasons(plan) == %{attribute_engine_disabled: 1, guard_engine_disabled: 1}
+    assert skip_reasons(plan) == %{attribute_engine_disabled: 1, missing_oracle_site: 1}
   end
 
-  test "enabled fallback targets skip when no fallback mutators exist" do
+  test "enabled fallback targets produce attribute mutants" do
     plan =
       Mut.Orchestrator.plan(@fixture_root, oracle(),
         files: ["lib/sample.ex"],
@@ -43,8 +43,9 @@ defmodule Mut.OrchestratorTest do
       )
 
     assert length(plan.schema) == 2
-    assert [] = plan.fallback
-    assert skip_reasons(plan) == %{no_applicable_mutator: 2}
+    assert length(plan.fallback) == 2
+    assert Enum.all?(plan.fallback, &(&1.mutator == Mut.Mutator.AttributeLiteral))
+    assert skip_reasons(plan) == %{missing_oracle_site: 1}
   end
 
   test "oracle-backed unsupported candidates are not reported as missing" do

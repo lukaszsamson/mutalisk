@@ -12,16 +12,29 @@ defmodule Mut.OrchestratorIntegrationTest do
     plan = Mut.Orchestrator.plan(@fixture_root, oracle)
 
     assert length(plan.schema) == 27
-    assert plan.fallback == []
+    assert length(plan.fallback) == 4
     assert plan.invalid == []
 
     assert Enum.frequencies_by(plan.skipped, & &1.reason) == %{
              attribute_engine_disabled: 1,
-             guard_engine_disabled: 3,
-             unsupported_dispatch: 2
+             unsupported_dispatch: 3
            }
 
-    stable_ids = plan.schema |> Enum.map(& &1.stable_id) |> Enum.sort()
+    opt_in_plan =
+      Mut.Orchestrator.plan(@fixture_root, oracle,
+        enabled_targets: [:dispatch, :guard, :module_attribute]
+      )
+
+    assert length(opt_in_plan.schema) == 27
+    assert length(opt_in_plan.fallback) == 6
+    assert opt_in_plan.invalid == []
+    assert Enum.frequencies_by(opt_in_plan.skipped, & &1.reason) == %{unsupported_dispatch: 3}
+
+    stable_ids =
+      opt_in_plan
+      |> then(&(&1.schema ++ &1.fallback))
+      |> Enum.map(& &1.stable_id)
+      |> Enum.sort()
 
     if System.get_env("MUT_REGOLD") == "1" do
       File.mkdir_p!(Path.dirname(@golden))

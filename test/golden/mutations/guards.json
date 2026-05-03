@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "column": 25,
+    "description": "replace guard is_integer with is_float",
+    "file": "lib/guards.ex",
+    "guard_safe": true,
+    "kind": "guard_type_test",
+    "line": 4,
+    "mutator": "GuardTypeTest",
+    "operator": "is_integer",
+    "replacement": "is_float"
+  },
+  {
+    "column": 25,
+    "description": "replace guard is_integer with is_number",
+    "file": "lib/guards.ex",
+    "guard_safe": true,
+    "kind": "guard_type_test",
+    "line": 4,
+    "mutator": "GuardTypeTest",
+    "operator": "is_integer",
+    "replacement": "is_number"
+  },
+  {
+    "column": 45,
+    "description": "replace guard > with >=",
+    "file": "lib/guards.ex",
+    "guard_safe": true,
+    "kind": "guard_comparison_boundary",
+    "line": 4,
+    "mutator": "GuardComparisonBoundary",
+    "operator": ">",
+    "replacement": ">="
+  },
+  {
+    "column": 45,
+    "description": "replace guard > with <=",
+    "file": "lib/guards.ex",
+    "guard_safe": true,
+    "kind": "guard_comparison_negation",
+    "line": 4,
+    "mutator": "GuardComparisonNegation",
+    "operator": ">",
+    "replacement": "<="
+  }
+]

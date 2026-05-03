@@ -14,7 +14,7 @@ defmodule Mut.Orchestrator do
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
     mutators = Keyword.get(opts, :mutators, Defaults.list())
-    enabled_targets = Keyword.get(opts, :enabled_targets, [:dispatch])
+    enabled_targets = Keyword.get(opts, :enabled_targets, [:dispatch, :guard])
 
     work_copy_root
     |> files(opts)
@@ -58,15 +58,21 @@ defmodule Mut.Orchestrator do
 
     {schema, dispatch_skips} = dispatch_results(matched, mutators, source)
 
+    {attribute_fallback, attribute_skips} =
+      attribute_fallback_results(attribute_candidates, enabled_targets, mutators, source)
+
+    {guard_fallback, guard_skips} =
+      guard_fallback_results(guard_candidates, oracle, enabled_targets, mutators, source)
+
     %Plan{
       schema: schema,
-      fallback: [],
+      fallback: attribute_fallback ++ guard_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
           dispatch_skips ++
-          attribute_fallback_results(attribute_candidates, enabled_targets, mutators, source) ++
-          guard_fallback_results(guard_candidates, oracle, enabled_targets, mutators, source),
+          attribute_skips ++
+          guard_skips,
       matched_pairs: matched
     }
   end
@@ -100,7 +106,7 @@ defmodule Mut.Orchestrator do
     if :module_attribute in enabled_targets do
       enabled_fallback_results(candidates, :module_attribute, nil, mutators, source)
     else
-      Enum.map(candidates, &skip(&1, :attribute_engine_disabled, nil))
+      {[], Enum.map(candidates, &skip(&1, :attribute_engine_disabled, nil))}
     end
   end
 
@@ -109,18 +115,19 @@ defmodule Mut.Orchestrator do
       guard_mutators = Enum.filter(mutators, &target?(&1, :guard))
       guard_enabled_results(candidates, oracle, guard_mutators, source)
     else
-      Enum.map(candidates, &skip(&1, :guard_engine_disabled, nil))
+      {[], Enum.map(candidates, &skip(&1, :guard_engine_disabled, nil))}
     end
   end
 
   defp guard_enabled_results(candidates, _oracle, [], _source),
-    do: Enum.map(candidates, &skip(&1, :no_applicable_mutator, nil))
+    do: {[], Enum.map(candidates, &skip(&1, :no_applicable_mutator, nil))}
 
   defp guard_enabled_results(candidates, oracle, guard_mutators, source) do
     {matched, diagnostics} = Mut.Match.attach(candidates, oracle, guard_mutators)
 
-    enabled_fallback_results(matched, :guard, guard_mutators, source) ++
-      diagnostic_skips(diagnostics, oracle)
+    {fallback, skips} = enabled_fallback_results(matched, :guard, guard_mutators, source)
+
+    {fallback, skips ++ diagnostic_skips(diagnostics, oracle)}
   end
 
   defp enabled_fallback_results(candidates, target, site, mutators, source) do
@@ -132,7 +139,12 @@ defmodule Mut.Orchestrator do
   end
 
   defp enabled_fallback_results(pairs, target, target_mutators, source) do
-    Enum.flat_map(pairs, &fallback_result(&1, target, target_mutators, source))
+    pairs
+    |> Enum.map(&fallback_result(&1, target, target_mutators, source))
+    |> Enum.reduce({[], []}, fn
+      {:mutants, mutants}, {all_mutants, skips} -> {all_mutants ++ mutants, skips}
+      {:skip, skip}, {all_mutants, skips} -> {all_mutants, skips ++ [skip]}
+    end)
   end
 
   defp fallback_result({candidate, site}, target, target_mutators, source) do
@@ -141,7 +153,9 @@ defmodule Mut.Orchestrator do
     mutants =
       Enum.flat_map(target_mutators, &mutations(candidate, site, &1, ctx, :fallback, source))
 
-    if mutants == [], do: [skip(candidate, :no_applicable_mutator, nil)], else: mutants
+    if mutants == [],
+      do: {:skip, skip(candidate, :no_applicable_mutator, nil)},
+      else: {:mutants, mutants}
   end
 
   defp mutations(candidate, site, mutator, ctx, engine, source) do

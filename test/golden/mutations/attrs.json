@@ -1,0 +1,24 @@
+[
+  {
+    "column": 3,
+    "description": "replace attribute literal 42 with 0",
+    "file": "lib/attrs.ex",
+    "guard_safe": false,
+    "kind": "attribute_int_replace",
+    "line": 4,
+    "mutator": "AttributeLiteral",
+    "original_value": "42",
+    "replacement_value": "0"
+  },
+  {
+    "column": 3,
+    "description": "replace attribute literal 42 with 43",
+    "file": "lib/attrs.ex",
+    "guard_safe": false,
+    "kind": "attribute_int_replace",
+    "line": 4,
+    "mutator": "AttributeLiteral",
+    "original_value": "42",
+    "replacement_value": "43"
+  }
+]

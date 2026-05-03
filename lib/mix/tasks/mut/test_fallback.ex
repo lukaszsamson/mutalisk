@@ -1,8 +1,7 @@
 defmodule Mix.Tasks.Mut.TestFallback do
-  @moduledoc "Integration: run M10 fallback worker against the demo_app fixture."
+  @moduledoc "Integration: run fallback worker against the demo_app fixture."
   use Mix.Task
 
-  alias Mut.Mutant
   alias Mut.Plan
 
   @shortdoc "Runs fallback worker integration against demo_app"
@@ -11,27 +10,42 @@ defmodule Mix.Tasks.Mut.TestFallback do
   @fixture_test_paths [Path.join(@fixture_root, "test")]
   @concurrency 1
   @timeout_ms 15_000
+  @expected_outcomes %{
+    "45edaa4c59d00428222da80093414496" => :survived,
+    "6c0a95fb2e147bdddb88354363ae9f4e" => :killed,
+    "6d375d71e93497a6b9f9e7b992e76bba" => :killed,
+    "7995727a9a8a20c0380a6f23691cd640" => :killed,
+    "cce51daa589c14f64bbda5702741877c" => :killed,
+    "fec6b0dd35b70d4fb31ed7db9e690194" => :survived
+  }
 
   @impl Mix.Task
   def run(_argv) do
     Mix.Task.run("app.start")
     started = System.monotonic_time(:millisecond)
 
-    {:ok, oracle} = Mut.OracleBuild.run(@fixture_root, run_id: "m10-oracle", force: true)
-    schema_plan = Mut.Orchestrator.plan(@fixture_root, oracle)
+    {:ok, oracle} = Mut.OracleBuild.run(@fixture_root, run_id: "m11-oracle", force: true)
+    assert_default_attribute_skip!(oracle)
+
+    plan =
+      Mut.Orchestrator.plan(@fixture_root, oracle,
+        enabled_targets: [:dispatch, :guard, :module_attribute]
+      )
+
+    assert_fallback_plan!(plan)
 
     {:ok, schema_result} =
-      Mut.SchemaBuild.build(schema_plan,
+      Mut.SchemaBuild.build(plan,
         user_project_root: @fixture_root,
-        run_id: "m10-schema",
+        run_id: "m11-schema",
         force: true,
         keep: true
       )
 
-    fallback_plan = fallback_plan()
+    fallback_plan = %Plan{schema: [], fallback: plan.fallback, skipped: []} |> Plan.finalize()
 
     {:ok, pool} =
-      Mut.Sandbox.create_pool(schema_result, @concurrency, run_id: "m10-fallback", force: true)
+      Mut.Sandbox.create_pool(schema_result, @concurrency, run_id: "m11-fallback", force: true)
 
     final_pool =
       try do
@@ -49,7 +63,9 @@ defmodule Mix.Tasks.Mut.TestFallback do
   end
 
   defp run_mutants(pool, plan, selection, all_test_files) do
-    Enum.reduce(plan.fallback, {[], pool}, fn mutant, {results, pool} ->
+    plan.fallback
+    |> Enum.sort_by(& &1.stable_id)
+    |> Enum.reduce({[], pool}, fn mutant, {results, pool} ->
       expected = expected(mutant)
       {:ok, sandbox, checked_out} = Mut.Sandbox.checkout(pool)
       selected = Map.fetch!(selection, mutant.stable_id)
@@ -90,7 +106,7 @@ defmodule Mix.Tasks.Mut.TestFallback do
   defp summarize!(results, wall_ms) do
     mismatches = Enum.reject(results, &(&1.expected == &1.actual))
     counts = Enum.frequencies_by(results, & &1.actual)
-    expected_counts = %{killed: 2, survived: 1}
+    expected_counts = %{killed: 4, survived: 2}
 
     IO.puts("mut.test_fallback results=#{inspect(counts)} wall_ms=#{wall_ms}")
     IO.puts("mut.test_fallback dependents=#{inspect(dependent_summary(results))}")
@@ -139,9 +155,7 @@ defmodule Mix.Tasks.Mut.TestFallback do
     |> Enum.count()
   end
 
-  defp expected(%{mutation_kind: :boundary}), do: :survived
-  defp expected(%{mutation_kind: :negation}), do: :killed
-  defp expected(%{mutation_kind: :type_test}), do: :killed
+  defp expected(%{stable_id: stable_id}), do: Map.fetch!(@expected_outcomes, stable_id)
 
   defp worker_test_files(selected, all_test_files) do
     if selected == [] or length(selected) == length(all_test_files) do
@@ -157,75 +171,32 @@ defmodule Mix.Tasks.Mut.TestFallback do
     end)
   end
 
-  defp fallback_plan do
-    source = File.read!(Path.join(@fixture_root, "lib/guards.ex"))
+  defp assert_fallback_plan!(%Plan{} = plan) do
+    stable_ids = MapSet.new(Enum.map(plan.fallback, & &1.stable_id))
+    expected_ids = @expected_outcomes |> Map.keys() |> MapSet.new()
 
-    %Plan{schema: [], fallback: fallback_mutants(source), skipped: []}
-    |> Plan.finalize()
+    if stable_ids != expected_ids do
+      raise "fallback stable IDs mismatch: expected #{inspect(expected_ids)}, got #{inspect(stable_ids)}"
+    end
+
+    if length(plan.fallback) != 6 do
+      raise "fallback plan mismatch: expected 6 mutants, got #{length(plan.fallback)}"
+    end
   end
 
-  defp fallback_mutants(source) do
-    [
-      fallback_mutant(source, "boundary >=", "x > 0", quote(do: x >= 0), :boundary),
-      fallback_mutant(source, "negation <=", "x > 0", quote(do: x <= 0), :negation),
-      fallback_mutant(
-        source,
-        "type-test is_float",
-        "is_integer(x)",
-        quote(do: is_float(x)),
-        :type_test
+  defp assert_default_attribute_skip!(oracle) do
+    plan = Mut.Orchestrator.plan(@fixture_root, oracle)
+
+    attribute_skips =
+      Enum.filter(
+        plan.skipped,
+        &(&1.file == "lib/attrs.ex" and &1.syntactic_name == :some_const and
+            &1.reason == :attribute_engine_disabled)
       )
-    ]
-  end
 
-  defp fallback_mutant(source, description, original, mutated_ast, mutation_kind) do
-    {start_byte, length} = :binary.match(source, original)
-    end_byte = start_byte + length
-    {line, column} = line_column(source, start_byte)
-    {end_line, end_column} = line_column(source, end_byte)
-
-    %Mutant{
-      id: 0,
-      stable_id: "",
-      engine: :fallback,
-      mutator: __MODULE__,
-      mutator_name: "fallback_fixture",
-      mutation_kind: mutation_kind,
-      stable_id_kind: Atom.to_string(mutation_kind),
-      original_dispatch: "guard:#{original}",
-      ast_path_hash: nil,
-      start_byte: start_byte,
-      end_byte: end_byte,
-      file: "lib/guards.ex",
-      line: line,
-      column: column,
-      span: {line, column, end_line, end_column},
-      module: Guards,
-      function: {:positive?, 1},
-      original_ast: original_ast(original),
-      mutated_ast: mutated_ast,
-      source_patch: nil,
-      original_source: original,
-      mutated_source: nil,
-      description: description,
-      status: :pending,
-      skip_reason: nil,
-      covering_tests: nil,
-      killing_test: nil,
-      duration_ms: nil,
-      compile_error: nil
-    }
-  end
-
-  defp original_ast("x > 0"), do: quote(do: x > 0)
-  defp original_ast("is_integer(x)"), do: quote(do: is_integer(x))
-
-  defp line_column(source, byte_offset) do
-    before = binary_part(source, 0, byte_offset)
-    lines = String.split(before, "\n")
-    line = length(lines)
-    column = List.last(lines) |> String.length() |> Kernel.+(1)
-    {line, column}
+    if length(attribute_skips) != 1 do
+      raise "default plan expected one attrs.ex @some_const attribute_engine_disabled skip"
+    end
   end
 
   defp elapsed(started), do: System.monotonic_time(:millisecond) - started

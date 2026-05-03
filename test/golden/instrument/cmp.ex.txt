@@ -4,8 +4,8 @@ defmodule Cmp do
   def ordered?(a, b) do
     case :persistent_term.get(Mut.Runtime.active_key(), 0) do
       0 -> a <= b
-      10 -> a > b
-      17 -> a < b
+      11 -> a > b
+      20 -> a < b
       _ -> a <= b
     end
   end
@@ -21,8 +21,8 @@ defmodule Cmp do
               0 ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -32,14 +32,14 @@ defmodule Cmp do
                     _ -> a >= b
                   end
 
-              11 ->
+              12 ->
                 a > b and a >= b
 
               _ ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -51,11 +51,11 @@ defmodule Cmp do
             end or
               case mutalisk_schema_active do
                 0 -> a == b
-                27 -> a != b
+                30 -> a != b
                 _ -> a == b
               end
 
-          13 ->
+          16 ->
             (a > b or a >= b) and a == b
 
           _ ->
@@ -63,8 +63,8 @@ defmodule Cmp do
               0 ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -74,14 +74,14 @@ defmodule Cmp do
                     _ -> a >= b
                   end
 
-              11 ->
+              12 ->
                 a > b and a >= b
 
               _ ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -93,7 +93,7 @@ defmodule Cmp do
             end or
               case mutalisk_schema_active do
                 0 -> a == b
-                27 -> a != b
+                30 -> a != b
                 _ -> a == b
               end
         end or
@@ -103,7 +103,7 @@ defmodule Cmp do
             _ -> a != b
           end
 
-      22 ->
+      25 ->
         (a > b or a >= b or a == b) and a != b
 
       _ ->
@@ -113,8 +113,8 @@ defmodule Cmp do
               0 ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -124,14 +124,14 @@ defmodule Cmp do
                     _ -> a >= b
                   end
 
-              11 ->
+              12 ->
                 a > b and a >= b
 
               _ ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -143,11 +143,11 @@ defmodule Cmp do
             end or
               case mutalisk_schema_active do
                 0 -> a == b
-                27 -> a != b
+                30 -> a != b
                 _ -> a == b
               end
 
-          13 ->
+          16 ->
             (a > b or a >= b) and a == b
 
           _ ->
@@ -155,8 +155,8 @@ defmodule Cmp do
               0 ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -166,14 +166,14 @@ defmodule Cmp do
                     _ -> a >= b
                   end
 
-              11 ->
+              12 ->
                 a > b and a >= b
 
               _ ->
                 case mutalisk_schema_active do
                   0 -> a > b
-                  21 -> a >= b
-                  26 -> a <= b
+                  24 -> a >= b
+                  29 -> a <= b
                   _ -> a > b
                 end or
                   case mutalisk_schema_active do
@@ -185,7 +185,7 @@ defmodule Cmp do
             end or
               case mutalisk_schema_active do
                 0 -> a == b
-                27 -> a != b
+                30 -> a != b
                 _ -> a == b
               end
         end or

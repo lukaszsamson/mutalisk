@@ -18,8 +18,7 @@
     "kind": "unary_not_removal",
     "line": 5,
     "mutator": "UnaryNot",
-    "operator": "not",
-    "replacement": null
+    "operator": "not"
   },
   {
     "column": 7,
@@ -51,7 +50,6 @@
     "kind": "unary_not_removal",
     "line": 9,
     "mutator": "UnaryNot",
-    "operator": "!",
-    "replacement": null
+    "operator": "!"
   }
 ]

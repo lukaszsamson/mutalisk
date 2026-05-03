@@ -1,5 +1,5 @@
 defmodule Mut.Mutator.Defaults do
-  @moduledoc "Default v1 schema mutator set."
+  @moduledoc "Default v1 mutator set."
 
   @spec list() :: [module]
   def list do
@@ -8,7 +8,11 @@ defmodule Mut.Mutator.Defaults do
       Mut.Mutator.ComparisonBoundary,
       Mut.Mutator.ComparisonNegation,
       Mut.Mutator.Boolean,
-      Mut.Mutator.UnaryNot
+      Mut.Mutator.UnaryNot,
+      Mut.Mutator.GuardComparisonBoundary,
+      Mut.Mutator.GuardComparisonNegation,
+      Mut.Mutator.GuardTypeTest,
+      Mut.Mutator.AttributeLiteral
     ]
   end
 

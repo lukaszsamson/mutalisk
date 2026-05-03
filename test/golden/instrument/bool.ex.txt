@@ -13,7 +13,7 @@ defmodule Bool do
             _ -> not b
           end
 
-      19 ->
+      22 ->
         a or not b
 
       _ ->
@@ -33,7 +33,7 @@ defmodule Bool do
       0 ->
         case mutalisk_schema_active do
           0 -> a || b
-          20 -> a && b
+          23 -> a && b
           _ -> a || b
         end ||
           case mutalisk_schema_active do
@@ -42,13 +42,13 @@ defmodule Bool do
             _ -> !b
           end
 
-      14 ->
+      17 ->
         (a || b) && !b
 
       _ ->
         case mutalisk_schema_active do
           0 -> a || b
-          20 -> a && b
+          23 -> a && b
           _ -> a || b
         end ||
           case mutalisk_schema_active do

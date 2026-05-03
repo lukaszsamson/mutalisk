@@ -28,7 +28,7 @@ defmodule Mut.AstWalk do
     file = Keyword.fetch!(opts, :file)
     source = Keyword.get(opts, :source)
     line_offsets = if source, do: Compute.line_offsets(source), else: %{}
-    acc = acc(file, source, line_offsets)
+    acc = acc(file, source, line_offsets, false)
 
     {_ast, acc} = Macro.traverse(ast, acc, &pre/2, &post/2)
 
@@ -42,7 +42,7 @@ defmodule Mut.AstWalk do
     file = Keyword.fetch!(opts, :file)
     source = Keyword.fetch!(opts, :source)
     line_offsets = Compute.line_offsets(source)
-    acc = acc(file, source, line_offsets)
+    acc = acc(file, source, line_offsets, false)
 
     {_ast, acc} = Macro.traverse(ast, acc, &attribute_pre/2, &post/2)
 
@@ -56,7 +56,7 @@ defmodule Mut.AstWalk do
     file = Keyword.fetch!(opts, :file)
     source = Keyword.get(opts, :source)
     line_offsets = if source, do: Compute.line_offsets(source), else: %{}
-    acc = acc(file, source, line_offsets)
+    acc = acc(file, source, line_offsets, true)
 
     {_ast, acc} = Macro.traverse(ast, acc, &guard_pre/2, &post/2)
 
@@ -65,8 +65,15 @@ defmodule Mut.AstWalk do
     |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp acc(file, source, line_offsets) do
-    %{frames: [], candidates: [], file: file, source: source, line_offsets: line_offsets}
+  defp acc(file, source, line_offsets, span_fallback?) do
+    %{
+      frames: [],
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      span_fallback?: span_fallback?
+    }
   end
 
   defp pre(node, acc) do
@@ -191,7 +198,9 @@ defmodule Mut.AstWalk do
           column: Keyword.get(meta, :column),
           syntactic_name: name,
           syntactic_arity: arity,
-          source_span: Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets),
+          source_span:
+            Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) ||
+              fallback_source_text_span(node, meta, acc),
           env_context: env_context,
           ast_path: path,
           ast_path_hash: path_hash(path),
@@ -349,6 +358,42 @@ defmodule Mut.AstWalk do
     source
     |> String.split("\n")
     |> Enum.at(line - 1)
+  end
+
+  defp fallback_source_text_span(node, meta, %{span_fallback?: true} = acc),
+    do: source_text_span(node, meta, acc)
+
+  defp fallback_source_text_span(_node, _meta, _acc), do: nil
+
+  defp source_text_span(_node, _meta, %{source: nil}), do: nil
+
+  defp source_text_span(node, meta, acc) do
+    with line when is_integer(line) <- Keyword.get(meta, :line),
+         column when is_integer(column) <- Keyword.get(meta, :column),
+         rendered when rendered != "" <- Macro.to_string(node),
+         line_text when is_binary(line_text) <- source_line(acc.source, line),
+         {start_column, end_column} <- rendered_span(line_text, rendered, column) do
+      %Mut.SourceSpan{
+        file: acc.file,
+        start_line: line,
+        start_column: start_column,
+        end_line: line,
+        end_column: end_column,
+        start_byte: byte_offset(acc.source, acc.line_offsets, line, start_column),
+        end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
+      }
+    else
+      _missing -> nil
+    end
+  end
+
+  defp rendered_span(line_text, rendered, column) do
+    line_text
+    |> :binary.matches(rendered)
+    |> Enum.map(fn {start_byte, length} -> {start_byte + 1, start_byte + length + 1} end)
+    |> Enum.find(fn {start_column, end_column} ->
+      start_column <= column and column <= end_column
+    end)
   end
 
   defp attribute_value_column(line_text, attr_column, name) do
