@@ -2,17 +2,17 @@ defmodule Arith do
   @moduledoc "Fixture arithmetic module."
 
   def score(a, b) do
-    mut_active = :persistent_term.get(Mut.Runtime.active_key(), 0)
+    mutalisk_schema_active = :persistent_term.get(Mut.Runtime.active_key(), 0)
 
-    case mut_active do
+    case mutalisk_schema_active do
       0 ->
-        case mut_active do
+        case mutalisk_schema_active do
           0 -> a + b
           4 -> a * b
           28 -> a - b
           _ -> a + b
         end *
-          case mut_active do
+          case mutalisk_schema_active do
             0 -> a - b
             6 -> a * b
             8 -> a + b
@@ -29,13 +29,13 @@ defmodule Arith do
         a + b - (a - b)
 
       _ ->
-        case mut_active do
+        case mutalisk_schema_active do
           0 -> a + b
           4 -> a * b
           28 -> a - b
           _ -> a + b
         end *
-          case mut_active do
+          case mutalisk_schema_active do
             0 -> a - b
             6 -> a * b
             8 -> a + b
@@ -45,14 +45,14 @@ defmodule Arith do
   end
 
   def integer_parts(a, b) do
-    mut_active = :persistent_term.get(Mut.Runtime.active_key(), 0)
+    mutalisk_schema_active = :persistent_term.get(Mut.Runtime.active_key(), 0)
 
-    {case mut_active do
+    {case mutalisk_schema_active do
        0 -> div(a, b)
        27 -> rem(a, b)
        _ -> div(a, b)
      end,
-     case mut_active do
+     case mutalisk_schema_active do
        0 -> rem(a, b)
        17 -> div(a, b)
        _ -> rem(a, b)

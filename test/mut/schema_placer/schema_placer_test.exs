@@ -66,7 +66,7 @@ defmodule Mut.SchemaPlacerTest do
     instrumented = SchemaPlacer.place(ast, mutants)
     body = function_body(instrumented, :f)
     assert {:__block__, [], [{:=, [generated: true], [hoisted_var, hoist_call]}, _expr]} = body
-    assert {:mut_active, meta, Mut.SchemaPlacer} = hoisted_var
+    assert {:mutalisk_schema_active, meta, Mut.SchemaPlacer} = hoisted_var
     assert Keyword.has_key?(meta, :counter)
     assert persistent_term_get?(hoist_call)
 
@@ -106,6 +106,89 @@ defmodule Mut.SchemaPlacerTest do
       )
 
     assert_raise SchemaPlacer.RefusedContext, ~r/inside a when clause guard/, fn ->
+      SchemaPlacer.place(ast, [mutant])
+    end
+  end
+
+  test "instrument_file returns rendered source and placement map keyed by formatted case locations" do
+    source = "defmodule Sample do\n  def f(a), do: a + 1\nend\n"
+    path = Path.expand("tmp/schema_placer_sample.ex")
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, source)
+    on_exit(fn -> File.rm(path) end)
+
+    ast = parsed!(source)
+
+    mutant =
+      mutant(
+        ast,
+        source,
+        :+,
+        11,
+        7,
+        {:-, [line: 2, column: 14], [{:a, [line: 2, column: 13], nil}, 1]}
+      )
+
+    assert {:ok, rendered, %SchemaPlacer.PlacementMap{} = placement_map} =
+             SchemaPlacer.instrument_file(path, [%{mutant | file: "tmp/schema_placer_sample.ex"}])
+
+    assert String.contains?(rendered, "case :persistent_term.get")
+    assert placement_map.file == "tmp/schema_placer_sample.ex"
+    assert Enum.sort(Map.values(placement_map.entries)) == [[11]]
+  end
+
+  test "rendered hoist variable does not collide with a user mut_active binding" do
+    source =
+      "defmodule Sample do\n  def f(a), do: (mut_active = a + 1; mut_active * (a - 1))\nend"
+
+    ast = parsed!(source)
+
+    mutants = [
+      mutant(
+        ast,
+        source,
+        :+,
+        11,
+        7,
+        {:-, [line: 2, column: 31], [{:a, [line: 2, column: 30], nil}, 1]}
+      ),
+      mutant(
+        ast,
+        source,
+        :-,
+        12,
+        7,
+        {:+, [line: 2, column: 51], [{:a, [line: 2, column: 50], nil}, 1]}
+      )
+    ]
+
+    rendered = ast |> SchemaPlacer.place(mutants) |> SchemaPlacer.render()
+    module = Module.concat([:"SchemaCollisionTest_#{:erlang.unique_integer([:positive])}"])
+    rendered = String.replace(rendered, "defmodule Sample do", "defmodule #{module} do")
+    Code.compile_string(rendered, "schema_collision_test.ex")
+    on_exit(fn -> Mut.Runtime.clear() end)
+
+    Mut.Runtime.set_active(0)
+    assert module.f(3) == 8
+    assert String.contains?(rendered, "mutalisk_schema_active")
+    assert String.contains?(rendered, "mut_active =")
+  end
+
+  test "macro body context is refused when a matching mutant slips through" do
+    source = "defmodule Sample do\n  defmacro f(a), do: a + 1\nend"
+    ast = parsed!(source)
+
+    mutant =
+      mutant(
+        ast,
+        source,
+        :+,
+        11,
+        7,
+        {:-, [line: 2, column: 25], [{:a, [line: 2, column: 24], nil}, 1]}
+      )
+
+    assert_raise SchemaPlacer.RefusedContext, ~r/inside a defmacro\/defmacrop body/, fn ->
       SchemaPlacer.place(ast, [mutant])
     end
   end

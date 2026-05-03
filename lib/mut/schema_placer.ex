@@ -3,9 +3,21 @@ defmodule Mut.SchemaPlacer do
 
   alias Mut.Mutant
 
-  @function_defs ~w(def defp defmacro defmacrop)a
+  @function_defs ~w(def defp)a
+  @macro_defs ~w(defmacro defmacrop)a
+  @definition_defs @function_defs ++ @macro_defs
   @no_descend ~w(quote unquote unquote_splicing)a
   @clause_heads ~w(case with fn for)a
+
+  defmodule PlacementMap do
+    @moduledoc "Maps rendered schema locations to mutant IDs for rollback."
+
+    @enforce_keys [:file, :entries]
+    defstruct [:file, :entries]
+
+    @type location :: {line :: pos_integer(), column :: pos_integer() | nil}
+    @type t :: %__MODULE__{file: Path.t(), entries: %{location => [non_neg_integer()]}}
+  end
 
   defmodule RefusedContext do
     @moduledoc "Raised when a schema mutant is placed in a refused AST context."
@@ -46,11 +58,12 @@ defmodule Mut.SchemaPlacer do
   end
 
   @spec instrument_file(file :: Path.t(), [Mutant.t()]) ::
-          {:ok, instrumented_source :: String.t()} | {:error, term}
+          {:ok, instrumented_source :: String.t(), PlacementMap.t()} | {:error, term}
   def instrument_file(file, mutants) do
     with {:ok, {ast, _source}} <- Mut.SourceParse.parse(file) do
       file_mutants = Enum.filter(mutants, &same_file?(&1.file, file))
-      {:ok, render(place(ast, file_mutants))}
+      rendered = render(place(ast, file_mutants))
+      {:ok, rendered, placement_map(file, rendered)}
     end
   end
 
@@ -67,7 +80,7 @@ defmodule Mut.SchemaPlacer do
     Map.new(acc.bodies, fn {path, hashes} ->
       mode =
         if MapSet.size(hashes) >= 2,
-          do: {:hoisted, Macro.unique_var(:mut_active, __MODULE__)},
+          do: {:hoisted, Macro.unique_var(:mutalisk_schema_active, __MODULE__)},
           else: :inline
 
       {path, mode}
@@ -207,6 +220,7 @@ defmodule Mut.SchemaPlacer do
     cond do
       Enum.any?(path, &match?({:elem, :when, 1}, &1)) -> "inside a when clause guard"
       function_head_path?(path) -> "inside a def/defp/defmacro/defmacrop head pattern"
+      macro_body_path?(path) -> "inside a defmacro/defmacrop body"
       Enum.any?(path, &match?({:elem, :@, _index}, &1)) -> "inside a module attribute value"
       lhs_match_path?(path) -> "inside the left-hand side of a match"
       clause_head_pattern_path?(path) -> "inside a case/with/fn/for clause head pattern"
@@ -226,12 +240,16 @@ defmodule Mut.SchemaPlacer do
     function_head_tail?(Enum.take(path, -1)) or function_head_tail?(Enum.take(path, -2))
   end
 
-  defp function_head_tail?([{:elem, parent, 0}]) when parent in @function_defs, do: true
+  defp function_head_tail?([{:elem, parent, 0}]) when parent in @definition_defs, do: true
 
-  defp function_head_tail?([{:elem, parent, 0}, {:elem, :when, 0}]) when parent in @function_defs,
-    do: true
+  defp function_head_tail?([{:elem, parent, 0}, {:elem, :when, 0}])
+       when parent in @definition_defs,
+       do: true
 
   defp function_head_tail?(_tail), do: false
+
+  defp macro_body_path?(path),
+    do: Enum.any?(path, &match?({:elem, kind, 1} when kind in @macro_defs, &1))
 
   defp lhs_match_path?(path), do: Enum.any?(path, &match?({:elem, :=, 0}, &1))
 
@@ -293,6 +311,60 @@ defmodule Mut.SchemaPlacer do
 
   defp original_line({_name, meta, _args}) when is_list(meta), do: Keyword.get(meta, :line)
   defp original_line(_node), do: nil
+
+  defp placement_map(file, rendered) do
+    entries =
+      case Mut.SourceParse.parse_string(rendered, file) do
+        {:ok, ast} -> schema_entries(ast)
+        {:error, _reason} -> %{}
+      end
+
+    %PlacementMap{file: relativize(file), entries: entries}
+  end
+
+  defp schema_entries(ast) do
+    ast
+    |> Macro.prewalker()
+    |> Enum.reduce(%{}, fn
+      {:case, meta, [scrutinee, [do: arms]]}, entries when is_list(meta) ->
+        ids = schema_arm_ids(arms)
+
+        if ids == [] or not schema_scrutinee?(scrutinee) do
+          entries
+        else
+          Map.put(entries, {Keyword.get(meta, :line), Keyword.get(meta, :column)}, ids)
+        end
+
+      _other, entries ->
+        entries
+    end)
+  end
+
+  defp schema_arm_ids(arms) do
+    ids =
+      Enum.flat_map(arms, fn
+        {:->, _meta, [[id], _body]} when is_integer(id) and id > 0 -> [id]
+        _arm -> []
+      end)
+
+    if original_and_wildcard_arms?(arms), do: Enum.sort(ids), else: []
+  end
+
+  defp original_and_wildcard_arms?([{:->, _meta, [[0], _body]} | rest]) do
+    match?({:->, _meta, [[{:_, _wild_meta, nil}], _body]}, List.last(rest))
+  end
+
+  defp original_and_wildcard_arms?(_arms), do: false
+
+  defp schema_scrutinee?({:mutalisk_schema_active, _meta, nil}), do: true
+
+  defp schema_scrutinee?(
+         {{:., _, [:persistent_term, :get]}, _,
+          [{{:., _, [{:__aliases__, _, [:Mut, :Runtime]}, :active_key]}, _, []}, 0]}
+       ),
+       do: true
+
+  defp schema_scrutinee?(_scrutinee), do: false
 
   defp same_file?(mutant_file, file) do
     relative = relativize(file)

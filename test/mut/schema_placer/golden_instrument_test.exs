@@ -16,7 +16,7 @@ defmodule Mut.SchemaPlacer.GoldenInstrumentTest do
       path = Path.join(@fixture_root, relative)
       mutants = Enum.filter(plan.schema, &(&1.file == relative))
 
-      assert {:ok, actual} = Mut.SchemaPlacer.instrument_file(path, mutants)
+      assert {:ok, actual, _placement_map} = Mut.SchemaPlacer.instrument_file(path, mutants)
 
       golden = Path.join(@golden_root, "#{Path.rootname(file)}.ex.txt")
 
