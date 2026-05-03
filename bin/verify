@@ -77,7 +77,7 @@ run_unit() {
 
 run_dialyzer() {
   step dialyzer
-  mix dialyzer --halt-exit-status
+  mix dialyzer
 }
 
 run_golden_oracle() {

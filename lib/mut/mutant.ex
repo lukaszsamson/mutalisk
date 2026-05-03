@@ -1,7 +1,6 @@
 defmodule Mut.Mutant do
   @moduledoc "Mutation candidate and execution result."
 
-  @derive {Jason.Encoder, except: [:original_ast, :mutated_ast]}
   @enforce_keys [
     :id,
     :stable_id,
@@ -69,4 +68,23 @@ defmodule Mut.Mutant do
           duration_ms: non_neg_integer() | nil,
           compile_error: term() | nil
         }
+end
+
+defimpl Jason.Encoder, for: Mut.Mutant do
+  def encode(mutant, opts) do
+    mutant
+    |> Map.from_struct()
+    |> Map.drop([:original_ast, :mutated_ast])
+    |> Map.update!(:span, &encode_span/1)
+    |> Map.update!(:function, &encode_function/1)
+    |> Jason.Encode.map(opts)
+  end
+
+  defp encode_span(nil), do: nil
+
+  defp encode_span({start_line, start_column, end_line, end_column}),
+    do: [start_line, start_column, end_line, end_column]
+
+  defp encode_function(nil), do: nil
+  defp encode_function({name, arity}), do: [name, arity]
 end

@@ -1,7 +1,6 @@
 defmodule Mut.Oracle.DispatchSite do
   @moduledoc "Normalized compiler dispatch site."
 
-  @derive Jason.Encoder
   @enforce_keys [
     :file,
     :line,
@@ -51,4 +50,24 @@ defmodule Mut.Oracle.DispatchSite do
           event_file: Path.t(),
           meta: keyword()
         }
+end
+
+defimpl Jason.Encoder, for: Mut.Oracle.DispatchSite do
+  def encode(site, opts) do
+    site
+    |> Map.from_struct()
+    |> Map.update!(:function, &encode_function/1)
+    |> Map.update!(:meta, &encode_meta/1)
+    |> Jason.Encode.map(opts)
+  end
+
+  defp encode_function(nil), do: nil
+  defp encode_function({name, arity}), do: [name, arity]
+
+  defp encode_meta(meta) when is_list(meta) do
+    Enum.map(meta, fn
+      {key, value} -> [key, value]
+      value -> value
+    end)
+  end
 end

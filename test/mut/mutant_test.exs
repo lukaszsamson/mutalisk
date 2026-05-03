@@ -60,7 +60,7 @@ defmodule Mut.MutantTest do
   end
 
   test "Jason round-trip has expected keys and excludes AST fields" do
-    json = Jason.encode!(jsonable_mutant())
+    json = Jason.encode!(mutant(:survived))
     decoded = Jason.decode!(json)
     encoded_again = Jason.encode!(decoded)
 
@@ -69,6 +69,8 @@ defmodule Mut.MutantTest do
 
     refute Map.has_key?(decoded, "original_ast")
     refute Map.has_key?(decoded, "mutated_ast")
+    assert decoded["span"] == [1, 3, 1, 8]
+    assert decoded["function"] == ["sum", 2]
     refute String.contains?(encoded_again, "original_ast")
     refute String.contains?(encoded_again, "mutated_ast")
   end
@@ -110,10 +112,5 @@ defmodule Mut.MutantTest do
       duration_ms: 12,
       compile_error: %{message: "boom"}
     }
-  end
-
-  @spec jsonable_mutant() :: Mut.Mutant.t()
-  defp jsonable_mutant do
-    %{mutant(:survived) | span: nil, function: nil}
   end
 end
