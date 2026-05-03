@@ -1,0 +1,57 @@
+[
+  {
+    "column": 7,
+    "description": "replace and with or",
+    "file": "lib/bool.ex",
+    "guard_safe": true,
+    "kind": "boolean_op",
+    "line": 5,
+    "mutator": "Boolean",
+    "operator": "and",
+    "replacement": "or"
+  },
+  {
+    "column": 11,
+    "description": "remove unary not",
+    "file": "lib/bool.ex",
+    "guard_safe": true,
+    "kind": "unary_not_removal",
+    "line": 5,
+    "mutator": "UnaryNot",
+    "operator": "not",
+    "replacement": null
+  },
+  {
+    "column": 7,
+    "description": "replace || with &&",
+    "file": "lib/bool.ex",
+    "guard_safe": false,
+    "kind": "boolean_op",
+    "line": 9,
+    "mutator": "Boolean",
+    "operator": "||",
+    "replacement": "&&"
+  },
+  {
+    "column": 12,
+    "description": "replace || with &&",
+    "file": "lib/bool.ex",
+    "guard_safe": false,
+    "kind": "boolean_op",
+    "line": 9,
+    "mutator": "Boolean",
+    "operator": "||",
+    "replacement": "&&"
+  },
+  {
+    "column": 15,
+    "description": "remove unary !",
+    "file": "lib/bool.ex",
+    "guard_safe": true,
+    "kind": "unary_not_removal",
+    "line": 9,
+    "mutator": "UnaryNot",
+    "operator": "!",
+    "replacement": null
+  }
+]

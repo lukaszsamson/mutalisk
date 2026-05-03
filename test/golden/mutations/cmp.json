@@ -1,0 +1,156 @@
+[
+  {
+    "column": 7,
+    "description": "replace < with <=",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_boundary",
+    "line": 5,
+    "mutator": "ComparisonBoundary",
+    "operator": "<",
+    "replacement": "<="
+  },
+  {
+    "column": 7,
+    "description": "replace < with >=",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_negation",
+    "line": 5,
+    "mutator": "ComparisonNegation",
+    "operator": "<",
+    "replacement": ">="
+  },
+  {
+    "column": 11,
+    "description": "replace and with or",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "boolean_op",
+    "line": 5,
+    "mutator": "Boolean",
+    "operator": "and",
+    "replacement": "or"
+  },
+  {
+    "column": 17,
+    "description": "replace <= with <",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_boundary",
+    "line": 5,
+    "mutator": "ComparisonBoundary",
+    "operator": "<=",
+    "replacement": "<"
+  },
+  {
+    "column": 17,
+    "description": "replace <= with >",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_negation",
+    "line": 5,
+    "mutator": "ComparisonNegation",
+    "operator": "<=",
+    "replacement": ">"
+  },
+  {
+    "column": 7,
+    "description": "replace > with >=",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_boundary",
+    "line": 9,
+    "mutator": "ComparisonBoundary",
+    "operator": ">",
+    "replacement": ">="
+  },
+  {
+    "column": 7,
+    "description": "replace > with <=",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_negation",
+    "line": 9,
+    "mutator": "ComparisonNegation",
+    "operator": ">",
+    "replacement": "<="
+  },
+  {
+    "column": 11,
+    "description": "replace or with and",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "boolean_op",
+    "line": 9,
+    "mutator": "Boolean",
+    "operator": "or",
+    "replacement": "and"
+  },
+  {
+    "column": 16,
+    "description": "replace >= with >",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_boundary",
+    "line": 9,
+    "mutator": "ComparisonBoundary",
+    "operator": ">=",
+    "replacement": ">"
+  },
+  {
+    "column": 16,
+    "description": "replace >= with <",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_negation",
+    "line": 9,
+    "mutator": "ComparisonNegation",
+    "operator": ">=",
+    "replacement": "<"
+  },
+  {
+    "column": 21,
+    "description": "replace or with and",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "boolean_op",
+    "line": 9,
+    "mutator": "Boolean",
+    "operator": "or",
+    "replacement": "and"
+  },
+  {
+    "column": 26,
+    "description": "replace == with !=",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_negation",
+    "line": 9,
+    "mutator": "ComparisonNegation",
+    "operator": "==",
+    "replacement": "!="
+  },
+  {
+    "column": 31,
+    "description": "replace or with and",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "boolean_op",
+    "line": 9,
+    "mutator": "Boolean",
+    "operator": "or",
+    "replacement": "and"
+  },
+  {
+    "column": 36,
+    "description": "replace != with ==",
+    "file": "lib/cmp.ex",
+    "guard_safe": true,
+    "kind": "comparison_negation",
+    "line": 9,
+    "mutator": "ComparisonNegation",
+    "operator": "!=",
+    "replacement": "=="
+  }
+]

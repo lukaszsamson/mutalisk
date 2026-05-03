@@ -1,0 +1,101 @@
+[
+  {
+    "column": 8,
+    "description": "replace + with *",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "+",
+    "replacement": "*"
+  },
+  {
+    "column": 8,
+    "description": "replace + with -",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "+",
+    "replacement": "-"
+  },
+  {
+    "column": 13,
+    "description": "replace * with +",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "*",
+    "replacement": "+"
+  },
+  {
+    "column": 13,
+    "description": "replace * with -",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "*",
+    "replacement": "-"
+  },
+  {
+    "column": 13,
+    "description": "replace * with /",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "*",
+    "replacement": "/"
+  },
+  {
+    "column": 18,
+    "description": "replace - with *",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "-",
+    "replacement": "*"
+  },
+  {
+    "column": 18,
+    "description": "replace - with +",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 5,
+    "mutator": "Arithmetic",
+    "operator": "-",
+    "replacement": "+"
+  },
+  {
+    "column": 6,
+    "description": "replace div with rem",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 9,
+    "mutator": "Arithmetic",
+    "operator": "div",
+    "replacement": "rem"
+  },
+  {
+    "column": 17,
+    "description": "replace rem with div",
+    "file": "lib/arith.ex",
+    "guard_safe": true,
+    "kind": "arithmetic_op",
+    "line": 9,
+    "mutator": "Arithmetic",
+    "operator": "rem",
+    "replacement": "div"
+  }
+]
