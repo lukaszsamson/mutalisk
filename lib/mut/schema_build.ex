@@ -42,15 +42,20 @@ defmodule Mut.SchemaBuild do
     with {:ok, user_project_root} <- fetch_user_project_root(opts),
          {:ok, work_copy} <- materialize(user_project_root, opts) do
       result = build_in_work_copy(work_copy, plan, opts)
-      maybe_remove_work_copy(work_copy, Keyword.get(opts, :keep, false), result)
+      maybe_remove_work_copy(work_copy, opts, result)
       result
     end
   end
 
   @spec snapshot(Path.t()) :: %{Path.t() => String.t()}
-  def snapshot(build_path) do
+  def snapshot(build_path), do: snapshot(build_path, [])
+
+  @spec snapshot(Path.t(), keyword) :: %{Path.t() => String.t()}
+  def snapshot(build_path, opts) do
+    app = Keyword.get(opts, :app)
+
     build_path
-    |> Path.join("**/*")
+    |> snapshot_glob(app)
     |> Path.wildcard(match_dot: true)
     |> Enum.filter(&File.regular?/1)
     |> Enum.map(fn file ->
@@ -154,13 +159,14 @@ defmodule Mut.SchemaBuild do
 
   defp result(work_copy, final) do
     build_path = Path.join(work_copy, "_build/mut_schema")
+    app = target_app(work_copy)
 
     %Result{
       work_copy_root: work_copy,
       build_path: build_path,
       plan: final.plan,
       placement_maps: final.placement_maps,
-      snapshot: snapshot(build_path),
+      snapshot: snapshot(build_path, app: app),
       rollback_iterations: final.rollback_iterations,
       invalid_mutants: final.invalid_mutants
     }
@@ -180,9 +186,44 @@ defmodule Mut.SchemaBuild do
     {:compile, output, exit_code}
   end
 
-  defp maybe_remove_work_copy(_work_copy, true, _result), do: :ok
-  defp maybe_remove_work_copy(work_copy, false, {:ok, _result}), do: File.rm_rf!(work_copy)
-  defp maybe_remove_work_copy(_work_copy, false, {:error, _reason}), do: :ok
+  defp maybe_remove_work_copy(work_copy, opts, result) do
+    keep? = Keyword.get(opts, :keep, false)
+    keep_failed? = Keyword.get(opts, :keep_failed, false)
+
+    if keep? or (keep_failed? and match?({:error, _reason}, result)) do
+      :ok
+    else
+      File.rm_rf!(work_copy)
+      :ok
+    end
+  end
+
+  defp snapshot_glob(build_path, nil), do: Path.join(build_path, "**/*")
+  defp snapshot_glob(build_path, app), do: Path.join([build_path, "lib", app, "**/*"])
+
+  defp target_app(work_copy) do
+    work_copy
+    |> Path.join("mix_user.exs")
+    |> File.read!()
+    |> Code.string_to_quoted!()
+    |> app_from_ast()
+  end
+
+  defp app_from_ast(ast) do
+    {_ast, app} =
+      Macro.prewalk(ast, nil, fn
+        {:app, _meta, value}, nil when is_atom(value) ->
+          {{:app, [], value}, Atom.to_string(value)}
+
+        {:app, value}, nil when is_atom(value) ->
+          {{:app, value}, Atom.to_string(value)}
+
+        node, app ->
+          {node, app}
+      end)
+
+    app
+  end
 
   defp sha256(file) do
     :sha256

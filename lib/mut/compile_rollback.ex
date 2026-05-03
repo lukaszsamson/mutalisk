@@ -254,7 +254,7 @@ defmodule Mut.CompileRollback do
     |> Map.keys()
     |> Enum.filter(fn file ->
       limit = invalid_limit(max_invalid_per_file, plan, file)
-      MapSet.size(Map.get(invalid_by_file, file, MapSet.new())) > limit
+      MapSet.size(Map.get(invalid_by_file, file, MapSet.new())) >= limit
     end)
   end
 

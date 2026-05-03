@@ -40,4 +40,16 @@ defmodule Mut.CompileRollbackTest do
     assert CompileRollback.locate_mutants(map, 10) == {:ok, [1]}
     assert CompileRollback.locate_mutants(map, 21) == :not_found
   end
+
+  test "locate_mutants prefers a single mutant arm over an aggregate same-site range" do
+    map = %PlacementMap{
+      file: "lib/foo.ex",
+      entries: [
+        %{start_line: 10, end_line: 10, column: 5, mut_ids: [1, 2]},
+        %{start_line: 10, end_line: 10, column: 15, mut_ids: [2]}
+      ]
+    }
+
+    assert CompileRollback.locate_mutants(map, 10) == {:ok, [2]}
+  end
 end

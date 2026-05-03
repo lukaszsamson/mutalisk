@@ -31,6 +31,9 @@ defmodule Mut.SchemaBuildIntegrationTest do
           ~w(Elixir.Arith.beam Elixir.Cmp.beam Elixir.Bool.beam Elixir.Attrs.beam Elixir.Guards.beam) do
       assert Map.has_key?(result.snapshot, "lib/demo_app/ebin/#{beam}")
     end
+
+    refute Enum.any?(Map.keys(result.snapshot), &String.starts_with?(&1, "lib/mutalisk/"))
+    refute Enum.any?(Map.keys(result.snapshot), &String.starts_with?(&1, "lib/jason/"))
   end
 
   test "rollback invalidates AlwaysWrong mutants and keeps valid schema mutants" do
@@ -116,6 +119,34 @@ defmodule Mut.SchemaBuildIntegrationTest do
                run_id: "m7-user-code-failure",
                force: true
              )
+  end
+
+  test "failed builds are cleaned unless keep_failed is requested" do
+    plan = always_wrong_plan(["lib/bool.ex"])
+    run_id = "m7-clean-failure"
+    work_copy = Path.expand(Path.join(["tmp", "mut_work", run_id]))
+
+    assert {:error, {:schema_build_failed, {:rollback_budget_exhausted, _details}}} =
+             Mut.SchemaBuild.build(plan,
+               user_project_root: @fixture_root,
+               run_id: run_id,
+               force: true,
+               rollback: [max_iterations: 0]
+             )
+
+    refute File.exists?(work_copy)
+
+    assert {:error, {:schema_build_failed, {:rollback_budget_exhausted, _details}}} =
+             Mut.SchemaBuild.build(plan,
+               user_project_root: @fixture_root,
+               run_id: run_id,
+               force: true,
+               keep_failed: true,
+               rollback: [max_iterations: 0]
+             )
+
+    assert File.exists?(work_copy)
+    File.rm_rf!(work_copy)
   end
 
   defp always_wrong_plan(files) do

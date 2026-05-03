@@ -341,8 +341,8 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 **Inputs:** SPEC §Phase 2 + §Compile-Error Rollback. Operational Contracts: Child-Process Bootstrap (schema role) and Build-Path (schema row).
 
 **Deliverables:**
-- `Mut.SchemaBuild.build/2`: `(working_copy_root, plan)` → produces an instrumented build at `<working_copy>/_build/mut_schema/test`. Steps:
-  1. Reuse the working copy from oracle phase or materialize a fresh one.
+- `Mut.SchemaBuild.build/2`: `(plan, opts)` → produces an instrumented build at `<working_copy>/_build/mut_schema`. With `MIX_BUILD_PATH=_build/mut_schema`, Mix writes app artifacts under `_build/mut_schema/lib/<app>/...` (no extra `test/` path segment). Steps:
+  1. Materialize a fresh working copy for the schema phase; do not reuse the oracle working copy because schema build overwrites `lib/`.
   2. Reinstall overlay in **schema role**. The overlay differs from oracle role only by NOT prepending `:mut_oracle` to `:compilers`. It still adds `mutalisk` as a `:path` dep. `application/0` is delegated unchanged to the user's module — **the overlay does not replace `:mod`**. `Mut.Application` runs because `:mutalisk` is a dep, OTP starts it before the user's app, and its `start/2` reads `MUT_ACTIVE` into `:persistent_term`.
   3. Write instrumented source files over the working-copy `lib/` (and `test/` is left untouched).
   4. Run, in sequence:
@@ -351,7 +351,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
      System.cmd("mix", ["compile", "--force"],       cd: working_copy, env: env)
      ```
      where `env = [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_schema"}, {"MUTALISK_ROLE", "schema"}, {"MUTALISK_PATH", host_mutalisk_root}]`.
-  5. Snapshot `_build/mut_schema` (recursive list of files + content hashes) for sandbox reset later.
+  5. Snapshot `_build/mut_schema/lib/<app>` (recursive list of files + content hashes) for sandbox reset later; dependency/path-dep artifacts such as `mutalisk`, `jason`, and host `priv/plts` are not part of the target-app snapshot.
 - `Mut.CompileRollback.run/3`: parses Elixir compiler diagnostics, locates the surrounding instrumented `case` by line/col + `mut_ids` metadata, removes those mutants from the placer plan (transitions them to `:invalid` with diagnostic attached), re-renders the file, and recompiles. Honors `max_rollback_iterations: 3` and `max_invalid_mutants_per_file: max(10, ceil(file_mutants * 0.02))`.
 - `Mut.Mutator.Test.AlwaysWrong` (test-only): emits non-compiling AST. Drives a rollback test asserting budgets are enforced and that good mutants survive.
 
@@ -420,7 +420,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 
 **Deliverables:**
 - `Mut.FallbackPatch.render/2`: `(mutant, source_text)` → `%Mut.SourcePatch{}`. Renders only the mutated sub-expression with the formatter; computes byte-range splice. Refuses with `:missing_source_span` if the span cannot be computed precisely.
-- `Mut.MixManifest.read/1`: parses `_build/mut_schema/test/lib/<app>/.mix/compile.elixir`. Tolerant of Elixir 1.17+ format variants. Exposes module-to-source and source dependency graph (compile, export, struct, runtime). Has an explicit `version_assertion/1` that fails loudly on unknown shape.
+- `Mut.MixManifest.read/1`: parses `_build/mut_schema/lib/<app>/.mix/compile.elixir`. Tolerant of Elixir 1.17+ format variants. Exposes module-to-source and source dependency graph (compile, export, struct, runtime). Has an explicit `version_assertion/1` that fails loudly on unknown shape.
 - `Mut.Recompile.dependents/2`: walks `[:compile, :struct, :export]` edges (transitive `:compile`). Ignores `:runtime`.
 - `Mix.Tasks.Mut.Recompile`: a custom Mix task shipped in mutalisk. Accepts a list of source files plus `--app` and an optional `--ebin <dir>`; resolves the target ebin (defaults to `<MIX_BUILD_PATH>/lib/<app>/ebin`); calls `Kernel.ParallelCompiler.compile_to_path(files, ebin)`. Runs **inside the sandbox's Mix env** so deps are loaded. This is the SPEC-mandated targeted compile — full `mix compile` is forbidden by SPEC §Fallback Engine.
 - `Mut.Recompile.recompile/3`: host-side driver. `(sandbox, mutated_source_files, dependents)` →

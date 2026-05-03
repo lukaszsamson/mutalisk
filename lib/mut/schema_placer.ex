@@ -337,16 +337,7 @@ defmodule Mut.SchemaPlacer do
         if ids == [] or not schema_scrutinee?(scrutinee) do
           entries
         else
-          schema_arm_entries(arms) ++
-            [
-              %{
-                start_line: Keyword.fetch!(meta, :line),
-                end_line: meta |> Keyword.fetch!(:end) |> Keyword.fetch!(:line),
-                column: Keyword.get(meta, :column),
-                mut_ids: ids
-              }
-              | entries
-            ]
+          schema_arm_entries(arms) ++ entries
         end
 
       _other, entries ->
