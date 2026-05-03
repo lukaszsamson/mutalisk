@@ -12,6 +12,7 @@ defmodule Mut.Metrics do
     defstruct [
       :total,
       :score,
+      :planned_total,
       :by_status,
       :by_engine_status,
       :fallback_count_pct,
@@ -47,6 +48,7 @@ defmodule Mut.Metrics do
     @type t :: %__MODULE__{
             total: non_neg_integer(),
             score: float(),
+            planned_total: non_neg_integer() | nil,
             by_status: %{Mutant.status() => non_neg_integer()},
             by_engine_status: %{{Mutant.engine(), Mutant.status()} => non_neg_integer()},
             fallback_count_pct: float(),
@@ -64,6 +66,7 @@ defmodule Mut.Metrics do
   end
 
   @type state :: %{
+          planned_total: non_neg_integer() | nil,
           by_status: map(),
           by_engine_status: map(),
           wall_clock_ms: map(),
@@ -81,6 +84,11 @@ defmodule Mut.Metrics do
           :ok
   def record_mutant(pid, %Mutant{} = mutant, %Result{} = result) do
     GenServer.cast(pid, {:record_mutant, mutant, result})
+  end
+
+  @spec set_planned_total(pid :: GenServer.server(), non_neg_integer) :: :ok
+  def set_planned_total(pid, total) when is_integer(total) and total >= 0 do
+    GenServer.cast(pid, {:set_planned_total, total})
   end
 
   @spec record_skipped(pid :: GenServer.server(), skipped_entry :: map()) :: :ok
@@ -110,6 +118,7 @@ defmodule Mut.Metrics do
   def init(_opts) do
     {:ok,
      %{
+       planned_total: nil,
        by_status: %{},
        by_engine_status: %{},
        wall_clock_ms: %{schema: 0, fallback: 0, total: 0},
@@ -134,6 +143,10 @@ defmodule Mut.Metrics do
      |> add_wall_clock(mutant.engine, duration_ms)
      |> put_fanout(mutant)
      |> prepend_ledger(entry)}
+  end
+
+  def handle_cast({:set_planned_total, total}, state) do
+    {:noreply, %{state | planned_total: total}}
   end
 
   def handle_cast({:record_skipped, skipped_entry}, state) do
@@ -201,9 +214,12 @@ defmodule Mut.Metrics do
     killed = Map.get(by_status, :killed, 0)
     survived = Map.get(by_status, :survived, 0)
 
+    executed_ledger = Enum.reject(ledger, &(&1.status in [:skipped, :invalid]))
+
     %Snapshot{
-      total: length(ledger),
+      total: length(executed_ledger),
       score: score(killed, survived),
+      planned_total: state.planned_total,
       by_status: by_status,
       by_engine_status: state.by_engine_status,
       fallback_count_pct: fallback_count_pct(state.by_engine_status),

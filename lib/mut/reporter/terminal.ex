@@ -16,12 +16,12 @@ defmodule Mut.Reporter.Terminal do
 
   @spec stream_event(Snapshot.t(), Mutant.t(), Result.t()) :: :ok
   def stream_event(%Snapshot{} = snapshot, %Mutant{} = mutant, %Result{} = result) do
-    index = length(snapshot.ledger)
+    index = Enum.count(snapshot.ledger, &executed?/1)
     status = Atom.to_string(result.status)
 
     line =
       [
-        "[#{index}/#{snapshot.total}] ",
+        "[#{index}/#{planned_total(snapshot)}] ",
         color(result.status, String.pad_trailing(status, 8)),
         "  ",
         location(mutant),
@@ -89,6 +89,11 @@ defmodule Mut.Reporter.Terminal do
       ]
     end
   end
+
+  defp planned_total(%Snapshot{planned_total: total}) when is_integer(total), do: total
+  defp planned_total(%Snapshot{total: total}), do: total
+
+  defp executed?(%{status: status}), do: status not in [:skipped, :invalid]
 
   defp engine_line(snapshot, engine, label) do
     total = engine_total(snapshot, engine)

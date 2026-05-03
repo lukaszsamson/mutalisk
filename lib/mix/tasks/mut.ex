@@ -113,21 +113,24 @@ defmodule Mix.Tasks.Mut do
     {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: run_id, force: true)
 
     {:ok, metrics_pid} = Metrics.start_link([])
+    Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
-    final_pool =
+    {snapshot, final_pool} =
       try do
         record_schema_build_metadata(metrics_pid, schema_result)
+
+        source_root = schema_result.work_copy_root
 
         selection =
           Mut.TestSelection.for_plan(
             schema_result.plan,
-            absolute_test_paths(schema_result.work_copy_root, opts)
+            absolute_test_paths(source_root, opts)
           )
 
         all_test_files =
-          Mut.TestSelection.discover_test_files(
-            absolute_test_paths(schema_result.work_copy_root, opts)
-          )
+          Mut.TestSelection.discover_test_files(absolute_test_paths(source_root, opts))
+
+        stream? = :terminal in opts.reporters
 
         pool =
           run_schema_mutants(
@@ -135,25 +138,31 @@ defmodule Mix.Tasks.Mut do
             schema_result.plan,
             selection,
             all_test_files,
-            schema_result.work_copy_root,
-            metrics_pid
+            source_root,
+            metrics_pid,
+            stream?
           )
 
-        run_fallback_mutants(
-          pool,
-          schema_result.plan,
-          selection,
-          all_test_files,
-          schema_result.work_copy_root,
-          metrics_pid
-        )
+        final_pool =
+          run_fallback_mutants(
+            pool,
+            schema_result.plan,
+            selection,
+            all_test_files,
+            source_root,
+            metrics_pid,
+            stream?
+          )
+
+        snapshot = Metrics.snapshot(metrics_pid)
+        render_reports(snapshot, schema_result.plan, source_root, target_root, opts)
+
+        {snapshot, final_pool}
       after
         File.rm_rf!(schema_result.work_copy_root)
       end
 
     Sandbox.destroy_pool(final_pool)
-    snapshot = Metrics.snapshot(metrics_pid)
-    render_reports(snapshot, schema_result.plan, target_root, target_root, opts)
     set_exit_code(snapshot, opts.fail_at)
     IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
   end
@@ -186,7 +195,7 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp run_schema_mutants(pool, plan, selection, all_test_files, work_copy, metrics_pid) do
+  defp run_schema_mutants(pool, plan, selection, all_test_files, work_copy, metrics_pid, stream?) do
     plan.schema
     |> Enum.sort_by(& &1.id)
     |> Enum.reduce(pool, fn mutant, pool ->
@@ -206,12 +215,20 @@ defmodule Mix.Tasks.Mut do
         result
       )
 
-      Terminal.stream_event(Metrics.snapshot(metrics_pid), mutant, result)
+      maybe_stream_event(stream?, metrics_pid, mutant, result)
       Sandbox.checkin(sandbox, checked_out)
     end)
   end
 
-  defp run_fallback_mutants(pool, plan, selection, all_test_files, work_copy, metrics_pid) do
+  defp run_fallback_mutants(
+         pool,
+         plan,
+         selection,
+         all_test_files,
+         work_copy,
+         metrics_pid,
+         stream?
+       ) do
     plan.fallback
     |> Enum.sort_by(& &1.id)
     |> Enum.reduce(pool, fn mutant, pool ->
@@ -231,10 +248,16 @@ defmodule Mix.Tasks.Mut do
         result
       )
 
-      Terminal.stream_event(Metrics.snapshot(metrics_pid), mutant, result)
+      maybe_stream_event(stream?, metrics_pid, mutant, result)
       Sandbox.checkin(sandbox, checked_out)
     end)
   end
+
+  defp maybe_stream_event(true, metrics_pid, mutant, result) do
+    Terminal.stream_event(Metrics.snapshot(metrics_pid), mutant, result)
+  end
+
+  defp maybe_stream_event(false, _metrics_pid, _mutant, _result), do: :ok
 
   defp record_schema_build_metadata(metrics_pid, schema_result) do
     Enum.each(schema_result.invalid_mutants, fn invalidation ->
@@ -268,7 +291,10 @@ defmodule Mix.Tasks.Mut do
     end
 
     if :stryker_json in opts.reporters do
-      rendered = StrykerJson.render(snapshot, plan, source_loader(work_copy), [])
+      rendered =
+        StrykerJson.render(snapshot, plan, source_loader(work_copy),
+          thresholds: thresholds(opts.fail_at)
+        )
 
       case StrykerJson.validate(rendered) do
         :ok -> StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
@@ -298,6 +324,10 @@ defmodule Mix.Tasks.Mut do
       }
     end
   end
+
+  defp thresholds(fail_at), do: %{"high" => fail_at, "low" => fail_at}
+
+  defp executable_count(plan), do: length(plan.schema) + length(plan.fallback)
 
   defp selected_tests(selection, mutant), do: Map.get(selection, mutant.stable_id, [])
 

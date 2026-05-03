@@ -14,10 +14,12 @@ defmodule Mut.MetricsTest do
     Metrics.record_mutant(metrics, mutant(:fallback, "b", 2), result(:survived, 30))
     Metrics.record_mutant(metrics, mutant(:fallback, "c", 3), result(:error, 5))
     Metrics.record_compile_rollback(metrics, "lib/a.ex", 2)
+    Metrics.set_planned_total(metrics, 10)
 
     snapshot = Metrics.snapshot(metrics)
 
     assert snapshot.total == 3
+    assert snapshot.planned_total == 10
     assert snapshot.score == 50.0
     assert snapshot.by_status == %{killed: 1, survived: 1, error: 1}
 
@@ -42,7 +44,7 @@ defmodule Mut.MetricsTest do
 
     snapshot = Metrics.snapshot(metrics)
 
-    assert snapshot.total == 2
+    assert snapshot.total == 0
     assert snapshot.score == 100.0
     assert snapshot.by_status == %{invalid: 1, skipped: 1}
     assert snapshot.invalid_by_mutator == %{Mut.MetricsTest => 1}

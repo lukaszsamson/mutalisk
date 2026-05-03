@@ -24,7 +24,7 @@ defmodule Mut.Reporter.TerminalTest do
   test "stream_event writes ANSI colored progress line" do
     mutant = mutant(:schema, :killed, "a", 1)
     result = %Result{status: :killed, duration_ms: 12}
-    snapshot = snapshot([entry(mutant, result)], total: 33)
+    snapshot = snapshot([entry(mutant, result)], planned_total: 33)
 
     output =
       ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
@@ -105,6 +105,7 @@ defmodule Mut.Reporter.TerminalTest do
   defp snapshot(entries, opts) do
     %Snapshot{
       total: Keyword.get(opts, :total, length(entries)),
+      planned_total: Keyword.get(opts, :planned_total),
       score: Keyword.get(opts, :score, 100.0),
       by_status: Keyword.get(opts, :by_status, %{}),
       by_engine_status: Keyword.get(opts, :by_engine_status, %{}),

@@ -213,9 +213,23 @@ defmodule Mut.Sandbox do
 
   defp all_files(root) do
     root
-    |> Path.join("**/*")
-    |> Path.wildcard(match_dot: true)
+    |> do_all_files()
     |> Enum.filter(&File.regular?/1)
+  end
+
+  defp do_all_files(root) do
+    root
+    |> File.ls!()
+    |> Enum.flat_map(fn entry ->
+      path = Path.join(root, entry)
+
+      case File.lstat(path) do
+        {:ok, %File.Stat{type: :directory}} -> do_all_files(path)
+        {:ok, %File.Stat{type: :symlink}} -> []
+        {:ok, _stat} -> [path]
+        {:error, _reason} -> []
+      end
+    end)
   end
 
   defp baseline_roots(paths) do
