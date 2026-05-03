@@ -152,6 +152,25 @@
       "stable-survived": "schema",
       "stable-timeout": "schema"
     },
+    "metrics": {
+      "fallback_count": 2,
+      "fallback_time_ms": 90,
+      "fanout": {
+        "stable-error": 1,
+        "stable-invalid": 1,
+        "stable-killed": 1,
+        "stable-skipped": 1,
+        "stable-survived": 1,
+        "stable-timeout": 1
+      },
+      "invalid_mutants": {
+        "Elixir.Mut.Reporter.StrykerJsonGoldenTest": 1
+      },
+      "rollback_count": 1,
+      "skipped": {
+        "unsupported_dispatch": 1
+      }
+    },
     "mutation_kind": {
       "stable-error": "guard_comparison_boundary",
       "stable-invalid": "arithmetic_op",

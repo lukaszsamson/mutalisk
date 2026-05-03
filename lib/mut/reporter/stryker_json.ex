@@ -33,7 +33,7 @@ defmodule Mut.Reporter.StrykerJson do
       "schemaVersion" => "2",
       "thresholds" => thresholds,
       "files" => files(mutants, snapshot, source_loader),
-      "mutalisk" => mutalisk_extension(plan, mutants)
+      "mutalisk" => mutalisk_extension(plan, mutants, snapshot)
     }
   end
 
@@ -91,7 +91,7 @@ defmodule Mut.Reporter.StrykerJson do
     |> put_optional("statusReason", status_reason(mutant, entry, status))
   end
 
-  defp mutalisk_extension(%Plan{} = plan, mutants) do
+  defp mutalisk_extension(%Plan{} = plan, mutants, snapshot) do
     planned = plan.schema ++ plan.fallback ++ plan.invalid
     by_stable_id = Map.new(planned, &{&1.stable_id, &1})
 
@@ -102,8 +102,30 @@ defmodule Mut.Reporter.StrykerJson do
         Map.new(mutants, fn mutant ->
           planned_mutant = Map.get(by_stable_id, mutant.stable_id, mutant)
           {mutant.stable_id, atom_string(planned_mutant.mutation_kind)}
-        end)
+        end),
+      "metrics" => metrics_extension(snapshot)
     }
+  end
+
+  defp metrics_extension(snapshot) do
+    %{
+      "fallback_count" => engine_count(snapshot, :fallback),
+      "fallback_time_ms" => snapshot.wall_clock_ms.fallback,
+      "rollback_count" => Enum.sum(Map.values(snapshot.rollback_per_file)),
+      "invalid_mutants" => atom_keyed_counts(snapshot.invalid_by_mutator),
+      "skipped" => atom_keyed_counts(snapshot.skipped_by_reason),
+      "fanout" => snapshot.test_selection_fanout
+    }
+  end
+
+  defp engine_count(snapshot, engine) do
+    snapshot.by_engine_status
+    |> Enum.filter(fn {{entry_engine, _status}, _count} -> entry_engine == engine end)
+    |> Enum.reduce(0, fn {_key, count}, total -> total + count end)
+  end
+
+  defp atom_keyed_counts(counts) do
+    Map.new(counts, fn {key, count} -> {atom_string(key) || inspect(key), count} end)
   end
 
   defp replacement(%Mutant{source_patch: %{replacement: replacement}})

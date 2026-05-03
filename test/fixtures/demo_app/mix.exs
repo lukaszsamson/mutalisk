@@ -8,12 +8,22 @@ defmodule DemoApp.MixProject do
       version: "0.1.0",
       elixir: ">= 1.17.0",
       start_permanent: Mix.env() == :prod,
-      deps: []
+      deps: deps()
     ]
   end
 
   @spec application() :: keyword
   def application do
     [extra_applications: [:logger]]
+  end
+
+  @spec deps() :: [Mix.Project.dependency()]
+  defp deps do
+    [
+      {:mutalisk,
+       path: System.get_env("MUTALISK_PATH") || Path.expand("../../..", __DIR__),
+       only: [:test],
+       runtime: true}
+    ]
   end
 end

@@ -27,3 +27,7 @@ M*_PROMPT.txt
 
 # Dialyzer PLT cache.
 /priv/plts/
+
+# Local mutation run outputs.
+/stryker.report.json
+/plan.debug.json
