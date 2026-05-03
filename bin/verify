@@ -12,6 +12,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+rm -rf tmp
+
 # Enable layers as their milestone is completed. Order in this list is the
 # execution order for `bin/verify` (no args).
 ENABLED_LAYERS=(

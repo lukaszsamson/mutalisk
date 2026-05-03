@@ -12,6 +12,10 @@ defmodule Mut.MixManifestTest do
     assert manifest.version == 34
     assert manifest.modules[Guards] == "lib/guards.ex"
     assert manifest.sources["lib/guards.ex"].compile_deps == [Module, Kernel]
+
+    assert manifest.sources["lib/guards.ex"].struct_deps ==
+             manifest.sources["lib/guards.ex"].export_deps
+
     assert manifest.sources["lib/guards.ex"].runtime_deps == [:erlang]
   end
 

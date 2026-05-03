@@ -12,7 +12,7 @@ defmodule Mut.Recompile do
       when is_list(mutated_files) and is_list(dependent_files) and is_list(opts) do
     app = Keyword.fetch!(opts, :app)
     files = Enum.uniq(mutated_files ++ dependent_files)
-    args = ["mut.recompile", "--app", app | files]
+    args = ["mut.recompile", "--no-deps-check", "--no-archives-check", "--app", app | files]
 
     case System.cmd("mix", args, cd: sandbox.path, env: env(), stderr_to_stdout: true) do
       {_output, 0} -> :ok

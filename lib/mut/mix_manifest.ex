@@ -1,5 +1,5 @@
 defmodule Mut.MixManifest do
-  @moduledoc "Reads Mix Elixir compiler manifests for fallback recompilation."
+  @moduledoc "Reads pinned Mix Elixir compiler manifests for fallback recompilation."
 
   @manifest_vsn 34
 
@@ -69,7 +69,9 @@ defmodule Mut.MixManifest do
   #      %{source => {:source, size, mtime, digest, compile_refs, export_refs,
   #                   runtime_refs, compile_env, external, compile_warnings,
   #                   runtime_warnings, modules}}, ...}
-  # The real demo_app schema manifest was probed before pinning this parser.
+  # The real demo_app schema manifest was probed before pinning this parser. This
+  # shape has export references but no distinct struct-reference slot, so
+  # struct_deps intentionally mirrors export_deps for the v34 adapter.
   defp parse(term) do
     :ok = version_assertion(term)
 

@@ -20,7 +20,9 @@ defmodule Mut.WorkCopyTest do
 
     {:ok, stat_before} = File.stat(Path.join(root, "lib/tiny.ex"), time: :posix)
 
-    assert {:ok, work_copy} = Mut.WorkCopy.materialize(root, "unit-work-copy", force: true)
+    assert {:ok, work_copy} =
+             Mut.WorkCopy.materialize(root, unique_run_id("work-copy"), force: true)
+
     assert File.exists?(Path.join(work_copy, "mix.exs"))
     assert File.exists?(Path.join(work_copy, "lib/tiny.ex"))
     assert {:ok, %File.Stat{type: :symlink}} = File.lstat(Path.join(work_copy, "deps"))
@@ -40,7 +42,9 @@ defmodule Mut.WorkCopyTest do
       "defmodule Tiny.MixProject do\n  use Mix.Project\n  def project, do: [app: :tiny, version: \"0.1.0\"]\nend\n"
     )
 
-    assert {:ok, work_copy} = Mut.WorkCopy.materialize(root, "unit-overlay", force: true)
+    assert {:ok, work_copy} =
+             Mut.WorkCopy.materialize(root, unique_run_id("overlay"), force: true)
+
     assert :ok = Mut.WorkCopy.install_overlay(work_copy, :oracle)
 
     assert_raise RuntimeError, ~r/overlay already installed/, fn ->
@@ -53,5 +57,9 @@ defmodule Mut.WorkCopyTest do
     File.rm_rf!(dir)
     File.mkdir_p!(dir)
     dir
+  end
+
+  defp unique_run_id(name) do
+    "unit-#{name}-#{System.unique_integer([:positive])}"
   end
 end
