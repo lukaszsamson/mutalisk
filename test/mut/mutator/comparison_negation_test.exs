@@ -8,11 +8,17 @@ defmodule Mut.Mutator.ComparisonNegationTest do
   import Mut.MutatorTestSupport
 
   test "filters shape and body context" do
-    assert ComparisonNegation.applicable?(ast_node(:==), context())
-    refute ComparisonNegation.applicable?(ast_node(:and), context())
-    refute ComparisonNegation.applicable?({:==, [], [1]}, context())
-    refute ComparisonNegation.applicable?(ast_node(:==), context(env_context: :guard))
-    assert ComparisonNegation.mutate(ast_node(:==), context(env_context: :guard)) == []
+    assert ComparisonNegation.applicable?(ast_node(:==), context_for(:==))
+    refute ComparisonNegation.applicable?(ast_node(:and), context_for(:and))
+    refute ComparisonNegation.applicable?({:==, [], [1]}, context_for(:==))
+    refute ComparisonNegation.applicable?(ast_node(:==), context_for(:==, env_context: :guard))
+
+    refute ComparisonNegation.applicable?(
+             ast_node(:==),
+             context_for(:==, oracle_site: site(:==, resolved_module: Path))
+           )
+
+    assert ComparisonNegation.mutate(ast_node(:==), context_for(:==, env_context: :guard)) == []
   end
 
   test "emits negation replacement table" do
@@ -27,7 +33,7 @@ defmodule Mut.Mutator.ComparisonNegationTest do
   end
 
   test "marks every negation mutation guard-safe and non-equivalent" do
-    mutations = ComparisonNegation.mutate(ast_node(:==), context())
+    mutations = ComparisonNegation.mutate(ast_node(:==), context_for(:==))
 
     assert Enum.all?(mutations, & &1.guard_safe?)
     assert Enum.all?(mutations, &(ComparisonNegation.equivalent?(&1) == false))

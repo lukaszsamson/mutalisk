@@ -8,11 +8,17 @@ defmodule Mut.Mutator.ArithmeticTest do
   import Mut.MutatorTestSupport
 
   test "filters shape and body context" do
-    assert Arithmetic.applicable?(ast_node(:+), context())
-    refute Arithmetic.applicable?(ast_node(:==), context())
-    refute Arithmetic.applicable?({:+, [], [1]}, context())
-    refute Arithmetic.applicable?(ast_node(:+), context(env_context: :guard))
-    assert Arithmetic.mutate(ast_node(:+), context(env_context: :guard)) == []
+    assert Arithmetic.applicable?(ast_node(:+), context_for(:+))
+    refute Arithmetic.applicable?(ast_node(:==), context_for(:==))
+    refute Arithmetic.applicable?({:+, [], [1]}, context_for(:+))
+    refute Arithmetic.applicable?(ast_node(:+), context_for(:+, env_context: :guard))
+
+    refute Arithmetic.applicable?(
+             ast_node(:+),
+             context_for(:+, oracle_site: site(:+, resolved_module: Path))
+           )
+
+    assert Arithmetic.mutate(ast_node(:+), context_for(:+, env_context: :guard)) == []
   end
 
   test "emits arithmetic replacement table" do
@@ -25,7 +31,7 @@ defmodule Mut.Mutator.ArithmeticTest do
   end
 
   test "marks every arithmetic mutation guard-safe and non-equivalent" do
-    mutations = Arithmetic.mutate(ast_node(:*), context())
+    mutations = Arithmetic.mutate(ast_node(:*), context_for(:*))
 
     assert Enum.all?(mutations, & &1.guard_safe?)
     assert Enum.all?(mutations, &(Arithmetic.equivalent?(&1) == false))

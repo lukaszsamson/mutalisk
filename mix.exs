@@ -13,7 +13,7 @@ defmodule Mutalisk.MixProject do
           String.ends_with?(file, "_test.exs") and not String.contains?(file, "/fixtures/")
         end
       ],
-      test_ignore_filters: [~r|test/fixtures/|],
+      test_ignore_filters: [~r|test/fixtures/|, ~r|test/support/|],
       application: application(),
       deps: deps(),
       aliases: aliases(),

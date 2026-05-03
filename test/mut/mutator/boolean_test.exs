@@ -7,11 +7,17 @@ defmodule Mut.Mutator.BooleanTest do
   import Mut.MutatorTestSupport
 
   test "filters shape and body context" do
-    assert Boolean.applicable?(ast_node(:and), context())
-    refute Boolean.applicable?(ast_node(:+), context())
-    refute Boolean.applicable?({:and, [], [true]}, context())
-    refute Boolean.applicable?(ast_node(:and), context(env_context: :guard))
-    assert Boolean.mutate(ast_node(:and), context(env_context: :guard)) == []
+    assert Boolean.applicable?(ast_node(:and), context_for(:and))
+    refute Boolean.applicable?(ast_node(:+), context_for(:+))
+    refute Boolean.applicable?({:and, [], [true]}, context_for(:and))
+    refute Boolean.applicable?(ast_node(:and), context_for(:and, env_context: :guard))
+
+    refute Boolean.applicable?(
+             ast_node(:&&),
+             context_for(:&&, oracle_site: site(:&&, resolved_module: :erlang))
+           )
+
+    assert Boolean.mutate(ast_node(:and), context_for(:and, env_context: :guard)) == []
   end
 
   test "emits boolean replacement table" do
@@ -22,9 +28,9 @@ defmodule Mut.Mutator.BooleanTest do
   end
 
   test "marks strict boolean mutations guard-safe and truthy mutations unsafe" do
-    assert [strict] = Boolean.mutate(ast_node(:and), context())
+    assert [strict] = Boolean.mutate(ast_node(:and), context_for(:and))
     assert strict.guard_safe?
-    assert [truthy] = Boolean.mutate(ast_node(:||), context())
+    assert [truthy] = Boolean.mutate(ast_node(:||), context_for(:||))
     refute truthy.guard_safe?
     refute Boolean.equivalent?(strict)
   end

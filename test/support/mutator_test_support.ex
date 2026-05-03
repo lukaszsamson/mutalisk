@@ -13,17 +13,25 @@ defmodule Mut.MutatorTestSupport do
       ast_path: Keyword.get(opts, :ast_path, []),
       ast_path_hash: Keyword.get(opts, :ast_path_hash, "hash"),
       engine: Keyword.get(opts, :engine, :schema),
-      env_context: Keyword.get(opts, :env_context)
+      env_context: Keyword.get(opts, :env_context),
+      oracle_site: Keyword.get(opts, :oracle_site)
     }
+  end
+
+  def context_for(op, opts \\ []) do
+    context(Keyword.put_new(opts, :oracle_site, site(op, resolved_arity: arity_for(op))))
   end
 
   def ast_node(op), do: {op, [line: 1, column: 1], [1, 2]}
   def unary_node(op), do: {op, [line: 1, column: 1], [{:x, [], nil}]}
 
   def replacements(mutator, op) do
-    mutator.mutate(ast_node(op), context())
+    mutator.mutate(ast_node(op), context_for(op))
     |> Enum.map(& &1.metadata.replacement)
   end
+
+  defp arity_for(op) when op in [:not, :!], do: 1
+  defp arity_for(_op), do: 2
 
   def candidate(name, arity \\ 2) do
     %AstCandidate{

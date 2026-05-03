@@ -22,7 +22,7 @@ defmodule Mut.Mutator.UnaryNot do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and shape_matches?(node)
+    ctx.env_context == nil and shape_matches?(node) and oracle_compatible?(node, ctx)
   end
 
   @impl true
@@ -45,6 +45,26 @@ defmodule Mut.Mutator.UnaryNot do
     do: true
 
   defp shape_matches?(_node), do: false
+
+  defp oracle_compatible?(node, %Mut.Context{oracle_site: %DispatchSite{} = site} = ctx) do
+    compatible?(candidate(node, ctx), site)
+  end
+
+  defp oracle_compatible?(_node, %Mut.Context{}), do: false
+
+  defp candidate({op, meta, args} = node, ctx) do
+    %AstCandidate{
+      file: ctx.file,
+      line: Keyword.get(meta, :line, 1),
+      column: Keyword.get(meta, :column),
+      syntactic_name: op,
+      syntactic_arity: length(args),
+      source_span: ctx.source_span,
+      ast_path: ctx.ast_path,
+      ast_path_hash: ctx.ast_path_hash,
+      node: node
+    }
+  end
 
   defp build_mutations({op, _meta, [arg]} = node) do
     [

@@ -8,11 +8,17 @@ defmodule Mut.Mutator.ComparisonBoundaryTest do
   import Mut.MutatorTestSupport
 
   test "filters shape and body context" do
-    assert ComparisonBoundary.applicable?(ast_node(:<), context())
-    refute ComparisonBoundary.applicable?(ast_node(:==), context())
-    refute ComparisonBoundary.applicable?({:<, [], [1]}, context())
-    refute ComparisonBoundary.applicable?(ast_node(:<), context(env_context: :guard))
-    assert ComparisonBoundary.mutate(ast_node(:<), context(env_context: :guard)) == []
+    assert ComparisonBoundary.applicable?(ast_node(:<), context_for(:<))
+    refute ComparisonBoundary.applicable?(ast_node(:==), context_for(:==))
+    refute ComparisonBoundary.applicable?({:<, [], [1]}, context_for(:<))
+    refute ComparisonBoundary.applicable?(ast_node(:<), context_for(:<, env_context: :guard))
+
+    refute ComparisonBoundary.applicable?(
+             ast_node(:<),
+             context_for(:<, oracle_site: site(:<, resolved_module: Path))
+           )
+
+    assert ComparisonBoundary.mutate(ast_node(:<), context_for(:<, env_context: :guard)) == []
   end
 
   test "emits boundary replacement table" do
@@ -23,7 +29,7 @@ defmodule Mut.Mutator.ComparisonBoundaryTest do
   end
 
   test "marks every boundary mutation guard-safe and non-equivalent" do
-    mutations = ComparisonBoundary.mutate(ast_node(:<), context())
+    mutations = ComparisonBoundary.mutate(ast_node(:<), context_for(:<))
 
     assert Enum.all?(mutations, & &1.guard_safe?)
     assert Enum.all?(mutations, &(ComparisonBoundary.equivalent?(&1) == false))
