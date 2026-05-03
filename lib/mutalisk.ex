@@ -1,18 +1,15 @@
 defmodule Mutalisk do
-  @moduledoc """
-  Documentation for `Mutalisk`.
-  """
+  @moduledoc "Public entry points for Mutalisk."
 
-  @doc """
-  Hello world.
+  @spec active_key() :: term
+  defdelegate active_key, to: Mut.Runtime
 
-  ## Examples
+  @spec set_active(non_neg_integer) :: :ok
+  defdelegate set_active(id), to: Mut.Runtime
 
-      iex> Mutalisk.hello()
-      :world
+  @spec get_active() :: non_neg_integer
+  defdelegate get_active, to: Mut.Runtime
 
-  """
-  def hello do
-    :world
-  end
+  @spec clear() :: :ok
+  defdelegate clear, to: Mut.Runtime
 end
