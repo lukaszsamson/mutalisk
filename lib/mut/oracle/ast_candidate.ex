@@ -17,6 +17,7 @@ defmodule Mut.Oracle.AstCandidate do
     :syntactic_name,
     :syntactic_arity,
     :source_span,
+    :env_context,
     :ast_path,
     :ast_path_hash,
     :node
@@ -29,6 +30,7 @@ defmodule Mut.Oracle.AstCandidate do
           syntactic_name: atom(),
           syntactic_arity: non_neg_integer(),
           source_span: Mut.SourceSpan.t() | nil,
+          env_context: nil | :guard | :match,
           ast_path: [term()],
           ast_path_hash: binary(),
           node: Macro.t()

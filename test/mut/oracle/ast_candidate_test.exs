@@ -17,6 +17,7 @@ defmodule Mut.Oracle.AstCandidateTest do
     assert %Mut.Oracle.AstCandidate{} = candidate
     assert candidate.column == nil
     assert candidate.source_span == nil
+    assert candidate.env_context == nil
 
     assert_raise ArgumentError, fn -> struct!(Mut.Oracle.AstCandidate, []) end
   end
@@ -30,6 +31,7 @@ defmodule Mut.Oracle.AstCandidateTest do
     assert candidate.syntactic_name == :+
     assert candidate.syntactic_arity == 2
     assert %Mut.SourceSpan{} = candidate.source_span
+    assert candidate.env_context == :guard
     assert candidate.ast_path == [0, :body]
     assert candidate.ast_path_hash == "abc"
     assert candidate.node == {:+, [], [1, 2]}
@@ -49,6 +51,7 @@ defmodule Mut.Oracle.AstCandidateTest do
         start_byte: 0,
         end_byte: 5
       },
+      env_context: :guard,
       ast_path: [0, :body],
       ast_path_hash: "abc",
       node: {:+, [], [1, 2]}
