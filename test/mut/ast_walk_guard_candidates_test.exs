@@ -8,6 +8,11 @@ defmodule Mut.AstWalk.GuardCandidatesTest do
              candidates("defmodule M do\n  def f(x) when x > 0, do: x\nend\n")
   end
 
+  test "emits enclosing module for fallback metadata" do
+    assert [%{syntactic_name: :>, enclosing_module: M}] =
+             candidates("defmodule M do\n  def f(x) when x > 0, do: x\nend\n")
+  end
+
   test "emits all dispatches from compound guards" do
     found = candidates("defmodule M do\n  def f(x) when is_integer(x) and x > 0, do: x\nend\n")
 

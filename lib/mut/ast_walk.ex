@@ -72,12 +72,14 @@ defmodule Mut.AstWalk do
       file: file,
       source: source,
       line_offsets: line_offsets,
+      module_stack: [],
       span_fallback?: span_fallback?
     }
   end
 
   defp pre(node, acc) do
     {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
     acc = maybe_candidate(node, path, acc, nil)
 
     if no_descend?(node) do
@@ -88,11 +90,14 @@ defmodule Mut.AstWalk do
   end
 
   defp post(node, acc) do
-    {node, pop_frame(node, acc)}
+    acc = pop_frame(node, acc)
+    acc = exit_module(node, acc)
+    {node, acc}
   end
 
   defp attribute_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
     acc = maybe_attribute_candidate(node, path, acc)
 
     if no_descend?(node) do
@@ -104,6 +109,7 @@ defmodule Mut.AstWalk do
 
   defp guard_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
     acc = maybe_guard_candidates(node, path, acc)
 
     if no_descend?(node) do
@@ -202,6 +208,7 @@ defmodule Mut.AstWalk do
             Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) ||
               fallback_source_text_span(node, meta, acc),
           env_context: env_context,
+          enclosing_module: current_module(acc),
           ast_path: path,
           ast_path_hash: path_hash(path),
           node: node
@@ -227,6 +234,7 @@ defmodule Mut.AstWalk do
             Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) ||
               attribute_source_span(acc, attr_meta, name),
           env_context: nil,
+          enclosing_module: current_module(acc),
           ast_path: path,
           ast_path_hash: path_hash(path),
           node: node
@@ -316,6 +324,20 @@ defmodule Mut.AstWalk do
 
   defp prune({name, meta, _args}), do: {name, meta, []}
 
+  defp enter_module({:defmodule, _meta, [{:__aliases__, _alias_meta, parts}, _body]}, acc) do
+    %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}
+  end
+
+  defp enter_module(_node, acc), do: acc
+
+  defp exit_module({:defmodule, _meta, _args}, %{module_stack: [_module | rest]} = acc),
+    do: %{acc | module_stack: rest}
+
+  defp exit_module(_node, acc), do: acc
+
+  defp current_module(%{module_stack: [module | _rest]}), do: module
+  defp current_module(_acc), do: nil
+
   defp literal?(value) when is_number(value) or is_binary(value) or is_atom(value), do: true
   defp literal?(list) when is_list(list), do: Enum.all?(list, &literal?/1)
   defp literal?({:{}, _meta, values}) when is_list(values), do: Enum.all?(values, &literal?/1)
@@ -368,6 +390,8 @@ defmodule Mut.AstWalk do
   defp source_text_span(_node, _meta, %{source: nil}), do: nil
 
   defp source_text_span(node, meta, acc) do
+    # Parser metadata can omit end positions for guard operators; require the operator
+    # column to fall inside the rendered snippet to avoid same-line duplicate matches.
     with line when is_integer(line) <- Keyword.get(meta, :line),
          column when is_integer(column) <- Keyword.get(meta, :column),
          rendered when rendered != "" <- Macro.to_string(node),

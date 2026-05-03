@@ -8,6 +8,7 @@ defmodule Mut.AstWalk.AttributeCandidatesTest do
     assert candidate.syntactic_name == :some_const
     assert candidate.syntactic_arity == 0
     assert candidate.env_context == nil
+    assert candidate.enclosing_module == M
     assert candidate.node == 42
     assert candidate.source_span.start_line == 2
   end
@@ -55,6 +56,12 @@ defmodule Mut.AstWalk.AttributeCandidatesTest do
     """
 
     assert [] = candidates(source)
+  end
+
+  test "emits nested enclosing module" do
+    source = "defmodule Outer.Inner do\n  @some_const 42\nend\n"
+
+    assert [%{enclosing_module: Outer.Inner}] = candidates(source)
   end
 
   defp candidates(source) do

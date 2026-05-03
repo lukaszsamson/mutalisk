@@ -186,7 +186,7 @@ defmodule Mut.Orchestrator do
       line: candidate.line,
       column: candidate.column,
       span: span_tuple(candidate.source_span),
-      module: site && site.module,
+      module: mutant_module(candidate, site),
       function: site && site.function,
       original_ast: mutation.original_ast,
       mutated_ast: mutation.mutated_ast,
@@ -248,7 +248,7 @@ defmodule Mut.Orchestrator do
     %Context{
       oracle_site: site,
       enclosing_function: site && site.function,
-      enclosing_module: site && site.module,
+      enclosing_module: (site && site.module) || candidate.enclosing_module,
       file: candidate.file,
       source_span: candidate.source_span,
       ast_path: candidate.ast_path,
@@ -294,6 +294,9 @@ defmodule Mut.Orchestrator do
     prefix = if env_context == :guard, do: "guard:", else: ""
     prefix <> "#{inspect(site.resolved_module)}.#{site.resolved_name}/#{site.resolved_arity}"
   end
+
+  defp mutant_module(_candidate, %DispatchSite{} = site), do: site.module
+  defp mutant_module(%AstCandidate{} = candidate, nil), do: candidate.enclosing_module
 
   defp span_tuple(nil), do: nil
 

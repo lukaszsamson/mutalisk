@@ -66,6 +66,7 @@ defmodule Mut.Mutator.ComparisonBoundary do
       syntactic_name: op,
       syntactic_arity: length(args),
       source_span: ctx.source_span,
+      enclosing_module: ctx.enclosing_module,
       ast_path: ctx.ast_path,
       ast_path_hash: ctx.ast_path_hash,
       node: node

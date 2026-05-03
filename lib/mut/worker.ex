@@ -58,7 +58,7 @@ defmodule Mut.Worker do
            {:ok, manifest} <- read_manifest(sandbox, opts),
            dependents <-
              manifest
-             |> Mut.Recompile.dependents([mutant.module], dep_kinds(mutant))
+             |> Mut.Recompile.dependents(dependent_modules(mutant), dep_kinds(mutant))
              |> Enum.to_list(),
            :ok <- Mut.Recompile.recompile(sandbox, [patch.file], dependents, app: app(opts)) do
         spawn_fallback_mix(sandbox, test_files, opts, started)
@@ -199,6 +199,9 @@ defmodule Mut.Worker do
   defp app(opts), do: Keyword.get(opts, :app, "demo_app")
 
   defp dep_kinds(_mutant), do: [:compile, :struct, :export]
+
+  defp dependent_modules(%Mutant{module: nil}), do: []
+  defp dependent_modules(%Mutant{module: module}), do: [module]
 
   defp validate_sandbox(sandbox) do
     if File.exists?(Path.join(sandbox.path, "mix.exs")) do

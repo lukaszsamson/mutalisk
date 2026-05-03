@@ -151,9 +151,12 @@ defmodule Mix.Tasks.Mut.TestFallback do
     {:ok, manifest} = Mut.MixManifest.read(manifest_path)
 
     manifest
-    |> Mut.Recompile.dependents([mutant.module], [:compile])
+    |> Mut.Recompile.dependents(dependent_modules(mutant), [:compile])
     |> Enum.count()
   end
+
+  defp dependent_modules(%{module: nil}), do: []
+  defp dependent_modules(%{module: module}), do: [module]
 
   defp expected(%{stable_id: stable_id}), do: Map.fetch!(@expected_outcomes, stable_id)
 
@@ -181,6 +184,10 @@ defmodule Mix.Tasks.Mut.TestFallback do
 
     if length(plan.fallback) != 6 do
       raise "fallback plan mismatch: expected 6 mutants, got #{length(plan.fallback)}"
+    end
+
+    if Enum.any?(plan.fallback, &is_nil(&1.module)) do
+      raise "fallback plan contains mutants without module metadata"
     end
   end
 

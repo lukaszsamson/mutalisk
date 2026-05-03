@@ -45,6 +45,7 @@ defmodule Mut.OrchestratorTest do
     assert length(plan.schema) == 2
     assert length(plan.fallback) == 2
     assert Enum.all?(plan.fallback, &(&1.mutator == Mut.Mutator.AttributeLiteral))
+    assert Enum.all?(plan.fallback, &(&1.module == Sample))
     assert skip_reasons(plan) == %{missing_oracle_site: 1}
   end
 
