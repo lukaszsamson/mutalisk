@@ -5,6 +5,11 @@ defmodule Mut.ApplicationTest do
 
   setup_all do
     Application.stop(:mutalisk)
+
+    on_exit(fn ->
+      Application.ensure_all_started(:mutalisk)
+    end)
+
     :ok
   end
 

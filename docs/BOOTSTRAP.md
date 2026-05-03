@@ -121,7 +121,7 @@ The `:mut_oracle` atom is resolved by Mix to `Mix.Tasks.Compile.MutOracle` via M
 
 ### Idempotency / re-entry
 
-If the user already depends on mutalisk (unlikely but possible), `add_mutalisk_dep/1` skips re-adding. If the user's `:compilers` already includes `:mut_oracle`, `maybe_prepend_oracle_compiler/1` skips re-prepending (low-risk guard; user code shouldn't reference mutalisk's compiler atom).
+If the user already depends on mutalisk (unlikely but possible), `add_mutalisk_dep/1` skips re-adding. The oracle overlay prepends `:mut_oracle`; user projects should not include mutalisk's compiler atom themselves.
 
 ## Module API surfaces
 

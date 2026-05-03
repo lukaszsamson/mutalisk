@@ -8,6 +8,11 @@ defmodule Mutalisk.MixProject do
       version: "0.1.0",
       elixir: ">= 1.17.0",
       start_permanent: Mix.env() == :prod,
+      test_load_filters: [
+        fn file ->
+          String.ends_with?(file, "_test.exs") and not String.contains?(file, "/fixtures/")
+        end
+      ],
       test_ignore_filters: [~r|test/fixtures/|],
       application: application(),
       deps: deps(),
