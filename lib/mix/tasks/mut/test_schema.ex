@@ -7,8 +7,10 @@ defmodule Mix.Tasks.Mut.TestSchema do
   @shortdoc "Runs schema worker integration against demo_app"
 
   @fixture_root Path.expand("test/fixtures/demo_app")
+  @fixture_test_paths [Path.join(@fixture_root, "test")]
   @concurrency 1
   @timeout_ms 15_000
+  @m8_baseline_ms 9_300
 
   # Expected outcomes are grounded in test/fixtures/demo_app/test assertions.
   @expectations [
@@ -53,8 +55,10 @@ defmodule Mix.Tasks.Mut.TestSchema do
 
     final_pool =
       try do
-        {results, pool} = run_expectations(pool, schema_result.plan)
-        summarize!(results, elapsed(started))
+        selection = Mut.TestSelection.for_plan(schema_result.plan, @fixture_test_paths)
+        all_test_files = Mut.TestSelection.discover_test_files(@fixture_test_paths)
+        {results, pool} = run_expectations(pool, schema_result.plan, selection, all_test_files)
+        summarize!(results, all_test_files, elapsed(started))
         pool
       after
         File.rm_rf!(schema_result.work_copy_root)
@@ -63,15 +67,15 @@ defmodule Mix.Tasks.Mut.TestSchema do
     Mut.Sandbox.destroy_pool(final_pool)
   end
 
-  defp run_expectations(pool, plan) do
+  defp run_expectations(pool, plan, selection, all_test_files) do
     Enum.reduce(@expectations, {[], pool}, fn expectation, {results, pool} ->
-      {result, pool} = run_expected(expectation, pool, plan)
+      {result, pool} = run_expected(expectation, pool, plan, selection, all_test_files)
       {[result | results], pool}
     end)
     |> then(fn {results, pool} -> {Enum.reverse(results), pool} end)
   end
 
-  defp run_expected(expectation, pool, plan) do
+  defp run_expected(expectation, pool, plan, selection, all_test_files) do
     mutant = Mut.Plan.find_by_stable_id(plan, expectation.stable_id)
 
     if is_nil(mutant) do
@@ -79,9 +83,18 @@ defmodule Mix.Tasks.Mut.TestSchema do
     end
 
     {:ok, sandbox, checked_out} = Mut.Sandbox.checkout(pool)
+    selected = Map.fetch!(selection, mutant.stable_id)
+    selected_for_worker = worker_test_files(selected, all_test_files, @fixture_root)
+
+    IO.puts(
+      "mutant #{mutant.id} #{String.slice(mutant.stable_id, 0, 8)} #{inspect(mutant.module)} → #{length(selected)} test files"
+    )
 
     result =
-      Mut.Worker.run_schema(sandbox, mutant.id, [], timeout_ms: @timeout_ms, retry_on_error: true)
+      Mut.Worker.run_schema(sandbox, mutant.id, selected_for_worker,
+        timeout_ms: @timeout_ms,
+        retry_on_error: true
+      )
 
     checked_in = Mut.Sandbox.checkin(sandbox, checked_out)
 
@@ -93,19 +106,58 @@ defmodule Mix.Tasks.Mut.TestSchema do
        actual: result.status,
        killing_test: result.killing_test,
        duration_ms: result.duration_ms,
+       module: mutant.module,
+       selected_tests: selected,
+       selected_count: length(selected),
        raw_output: result.raw_output
      }, checked_in}
   end
 
-  defp summarize!(results, wall_ms) do
+  defp summarize!(results, all_test_files, wall_ms) do
     mismatches = Enum.reject(results, &(&1.expected == &1.actual))
     counts = Enum.frequencies_by(results, & &1.actual)
+    total_test_files = length(all_test_files)
+    selection_size_per_mutant = Enum.map(results, & &1.selected_count)
+    reduced_ms = wall_ms
+    reduction_pct = Float.round((@m8_baseline_ms - reduced_ms) * 100 / @m8_baseline_ms, 1)
 
-    IO.puts("mut.test_schema results=#{inspect(counts)} wall_ms=#{wall_ms}")
+    expected_counts = %{killed: 9, survived: 1}
+
+    IO.puts(
+      "mut.test_schema results=#{inspect(counts)} wall_ms=#{wall_ms} baseline_wall_ms=#{@m8_baseline_ms} reduction_pct=#{reduction_pct}"
+    )
+
+    IO.puts(
+      "mut.test_schema selection_size_per_mutant=#{inspect(selection_size_per_mutant)} total_test_files=#{total_test_files}"
+    )
+
+    IO.puts("mut.test_schema selection_summary=#{inspect(selection_summary(results))}")
 
     if mismatches != [] do
       raise "schema integration mismatches: #{inspect(mismatches, pretty: true)}"
     end
+
+    if counts != expected_counts do
+      raise "schema integration count mismatch: expected #{inspect(expected_counts)}, got #{inspect(counts)}"
+    end
+
+    if not Enum.all?(selection_size_per_mutant, &(&1 < total_test_files)) do
+      raise "schema integration selection did not narrow every curated mutant"
+    end
+  end
+
+  defp worker_test_files(selected, all_test_files, fixture_root) do
+    if selected == [] or length(selected) == length(all_test_files) do
+      []
+    else
+      Enum.map(selected, &Path.relative_to(&1, fixture_root))
+    end
+  end
+
+  defp selection_summary(results) do
+    Enum.map(results, fn result ->
+      {String.slice(result.stable_id, 0, 8), result.module, result.selected_count}
+    end)
   end
 
   defp elapsed(started), do: System.monotonic_time(:millisecond) - started

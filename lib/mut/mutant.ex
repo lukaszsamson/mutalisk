@@ -47,6 +47,7 @@ defmodule Mut.Mutant do
 
   @type engine :: :schema | :fallback
   @type status :: :pending | :killed | :survived | :timeout | :invalid | :skipped | :error
+  @type stable_id :: String.t()
 
   @type t :: %__MODULE__{
           id: non_neg_integer(),
