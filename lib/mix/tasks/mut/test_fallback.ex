@@ -3,6 +3,8 @@ defmodule Mix.Tasks.Mut.TestFallback do
   use Mix.Task
 
   alias Mut.Plan
+  alias Mut.Reporter.StrykerJson
+  alias Mut.Worker.Result
 
   @shortdoc "Runs fallback worker integration against demo_app"
 
@@ -52,7 +54,7 @@ defmodule Mix.Tasks.Mut.TestFallback do
         selection = Mut.TestSelection.for_plan(fallback_plan, @fixture_test_paths)
         all_test_files = Mut.TestSelection.discover_test_files(@fixture_test_paths)
         {results, pool} = run_mutants(pool, fallback_plan, selection, all_test_files)
-        summarize!(results, elapsed(started))
+        summarize!(results, elapsed(started), fallback_plan)
         assert_sandbox_clean!(pool, schema_result)
         pool
       after
@@ -95,6 +97,7 @@ defmodule Mix.Tasks.Mut.TestFallback do
            killing_test: result.killing_test,
            duration_ms: result.duration_ms,
            dependent_count: dependent_count,
+           selected_tests: selected,
            raw_output: result.raw_output
          }
          | results
@@ -103,13 +106,14 @@ defmodule Mix.Tasks.Mut.TestFallback do
     |> then(fn {results, pool} -> {Enum.reverse(results), pool} end)
   end
 
-  defp summarize!(results, wall_ms) do
+  defp summarize!(results, wall_ms, plan) do
     mismatches = Enum.reject(results, &(&1.expected == &1.actual))
     counts = Enum.frequencies_by(results, & &1.actual)
     expected_counts = %{killed: 4, survived: 2}
 
     IO.puts("mut.test_fallback results=#{inspect(counts)} wall_ms=#{wall_ms}")
     IO.puts("mut.test_fallback dependents=#{inspect(dependent_summary(results))}")
+    validate_stryker_json!(results, plan)
 
     if mismatches != [] do
       raise "fallback integration mismatches: #{inspect(mismatches, pretty: true)}"
@@ -119,6 +123,32 @@ defmodule Mix.Tasks.Mut.TestFallback do
       raise "fallback integration count mismatch: expected #{inspect(expected_counts)}, got #{inspect(counts)}"
     end
   end
+
+  defp validate_stryker_json!(results, plan) do
+    {:ok, metrics} = Mut.Metrics.start_link([])
+
+    Enum.each(results, fn result ->
+      mutant =
+        plan
+        |> Plan.find_by_stable_id(result.stable_id)
+        |> Map.put(:covering_tests, result.selected_tests)
+
+      worker_result = %Result{
+        status: result.actual,
+        duration_ms: result.duration_ms,
+        killing_test: result.killing_test,
+        raw_output: result.raw_output
+      }
+
+      Mut.Metrics.record_mutant(metrics, mutant, worker_result)
+    end)
+
+    rendered = StrykerJson.render(Mut.Metrics.snapshot(metrics), plan, &source/1, [])
+    :ok = StrykerJson.validate(rendered)
+    IO.puts("mut.test_fallback stryker_json=:ok")
+  end
+
+  defp source(file), do: File.read!(Path.join(@fixture_root, file))
 
   defp assert_sandbox_clean!(pool, schema_result) do
     baselines = baseline_files(schema_result.work_copy_root)

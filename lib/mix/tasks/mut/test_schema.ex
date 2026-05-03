@@ -4,6 +4,9 @@ defmodule Mix.Tasks.Mut.TestSchema do
 
   @dialyzer {:no_opaque, run: 1}
 
+  alias Mut.Reporter.StrykerJson
+  alias Mut.Worker.Result
+
   @shortdoc "Runs schema worker integration against demo_app"
 
   @fixture_root Path.expand("test/fixtures/demo_app")
@@ -58,7 +61,7 @@ defmodule Mix.Tasks.Mut.TestSchema do
         selection = Mut.TestSelection.for_plan(schema_result.plan, @fixture_test_paths)
         all_test_files = Mut.TestSelection.discover_test_files(@fixture_test_paths)
         {results, pool} = run_expectations(pool, schema_result.plan, selection, all_test_files)
-        summarize!(results, all_test_files, elapsed(started))
+        summarize!(results, all_test_files, elapsed(started), schema_result.plan)
         pool
       after
         File.rm_rf!(schema_result.work_copy_root)
@@ -113,7 +116,7 @@ defmodule Mix.Tasks.Mut.TestSchema do
      }, checked_in}
   end
 
-  defp summarize!(results, all_test_files, wall_ms) do
+  defp summarize!(results, all_test_files, wall_ms, plan) do
     mismatches = Enum.reject(results, &(&1.expected == &1.actual))
     counts = Enum.frequencies_by(results, & &1.actual)
     total_test_files = length(all_test_files)
@@ -132,6 +135,7 @@ defmodule Mix.Tasks.Mut.TestSchema do
     )
 
     IO.puts("mut.test_schema selection_summary=#{inspect(selection_summary(results))}")
+    validate_stryker_json!(results, plan)
 
     if mismatches != [] do
       raise "schema integration mismatches: #{inspect(mismatches, pretty: true)}"
@@ -145,6 +149,32 @@ defmodule Mix.Tasks.Mut.TestSchema do
       raise "schema integration selection did not narrow every curated mutant"
     end
   end
+
+  defp validate_stryker_json!(results, plan) do
+    {:ok, metrics} = Mut.Metrics.start_link([])
+
+    Enum.each(results, fn result ->
+      mutant =
+        plan
+        |> Mut.Plan.find_by_stable_id(result.stable_id)
+        |> Map.put(:covering_tests, result.selected_tests)
+
+      worker_result = %Result{
+        status: result.actual,
+        duration_ms: result.duration_ms,
+        killing_test: result.killing_test,
+        raw_output: result.raw_output
+      }
+
+      Mut.Metrics.record_mutant(metrics, mutant, worker_result)
+    end)
+
+    rendered = StrykerJson.render(Mut.Metrics.snapshot(metrics), plan, &source/1, [])
+    :ok = StrykerJson.validate(rendered)
+    IO.puts("mut.test_schema stryker_json=:ok")
+  end
+
+  defp source(file), do: File.read!(Path.join(@fixture_root, file))
 
   defp worker_test_files(selected, all_test_files, fixture_root) do
     if selected == [] or length(selected) == length(all_test_files) do

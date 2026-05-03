@@ -1,0 +1,181 @@
+{
+  "files": {
+    "lib/synthetic.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "SyntheticTest:case_4"
+          ],
+          "description": "replace guard > with >=",
+          "duration": 40,
+          "id": "stable-error",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 5
+            },
+            "start": {
+              "column": 7,
+              "line": 5
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "value >= 1",
+          "status": "RuntimeError",
+          "statusReason": null
+        },
+        {
+          "coveredBy": [
+            "SyntheticTest:case_6"
+          ],
+          "description": "replace + with -",
+          "duration": 60,
+          "id": "stable-invalid",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 7
+            },
+            "start": {
+              "column": 7,
+              "line": 7
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value - 1",
+          "status": "CompileError",
+          "statusReason": "\"synthetic compile error\""
+        },
+        {
+          "coveredBy": [
+            "SyntheticTest:case_1"
+          ],
+          "description": "replace + with -",
+          "duration": 10,
+          "id": "stable-killed",
+          "killedBy": [
+            "SyntheticTest:case_1"
+          ],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 2
+            },
+            "start": {
+              "column": 7,
+              "line": 2
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value - 1",
+          "status": "Killed",
+          "statusReason": null
+        },
+        {
+          "coveredBy": [
+            "SyntheticTest:case_5"
+          ],
+          "description": "replace guard > with >=",
+          "duration": 50,
+          "id": "stable-skipped",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 6
+            },
+            "start": {
+              "column": 7,
+              "line": 6
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "value >= 1",
+          "status": "Ignored",
+          "statusReason": "unsupported_dispatch"
+        },
+        {
+          "coveredBy": [
+            "SyntheticTest:case_2"
+          ],
+          "description": "replace + with -",
+          "duration": 20,
+          "id": "stable-survived",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 3
+            },
+            "start": {
+              "column": 7,
+              "line": 3
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value - 1",
+          "status": "Survived",
+          "statusReason": null
+        },
+        {
+          "coveredBy": [
+            "SyntheticTest:case_3"
+          ],
+          "description": "replace + with -",
+          "duration": 30,
+          "id": "stable-timeout",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 4
+            },
+            "start": {
+              "column": 7,
+              "line": 4
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value - 1",
+          "status": "Timeout",
+          "statusReason": null
+        }
+      ],
+      "source": "defmodule Synthetic do\n  def value(value), do: value + 1\n  def positive?(value) when value > 1, do: true\nend\n"
+    }
+  },
+  "mutalisk": {
+    "engine": {
+      "stable-error": "fallback",
+      "stable-invalid": "schema",
+      "stable-killed": "schema",
+      "stable-skipped": "fallback",
+      "stable-survived": "schema",
+      "stable-timeout": "schema"
+    },
+    "mutation_kind": {
+      "stable-error": "guard_comparison_boundary",
+      "stable-invalid": "arithmetic_op",
+      "stable-killed": "arithmetic_op",
+      "stable-skipped": "guard_comparison_boundary",
+      "stable-survived": "arithmetic_op",
+      "stable-timeout": "arithmetic_op"
+    },
+    "stable_id_to_integer": {
+      "stable-error": 4,
+      "stable-invalid": 6,
+      "stable-killed": 1,
+      "stable-skipped": 5,
+      "stable-survived": 2,
+      "stable-timeout": 3
+    }
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 80,
+    "low": 60
+  }
+}

@@ -1,0 +1,260 @@
+defmodule Mut.Reporter.StrykerJson do
+  @moduledoc "Renders and validates Stryker mutation-testing-elements JSON."
+
+  alias Mut.Metrics.Snapshot
+  alias Mut.Mutant
+  alias Mut.Plan
+
+  @statuses %{
+    killed: "Killed",
+    survived: "Survived",
+    timeout: "Timeout",
+    invalid: "CompileError",
+    error: "RuntimeError",
+    skipped: "Ignored"
+  }
+
+  @valid_statuses Map.values(@statuses)
+
+  @type violation :: String.t()
+
+  @spec render(Snapshot.t(), Plan.t(), (Path.t() -> String.t()), keyword) :: map()
+  def render(%Snapshot{} = snapshot, %Plan{} = plan, source_loader, opts)
+      when is_function(source_loader, 1) do
+    thresholds = Keyword.get(opts, :thresholds, %{"high" => 80, "low" => 60})
+
+    mutants =
+      snapshot.ledger
+      |> Enum.map(&ledger_mutant/1)
+      |> Enum.reject(&(is_nil(&1) or &1.status == :pending))
+      |> Enum.sort_by(&{&1.file, &1.stable_id})
+
+    %{
+      "schemaVersion" => "2",
+      "thresholds" => thresholds,
+      "files" => files(mutants, snapshot, source_loader),
+      "mutalisk" => mutalisk_extension(plan, mutants)
+    }
+  end
+
+  @spec write(rendered :: map(), path :: Path.t()) :: :ok
+  def write(rendered, path) when is_map(rendered) and is_binary(path) do
+    File.write!(path, Jason.encode!(rendered, pretty: true) <> "\n")
+    :ok
+  end
+
+  @spec validate(rendered :: map()) :: :ok | {:error, [violation()]}
+  def validate(rendered) when is_map(rendered) do
+    violations =
+      []
+      |> validate_schema_version(rendered)
+      |> validate_thresholds(rendered)
+      |> validate_files(rendered)
+      |> Enum.reverse()
+
+    if violations == [], do: :ok, else: {:error, violations}
+  end
+
+  @spec status(Mutant.status()) :: String.t() | nil
+  def status(:pending), do: nil
+  def status(status), do: Map.fetch!(@statuses, status)
+
+  defp files(mutants, snapshot, source_loader) do
+    mutants
+    |> Enum.group_by(& &1.file)
+    |> Enum.sort_by(fn {file, _mutants} -> file end)
+    |> Map.new(fn {file, file_mutants} ->
+      {file,
+       %{
+         "language" => "elixir",
+         "source" => source_loader.(file),
+         "mutants" => Enum.map(file_mutants, &mutant_result(&1, snapshot))
+       }}
+    end)
+  end
+
+  defp mutant_result(%Mutant{} = mutant, snapshot) do
+    entry = Enum.find(snapshot.ledger, &(Map.get(&1, :stable_id) == mutant.stable_id)) || %{}
+    status = Map.get(entry, :status, mutant.status)
+
+    %{
+      "id" => mutant.stable_id,
+      "mutatorName" => mutant.mutator_name,
+      "replacement" => replacement(mutant),
+      "location" => location(mutant),
+      "status" => status(status),
+      "statusReason" => status_reason(mutant, entry, status),
+      "killedBy" => killed_by(entry),
+      "coveredBy" => covered_by(mutant),
+      "duration" => duration(mutant, entry),
+      "description" => mutant.description
+    }
+  end
+
+  defp mutalisk_extension(%Plan{} = plan, mutants) do
+    planned = plan.schema ++ plan.fallback ++ plan.invalid
+    by_stable_id = Map.new(planned, &{&1.stable_id, &1})
+
+    %{
+      "stable_id_to_integer" => Map.new(mutants, &{&1.stable_id, &1.id}),
+      "engine" => Map.new(mutants, &{&1.stable_id, Atom.to_string(&1.engine)}),
+      "mutation_kind" =>
+        Map.new(mutants, fn mutant ->
+          planned_mutant = Map.get(by_stable_id, mutant.stable_id, mutant)
+          {mutant.stable_id, atom_string(planned_mutant.mutation_kind)}
+        end)
+    }
+  end
+
+  defp replacement(%Mutant{source_patch: %{replacement: replacement}})
+       when is_binary(replacement) do
+    replacement
+  end
+
+  defp replacement(%Mutant{mutated_source: mutated_source}) when is_binary(mutated_source) do
+    mutated_source
+  end
+
+  defp replacement(%Mutant{mutated_ast: ast}) do
+    ast
+    |> Macro.to_string()
+    |> Code.format_string!()
+    |> IO.iodata_to_binary()
+  end
+
+  defp location(%Mutant{span: {start_line, start_column, end_line, end_column}}) do
+    %{
+      "start" => %{"line" => start_line, "column" => column(start_column)},
+      "end" => %{"line" => end_line || start_line, "column" => column(end_column || start_column)}
+    }
+  end
+
+  defp location(%Mutant{line: line, column: column}) do
+    point = %{"line" => line, "column" => column(column)}
+    %{"start" => point, "end" => point}
+  end
+
+  defp column(nil), do: 0
+  defp column(column), do: column
+
+  defp status_reason(mutant, entry, status) when status in [:error, :invalid] do
+    cond do
+      not is_nil(mutant.compile_error) -> inspect(mutant.compile_error)
+      not is_nil(Map.get(entry, :compile_error)) -> inspect(Map.fetch!(entry, :compile_error))
+      not is_nil(Map.get(entry, :result)) -> Map.get(entry.result, :raw_output)
+      true -> nil
+    end
+  end
+
+  defp status_reason(mutant, _entry, :skipped), do: atom_string(mutant.skip_reason)
+  defp status_reason(_mutant, _entry, _status), do: nil
+
+  defp killed_by(%{killing_test: nil}), do: []
+  defp killed_by(%{killing_test: killing_test}), do: [test_id(killing_test)]
+  defp killed_by(_entry), do: []
+
+  defp covered_by(%Mutant{covering_tests: nil}), do: []
+  defp covered_by(%Mutant{covering_tests: tests}), do: Enum.map(tests, &test_id/1)
+
+  defp duration(mutant, entry), do: Map.get(entry, :duration_ms) || mutant.duration_ms || 0
+
+  defp test_id(test) when is_binary(test), do: String.replace(test, " ", ":", global: false)
+
+  defp atom_string(nil), do: nil
+  defp atom_string(atom) when is_atom(atom), do: Atom.to_string(atom)
+
+  defp ledger_mutant(%{mutant: %Mutant{} = mutant} = entry) do
+    %{
+      mutant
+      | status: Map.get(entry, :status, mutant.status),
+        killing_test: Map.get(entry, :killing_test, mutant.killing_test),
+        duration_ms: Map.get(entry, :duration_ms, mutant.duration_ms)
+    }
+  end
+
+  defp ledger_mutant(_entry), do: nil
+
+  defp validate_schema_version(violations, %{"schemaVersion" => "2"}), do: violations
+
+  defp validate_schema_version(violations, _rendered),
+    do: ["schemaVersion must be \"2\"" | violations]
+
+  defp validate_thresholds(violations, %{"thresholds" => %{"high" => high, "low" => low}})
+       when is_number(high) and is_number(low),
+       do: violations
+
+  defp validate_thresholds(violations, _rendered) do
+    ["thresholds.high and thresholds.low must be numeric" | violations]
+  end
+
+  defp validate_files(violations, %{"files" => files}) when is_map(files) do
+    Enum.reduce(files, violations, fn {file, file_report}, acc ->
+      validate_file(acc, file, file_report)
+    end)
+  end
+
+  defp validate_files(violations, _rendered), do: ["files must be a map" | violations]
+
+  defp validate_file(violations, file, %{
+         "language" => language,
+         "source" => source,
+         "mutants" => mutants
+       })
+       when is_binary(language) and is_binary(source) and is_list(mutants) do
+    mutants
+    |> Enum.with_index()
+    |> Enum.reduce(violations, fn {mutant, index}, acc ->
+      validate_mutant(acc, file, index, mutant)
+    end)
+  end
+
+  defp validate_file(violations, file, _file_report) do
+    ["files.#{file} must include language, source, and mutants" | violations]
+  end
+
+  defp validate_mutant(violations, file, index, mutant) when is_map(mutant) do
+    path = "files.#{file}.mutants[#{index}]"
+
+    violations
+    |> require_string(mutant, "id", path)
+    |> require_string(mutant, "mutatorName", path)
+    |> require_string(mutant, "replacement", path)
+    |> require_status(mutant, path)
+    |> require_location(mutant, path)
+  end
+
+  defp validate_mutant(violations, file, index, _mutant) do
+    ["files.#{file}.mutants[#{index}] must be a map" | violations]
+  end
+
+  defp require_string(violations, mutant, key, path) do
+    if is_binary(Map.get(mutant, key)),
+      do: violations,
+      else: ["#{path}.#{key} must be a string" | violations]
+  end
+
+  defp require_status(violations, mutant, path) do
+    if Map.get(mutant, "status") in @valid_statuses do
+      violations
+    else
+      ["#{path}.status must be one of #{inspect(@valid_statuses)}" | violations]
+    end
+  end
+
+  defp require_location(violations, %{"location" => %{"start" => start, "end" => finish}}, path) do
+    violations
+    |> require_position(start, "#{path}.location.start")
+    |> require_position(finish, "#{path}.location.end")
+  end
+
+  defp require_location(violations, _mutant, path),
+    do: ["#{path}.location must include start and end" | violations]
+
+  defp require_position(violations, %{"line" => line, "column" => column}, _path)
+       when is_integer(line) and line > 0 and is_integer(column) and column >= 0,
+       do: violations
+
+  defp require_position(violations, _position, path) do
+    ["#{path} must include positive integer line and non-negative integer column" | violations]
+  end
+end
