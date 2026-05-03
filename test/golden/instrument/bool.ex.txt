@@ -1,0 +1,61 @@
+defmodule Bool do
+  @moduledoc "Fixture boolean module."
+
+  def strict?(a, b) do
+    mut_active = :persistent_term.get(Mut.Runtime.active_key(), 0)
+
+    case mut_active do
+      0 ->
+        a and
+          case mut_active do
+            0 -> not b
+            2 -> b
+            _ -> not b
+          end
+
+      20 ->
+        a or not b
+
+      _ ->
+        a and
+          case mut_active do
+            0 -> not b
+            2 -> b
+            _ -> not b
+          end
+    end
+  end
+
+  def loose?(a, b) do
+    mut_active = :persistent_term.get(Mut.Runtime.active_key(), 0)
+
+    case mut_active do
+      0 ->
+        case mut_active do
+          0 -> a || b
+          21 -> a && b
+          _ -> a || b
+        end ||
+          case mut_active do
+            0 -> !b
+            9 -> b
+            _ -> !b
+          end
+
+      16 ->
+        (a || b) && !b
+
+      _ ->
+        case mut_active do
+          0 -> a || b
+          21 -> a && b
+          _ -> a || b
+        end ||
+          case mut_active do
+            0 -> !b
+            9 -> b
+            _ -> !b
+          end
+    end
+  end
+end

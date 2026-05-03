@@ -19,6 +19,7 @@ ENABLED_LAYERS=(
   unit
   dialyzer
   golden_oracle
+  golden_instrument
 )
 
 ALL_LAYERS=(
