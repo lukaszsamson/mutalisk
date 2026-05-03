@@ -5,7 +5,7 @@ defmodule Mut.Plan do
 
   @derive {Jason.Encoder, except: [:matched_pairs]}
   @enforce_keys [:schema, :fallback, :skipped]
-  defstruct schema: [], fallback: [], skipped: [], matched_pairs: []
+  defstruct schema: [], fallback: [], skipped: [], invalid: [], matched_pairs: []
 
   @type skip_reason ::
           :no_applicable_mutator
@@ -30,6 +30,7 @@ defmodule Mut.Plan do
           schema: [Mutant.t()],
           fallback: [Mutant.t()],
           skipped: [skipped_entry],
+          invalid: [Mutant.t()],
           matched_pairs: [{Mut.Oracle.AstCandidate.t(), Mut.Oracle.DispatchSite.t() | nil}]
         }
 
@@ -85,6 +86,7 @@ defmodule Mut.Plan do
     Jason.OrderedObject.new(
       schema: Enum.sort_by(plan.schema, & &1.stable_id),
       fallback: Enum.sort_by(plan.fallback, & &1.stable_id),
+      invalid: Enum.sort_by(plan.invalid, & &1.stable_id),
       skipped: sort_skipped(plan.skipped)
     )
   end

@@ -15,8 +15,13 @@ defmodule Mut.SchemaPlacer do
     @enforce_keys [:file, :entries]
     defstruct [:file, :entries]
 
-    @type location :: {line :: pos_integer(), column :: pos_integer() | nil}
-    @type t :: %__MODULE__{file: Path.t(), entries: %{location => [non_neg_integer()]}}
+    @type entry :: %{
+            start_line: pos_integer(),
+            end_line: pos_integer(),
+            column: pos_integer() | nil,
+            mut_ids: [non_neg_integer()]
+          }
+    @type t :: %__MODULE__{file: Path.t(), entries: [entry]}
   end
 
   defmodule RefusedContext do
@@ -325,19 +330,29 @@ defmodule Mut.SchemaPlacer do
   defp schema_entries(ast) do
     ast
     |> Macro.prewalker()
-    |> Enum.reduce(%{}, fn
+    |> Enum.reduce([], fn
       {:case, meta, [scrutinee, [do: arms]]}, entries when is_list(meta) ->
         ids = schema_arm_ids(arms)
 
         if ids == [] or not schema_scrutinee?(scrutinee) do
           entries
         else
-          Map.put(entries, {Keyword.get(meta, :line), Keyword.get(meta, :column)}, ids)
+          schema_arm_entries(arms) ++
+            [
+              %{
+                start_line: Keyword.fetch!(meta, :line),
+                end_line: meta |> Keyword.fetch!(:end) |> Keyword.fetch!(:line),
+                column: Keyword.get(meta, :column),
+                mut_ids: ids
+              }
+              | entries
+            ]
         end
 
       _other, entries ->
         entries
     end)
+    |> Enum.reverse()
   end
 
   defp schema_arm_ids(arms) do
@@ -349,6 +364,25 @@ defmodule Mut.SchemaPlacer do
 
     if original_and_wildcard_arms?(arms), do: Enum.sort(ids), else: []
   end
+
+  defp schema_arm_entries(arms) do
+    Enum.flat_map(arms, fn
+      {:->, _meta, [[id], body]} when is_integer(id) and id > 0 ->
+        {start_line, end_line, column} = line_range(body)
+        [%{start_line: start_line, end_line: end_line, column: column, mut_ids: [id]}]
+
+      _arm ->
+        []
+    end)
+  end
+
+  defp line_range({_name, meta, _args}) when is_list(meta) do
+    start_line = Keyword.fetch!(meta, :line)
+    end_line = meta |> Keyword.get(:end_of_expression, []) |> Keyword.get(:line, start_line)
+    {start_line, end_line, Keyword.get(meta, :column)}
+  end
+
+  defp line_range(_node), do: {1, 1, nil}
 
   defp original_and_wildcard_arms?([{:->, _meta, [[0], _body]} | rest]) do
     match?({:->, _meta, [[{:_, _wild_meta, nil}], _body]}, List.last(rest))

@@ -134,7 +134,9 @@ defmodule Mut.SchemaPlacerTest do
 
     assert String.contains?(rendered, "case :persistent_term.get")
     assert placement_map.file == "tmp/schema_placer_sample.ex"
-    assert Enum.sort(Map.values(placement_map.entries)) == [[11]]
+    assert Enum.map(placement_map.entries, & &1.mut_ids) == [[11], [11]]
+    assert [%{start_line: start_line, end_line: end_line} | _rest] = placement_map.entries
+    assert start_line <= end_line
   end
 
   test "rendered hoist variable does not collide with a user mut_active binding" do

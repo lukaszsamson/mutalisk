@@ -13,6 +13,7 @@ defmodule Mut.OrchestratorIntegrationTest do
 
     assert length(plan.schema) == 30
     assert plan.fallback == []
+    assert plan.invalid == []
 
     assert Enum.frequencies_by(plan.skipped, & &1.reason) == %{
              attribute_engine_disabled: 1,

@@ -61,6 +61,7 @@ defmodule Mut.Orchestrator do
     %Plan{
       schema: schema,
       fallback: [],
+      invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
           dispatch_skips ++
@@ -306,6 +307,7 @@ defmodule Mut.Orchestrator do
     %Plan{
       schema: Enum.flat_map(plans, & &1.schema),
       fallback: Enum.flat_map(plans, & &1.fallback),
+      invalid: Enum.flat_map(plans, & &1.invalid),
       skipped: Enum.flat_map(plans, & &1.skipped),
       matched_pairs: Enum.flat_map(plans, & &1.matched_pairs)
     }

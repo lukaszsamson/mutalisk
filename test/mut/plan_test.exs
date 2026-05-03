@@ -10,6 +10,7 @@ defmodule Mut.PlanTest do
     plan = %Plan{
       schema: [mutant("b", 2), mutant("a", 1)],
       fallback: [],
+      invalid: [],
       skipped: [skip("b.ex", 2, :z), skip("a.ex", 1, :a)]
     }
 
@@ -18,17 +19,19 @@ defmodule Mut.PlanTest do
   end
 
   test "round-trip decoded values are stable" do
-    json = Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], skipped: []})
+    json = Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], invalid: [], skipped: []})
     decoded = Jason.decode!(json)
 
     second =
-      Jason.decode!(Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], skipped: []}))
+      Jason.decode!(
+        Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], invalid: [], skipped: []})
+      )
 
     assert decoded == second
   end
 
   test "mutant AST fields are excluded from JSON output" do
-    json = Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], skipped: []})
+    json = Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], invalid: [], skipped: []})
 
     refute String.contains?(json, "original_ast")
     refute String.contains?(json, "mutated_ast")

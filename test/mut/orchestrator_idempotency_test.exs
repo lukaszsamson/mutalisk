@@ -26,6 +26,7 @@ defmodule Mut.OrchestratorIdempotencyTest do
     %{
       schema: Enum.map(plan.schema, & &1.stable_id) |> Enum.sort(),
       fallback: Enum.map(plan.fallback, & &1.stable_id) |> Enum.sort(),
+      invalid: Enum.map(plan.invalid, & &1.stable_id) |> Enum.sort(),
       skipped:
         Enum.map(plan.skipped, &{&1.file, &1.line, &1.syntactic_name, &1.reason})
         |> Enum.sort()
