@@ -24,7 +24,7 @@ defmodule Mut.SchemaBuildIntegrationTest do
 
     assert result.invalid_mutants == []
     assert result.plan.invalid == []
-    assert length(result.plan.schema) == 30
+    assert length(result.plan.schema) == 27
     assert result.rollback_iterations == 0
 
     for beam <-

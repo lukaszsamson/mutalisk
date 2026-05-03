@@ -64,7 +64,7 @@ defmodule Mut.WorkCopy do
   end
 
   defp copy_project(source, destination) do
-    case cow_copy(source, destination) do
+    case Mut.FileCopy.cow_copy(source, destination) do
       :ok ->
         :ok
 
@@ -72,21 +72,6 @@ defmodule Mut.WorkCopy do
         Logger.info("COW copy failed; falling back to plain copy: #{inspect(reason)}")
         File.cp_r!(source, destination)
         :ok
-    end
-  end
-
-  defp cow_copy(source, destination) do
-    case :os.type() do
-      {:unix, :darwin} -> run_cp(["-Rc", source, destination])
-      {:unix, :linux} -> run_cp(["-R", "--reflink=auto", source, destination])
-      _other -> {:error, :unsupported_platform}
-    end
-  end
-
-  defp run_cp(args) do
-    case System.cmd("cp", args, stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {output, exit_code} -> {:error, {:cp_failed, exit_code, output}}
     end
   end
 

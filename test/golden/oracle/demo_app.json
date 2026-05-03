@@ -1107,62 +1107,6 @@
     ],
     "dispatch_kind": "imported_function",
     "resolved_module": "Elixir.Kernel",
-    "resolved_name": "<",
-    "resolved_arity": 2,
-    "event_file": "lib/cmp.ex",
-    "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        7
-      ]
-    ]
-  },
-  {
-    "file": "lib/cmp.ex",
-    "line": 5,
-    "column": 11,
-    "end_line": null,
-    "end_column": null,
-    "env_context": null,
-    "module": "Elixir.Cmp",
-    "function": [
-      "ordered?",
-      2
-    ],
-    "dispatch_kind": "imported_macro",
-    "resolved_module": "Elixir.Kernel",
-    "resolved_name": "and",
-    "resolved_arity": 2,
-    "event_file": "lib/cmp.ex",
-    "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        11
-      ]
-    ]
-  },
-  {
-    "file": "lib/cmp.ex",
-    "line": 5,
-    "column": 17,
-    "end_line": null,
-    "end_column": null,
-    "env_context": null,
-    "module": "Elixir.Cmp",
-    "function": [
-      "ordered?",
-      2
-    ],
-    "dispatch_kind": "imported_function",
-    "resolved_module": "Elixir.Kernel",
     "resolved_name": "<=",
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
@@ -1173,7 +1117,7 @@
       ],
       [
         "column",
-        17
+        7
       ]
     ]
   },

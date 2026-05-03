@@ -11,7 +11,7 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert {:ok, oracle} = Mut.OracleBuild.run(@fixture_root, run_id: "m5-plan-golden")
     plan = Mut.Orchestrator.plan(@fixture_root, oracle)
 
-    assert length(plan.schema) == 30
+    assert length(plan.schema) == 27
     assert plan.fallback == []
     assert plan.invalid == []
 

@@ -9,36 +9,36 @@ defmodule Arith do
         case mutalisk_schema_active do
           0 -> a + b
           4 -> a * b
-          28 -> a - b
+          25 -> a - b
           _ -> a + b
         end *
           case mutalisk_schema_active do
             0 -> a - b
-            6 -> a * b
-            8 -> a + b
+            5 -> a * b
+            7 -> a + b
             _ -> a - b
           end
 
       3 ->
         (a + b) / (a - b)
 
-      18 ->
+      16 ->
         a + b + (a - b)
 
-      19 ->
+      18 ->
         a + b - (a - b)
 
       _ ->
         case mutalisk_schema_active do
           0 -> a + b
           4 -> a * b
-          28 -> a - b
+          25 -> a - b
           _ -> a + b
         end *
           case mutalisk_schema_active do
             0 -> a - b
-            6 -> a * b
-            8 -> a + b
+            5 -> a * b
+            7 -> a + b
             _ -> a - b
           end
     end
@@ -49,12 +49,12 @@ defmodule Arith do
 
     {case mutalisk_schema_active do
        0 -> div(a, b)
-       27 -> rem(a, b)
+       24 -> rem(a, b)
        _ -> div(a, b)
      end,
      case mutalisk_schema_active do
        0 -> rem(a, b)
-       17 -> div(a, b)
+       15 -> div(a, b)
        _ -> rem(a, b)
      end}
   end
