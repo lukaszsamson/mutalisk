@@ -9,7 +9,7 @@ defmodule Mut.StableId do
           required(:end_byte) => non_neg_integer() | nil,
           required(:mutator_name) => String.t(),
           required(:original_dispatch) => String.t(),
-          required(:mutation_kind) => atom(),
+          required(:mutation_kind) => atom() | String.t(),
           optional(:ast_path_hash) => String.t() | nil
         }
 
@@ -21,7 +21,7 @@ defmodule Mut.StableId do
       end_byte: mutant.end_byte,
       mutator_name: mutant.mutator_name,
       original_dispatch: mutant.original_dispatch || "",
-      mutation_kind: mutant.mutation_kind,
+      mutation_kind: mutant.stable_id_kind || mutant.mutation_kind,
       ast_path_hash: mutant.ast_path_hash
     })
   end
@@ -35,7 +35,7 @@ defmodule Mut.StableId do
       offset(input.end_byte, fallback),
       input.mutator_name,
       input.original_dispatch,
-      Atom.to_string(input.mutation_kind)
+      to_string(input.mutation_kind)
     ]
     |> Enum.join(<<0>>)
     |> sha256_128_hex()

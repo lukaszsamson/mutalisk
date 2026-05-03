@@ -42,6 +42,7 @@ defmodule Mut.PlanTest do
       mutator: Mut.Mutator.Arithmetic,
       mutator_name: "Arithmetic",
       mutation_kind: :arithmetic_op,
+      stable_id_kind: "arithmetic_op:operator=:+,replacement=:-",
       original_dispatch: "Kernel.+/2",
       ast_path_hash: "hash",
       file: "lib/a.ex",

@@ -135,6 +135,7 @@ defmodule Mut.Orchestrator do
       mutator: mutator,
       mutator_name: mutator.name(),
       mutation_kind: mutation.mutation_kind,
+      stable_id_kind: stable_id_kind(mutation),
       original_dispatch: original_dispatch(candidate, site, ctx.env_context),
       ast_path_hash: candidate.ast_path_hash,
       start_byte: start_byte(candidate.source_span),
@@ -162,6 +163,15 @@ defmodule Mut.Orchestrator do
 
   defp diagnostic_skips(diagnostics) do
     Enum.map(diagnostics, fn {reason, candidate, detail} -> skip(candidate, reason, detail) end)
+  end
+
+  defp stable_id_kind(mutation) do
+    metadata =
+      mutation.metadata
+      |> Enum.sort_by(fn {key, _value} -> key end)
+      |> Enum.map_join(",", fn {key, value} -> "#{key}=#{inspect(value)}" end)
+
+    "#{mutation.mutation_kind}:#{metadata}"
   end
 
   defp skip(%AstCandidate{} = candidate, reason, detail) do
