@@ -3,18 +3,7 @@ defmodule Mut.BootstrapStubTest do
 
   @moduledoc false
 
-  alias Mix.Tasks.Mut.Recompile
   alias Mut.Bootstrap
-
-  test "raising stubs use the milestone marker" do
-    stubs = [
-      fn -> Recompile.run([]) end
-    ]
-
-    for stub <- stubs do
-      assert_raise RuntimeError, ~r/^not yet implemented \(M\d+\)/, stub
-    end
-  end
 
   test "bootstrap role reads MUTALISK_ROLE" do
     previous = System.get_env("MUTALISK_ROLE")

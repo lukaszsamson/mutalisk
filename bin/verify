@@ -21,6 +21,7 @@ ENABLED_LAYERS=(
   golden_oracle
   golden_instrument
   integration_schema
+  integration_fallback
 )
 
 ALL_LAYERS=(

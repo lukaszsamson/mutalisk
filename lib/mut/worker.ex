@@ -1,6 +1,7 @@
 defmodule Mut.Worker do
-  @moduledoc "Runs schema mutants in sandboxed Mix test workers."
+  @moduledoc "Runs mutants in sandboxed Mix test workers."
 
+  alias Mut.Mutant
   alias Mut.Sandbox
   alias Mut.Worker.Formatter
 
@@ -10,7 +11,7 @@ defmodule Mut.Worker do
     @enforce_keys [:status, :duration_ms]
     defstruct [:status, :duration_ms, :killing_test, :raw_output]
 
-    @type status :: :killed | :survived | :timeout | :error
+    @type status :: :killed | :survived | :timeout | :error | :invalid
     @type t :: %__MODULE__{
             status: status,
             duration_ms: non_neg_integer,
@@ -42,6 +43,50 @@ defmodule Mut.Worker do
       end
     else
       result
+    end
+  end
+
+  @spec run_fallback(Sandbox.t(), Mutant.t(), [String.t()], keyword) :: Result.t()
+  def run_fallback(%Sandbox{} = sandbox, %Mutant{} = mutant, test_files, opts \\ [])
+      when is_list(test_files) and is_list(opts) do
+    started = System.monotonic_time(:millisecond)
+
+    try do
+      with :ok <- validate_sandbox(sandbox),
+           {:ok, patch} <- render_patch(sandbox, mutant),
+           :ok <- Mut.FallbackPatch.apply(patch, sandbox.path),
+           {:ok, manifest} <- read_manifest(sandbox, opts),
+           dependents <-
+             manifest |> Mut.Recompile.dependents([mutant.module], [:compile]) |> Enum.to_list(),
+           :ok <- Mut.Recompile.recompile(sandbox, [patch.file], dependents, app: app(opts)) do
+        spawn_fallback_mix(sandbox, test_files, opts, started)
+      else
+        {:error, :missing_source_span} ->
+          %Result{
+            status: :invalid,
+            duration_ms: elapsed(started),
+            raw_output: "missing_source_span"
+          }
+
+        {:error, {:recompile_failed, _code, output} = reason} ->
+          %Result{
+            status: :invalid,
+            duration_ms: elapsed(started),
+            raw_output: output || inspect(reason)
+          }
+
+        {:error, reason} ->
+          %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
+      end
+    rescue
+      exception ->
+        %Result{
+          status: :error,
+          duration_ms: elapsed(started),
+          raw_output: Exception.message(exception)
+        }
+    after
+      Sandbox.reset(sandbox)
     end
   end
 
@@ -114,6 +159,43 @@ defmodule Mut.Worker do
     end
   end
 
+  defp spawn_fallback_mix(sandbox, test_files, opts, started) do
+    case mix_path(opts) do
+      {:ok, mix_path} ->
+        port =
+          Port.open({:spawn_executable, mix_path}, [
+            {:args, args(test_files)},
+            {:cd, sandbox.path},
+            {:env, fallback_port_env()},
+            :stderr_to_stdout,
+            :exit_status,
+            :binary
+          ])
+
+        port
+        |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> classify(elapsed(started))
+
+      {:error, reason} ->
+        %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
+    end
+  end
+
+  defp render_patch(sandbox, mutant) do
+    sandbox.path
+    |> Path.join(mutant.file)
+    |> File.read!()
+    |> then(&Mut.FallbackPatch.render(mutant, &1))
+  end
+
+  defp read_manifest(sandbox, opts) do
+    [sandbox.path, "_build/mut_schema/lib", app(opts), ".mix/compile.elixir"]
+    |> Path.join()
+    |> Mut.MixManifest.read()
+  end
+
+  defp app(opts), do: Keyword.get(opts, :app, "demo_app")
+
   defp validate_sandbox(sandbox) do
     if File.exists?(Path.join(sandbox.path, "mix.exs")) do
       :ok
@@ -133,6 +215,18 @@ defmodule Mut.Worker do
     Enum.map(env(mutant_id), fn {key, value} ->
       {String.to_charlist(key), String.to_charlist(value)}
     end)
+  end
+
+  defp fallback_port_env do
+    [
+      {"MIX_ENV", "test"},
+      {"MIX_BUILD_PATH", "_build/mut_schema"},
+      {"MIX_DEPS_PATH", "_build/mut_schema/deps"},
+      {"MUTALISK_ROLE", "fallback"},
+      {"MUTALISK_PATH", Path.expand(File.cwd!())},
+      {"MUT_ACTIVE", "0"}
+    ]
+    |> Enum.map(fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)
   end
 
   defp collect(port, output, timeout_ms) do

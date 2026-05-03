@@ -116,6 +116,29 @@ defmodule Mut.WorkerTest do
              "beam"
   end
 
+  test "run_fallback returns invalid for mutants missing precise spans and still resets" do
+    path = fake_sandbox("fallback_missing_span")
+    baseline_source = fake_sandbox("fallback_missing_span_baseline")
+    File.mkdir_p!(Path.join(path, "lib"))
+    File.mkdir_p!(Path.join(baseline_source, "lib"))
+    File.write!(Path.join(path, "lib/guards.ex"), "corrupt")
+    File.write!(Path.join(baseline_source, "lib/guards.ex"), "baseline")
+
+    mutant = %{hd(Mut.FallbackFixture.plan().fallback) | start_byte: nil}
+
+    sandbox = %Sandbox{
+      id: 1,
+      path: path,
+      baseline_source: baseline_source,
+      baseline_snapshot: %{}
+    }
+
+    result = Worker.run_fallback(sandbox, mutant, [], app: "demo_app")
+
+    assert result.status == :invalid
+    assert File.read!(Path.join(path, "lib/guards.ex")) == "baseline"
+  end
+
   defp fake_sandbox(name) do
     path = Path.expand(Path.join(["tmp", "tests", "worker", name]))
     File.rm_rf!(path)
