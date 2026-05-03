@@ -104,7 +104,8 @@ defmodule Mut.SchemaBuild do
              output,
              exit_code,
              opts
-           ) do
+           ),
+         :ok <- restore_original_sources(work_copy, original_sources) do
       {:ok, result(work_copy, final)}
     else
       {:compile, output, exit_code} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
@@ -130,6 +131,14 @@ defmodule Mut.SchemaBuild do
           {:halt, {:error, reason}}
       end
     end)
+  end
+
+  defp restore_original_sources(work_copy, original_sources) do
+    Enum.each(original_sources, fn {file, source} ->
+      File.write!(Path.join(work_copy, file), source)
+    end)
+
+    :ok
   end
 
   defp handle_compile(_work_copy, plan, placement_maps, _original_sources, _output, 0, _opts) do

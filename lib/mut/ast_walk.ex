@@ -198,6 +198,8 @@ defmodule Mut.AstWalk do
   defp add_candidate(acc, node, path, name, arity, meta, env_context) do
     case Keyword.fetch(meta, :line) do
       {:ok, line} ->
+        fallback_span = fallback_source_text_span(node, meta, acc)
+
         candidate = %AstCandidate{
           file: acc.file,
           line: line,
@@ -205,8 +207,7 @@ defmodule Mut.AstWalk do
           syntactic_name: name,
           syntactic_arity: arity,
           source_span:
-            Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) ||
-              fallback_source_text_span(node, meta, acc),
+            fallback_span || Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets),
           env_context: env_context,
           enclosing_module: current_module(acc),
           ast_path: path,

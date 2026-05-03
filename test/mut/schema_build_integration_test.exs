@@ -36,6 +36,23 @@ defmodule Mut.SchemaBuildIntegrationTest do
     refute Enum.any?(Map.keys(result.snapshot), &String.starts_with?(&1, "lib/jason/"))
   end
 
+  test "build restores source files after schema compilation" do
+    plan = Mut.Orchestrator.plan(@fixture_root, Mut.FixtureOracleHelper.golden_oracle())
+    arith_original = File.read!(Path.join(@fixture_root, "lib/arith.ex"))
+
+    assert {:ok, result} =
+             Mut.SchemaBuild.build(plan,
+               user_project_root: @fixture_root,
+               run_id: "m7-restored-source",
+               force: true,
+               keep: true
+             )
+
+    on_exit(fn -> File.rm_rf!(result.work_copy_root) end)
+
+    assert File.read!(Path.join(result.work_copy_root, "lib/arith.ex")) == arith_original
+  end
+
   test "rollback invalidates AlwaysWrong mutants and keeps valid schema mutants" do
     plan = always_wrong_plan(["lib/bool.ex"])
     wrong_count = Enum.count(plan.schema, &(&1.mutator == Mut.Mutator.Test.AlwaysWrong))

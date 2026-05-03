@@ -31,3 +31,6 @@ M*_PROMPT.txt
 # Local mutation run outputs.
 /stryker.report.json
 /plan.debug.json
+
+# Real-project benchmark working copies.
+/tmp/bench/
