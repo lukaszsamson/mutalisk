@@ -49,7 +49,7 @@ defmodule Mut.SchemaPlacer do
           {:ok, instrumented_source :: String.t()} | {:error, term}
   def instrument_file(file, mutants) do
     with {:ok, {ast, _source}} <- Mut.SourceParse.parse(file) do
-      file_mutants = Enum.filter(mutants, &(&1.file == relativize(file)))
+      file_mutants = Enum.filter(mutants, &same_file?(&1.file, file))
       {:ok, render(place(ast, file_mutants))}
     end
   end
@@ -293,6 +293,11 @@ defmodule Mut.SchemaPlacer do
 
   defp original_line({_name, meta, _args}) when is_list(meta), do: Keyword.get(meta, :line)
   defp original_line(_node), do: nil
+
+  defp same_file?(mutant_file, file) do
+    relative = relativize(file)
+    mutant_file == relative or String.ends_with?(Path.expand(file), "/" <> mutant_file)
+  end
 
   defp relativize(file) do
     cwd = File.cwd!()
