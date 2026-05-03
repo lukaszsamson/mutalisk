@@ -3,7 +3,9 @@ defmodule DslUserTest do
 
   @moduledoc false
 
-  test "passes" do
-    assert true
+  # M8 exercises DSL-generated functions while expecting internals to stay skipped.
+  test "generated add functions work" do
+    assert DslUser.sum(2, 3) == 5
+    assert DslUser.sum_keep(2, 3) == 5
   end
 end

@@ -3,7 +3,8 @@ defmodule GuardsTest do
 
   @moduledoc false
 
-  test "passes" do
-    assert true
+  # Intentionally weak: future guard boundary mutants can survive here.
+  test "positive? accepts positive integers" do
+    assert Guards.positive?(5) == true
   end
 end
