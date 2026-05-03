@@ -1,0 +1,101 @@
+defmodule Mix.Tasks.Mut.TestSchema do
+  @moduledoc "Integration: run M8 worker against the demo_app fixture."
+  use Mix.Task
+
+  @dialyzer {:no_opaque, run: 1}
+
+  @shortdoc "Runs schema worker integration against demo_app"
+
+  @fixture_root Path.expand("test/fixtures/demo_app")
+  @concurrency 1
+  @timeout_ms 15_000
+
+  # Expected outcomes are grounded in test/fixtures/demo_app/test assertions.
+  @expectations [
+    %{stable_id: "14966a08023e637a7349711c44b348b3", expected: :killed, note: "arith + -> *"},
+    %{stable_id: "f19d8b683235e84ef28fb8d9d139d852", expected: :killed, note: "arith + -> -"},
+    %{stable_id: "2c610211a71402b0d80a5f05e85b09ef", expected: :killed, note: "arith - -> +"},
+    %{stable_id: "8c6aca74d878982d0c2bf76c5c3df9a3", expected: :killed, note: "arith * -> +"},
+    %{stable_id: "139acf2b882c3cdfa8be790efda87030", expected: :killed, note: "arith * -> /"},
+    %{stable_id: "ead0057386314e63eb0624e5246c8e8b", expected: :killed, note: "div -> rem"},
+    %{stable_id: "883292c5cea6155e159fafa5623972a6", expected: :killed, note: "rem -> div"},
+    %{stable_id: "732984a4c8db998c31901d5dbf99321c", expected: :killed, note: "attrs + -> -"},
+    %{
+      stable_id: "b15e819710f4a60e2c5dc31377cc3c27",
+      expected: :killed,
+      note: "strict? and -> or"
+    },
+    %{
+      stable_id: "303188d6acf275464e9aba440bfc9ae7",
+      expected: :survived,
+      note: "loose? remove unary !"
+    }
+  ]
+
+  @impl Mix.Task
+  def run(_argv) do
+    Mix.Task.run("app.start")
+    started = System.monotonic_time(:millisecond)
+
+    {:ok, oracle} = Mut.OracleBuild.run(@fixture_root, run_id: "m8-oracle", force: true)
+    plan = Mut.Orchestrator.plan(@fixture_root, oracle)
+
+    {:ok, schema_result} =
+      Mut.SchemaBuild.build(plan,
+        user_project_root: @fixture_root,
+        run_id: "m8-schema",
+        force: true,
+        keep: true
+      )
+
+    {:ok, pool} =
+      Mut.Sandbox.create_pool(schema_result, @concurrency, run_id: "m8-worker", force: true)
+
+    try do
+      results = Enum.map(@expectations, &run_expected(&1, pool, schema_result.plan))
+      summarize!(results, elapsed(started))
+    after
+      Mut.Sandbox.destroy_pool(pool)
+      File.rm_rf!(schema_result.work_copy_root)
+    end
+  end
+
+  defp run_expected(expectation, pool, plan) do
+    mutant = Mut.Plan.find_by_stable_id(plan, expectation.stable_id)
+
+    if is_nil(mutant) do
+      raise "expected stable_id not found: #{expectation.stable_id}"
+    end
+
+    {:ok, sandbox, checked_out} = Mut.Sandbox.checkout(pool)
+
+    result =
+      Mut.Worker.run_schema(sandbox, mutant.id, [], timeout_ms: @timeout_ms, retry_on_error: true)
+
+    _pool = Mut.Sandbox.checkin(sandbox, checked_out)
+
+    %{
+      stable_id: expectation.stable_id,
+      mutant_id: mutant.id,
+      note: expectation.note,
+      expected: expectation.expected,
+      actual: result.status,
+      killing_test: result.killing_test,
+      duration_ms: result.duration_ms,
+      raw_output: result.raw_output
+    }
+  end
+
+  defp summarize!(results, wall_ms) do
+    mismatches = Enum.reject(results, &(&1.expected == &1.actual))
+    counts = Enum.frequencies_by(results, & &1.actual)
+
+    IO.puts("mut.test_schema results=#{inspect(counts)} wall_ms=#{wall_ms}")
+
+    if mismatches != [] do
+      raise "schema integration mismatches: #{inspect(mismatches, pretty: true)}"
+    end
+  end
+
+  defp elapsed(started), do: System.monotonic_time(:millisecond) - started
+end

@@ -67,6 +67,11 @@ defmodule Mut.Plan do
   @spec dump_json(t) :: String.t()
   def dump_json(%__MODULE__{} = plan), do: json_dump(plan)
 
+  @spec find_by_stable_id(t, String.t()) :: Mutant.t() | nil
+  def find_by_stable_id(%__MODULE__{} = plan, stable_id) when is_binary(stable_id) do
+    Enum.find(plan.schema ++ plan.fallback ++ plan.invalid, &(&1.stable_id == stable_id))
+  end
+
   defp put_stable_id(%Mutant{} = mutant), do: %{mutant | stable_id: Mut.StableId.compute(mutant)}
 
   defp bucket(finalized, bucket) do

@@ -1,6 +1,8 @@
 defmodule Mut.Sandbox do
   @moduledoc "Manages isolated worker sandboxes."
 
+  @dialyzer {:no_opaque, checkin: 2, destroy_pool: 1}
+
   alias Mut.SchemaBuild
 
   defstruct [
@@ -29,8 +31,8 @@ defmodule Mut.Sandbox do
 
     @type t :: %__MODULE__{
             run_id: String.t(),
-            sandboxes: MapSet.t(Mut.Sandbox.t()),
-            checked_out: MapSet.t(Mut.Sandbox.t()),
+            sandboxes: term,
+            checked_out: term,
             schema_result: Mut.SchemaBuild.Result.t()
           }
   end
@@ -89,11 +91,9 @@ defmodule Mut.Sandbox do
 
   @spec reset(t) :: :ok | {:error, term}
   def reset(%__MODULE__{} = sandbox) do
-    with :ok <- restore_baseline_files(sandbox),
-         :ok <- remove_stray_files(sandbox),
-         :ok <- verify_baseline(sandbox) do
-      :ok
-    end
+    :ok = restore_baseline_files(sandbox)
+    :ok = remove_stray_files(sandbox)
+    verify_baseline(sandbox)
   rescue
     exception -> {:error, {exception.__struct__, Exception.message(exception)}}
   end
@@ -157,7 +157,7 @@ defmodule Mut.Sandbox do
   end
 
   defp remove_stray_files(sandbox) do
-    baseline_paths = MapSet.new(Map.keys(sandbox.baseline_snapshot))
+    baseline_paths = sandbox.baseline_snapshot
     baseline_roots = baseline_roots(baseline_paths)
 
     snapshot_root(sandbox.path)
@@ -165,7 +165,7 @@ defmodule Mut.Sandbox do
     |> Enum.each(fn file ->
       relative = Path.relative_to(file, snapshot_root(sandbox.path))
 
-      if tracked_root?(relative, baseline_roots) and not MapSet.member?(baseline_paths, relative) do
+      if tracked_root?(relative, baseline_roots) and not Map.has_key?(baseline_paths, relative) do
         File.rm!(file)
       end
     end)
@@ -195,15 +195,16 @@ defmodule Mut.Sandbox do
 
   defp baseline_roots(paths) do
     paths
+    |> Map.keys()
     |> Enum.map(fn path -> path |> Path.split() |> List.first() end)
-    |> MapSet.new()
+    |> Map.new(&{&1, true})
   end
 
   defp tracked_root?(relative, roots) do
     relative
     |> Path.split()
     |> List.first()
-    |> then(&MapSet.member?(roots, &1))
+    |> then(&Map.has_key?(roots, &1))
   end
 
   defp sha256(path) do

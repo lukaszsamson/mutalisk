@@ -20,6 +20,7 @@ ENABLED_LAYERS=(
   dialyzer
   golden_oracle
   golden_instrument
+  integration_schema
 )
 
 ALL_LAYERS=(

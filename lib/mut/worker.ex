@@ -2,6 +2,7 @@ defmodule Mut.Worker do
   @moduledoc "Runs schema mutants in sandboxed Mix test workers."
 
   alias Mut.Sandbox
+  alias Mut.Worker.Formatter
 
   defmodule Result do
     @moduledoc "Worker execution result."
@@ -63,21 +64,22 @@ defmodule Mut.Worker do
     started = System.monotonic_time(:millisecond)
 
     try do
-      with {:ok, mix_path} <- mix_path(opts) do
-        port =
-          Port.open({:spawn_executable, mix_path}, [
-            {:args, args(test_files)},
-            {:cd, sandbox.path},
-            {:env, port_env(mutant_id)},
-            :stderr_to_stdout,
-            :exit_status,
-            :binary
-          ])
+      case mix_path(opts) do
+        {:ok, mix_path} ->
+          port =
+            Port.open({:spawn_executable, mix_path}, [
+              {:args, args(test_files)},
+              {:cd, sandbox.path},
+              {:env, port_env(mutant_id)},
+              :stderr_to_stdout,
+              :exit_status,
+              :binary
+            ])
 
-        port
-        |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
-        |> classify(elapsed(started))
-      else
+          port
+          |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+          |> classify(elapsed(started))
+
         {:error, reason} ->
           %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
       end
@@ -120,7 +122,7 @@ defmodule Mut.Worker do
   end
 
   defp classify({:exit, code, output}, duration_ms) do
-    case Mut.Worker.Formatter.parse_output(output) do
+    case Formatter.parse_output(output) do
       %{summary: %{"failed" => 0}} when code == 0 ->
         %Result{status: :survived, duration_ms: duration_ms}
 
@@ -146,7 +148,7 @@ defmodule Mut.Worker do
     Port.close(port)
 
     case os_pid do
-      {:os_pid, pid} when is_integer(pid) -> :os.cmd(~c"kill -9 #{pid}")
+      {:os_pid, pid} when is_integer(pid) -> System.cmd("kill", ["-9", Integer.to_string(pid)])
       _unknown -> :ok
     end
   catch
