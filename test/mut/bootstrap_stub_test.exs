@@ -3,23 +3,11 @@ defmodule Mut.BootstrapStubTest do
 
   @moduledoc false
 
-  alias Mix.Tasks.Compile.MutOracle
   alias Mix.Tasks.Mut.Recompile
   alias Mut.Bootstrap
-  alias Mut.Bootstrap.Overlay
-  alias Mut.Trace.Writer
-  alias Mut.WorkCopy
 
   test "raising stubs use the milestone marker" do
     stubs = [
-      fn -> Overlay.materialize("work", :oracle) end,
-      fn -> Overlay.render(:oracle) end,
-      fn -> Overlay.assert_not_umbrella!("work") end,
-      fn -> WorkCopy.materialize("project", "run") end,
-      fn -> MutOracle.run([]) end,
-      fn -> MutOracle.clean() end,
-      fn -> MutOracle.manifests() end,
-      fn -> Writer.start_link([]) end,
       fn -> Recompile.run([]) end
     ]
 
