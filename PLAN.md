@@ -27,8 +27,8 @@ The contract:
 2. **`mix.exs` overlay.** Mutalisk writes a replacement `mix.exs` into the working copy that:
    - Renames the original `mix.exs` to `mix_user.exs` (preserved verbatim).
    - `Code.require_file/2`s `mix_user.exs` so the user's `MyApp.MixProject` is defined and pushed via `use Mix.Project`.
-   - Captures the user module via `Mix.Project.get!()` and stashes it through `Application.put_env/3`.
-   - Defines `Mutalisk.WrappedMixProject` which `use Mix.Project` (pushed on top of user's). Its `project/0` delegates to the user module then injects two overrides: append `{:mutalisk, path: System.fetch_env!("MUTALISK_PATH"), only: [:test], runtime: true}` to `:deps`; and (oracle role only) prepend the atom `:mut_oracle` to `:compilers`.
+   - Captures the user module via `Mix.Project.get!()`, pops the user project from Mix's project stack, and stashes the module through `Application.put_env/3`.
+   - Defines `Mutalisk.WrappedMixProject` which `use Mix.Project`. Its `project/0` delegates to the user module then injects two overrides: append `{:mutalisk, path: System.fetch_env!("MUTALISK_PATH"), only: [:test], runtime: true}` to `:deps`; and (oracle role only) prepend the atom `:mut_oracle` to `:compilers`.
    - `application/0` delegates to the user module unchanged. **The overlay never replaces the user's `:mod` callback.** Mutalisk's runtime boot runs because `:mutalisk` is a dep, so OTP starts the `:mutalisk` application before the user app.
 3. **Bootstrap modules** (loaded into the child BEAM via the path-dep, NOT referenced from the overlay file):
    - `Mix.Tasks.Compile.MutOracle` — a `Mix.Task.Compiler` shipped in mutalisk. The atom `:mut_oracle` in `:compilers` resolves to this module via Mix's standard `Mix.Tasks.Compile.<Camelize>` convention. Its `run/1` calls `Code.put_compiler_option(:tracers, [Mut.Trace | existing_tracers])`, starts `Mut.Trace.Writer`, and registers `System.at_exit/1` to flush + write the count sentinel before BEAM shutdown. Returns `{:noop, []}`. `manifests/0` returns `[]`. `clean/0` is a no-op.
@@ -36,7 +36,8 @@ The contract:
 4. **Worker bootstrap.** Workers run via `mix test --no-compile ...` with `MUT_ACTIVE=<id>` in the environment. Because mutalisk is a dep of the working copy, OTP starts `:mutalisk` before the user app, so `Mut.Application.start/2` fires and `:persistent_term` is set before any user code or test runs. **No `MIX_INIT`. No `--eval` injections. No replacement of the user's `:mod` callback.**
 5. **Bootstrap load order.** The `:mut_oracle` compiler atom resolves to a module that lives inside the mutalisk dep. That module is loadable only after deps are compiled. Therefore every host-side child invocation runs deps.compile before compile:
    ```
-   mix do deps.get + deps.compile, compile --force
+   mix do deps.get + deps.compile --include-children mutalisk
+   mix compile --force
    ```
    `deps.compile` is targeted by name (`mix deps.compile mutalisk`) when only mutalisk needs building.
 6. **Tracer event handoff.** `Mut.Trace.Writer` is a GenServer started by `Mix.Tasks.Compile.MutOracle.run/1` before `:elixir` runs. All tracer callbacks send events to the writer; the writer batches and writes JSONL to `_build/mut_oracle/.mut_oracle.jsonl`. The final `{"event":"end","count":N}` sentinel is written from a `System.at_exit/1` hook registered in the same `run/1`, so it fires when the child BEAM shuts down (after Mix returns). Direct file appends from concurrent tracer callbacks are forbidden — `Kernel.ParallelCompiler` runs tracer callbacks in many processes simultaneously and unsynchronized appends interleave or lose events.
@@ -47,18 +48,19 @@ This contract is implemented in M0 (stub modules) and fully wired in M2. See `do
 
 There are exactly four roles for build directories. Every command that compiles or runs tests in a target project MUST set both `MIX_ENV` and `MIX_BUILD_PATH` per this table — never omit either.
 
-| Role | `MIX_ENV` | `MIX_BUILD_PATH` (relative to working copy root) | Purpose |
-|---|---|---|---|
-| Oracle build | `test` | `_build/mut_oracle` | Tracer-instrumented compile; produces oracle JSONL + baseline beams |
-| Baseline test run | `test` | `_build/mut_oracle` | Pre-mutation green-baseline check; reuses the oracle build |
-| Schema build | `test` | `_build/mut_schema` | Compiles schema-instrumented sources; produces beams used by all workers |
-| Worker test run (schema) | `test` | `_build/mut_schema` | `mix test --no-compile` only; `MUT_ACTIVE` env var selects mutant |
-| Fallback recompile | `test` | `_build/mut_schema` (per-sandbox copy) | Targeted recompile inside sandbox before its `mix test --no-compile` |
-| Worker test run (fallback) | `test` | `_build/mut_schema` (per-sandbox copy) | `mix test --no-compile`; mutant pre-baked into source + beams |
+| Role | `MIX_ENV` | `MIX_BUILD_PATH` (relative to working copy root) | `MIX_DEPS_PATH` (relative to working copy root) | Purpose |
+|---|---|---|---|---|
+| Oracle build | `test` | `_build/mut_oracle` | `_build/mut_oracle/deps` | Tracer-instrumented compile; produces oracle JSONL + baseline beams |
+| Baseline test run | `test` | `_build/mut_oracle` | `_build/mut_oracle/deps` | Pre-mutation green-baseline check; reuses the oracle build |
+| Schema build | `test` | `_build/mut_schema` | `_build/mut_schema/deps` | Compiles schema-instrumented sources; produces beams used by all workers |
+| Worker test run (schema) | `test` | `_build/mut_schema` | `_build/mut_schema/deps` | `mix test --no-compile` only; `MUT_ACTIVE` env var selects mutant |
+| Fallback recompile | `test` | `_build/mut_schema` (per-sandbox copy) | `_build/mut_schema/deps` (per-sandbox copy) | Targeted recompile inside sandbox before its `mix test --no-compile` |
+| Worker test run (fallback) | `test` | `_build/mut_schema` (per-sandbox copy) | `_build/mut_schema/deps` (per-sandbox copy) | `mix test --no-compile`; mutant pre-baked into source + beams |
 
 Notes:
 
 - `MIX_BUILD_PATH` is always relative to the working-copy/sandbox root, never to the user's project.
+- `MIX_DEPS_PATH` is always under the role build path so dependency fetching never writes through a working-copy `deps/` symlink into the user's project.
 - `MIX_ENV` is always `test` in v1. The reasoning the SPEC gives for not introducing a separate env is honored.
 - Worker `mix test` invocations always pass `--no-compile --no-deps-check --no-archives-check --max-failures 1` per SPEC §Phase 3.
 - Fallback recompile must restore not only `.beam` files but also Mix manifest files (`compile.elixir`, `compile.elixir_scm`, etc.) from the sandbox baseline snapshot taken at sandbox checkout, otherwise the next `mix test --no-compile` may detect staleness and trigger an uncontrolled compile.
@@ -201,7 +203,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
 - `Mut.OracleBuild.run/2`: drives the working copy → overlay → child Mix invocations. Two commands, sequential:
   ```
   # Step 1: ensure mutalisk dep is built so :mut_oracle compiler module is loadable
-  System.cmd("mix", ["deps.compile", "mutalisk"],
+  System.cmd("mix", ["do", "deps.get", "+", "deps.compile", "--include-children", "mutalisk"],
     cd: working_copy,
     env: [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_oracle"}, {"MUTALISK_ROLE", "oracle"}, {"MUTALISK_PATH", host_mutalisk_root}])
 
@@ -345,7 +347,7 @@ The fixture is **never** opened from the host project's mix; it is a fully separ
   3. Write instrumented source files over the working-copy `lib/` (and `test/` is left untouched).
   4. Run, in sequence:
      ```
-     System.cmd("mix", ["deps.compile", "mutalisk"], cd: working_copy, env: env)
+      System.cmd("mix", ["do", "deps.get", "+", "deps.compile", "--include-children", "mutalisk"], cd: working_copy, env: env)
      System.cmd("mix", ["compile", "--force"],       cd: working_copy, env: env)
      ```
      where `env = [{"MIX_ENV", "test"}, {"MIX_BUILD_PATH", "_build/mut_schema"}, {"MUTALISK_ROLE", "schema"}, {"MUTALISK_PATH", host_mutalisk_root}]`.
