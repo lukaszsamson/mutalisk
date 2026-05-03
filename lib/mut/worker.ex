@@ -28,7 +28,18 @@ defmodule Mut.Worker do
     result = do_run_schema(sandbox, mutant_id, test_files, opts)
 
     if retry? and result.status == :error do
-      do_run_schema(sandbox, mutant_id, test_files, Keyword.put(opts, :retry_on_error, false))
+      case Sandbox.reset(sandbox) do
+        :ok ->
+          do_run_schema(sandbox, mutant_id, test_files, Keyword.put(opts, :retry_on_error, false))
+
+        {:error, reason} ->
+          %Result{
+            status: :error,
+            duration_ms: result.duration_ms,
+            raw_output:
+              "sandbox reset before retry failed: #{inspect(reason)}\n#{result.raw_output}"
+          }
+      end
     else
       result
     end
@@ -64,21 +75,9 @@ defmodule Mut.Worker do
     started = System.monotonic_time(:millisecond)
 
     try do
-      case mix_path(opts) do
-        {:ok, mix_path} ->
-          port =
-            Port.open({:spawn_executable, mix_path}, [
-              {:args, args(test_files)},
-              {:cd, sandbox.path},
-              {:env, port_env(mutant_id)},
-              :stderr_to_stdout,
-              :exit_status,
-              :binary
-            ])
-
-          port
-          |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
-          |> classify(elapsed(started))
+      case validate_sandbox(sandbox) do
+        :ok ->
+          spawn_mix(sandbox, mutant_id, test_files, opts, started)
 
         {:error, reason} ->
           %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
@@ -90,6 +89,36 @@ defmodule Mut.Worker do
           duration_ms: elapsed(started),
           raw_output: Exception.message(exception)
         }
+    end
+  end
+
+  defp spawn_mix(sandbox, mutant_id, test_files, opts, started) do
+    case mix_path(opts) do
+      {:ok, mix_path} ->
+        port =
+          Port.open({:spawn_executable, mix_path}, [
+            {:args, args(test_files)},
+            {:cd, sandbox.path},
+            {:env, port_env(mutant_id)},
+            :stderr_to_stdout,
+            :exit_status,
+            :binary
+          ])
+
+        port
+        |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> classify(elapsed(started))
+
+      {:error, reason} ->
+        %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
+    end
+  end
+
+  defp validate_sandbox(sandbox) do
+    if File.exists?(Path.join(sandbox.path, "mix.exs")) do
+      :ok
+    else
+      {:error, {:sandbox_not_materialized, Path.join(sandbox.path, "mix.exs")}}
     end
   end
 

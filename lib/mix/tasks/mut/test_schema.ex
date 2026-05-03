@@ -51,13 +51,24 @@ defmodule Mix.Tasks.Mut.TestSchema do
     {:ok, pool} =
       Mut.Sandbox.create_pool(schema_result, @concurrency, run_id: "m8-worker", force: true)
 
-    try do
-      results = Enum.map(@expectations, &run_expected(&1, pool, schema_result.plan))
-      summarize!(results, elapsed(started))
-    after
-      Mut.Sandbox.destroy_pool(pool)
-      File.rm_rf!(schema_result.work_copy_root)
-    end
+    final_pool =
+      try do
+        {results, pool} = run_expectations(pool, schema_result.plan)
+        summarize!(results, elapsed(started))
+        pool
+      after
+        File.rm_rf!(schema_result.work_copy_root)
+      end
+
+    Mut.Sandbox.destroy_pool(final_pool)
+  end
+
+  defp run_expectations(pool, plan) do
+    Enum.reduce(@expectations, {[], pool}, fn expectation, {results, pool} ->
+      {result, pool} = run_expected(expectation, pool, plan)
+      {[result | results], pool}
+    end)
+    |> then(fn {results, pool} -> {Enum.reverse(results), pool} end)
   end
 
   defp run_expected(expectation, pool, plan) do
@@ -72,18 +83,18 @@ defmodule Mix.Tasks.Mut.TestSchema do
     result =
       Mut.Worker.run_schema(sandbox, mutant.id, [], timeout_ms: @timeout_ms, retry_on_error: true)
 
-    _pool = Mut.Sandbox.checkin(sandbox, checked_out)
+    checked_in = Mut.Sandbox.checkin(sandbox, checked_out)
 
-    %{
-      stable_id: expectation.stable_id,
-      mutant_id: mutant.id,
-      note: expectation.note,
-      expected: expectation.expected,
-      actual: result.status,
-      killing_test: result.killing_test,
-      duration_ms: result.duration_ms,
-      raw_output: result.raw_output
-    }
+    {%{
+       stable_id: expectation.stable_id,
+       mutant_id: mutant.id,
+       note: expectation.note,
+       expected: expectation.expected,
+       actual: result.status,
+       killing_test: result.killing_test,
+       duration_ms: result.duration_ms,
+       raw_output: result.raw_output
+     }, checked_in}
   end
 
   defp summarize!(results, wall_ms) do

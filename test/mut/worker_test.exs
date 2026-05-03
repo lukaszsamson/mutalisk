@@ -57,6 +57,7 @@ defmodule Mut.WorkerTest do
 
   test "run_schema closes timed out ports" do
     path = fake_sandbox("timeout")
+    File.write!(Path.join(path, "mix.exs"), "mix")
     mix = timeout_shim()
 
     result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, timeout_ms: 50)
@@ -64,10 +65,62 @@ defmodule Mut.WorkerTest do
     assert result.status == :timeout
   end
 
+  test "run_schema returns clear error when sandbox is missing mix.exs" do
+    path = fake_sandbox("missing_mix")
+    File.rm!(Path.join(path, "mix.exs"))
+    mix = mix_shim("missing_mix", 0)
+
+    result =
+      Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, retry_on_error: false)
+
+    assert result.status == :error
+    assert result.raw_output =~ "sandbox_not_materialized"
+    assert result.raw_output =~ "mix.exs"
+  end
+
+  test "run_schema resets sandbox before retrying infrastructure errors" do
+    path = fake_sandbox("retry_reset")
+    baseline_source = fake_sandbox("retry_reset_baseline")
+    File.mkdir_p!(Path.join(path, "_build/mut_schema/lib/demo_app/ebin"))
+    File.mkdir_p!(Path.join(path, "lib"))
+    File.mkdir_p!(Path.join(baseline_source, "_build/mut_schema/lib/demo_app/ebin"))
+    File.mkdir_p!(Path.join(baseline_source, "lib"))
+    File.write!(Path.join(path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam"), "beam")
+    File.write!(Path.join(path, "lib/arith.ex"), "source")
+
+    File.write!(
+      Path.join(baseline_source, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam"),
+      "beam"
+    )
+
+    File.write!(Path.join(baseline_source, "lib/arith.ex"), "source")
+
+    mix = retry_shim()
+
+    sandbox = %Sandbox{
+      id: 1,
+      path: path,
+      baseline_source: baseline_source,
+      baseline_snapshot: %{
+        "lib/demo_app/ebin/Elixir.Arith.beam" =>
+          sha256(Path.join(path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam"))
+      }
+    }
+
+    result = Worker.run_schema(sandbox, 7, [], mix_path: mix)
+
+    assert result.status == :survived
+    assert File.read!(Path.join(path, "attempts")) == "2"
+
+    assert File.read!(Path.join(path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")) ==
+             "beam"
+  end
+
   defp fake_sandbox(name) do
     path = Path.expand(Path.join(["tmp", "tests", "worker", name]))
     File.rm_rf!(path)
     File.mkdir_p!(path)
+    File.write!(Path.join(path, "mix.exs"), "mix")
     path
   end
 
@@ -100,5 +153,36 @@ defmodule Mut.WorkerTest do
     File.write!(path, "#!/usr/bin/env bash\nsleep 5\n")
     File.chmod!(path, 0o755)
     path
+  end
+
+  defp retry_shim do
+    path = Path.expand(Path.join(["tmp", "tests", "worker", "mix_retry.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    attempts_file="attempts"
+    attempts=0
+    if [ -f "$attempts_file" ]; then attempts=$(cat "$attempts_file"); fi
+    attempts=$((attempts + 1))
+    printf '%s' "$attempts" > "$attempts_file"
+    if [ "$attempts" -eq 1 ]; then
+      printf '%s' 'corrupt' > _build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam
+      printf '%s\n' 'not json'
+      exit 1
+    fi
+    printf '%s\n' '{"event":"test_finished","module":"ArithTest","test":"score","status":"passed","duration_us":1}'
+    printf '%s\n' '{"event":"suite_finished","total":1,"failed":0,"passed":1,"skipped":0}'
+    exit 0
+    """)
+
+    File.chmod!(path, 0o755)
+    path
+  end
+
+  defp sha256(path) do
+    :sha256
+    |> :crypto.hash(File.read!(path))
+    |> Base.encode16(case: :lower)
   end
 end

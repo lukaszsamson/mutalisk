@@ -91,9 +91,10 @@ defmodule Mut.Sandbox do
 
   @spec reset(t) :: :ok | {:error, term}
   def reset(%__MODULE__{} = sandbox) do
-    :ok = restore_baseline_files(sandbox)
+    baseline = baseline(sandbox)
+    :ok = restore_baseline_files(sandbox, baseline)
     :ok = remove_stray_files(sandbox)
-    verify_baseline(sandbox)
+    verify_baseline(sandbox, baseline)
   rescue
     exception -> {:error, {exception.__struct__, Exception.message(exception)}}
   end
@@ -102,6 +103,7 @@ defmodule Mut.Sandbox do
   def destroy_pool(%Pool{} = pool) do
     pool.sandboxes
     |> MapSet.union(pool.checked_out)
+    |> Enum.uniq_by(& &1.path)
     |> Enum.each(&File.rm_rf!(&1.path))
 
     File.rm_rf!(pool_path(pool.run_id))
@@ -125,28 +127,51 @@ defmodule Mut.Sandbox do
   end
 
   defp create_sandboxes(schema_result, concurrency, parent) do
-    sandboxes =
-      Enum.map(1..concurrency, fn id ->
-        path = Path.join(parent, Integer.to_string(id))
-        :ok = Mut.FileCopy.copy_tree(schema_result.work_copy_root, path)
+    Enum.reduce_while(1..concurrency, {:ok, []}, fn id, {:ok, sandboxes} ->
+      path = Path.join(parent, Integer.to_string(id))
 
-        %__MODULE__{
+      with :ok <- Mut.FileCopy.copy_tree(schema_result.work_copy_root, path),
+           :ok <- assert_materialized(path) do
+        sandbox = %__MODULE__{
           id: id,
           path: path,
           baseline_snapshot: schema_result.snapshot,
           baseline_source: schema_result.work_copy_root
         }
-      end)
 
-    {:ok, sandboxes}
+        {:cont, {:ok, [sandbox | sandboxes]}}
+      else
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, sandboxes} -> {:ok, Enum.reverse(sandboxes)}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
-  defp restore_baseline_files(sandbox) do
-    Enum.each(sandbox.baseline_snapshot, fn {relative, expected_hash} ->
-      target = sandbox_file(sandbox, relative)
+  defp assert_materialized(path) do
+    cond do
+      not File.exists?(Path.join(path, "mix.exs")) ->
+        {:error, {:missing_mix_exs, path}}
+
+      match?({:ok, %File.Stat{type: :symlink}}, File.lstat(Path.join(path, "_build/mut_schema"))) ->
+        {:error, {:schema_build_is_symlink, Path.join(path, "_build/mut_schema")}}
+
+      not File.dir?(Path.join(path, "_build/mut_schema")) ->
+        {:error, {:missing_schema_build, Path.join(path, "_build/mut_schema")}}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp restore_baseline_files(sandbox, baseline) do
+    Enum.each(baseline, fn {relative, expected_hash} ->
+      target = Path.join(sandbox.path, relative)
 
       if sha256(target) != expected_hash do
-        source = baseline_file(sandbox, relative)
+        source = Path.join(sandbox.baseline_source, relative)
         File.mkdir_p!(Path.dirname(target))
         File.rm_rf!(target)
         :ok = Mut.FileCopy.copy_tree(source, target)
@@ -157,13 +182,13 @@ defmodule Mut.Sandbox do
   end
 
   defp remove_stray_files(sandbox) do
-    baseline_paths = sandbox.baseline_snapshot
+    baseline_paths = baseline(sandbox)
     baseline_roots = baseline_roots(baseline_paths)
 
-    snapshot_root(sandbox.path)
+    sandbox.path
     |> all_files()
     |> Enum.each(fn file ->
-      relative = Path.relative_to(file, snapshot_root(sandbox.path))
+      relative = Path.relative_to(file, sandbox.path)
 
       if tracked_root?(relative, baseline_roots) and not Map.has_key?(baseline_paths, relative) do
         File.rm!(file)
@@ -173,11 +198,11 @@ defmodule Mut.Sandbox do
     :ok
   end
 
-  defp verify_baseline(sandbox) do
+  defp verify_baseline(sandbox, baseline) do
     mismatches =
-      Enum.reject(sandbox.baseline_snapshot, fn {relative, expected_hash} ->
-        sandbox
-        |> sandbox_file(relative)
+      Enum.reject(baseline, fn {relative, expected_hash} ->
+        sandbox.path
+        |> Path.join(relative)
         |> sha256() == expected_hash
       end)
 
@@ -207,6 +232,23 @@ defmodule Mut.Sandbox do
     |> then(&Map.has_key?(roots, &1))
   end
 
+  defp baseline(sandbox) do
+    sandbox.baseline_snapshot
+    |> Enum.into(%{}, fn {relative, hash} -> {Path.join("_build/mut_schema", relative), hash} end)
+    |> Map.merge(source_baseline(sandbox.baseline_source))
+  end
+
+  defp source_baseline(baseline_source) do
+    baseline_source
+    |> Path.join("lib/**/*")
+    |> Path.wildcard(match_dot: true)
+    |> Enum.filter(&File.regular?/1)
+    |> Map.new(fn file ->
+      relative = Path.relative_to(file, baseline_source)
+      {relative, sha256(file)}
+    end)
+  end
+
   defp sha256(path) do
     if File.regular?(path) do
       :sha256
@@ -214,13 +256,6 @@ defmodule Mut.Sandbox do
       |> Base.encode16(case: :lower)
     end
   end
-
-  defp sandbox_file(sandbox, relative), do: Path.join(snapshot_root(sandbox.path), relative)
-
-  defp baseline_file(sandbox, relative),
-    do: Path.join(snapshot_root(sandbox.baseline_source), relative)
-
-  defp snapshot_root(root), do: Path.join(root, "_build/mut_schema")
 
   defp pool_path(run_id), do: Path.expand(Path.join(@sandbox_root, run_id))
 

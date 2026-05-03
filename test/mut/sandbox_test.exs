@@ -16,6 +16,7 @@ defmodule Mut.SandboxTest do
     assert length(paths) == 2
     assert Enum.all?(paths, &File.dir?/1)
     assert Enum.all?(paths, &File.dir?(Path.join(&1, "_build/mut_schema")))
+    assert Enum.all?(paths, &File.exists?(Path.join(&1, "mix.exs")))
 
     assert Enum.all?(
              paths,
@@ -44,7 +45,20 @@ defmodule Mut.SandboxTest do
     Sandbox.destroy_pool(checked_in)
   end
 
-  test "reset restores corrupted baseline files and removes stray files" do
+  test "create_pool fails loudly when sandbox materialization is incomplete" do
+    schema_result = schema_result("bad_materialization")
+    File.rm!(Path.join(schema_result.work_copy_root, "mix.exs"))
+
+    assert {:error, {:missing_mix_exs, path}} =
+             Sandbox.create_pool(schema_result, 1,
+               run_id: "unit-sandbox-bad-materialization",
+               force: true
+             )
+
+    assert path =~ "unit-sandbox-bad-materialization/1"
+  end
+
+  test "reset restores corrupted baseline and source files and removes stray files" do
     schema_result = schema_result("reset")
     {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-reset", force: true)
     {:ok, sandbox, pool} = Sandbox.checkout(pool)
@@ -53,6 +67,8 @@ defmodule Mut.SandboxTest do
       Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")
 
     File.write!(baseline_file, "corrupt")
+    source_file = Path.join(sandbox.path, "lib/arith.ex")
+    File.write!(source_file, "corrupt source")
 
     File.write!(
       Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/stray.beam"),
@@ -61,6 +77,7 @@ defmodule Mut.SandboxTest do
 
     assert :ok = Sandbox.reset(sandbox)
     assert File.read!(baseline_file) == "beam"
+    assert File.read!(source_file) == "defmodule Arith, do: :ok\n"
     refute File.exists?(Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/stray.beam"))
 
     sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
@@ -70,8 +87,10 @@ defmodule Mut.SandboxTest do
     root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
     File.rm_rf!(Path.dirname(root))
     File.mkdir_p!(Path.join(root, "_build/mut_schema/lib/demo_app/ebin"))
+    File.mkdir_p!(Path.join(root, "lib"))
     File.mkdir_p!(Path.join(root, "deps_target"))
     File.write!(Path.join(root, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam"), "beam")
+    File.write!(Path.join(root, "lib/arith.ex"), "defmodule Arith, do: :ok\n")
     File.write!(Path.join(root, "mix.exs"), "mix")
     :ok = File.ln_s(Path.join(root, "deps_target"), Path.join(root, "deps"))
 
