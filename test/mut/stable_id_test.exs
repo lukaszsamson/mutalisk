@@ -32,10 +32,17 @@ defmodule Mut.StableIdTest do
     assert id =~ ~r/\A[0-9a-f]{32}\z/
   end
 
-  test "nil byte offsets fall back to ast path hash and stay stable" do
-    input = %{@input | start_byte: nil, end_byte: nil} |> Map.put(:ast_path_hash, "abc123")
+  test "nil byte offsets fall back to ast path hash and source snippet" do
+    input =
+      @input
+      |> Map.merge(%{start_byte: nil, end_byte: nil})
+      |> Map.put(:ast_path_hash, "abc123")
+      |> Map.put(:original_source, "a + b")
 
     assert Mut.StableId.compute(input) == Mut.StableId.compute(input)
     assert Mut.StableId.compute(input) != Mut.StableId.compute(%{input | ast_path_hash: "def456"})
+
+    assert Mut.StableId.compute(input) !=
+             Mut.StableId.compute(%{input | original_source: "a - b"})
   end
 end

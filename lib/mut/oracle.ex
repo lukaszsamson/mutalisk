@@ -80,6 +80,11 @@ defmodule Mut.Oracle do
      site.resolved_arity}
   end
 
+  @spec sites_at_line?(t, Path.t(), pos_integer) :: boolean
+  def sites_at_line?(%__MODULE__{by_file_line: by_file_line}, file, line) do
+    Map.get(by_file_line, {file, line}, []) != []
+  end
+
   defp ensure_started do
     case Process.whereis(__MODULE__) do
       nil -> {:ok, _pid} = start_link([])

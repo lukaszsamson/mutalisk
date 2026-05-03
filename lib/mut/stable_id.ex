@@ -10,7 +10,8 @@ defmodule Mut.StableId do
           required(:mutator_name) => String.t(),
           required(:original_dispatch) => String.t(),
           required(:mutation_kind) => atom() | String.t(),
-          optional(:ast_path_hash) => String.t() | nil
+          optional(:ast_path_hash) => String.t() | nil,
+          optional(:original_source) => String.t() | nil
         }
 
   @spec compute(Mutant.t() | input_map) :: String.t()
@@ -22,12 +23,13 @@ defmodule Mut.StableId do
       mutator_name: mutant.mutator_name,
       original_dispatch: mutant.original_dispatch || "",
       mutation_kind: mutant.stable_id_kind || mutant.mutation_kind,
-      ast_path_hash: mutant.ast_path_hash
+      ast_path_hash: mutant.ast_path_hash,
+      original_source: mutant.original_source
     })
   end
 
   def compute(input) when is_map(input) do
-    fallback = Map.get(input, :ast_path_hash, "") || ""
+    fallback = fallback_offset(input)
 
     [
       input.relative_file_path,
@@ -43,6 +45,16 @@ defmodule Mut.StableId do
 
   defp offset(nil, fallback), do: fallback
   defp offset(offset, _fallback), do: Integer.to_string(offset)
+
+  defp fallback_offset(input) do
+    [Map.get(input, :ast_path_hash), normalize_source(Map.get(input, :original_source))]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(":")
+  end
+
+  defp normalize_source(nil), do: nil
+
+  defp normalize_source(source), do: source |> String.trim() |> String.replace(~r/\s+/, " ")
 
   defp sha256_128_hex(input) do
     :sha256

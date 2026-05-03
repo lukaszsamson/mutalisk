@@ -346,6 +346,12 @@ The implementation may start conservatively with `[:compile, :struct, :export]` 
   engine: :schema | :fallback,
   mutator: module(),
   mutator_name: String.t(),
+  mutation_kind: atom(),
+  stable_id_kind: String.t() | nil,
+  original_dispatch: String.t(),
+  ast_path_hash: String.t() | nil,
+  start_byte: non_neg_integer() | nil,
+  end_byte: non_neg_integer() | nil,
   file: Path.t(),
   line: pos_integer(),
   column: pos_integer() | nil,
@@ -374,12 +380,14 @@ Mutant IDs must be stable across runs.
 Stable ID input:
 
 ```text
-relative_file_path\0start_byte_offset\0end_byte_offset\0mutator_name\0original_dispatch\0mutation_kind
+relative_file_path\0start_byte_offset\0end_byte_offset\0mutator_name\0original_dispatch\0mutation_discriminator
 ```
 
 Hash with SHA-256 and encode/truncate to a 64-bit or 128-bit stable identifier. The runtime integer ID can be assigned per run from sorted stable IDs, but reports must include the stable ID.
 
-Byte offsets are derived from line/column metadata and source text. If end metadata is missing, include AST path hash and normalized original snippet to avoid collisions.
+`mutation_discriminator` is `mutation_kind` for mutators that emit at most one replacement per site/kind. Mutators that emit multiple replacements for the same site/kind must include a stable replacement discriminator derived from deterministic mutation metadata, such as `arithmetic_op:operator=:+,replacement=:-`.
+
+Byte offsets are derived from line/column metadata and source text. If either byte offset is missing, substitute a deterministic fallback containing the AST path hash and normalized original snippet to avoid collisions.
 
 ## Mutator Behaviour
 

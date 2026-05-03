@@ -8,7 +8,7 @@ defmodule Mut.OrchestratorIntegrationTest do
   @golden Path.expand("test/golden/plan/demo_app_stable_ids.json")
 
   test "demo_app plan matches stable-id golden" do
-    oracle = build_or_load_oracle()
+    assert {:ok, oracle} = Mut.OracleBuild.run(@fixture_root, run_id: "m5-plan-golden")
     plan = Mut.Orchestrator.plan(@fixture_root, oracle)
 
     assert length(plan.schema) == 30
@@ -17,7 +17,7 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert Enum.frequencies_by(plan.skipped, & &1.reason) == %{
              attribute_engine_disabled: 1,
              guard_engine_disabled: 3,
-             missing_oracle_site: 2
+             unsupported_dispatch: 2
            }
 
     stable_ids = plan.schema |> Enum.map(& &1.stable_id) |> Enum.sort()
@@ -28,12 +28,5 @@ defmodule Mut.OrchestratorIntegrationTest do
     end
 
     assert stable_ids == Jason.decode!(File.read!(@golden))
-  end
-
-  defp build_or_load_oracle do
-    case Mut.OracleBuild.run(@fixture_root, run_id: "m5-plan-golden") do
-      {:ok, oracle} -> oracle
-      _error -> Mut.FixtureOracleHelper.golden_oracle()
-    end
   end
 end

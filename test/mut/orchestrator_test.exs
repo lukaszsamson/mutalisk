@@ -47,11 +47,28 @@ defmodule Mut.OrchestratorTest do
     assert skip_reasons(plan) == %{no_applicable_mutator: 2}
   end
 
+  test "oracle-backed unsupported candidates are not reported as missing" do
+    plan =
+      Mut.Orchestrator.plan(@fixture_root, oracle_with_unsupported_site(),
+        files: ["lib/sample.ex"]
+      )
+
+    assert Enum.any?(
+             plan.skipped,
+             &(&1.reason == :unsupported_dispatch and &1.syntactic_name == :+)
+           )
+  end
+
   defp oracle do
     [
       site(7, 7, :+, 2),
       site(7, 11, :+, 2)
     ]
+    |> FixtureOracleHelper.oracle()
+  end
+
+  defp oracle_with_unsupported_site do
+    [site(7, 7, :defadd, 1)]
     |> FixtureOracleHelper.oracle()
   end
 
