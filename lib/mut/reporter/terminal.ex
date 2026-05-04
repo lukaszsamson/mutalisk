@@ -69,7 +69,8 @@ defmodule Mut.Reporter.Terminal do
       "\n\n",
       "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
-      "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n"
+      "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n",
+      phase_block(snapshot)
     ]
   end
 
@@ -161,6 +162,43 @@ defmodule Mut.Reporter.Terminal do
     case schema + fallback do
       0 -> "0.0%"
       total -> format_pct(fallback / total * 100.0)
+    end
+  end
+
+  defp phase_block(%Snapshot{phase_timings: nil}), do: ""
+
+  defp phase_block(%Snapshot{phase_timings: timings}) do
+    phases = [
+      {:oracle_build_ms, "oracle build"},
+      {:baseline_tests_ms, "baseline tests"},
+      {:plan_generation_ms, "plan generation"},
+      {:coverage_collection_ms, "coverage collection"},
+      {:schema_build_ms, "schema build"},
+      {:schema_workers_ms, "schema workers"},
+      {:fallback_workers_ms, "fallback workers"},
+      {:report_writing_ms, "report writing"},
+      {:total_ms, "total"}
+    ]
+
+    rows =
+      phases
+      |> Enum.map(fn {key, label} -> {label, Map.get(timings, key, 0)} end)
+      |> Enum.reject(fn {label, value} -> value == 0 and label != "total" end)
+
+    if rows == [] do
+      ""
+    else
+      width =
+        rows
+        |> Enum.map(fn {_label, value} -> value |> Integer.to_string() |> String.length() end)
+        |> Enum.max()
+
+      [
+        "\nPhases:\n",
+        Enum.map(rows, fn {label, value} ->
+          "  #{String.pad_trailing(label <> ":", 20)} #{String.pad_leading(Integer.to_string(value), width)} ms\n"
+        end)
+      ]
     end
   end
 

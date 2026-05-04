@@ -30,6 +30,8 @@ defmodule Mut.MetricsTest do
            }
 
     assert snapshot.wall_clock_ms == %{schema: 10, fallback: 35, total: 45}
+    assert snapshot.phase_timings.coverage_collection_ms == 0
+    assert is_integer(snapshot.phase_timings.total_ms)
     assert_in_delta snapshot.fallback_count_pct, 66.666, 0.001
     assert snapshot.rollback_per_file == %{"lib/a.ex" => 2}
     assert snapshot.test_selection_fanout == %{"a" => 2, "b" => 2, "c" => 2}
@@ -59,7 +61,25 @@ defmodule Mut.MetricsTest do
     first = Metrics.snapshot(metrics)
     second = Metrics.snapshot(metrics)
 
-    assert first == second
+    assert %{first | phase_timings: %{first.phase_timings | total_ms: 0}} ==
+             %{second | phase_timings: %{second.phase_timings | total_ms: 0}}
+  end
+
+  test "with_phase records elapsed milliseconds" do
+    {:ok, metrics} = Metrics.start_link([])
+
+    Metrics.with_phase(metrics, :oracle_build, fn -> Process.sleep(50) end)
+
+    snapshot = Metrics.snapshot(metrics)
+    assert snapshot.phase_timings.oracle_build_ms in 40..90
+  end
+
+  test "ending a phase without a start records zero" do
+    {:ok, metrics} = Metrics.start_link([])
+
+    assert :ok = Metrics.end_phase(metrics, :schema_build)
+
+    assert Metrics.snapshot(metrics).phase_timings.schema_build_ms == 0
   end
 
   defp result(status, duration_ms) do

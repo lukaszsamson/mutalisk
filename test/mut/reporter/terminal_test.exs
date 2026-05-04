@@ -76,6 +76,17 @@ defmodule Mut.Reporter.TerminalTest do
         fallback_count_pct: 50.0,
         skipped_by_reason: %{unsupported_dispatch: 1},
         invalid_by_mutator: %{Mut.Reporter.TerminalTest => 1},
+        phase_timings: %{
+          oracle_build_ms: 1000,
+          baseline_tests_ms: 2000,
+          plan_generation_ms: 300,
+          coverage_collection_ms: 0,
+          schema_build_ms: 4000,
+          schema_workers_ms: 5000,
+          fallback_workers_ms: 6000,
+          report_writing_ms: 70,
+          total_ms: 18_370
+        },
         score: 50.0
       )
       |> Terminal.render_summary()
@@ -99,6 +110,16 @@ defmodule Mut.Reporter.TerminalTest do
            Run time: 10.0s
            Fallback wall-clock: 70.0% of total
            Fallback mutants: 50.0% of executed
+
+           Phases:
+             oracle build:         1000 ms
+             baseline tests:       2000 ms
+             plan generation:       300 ms
+             schema build:         4000 ms
+             schema workers:       5000 ms
+             fallback workers:     6000 ms
+             report writing:         70 ms
+             total:               18370 ms
            """
   end
 
@@ -115,6 +136,7 @@ defmodule Mut.Reporter.TerminalTest do
       invalid_by_mutator: Keyword.get(opts, :invalid_by_mutator, %{}),
       skipped_by_reason: Keyword.get(opts, :skipped_by_reason, %{}),
       test_selection_fanout: %{},
+      phase_timings: Keyword.get(opts, :phase_timings, %{}),
       ledger: entries
     }
   end

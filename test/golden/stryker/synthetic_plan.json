@@ -179,6 +179,17 @@
       "stable-survived": "arithmetic_op",
       "stable-timeout": "arithmetic_op"
     },
+    "phase_timings": {
+      "baseline_tests_ms": 2000,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 6000,
+      "oracle_build_ms": 1000,
+      "plan_generation_ms": 300,
+      "report_writing_ms": 70,
+      "schema_build_ms": 4000,
+      "schema_workers_ms": 5000,
+      "total_ms": 18370
+    },
     "stable_id_to_integer": {
       "stable-error": 4,
       "stable-invalid": 6,

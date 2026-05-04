@@ -103,6 +103,7 @@ defmodule Mut.Reporter.StrykerJson do
           planned_mutant = Map.get(by_stable_id, mutant.stable_id, mutant)
           {mutant.stable_id, atom_string(planned_mutant.mutation_kind)}
         end),
+      "phase_timings" => stringify_keys(snapshot.phase_timings || %{}),
       "metrics" => metrics_extension(snapshot)
     }
   end
@@ -127,6 +128,8 @@ defmodule Mut.Reporter.StrykerJson do
   defp atom_keyed_counts(counts) do
     Map.new(counts, fn {key, count} -> {atom_string(key) || inspect(key), count} end)
   end
+
+  defp stringify_keys(map), do: Map.new(map, fn {key, value} -> {Atom.to_string(key), value} end)
 
   defp replacement(%Mutant{source_patch: %{replacement: replacement}})
        when is_binary(replacement) do

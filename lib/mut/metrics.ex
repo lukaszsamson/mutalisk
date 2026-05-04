@@ -21,6 +21,7 @@ defmodule Mut.Metrics do
       :invalid_by_mutator,
       :skipped_by_reason,
       :test_selection_fanout,
+      :phase_timings,
       :ledger
     ]
 
@@ -61,9 +62,21 @@ defmodule Mut.Metrics do
             invalid_by_mutator: %{module() => pos_integer()},
             skipped_by_reason: %{atom() => pos_integer()},
             test_selection_fanout: %{String.t() => non_neg_integer()},
+            phase_timings: %{atom() => non_neg_integer()},
             ledger: [ledger_entry()]
           }
   end
+
+  @phases [
+    :oracle_build,
+    :baseline_tests,
+    :plan_generation,
+    :coverage_collection,
+    :schema_build,
+    :schema_workers,
+    :fallback_workers,
+    :report_writing
+  ]
 
   @type state :: %{
           planned_total: non_neg_integer() | nil,
@@ -74,6 +87,10 @@ defmodule Mut.Metrics do
           invalid_by_mutator: map(),
           skipped_by_reason: map(),
           test_selection_fanout: map(),
+          phase_starts: map(),
+          phase_timings: map(),
+          phase_warnings: [term()],
+          started_ms: integer(),
           ledger: [Snapshot.ledger_entry()]
         }
 
@@ -111,6 +128,27 @@ defmodule Mut.Metrics do
     GenServer.cast(pid, {:record_compile_rollback, file, removed_count})
   end
 
+  @spec start_phase(GenServer.server(), phase_name :: atom) :: :ok
+  def start_phase(pid, phase) when is_atom(phase) do
+    GenServer.cast(pid, {:start_phase, phase, monotonic_ms()})
+  end
+
+  @spec end_phase(GenServer.server(), phase_name :: atom) :: :ok
+  def end_phase(pid, phase) when is_atom(phase) do
+    GenServer.cast(pid, {:end_phase, phase, monotonic_ms()})
+  end
+
+  @spec with_phase(GenServer.server(), phase_name :: atom, fun :: (-> any)) :: any
+  def with_phase(pid, phase, fun) when is_function(fun, 0) and is_atom(phase) do
+    start_phase(pid, phase)
+
+    try do
+      fun.()
+    after
+      end_phase(pid, phase)
+    end
+  end
+
   @spec snapshot(pid :: GenServer.server()) :: Snapshot.t()
   def snapshot(pid), do: GenServer.call(pid, :snapshot)
 
@@ -126,6 +164,10 @@ defmodule Mut.Metrics do
        invalid_by_mutator: %{},
        skipped_by_reason: %{},
        test_selection_fanout: %{},
+       phase_starts: %{},
+       phase_timings: %{},
+       phase_warnings: [],
+       started_ms: monotonic_ms(),
        ledger: []
      }}
   end
@@ -174,6 +216,31 @@ defmodule Mut.Metrics do
 
   def handle_cast({:record_compile_rollback, file, removed_count}, state) do
     {:noreply, increment_map(state, :rollback_per_file, file, removed_count)}
+  end
+
+  def handle_cast({:start_phase, phase, started_ms}, state) do
+    warning =
+      if Map.has_key?(state.phase_starts, phase), do: {:phase_restarted, phase}, else: nil
+
+    {:noreply,
+     state
+     |> put_in([:phase_starts, phase], started_ms)
+     |> maybe_prepend_phase_warning(warning)}
+  end
+
+  def handle_cast({:end_phase, phase, ended_ms}, state) do
+    case Map.fetch(state.phase_starts, phase) do
+      {:ok, started_ms} ->
+        duration_ms = max(ended_ms - started_ms, 0)
+
+        {:noreply,
+         state
+         |> put_in([:phase_timings, phase], duration_ms)
+         |> update_in([:phase_starts], &Map.delete(&1, phase))}
+
+      :error ->
+        {:noreply, put_in(state, [:phase_timings, phase], 0)}
+    end
   end
 
   @impl GenServer
@@ -228,8 +295,18 @@ defmodule Mut.Metrics do
       invalid_by_mutator: state.invalid_by_mutator,
       skipped_by_reason: state.skipped_by_reason,
       test_selection_fanout: state.test_selection_fanout,
+      phase_timings: phase_timings(state),
       ledger: ledger
     }
+  end
+
+  defp phase_timings(state) do
+    base =
+      Map.new(@phases, fn phase ->
+        {:"#{phase}_ms", Map.get(state.phase_timings, phase, 0)}
+      end)
+
+    Map.put(base, :total_ms, max(monotonic_ms() - state.started_ms, 0))
   end
 
   defp score(0, 0), do: 100.0
@@ -273,4 +350,11 @@ defmodule Mut.Metrics do
   defp increment_map(state, field, key, amount) do
     update_in(state[field], &Map.update(&1, key, amount, fn count -> count + amount end))
   end
+
+  defp maybe_prepend_phase_warning(state, nil), do: state
+
+  defp maybe_prepend_phase_warning(state, warning),
+    do: update_in(state.phase_warnings, &[warning | &1])
+
+  defp monotonic_ms, do: :erlang.monotonic_time(:millisecond)
 end

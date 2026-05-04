@@ -72,24 +72,36 @@ defmodule Mix.Tasks.Mut do
     mutalisk_root = @mutalisk_root
     run_id = run_id()
     started = System.monotonic_time(:millisecond)
+    {:ok, metrics_pid} = Metrics.start_link([])
 
     try do
       {:ok, oracle} =
-        File.cd!(mutalisk_root, fn ->
-          Mut.OracleBuild.run(target_root, run_id: run_id, force: true, keep: true)
+        Metrics.with_phase(metrics_pid, :oracle_build, fn ->
+          File.cd!(mutalisk_root, fn ->
+            Mut.OracleBuild.run(target_root, run_id: run_id, force: true, keep: true)
+          end)
         end)
 
       work_copy = Path.join([mutalisk_root, "tmp", "mut_work", run_id])
-      baseline_tests!(work_copy, mutalisk_root)
 
-      plan = build_plan(work_copy, oracle, opts)
+      Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
+        baseline_tests!(work_copy, mutalisk_root)
+      end)
+
+      plan =
+        Metrics.with_phase(metrics_pid, :plan_generation, fn ->
+          build_plan(work_copy, oracle, opts)
+        end)
+
+      Metrics.with_phase(metrics_pid, :coverage_collection, fn -> :ok end)
+
       plan = maybe_limit_plan(plan, opts.max_mutants)
 
       if opts.debug_plan do
         Mut.Plan.dump_json(plan, Path.join(target_root, "plan.debug.json"))
       else
         File.cd!(mutalisk_root, fn ->
-          execute_plan(plan, target_root, run_id, opts, started)
+          execute_plan(plan, target_root, run_id, opts, started, metrics_pid)
         end)
       end
     after
@@ -97,22 +109,23 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp execute_plan(plan, target_root, run_id, opts, started) do
+  defp execute_plan(plan, target_root, run_id, opts, started, metrics_pid) do
     IO.puts("Schema build starting")
 
     {:ok, schema_result} =
-      Mut.SchemaBuild.build(plan,
-        user_project_root: target_root,
-        run_id: "#{run_id}-schema",
-        force: true,
-        keep: true
-      )
+      Metrics.with_phase(metrics_pid, :schema_build, fn ->
+        Mut.SchemaBuild.build(plan,
+          user_project_root: target_root,
+          run_id: "#{run_id}-schema",
+          force: true,
+          keep: true
+        )
+      end)
 
     IO.puts("Schema build complete")
 
     {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: run_id, force: true)
 
-    {:ok, metrics_pid} = Metrics.start_link([])
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
     {snapshot, final_pool} =
@@ -133,29 +146,39 @@ defmodule Mix.Tasks.Mut do
         stream? = :terminal in opts.reporters
 
         pool =
-          run_schema_mutants(
-            pool,
-            schema_result.plan,
-            selection,
-            all_test_files,
-            source_root,
-            metrics_pid,
-            stream?
-          )
+          Metrics.with_phase(metrics_pid, :schema_workers, fn ->
+            run_schema_mutants(
+              pool,
+              schema_result.plan,
+              selection,
+              all_test_files,
+              source_root,
+              metrics_pid,
+              stream?
+            )
+          end)
 
         final_pool =
-          run_fallback_mutants(
-            pool,
-            schema_result.plan,
-            selection,
-            all_test_files,
-            source_root,
-            metrics_pid,
-            stream?
-          )
+          Metrics.with_phase(metrics_pid, :fallback_workers, fn ->
+            run_fallback_mutants(
+              pool,
+              schema_result.plan,
+              selection,
+              all_test_files,
+              source_root,
+              metrics_pid,
+              stream?
+            )
+          end)
 
-        snapshot = Metrics.snapshot(metrics_pid)
-        render_reports(snapshot, schema_result.plan, source_root, target_root, opts)
+        snapshot =
+          render_reports_with_timing(
+            metrics_pid,
+            schema_result.plan,
+            source_root,
+            target_root,
+            opts
+          )
 
         {snapshot, final_pool}
       after
@@ -291,15 +314,37 @@ defmodule Mix.Tasks.Mut do
     end
 
     if :stryker_json in opts.reporters do
-      rendered =
-        StrykerJson.render(snapshot, plan, source_loader(work_copy),
-          thresholds: thresholds(opts.fail_at)
-        )
+      write_stryker_report(snapshot, plan, work_copy, host_root, opts)
+    end
+  end
 
-      case StrykerJson.validate(rendered) do
-        :ok -> StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
-        {:error, violations} -> Mix.raise("invalid Stryker JSON: #{inspect(violations)}")
-      end
+  defp render_reports_with_timing(metrics_pid, plan, work_copy, host_root, opts) do
+    Metrics.start_phase(metrics_pid, :report_writing)
+    snapshot = Metrics.snapshot(metrics_pid)
+
+    if :terminal in opts.reporters do
+      _iodata = Terminal.render_summary(snapshot)
+    end
+
+    if :stryker_json in opts.reporters do
+      write_stryker_report(snapshot, plan, work_copy, host_root, opts)
+    end
+
+    Metrics.end_phase(metrics_pid, :report_writing)
+    snapshot = Metrics.snapshot(metrics_pid)
+    render_reports(snapshot, plan, work_copy, host_root, opts)
+    snapshot
+  end
+
+  defp write_stryker_report(snapshot, plan, work_copy, host_root, opts) do
+    rendered =
+      StrykerJson.render(snapshot, plan, source_loader(work_copy),
+        thresholds: thresholds(opts.fail_at)
+      )
+
+    case StrykerJson.validate(rendered) do
+      :ok -> StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
+      {:error, violations} -> Mix.raise("invalid Stryker JSON: #{inspect(violations)}")
     end
   end
 

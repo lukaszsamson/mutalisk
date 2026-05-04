@@ -53,6 +53,17 @@ defmodule Mut.Reporter.StrykerJsonGoldenTest do
       invalid_by_mutator: %{__MODULE__ => 1},
       skipped_by_reason: %{unsupported_dispatch: 1},
       test_selection_fanout: Map.new(mutants, &{&1.stable_id, length(&1.covering_tests || [])}),
+      phase_timings: %{
+        oracle_build_ms: 1000,
+        baseline_tests_ms: 2000,
+        plan_generation_ms: 300,
+        coverage_collection_ms: 0,
+        schema_build_ms: 4000,
+        schema_workers_ms: 5000,
+        fallback_workers_ms: 6000,
+        report_writing_ms: 70,
+        total_ms: 18_370
+      },
       ledger: Enum.map(mutants, &entry/1)
     }
 
