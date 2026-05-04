@@ -1,5 +1,16 @@
 defmodule Mut.ChildProcess do
-  @moduledoc "Runs child processes with bounded output retention."
+  @moduledoc """
+  Runs child processes with bounded output retention.
+
+  ## Options
+
+    * `:max_output_bytes` - cap retained in-memory output (default 256_000).
+    * `:log_path` - if set, every chunk of stdout/stderr is appended to that
+      file as it arrives. The in-memory buffer is still maintained (bounded by
+      `:max_output_bytes`) so callers using the return value's `output` keep
+      working — this is observability layered on top of the existing API.
+    * `:timeout_ms`, `:cd`, `:env` - as before.
+  """
 
   @default_max_output_bytes 256_000
 
@@ -14,8 +25,14 @@ defmodule Mut.ChildProcess do
         {:error, {:executable_not_found, executable}}
 
       path ->
-        port = open_port(path, args, opts)
-        collect(port, init_state(opts), Keyword.get(opts, :timeout_ms, :infinity))
+        log_io = open_log(Keyword.get(opts, :log_path))
+
+        try do
+          port = open_port(path, args, opts)
+          collect(port, init_state(opts, log_io), Keyword.get(opts, :timeout_ms, :infinity))
+        after
+          close_log(log_io)
+        end
     end
   end
 
@@ -57,11 +74,12 @@ defmodule Mut.ChildProcess do
     Enum.map(env, fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)
   end
 
-  defp init_state(opts) do
+  defp init_state(opts, log_io) do
     %{
       output: "",
       bytes: 0,
-      max_bytes: Keyword.get(opts, :max_output_bytes, @default_max_output_bytes)
+      max_bytes: Keyword.get(opts, :max_output_bytes, @default_max_output_bytes),
+      log_io: log_io
     }
   end
 
@@ -79,11 +97,37 @@ defmodule Mut.ChildProcess do
     end
   end
 
-  defp append_output(%{max_bytes: max_bytes} = state, data) do
+  defp append_output(%{max_bytes: max_bytes, log_io: log_io} = state, data) do
+    write_log(log_io, data)
     bytes = state.bytes + byte_size(data)
     output = state.output <> data
 
     %{state | bytes: bytes, output: trim_output(output, max_bytes)}
+  end
+
+  defp open_log(nil), do: nil
+
+  defp open_log(path) when is_binary(path) do
+    File.mkdir_p!(Path.dirname(path))
+
+    case File.open(path, [:write, :binary, :raw]) do
+      {:ok, io} -> io
+      {:error, _reason} -> nil
+    end
+  end
+
+  defp write_log(nil, _data), do: :ok
+
+  defp write_log(io, data) do
+    _ = :file.write(io, data)
+    :ok
+  end
+
+  defp close_log(nil), do: :ok
+
+  defp close_log(io) do
+    _ = File.close(io)
+    :ok
   end
 
   defp trim_output(output, max_bytes) when byte_size(output) <= max_bytes, do: output

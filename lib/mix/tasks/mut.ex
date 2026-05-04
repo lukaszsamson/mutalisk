@@ -25,6 +25,8 @@ defmodule Mix.Tasks.Mut do
                                any mutant runs
     --selection MODE         Test selection mode: static (default), coverage,
                                coverage_with_static_fallback
+    --keep-work-copy         Skip cleanup of tmp/mut_work/<run_id>/ on exit
+                               (debug aid; default: false)
 
   Configuration via `config :mut`:
 
@@ -81,6 +83,12 @@ defmodule Mix.Tasks.Mut do
     started = System.monotonic_time(:millisecond)
     {:ok, metrics_pid} = Metrics.start_link([])
 
+    watchdog_pid =
+      case Mut.MemoryWatchdog.start(Path.join([mutalisk_root, "tmp", "mut_memory.log"])) do
+        {:ok, pid} -> pid
+        _ -> nil
+      end
+
     try do
       {:ok, oracle} =
         Metrics.with_phase(metrics_pid, :oracle_build, fn ->
@@ -124,7 +132,16 @@ defmodule Mix.Tasks.Mut do
         end)
       end
     after
-      File.rm_rf!(Path.join([mutalisk_root, "tmp", "mut_work", run_id]))
+      if watchdog_pid, do: Mut.MemoryWatchdog.stop(watchdog_pid)
+
+      if opts.keep_work_copy do
+        IO.puts(
+          :stderr,
+          "[mutalisk] --keep-work-copy: retaining #{Path.join([mutalisk_root, "tmp", "mut_work", run_id])}"
+        )
+      else
+        File.rm_rf!(Path.join([mutalisk_root, "tmp", "mut_work", run_id]))
+      end
     end
   end
 
@@ -218,7 +235,14 @@ defmodule Mix.Tasks.Mut do
 
         {snapshot, final_pool}
       after
-        File.rm_rf!(schema_result.work_copy_root)
+        if opts.keep_work_copy do
+          IO.puts(
+            :stderr,
+            "[mutalisk] --keep-work-copy: retaining #{schema_result.work_copy_root}"
+          )
+        else
+          File.rm_rf!(schema_result.work_copy_root)
+        end
       end
 
     Sandbox.destroy_pool(final_pool)
@@ -244,19 +268,31 @@ defmodule Mix.Tasks.Mut do
       {"MUTALISK_PATH", host_root}
     ]
 
+    log_path = Path.join([host_root, "tmp", "mut_baseline.log"])
+
     case Mut.ChildProcess.run("mix", ["test", "--no-deps-check", "--no-archives-check"],
            cd: work_copy,
            env: env,
-           max_output_bytes: 512_000
+           max_output_bytes: 512_000,
+           log_path: log_path
          ) do
       {:exit, 0, _output} ->
         :ok
 
       {:exit, _exit_code, output} ->
-        Mix.raise("baseline tests failed; aborting mutation run\n\n#{output_tail(output)}")
+        Mix.raise(
+          "baseline tests failed; aborting mutation run (full log: #{log_path})\n\n#{output_tail(output)}"
+        )
 
       {:error, reason} ->
-        Mix.raise("baseline tests failed; aborting mutation run\n\n#{inspect(reason)}")
+        Mix.raise(
+          "baseline tests failed; aborting mutation run (full log: #{log_path})\n\n#{inspect(reason)}"
+        )
+
+      {:timeout, output} ->
+        Mix.raise(
+          "baseline tests timed out; aborting mutation run (full log: #{log_path})\n\n#{output_tail(output)}"
+        )
     end
   end
 

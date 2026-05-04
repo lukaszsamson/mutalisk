@@ -17,7 +17,8 @@ defmodule Mut.Cli do
             max_mutants: pos_integer | nil,
             debug_plan: boolean,
             selection: atom,
-            test_paths: [String.t()]
+            test_paths: [String.t()],
+            keep_work_copy: boolean
           }
 
     defstruct [
@@ -31,7 +32,8 @@ defmodule Mut.Cli do
       :max_mutants,
       :debug_plan,
       :selection,
-      :test_paths
+      :test_paths,
+      :keep_work_copy
     ]
   end
 
@@ -94,7 +96,8 @@ defmodule Mut.Cli do
           concurrency: :integer,
           max_mutants: :integer,
           selection: :string,
-          debug_plan: :boolean
+          debug_plan: :boolean,
+          keep_work_copy: :boolean
         ],
         aliases: []
       )
@@ -138,7 +141,8 @@ defmodule Mut.Cli do
          max_mutants: max_mutants,
          debug_plan: Keyword.get(parsed, :debug_plan, false),
          selection: selection,
-         test_paths: test_paths
+         test_paths: test_paths,
+         keep_work_copy: Keyword.get(parsed, :keep_work_copy, false)
        }}
     end
   end
