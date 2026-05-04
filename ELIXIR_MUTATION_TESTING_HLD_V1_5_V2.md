@@ -17,14 +17,19 @@ v1.5 and v2 should build on that foundation without changing the core execution 
 
 ### Goal
 
-Replace static dependency-only test selection with coverage-informed selection so each mutant runs the smallest safe subset of tests.
+Make v1 practical on medium-sized libraries by reducing per-mutant test work via coverage-informed selection. v1.5 does not improve kill rate (kill rate is a function of the user's test suite, not mutalisk); it reduces wall-clock by narrowing the test set per mutant.
+
+The acceptance signal: Decimal-class projects either complete within a documented time budget OR coverage selection demonstrably reduces per-mutant test fanout by ≥10× and identifies the next bottleneck. v1's plug_crypto smoke validates the perf-neutral floor; v1.5's smoke validates the medium-project ceiling.
 
 ### Non-Goals
 
 - Do not change schema/fallback execution mechanics.
+- Do not change stable_id input shape — coverage data must NOT enter mutant identity.
 - Do not mutate literals or patterns yet.
 - Do not build the v2 env walker.
 - Do not require compiler patches.
+- Do not introduce persistent incremental history (in-run last-killer is fine; cross-run state is v2).
+- Do not turn on parallel workers. v1.5 stays sequential. If coverage alone fails to move Decimal materially, scope reopens — but parallelism is not pre-committed.
 
 ### Core Idea
 
@@ -48,10 +53,22 @@ Mutant execution uses this priority order:
 
 Selected tests are ordered by:
 
-1. Previously killing test from history, if available.
+1. **In-run** last-killer for the same module if available (per-run only, in-memory; NO persistent history in v1.5).
 2. Convention match such as `FooTest` for `Foo`.
 3. Shortest baseline runtime first.
 4. Stable path/name ordering for determinism.
+
+### Selection Modes
+
+v1.5 introduces a `--selection` CLI flag with three values:
+
+- `static` (DEFAULT in first v1.5 release): v1 behavior unchanged. Coverage collection does not run. Acts as escape hatch and validates the non-regression path.
+- `coverage_with_static_fallback`: collect coverage; if collection wall-clock exceeds 2× baseline test wall-clock, log a warning and fall back to `static` for the remainder of the run.
+- `coverage`: collect coverage; if collection is pathological, fail visibly with a clear error. Does NOT silently downgrade — users in this mode want to know when coverage isn't working.
+
+After v1.5 validates on real projects, a follow-up release flips the default to `coverage_with_static_fallback`. Shipping coverage-as-default in the first v1.5 release would mask edge-case bugs as silent fallbacks.
+
+The mode is reported in every run's metrics and terminal output; users always know which selection ran.
 
 ### Coverage Collection Options
 
@@ -94,48 +111,40 @@ Cons:
 - Async test execution complicates attribution.
 - `:cover` instrumentation can perturb performance and code loading.
 
-#### Option C: Hybrid
+#### Option C: Hybrid (deferred)
 
-Start with per-test-file or per-test-module `:cover`, then introduce source probes only for hot/ambiguous files.
-
-Pros:
-
-- Lower v1.5 implementation risk.
-- Better precision can be added incrementally.
-
-Cons:
-
-- Two mechanisms to maintain.
+Start with per-test-file/module `:cover`, then introduce source probes for hot/ambiguous files. **Source probes are NOT in v1.5.** v1.5 ships Option B exclusively. Option C is a v2 path if v1.5 fanout proves insufficient.
 
 ### Recommendation
 
-Use Option C.
-
-v1.5 baseline implementation:
+**v1.5 ships Option B exclusively.**
 
 - Run coverage per test file or per test module, not per individual test case.
-- Disable ExUnit async during coverage collection for deterministic attribution.
-- Store line and function coverage.
-- Use static dependency selection as a safety fallback.
-
-v1.5 optional enhancement:
-
-- Add mutation-site probes for projects where line-level coverage creates too much fanout.
+- Disable ExUnit `async: true` ONLY during coverage collection (set via `ExUnit.start(async: false)` in the coverage baseline run). Mutant runs preserve normal user config.
+- Store line and function coverage in `Mut.CoverageOracle`.
+- Use static dependency selection as a safety fallback in the `coverage_with_static_fallback` mode.
+- "Exact line coverage" is concretely defined: `:cover.analyse(:coverage, :line)` reports the test executed the line where the mutant lives. Function-level fallback uses the enclosing function's line range.
+- Coverage is recollected on every `mix mut` invocation. No caching, no disk-persisted oracle. v2 may add caching when stability is proven.
 
 ### Architecture Changes
 
 New components:
 
-- `Mut.Coverage.Runner`: runs baseline coverage collection in isolated build path.
-- `Mut.Coverage.Parser`: normalizes `:cover` or probe results into `CoverageOracle`.
-- `Mut.TestSelector`: combines coverage, static dependencies, naming conventions, and runtime ordering.
-- `Mut.TestRuntime`: records baseline test runtime by test file/module.
+- `Mut.Coverage.Runner`: runs baseline coverage collection in isolated build path under `_build/mut_coverage`.
+- `Mut.Coverage.Parser`: normalizes `:cover.analyse/2` results into `CoverageOracle`.
+- `Mut.TestSelection.Coverage`: extends the v1 `Mut.TestSelection` facade with coverage-based selection. Static remains as the underlying safety mechanism.
+- `Mut.TestRuntime`: records baseline test runtime by test file/module for ordering.
+- `Mut.LastKiller`: in-run, per-module last-killing-test cache (process-local; not persisted).
 
 Existing components changed:
 
-- `Mut.Runner` accepts ordered test IDs rather than raw test paths.
-- `Mut.Reporter` includes selection metrics.
-- `Mut.History` can store last killing test even before full incremental mode exists.
+- `Mut.Worker` accepts an ordered list of test IDs from the selector rather than a raw test_files list.
+- `Mut.Reporter.Terminal` and `Mut.Reporter.StrykerJson` include selection metrics and phase timings.
+- `Mut.Metrics` gains structured phase timings and the selection metrics block.
+- `Mix.Tasks.Mut` parses `--selection` and threads the mode through the pipeline.
+- `Mut.Application` does NOT change — runtime gate behavior is unchanged.
+
+No `Mut.History` module in v1.5. Persistent cross-run state is v2.
 
 ### Build Paths
 
@@ -187,16 +196,30 @@ v1.5 may use only `:file` and `:module` test IDs. `:case` is reserved for later.
 
 ### Metrics
 
-v1.5 must report:
+v1.5 introduces two new metric blocks.
 
-- Average selected tests per mutant.
-- Median selected tests per mutant.
-- Percent of mutants selected by exact line coverage.
-- Percent selected by function coverage.
-- Percent falling back to static dependency selection.
-- Percent falling back to all tests.
-- Coverage collection wall-clock.
-- Mutation execution wall-clock saved versus static-only estimate.
+**Selection metrics** (per run):
+
+- `coverage_match_distribution`: histogram of `[:exact_line, :enclosing_function, :static_fallback, :all_tests]` — counts per bucket across all mutants.
+- `fallback_reason_distribution`: histogram of reasons coverage was NOT used (e.g., `:no_coverage_data, :coverage_pathological, :static_only_mode`).
+- `selected_tests_avg`: average tests-per-mutant across the run.
+- `selected_tests_median`: median tests-per-mutant.
+- `coverage_collection_wall_ms`: wall-clock spent in baseline coverage run.
+- `selection_mode`: the actual mode that ran (`:static`, `:coverage`, `:coverage_with_static_fallback`, `:downgraded_to_static`).
+
+**Phase timing metrics** (per run, in `Mut.Metrics.Snapshot`):
+
+- `oracle_build_ms`
+- `baseline_tests_ms`
+- `plan_generation_ms`
+- `coverage_collection_ms` (zero for static mode)
+- `schema_build_ms`
+- `schema_workers_ms`
+- `fallback_workers_ms`
+- `report_writing_ms`
+- `total_ms`
+
+These appear in the Stryker JSON's `mutalisk` extension key and in the terminal summary. "Estimated wall-clock saved versus static" is NOT a metric — speculative comparisons mislead users.
 
 ### Risks
 
@@ -206,11 +229,18 @@ v1.5 must report:
 
 ### Acceptance Criteria
 
-- Coverage collection runs in isolated build path.
-- Test selection never silently drops to an empty set unless the mutant is marked `:no_coverage`.
-- Static selection remains a safety fallback.
-- Mutation results stay deterministic with the same seed/config.
-- Reports include coverage-selection metrics.
+- All v1 `bin/verify` layers remain green.
+- Coverage collection runs only in isolated `_build/mut_coverage`; the user's `_build/test` is never written.
+- Test selection never silently drops to an empty set unless the mutant is explicitly marked `:no_coverage`.
+- Static selection remains available as `--selection static` and is the safety fallback in `coverage_with_static_fallback` mode.
+- `--selection coverage` does NOT silently downgrade — it fails or continues visibly.
+- Demo_app fixture mutation outcomes remain stable (same kill/survived counts as v1).
+- Stable IDs are byte-identical to v1 for the same plan; coverage data does not enter ID computation.
+- plug_crypto smoke run still produces zero `:error`-status mutants.
+- **Decimal acceptance**: completes within a documented budget (target: ≤30 minutes) OR coverage selection demonstrably reduces per-mutant test fanout by ≥10× and the v1.5 BENCHMARKS clearly identifies the next blocking bottleneck. Soft failure on this acceptance is permitted but must be honestly documented.
+- Reports include phase timings AND selection metrics AND the active `selection_mode`.
+- No new mutator surface is introduced.
+- No persistent state is introduced (`tmp/`, in-memory only).
 
 ## v2 HLD: Lean Env Walker And Broader Mutators
 
@@ -432,13 +462,24 @@ v2 must report:
 
 ## Milestone Split
 
-### v1.5
+### v1.5 (two milestones)
 
-- Coverage oracle.
-- Coverage-aware test selection.
-- Baseline runtime ordering.
-- Selection metrics.
-- Optional last-killing-test prioritization.
+**M15 — Coverage Infrastructure And Phase Timing**
+- Phase timings added to `Mut.Metrics` and reported in terminal + Stryker JSON.
+- `_build/mut_coverage` build-path role added to the Build-Path Contract.
+- Baseline test runner under `:cover` (per file/module), `async: false` during collection only.
+- Normalized line/function coverage in `Mut.CoverageOracle`.
+- No caching: recollect every run.
+- Stable IDs unchanged.
+- Coverage writes only to isolated build path; user `_build/test` untouched.
+
+**M16 — Coverage Selector And Smoke**
+- `--selection static|coverage|coverage_with_static_fallback` CLI flag (default `static`).
+- Selector priority chain: exact line → enclosing function → static → all tests.
+- In-run last-killer prioritization by module (NO persistent history).
+- Selection metrics + selection mode reported.
+- Smoke run on plug_crypto + Decimal retry; BENCHMARKS update.
+- Acceptance per criteria above.
 
 ### v2
 
@@ -451,8 +492,14 @@ v2 must report:
 
 ## Open Questions
 
-- Should v1.5 coverage attribution target test files/modules only, or should we invest directly in per-test-case attribution?
-- Should source probes replace `:cover` if `:cover` produces too much fanout?
+Resolved in v1.5 scope:
+
+- ~~Should v1.5 coverage attribution target test files/modules only, or per-test-case?~~ Files/modules only in v1.5; case-level deferred.
+- ~~Should source probes replace `:cover` if `:cover` produces too much fanout?~~ `:cover` only in v1.5 (Option B); source probes deferred to v2 if needed.
+
+Open for v2:
+
 - Should v2 literal atom mutations be disabled by default to avoid atom-table and semantic-noise risks?
 - Should pattern mutators ship as opt-in experimental only?
 - Should persistent history be v2 or v2.1, after coverage selection proves stable?
+- If v1.5 Decimal acceptance fails (coverage doesn't move the needle), does parallel-worker execution become a v1.6 milestone or fold into v2?
