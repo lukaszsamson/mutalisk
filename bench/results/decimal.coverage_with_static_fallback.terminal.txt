@@ -2,7 +2,7 @@ target=decimal repo=https://github.com/ericmj/decimal.git ref=v2.1.1 sha=12f2776
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.016s
+Resolution completed in 0.013s
 New:
   jason 1.4.4
 Unchanged:

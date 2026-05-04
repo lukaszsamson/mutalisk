@@ -14,9 +14,10 @@ defmodule Mut.Recompile do
     files = Enum.uniq(mutated_files ++ dependent_files)
     args = ["mut.recompile", "--no-deps-check", "--no-archives-check", "--app", app | files]
 
-    case System.cmd("mix", args, cd: sandbox.path, env: env(), stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {output, code} -> {:error, {:recompile_failed, code, output}}
+    case Mut.ChildProcess.run("mix", args, cd: sandbox.path, env: env()) do
+      {:exit, 0, _output} -> :ok
+      {:exit, code, output} -> {:error, {:recompile_failed, code, output}}
+      {:error, reason} -> {:error, reason}
     end
   end
 

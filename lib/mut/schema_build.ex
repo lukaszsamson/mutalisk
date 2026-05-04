@@ -182,17 +182,18 @@ defmodule Mut.SchemaBuild do
   end
 
   defp run_child_mix(work_copy, args) do
-    case System.cmd("mix", args, cd: work_copy, env: child_env(), stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {output, exit_code} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+    case Mut.ChildProcess.run("mix", args, cd: work_copy, env: child_env()) do
+      {:exit, 0, _output} -> :ok
+      {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+      {:error, reason} -> {:error, reason}
     end
   end
 
   defp compile(work_copy) do
-    {output, exit_code} =
-      System.cmd("mix", @compile_args, cd: work_copy, env: child_env(), stderr_to_stdout: true)
-
-    {:compile, output, exit_code}
+    case Mut.ChildProcess.run("mix", @compile_args, cd: work_copy, env: child_env()) do
+      {:exit, exit_code, output} -> {:compile, output, exit_code}
+      {:error, reason} -> {:compile, inspect(reason), 1}
+    end
   end
 
   defp maybe_remove_work_copy(work_copy, opts, result) do
@@ -240,12 +241,7 @@ defmodule Mut.SchemaBuild do
     |> Base.encode16(case: :lower)
   end
 
-  defp output_tail(output) do
-    output
-    |> String.split("\n")
-    |> Enum.take(-80)
-    |> Enum.join("\n")
-  end
+  defp output_tail(output), do: Mut.ChildProcess.output_tail(output)
 
   defp run_id do
     random = :crypto.strong_rand_bytes(4) |> Base.url_encode64(padding: false)

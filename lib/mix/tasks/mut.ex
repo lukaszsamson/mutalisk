@@ -236,21 +236,27 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp baseline_tests!(work_copy, host_root) do
-    {output, exit_code} =
-      System.cmd("mix", ["test", "--no-deps-check", "--no-archives-check"],
-        cd: work_copy,
-        env: [
-          {"MIX_ENV", "test"},
-          {"MIX_BUILD_PATH", "_build/mut_oracle"},
-          {"MIX_DEPS_PATH", "_build/mut_oracle/deps"},
-          {"MUTALISK_ROLE", "schema"},
-          {"MUTALISK_PATH", host_root}
-        ],
-        stderr_to_stdout: true
-      )
+    env = [
+      {"MIX_ENV", "test"},
+      {"MIX_BUILD_PATH", "_build/mut_oracle"},
+      {"MIX_DEPS_PATH", "_build/mut_oracle/deps"},
+      {"MUTALISK_ROLE", "schema"},
+      {"MUTALISK_PATH", host_root}
+    ]
 
-    if exit_code != 0 do
-      Mix.raise("baseline tests failed; aborting mutation run\n\n#{output_tail(output)}")
+    case Mut.ChildProcess.run("mix", ["test", "--no-deps-check", "--no-archives-check"],
+           cd: work_copy,
+           env: env,
+           max_output_bytes: 512_000
+         ) do
+      {:exit, 0, _output} ->
+        :ok
+
+      {:exit, _exit_code, output} ->
+        Mix.raise("baseline tests failed; aborting mutation run\n\n#{output_tail(output)}")
+
+      {:error, reason} ->
+        Mix.raise("baseline tests failed; aborting mutation run\n\n#{inspect(reason)}")
     end
   end
 
@@ -688,12 +694,7 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp output_tail(output) do
-    output
-    |> String.split("\n")
-    |> Enum.take(-80)
-    |> Enum.join("\n")
-  end
+  defp output_tail(output), do: Mut.ChildProcess.output_tail(output)
 
   defp elapsed(started), do: System.monotonic_time(:millisecond) - started
 

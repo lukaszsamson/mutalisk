@@ -135,7 +135,7 @@ Coverage mode matched static outcomes exactly. Fanout improved by 1.31x on plug_
 - Phase breakdown: unavailable; terminal output reached target compile completion but no Mutalisk phase summary was emitted.
 - Coverage match distribution: unavailable.
 - Per-mutant fanout reduction estimate: unavailable.
-- Identified next bottleneck: baseline/oracle-side execution for Decimal exceeds the 30-minute smoke budget before coverage collection or mutation workers can emit metrics. A bootstrap bug exposed by the first Decimal retry was fixed by changing the generated overlay to capture the user Mix project module in a module attribute instead of `Application` env; the second retry progressed past that failure and then hit the time budget.
+- Identified next bottleneck: Decimal-class runs exposed two robustness gaps before selection performance could be measured. First, the generated overlay used `Application` env to hand off the user Mix project module; that was fixed by capturing the module in a generated module attribute. Second, rerunning Decimal before memory-bounded child-output handling caused host OOM risk, with the terminal process observed near 120GB. Long-running Mix child output is now retained as bounded diagnostic tails, but Decimal was not rerun again in this benchmark after the OOM event.
 
 ### Acceptance evaluation
 - ☐ Decimal completes within 30-minute budget
@@ -144,4 +144,4 @@ Coverage mode matched static outcomes exactly. Fanout improved by 1.31x on plug_
 - ✓ plug_crypto outcomes unchanged in static mode
 - ✓ plug_crypto outcomes match within ±1 mutant in coverage mode
 
-v1.5 acceptance is soft-failed for Decimal because the run did not reach mutation execution and did not produce fanout data. The next decision is a v1.6 execution milestone focused on reducing baseline/oracle wall-clock and then re-measuring coverage fanout on Decimal.
+v1.5 acceptance is soft-failed for Decimal because the run did not reach mutation execution and did not produce fanout data. Decimal should be retried only with memory monitoring enabled; the next decision is a v1.6 execution milestone focused on proving bounded child-process memory, reducing baseline/oracle wall-clock, and then re-measuring coverage fanout on Decimal.

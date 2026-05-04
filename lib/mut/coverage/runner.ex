@@ -90,9 +90,10 @@ defmodule Mut.Coverage.Runner do
   defp compile(root, mutalisk_path), do: run_mix(root, ["compile"], mutalisk_path)
 
   defp run_mix(root, args, mutalisk_path) do
-    case System.cmd("mix", args, cd: root, env: child_env(mutalisk_path), stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {output, exit_code} -> {:error, {:mix_failed, args, exit_code, output_tail(output)}}
+    case Mut.ChildProcess.run("mix", args, cd: root, env: child_env(mutalisk_path)) do
+      {:exit, 0, _output} -> :ok
+      {:exit, exit_code, output} -> {:error, {:mix_failed, args, exit_code, output_tail(output)}}
+      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -127,18 +128,14 @@ defmodule Mut.Coverage.Runner do
 
   defp run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
     with {:ok, mix_path} <- mix_path() do
-      port =
-        Port.open({:spawn_executable, mix_path}, [
-          {:args,
-           ["run", "--no-compile", "--no-deps-check", "--no-archives-check", "-e", script]},
-          {:cd, root},
-          {:env, port_env(mutalisk_path)},
-          :stderr_to_stdout,
-          :exit_status,
-          :binary
-        ])
-
-      collect_port(port, "", timeout_ms)
+      Mut.ChildProcess.run(
+        mix_path,
+        ["run", "--no-compile", "--no-deps-check", "--no-archives-check", "-e", script],
+        cd: root,
+        env: child_env(mutalisk_path),
+        timeout_ms: timeout_ms,
+        max_output_bytes: 512_000
+      )
     end
   end
 
@@ -233,12 +230,6 @@ defmodule Mut.Coverage.Runner do
     ]
   end
 
-  defp port_env(mutalisk_path) do
-    Enum.map(child_env(mutalisk_path), fn {key, value} ->
-      {String.to_charlist(key), String.to_charlist(value)}
-    end)
-  end
-
   defp mix_path do
     case System.find_executable("mix") do
       nil -> {:error, :mix_not_found}
@@ -246,81 +237,7 @@ defmodule Mut.Coverage.Runner do
     end
   end
 
-  defp collect_port(port, output, timeout_ms) do
-    receive do
-      {^port, {:data, data}} -> collect_port(port, output <> data, timeout_ms)
-      {^port, {:exit_status, code}} -> {:exit, code, output}
-    after
-      timeout_ms ->
-        kill_port(port)
-        {:timeout, output}
-    end
-  end
-
-  defp kill_port(port) do
-    os_pid = Port.info(port, :os_pid)
-    Port.close(port)
-
-    case os_pid do
-      {:os_pid, pid} when is_integer(pid) ->
-        kill_process_tree(pid)
-
-      _unknown ->
-        :ok
-    end
-  catch
-    _kind, _reason -> :ok
-  end
-
-  defp kill_process_tree(pid) do
-    descendants = descendant_pids(pid)
-
-    Enum.each(descendants, fn child_pid ->
-      System.cmd("kill", ["-TERM", Integer.to_string(child_pid)], stderr_to_stdout: true)
-    end)
-
-    System.cmd("kill", ["-TERM", Integer.to_string(pid)], stderr_to_stdout: true)
-    Process.sleep(100)
-
-    Enum.each(descendants, fn child_pid ->
-      System.cmd("kill", ["-KILL", Integer.to_string(child_pid)], stderr_to_stdout: true)
-    end)
-
-    System.cmd("kill", ["-KILL", Integer.to_string(pid)], stderr_to_stdout: true)
-    :ok
-  end
-
-  defp descendant_pids(pid) do
-    pid
-    |> child_pids()
-    |> Enum.flat_map(fn child_pid -> [child_pid | descendant_pids(child_pid)] end)
-  end
-
-  defp child_pids(pid) do
-    case System.cmd("pgrep", ["-P", Integer.to_string(pid)], stderr_to_stdout: true) do
-      {output, 0} ->
-        output
-        |> String.split("\n", trim: true)
-        |> Enum.flat_map(&parse_pid/1)
-
-      _no_children ->
-        []
-    end
-  end
-
-  defp parse_pid(value) do
-    case Integer.parse(value) do
-      {child_pid, ""} -> [child_pid]
-      _invalid -> []
-    end
-  end
-
-  defp output_tail(output) do
-    output
-    |> String.split("\n")
-    |> Enum.take(-80)
-    |> Enum.join("\n")
-  end
+  defp output_tail(output), do: Mut.ChildProcess.output_tail(output)
 
   defp monotonic_ms, do: :erlang.monotonic_time(:millisecond)
 end

@@ -40,9 +40,10 @@ defmodule Mut.OracleBuild do
   end
 
   defp run_child_mix(work_copy, args) do
-    case System.cmd("mix", args, cd: work_copy, env: child_env(), stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {output, exit_code} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+    case Mut.ChildProcess.run("mix", args, cd: work_copy, env: child_env()) do
+      {:exit, 0, _output} -> :ok
+      {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -56,12 +57,7 @@ defmodule Mut.OracleBuild do
     ]
   end
 
-  defp output_tail(output) do
-    output
-    |> String.split("\n")
-    |> Enum.take(-80)
-    |> Enum.join("\n")
-  end
+  defp output_tail(output), do: Mut.ChildProcess.output_tail(output)
 
   defp maybe_remove_work_copy(_work_copy, true), do: :ok
 

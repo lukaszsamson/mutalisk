@@ -21,6 +21,7 @@ defmodule Mut.Worker do
   end
 
   @default_timeout_ms 60_000
+  @max_output_bytes 512_000
 
   @spec run_schema(Sandbox.t(), non_neg_integer, [String.t()], keyword) :: Result.t()
   def run_schema(%Sandbox{} = sandbox, mutant_id, test_files, opts \\ [])
@@ -74,7 +75,7 @@ defmodule Mut.Worker do
           %Result{
             status: :invalid,
             duration_ms: elapsed(started),
-            raw_output: output || inspect(reason)
+            raw_output: recompile_output(output, reason)
           }
 
         {:error, reason} ->
@@ -143,14 +144,7 @@ defmodule Mut.Worker do
     case mix_path(opts) do
       {:ok, mix_path} ->
         port =
-          Port.open({:spawn_executable, mix_path}, [
-            {:args, args(test_files)},
-            {:cd, sandbox.path},
-            {:env, port_env(mutant_id)},
-            :stderr_to_stdout,
-            :exit_status,
-            :binary
-          ])
+          open_mix_port(mix_path, args(test_files), sandbox.path, env(mutant_id))
 
         port
         |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
@@ -165,14 +159,7 @@ defmodule Mut.Worker do
     case mix_path(opts) do
       {:ok, mix_path} ->
         port =
-          Port.open({:spawn_executable, mix_path}, [
-            {:args, args(test_files)},
-            {:cd, sandbox.path},
-            {:env, fallback_port_env()},
-            :stderr_to_stdout,
-            :exit_status,
-            :binary
-          ])
+          open_mix_port(mix_path, args(test_files), sandbox.path, fallback_env())
 
         port
         |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
@@ -198,6 +185,9 @@ defmodule Mut.Worker do
 
   defp app(opts), do: Keyword.get(opts, :app, "demo_app")
 
+  defp recompile_output("", reason), do: inspect(reason)
+  defp recompile_output(output, _reason), do: output
+
   defp dep_kinds(_mutant), do: [:compile, :struct, :export]
 
   defp dependent_modules(%Mutant{module: nil}), do: []
@@ -218,13 +208,7 @@ defmodule Mut.Worker do
     end
   end
 
-  defp port_env(mutant_id) do
-    Enum.map(env(mutant_id), fn {key, value} ->
-      {String.to_charlist(key), String.to_charlist(value)}
-    end)
-  end
-
-  defp fallback_port_env do
+  defp fallback_env do
     [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_schema"},
@@ -233,17 +217,42 @@ defmodule Mut.Worker do
       {"MUTALISK_PATH", Path.expand(File.cwd!())},
       {"MUT_ACTIVE", "0"}
     ]
-    |> Enum.map(fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)
+  end
+
+  defp open_mix_port(mix_path, args, cd, env) do
+    Port.open({:spawn_executable, mix_path}, [
+      {:args, args},
+      {:cd, cd},
+      {:env,
+       Enum.map(env, fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)},
+      :stderr_to_stdout,
+      :exit_status,
+      :binary
+    ])
   end
 
   defp collect(port, output, timeout_ms) do
     receive do
-      {^port, {:data, data}} -> collect(port, output <> data, timeout_ms)
+      {^port, {:data, data}} -> collect(port, bounded_output(output, data), timeout_ms)
       {^port, {:exit_status, code}} -> {:exit, code, output}
     after
       timeout_ms ->
         kill_port(port)
         {:timeout, output}
+    end
+  end
+
+  defp bounded_output(output, data) do
+    combined = output <> data
+
+    if byte_size(combined) <= @max_output_bytes do
+      combined
+    else
+      marker =
+        "\n...[mutalisk worker output truncated; retaining last #{@max_output_bytes} bytes]...\n"
+
+      keep_bytes = @max_output_bytes - byte_size(marker)
+      marker <> binary_part(combined, byte_size(combined), -keep_bytes)
     end
   end
 

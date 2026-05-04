@@ -87,14 +87,10 @@ defmodule Mut.CompileRollback do
   end
 
   defp compile_and_loop(state) do
-    {output, exit_code} =
-      System.cmd("mix", state.compile_args,
-        cd: state.work_copy_root,
-        env: state.env,
-        stderr_to_stdout: true
-      )
-
-    loop(state, output, exit_code)
+    case Mut.ChildProcess.run("mix", state.compile_args, cd: state.work_copy_root, env: state.env) do
+      {:exit, exit_code, output} -> loop(state, output, exit_code)
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   defp success(state) do
