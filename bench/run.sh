@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TARGET="decimal"
+TARGET="plug_crypto"
 
 usage() {
   printf 'usage: bench/run.sh [--target decimal|plug_crypto]\n' >&2

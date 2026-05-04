@@ -11,7 +11,7 @@
 - Choice: fallback target. The primary decimal URL in the prompt was unavailable; the maintained decimal repo (`https://github.com/ericmj/decimal.git`) at v2.1.1 reached baseline test execution but did not complete within a 60-minute harness timeout, so M14 used the smaller documented fallback target.
 
 ### Configuration
-- Mutalisk version: `c13f03c3ab707371d53da543014614a973b6c357` plus M14 working tree fixes
+- Mutalisk version: `1a819a8` (M14 landed commit containing the benchmark runner, results, and fixes)
 - Elixir version: Elixir 1.20.0-rc.4 (`3cfb19f`)
 - OTP version: Erlang/OTP 28 (`erts-16.2`)
 - Mutators: default v1 set (`Arithmetic`, `ComparisonBoundary`, `ComparisonNegation`, `Boolean`, `UnaryNot`, `GuardComparisonBoundary`, `GuardComparisonNegation`, `GuardTypeTest`)
@@ -71,9 +71,13 @@ Target: zero invalid mutants on a real codebase.
 ### Known limitations on real code
 - v1 terminal metrics do not expose oracle build, plan generation, schema build, or reporting wall-clock as independent values; only worker wall-clock and total run time are reported.
 - Static test selection selected 2-3 test files per mutant for plug_crypto. There is no coverage-based reduction in v1.
-- Decimal v2.1.1 was not used as the reference run because baseline test execution exceeded the local 60-minute bench timeout; this is documented as a performance/target-suite limitation, not a v1 feature change.
+- The 471 skipped candidates outnumber the 64 executable mutants because v1 intentionally allowlists a narrow dispatch set; most plug_crypto dispatches are unsupported crypto/runtime calls.
+- Decimal v2.1.1 was not used as the reference run because baseline test execution exceeded the local 60-minute bench timeout. This is the largest empirical M14 signal: small libraries are viable today, medium libraries are borderline, and larger libraries/applications need v2 execution improvements.
+- plug_crypto's schema score is low (50.0%) while fallback guard score is high (81.0%). This is useful signal rather than a Mutalisk failure: crypto code and its tests leave many arithmetic/schema mutations surviving, while guard predicate mutations are easier for the suite to kill.
 
 ### v1.5 / v2 candidates surfaced
 - Add explicit phase timing metrics for oracle, plan, schema build, schema workers, fallback workers, and reporting.
+- Enable and validate parallel worker execution; M8 already has a sandbox pool, and decimal showed sequential v1 is the bottleneck.
+- Add coverage-based test selection; decimal's suite references `Decimal` broadly, making static module-reference selection effectively a no-op.
 - Consider wrapper-schemata for fallback guard mutants; fallback took 28.3% of total wall-clock on the reference run.
-- Consider coverage-based selection for real projects once the static 2-3 file fanout is not selective enough.
+- Add an opt-in skipped-candidate report grouped by module/reason so users can decide whether future allowlist expansion is worth it.
