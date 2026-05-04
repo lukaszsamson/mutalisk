@@ -52,6 +52,7 @@ There are exactly four roles for build directories. Every command that compiles 
 |---|---|---|---|---|
 | Oracle build | `test` | `_build/mut_oracle` | `_build/mut_oracle/deps` | Tracer-instrumented compile; produces oracle JSONL + baseline beams |
 | Baseline test run | `test` | `_build/mut_oracle` | `_build/mut_oracle/deps` | Pre-mutation green-baseline check; reuses the oracle build |
+| Coverage build | `test` | `_build/mut_coverage` | `_build/mut_coverage/deps` | Tracer-coverage compile + baseline test run; produces line/function coverage oracle. |
 | Schema build | `test` | `_build/mut_schema` | `_build/mut_schema/deps` | Compiles schema-instrumented sources; produces beams used by all workers |
 | Worker test run (schema) | `test` | `_build/mut_schema` | `_build/mut_schema/deps` | `mix test --no-compile` only; `MUT_ACTIVE` env var selects mutant |
 | Fallback recompile | `test` | `_build/mut_schema` (per-sandbox copy) | `_build/mut_schema/deps` (per-sandbox copy) | Targeted recompile inside sandbox before its `mix test --no-compile` |
@@ -578,3 +579,198 @@ The orchestrator must:
 - In-process ExUnit reruns (never).
 - Function-call deletion mutator (deferred until false-positive profile is understood).
 - Return-value replacement mutator (deferred until concrete variants are pinned in SPEC).
+
+---
+
+# v1.5 Milestones
+
+v1.5's stated goal is making v1 practical on medium libraries by reducing per-mutant test work. v1.5 does NOT improve kill rate (kill rate is a function of the user's test suite); it reduces wall-clock by narrowing the per-mutant test set and exposes phase timings.
+
+The acceptance signal is Decimal: either it completes within a documented budget OR coverage selection demonstrably reduces per-mutant test fanout by ≥10× and v1.5's BENCHMARKS identifies the next blocking bottleneck.
+
+v1.5 is two milestones (M15 and M16). Each ships as an independently reviewable increment. M15 alone is useful (phase timing answers questions today); M16 lights up the actual perf win.
+
+## M15 — Coverage infrastructure + phase timing
+
+**Goal:** Add the coverage data path and phase-timing instrumentation. M15 ships ALL the measurement plumbing v1.5 needs without yet changing test selection. After M15, runs are no faster but are far more observable.
+
+**Inputs:** `ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md` v1.5 sections; v1's `Mut.Metrics`, `Mut.WorkCopy`, `Mut.OracleBuild`, `Mut.SchemaBuild`, `Mut.Worker`, `Mut.Reporter.Terminal`, `Mut.Reporter.StrykerJson`.
+
+**Deliverables:**
+
+- **Build-Path Contract update.** Add a new role row:
+  - `Coverage build` | `MIX_ENV=test` | `MIX_BUILD_PATH=_build/mut_coverage` | `MIX_DEPS_PATH=_build/mut_coverage/deps` | `MUTALISK_ROLE=coverage` | "Baseline test run under `:cover`; produces line/function coverage oracle."
+  Update PLAN's Build-Path Contract table.
+
+- **`Mut.Coverage.Runner`**: drives a baseline test run under `:cover` in an isolated working copy. Per-test-file/module attribution (NOT per-case). `async: false` set in the coverage run only. Captures `:cover.analyse(:coverage, :line)` and `:cover.analyse(:coverage, :function)` output.
+
+  Signature: `run(work_copy_root, opts) :: {:ok, %Mut.CoverageOracle{}} | {:error, term}`. Implementation shells `mix test --no-deps-check --no-archives-check` with the `MIX_BUILD_PATH` override and a `MUTALISK_COVERAGE=1` env var that triggers the coverage-mode test_helper changes.
+
+- **`Mut.Coverage.Parser`**: normalizes `:cover` output into:
+  ```elixir
+  %Mut.CoverageOracle{
+    by_line: %{{file, line} => MapSet.t(test_id)},
+    by_function: %{{module, fun, arity} => MapSet.t(test_id)},
+    test_runtime_ms: %{test_id => non_neg_integer()},
+    fallback_static_tests: %{module => [test_id]}
+  }
+  ```
+  `test_id` is a `{:file | :module, path_or_module}` tagged tuple per HLD §Data Model. Per-case (`:case`) reserved for v2.
+
+- **`Mut.TestRuntime`**: records per-test-file/module baseline runtime in milliseconds during the coverage run. Sourced from the JSONL output of `Mut.Worker.Formatter` (already emits per-test-finished durations in M8).
+
+- **Phase timing in `Mut.Metrics`.** Extend `%Mut.Metrics.Snapshot{}` with:
+  ```elixir
+  %{phase_timings: %{
+      oracle_build_ms: ms,
+      baseline_tests_ms: ms,
+      plan_generation_ms: ms,
+      coverage_collection_ms: ms,  # 0 in static mode
+      schema_build_ms: ms,
+      schema_workers_ms: ms,
+      fallback_workers_ms: ms,
+      report_writing_ms: ms,
+      total_ms: ms
+    }}
+  ```
+  Use `:os.system_time(:millisecond)` (monotonic) for measurement.
+
+- **Reporter updates.**
+  - `Mut.Reporter.Terminal.render_summary/1` displays a phase-timings block at the bottom: `oracle 1.2s | baseline 4.8s | plan 0.1s | coverage 0.0s | schema 6.4s | schema workers 18.0s | fallback workers 41.0s | report 0.1s | total 71.7s`.
+  - `Mut.Reporter.StrykerJson.render/4` includes `phase_timings` in the `mutalisk` extension key.
+  - Both updates are golden-tested (synthetic snapshot with known timings).
+
+- **Mix task wiring.** `Mix.Tasks.Mut` records phase entries via the new `Mut.Metrics.start_phase/2 + end_phase/2` (or equivalent) helpers around each pipeline phase. M15 does NOT yet collect coverage in `mix mut` (coverage is opt-in starting in M16); the `coverage_collection_ms` field stays at zero.
+
+- **`Mut.Coverage.Runner` standalone test.** A unit test runs the coverage runner against demo_app and asserts the oracle has by_line entries for known fixture lines (e.g., `lib/arith.ex:5` is hit by `arith_test.exs`).
+
+**Verification gate:** `bin/verify` exits 0 with all 8 v1 layers green. No new layer added; M15 reuses `unit` for coverage-runner tests, `golden_oracle` for the synthetic phase-timing JSON golden, and the existing integration layers (which exercise the phase-timing path).
+
+**Out of scope for M15:**
+
+- Coverage-aware test selection (M16).
+- The `--selection` CLI flag (M16).
+- Decimal smoke run (M16).
+- Persistent caching of the coverage oracle.
+- Per-test-case attribution.
+
+**Subagent brief:**
+
+The risk concentration is `:cover` interaction with the schema build. M15's coverage runner runs against the ORIGINAL user source (not the schema-instrumented source) — `:cover` and the schema's `case` injection do not coexist cleanly. Coverage run uses its own `_build/mut_coverage` build path; schema run uses `_build/mut_schema`. Two builds, two cover-or-not states, no overlap.
+
+Pre-implementation: in a tmp working copy, manually run `MIX_ENV=test MIX_BUILD_PATH=_build/test_cover mix test --cover` to confirm `:cover` works against demo_app's lib/. If it fails or interacts badly with the path-dep mutalisk, resolve before writing the runner.
+
+Phase timing is the cheap deliverable. Land that first; it doesn't depend on coverage at all.
+
+**Recommended commit pacing:** 3 commits.
+
+1. Phase timings in `Mut.Metrics` + reporter updates + golden updates.
+2. Build-Path Contract update + `Mut.Coverage.Runner` + `Mut.Coverage.Parser` + `%Mut.CoverageOracle{}`.
+3. Standalone coverage-runner integration test against demo_app.
+
+---
+
+## M16 — Coverage-aware selector + smoke run
+
+**Goal:** Wire coverage-aware test selection into `mix mut`, ship the `--selection` CLI flag, run the v1.5 smoke benchmark on plug_crypto + Decimal, update `BENCHMARKS.md`. M16 is where the perf win lights up.
+
+**Inputs:** `ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md` v1.5 sections; M15's `Mut.CoverageOracle` and phase timings; v1's `Mut.TestSelection.Static`, `Mut.Worker`, `Mix.Tasks.Mut`.
+
+**Deliverables:**
+
+- **`Mut.TestSelection.Coverage`**: extends the v1 facade. `for_plan(plan, oracle, opts)` returns `%{stable_id => [test_id]}`. Selection priority chain per HLD §Core Idea:
+  1. Exact line: `oracle.by_line[{file, line}]` returns ≥ 1 test.
+  2. Enclosing function: `oracle.by_function[{module, fun, arity}]` returns ≥ 1 test.
+  3. Static dependency selection (existing M9 path).
+  4. All tests as final safety fallback.
+
+  Each mutant gets a tagged result: `{:exact_line | :enclosing_function | :static_fallback | :all_tests, [test_id]}`. The tag drives the `coverage_match_distribution` metric.
+
+- **Test ordering** within a selected set:
+  1. In-run last-killer for the same module if present (see `Mut.LastKiller` below).
+  2. Convention match (e.g., `FooTest` for `Foo`).
+  3. Shortest baseline runtime first (from `Mut.TestRuntime`).
+  4. Stable path/name ordering for determinism.
+
+- **`Mut.LastKiller`**: a tiny in-run, in-memory cache. `record_kill(module, test_id)`; `lookup(module) :: test_id | nil`. Process-local (Agent or `:persistent_term` namespaced to the current run). NOT persisted between runs.
+
+- **`Mix.Tasks.Mut` CLI extension**:
+  - New `--selection MODE` flag accepting `static | coverage | coverage_with_static_fallback`.
+  - Default: `static`. (Coverage modes are opt-in for the first v1.5 release. A follow-up may flip the default.)
+  - Mode is reported in terminal output ("Selection mode: coverage_with_static_fallback") and in the JSON's `mutalisk` extension key.
+
+- **Mode-specific fallback policy** (HLD §Selection Modes):
+  - `static`: skip M15's coverage runner entirely; `coverage_collection_ms = 0`.
+  - `coverage_with_static_fallback`: run coverage; if `coverage_collection_ms > 2 * baseline_tests_ms`, log a warning, set `selection_mode: :downgraded_to_static` in metrics, fall back for the remainder of the run.
+  - `coverage`: run coverage; if collection is pathological (same threshold), FAIL with a clear error referencing the mode and timing. Does NOT silently downgrade.
+
+- **Selection metrics** in `Mut.Metrics.Snapshot`:
+  ```elixir
+  %{selection: %{
+      mode: :static | :coverage | :coverage_with_static_fallback | :downgraded_to_static,
+      coverage_match_distribution: %{
+        exact_line: count, enclosing_function: count,
+        static_fallback: count, all_tests: count
+      },
+      fallback_reason_distribution: %{atom => count},
+      selected_tests_avg: float,
+      selected_tests_median: pos_integer,
+      coverage_collection_wall_ms: ms
+    }}
+  ```
+
+- **Reporter updates**:
+  - Terminal: add a "Selection:" section showing the mode + match distribution + average fanout.
+  - Stryker JSON: add `selection` block to the `mutalisk` extension key.
+  - Synthetic golden updated to cover the new fields.
+
+- **Smoke run**: extend `bench/run.sh` to support `--selection coverage` runs. Re-run plug_crypto AND retry Decimal under `coverage_with_static_fallback`. Update `BENCHMARKS.md` with:
+  - Side-by-side comparison of v1 vs v1.5 numbers per target (wall-clock, average fanout, mode).
+  - Decimal completion outcome (success with timing, OR documented bottleneck after coverage).
+  - Phase-timing breakdown for both targets.
+
+- **Non-regression on demo_app**: the existing e2e test runs in `static` mode by default (unchanged). Add a parallel e2e run in `coverage_with_static_fallback` mode asserting same kill/survive outcomes (33 mutants, ~21-23 killed) but reduced fanout per the new selection metrics.
+
+**Verification gate:** `bin/verify` exits 0 with all 8 v1 layers green PLUS the new e2e_mut variant for coverage mode. The smoke benchmark on plug_crypto produces zero `:error`-status mutants. Decimal acceptance per the criterion (completion within budget OR ≥10× fanout reduction with documented next bottleneck).
+
+**Out of scope for M16:**
+
+- Per-test-case coverage attribution.
+- Persistent cross-run history.
+- Parallel worker execution.
+- Source probes (Option C from HLD).
+- Coverage-driven kill prediction or any heuristic beyond the documented priority chain.
+- Modifying the schema or fallback engines.
+
+**Subagent brief:**
+
+This milestone has two distinct risk surfaces: (a) selection correctness — wrong narrowing produces silent false-survivor or false-kill drift — and (b) Decimal acceptance — there's no guarantee coverage alone moves Decimal under the budget.
+
+For (a): the demo_app non-regression e2e (same outcomes in coverage mode as static mode) is the primary correctness test. Run it BEFORE the smoke benchmark; if outcomes drift, the selector has a bug. The selection priority chain's correctness is testable in unit tests with constructed oracles.
+
+For (b): the smoke is informational, not gating. If Decimal doesn't fit under coverage_with_static_fallback within 30 minutes, document the actual time + the next bottleneck (e.g., "schema build dominates because Decimal has 30 lib files; schema build takes 18 minutes alone"). That's an honest report; v1.5 still ships if (a) is correct and the metrics are valuable. Failure on (b) escalates to the orchestrator (you), who decides whether v1.5 widens to include a M17 (parallel workers) or ships as-is and v1.6 picks up.
+
+The `coverage` (strict) mode's failure path is important: when collection is pathological, the error message must say "coverage collection took Xs vs baseline Ys; 2× threshold exceeded; rerun with --selection coverage_with_static_fallback or static." Users in strict mode chose to fail loudly; respect that.
+
+**Recommended commit pacing:** 4 commits.
+
+1. `Mut.TestSelection.Coverage` + selector priority chain + unit tests with constructed oracles.
+2. `Mut.LastKiller` + test-ordering integration in the selector.
+3. `--selection` CLI flag + mode wiring through `Mix.Tasks.Mut` + selection metrics + reporter updates + golden updates.
+4. Bench script extension + smoke runs + `BENCHMARKS.md` update.
+
+---
+
+# Out of scope for v1.5 (do not let it sneak in)
+
+- Per-test-case coverage attribution.
+- Source probes (mutation-site coverage instrumentation).
+- Persistent incremental history (cross-run reuse).
+- Parallel worker execution.
+- Coverage caching between runs.
+- Any new mutator (literal, pattern, variable, function-call deletion, return-value replacement).
+- Env walker (M5's syntactic walker stays unchanged).
+- Wrapper guard schemata.
+- Coverage data entering stable_id input.
+
+If coverage selection on Decimal proves insufficient, parallel workers are reconsidered as a v1.6 standalone milestone — NOT folded into v1.5 mid-milestone.

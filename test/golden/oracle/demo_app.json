@@ -741,6 +741,30 @@
   {
     "file": "lib/bool.ex",
     "line": 5,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Bool",
+    "function": [
+      "strict?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "error",
+    "resolved_arity": 1,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        5
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 5,
     "column": 7,
     "end_line": null,
     "end_column": null,
@@ -865,6 +889,294 @@
       [
         "column",
         7
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "=:=",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "=:=",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "=:=",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "=:=",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "=:=",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "=:=",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "orelse",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "orelse",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "erlang",
+    "resolved_name": "orelse",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "in",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "in",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
+      ]
+    ]
+  },
+  {
+    "file": "lib/bool.ex",
+    "line": 9,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": "guard",
+    "module": "Elixir.Bool",
+    "function": [
+      "loose?",
+      2
+    ],
+    "dispatch_kind": "remote_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "in",
+    "resolved_arity": 2,
+    "event_file": "lib/bool.ex",
+    "meta": [
+      [
+        "line",
+        9
       ]
     ]
   },

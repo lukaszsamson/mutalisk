@@ -1,7 +1,7 @@
 defmodule Mut.MixManifest do
   @moduledoc "Reads pinned Mix Elixir compiler manifests for fallback recompilation."
 
-  @manifest_vsn 34
+  @supported_manifest_versions [29, 34]
 
   defstruct version: nil, modules: %{}, sources: %{}
 
@@ -31,10 +31,10 @@ defmodule Mut.MixManifest do
 
   @spec version_assertion(term) :: :ok
   def version_assertion(
-        {@manifest_vsn, modules, sources, _exports, _parents, _cache_key, _cwd, _deps_config,
+        {version, modules, sources, _exports, _parents, _cache_key, _cwd, _deps_config,
          _project_mtime, _config_mtime, _protocols_and_impls}
       )
-      when is_map(modules) and is_map(sources),
+      when version in @supported_manifest_versions and is_map(modules) and is_map(sources),
       do: :ok
 
   def version_assertion(term) do
@@ -42,7 +42,7 @@ defmodule Mut.MixManifest do
 
     raise ArgumentError,
           "unsupported Mix Elixir manifest shape/version #{inspect(version)}; " <>
-            "Mut.MixManifest is pinned to Elixir 1.20-rc.4 manifest version #{@manifest_vsn}"
+            "Mut.MixManifest supports manifest versions #{inspect(@supported_manifest_versions)}"
   end
 
   @spec dependents(t, [module], [dep_kind]) :: MapSet.t(Path.t())
@@ -75,11 +75,11 @@ defmodule Mut.MixManifest do
   defp parse(term) do
     :ok = version_assertion(term)
 
-    {@manifest_vsn, module_records, source_records, _exports, _parents, _cache_key, _cwd,
-     _deps_config, _project_mtime, _config_mtime, _protocols_and_impls} = term
+    {version, module_records, source_records, _exports, _parents, _cache_key, _cwd, _deps_config,
+     _project_mtime, _config_mtime, _protocols_and_impls} = term
 
     %__MODULE__{
-      version: @manifest_vsn,
+      version: version,
       modules: module_sources(module_records),
       sources: sources(source_records)
     }

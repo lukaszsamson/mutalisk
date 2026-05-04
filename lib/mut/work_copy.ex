@@ -26,7 +26,7 @@ defmodule Mut.WorkCopy do
   end
 
   @spec install_overlay(Path.t(), Overlay.role()) :: :ok | {:error, term}
-  def install_overlay(work_copy, role) when role in [:oracle, :schema] do
+  def install_overlay(work_copy, role) when role in [:oracle, :schema, :coverage] do
     case Overlay.materialize(work_copy, role) do
       {:error, {:already_installed, _path}} ->
         raise RuntimeError, "overlay already installed: #{work_copy}"

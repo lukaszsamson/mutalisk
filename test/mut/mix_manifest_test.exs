@@ -9,7 +9,7 @@ defmodule Mut.MixManifestTest do
     manifest_path = real_manifest_path()
 
     assert {:ok, %MixManifest{} = manifest} = MixManifest.read(manifest_path)
-    assert manifest.version == 34
+    assert manifest.version in [29, 34]
     assert manifest.modules[Guards] == "lib/guards.ex"
     assert manifest.sources["lib/guards.ex"].compile_deps == [Module, Kernel]
 
@@ -20,7 +20,7 @@ defmodule Mut.MixManifestTest do
   end
 
   test "version_assertion raises clearly on unknown shape" do
-    assert_raise ArgumentError, ~r/pinned to Elixir 1\.20-rc\.4 manifest version 34/, fn ->
+    assert_raise ArgumentError, ~r/supports manifest versions \[29, 34\]/, fn ->
       MixManifest.version_assertion({33, %{}, %{}})
     end
   end
@@ -33,7 +33,7 @@ defmodule Mut.MixManifestTest do
     File.write!(path, :erlang.term_to_binary({33, %{}, %{}}))
 
     assert {:error, {ArgumentError, message}} = MixManifest.read(path)
-    assert message =~ "manifest version 34"
+    assert message =~ "manifest versions [29, 34]"
   end
 
   test "dependents traverses compile deps transitively and direct export/struct deps only" do

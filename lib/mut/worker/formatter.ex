@@ -22,7 +22,7 @@ defmodule Mut.Worker.Formatter do
 
   @impl GenServer
   def handle_cast({:test_started, %ExUnit.Test{} = test}, state) do
-    emit(%{event: "test_started", module: inspect(test.module), test: test.description})
+    emit(%{event: "test_started", module: inspect(test.module), test: test_name(test)})
     {:noreply, state}
   end
 
@@ -73,7 +73,8 @@ defmodule Mut.Worker.Formatter do
     %{
       event: "test_finished",
       module: inspect(test.module),
-      test: test.description,
+      test: test_name(test),
+      file: test_file(test),
       status: status,
       duration_us: test.time || 0
     }
@@ -91,6 +92,12 @@ defmodule Mut.Worker.Formatter do
   defp status(%ExUnit.Test{state: {:excluded, _reason}}), do: "skipped"
   defp status(%ExUnit.Test{state: {:failed, _failures}}), do: "failed"
   defp status(%ExUnit.Test{state: {:invalid, _reason}}), do: "failed"
+
+  defp test_name(%ExUnit.Test{tags: %{test: test}}),
+    do: test |> Atom.to_string() |> String.trim_leading("test ")
+
+  defp test_name(%ExUnit.Test{name: name}), do: Atom.to_string(name)
+  defp test_file(%ExUnit.Test{tags: %{file: file}}), do: file
 
   defp emit(event) do
     event
