@@ -23,7 +23,7 @@ mix mut starting
 Compiling 10 files (.ex)
 Generated jason app
 ==> mutalisk
-Compiling 65 files (.ex)
+Compiling 67 files (.ex)
 Generated mutalisk app
 ==> plug_crypto
 Compiling 5 files (.ex)
@@ -123,8 +123,8 @@ Surviving mutants:
   lib/plug/crypto/message_verifier.ex:31 GuardComparisonBoundary  replace guard > with >=
   lib/plug/crypto/message_verifier.ex:21 GuardComparisonBoundary  replace guard > with >=
 
-Schema:    21/43 killed (48.8%)   wall: 96.3s
-Fallback:  17/21 killed (81.0%)   wall: 42.0s
+Schema:    21/43 killed (48.8%)   wall: 98.3s
+Fallback:  17/21 killed (81.0%)   wall: 47.3s
   guard_comparison_boundary:    0/3 killed
   guard_comparison_negation:    6/6 killed
   guard_type_test:              11/12 killed
@@ -133,19 +133,19 @@ Invalid:   0
 Errors:    0
 Timeouts:  1
 
-Run time: 138.3s
-Fallback wall-clock: 30.4% of total
+Run time: 145.7s
+Fallback wall-clock: 32.5% of total
 Fallback mutants: 32.8% of executed
 
 Phases:
-  oracle build:          2624 ms
-  baseline tests:        1095 ms
-  plan generation:         12 ms
-  schema build:          2504 ms
-  schema workers:       96483 ms
-  fallback workers:     43758 ms
-  report writing:           9 ms
-  total:               146572 ms
+  oracle build:          2733 ms
+  baseline tests:        1137 ms
+  plan generation:         11 ms
+  schema build:          2797 ms
+  schema workers:       98489 ms
+  fallback workers:     48971 ms
+  report writing:          42 ms
+  total:               154301 ms
 
 Selection:
   mode: static
@@ -158,5 +158,5 @@ Selection:
   median tests/mutant: 2
   coverage collection: 0 ms
 
-Mutalisk run complete in 146672ms
-bench.wall_ms=148000
+Mutalisk run complete in 154425ms
+bench.wall_ms=156000

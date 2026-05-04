@@ -1,8 +1,8 @@
-target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=coverage_with_static_fallback
+target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=static
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.021s
+Resolution completed in 0.014s
 New:
   jason 1.4.4
 Unchanged:
@@ -83,7 +83,7 @@ Schema build complete
 [40/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with /
 [41/456] killed    lib/decimal.ex:1524  Arithmetic  replace + with *
 [42/456] survived  lib/decimal.ex:1116  Arithmetic  replace + with *
-[43/456] timeout   lib/decimal.ex:1790  Arithmetic  replace - with *
+[43/456] killed    lib/decimal.ex:1790  Arithmetic  replace - with *
 [44/456] killed    lib/decimal.ex:1754  Arithmetic  replace - with *
 [45/456] killed    lib/decimal.ex:1742  ComparisonNegation  replace > with <=
 [46/456] survived  lib/decimal.ex:1745  ComparisonNegation  replace != with ==
@@ -114,7 +114,7 @@ Schema build complete
 [71/456] killed    lib/decimal.ex:1688  Arithmetic  replace - with +
 [72/456] killed    lib/decimal.ex:1510  ComparisonNegation  replace > with <=
 [73/456] survived  lib/decimal.ex:407  ComparisonBoundary  replace < with <=
-[74/456] timeout   lib/decimal.ex:1637  ComparisonNegation  replace == with !=
+[74/456] killed    lib/decimal.ex:1637  ComparisonNegation  replace == with !=
 [75/456] killed    lib/decimal.ex:1738  Arithmetic  replace * with -
 [76/456] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
 [77/456] killed    lib/decimal.ex:671  ComparisonNegation  replace == with !=
@@ -266,7 +266,7 @@ Schema build complete
 [223/456] killed    lib/decimal.ex:487  ComparisonNegation  replace == with !=
 [224/456] timeout   lib/decimal.ex:1827  Arithmetic  replace - with +
 [225/456] killed    lib/decimal.ex:1533  Arithmetic  replace + with *
-[226/456] killed    lib/decimal.ex:1605  Arithmetic  replace - with *
+[226/456] timeout   lib/decimal.ex:1605  Arithmetic  replace - with *
 [227/456] killed    lib/decimal.ex:1699  Arithmetic  replace - with +
 [228/456] killed    lib/decimal.ex:1911  Arithmetic  replace + with -
 [229/456] killed    lib/decimal.ex:1763  ComparisonNegation  replace == with !=
@@ -420,7 +420,7 @@ Schema build complete
 [377/456] survived  lib/decimal.ex:254  ComparisonBoundary  replace > with >=
 [378/456] survived  lib/decimal.ex:1271  Arithmetic  replace * with /
 [379/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with /
-[380/456] timeout   lib/decimal.ex:802  ComparisonNegation  replace == with !=
+[380/456] killed    lib/decimal.ex:802  ComparisonNegation  replace == with !=
 [381/456] killed    lib/decimal.ex:1744  ComparisonNegation  replace == with !=
 [381/456] invalid   lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_integer
 [381/456] invalid   lib/decimal.ex:1817  GuardComparisonBoundary  replace guard >= with >
@@ -497,7 +497,7 @@ Schema build complete
 [381/456] invalid   lib/decimal.ex:1750  GuardComparisonBoundary  replace guard < with <=
 [381/456] invalid   lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_number
 [381/456] invalid   lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_integer
-Mutation score: 304/368 = 82.6%
+Mutation score: 306/370 = 82.7%
 
 Surviving mutants:
   lib/decimal.ex:1824 Arithmetic               replace * with /
@@ -565,41 +565,40 @@ Surviving mutants:
   lib/decimal.ex:254 ComparisonBoundary       replace > with >=
   lib/decimal.ex:1271 Arithmetic               replace * with /
 
-Schema:    304/381 killed (79.8%)   wall: 2213.4s
-Fallback:  0/75 killed (0.0%)   wall: 26.6s
+Schema:    306/381 killed (80.3%)   wall: 1969.9s
+Fallback:  0/75 killed (0.0%)   wall: 26.7s
   guard_comparison_boundary:    0/20 killed
   guard_comparison_negation:    0/24 killed
   guard_type_test:              0/31 killed
 Skipped:   1133 (attribute_engine_disabled: 3, missing_oracle_site: 76, no_applicable_mutator: 4, unsupported_dispatch: 1050)
 Invalid:   75
 Errors:    0
-Timeouts:  13
+Timeouts:  11
 
-Run time: 2240.0s
-Fallback wall-clock: 1.2% of total
+Run time: 1996.6s
+Fallback wall-clock: 1.3% of total
 Fallback mutants: 16.4% of executed
 
 Phases:
-  oracle build:           3092 ms
-  baseline tests:          793 ms
-  plan generation:          29 ms
-  coverage collection:    5258 ms
-  schema build:           3213 ms
-  schema workers:      2214876 ms
-  fallback workers:      28223 ms
-  report writing:           93 ms
-  total:               2255672 ms
+  oracle build:           3332 ms
+  baseline tests:          849 ms
+  plan generation:          30 ms
+  schema build:           3493 ms
+  schema workers:      1973937 ms
+  fallback workers:      28887 ms
+  report writing:           82 ms
+  total:               2010702 ms
 
 Selection:
-  mode: coverage_with_static_fallback
+  mode: static
   match distribution:
-    exact line:         354
-    enclosing function: 97
-    static fallback:    4
-    all tests:          1
-  avg tests/mutant: 1.3
-  median tests/mutant: 1
-  coverage collection: 5258 ms
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          456
+  avg tests/mutant: 2.0
+  median tests/mutant: 2
+  coverage collection: 0 ms
 
-Mutalisk run complete in 2255799ms
-bench.wall_ms=2258000
+Mutalisk run complete in 2010835ms
+bench.wall_ms=2014000

@@ -145,3 +145,113 @@ Coverage mode matched static outcomes exactly. Fanout improved by 1.31x on plug_
 - ✓ plug_crypto outcomes match within ±1 mutant in coverage mode
 
 v1.5 acceptance is soft-failed for Decimal because the run did not reach mutation execution and did not produce fanout data. Decimal should be retried only with memory monitoring enabled; the next decision is a v1.6 execution milestone focused on proving bounded child-process memory, reducing baseline/oracle wall-clock, and then re-measuring coverage fanout on Decimal.
+
+## v1.5 follow-up: Decimal OOM diagnostic mission
+
+See `OOM_DECIMAL.md` for the full mission write-up. Summary of root causes uncovered when retrying Decimal:
+
+1. **App-start cycle (the main hang).** `jason 1.4.4` declares `:decimal` in `optional_applications`. With Mutalisk added as a path-dep to a project whose own app is `:decimal`, the runtime app dependency graph becomes `decimal -> mutalisk -> jason -> decimal`. Erlang/OTP 28's `:application_controller` does not break the cycle even though one edge is optional; `mix test` deadlocks at `:application_controller.call/2` inside `:application.load1/2`. The 120 GB host memory consumption originally reported was downstream of the user letting this hang run for hours. **Fix:** `{:jason, "~> 1.4", runtime: false}` in mutalisk's `mix.exs` (commit `aae50a7`). Mutalisk uses Jason only via plain function calls (no GenServer), so it does not need `:jason` to be a started OTP application. The cycle is broken at the `mutalisk -> jason` runtime edge.
+
+2. **`nil` `mutant.module` crashed coverage selection ordering.** `convention_priority/2` had a `when is_atom(module)` guard, but `nil` is itself an atom, so the no-op clause never matched for module-less mutants and `Module.split(nil)` raised mid-run. This aborted the first Decimal static bench at mutant 144/456. **Fix:** add `not is_nil(module)` to the guard (commit `cce5f84`).
+
+3. **Memory watchdog produced empty samples.** `File.open/2` with `[:write, :raw]` in the parent process and `:file.write/2` from a child process silently no-op'd. **Fix:** open the log inside the spawned watchdog process via buffered IO/`IO.binwrite` (commit `71230d0`). Sampling now records BEAM memory every 5 s into `tmp/mut_memory.log`.
+
+Phase-0 observability hooks landed alongside the diagnosis (commit `46e7d93`):
+- `Mut.ChildProcess.run` accepts `:log_path` and streams every chunk of stdout/stderr to disk; the baseline gate persists the full transcript at `tmp/mut_baseline.log`.
+- `mix mut --keep-work-copy` retains both work-copies on exit for post-mortem.
+- `Mut.MemoryWatchdog` writes BEAM memory snapshots to `tmp/mut_memory.log` every 5 s.
+
+### Re-test outcomes after the fixes
+
+Mutalisk version under test: `ccfe44a` (post-fix tip).
+Decimal target: `lukaszsamson/decimal@78ff041` (mutalisk-bench branch with property tests disabled for the benchmark).
+
+#### plug_crypto (regression check)
+
+| Metric | static | coverage_with_static_fallback |
+|---|---:|---:|
+| Schema mutants | 43 | 43 |
+| Fallback mutants | 21 | 21 |
+| Combined score | 60.3% | 60.3% |
+| Errors | 0 | 0 |
+| Invalid | 0 | 0 |
+
+Outcomes are byte-identical to the pre-mission v1.5 numbers above. No regression from the fix.
+
+#### decimal: static
+
+| Metric | value |
+|---|---:|
+| Schema mutants | 381 |
+| Fallback mutants | 75 |
+| Schema killed / executed | 306 / 381 (80.3%) |
+| Fallback killed / executed | 0 / 0 (all 75 invalid) |
+| Bench combined score (excludes invalid/timeout) | 82.7% |
+| Errors | 0 |
+| Invalid | 75 (entire fallback bucket) |
+| Timeouts | 11 |
+| Skipped (unsupported_dispatch / missing_oracle_site / no_applicable_mutator / attribute_engine_disabled) | 1050 / 76 / 4 / 3 |
+| Total wall | 2010.7 s (33.5 min) |
+| Phase: oracle build | 3.3 s |
+| Phase: baseline tests | 0.85 s |
+| Phase: schema build | 3.5 s |
+| Phase: schema workers | 1973.9 s |
+| Phase: fallback workers | 28.9 s |
+| Selection mode | static |
+| avg tests/mutant | 2.0 |
+| match: all_tests | 456 |
+
+#### decimal: coverage_with_static_fallback
+
+| Metric | value |
+|---|---:|
+| Schema mutants | 381 |
+| Fallback mutants | 75 |
+| Schema killed / executed | 304 / 381 (79.8%) |
+| Fallback killed / executed | 0 / 0 (all 75 invalid) |
+| Bench combined score (excludes invalid/timeout) | 82.6% |
+| Errors | 0 |
+| Invalid | 75 (entire fallback bucket) |
+| Timeouts | 13 |
+| Total wall | 2255.7 s (37.6 min) |
+| Phase: oracle build | 3.1 s |
+| Phase: baseline tests | 0.79 s |
+| Phase: coverage collection | 5.3 s |
+| Phase: schema build | 3.2 s |
+| Phase: schema workers | 2214.9 s |
+| Phase: fallback workers | 28.2 s |
+| Selection mode | coverage_with_static_fallback |
+| avg tests/mutant | 1.3 |
+| median tests/mutant | 1 |
+| match: exact_line / enclosing_function / static_fallback / all_tests | 354 / 97 / 4 / 1 |
+
+#### Memory observation
+
+`tmp/mut_memory.log` recorded 451 BEAM samples (one every 5 s) over the coverage run.
+
+| Metric | value |
+|---|---:|
+| Peak total memory (parent BEAM) | 82.4 MB |
+| Min total memory | 67.7 MB |
+| Peak processes memory | 30.7 MB |
+| Process count (steady) | ~109 |
+
+Memory stays effectively flat for the entire 37-minute run. The original 120 GB OOM was an artifact of the app-start hang; with the cycle broken, the BEAM does not grow unbounded.
+
+### Acceptance evaluation (revised)
+
+- ✓ Decimal reaches mutation execution and produces fanout data (it did not before).
+- ☐ Decimal completes within 30-minute budget — static at 33.5 min and coverage at 37.6 min both miss the budget by ~10–25%. The bottleneck is per-test wall-clock × 456 mutants in sequential execution, not test fanout.
+- ☐ Coverage reduces fanout ≥10×. Observed fanout reduction: 2.0 → 1.3 tests/mutant ≈ 1.5× on Decimal. The suite is small (only 6 test files in the bench branch with property tests disabled), so static selection already touches few files; coverage gains are correspondingly capped.
+- ✓ Next bottleneck documented (sequential per-mutant wall × 456 mutants).
+- ✓ plug_crypto outcomes unchanged in static mode.
+- ✓ plug_crypto outcomes match within ±0 mutants in coverage mode.
+- ✓ BEAM memory bounded under load; peak 82 MB on Decimal vs. 120 GB pre-fix.
+
+v1.5 acceptance: **partially met**. The blocking failure (host OOM and inability to reach mutation execution on Decimal) is resolved. Time and fanout targets are not yet met, but the runtime now produces signal that scopes v1.6 work concretely:
+
+1. **Parallel workers** is the obvious lever — schema_workers wall ≈ 33 minutes is the entire budget. Even 4-way parallelism brings Decimal under 10 minutes.
+2. **Decimal's fallback bucket compiles to 75/75 invalid** under both selection modes. This is independent of OOM but surfaced now that Decimal executes. Fallback engine on Decimal hits `CompileError` for every guard mutation; needs a separate diagnostic pass before fallback adds signal on this target.
+3. **Decimal-class targets exercise an app-name surface mutalisk had not handled.** Any future target that shares an app name with one of mutalisk's transitive deps' `optional_applications` would have hit the same hang. The fix (jason `runtime: false`) is general — but the wider class is worth keeping in mind: never let mutalisk transitively contribute to the target's runtime app graph.
+
+
