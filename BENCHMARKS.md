@@ -81,3 +81,67 @@ Target: zero invalid mutants on a real codebase.
 - Add coverage-based test selection; decimal's suite references `Decimal` broadly, making static module-reference selection effectively a no-op.
 - Consider wrapper-schemata for fallback guard mutants; fallback took 28.3% of total wall-clock on the reference run.
 - Add an opt-in skipped-candidate report grouped by module/reason so users can decide whether future allowlist expansion is worth it.
+
+## v1.5 Reference Run
+
+### Configuration delta from v1
+- Mutalisk version: `1a78f88` (M16 coverage selector commit)
+- Selection modes available: `static` (default), `coverage`, `coverage_with_static_fallback`
+- Smoke commands:
+  - `bench/run.sh --target plug_crypto --selection static`
+  - `bench/verify.sh --target plug_crypto --selection static`
+  - `bench/run.sh --target plug_crypto --selection coverage_with_static_fallback`
+  - `bench/verify.sh --target plug_crypto --selection coverage_with_static_fallback`
+  - `bench/run.sh --target decimal --selection coverage_with_static_fallback`
+
+### plug_crypto: v1 vs v1.5 (static)
+| Metric | v1 | v1.5 static |
+|---|---:|---:|
+| Schema mutants | 43 | 43 |
+| Fallback mutants | 21 | 21 |
+| Combined mutants | 64 | 64 |
+| Killed | 38 | 38 |
+| Survived | 25 | 25 |
+| Timeout | 1 | 1 |
+| Error | 0 | 0 |
+| Invalid | 0 | 0 |
+| Score | 60.3% | 60.3% |
+| Combined wall-clock (ms) | 145000 | 148000 |
+
+Static mode is outcome-identical to the v1 reference run.
+
+### plug_crypto: v1.5 coverage vs v1.5 static
+| Metric | static | coverage_with_static_fallback |
+|---|---:|---:|
+| Score | 60.3% | 60.3% |
+| Schema mutants | 43 | 43 |
+| Fallback mutants | 21 | 21 |
+| Combined wall-clock (ms) | 148000 | 152000 |
+| Coverage collection (ms) | 0 | 5239 |
+| avg tests/mutant | 2.17 | 1.66 |
+| median tests/mutant | 2 | 2 |
+| match: exact_line | 0 | 30 |
+| match: enclosing_function | 0 | 31 |
+| match: static_fallback | 64 | 3 |
+| match: all_tests | 0 | 0 |
+| Errors | 0 | 0 |
+| Invalid | 0 | 0 |
+
+Coverage mode matched static outcomes exactly. Fanout improved by 1.31x on plug_crypto; this target was already narrowed well by static selection.
+
+### Decimal: v1.5 coverage attempt
+- Status: did not reach mutation execution.
+- Wall-clock: failed during oracle/bootstrap compile, before the 30-minute mutation budget could be measured.
+- Phase breakdown: unavailable; no Stryker report was produced.
+- Coverage match distribution: unavailable.
+- Per-mutant fanout reduction estimate: unavailable.
+- Identified next bottleneck: Decimal v2.1.1 names its application `:decimal` and also has a dependency entry named `:decimal` after bench injection. The overlay compile failed before plan generation with `Application.fetch_env!(:mutalisk, :user_mix_module)` missing from `Mutalisk.WrappedMixProject.application/0`. This is a target bootstrap/self-dependency conflict, not a selector bottleneck. M16 did not add a Decimal-specific overlay workaround.
+
+### Acceptance evaluation
+- ☐ Decimal completes within 30-minute budget
+- ☐ Coverage selection reduces per-mutant fanout by >=10x
+- ✓ Next bottleneck documented
+- ✓ plug_crypto outcomes unchanged in static mode
+- ✓ plug_crypto outcomes match within ±1 mutant in coverage mode
+
+v1.5 acceptance is soft-failed for Decimal because the Decimal run did not reach mutation execution and did not produce fanout data. The next decision is a v1.6 bootstrap hardening item for self-dependency/name-conflict targets before parallel-worker evaluation.
