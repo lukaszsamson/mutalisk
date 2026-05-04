@@ -38,7 +38,14 @@ defmodule Mutalisk.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      {:jason, "~> 1.4"}
+      # runtime: false keeps :jason out of mutalisk.app's `applications` list.
+      # Without this, when a target project's app name is also a name that
+      # `:jason` lists in its `optional_applications` (e.g. `:decimal`),
+      # Erlang's app start graph forms a cycle target -> mutalisk -> jason
+      # -> target and `mix test` deadlocks at :application_controller.call/2.
+      # Mutalisk only uses Jason as plain function calls (no GenServer), so
+      # it does not need :jason to be a started OTP application.
+      {:jason, "~> 1.4", runtime: false}
     ]
   end
 
