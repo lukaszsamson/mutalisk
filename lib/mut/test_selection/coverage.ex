@@ -144,7 +144,8 @@ defmodule Mut.TestSelection.Coverage do
   defp killer_priority(test_file, test_file), do: 0
   defp killer_priority(_test_file, _last_killer), do: 1
 
-  defp convention_priority(test_file, %Mutant{module: module}) when is_atom(module) do
+  defp convention_priority(test_file, %Mutant{module: module})
+       when is_atom(module) and not is_nil(module) do
     if convention_match?(test_file, module), do: 0, else: 1
   end
 
