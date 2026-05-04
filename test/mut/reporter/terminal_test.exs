@@ -87,6 +87,19 @@ defmodule Mut.Reporter.TerminalTest do
           report_writing_ms: 70,
           total_ms: 18_370
         },
+        selection: %{
+          mode: :coverage_with_static_fallback,
+          coverage_match_distribution: %{
+            exact_line: 2,
+            enclosing_function: 1,
+            static_fallback: 1,
+            all_tests: 0
+          },
+          fallback_reason_distribution: %{no_line_coverage: 2},
+          selected_tests_avg: 1.5,
+          selected_tests_median: 1,
+          coverage_collection_wall_ms: 5832
+        },
         score: 50.0
       )
       |> Terminal.render_summary()
@@ -120,6 +133,17 @@ defmodule Mut.Reporter.TerminalTest do
              fallback workers:     6000 ms
              report writing:         70 ms
              total:               18370 ms
+
+           Selection:
+             mode: coverage_with_static_fallback
+             match distribution:
+               exact line:         2
+               enclosing function: 1
+               static fallback:    1
+               all tests:          0
+             avg tests/mutant: 1.5
+             median tests/mutant: 1
+             coverage collection: 5832 ms
            """
   end
 
@@ -137,6 +161,7 @@ defmodule Mut.Reporter.TerminalTest do
       skipped_by_reason: Keyword.get(opts, :skipped_by_reason, %{}),
       test_selection_fanout: %{},
       phase_timings: Keyword.get(opts, :phase_timings, %{}),
+      selection: Keyword.get(opts, :selection),
       ledger: entries
     }
   end

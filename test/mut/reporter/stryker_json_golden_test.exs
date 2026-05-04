@@ -64,6 +64,19 @@ defmodule Mut.Reporter.StrykerJsonGoldenTest do
         report_writing_ms: 70,
         total_ms: 18_370
       },
+      selection: %{
+        mode: :coverage_with_static_fallback,
+        coverage_match_distribution: %{
+          exact_line: 2,
+          enclosing_function: 1,
+          static_fallback: 2,
+          all_tests: 1
+        },
+        fallback_reason_distribution: %{no_line_coverage: 3, no_function_coverage: 1},
+        selected_tests_avg: 1.0,
+        selected_tests_median: 1,
+        coverage_collection_wall_ms: 5832
+      },
       ledger: Enum.map(mutants, &entry/1)
     }
 

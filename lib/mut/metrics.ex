@@ -22,6 +22,7 @@ defmodule Mut.Metrics do
       :skipped_by_reason,
       :test_selection_fanout,
       :phase_timings,
+      :selection,
       :ledger
     ]
 
@@ -63,6 +64,7 @@ defmodule Mut.Metrics do
             skipped_by_reason: %{atom() => pos_integer()},
             test_selection_fanout: %{String.t() => non_neg_integer()},
             phase_timings: %{atom() => non_neg_integer()},
+            selection: %{atom() => term()},
             ledger: [ledger_entry()]
           }
   end
@@ -90,6 +92,11 @@ defmodule Mut.Metrics do
           phase_starts: map(),
           phase_timings: map(),
           phase_warnings: [term()],
+          selection_mode: atom(),
+          coverage_collection_wall_ms: non_neg_integer(),
+          coverage_match_distribution: map(),
+          fallback_reason_distribution: map(),
+          selected_test_counts: [non_neg_integer()],
           started_ms: integer(),
           ledger: [Snapshot.ledger_entry()]
         }
@@ -149,6 +156,24 @@ defmodule Mut.Metrics do
     end
   end
 
+  @spec set_selection_mode(GenServer.server(), atom()) :: :ok
+  def set_selection_mode(pid, mode) when is_atom(mode) do
+    GenServer.cast(pid, {:set_selection_mode, mode})
+  end
+
+  @spec set_coverage_collection_wall_ms(GenServer.server(), non_neg_integer()) :: :ok
+  def set_coverage_collection_wall_ms(pid, wall_ms) when is_integer(wall_ms) and wall_ms >= 0 do
+    GenServer.cast(pid, {:set_coverage_collection_wall_ms, wall_ms})
+  end
+
+  @spec record_selection(GenServer.server(), Mutant.t(), atom(), atom() | nil, non_neg_integer()) ::
+          :ok
+  def record_selection(pid, %Mutant{} = mutant, match_kind, fallback_reason, selected_count)
+      when is_atom(match_kind) and (is_atom(fallback_reason) or is_nil(fallback_reason)) and
+             is_integer(selected_count) and selected_count >= 0 do
+    GenServer.cast(pid, {:record_selection, mutant, match_kind, fallback_reason, selected_count})
+  end
+
   @spec snapshot(pid :: GenServer.server()) :: Snapshot.t()
   def snapshot(pid), do: GenServer.call(pid, :snapshot)
 
@@ -167,6 +192,11 @@ defmodule Mut.Metrics do
        phase_starts: %{},
        phase_timings: %{},
        phase_warnings: [],
+       selection_mode: :static,
+       coverage_collection_wall_ms: 0,
+       coverage_match_distribution: base_match_distribution(),
+       fallback_reason_distribution: %{},
+       selected_test_counts: [],
        started_ms: monotonic_ms(),
        ledger: []
      }}
@@ -243,6 +273,27 @@ defmodule Mut.Metrics do
     end
   end
 
+  def handle_cast({:set_selection_mode, mode}, state) do
+    {:noreply, %{state | selection_mode: mode}}
+  end
+
+  def handle_cast({:set_coverage_collection_wall_ms, wall_ms}, state) do
+    {:noreply, %{state | coverage_collection_wall_ms: wall_ms}}
+  end
+
+  def handle_cast(
+        {:record_selection, _mutant, match_kind, fallback_reason, selected_count},
+        state
+      ) do
+    state =
+      state
+      |> increment_map(:coverage_match_distribution, match_kind, 1)
+      |> maybe_increment_fallback_reason(fallback_reason)
+      |> update_in([:selected_test_counts], &[selected_count | &1])
+
+    {:noreply, state}
+  end
+
   @impl GenServer
   def handle_call(:snapshot, _from, state) do
     {:reply, build_snapshot(state), state}
@@ -296,6 +347,7 @@ defmodule Mut.Metrics do
       skipped_by_reason: state.skipped_by_reason,
       test_selection_fanout: state.test_selection_fanout,
       phase_timings: phase_timings(state),
+      selection: selection_snapshot(state),
       ledger: ledger
     }
   end
@@ -307,6 +359,29 @@ defmodule Mut.Metrics do
       end)
 
     Map.put(base, :total_ms, max(monotonic_ms() - state.started_ms, 0))
+  end
+
+  defp selection_snapshot(state) do
+    counts = Enum.sort(state.selected_test_counts)
+
+    %{
+      mode: state.selection_mode,
+      coverage_match_distribution: state.coverage_match_distribution,
+      fallback_reason_distribution: state.fallback_reason_distribution,
+      selected_tests_avg: average(counts),
+      selected_tests_median: median_lower(counts),
+      coverage_collection_wall_ms: state.coverage_collection_wall_ms
+    }
+  end
+
+  defp average([]), do: 0.0
+  defp average(values), do: Enum.sum(values) / length(values)
+
+  defp median_lower([]), do: 0
+  defp median_lower(values), do: Enum.at(values, div(length(values) - 1, 2))
+
+  defp base_match_distribution do
+    %{exact_line: 0, enclosing_function: 0, static_fallback: 0, all_tests: 0}
   end
 
   defp score(0, 0), do: 100.0
@@ -349,6 +424,12 @@ defmodule Mut.Metrics do
 
   defp increment_map(state, field, key, amount) do
     update_in(state[field], &Map.update(&1, key, amount, fn count -> count + amount end))
+  end
+
+  defp maybe_increment_fallback_reason(state, nil), do: state
+
+  defp maybe_increment_fallback_reason(state, reason) do
+    increment_map(state, :fallback_reason_distribution, reason, 1)
   end
 
   defp maybe_prepend_phase_warning(state, nil), do: state

@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET="plug_crypto"
+SELECTION="static"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -11,8 +12,13 @@ while [ "$#" -gt 0 ]; do
       TARGET="$2"
       shift 2
       ;;
+    --selection)
+      [ "$#" -ge 2 ] || { printf 'missing --selection value\n' >&2; exit 64; }
+      SELECTION="$2"
+      shift 2
+      ;;
     *)
-      printf 'usage: bench/verify.sh [--target decimal|plug_crypto]\n' >&2
+      printf 'usage: bench/verify.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback]\n' >&2
       exit 64
       ;;
   esac
@@ -35,7 +41,7 @@ case "$TARGET" in
     ;;
 esac
 
-REPORT_PATH="$ROOT/bench/results/$TARGET.stryker.json"
+REPORT_PATH="$ROOT/bench/results/$TARGET.$SELECTION.stryker.json"
 
 if [ ! -f "$REPORT_PATH" ]; then
   printf 'missing benchmark report: %s\n' "$REPORT_PATH" >&2

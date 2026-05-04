@@ -16,6 +16,7 @@ defmodule Mut.Cli do
             concurrency: pos_integer,
             max_mutants: pos_integer | nil,
             debug_plan: boolean,
+            selection: atom,
             test_paths: [String.t()]
           }
 
@@ -29,11 +30,13 @@ defmodule Mut.Cli do
       :concurrency,
       :max_mutants,
       :debug_plan,
+      :selection,
       :test_paths
     ]
   end
 
   @known_reporters [:terminal, :stryker_json]
+  @known_selection_modes [:static, :coverage, :coverage_with_static_fallback]
   @known_targets [:dispatch, :guard, :module_attribute]
   @known_mutators [
     "arithmetic",
@@ -90,6 +93,7 @@ defmodule Mut.Cli do
           output_path: :string,
           concurrency: :integer,
           max_mutants: :integer,
+          selection: :string,
           debug_plan: :boolean
         ],
         aliases: []
@@ -120,6 +124,7 @@ defmodule Mut.Cli do
          {:ok, output_path} <- output_path(parsed, config),
          {:ok, concurrency} <- concurrency(parsed, config),
          {:ok, max_mutants} <- max_mutants(parsed),
+         {:ok, selection} <- selection(parsed, config),
          {:ok, test_paths} <- test_paths(config) do
       {:ok,
        %Options{
@@ -132,6 +137,7 @@ defmodule Mut.Cli do
          concurrency: concurrency,
          max_mutants: max_mutants,
          debug_plan: Keyword.get(parsed, :debug_plan, false),
+         selection: selection,
          test_paths: test_paths
        }}
     end
@@ -203,6 +209,18 @@ defmodule Mut.Cli do
       nil -> {:ok, nil}
       value when is_integer(value) and value >= 1 -> {:ok, value}
       _invalid -> {:error, "--max-mutants must be at least 1; run `mix help mut`"}
+    end
+  end
+
+  defp selection(parsed, config) do
+    value = Keyword.get(parsed, :selection, Keyword.get(config, :selection, :static))
+    mode = target_atom(value)
+
+    if mode in @known_selection_modes do
+      {:ok, mode}
+    else
+      {:error,
+       "unknown --selection mode #{inspect(mode)}; known: #{known(@known_selection_modes)}"}
     end
   end
 

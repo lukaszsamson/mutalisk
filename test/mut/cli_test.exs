@@ -1,6 +1,7 @@
 defmodule Mut.CliTest do
   use ExUnit.Case, async: true
 
+  alias Mix.Tasks.Mut, as: MutTask
   alias Mut.Cli
   alias Mut.Cli.Options
 
@@ -16,6 +17,7 @@ defmodule Mut.CliTest do
     assert opts.concurrency == System.schedulers_online()
     assert opts.max_mutants == nil
     assert opts.debug_plan == false
+    assert opts.selection == :static
     assert opts.test_paths == ["test"]
   end
 
@@ -39,6 +41,8 @@ defmodule Mut.CliTest do
                  "4",
                  "--max-mutants",
                  "10",
+                 "--selection",
+                 "coverage-with-static-fallback",
                  "--debug-plan"
                ],
                files: ["lib"],
@@ -60,7 +64,24 @@ defmodule Mut.CliTest do
     assert opts.concurrency == 4
     assert opts.max_mutants == 10
     assert opts.debug_plan == true
+    assert opts.selection == :coverage_with_static_fallback
     assert opts.test_paths == ["spec"]
+  end
+
+  test "parses selection flag and rejects unknown modes" do
+    assert {:ok, %{selection: :coverage}} = Cli.parse(["--selection", "coverage"])
+
+    assert {:error, message} = Cli.parse(["--selection", "dynamic"])
+    assert message =~ "unknown --selection mode :dynamic"
+    assert message =~ "static, coverage, coverage_with_static_fallback"
+  end
+
+  test "coverage collection pathology uses 2x threshold with small-project floor" do
+    refute MutTask.pathological_coverage_collection?(2_500, 400)
+    refute MutTask.pathological_coverage_collection?(5_001, 400)
+    assert MutTask.pathological_coverage_collection?(10_001, 400)
+    assert MutTask.pathological_coverage_collection?(10_001, 5_000)
+    refute MutTask.pathological_coverage_collection?(10_000, 5_000)
   end
 
   test "rejects invalid fail-at" do

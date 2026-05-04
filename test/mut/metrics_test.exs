@@ -35,7 +35,49 @@ defmodule Mut.MetricsTest do
     assert_in_delta snapshot.fallback_count_pct, 66.666, 0.001
     assert snapshot.rollback_per_file == %{"lib/a.ex" => 2}
     assert snapshot.test_selection_fanout == %{"a" => 2, "b" => 2, "c" => 2}
+    assert snapshot.selection.mode == :static
+    assert snapshot.selection.coverage_collection_wall_ms == 0
     assert Enum.map(snapshot.ledger, & &1.stable_id) == ["a", "b", "c"]
+  end
+
+  test "records selection metrics" do
+    {:ok, metrics} = Metrics.start_link([])
+
+    Metrics.set_selection_mode(metrics, :coverage_with_static_fallback)
+    Metrics.set_coverage_collection_wall_ms(metrics, 123)
+    Metrics.record_selection(metrics, mutant(:schema, "a", 1), :exact_line, nil, 1)
+
+    Metrics.record_selection(
+      metrics,
+      mutant(:schema, "b", 2),
+      :static_fallback,
+      :no_line_coverage,
+      5
+    )
+
+    Metrics.record_selection(
+      metrics,
+      mutant(:schema, "c", 3),
+      :all_tests,
+      :no_function_coverage,
+      9
+    )
+
+    snapshot = Metrics.snapshot(metrics)
+
+    assert snapshot.selection == %{
+             mode: :coverage_with_static_fallback,
+             coverage_match_distribution: %{
+               exact_line: 1,
+               enclosing_function: 0,
+               static_fallback: 1,
+               all_tests: 1
+             },
+             fallback_reason_distribution: %{no_line_coverage: 1, no_function_coverage: 1},
+             selected_tests_avg: 5.0,
+             selected_tests_median: 5,
+             coverage_collection_wall_ms: 123
+           }
   end
 
   test "invalid and skipped are excluded from score denominator" do

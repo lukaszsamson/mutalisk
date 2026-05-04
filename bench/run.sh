@@ -3,9 +3,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET="plug_crypto"
+SELECTION="static"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -13,6 +14,11 @@ while [ "$#" -gt 0 ]; do
     --target)
       [ "$#" -ge 2 ] || { usage; exit 64; }
       TARGET="$2"
+      shift 2
+      ;;
+    --selection)
+      [ "$#" -ge 2 ] || { usage; exit 64; }
+      SELECTION="$2"
       shift 2
       ;;
     -h|--help)
@@ -46,9 +52,10 @@ esac
 
 WORK_DIR="$ROOT/tmp/bench/$TARGET"
 RESULTS_DIR="$ROOT/bench/results"
-REPORT_PATH="$RESULTS_DIR/$TARGET.stryker.json"
-TERMINAL_PATH="$RESULTS_DIR/$TARGET.terminal.txt"
-REL_REPORT_PATH="bench/results/$TARGET.stryker.json"
+RESULT_PREFIX="$TARGET.$SELECTION"
+REPORT_PATH="$RESULTS_DIR/$RESULT_PREFIX.stryker.json"
+TERMINAL_PATH="$RESULTS_DIR/$RESULT_PREFIX.terminal.txt"
+REL_REPORT_PATH="bench/results/$RESULT_PREFIX.stryker.json"
 
 cleanup() {
   rm -rf "$WORK_DIR"
@@ -74,20 +81,20 @@ mkdir -p "$WORK_DIR/bench/results"
 
 (
   cd "$WORK_DIR"
-  printf 'target=%s repo=%s ref=%s sha=%s\n' "$TARGET" "$REPO" "$REF" "$SHA"
+  printf 'target=%s repo=%s ref=%s sha=%s selection=%s\n' "$TARGET" "$REPO" "$REF" "$SHA" "$SELECTION"
   printf 'mutalisk_path=%s\n' "$ROOT"
   printf 'deps.get starting\n'
   MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix deps.get
   printf 'mix mut starting\n'
   START_MS="$(date +%s)000"
-  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --output-path "$REL_REPORT_PATH"
+  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --output-path "$REL_REPORT_PATH"
   END_MS="$(date +%s)000"
   printf 'bench.wall_ms=%s\n' "$((END_MS - START_MS))"
 ) > "$TERMINAL_PATH" 2>&1
 
 cp "$WORK_DIR/$REL_REPORT_PATH" "$REPORT_PATH"
 
-ROOT="$ROOT" REPORT_PATH="$REPORT_PATH" TARGET="$TARGET" elixir --eval '
+ROOT="$ROOT" REPORT_PATH="$REPORT_PATH" TARGET="$TARGET" SELECTION="$SELECTION" elixir --eval '
 Mix.install([{:jason, "~> 1.4"}])
 report = System.fetch_env!("REPORT_PATH") |> File.read!() |> Jason.decode!()
 engine = report["mutalisk"]["engine"]
@@ -111,7 +118,7 @@ score = fn bucket ->
 end
 
 line =
-  "bench target=#{System.fetch_env!("TARGET")} " <>
+    "bench target=#{System.fetch_env!("TARGET")} selection=#{System.fetch_env!("SELECTION")} " <>
     "schema=#{Map.get(counts, {"schema", :total}, 0)} score=#{score.("schema")}% " <>
     "fallback=#{Map.get(counts, {"fallback", :total}, 0)} score=#{score.("fallback")}% " <>
     "combined=#{Map.get(counts, {"combined", :total}, 0)} score=#{score.("combined")}% " <>

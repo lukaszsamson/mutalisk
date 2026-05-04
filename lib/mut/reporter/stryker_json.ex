@@ -104,7 +104,21 @@ defmodule Mut.Reporter.StrykerJson do
           {mutant.stable_id, atom_string(planned_mutant.mutation_kind)}
         end),
       "phase_timings" => stringify_keys(snapshot.phase_timings || %{}),
+      "selection" => selection_extension(snapshot.selection || %{}),
       "metrics" => metrics_extension(snapshot)
+    }
+  end
+
+  defp selection_extension(selection) do
+    %{
+      "mode" => atom_string(Map.get(selection, :mode)) || "static",
+      "coverage_match_distribution" =>
+        atom_keyed_counts(Map.get(selection, :coverage_match_distribution, %{})),
+      "fallback_reason_distribution" =>
+        atom_keyed_counts(Map.get(selection, :fallback_reason_distribution, %{})),
+      "selected_tests_avg" => Map.get(selection, :selected_tests_avg, 0.0),
+      "selected_tests_median" => Map.get(selection, :selected_tests_median, 0),
+      "coverage_collection_wall_ms" => Map.get(selection, :coverage_collection_wall_ms, 0)
     }
   end
 

@@ -14,6 +14,7 @@ defmodule Mix.Tasks.Mut.E2e do
     Mix.Task.run("app.start")
 
     default = run_fixture!("default", [])
+    coverage = run_fixture!("coverage", ["--selection", "coverage_with_static_fallback"])
 
     attribute =
       run_fixture!("attribute", ["--enable", "dispatch,guard,module_attribute"])
@@ -21,6 +22,7 @@ defmodule Mix.Tasks.Mut.E2e do
     repeated = run_fixture!("repeat", ["--enable", "dispatch,guard,module_attribute"])
 
     assert_default!(default)
+    assert_coverage_non_regression!(default, coverage)
     assert_attribute!(attribute)
     assert_stable_ids!(attribute, repeated)
     assert_golden_ids!(attribute)
@@ -29,6 +31,7 @@ defmodule Mix.Tasks.Mut.E2e do
     assert_baseline_failure_aborts!()
 
     IO.puts("mut.e2e default=#{summary_line(default)}")
+    IO.puts("mut.e2e coverage=#{summary_line(coverage)}")
     IO.puts("mut.e2e attribute=#{summary_line(attribute)}")
     IO.puts("mut.e2e stable_ids=#{length(stable_ids(attribute.report))}")
     IO.puts("mut.e2e stryker_json=:ok")
@@ -96,6 +99,36 @@ defmodule Mix.Tasks.Mut.E2e do
     assert_count!(run, :fallback, 6)
     assert_score_range!(run, 69.0, 82.0)
     assert_metrics!(run.report, 6)
+  end
+
+  defp assert_coverage_non_regression!(static, coverage) do
+    if stable_ids(static.report) != stable_ids(coverage.report) do
+      raise "coverage stable ids differ from static"
+    end
+
+    for status <- ["Killed", "Survived"] do
+      static_count = Map.get(static.counts.statuses, status, 0)
+      coverage_count = Map.get(coverage.counts.statuses, status, 0)
+
+      if static_count != coverage_count do
+        raise "coverage #{status} count drift: static=#{static_count} coverage=#{coverage_count}"
+      end
+    end
+
+    selection = coverage.report["mutalisk"]["selection"]
+    phases = coverage.report["mutalisk"]["phase_timings"]
+
+    if selection["mode"] != "coverage_with_static_fallback" do
+      raise "coverage selection mode mismatch: #{inspect(selection["mode"])}"
+    end
+
+    unless selection["coverage_collection_wall_ms"] > 0 do
+      raise "coverage collection wall time missing from selection metrics"
+    end
+
+    unless phases["coverage_collection_ms"] > 0 do
+      raise "coverage_collection_ms missing from phase timings"
+    end
   end
 
   defp assert_stable_ids!(left, right) do

@@ -22,7 +22,9 @@ defmodule Mix.Tasks.Mut do
     --max-mutants N          Cap total mutants (stable-id sorted sample if
                               exceeded)
     --debug-plan             Dump plan JSON to plan.debug.json and exit before
-                              any mutant runs
+                               any mutant runs
+    --selection MODE         Test selection mode: static (default), coverage,
+                               coverage_with_static_fallback
 
   Configuration via `config :mut`:
 
@@ -47,14 +49,19 @@ defmodule Mix.Tasks.Mut do
   use Mix.Task
 
   alias Mut.Cli
+  alias Mut.Coverage.Runner, as: CoverageRunner
+  alias Mut.CoverageOracle
   alias Mut.Metrics
   alias Mut.Reporter.StrykerJson
   alias Mut.Reporter.Terminal
   alias Mut.Sandbox
+  alias Mut.TestSelection.Coverage, as: CoverageSelection
+  alias Mut.TestSelection.Static
   alias Mut.Worker
 
   @requirements ["app.config"]
   @timeout_ms 60_000
+  @coverage_pathology_floor_ms 10_000
   @mutalisk_root Path.expand("../../..", __DIR__)
 
   @impl Mix.Task
@@ -88,12 +95,15 @@ defmodule Mix.Tasks.Mut do
         baseline_tests!(work_copy, mutalisk_root)
       end)
 
+      baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
+
       plan =
         Metrics.with_phase(metrics_pid, :plan_generation, fn ->
           build_plan(work_copy, oracle, opts)
         end)
 
-      Metrics.with_phase(metrics_pid, :coverage_collection, fn -> :ok end)
+      {coverage_oracle, selection_mode} =
+        collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms)
 
       plan = maybe_limit_plan(plan, opts.max_mutants)
 
@@ -101,7 +111,16 @@ defmodule Mix.Tasks.Mut do
         Mut.Plan.dump_json(plan, Path.join(target_root, "plan.debug.json"))
       else
         File.cd!(mutalisk_root, fn ->
-          execute_plan(plan, target_root, run_id, opts, started, metrics_pid)
+          execute_plan(
+            plan,
+            target_root,
+            run_id,
+            opts,
+            started,
+            metrics_pid,
+            coverage_oracle,
+            selection_mode
+          )
         end)
       end
     after
@@ -109,7 +128,16 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp execute_plan(plan, target_root, run_id, opts, started, metrics_pid) do
+  defp execute_plan(
+         plan,
+         target_root,
+         run_id,
+         opts,
+         started,
+         metrics_pid,
+         coverage_oracle,
+         selection_mode
+       ) do
     IO.puts("Schema build starting")
 
     {:ok, schema_result} =
@@ -125,6 +153,7 @@ defmodule Mix.Tasks.Mut do
     IO.puts("Schema build complete")
 
     {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: run_id, force: true)
+    {:ok, last_killer} = Mut.LastKiller.start_link([])
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
@@ -134,14 +163,19 @@ defmodule Mix.Tasks.Mut do
 
         source_root = schema_result.work_copy_root
 
-        selection =
-          Mut.TestSelection.for_plan(
-            schema_result.plan,
-            absolute_test_paths(source_root, opts)
-          )
-
         all_test_files =
           Mut.TestSelection.discover_test_files(absolute_test_paths(source_root, opts))
+
+        selection_context =
+          build_selection_context(
+            schema_result.plan,
+            source_root,
+            opts,
+            coverage_oracle,
+            selection_mode,
+            last_killer,
+            all_test_files
+          )
 
         stream? = :terminal in opts.reporters
 
@@ -150,10 +184,11 @@ defmodule Mix.Tasks.Mut do
             run_schema_mutants(
               pool,
               schema_result.plan,
-              selection,
+              selection_context,
               all_test_files,
               source_root,
               metrics_pid,
+              last_killer,
               stream?
             )
           end)
@@ -163,10 +198,11 @@ defmodule Mix.Tasks.Mut do
             run_fallback_mutants(
               pool,
               schema_result.plan,
-              selection,
+              selection_context,
               all_test_files,
               source_root,
               metrics_pid,
+              last_killer,
               stream?
             )
           end)
@@ -218,12 +254,121 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp run_schema_mutants(pool, plan, selection, all_test_files, work_copy, metrics_pid, stream?) do
+  defp collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms) do
+    Metrics.set_selection_mode(metrics_pid, opts.selection)
+
+    case opts.selection do
+      :static ->
+        Metrics.with_phase(metrics_pid, :coverage_collection, fn -> :ok end)
+        Metrics.set_coverage_collection_wall_ms(metrics_pid, 0)
+        {nil, :static}
+
+      mode when mode in [:coverage, :coverage_with_static_fallback] ->
+        oracle =
+          Metrics.with_phase(metrics_pid, :coverage_collection, fn ->
+            run_coverage!(work_copy, opts)
+          end)
+
+        wall_ms = oracle.collection_wall_ms
+        Metrics.set_coverage_collection_wall_ms(metrics_pid, wall_ms)
+
+        if pathological_coverage_collection?(wall_ms, baseline_tests_ms) do
+          handle_pathological_coverage(mode, wall_ms, baseline_tests_ms, metrics_pid, oracle)
+        else
+          {oracle, mode}
+        end
+    end
+  end
+
+  @spec pathological_coverage_collection?(non_neg_integer(), non_neg_integer()) :: boolean()
+  def pathological_coverage_collection?(coverage_wall_ms, baseline_tests_ms)
+      when is_integer(coverage_wall_ms) and is_integer(baseline_tests_ms) do
+    coverage_wall_ms > max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)
+  end
+
+  defp run_coverage!(work_copy, opts) do
+    case CoverageRunner.run(work_copy,
+           test_paths: absolute_test_paths(work_copy, opts),
+           mutalisk_path: @mutalisk_root
+         ) do
+      {:ok, oracle} -> oracle
+      {:error, reason} -> Mix.raise("coverage collection failed: #{inspect(reason)}")
+    end
+  end
+
+  defp handle_pathological_coverage(
+         :coverage_with_static_fallback,
+         wall_ms,
+         baseline_ms,
+         metrics_pid,
+         oracle
+       ) do
+    IO.puts(
+      :stderr,
+      "Coverage collection took #{wall_ms}ms vs baseline #{baseline_ms}ms; falling back to static selection."
+    )
+
+    Metrics.set_selection_mode(metrics_pid, :downgraded_to_static)
+    {oracle, :downgraded_to_static}
+  end
+
+  defp handle_pathological_coverage(:coverage, wall_ms, baseline_ms, _metrics_pid, _oracle) do
+    ratio =
+      if baseline_ms == 0,
+        do: "inf",
+        else: :erlang.float_to_binary(wall_ms / baseline_ms, decimals: 1)
+
+    Mix.raise(
+      "Coverage collection took #{wall_ms}ms vs baseline #{baseline_ms}ms (#{ratio}x threshold). Rerun with --selection coverage_with_static_fallback to fall back automatically, or --selection static to skip coverage entirely."
+    )
+  end
+
+  defp build_selection_context(
+         plan,
+         source_root,
+         opts,
+         coverage_oracle,
+         selection_mode,
+         last_killer,
+         all_test_files
+       ) do
+    test_paths = absolute_test_paths(source_root, opts)
+    static_analysis = Static.analyze(test_paths)
+
+    %{
+      plan: plan,
+      source_root: source_root,
+      test_paths: test_paths,
+      static_analysis: static_analysis,
+      coverage_oracle: coverage_oracle || %CoverageOracle{},
+      selection_mode: selection_mode,
+      last_killer: last_killer,
+      all_test_files: all_test_files
+    }
+  end
+
+  defp static_match_kind(tests, all_test_files) do
+    if tests == [] or length(tests) == length(all_test_files),
+      do: :all_tests,
+      else: :static_fallback
+  end
+
+  defp run_schema_mutants(
+         pool,
+         plan,
+         selection_context,
+         all_test_files,
+         work_copy,
+         metrics_pid,
+         last_killer,
+         stream?
+       ) do
     plan.schema
     |> Enum.sort_by(& &1.id)
     |> Enum.reduce(pool, fn mutant, pool ->
       {:ok, sandbox, checked_out} = Sandbox.checkout(pool)
-      selected = selected_tests(selection, mutant)
+      selected = selected_tests(selection_context, mutant)
+      record_selection_metrics(metrics_pid, mutant, selected, work_copy)
       worker_tests = worker_test_files(selected, all_test_files, work_copy)
 
       result =
@@ -238,6 +383,8 @@ defmodule Mix.Tasks.Mut do
         result
       )
 
+      record_last_killer(last_killer, mutant, result, selected)
+
       maybe_stream_event(stream?, metrics_pid, mutant, result)
       Sandbox.checkin(sandbox, checked_out)
     end)
@@ -246,17 +393,19 @@ defmodule Mix.Tasks.Mut do
   defp run_fallback_mutants(
          pool,
          plan,
-         selection,
+         selection_context,
          all_test_files,
          work_copy,
          metrics_pid,
+         last_killer,
          stream?
        ) do
     plan.fallback
     |> Enum.sort_by(& &1.id)
     |> Enum.reduce(pool, fn mutant, pool ->
       {:ok, sandbox, checked_out} = Sandbox.checkout(pool)
-      selected = selected_tests(selection, mutant)
+      selected = selected_tests(selection_context, mutant)
+      record_selection_metrics(metrics_pid, mutant, selected, work_copy)
       worker_tests = worker_test_files(selected, all_test_files, work_copy)
 
       result =
@@ -270,6 +419,8 @@ defmodule Mix.Tasks.Mut do
         %{mutant | covering_tests: relative_tests(selected, work_copy)},
         result
       )
+
+      record_last_killer(last_killer, mutant, result, selected)
 
       maybe_stream_event(stream?, metrics_pid, mutant, result)
       Sandbox.checkin(sandbox, checked_out)
@@ -307,6 +458,37 @@ defmodule Mix.Tasks.Mut do
   defp record_result(metrics_pid, mutant, result) do
     Metrics.record_mutant(metrics_pid, mutant, result)
   end
+
+  defp record_selection_metrics(metrics_pid, mutant, selection_result, work_copy) do
+    fallback_reason = fallback_reason(metrics_pid, selection_result.match_kind)
+    count = length(relative_tests(selection_result.test_files, work_copy))
+
+    Metrics.record_selection(
+      metrics_pid,
+      mutant,
+      selection_result.match_kind,
+      fallback_reason,
+      count
+    )
+  end
+
+  defp fallback_reason(metrics_pid, match_kind) do
+    mode = Metrics.snapshot(metrics_pid).selection.mode
+
+    cond do
+      match_kind == :exact_line -> nil
+      mode == :static -> :static_only_mode
+      mode == :downgraded_to_static -> :downgraded_pathological_collection
+      match_kind == :enclosing_function -> :no_line_coverage
+      true -> :no_function_coverage
+    end
+  end
+
+  defp record_last_killer(killer, mutant, %{status: :killed}, %{test_files: [test_file | _]}) do
+    if mutant.module, do: Mut.LastKiller.record_kill(killer, mutant.module, test_file)
+  end
+
+  defp record_last_killer(_killer, _mutant, _result, _selected), do: :ok
 
   defp render_reports(snapshot, plan, work_copy, host_root, opts) do
     if :terminal in opts.reporters do
@@ -374,15 +556,42 @@ defmodule Mix.Tasks.Mut do
 
   defp executable_count(plan), do: length(plan.schema) + length(plan.fallback)
 
-  defp selected_tests(selection, mutant), do: Map.get(selection, mutant.stable_id, [])
+  defp selected_tests(%{selection_mode: mode} = context, mutant)
+       when mode in [:static, :downgraded_to_static] do
+    tests =
+      context.plan
+      |> Mut.TestSelection.for_plan(context.test_paths)
+      |> Map.get(mutant.stable_id, [])
+      |> CoverageSelection.order_tests(
+        mutant,
+        context.coverage_oracle,
+        context.last_killer
+      )
+
+    %{test_files: tests, match_kind: static_match_kind(tests, context.all_test_files)}
+  end
+
+  defp selected_tests(context, mutant) do
+    context.plan
+    |> CoverageSelection.for_plan(context.coverage_oracle, context.static_analysis,
+      all_test_files: context.all_test_files,
+      last_killer: context.last_killer
+    )
+    |> Map.fetch!(mutant.stable_id)
+  end
 
   defp worker_test_files(selected, all_test_files, work_copy) do
+    selected = selected.test_files
+
     if selected == [] or length(selected) == length(all_test_files) do
       []
     else
       Enum.map(selected, &Path.relative_to(&1, work_copy))
     end
   end
+
+  defp relative_tests(%{test_files: selected}, work_copy),
+    do: relative_tests(selected, work_copy)
 
   defp relative_tests(selected, work_copy),
     do: Enum.map(selected, &Path.relative_to(&1, work_copy))

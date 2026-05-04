@@ -70,7 +70,8 @@ defmodule Mut.Reporter.Terminal do
       "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
       "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n",
-      phase_block(snapshot)
+      phase_block(snapshot),
+      selection_block(snapshot)
     ]
   end
 
@@ -202,8 +203,28 @@ defmodule Mut.Reporter.Terminal do
     end
   end
 
+  defp selection_block(%Snapshot{selection: nil}), do: ""
+
+  defp selection_block(%Snapshot{selection: selection}) do
+    distribution = Map.get(selection, :coverage_match_distribution, %{})
+
+    [
+      "\nSelection:\n",
+      "  mode: #{selection.mode}\n",
+      "  match distribution:\n",
+      "    exact line:         #{Map.get(distribution, :exact_line, 0)}\n",
+      "    enclosing function: #{Map.get(distribution, :enclosing_function, 0)}\n",
+      "    static fallback:    #{Map.get(distribution, :static_fallback, 0)}\n",
+      "    all tests:          #{Map.get(distribution, :all_tests, 0)}\n",
+      "  avg tests/mutant: #{format_float(Map.get(selection, :selected_tests_avg, 0.0))}\n",
+      "  median tests/mutant: #{Map.get(selection, :selected_tests_median, 0)}\n",
+      "  coverage collection: #{Map.get(selection, :coverage_collection_wall_ms, 0)} ms\n"
+    ]
+  end
+
   defp format_seconds(ms), do: :erlang.float_to_binary(ms / 1000, decimals: 1) <> "s"
   defp format_pct(value), do: :erlang.float_to_binary(value, decimals: 1) <> "%"
+  defp format_float(value), do: :erlang.float_to_binary(value * 1.0, decimals: 1)
 
   defp location(%Mutant{file: file, line: line}), do: "#{file}:#{line}"
 

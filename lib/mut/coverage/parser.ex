@@ -20,7 +20,7 @@ defmodule Mut.Coverage.Parser do
     by_line =
       line_entries
       |> Enum.flat_map(fn
-        {{module, line}, {hits, _not_hits}} when hits > 0 ->
+        {{module, line}, {hits, _not_hits}} when line > 0 and hits > 0 ->
           case module_source(module, root) do
             nil -> []
             file -> [{{file, line}, MapSet.new([test_id])}]
@@ -34,7 +34,8 @@ defmodule Mut.Coverage.Parser do
     by_function =
       function_entries
       |> Enum.flat_map(fn
-        {{module, function, arity}, {hits, _not_hits}} when hits > 0 ->
+        {{module, function, arity}, {hits, _not_hits}}
+        when function != :__info__ and hits > 0 ->
           if module_source(module, root) do
             [{{module, function, arity}, MapSet.new([test_id])}]
           else

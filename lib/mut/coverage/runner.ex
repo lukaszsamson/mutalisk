@@ -15,21 +15,22 @@ defmodule Mut.Coverage.Runner do
     test_paths = Keyword.get(opts, :test_paths, ["test"])
     timeout_ms = Keyword.get(opts, :timeout_per_file_ms, @default_timeout_ms)
     fallback_static_tests = Keyword.get(opts, :fallback_static_tests, %{})
+    mutalisk_path = Keyword.get(opts, :mutalisk_path, File.cwd!())
 
     with :ok <- ensure_overlay(work_copy_root),
-         :ok <- deps_compile(work_copy_root),
-         :ok <- compile(work_copy_root) do
+         :ok <- deps_compile(work_copy_root, mutalisk_path),
+         :ok <- compile(work_copy_root, mutalisk_path) do
       test_files = discover_test_files(work_copy_root, test_paths)
 
       test_files
-      |> collect_files(work_copy_root, timeout_ms)
+      |> collect_files(work_copy_root, timeout_ms, mutalisk_path)
       |> put_collection_metadata(started, fallback_static_tests)
     end
   end
 
-  defp collect_files(test_files, root, timeout_ms) do
+  defp collect_files(test_files, root, timeout_ms, mutalisk_path) do
     Enum.reduce_while(test_files, {:ok, empty_oracle()}, fn test_file, {:ok, oracle} ->
-      case run_test_file(root, test_file, timeout_ms) do
+      case run_test_file(root, test_file, timeout_ms, mutalisk_path) do
         {:ok, partial} -> {:cont, {:ok, merge_oracle(oracle, partial)}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
@@ -59,41 +60,50 @@ defmodule Mut.Coverage.Runner do
   defp discover_test_files(root, test_paths) do
     test_paths
     |> Enum.flat_map(fn test_path ->
-      path = Path.join(root, test_path)
+      path = if Path.type(test_path) == :absolute, do: test_path, else: Path.join(root, test_path)
 
-      if File.regular?(path) and String.ends_with?(path, "_test.exs") do
-        [path]
-      else
-        path
-        |> Path.join("**/*_test.exs")
-        |> Path.wildcard()
+      cond do
+        File.regular?(test_path) and String.ends_with?(test_path, "_test.exs") ->
+          [test_path]
+
+        File.regular?(path) and String.ends_with?(path, "_test.exs") ->
+          [path]
+
+        true ->
+          path
+          |> Path.join("**/*_test.exs")
+          |> Path.wildcard()
       end
     end)
     |> Enum.uniq()
     |> Enum.sort()
   end
 
-  defp deps_compile(root) do
-    run_mix(root, ["do", "deps.get", "+", "deps.compile", "--include-children", "mutalisk"])
+  defp deps_compile(root, mutalisk_path) do
+    run_mix(
+      root,
+      ["do", "deps.get", "+", "deps.compile", "--include-children", "mutalisk"],
+      mutalisk_path
+    )
   end
 
-  defp compile(root), do: run_mix(root, ["compile"])
+  defp compile(root, mutalisk_path), do: run_mix(root, ["compile"], mutalisk_path)
 
-  defp run_mix(root, args) do
-    case System.cmd("mix", args, cd: root, env: child_env(), stderr_to_stdout: true) do
+  defp run_mix(root, args, mutalisk_path) do
+    case System.cmd("mix", args, cd: root, env: child_env(mutalisk_path), stderr_to_stdout: true) do
       {_output, 0} -> :ok
       {output, exit_code} -> {:error, {:mix_failed, args, exit_code, output_tail(output)}}
     end
   end
 
-  defp run_test_file(root, test_file, timeout_ms) do
+  defp run_test_file(root, test_file, timeout_ms, mutalisk_path) do
     out_path =
       Path.join([root, "tmp", "mut_coverage", "#{:erlang.unique_integer([:positive])}.term"])
 
     File.mkdir_p!(Path.dirname(out_path))
     script = coverage_script(root, test_file, out_path)
 
-    case run_coverage_mix(root, script, timeout_ms) do
+    case run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
       {:error, reason} ->
         {:error, reason}
 
@@ -115,14 +125,14 @@ defmodule Mut.Coverage.Runner do
     end
   end
 
-  defp run_coverage_mix(root, script, timeout_ms) do
+  defp run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
     with {:ok, mix_path} <- mix_path() do
       port =
         Port.open({:spawn_executable, mix_path}, [
           {:args,
            ["run", "--no-compile", "--no-deps-check", "--no-archives-check", "-e", script]},
           {:cd, root},
-          {:env, port_env()},
+          {:env, port_env(mutalisk_path)},
           :stderr_to_stdout,
           :exit_status,
           :binary
@@ -133,7 +143,7 @@ defmodule Mut.Coverage.Runner do
   end
 
   defp parse_test_output(root, test_file, out_path, output) do
-    {line, function} = out_path |> File.read!() |> :erlang.binary_to_term()
+    {line, function} = read_coverage_term(out_path)
     prepend_project_ebins(root)
     test_id = {:file, Path.relative_to(test_file, root)}
     {by_line, by_function} = Parser.parse(line, function, test_id, root)
@@ -151,6 +161,13 @@ defmodule Mut.Coverage.Runner do
      }}
   end
 
+  defp read_coverage_term(out_path) do
+    case out_path |> File.read!() |> :erlang.binary_to_term() do
+      {line, function} -> {line, function}
+      {line, function, _result} -> {line, function}
+    end
+  end
+
   defp prepend_project_ebins(root) do
     root
     |> Path.join("#{@build_path}/lib/*/ebin")
@@ -165,9 +182,12 @@ defmodule Mut.Coverage.Runner do
     :code.add_path(String.to_charlist(tools))
     Application.ensure_all_started(:tools)
     :cover.start()
+    Code.prepend_paths(Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"))
     for ebin <- Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"),
         Path.basename(Path.dirname(ebin)) not in ["mutalisk", "jason"] do
-      :cover.compile_beam_directory(String.to_charlist(ebin))
+      for beam <- Path.wildcard(Path.join(ebin, "*.beam")) do
+        {:ok, _module} = :cover.compile_beam(String.to_charlist(beam))
+      end
     end
     ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
     Code.require_file("test/test_helper.exs", "#{root}")
@@ -178,8 +198,12 @@ defmodule Mut.Coverage.Runner do
     result = ExUnit.run()
     line = :cover.analyse(:coverage, :line)
     function = :cover.analyse(:coverage, :function)
-    File.write!("#{out_path}", :erlang.term_to_binary({line, function}))
-    if result.failures > 0, do: System.halt(2)
+    File.write!("#{out_path}", :erlang.term_to_binary({line, function, result}))
+    if result.failures > 0 do
+      System.halt(2)
+    else
+      System.halt(0)
+    end
     """
   end
 
@@ -199,18 +223,18 @@ defmodule Mut.Coverage.Runner do
 
   defp empty_oracle, do: %CoverageOracle{}
 
-  defp child_env do
+  defp child_env(mutalisk_path) do
     [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", @build_path},
       {"MIX_DEPS_PATH", @deps_path},
       {"MUTALISK_ROLE", "coverage"},
-      {"MUTALISK_PATH", File.cwd!()}
+      {"MUTALISK_PATH", mutalisk_path}
     ]
   end
 
-  defp port_env do
-    Enum.map(child_env(), fn {key, value} ->
+  defp port_env(mutalisk_path) do
+    Enum.map(child_env(mutalisk_path), fn {key, value} ->
       {String.to_charlist(key), String.to_charlist(value)}
     end)
   end

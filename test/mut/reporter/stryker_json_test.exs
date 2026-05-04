@@ -29,6 +29,7 @@ defmodule Mut.Reporter.StrykerJsonTest do
     assert mutant["status"] == "Killed"
     assert rendered["mutalisk"]["engine"] == %{"stable-killed" => "schema"}
     assert rendered["mutalisk"]["phase_timings"]["oracle_build_ms"] == 1000
+    assert rendered["mutalisk"]["selection"]["mode"] == "coverage_with_static_fallback"
   end
 
   test "validate accepts known good shape and rejects missing fields" do
@@ -84,6 +85,19 @@ defmodule Mut.Reporter.StrykerJsonTest do
         fallback_workers_ms: 6000,
         report_writing_ms: 70,
         total_ms: 18_370
+      },
+      selection: %{
+        mode: :coverage_with_static_fallback,
+        coverage_match_distribution: %{
+          exact_line: length(mutants),
+          enclosing_function: 0,
+          static_fallback: 0,
+          all_tests: 0
+        },
+        fallback_reason_distribution: %{},
+        selected_tests_avg: 1.0,
+        selected_tests_median: 1,
+        coverage_collection_wall_ms: 123
       },
       ledger: Enum.map(mutants, &entry/1)
     }
