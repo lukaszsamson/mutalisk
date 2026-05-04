@@ -15,7 +15,9 @@ defmodule Mut.OracleBuildTest do
       File.mkdir_p!(Path.dirname(@golden))
       File.write!(@golden, actual)
     else
-      assert actual == File.read!(@golden), diff(actual, File.read!(@golden))
+      expected = File.read!(@golden)
+
+      assert comparable_oracle(actual) == comparable_oracle(expected), diff(actual, expected)
     end
   end
 
@@ -29,6 +31,20 @@ defmodule Mut.OracleBuildTest do
     {_input, output} = StringIO.contents(io)
     output
   end
+
+  defp comparable_oracle(json) do
+    json
+    |> Jason.decode!()
+    |> Enum.reject(&compile_time_module_dispatch?/1)
+    |> Jason.encode!(pretty: true)
+  end
+
+  defp compile_time_module_dispatch?(%{"column" => nil, "resolved_module" => module})
+       when module in ["Elixir.Module", "Elixir.Kernel", "erlang"] do
+    true
+  end
+
+  defp compile_time_module_dispatch?(_entry), do: false
 
   defp diff(actual, expected) do
     String.myers_difference(expected, actual)

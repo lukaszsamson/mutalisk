@@ -7,12 +7,13 @@ defmodule Mut.Coverage.Runner do
 
   @build_path "_build/mut_coverage"
   @deps_path "_build/mut_coverage/deps"
+  @default_timeout_ms 60_000
 
   @spec run(Path.t(), keyword) :: {:ok, CoverageOracle.t()} | {:error, term}
   def run(work_copy_root, opts \\ []) do
     started = monotonic_ms()
     test_paths = Keyword.get(opts, :test_paths, ["test"])
-    timeout_ms = Keyword.get(opts, :timeout_per_file_ms, 60_000)
+    timeout_ms = Keyword.get(opts, :timeout_per_file_ms, @default_timeout_ms)
     fallback_static_tests = Keyword.get(opts, :fallback_static_tests, %{})
 
     with :ok <- ensure_overlay(work_copy_root),
@@ -58,10 +59,15 @@ defmodule Mut.Coverage.Runner do
   defp discover_test_files(root, test_paths) do
     test_paths
     |> Enum.flat_map(fn test_path ->
-      root
-      |> Path.join(test_path)
-      |> Path.join("**/*_test.exs")
-      |> Path.wildcard()
+      path = Path.join(root, test_path)
+
+      if File.regular?(path) and String.ends_with?(path, "_test.exs") do
+        [path]
+      else
+        path
+        |> Path.join("**/*_test.exs")
+        |> Path.wildcard()
+      end
     end)
     |> Enum.uniq()
     |> Enum.sort()
@@ -87,33 +93,42 @@ defmodule Mut.Coverage.Runner do
     File.mkdir_p!(Path.dirname(out_path))
     script = coverage_script(root, test_file, out_path)
 
-    task =
-      Task.async(fn ->
-        System.cmd("mix", ["run", "--no-compile", "--no-deps-check", "-e", script],
-          cd: root,
-          env: child_env(),
-          stderr_to_stdout: true
-        )
-      end)
+    case run_coverage_mix(root, script, timeout_ms) do
+      {:error, reason} ->
+        {:error, reason}
 
-    result = Task.yield(task, timeout_ms) || Task.shutdown(task, :brutal_kill)
-
-    case result do
-      nil ->
+      {:timeout, _output} ->
         {:error, {:coverage_test_timeout, Path.relative_to(test_file, root), timeout_ms}}
 
-      {:ok, {output, exit_code}} when exit_code != 0 ->
+      {:exit, exit_code, output} when exit_code != 0 ->
         {:error,
          {:coverage_test_failed, Path.relative_to(test_file, root), exit_code,
           output_tail(output)}}
 
-      {:ok, {output, 0}} ->
+      {:exit, 0, output} ->
         if File.exists?(out_path) do
           parse_test_output(root, test_file, out_path, output)
         else
           {:error,
            {:coverage_output_missing, Path.relative_to(test_file, root), output_tail(output)}}
         end
+    end
+  end
+
+  defp run_coverage_mix(root, script, timeout_ms) do
+    with {:ok, mix_path} <- mix_path() do
+      port =
+        Port.open({:spawn_executable, mix_path}, [
+          {:args,
+           ["run", "--no-compile", "--no-deps-check", "--no-archives-check", "-e", script]},
+          {:cd, root},
+          {:env, port_env()},
+          :stderr_to_stdout,
+          :exit_status,
+          :binary
+        ])
+
+      collect_port(port, "", timeout_ms)
     end
   end
 
@@ -154,9 +169,11 @@ defmodule Mut.Coverage.Runner do
         Path.basename(Path.dirname(ebin)) not in ["mutalisk", "jason"] do
       :cover.compile_beam_directory(String.to_charlist(ebin))
     end
-    ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false)
+    ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
     Code.require_file("test/test_helper.exs", "#{root}")
-    ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false)
+    # Test modules may still declare `async: true`; max_cases: 1 serializes this
+    # per-file run, while v1.5 intentionally attributes only at file granularity.
+    ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
     Code.require_file("#{Path.relative_to(test_file, root)}", "#{root}")
     result = ExUnit.run()
     line = :cover.analyse(:coverage, :line)
@@ -190,6 +207,88 @@ defmodule Mut.Coverage.Runner do
       {"MUTALISK_ROLE", "coverage"},
       {"MUTALISK_PATH", File.cwd!()}
     ]
+  end
+
+  defp port_env do
+    Enum.map(child_env(), fn {key, value} ->
+      {String.to_charlist(key), String.to_charlist(value)}
+    end)
+  end
+
+  defp mix_path do
+    case System.find_executable("mix") do
+      nil -> {:error, :mix_not_found}
+      path -> {:ok, path}
+    end
+  end
+
+  defp collect_port(port, output, timeout_ms) do
+    receive do
+      {^port, {:data, data}} -> collect_port(port, output <> data, timeout_ms)
+      {^port, {:exit_status, code}} -> {:exit, code, output}
+    after
+      timeout_ms ->
+        kill_port(port)
+        {:timeout, output}
+    end
+  end
+
+  defp kill_port(port) do
+    os_pid = Port.info(port, :os_pid)
+    Port.close(port)
+
+    case os_pid do
+      {:os_pid, pid} when is_integer(pid) ->
+        kill_process_tree(pid)
+
+      _unknown ->
+        :ok
+    end
+  catch
+    _kind, _reason -> :ok
+  end
+
+  defp kill_process_tree(pid) do
+    descendants = descendant_pids(pid)
+
+    Enum.each(descendants, fn child_pid ->
+      System.cmd("kill", ["-TERM", Integer.to_string(child_pid)], stderr_to_stdout: true)
+    end)
+
+    System.cmd("kill", ["-TERM", Integer.to_string(pid)], stderr_to_stdout: true)
+    Process.sleep(100)
+
+    Enum.each(descendants, fn child_pid ->
+      System.cmd("kill", ["-KILL", Integer.to_string(child_pid)], stderr_to_stdout: true)
+    end)
+
+    System.cmd("kill", ["-KILL", Integer.to_string(pid)], stderr_to_stdout: true)
+    :ok
+  end
+
+  defp descendant_pids(pid) do
+    pid
+    |> child_pids()
+    |> Enum.flat_map(fn child_pid -> [child_pid | descendant_pids(child_pid)] end)
+  end
+
+  defp child_pids(pid) do
+    case System.cmd("pgrep", ["-P", Integer.to_string(pid)], stderr_to_stdout: true) do
+      {output, 0} ->
+        output
+        |> String.split("\n", trim: true)
+        |> Enum.flat_map(&parse_pid/1)
+
+      _no_children ->
+        []
+    end
+  end
+
+  defp parse_pid(value) do
+    case Integer.parse(value) do
+      {child_pid, ""} -> [child_pid]
+      _invalid -> []
+    end
   end
 
   defp output_tail(output) do

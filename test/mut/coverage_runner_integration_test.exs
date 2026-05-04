@@ -31,4 +31,32 @@ defmodule Mut.CoverageRunnerIntegrationTest do
       File.rm_rf!(work_copy)
     end
   end
+
+  @tag :integration_schema
+  test "installs coverage overlay for a clean work copy" do
+    run_id = "coverage-overlay-#{System.unique_integer([:positive])}"
+    fixture = Path.expand("../fixtures/demo_app", __DIR__)
+
+    {:ok, work_copy} = Mut.WorkCopy.materialize(fixture, run_id, force: true)
+
+    try do
+      refute File.exists?(Path.join(work_copy, "mix_user.exs"))
+
+      assert {:ok, oracle} =
+               Runner.run(work_copy,
+                 test_paths: ["test/arith_test.exs"],
+                 timeout_per_file_ms: 60_000
+               )
+
+      assert File.exists?(Path.join(work_copy, "mix_user.exs"))
+      assert File.read!(Path.join(work_copy, "mix.exs")) =~ "@mutalisk_role"
+
+      assert MapSet.member?(
+               Map.fetch!(oracle.by_line, {"lib/arith.ex", 5}),
+               {:file, "test/arith_test.exs"}
+             )
+    after
+      File.rm_rf!(work_copy)
+    end
+  end
 end
