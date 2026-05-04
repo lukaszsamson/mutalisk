@@ -10,6 +10,8 @@ defmodule Mut.Bootstrap.OverlayTest do
       rendered = Overlay.render(role)
 
       assert Code.string_to_quoted!(rendered)
+      assert rendered =~ "@user_mod mutalisk_user_mod"
+      refute rendered =~ "user_mix_module"
       assert rendered =~ "@mutalisk_path"
       assert rendered =~ ~s("oracle" -> [:mut_oracle | compilers])
     end

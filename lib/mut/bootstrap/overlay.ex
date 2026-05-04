@@ -8,17 +8,16 @@ defmodule Mut.Bootstrap.Overlay do
   Code.require_file("mix_user.exs", __DIR__)
   mutalisk_user_mod = Mix.Project.get!()
   Mix.Project.pop()
-  Application.put_env(:mutalisk, :user_mix_module, mutalisk_user_mod)
 
   defmodule Mutalisk.WrappedMixProject do
     use Mix.Project
 
+    @user_mod mutalisk_user_mod
     @mutalisk_path System.fetch_env!("MUTALISK_PATH")
     @mutalisk_role System.get_env("MUTALISK_ROLE", "schema")
 
     def project do
-      user_mod = Application.fetch_env!(:mutalisk, :user_mix_module)
-      user = user_mod.project()
+      user = @user_mod.project()
 
       user
       |> Keyword.update(:deps, default_deps(), &add_mutalisk_dep/1)
@@ -26,10 +25,8 @@ defmodule Mut.Bootstrap.Overlay do
     end
 
     def application do
-      user_mod = Application.fetch_env!(:mutalisk, :user_mix_module)
-
-      if function_exported?(user_mod, :application, 0) do
-        user_mod.application()
+      if function_exported?(@user_mod, :application, 0) do
+        @user_mod.application()
       else
         []
       end

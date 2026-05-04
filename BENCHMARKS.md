@@ -131,11 +131,11 @@ Coverage mode matched static outcomes exactly. Fanout improved by 1.31x on plug_
 
 ### Decimal: v1.5 coverage attempt
 - Status: did not reach mutation execution.
-- Wall-clock: failed during oracle/bootstrap compile, before the 30-minute mutation budget could be measured.
-- Phase breakdown: unavailable; no Stryker report was produced.
+- Wall-clock: killed by the 30-minute bench cap after dependency fetch and target compile; no mutation report was produced.
+- Phase breakdown: unavailable; terminal output reached target compile completion but no Mutalisk phase summary was emitted.
 - Coverage match distribution: unavailable.
 - Per-mutant fanout reduction estimate: unavailable.
-- Identified next bottleneck: Decimal v2.1.1 names its application `:decimal` and also has a dependency entry named `:decimal` after bench injection. The overlay compile failed before plan generation with `Application.fetch_env!(:mutalisk, :user_mix_module)` missing from `Mutalisk.WrappedMixProject.application/0`. This is a target bootstrap/self-dependency conflict, not a selector bottleneck. M16 did not add a Decimal-specific overlay workaround.
+- Identified next bottleneck: baseline/oracle-side execution for Decimal exceeds the 30-minute smoke budget before coverage collection or mutation workers can emit metrics. A bootstrap bug exposed by the first Decimal retry was fixed by changing the generated overlay to capture the user Mix project module in a module attribute instead of `Application` env; the second retry progressed past that failure and then hit the time budget.
 
 ### Acceptance evaluation
 - ☐ Decimal completes within 30-minute budget
@@ -144,4 +144,4 @@ Coverage mode matched static outcomes exactly. Fanout improved by 1.31x on plug_
 - ✓ plug_crypto outcomes unchanged in static mode
 - ✓ plug_crypto outcomes match within ±1 mutant in coverage mode
 
-v1.5 acceptance is soft-failed for Decimal because the Decimal run did not reach mutation execution and did not produce fanout data. The next decision is a v1.6 bootstrap hardening item for self-dependency/name-conflict targets before parallel-worker evaluation.
+v1.5 acceptance is soft-failed for Decimal because the run did not reach mutation execution and did not produce fanout data. The next decision is a v1.6 execution milestone focused on reducing baseline/oracle wall-clock and then re-measuring coverage fanout on Decimal.

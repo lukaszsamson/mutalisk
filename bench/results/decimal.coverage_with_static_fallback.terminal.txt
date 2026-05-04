@@ -2,7 +2,7 @@ target=decimal repo=https://github.com/ericmj/decimal.git ref=v2.1.1 sha=12f2776
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.014s
+Resolution completed in 0.016s
 New:
   jason 1.4.4
 Unchanged:
@@ -43,13 +43,3 @@ Generated mutalisk app
 warning: the application name :decimal is the same as one of its dependencies
 Compiling 4 files (.ex)
 Generated decimal app
-** (MatchError) no match of right hand side value:
-
-    {:error,
-     {:compile_failed, 1,
-      "warning: the application name :decimal is the same as one of its dependencies\nwarning: the application name :decimal is the same as one of its dependencies\n==> stream_data\nCompiling 3 files (.ex)\nwarning: left..right inside match is deprecated, you must always match on the step: left..right//var or left..right//_ if you want to ignore it\n  lib/stream_data.ex:508: StreamData.integer/1\n\nwarning: min..max inside match is deprecated, you must always match on the step: min..max//var or min..max//_ if you want to ignore it\n  lib/stream_data.ex:894: StreamData.list_length_range_fun/1\n\nGenerated stream_data app\n==> decimal\nwarning: the application name :decimal is the same as one of its dependencies\n** (ArgumentError) could not fetch application environment :user_mix_module for application :mutalisk because configuration at :user_mix_module was not set\n    (elixir 1.20.0-rc.4) lib/application.ex:780: Application.fetch_env!/2\n    mix.exs:23: Mutalisk.WrappedMixProject.application/0\n    (mix 1.20.0-rc.4) lib/mix/tasks/compile.all.ex:107: Mix.Tasks.Compile.All.compile_apps/2\n    (mix 1.20.0-rc.4) lib/mix/tasks/compile.all.ex:40: Mix.Tasks.Compile.All.do_run/2\n    (mix 1.20.0-rc.4) lib/mix/sync/lock.ex:122: Mix.Sync.Lock.with_lock/3\n    (mix 1.20.0-rc.4) lib/mix/task.ex:502: anonymous fn/3 in Mix.Task.run_task/5\n    (mix 1.20.0-rc.4) lib/mix/tasks/compile.ex:145: Mix.Tasks.Compile.run/1\n    (mix 1.20.0-rc.4) lib/mix/task.ex:502: anonymous fn/3 in Mix.Task.run_task/5\n"}}
-
-    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:85: Mix.Tasks.Mut.run_pipeline/1
-    (mix 1.20.0-rc.4) lib/mix/task.ex:502: anonymous fn/3 in Mix.Task.run_task/5
-    (mix 1.20.0-rc.4) lib/mix/cli.ex:129: Mix.CLI.run_task/2
-    /Users/lukaszsamson/elixir/bin/mix:7: (file)
