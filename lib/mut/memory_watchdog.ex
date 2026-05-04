@@ -14,24 +14,28 @@ defmodule Mut.MemoryWatchdog do
     interval = Keyword.get(opts, :interval_ms, @default_interval_ms)
     File.mkdir_p!(Path.dirname(log_path))
 
-    case File.open(log_path, [:write, :binary, :raw]) do
-      {:ok, io} ->
-        write_header(io)
-        # Intentionally NOT linked: shutting down the watchdog must never
-        # propagate exit signals to the orchestrator process. The BEAM
-        # exits when `mix mut` returns, so leak risk is bounded.
-        pid = spawn(fn -> loop(io, interval, System.monotonic_time(:millisecond)) end)
-        {:ok, pid}
+    # Open the file inside the spawned process to avoid raw-fd cross-process
+    # ownership pitfalls. `spawn` (not `spawn_link`) so a watchdog shutdown
+    # never propagates exit signals back to the orchestrator.
+    pid =
+      spawn(fn ->
+        case File.open(log_path, [:write, :binary]) do
+          {:ok, io} ->
+            write_header(io)
+            loop(io, interval, System.monotonic_time(:millisecond))
 
-      {:error, _reason} = err ->
-        err
-    end
+          _other ->
+            :ok
+        end
+      end)
+
+    {:ok, pid}
   end
 
   @spec stop(pid) :: :ok
   def stop(pid) when is_pid(pid) do
     if Process.alive?(pid) do
-      Process.exit(pid, :shutdown)
+      send(pid, :stop)
     end
 
     :ok
@@ -41,7 +45,9 @@ defmodule Mut.MemoryWatchdog do
     sample(io, started_ms)
 
     receive do
-      :stop -> :ok
+      :stop ->
+        File.close(io)
+        :ok
     after
       interval ->
         loop(io, interval, started_ms)
@@ -49,7 +55,7 @@ defmodule Mut.MemoryWatchdog do
   end
 
   defp write_header(io) do
-    :file.write(
+    IO.binwrite(
       io,
       "# elapsed_ms\ttotal_mb\tprocesses_mb\tbinary_mb\tets_mb\tatom_mb\tprocess_count\n"
     )
@@ -71,7 +77,7 @@ defmodule Mut.MemoryWatchdog do
       ]
       |> Enum.join("\t")
 
-    :file.write(io, line <> "\n")
+    IO.binwrite(io, line <> "\n")
   rescue
     _ -> :ok
   catch
