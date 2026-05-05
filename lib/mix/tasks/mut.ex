@@ -83,11 +83,8 @@ defmodule Mix.Tasks.Mut do
     started = System.monotonic_time(:millisecond)
     {:ok, metrics_pid} = Metrics.start_link([])
 
-    watchdog_pid =
-      case Mut.MemoryWatchdog.start(Path.join([mutalisk_root, "tmp", "mut_memory.log"])) do
-        {:ok, pid} -> pid
-        _ -> nil
-      end
+    {:ok, watchdog_pid} =
+      Mut.MemoryWatchdog.start(Path.join([mutalisk_root, "tmp", "mut_memory.log"]))
 
     try do
       {:ok, oracle} =
@@ -132,7 +129,7 @@ defmodule Mix.Tasks.Mut do
         end)
       end
     after
-      if watchdog_pid, do: Mut.MemoryWatchdog.stop(watchdog_pid)
+      Mut.MemoryWatchdog.stop(watchdog_pid)
 
       if opts.keep_work_copy do
         IO.puts(

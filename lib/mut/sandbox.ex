@@ -232,18 +232,27 @@ defmodule Mut.Sandbox do
     end)
   end
 
+  # Tracked roots are the prefixes of baseline files that bound stray-file
+  # removal. We use the first segment for source paths (so all of `lib/`
+  # is tracked) but the first FOUR segments for `_build/` paths (so we
+  # only sweep within `_build/<build>/lib/<user_app>/`, leaving sibling
+  # apps like mutalisk and deps' ebins untouched). Without this, reset
+  # would delete `_build/mut_schema/lib/mutalisk/ebin/mutalisk.app`,
+  # breaking subsequent `mix test` runs in the sandbox.
   defp baseline_roots(paths) do
     paths
     |> Map.keys()
-    |> Enum.map(fn path -> path |> Path.split() |> List.first() end)
+    |> Enum.map(&path_root/1)
     |> Map.new(&{&1, true})
   end
 
-  defp tracked_root?(relative, roots) do
-    relative
-    |> Path.split()
-    |> List.first()
-    |> then(&Map.has_key?(roots, &1))
+  defp tracked_root?(relative, roots), do: Map.has_key?(roots, path_root(relative))
+
+  defp path_root(relative) do
+    case Path.split(relative) do
+      ["_build" | _] = parts -> parts |> Enum.take(4) |> Path.join()
+      [first | _] -> first
+    end
   end
 
   defp baseline(sandbox) do
