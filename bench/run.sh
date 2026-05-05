@@ -4,9 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET="plug_crypto"
 SELECTION="static"
+CONCURRENCY="1"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -19,6 +20,11 @@ while [ "$#" -gt 0 ]; do
     --selection)
       [ "$#" -ge 2 ] || { usage; exit 64; }
       SELECTION="$2"
+      shift 2
+      ;;
+    --concurrency)
+      [ "$#" -ge 2 ] || { usage; exit 64; }
+      CONCURRENCY="$2"
       shift 2
       ;;
     -h|--help)
@@ -34,9 +40,9 @@ done
 
 case "$TARGET" in
   decimal)
-    REPO="https://github.com/ericmj/decimal.git"
-    REF="v2.1.1"
-    SHA="12f2776a924d887c727355d85bed194bfb3a4f2c"
+    REPO="https://github.com/lukaszsamson/decimal.git"
+    REF="mutalisk-bench"
+    SHA="78ff041047799f8bea75a47097430881cc9ba628"
     ;;
   plug_crypto)
     REPO="https://github.com/elixir-plug/plug_crypto.git"
@@ -52,7 +58,11 @@ esac
 
 WORK_DIR="$ROOT/tmp/bench/$TARGET"
 RESULTS_DIR="$ROOT/bench/results"
-RESULT_PREFIX="$TARGET.$SELECTION"
+if [ "$CONCURRENCY" = "1" ]; then
+  RESULT_PREFIX="$TARGET.$SELECTION"
+else
+  RESULT_PREFIX="$TARGET.$SELECTION.c$CONCURRENCY"
+fi
 REPORT_PATH="$RESULTS_DIR/$RESULT_PREFIX.stryker.json"
 TERMINAL_PATH="$RESULTS_DIR/$RESULT_PREFIX.terminal.txt"
 REL_REPORT_PATH="bench/results/$RESULT_PREFIX.stryker.json"
@@ -81,13 +91,13 @@ mkdir -p "$WORK_DIR/bench/results"
 
 (
   cd "$WORK_DIR"
-  printf 'target=%s repo=%s ref=%s sha=%s selection=%s\n' "$TARGET" "$REPO" "$REF" "$SHA" "$SELECTION"
+  printf 'target=%s repo=%s ref=%s sha=%s selection=%s concurrency=%s\n' "$TARGET" "$REPO" "$REF" "$SHA" "$SELECTION" "$CONCURRENCY"
   printf 'mutalisk_path=%s\n' "$ROOT"
   printf 'deps.get starting\n'
   MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix deps.get
   printf 'mix mut starting\n'
   START_MS="$(date +%s)000"
-  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --output-path "$REL_REPORT_PATH"
+  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" --output-path "$REL_REPORT_PATH"
   END_MS="$(date +%s)000"
   printf 'bench.wall_ms=%s\n' "$((END_MS - START_MS))"
 ) > "$TERMINAL_PATH" 2>&1
