@@ -34,7 +34,27 @@ defmodule Mut.Recompile do
           MapSet.t(Path.t())
   defdelegate dependents(manifest, modules, kinds), to: Mut.MixManifest
 
-  @spec recompile(Sandbox.t(), [Path.t()], [Path.t()], keyword) :: :ok | {:error, term}
+  @typedoc """
+  Why a recompile failed. Each category surfaces differently in reports:
+
+    * `:compile_error` — the patched Elixir source did not compile
+      (syntax error, type mismatch, undefined helper inside the
+      patched module, etc.).
+    * `:dep_path_error` — compilation reached a module that should
+      have been on `-pa` (a sibling module or a dep) but was not
+      loadable. Indicates a sandbox materialisation problem rather
+      than a faulty mutation.
+    * `:unknown` — the elixir invocation failed but the output didn't
+      match a known category. Surface verbatim for triage.
+  """
+  @type error_category :: :compile_error | :dep_path_error | :unknown
+
+  @type result ::
+          :ok
+          | {:error, {:recompile_failed, error_category(), non_neg_integer(), String.t()}}
+          | {:error, term()}
+
+  @spec recompile(Sandbox.t(), [Path.t()], [Path.t()], keyword) :: result
   def recompile(%Sandbox{} = sandbox, mutated_files, dependent_files, opts \\ [])
       when is_list(mutated_files) and is_list(dependent_files) and is_list(opts) do
     app = Keyword.fetch!(opts, :app)
@@ -46,8 +66,34 @@ defmodule Mut.Recompile do
            env: env()
          ) do
       {:exit, 0, _output} -> :ok
-      {:exit, code, output} -> {:error, {:recompile_failed, code, output}}
+      {:exit, code, output} -> {:error, {:recompile_failed, categorize(output), code, output}}
       {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Classify the stderr/stdout from a failed recompile invocation.
+
+  Public so callers (worker, reporters) can re-classify after they have
+  reformatted the output, but the typical path is via
+  `recompile/4`'s return value.
+  """
+  @spec categorize(String.t()) :: error_category()
+  def categorize(output) when is_binary(output) do
+    cond do
+      output =~
+          ~r/(?:module|function) [A-Za-z0-9_.\/]+ (?:is not loaded|is undefined|could not be found)/ ->
+        :dep_path_error
+
+      output =~ ~r/UndefinedFunctionError/ ->
+        :dep_path_error
+
+      output =~ "mut.recompile errors:" or output =~ "** (CompileError)" or
+        output =~ "** (SyntaxError)" or output =~ "** (TokenMissingError)" ->
+        :compile_error
+
+      true ->
+        :unknown
     end
   end
 

@@ -24,6 +24,7 @@ defmodule Mut.Metrics do
       :phase_timings,
       :selection,
       :concurrency,
+      :recompile_categories,
       :ledger
     ]
 
@@ -71,6 +72,7 @@ defmodule Mut.Metrics do
               effective: pos_integer(),
               schedulers_online: pos_integer()
             },
+            recompile_categories: %{atom() => non_neg_integer()},
             ledger: [ledger_entry()]
           }
   end
@@ -90,6 +92,7 @@ defmodule Mut.Metrics do
           planned_total: non_neg_integer() | nil,
           by_status: map(),
           by_engine_status: map(),
+          recompile_categories: %{atom() => non_neg_integer()},
           wall_clock_ms: map(),
           rollback_per_file: map(),
           invalid_by_mutator: map(),
@@ -210,6 +213,7 @@ defmodule Mut.Metrics do
        fallback_reason_distribution: %{},
        selected_test_counts: [],
        concurrency: nil,
+       recompile_categories: %{compile_error: 0, dep_path_error: 0, unknown: 0},
        started_ms: monotonic_ms(),
        ledger: []
      }}
@@ -227,6 +231,7 @@ defmodule Mut.Metrics do
      |> increment_engine_status(mutant.engine, status)
      |> add_wall_clock(mutant.engine, duration_ms)
      |> put_fanout(mutant)
+     |> increment_recompile_category(status, result)
      |> prepend_ledger(entry)}
   end
 
@@ -324,6 +329,13 @@ defmodule Mut.Metrics do
     {:reply, build_snapshot(state), state}
   end
 
+  defp increment_recompile_category(state, :invalid, %Mut.Worker.Result{recompile_category: cat})
+       when not is_nil(cat) do
+    update_in(state.recompile_categories[cat], &((&1 || 0) + 1))
+  end
+
+  defp increment_recompile_category(state, _status, _result), do: state
+
   defp ledger_entry(%Mutant{} = mutant, result, status) do
     duration_ms = if result, do: result.duration_ms, else: mutant.duration_ms
     killing_test = if result, do: result.killing_test, else: mutant.killing_test
@@ -374,6 +386,7 @@ defmodule Mut.Metrics do
       phase_timings: phase_timings(state),
       selection: selection_snapshot(state),
       concurrency: concurrency_snapshot(state.concurrency),
+      recompile_categories: state.recompile_categories,
       ledger: ledger
     }
   end

@@ -106,9 +106,13 @@ defmodule Mut.Reporter.StrykerJson do
       "phase_timings" => stringify_keys(snapshot.phase_timings || %{}),
       "selection" => selection_extension(snapshot.selection || %{}),
       "metrics" => metrics_extension(snapshot),
-      "concurrency" => concurrency_extension(snapshot.concurrency)
+      "concurrency" => concurrency_extension(snapshot.concurrency),
+      "recompile_categories" => recompile_categories_extension(snapshot.recompile_categories)
     }
   end
+
+  defp recompile_categories_extension(nil), do: %{}
+  defp recompile_categories_extension(%{} = cats), do: atom_keyed_counts(cats)
 
   defp concurrency_extension(nil) do
     schedulers = System.schedulers_online()

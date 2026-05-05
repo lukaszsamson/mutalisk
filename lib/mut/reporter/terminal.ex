@@ -50,6 +50,7 @@ defmodule Mut.Reporter.Terminal do
       "\n",
       engine_line(snapshot, :fallback, "Fallback: "),
       fallback_kind_lines(snapshot),
+      recompile_categories_block(snapshot),
       "\n",
       count_line(
         "Skipped",
@@ -74,6 +75,25 @@ defmodule Mut.Reporter.Terminal do
       selection_block(snapshot),
       concurrency_block(snapshot)
     ]
+  end
+
+  defp recompile_categories_block(%Snapshot{recompile_categories: nil}), do: ""
+
+  defp recompile_categories_block(%Snapshot{recompile_categories: cats}) do
+    total = Enum.sum(Map.values(cats))
+
+    if total == 0 do
+      ""
+    else
+      compile_n = Map.get(cats, :compile_error, 0)
+      dep_n = Map.get(cats, :dep_path_error, 0)
+      unknown_n = Map.get(cats, :unknown, 0)
+
+      "  recompile errors:\n" <>
+        "    compile errors:    #{compile_n}\n" <>
+        "    dep path errors:   #{dep_n}\n" <>
+        "    unknown:           #{unknown_n}\n"
+    end
   end
 
   defp concurrency_block(%Snapshot{concurrency: nil}), do: ""

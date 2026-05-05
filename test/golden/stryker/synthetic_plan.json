@@ -195,6 +195,11 @@
       "schema_workers_ms": 5000,
       "total_ms": 18370
     },
+    "recompile_categories": {
+      "compile_error": 1,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
     "selection": {
       "coverage_collection_wall_ms": 5832,
       "coverage_match_distribution": {

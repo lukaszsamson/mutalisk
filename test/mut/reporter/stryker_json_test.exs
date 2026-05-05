@@ -100,6 +100,7 @@ defmodule Mut.Reporter.StrykerJsonTest do
         coverage_collection_wall_ms: 123
       },
       concurrency: %{configured: 4, effective: 4, schedulers_online: 8},
+      recompile_categories: %{compile_error: 0, dep_path_error: 0, unknown: 0},
       ledger: Enum.map(mutants, &entry/1)
     }
 

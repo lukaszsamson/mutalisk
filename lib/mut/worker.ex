@@ -9,14 +9,16 @@ defmodule Mut.Worker do
     @moduledoc "Worker execution result."
 
     @enforce_keys [:status, :duration_ms]
-    defstruct [:status, :duration_ms, :killing_test, :raw_output]
+    defstruct [:status, :duration_ms, :killing_test, :raw_output, :recompile_category]
 
     @type status :: :killed | :survived | :timeout | :error | :invalid
+    @type recompile_category :: :compile_error | :dep_path_error | :unknown | nil
     @type t :: %__MODULE__{
             status: status,
             duration_ms: non_neg_integer,
             killing_test: String.t() | nil,
-            raw_output: String.t() | nil
+            raw_output: String.t() | nil,
+            recompile_category: recompile_category
           }
   end
 
@@ -71,11 +73,20 @@ defmodule Mut.Worker do
             raw_output: "missing_source_span"
           }
 
+        {:error, {:recompile_failed, category, _code, output} = reason} ->
+          %Result{
+            status: :invalid,
+            duration_ms: elapsed(started),
+            raw_output: recompile_output(output, reason),
+            recompile_category: category
+          }
+
         {:error, {:recompile_failed, _code, output} = reason} ->
           %Result{
             status: :invalid,
             duration_ms: elapsed(started),
-            raw_output: recompile_output(output, reason)
+            raw_output: recompile_output(output, reason),
+            recompile_category: :unknown
           }
 
         {:error, reason} ->

@@ -44,14 +44,104 @@ defmodule Mut.RecompileTest do
     File.rm_rf!(schema_result.work_copy_root)
   end
 
+  test "categorize/1 recognizes module-not-loaded as :dep_path_error" do
+    samples = [
+      "** (CompileError) error: module Decimal.Macros is not loaded and could not be found",
+      "** (UndefinedFunctionError) function Foo.bar/2 is undefined (module Foo is not available)",
+      "function Foo.bar/2 is undefined or private"
+    ]
+
+    for s <- samples do
+      assert Recompile.categorize(s) == :dep_path_error, "expected :dep_path_error for: #{s}"
+    end
+  end
+
+  test "categorize/1 recognizes compile errors" do
+    samples = [
+      "mut.recompile errors: [{\"lib/x.ex\", 1, \"unexpected token\"}]",
+      "** (CompileError) lib/x.ex: cannot compile module X",
+      "** (SyntaxError) lib/x.ex:5: syntax error before: end",
+      "** (TokenMissingError) lib/x.ex:5: missing terminator"
+    ]
+
+    for s <- samples do
+      assert Recompile.categorize(s) == :compile_error, "expected :compile_error for: #{s}"
+    end
+  end
+
+  test "categorize/1 falls back to :unknown for unmatched output" do
+    assert Recompile.categorize("") == :unknown
+
+    assert Recompile.categorize("** (Mix) Can't continue due to errors on dependencies") ==
+             :unknown
+
+    assert Recompile.categorize("random noise without markers") == :unknown
+  end
+
+  test "recompile returns :compile_error category for syntactically broken patch" do
+    {:ok, schema_result} = schema_result_for("compile-error")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "m17-recompile-broken", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    file_path = Path.join(sandbox.path, "lib/arith.ex")
+    File.write!(file_path, "defmodule Arith do def add(a, b), do: a +\nend\n")
+
+    assert {:error, {:recompile_failed, category, _code, _output}} =
+             Recompile.recompile(sandbox, ["lib/arith.ex"], [], app: "demo_app")
+
+    assert category == :compile_error
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+    File.rm_rf!(schema_result.work_copy_root)
+  end
+
+  test "recompile returns :dep_path_error when sibling module dep is missing" do
+    {:ok, schema_result} = schema_result_for("dep-error")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "m17-recompile-dep", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    # Patch Arith to import a module that does NOT exist anywhere on
+    # the sandbox's code path. The compile reaches the import and
+    # fails with a "module ... is not loaded" diagnostic.
+    file_path = Path.join(sandbox.path, "lib/arith.ex")
+
+    File.write!(file_path, """
+    defmodule Arith do
+      import Bogus.Missing.Module
+      def add(a, b), do: a + b
+    end
+    """)
+
+    assert {:error, {:recompile_failed, category, _code, _output}} =
+             Recompile.recompile(sandbox, ["lib/arith.ex"], [], app: "demo_app")
+
+    assert category == :dep_path_error
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+    File.rm_rf!(schema_result.work_copy_root)
+  end
+
   defp schema_result do
+    schema_result_for("default")
+  end
+
+  defp schema_result_for(suffix) do
     fixture_root = Path.expand("test/fixtures/demo_app")
-    {:ok, oracle} = Mut.OracleBuild.run(fixture_root, run_id: "m10-recompile-oracle", force: true)
+
+    {:ok, oracle} =
+      Mut.OracleBuild.run(fixture_root, run_id: "recompile-oracle-#{suffix}", force: true)
+
     plan = Mut.Orchestrator.plan(fixture_root, oracle)
 
     Mut.SchemaBuild.build(plan,
       user_project_root: fixture_root,
-      run_id: "m10-recompile-schema",
+      run_id: "recompile-schema-#{suffix}",
       force: true,
       keep: true
     )

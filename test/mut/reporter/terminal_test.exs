@@ -163,6 +163,12 @@ defmodule Mut.Reporter.TerminalTest do
       phase_timings: Keyword.get(opts, :phase_timings, %{}),
       selection: Keyword.get(opts, :selection),
       concurrency: Keyword.get(opts, :concurrency),
+      recompile_categories:
+        Keyword.get(opts, :recompile_categories, %{
+          compile_error: 0,
+          dep_path_error: 0,
+          unknown: 0
+        }),
       ledger: entries
     }
   end
