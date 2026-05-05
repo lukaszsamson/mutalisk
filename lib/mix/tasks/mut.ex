@@ -417,22 +417,44 @@ defmodule Mix.Tasks.Mut do
   defp run_schema_via(%{worker_type: :persistent} = ctx, sandbox, mutant, worker_tests) do
     case Map.get(ctx.persistent_servers, sandbox.id) do
       nil ->
-        Worker.run_schema(sandbox, mutant.id, worker_tests,
-          timeout_ms: @timeout_ms,
-          retry_on_error: true
-        )
+        run_schema_via_mix(sandbox, mutant, worker_tests)
 
       server ->
-        Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms)
+        run_schema_via_persistent(ctx, server, sandbox, mutant, worker_tests)
     end
   end
 
-  defp run_schema_via(_ctx, sandbox, mutant, worker_tests) do
+  defp run_schema_via(_ctx, sandbox, mutant, worker_tests),
+    do: run_schema_via_mix(sandbox, mutant, worker_tests)
+
+  # Step 6: crash recovery. If the persistent BEAM dies during a run
+  # (Port exit, timeout-followed-by-kill, GenServer crash), fall back
+  # to the mix-spawn worker for this mutant and every subsequent
+  # mutant on the same sandbox. Threshold-based per-sandbox routing
+  # is implicit: once the server is dead, all future calls land on
+  # the catch clause and route to mix. The host doesn't auto-restart
+  # the BEAM in v1.7's first release; future work may add restart +
+  # retry-then-mix per V17 §"Crash recovery".
+  defp run_schema_via_persistent(_ctx, server, sandbox, mutant, worker_tests) do
+    Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms)
+  catch
+    :exit, _reason ->
+      run_schema_via_mix(sandbox, mutant, worker_tests)
+  end
+
+  defp run_schema_via_mix(sandbox, mutant, worker_tests) do
     Worker.run_schema(sandbox, mutant.id, worker_tests,
       timeout_ms: @timeout_ms,
       retry_on_error: true
     )
   end
+
+  # Fallback mutants always route through the mix-spawn worker.
+  # In-process fallback recompile (V17 step 5) requires :code.purge +
+  # :code.load_binary to swap modules inside the persistent BEAM, with
+  # module-conflict edge cases that need a separate validation pass.
+  # Deferred to follow-up. The mix-spawn fallback path preserves the
+  # M17 "0 invalid Decimal fallback" baseline across worker types.
 
   defp maybe_start_persistent_workers(%{worker_type: :persistent}, pool) do
     pool.sandboxes
