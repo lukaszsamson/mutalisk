@@ -1,0 +1,83 @@
+Schema build starting
+Schema build complete
+[1/31] killed    lib/cmp.ex:9  ComparisonNegation  replace != with ==
+[2/31] killed    lib/bool.ex:5  UnaryNot  remove unary not
+[3/31] killed    lib/arith.ex:5  Arithmetic  replace * with /
+[4/31] killed    lib/arith.ex:5  Arithmetic  replace + with *
+[5/31] killed    lib/arith.ex:5  Arithmetic  replace - with *
+[6/31] survived  lib/cmp.ex:9  ComparisonBoundary  replace >= with >
+[7/31] killed    lib/arith.ex:5  Arithmetic  replace - with +
+[8/31] survived  lib/bool.ex:9  UnaryNot  remove unary !
+[9/31] survived  lib/cmp.ex:9  ComparisonNegation  replace >= with <
+[10/31] killed    lib/cmp.ex:5  ComparisonNegation  replace <= with >
+[11/31] survived  lib/cmp.ex:9  Boolean  replace or with and
+[12/31] killed    lib/attrs.ex:7  Arithmetic  replace + with -
+[13/31] survived  lib/cmp.ex:9  Boolean  replace or with and
+[14/31] killed    lib/bool.ex:9  Boolean  replace || with &&
+[15/31] killed    lib/arith.ex:9  Arithmetic  replace rem with div
+[16/31] killed    lib/arith.ex:5  Arithmetic  replace * with +
+[17/31] killed    lib/cmp.ex:5  ComparisonBoundary  replace <= with <
+[18/31] killed    lib/arith.ex:5  Arithmetic  replace * with -
+[19/31] killed    lib/bool.ex:5  Boolean  replace and with or
+[20/31] killed    lib/bool.ex:9  Boolean  replace || with &&
+[21/31] survived  lib/cmp.ex:9  ComparisonBoundary  replace > with >=
+[22/31] killed    lib/cmp.ex:9  Boolean  replace or with and
+[23/31] killed    lib/attrs.ex:7  Arithmetic  replace + with *
+[24/31] killed    lib/arith.ex:9  Arithmetic  replace div with rem
+[25/31] killed    lib/arith.ex:5  Arithmetic  replace + with -
+[26/31] survived  lib/cmp.ex:9  ComparisonNegation  replace > with <=
+[27/31] survived  lib/cmp.ex:9  ComparisonNegation  replace == with !=
+[28/31] survived  lib/guards.ex:4  GuardTypeTest  replace guard is_integer with is_number
+[29/31] killed    lib/guards.ex:4  GuardComparisonNegation  replace guard > with <=
+[30/31] killed    lib/guards.ex:4  GuardTypeTest  replace guard is_integer with is_float
+[31/31] survived  lib/guards.ex:4  GuardComparisonBoundary  replace guard > with >=
+Mutation score: 21/31 = 67.7%
+
+Surviving mutants:
+  lib/cmp.ex:9  ComparisonBoundary       replace >= with >
+  lib/bool.ex:9 UnaryNot                 remove unary !
+  lib/cmp.ex:9  ComparisonNegation       replace >= with <
+  lib/cmp.ex:9  Boolean                  replace or with and
+  lib/cmp.ex:9  Boolean                  replace or with and
+  lib/cmp.ex:9  ComparisonBoundary       replace > with >=
+  lib/cmp.ex:9  ComparisonNegation       replace > with <=
+  lib/cmp.ex:9  ComparisonNegation       replace == with !=
+  lib/guards.ex:4 GuardTypeTest            replace guard is_integer with is_number
+  lib/guards.ex:4 GuardComparisonBoundary  replace guard > with >=
+
+Schema:    19/27 killed (70.4%)   wall: 22.7s
+Fallback:  2/4 killed (50.0%)   wall: 6.5s
+  guard_comparison_boundary:    0/1 killed
+  guard_comparison_negation:    1/1 killed
+  guard_type_test:              1/2 killed
+Skipped:   4 (attribute_engine_disabled: 1, unsupported_dispatch: 3)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 29.2s
+Fallback wall-clock: 22.3% of total
+Fallback mutants: 12.9% of executed
+
+Phases:
+  oracle build:         8435 ms
+  baseline tests:       1187 ms
+  plan generation:       129 ms
+  schema build:         6010 ms
+  schema workers:      22803 ms
+  fallback workers:     6897 ms
+  report writing:         11 ms
+  total:               45518 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    31
+    all tests:          0
+  avg tests/mutant: 1.0
+  median tests/mutant: 1
+  coverage collection: 0 ms
+
+Mutalisk run complete in 45704ms

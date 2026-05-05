@@ -1,0 +1,635 @@
+target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=static concurrency=8
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+New:
+  jason 1.4.5
+Unchanged:
+  earmark_parser 1.4.41
+  ex_doc 0.35.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.1
+  nimble_parsec 1.4.0
+  stream_data 0.5.0
+* Getting ex_doc (Hex package)
+* Getting stream_data (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+* Updating jason (Hex package)
+mix mut starting
+==> stream_data
+Compiling 3 files (.ex)
+warning: left..right inside match is deprecated, you must always match on the step: left..right//var or left..right//_ if you want to ignore it
+  lib/stream_data.ex:508: StreamData.integer/1
+
+warning: min..max inside match is deprecated, you must always match on the step: min..max//var or min..max//_ if you want to ignore it
+  lib/stream_data.ex:894: StreamData.list_length_range_fun/1
+
+Generated stream_data app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> mutalisk
+Compiling 68 files (.ex)
+Generated mutalisk app
+==> decimal
+Compiling 4 files (.ex)
+Generated decimal app
+Schema build starting
+Schema build complete
+[1/456] killed    lib/decimal.ex:1556  ComparisonNegation  replace != with ==
+[2/456] killed    lib/decimal.ex:1999  ComparisonNegation  replace == with !=
+[3/456] killed    lib/decimal.ex:441  Arithmetic  replace * with -
+[4/456] killed    lib/decimal.ex:1701  Arithmetic  replace + with -
+[5/456] killed    lib/decimal.ex:991  ComparisonNegation  replace < with >=
+[6/456] killed    lib/decimal.ex:1239  Arithmetic  replace + with -
+[7/456] killed    lib/decimal.ex:1494  ComparisonNegation  replace == with !=
+[8/456] killed    lib/decimal.ex:2051  Boolean  replace || with &&
+[9/456] survived  lib/decimal.ex:1824  Arithmetic  replace * with /
+[10/456] killed    lib/decimal.ex:1545  ComparisonNegation  replace >= with <
+[11/456] killed    lib/decimal.ex:1679  ComparisonNegation  replace < with >=
+[12/456] killed    lib/decimal.ex:1817  Arithmetic  replace * with /
+[13/456] killed    lib/decimal.ex:1555  ComparisonNegation  replace == with !=
+[14/456] survived  lib/decimal.ex:1114  ComparisonNegation  replace == with !=
+[15/456] killed    lib/decimal.ex:1701  Arithmetic  replace + with *
+[16/456] killed    lib/decimal.ex:1688  Arithmetic  replace * with -
+[17/456] killed    lib/decimal.ex:1533  Arithmetic  replace + with -
+[18/456] killed    lib/decimal.ex:1568  Arithmetic  replace * with /
+[19/456] killed    lib/decimal.ex:1153  ComparisonNegation  replace == with !=
+[20/456] killed    lib/decimal.ex:1911  Arithmetic  replace + with *
+[21/456] killed    lib/decimal.ex:1763  ComparisonNegation  replace >= with <
+[22/456] killed    lib/decimal.ex:809  ComparisonNegation  replace == with !=
+[23/456] killed    lib/decimal.ex:1688  Arithmetic  replace * with +
+[24/456] killed    lib/decimal.ex:1572  Arithmetic  replace * with +
+[25/456] killed    lib/decimal.ex:1640  ComparisonNegation  replace >= with <
+[26/456] survived  lib/decimal.ex:672  Arithmetic  replace - with +
+[27/456] killed    lib/decimal.ex:401  ComparisonNegation  replace == with !=
+[28/456] killed    lib/decimal.ex:1846  ComparisonNegation  replace == with !=
+[29/456] killed    lib/decimal.ex:1288  Arithmetic  replace + with -
+[30/456] killed    lib/decimal.ex:1508  Arithmetic  replace + with -
+[31/456] survived  lib/decimal.ex:721  Arithmetic  replace - with *
+[32/456] survived  lib/decimal.ex:672  Arithmetic  replace - with *
+[33/456] survived  lib/decimal.ex:1269  ComparisonBoundary  replace >= with >
+[34/456] killed    lib/decimal.ex:1968  ComparisonNegation  replace == with !=
+[35/456] killed    lib/decimal.ex:1925  Boolean  replace and with or
+[36/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with /
+[37/456] killed    lib/decimal.ex:1862  ComparisonNegation  replace >= with <
+[38/456] killed    lib/decimal.ex:1524  Arithmetic  replace + with *
+[39/456] survived  lib/decimal.ex:1116  Arithmetic  replace + with *
+[40/456] killed    lib/decimal.ex:1742  ComparisonNegation  replace > with <=
+[41/456] killed    lib/decimal.ex:1790  Arithmetic  replace - with *
+[42/456] killed    lib/decimal.ex:1754  Arithmetic  replace - with *
+[43/456] survived  lib/decimal.ex:1745  ComparisonNegation  replace != with ==
+[44/456] survived  lib/decimal.ex:1271  Arithmetic  replace * with -
+[45/456] killed    lib/decimal.ex:1528  ComparisonNegation  replace == with !=
+[46/456] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[47/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with -
+[48/456] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[49/456] killed    lib/decimal.ex:1698  ComparisonNegation  replace == with !=
+[50/456] survived  lib/decimal.ex:945  ComparisonBoundary  replace < with <=
+[51/456] killed    lib/decimal.ex:1269  ComparisonNegation  replace >= with <
+[52/456] killed    lib/decimal.ex:1735  Arithmetic  replace * with -
+[53/456] killed    lib/decimal.ex:1123  Arithmetic  replace + with *
+[54/456] killed    lib/decimal.ex:1996  ComparisonNegation  replace == with !=
+[55/456] killed    lib/decimal.ex:1531  ComparisonNegation  replace >= with <
+[56/456] killed    lib/decimal.ex:550  ComparisonNegation  replace == with !=
+[57/456] survived  lib/decimal.ex:1110  Arithmetic  replace + with *
+[58/456] killed    lib/decimal.ex:403  Arithmetic  replace - with *
+[59/456] killed    lib/decimal.ex:1263  Arithmetic  replace + with -
+[60/456] killed    lib/decimal.ex:718  ComparisonNegation  replace == with !=
+[61/456] killed    lib/decimal.ex:1579  Arithmetic  replace + with *
+[62/456] killed    lib/decimal.ex:1895  ComparisonNegation  replace > with <=
+[63/456] killed    lib/decimal.ex:1605  Arithmetic  replace * with /
+[64/456] killed    lib/decimal.ex:647  ComparisonNegation  replace == with !=
+[65/456] killed    lib/decimal.ex:678  Arithmetic  replace - with *
+[66/456] survived  lib/decimal.ex:655  Arithmetic  replace - with +
+[67/456] killed    lib/decimal.ex:805  ComparisonNegation  replace == with !=
+[68/456] killed    lib/decimal.ex:1688  Arithmetic  replace - with +
+[69/456] killed    lib/decimal.ex:1510  ComparisonNegation  replace > with <=
+[70/456] killed    lib/decimal.ex:1637  ComparisonNegation  replace == with !=
+[71/456] killed    lib/decimal.ex:1738  Arithmetic  replace * with -
+[72/456] survived  lib/decimal.ex:407  ComparisonBoundary  replace < with <=
+[73/456] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[74/456] killed    lib/decimal/context.ex:94  Boolean  replace || with &&
+[75/456] killed    lib/decimal.ex:671  ComparisonNegation  replace == with !=
+[76/456] killed    lib/decimal.ex:1728  Boolean  replace or with and
+[77/456] killed    lib/decimal.ex:1850  Arithmetic  replace - with +
+[78/456] killed    lib/decimal.ex:1123  Arithmetic  replace * with /
+[79/456] killed    lib/decimal.ex:1843  Arithmetic  replace - with +
+[80/456] killed    lib/decimal.ex:1778  ComparisonBoundary  replace >= with >
+[81/456] killed    lib/decimal.ex:1239  Arithmetic  replace - with +
+[82/456] survived  lib/decimal.ex:1679  ComparisonBoundary  replace < with <=
+[83/456] killed    lib/decimal.ex:1277  Arithmetic  replace - with *
+[84/456] killed    lib/decimal.ex:1772  Arithmetic  replace + with -
+[85/456] survived  lib/decimal.ex:1824  Arithmetic  replace * with -
+[86/456] killed    lib/decimal.ex:1549  ComparisonNegation  replace == with !=
+[87/456] killed    lib/decimal.ex:944  ComparisonNegation  replace == with !=
+[88/456] killed    lib/decimal.ex:1996  Boolean  replace and with or
+[89/456] killed    lib/decimal.ex:1508  Arithmetic  replace + with *
+[90/456] survived  lib/decimal.ex:1239  Arithmetic  replace + with *
+[91/456] survived  lib/decimal.ex:1766  ComparisonBoundary  replace >= with >
+[92/456] killed    lib/decimal.ex:1524  Arithmetic  replace + with -
+[93/456] killed    lib/decimal.ex:1743  ComparisonBoundary  replace < with <=
+[94/456] survived  lib/decimal.ex:739  Arithmetic  replace - with *
+[95/456] killed    lib/decimal.ex:941  ComparisonNegation  replace == with !=
+[96/456] killed    lib/decimal.ex:1945  Arithmetic  replace + with *
+[97/456] killed    lib/decimal.ex:1849  ComparisonNegation  replace < with >=
+[98/456] killed    lib/decimal.ex:438  Arithmetic  replace + with *
+[99/456] killed    lib/decimal.ex:1531  Boolean  replace and with or
+[100/456] killed    lib/decimal.ex:1976  ComparisonNegation  replace == with !=
+[101/456] killed    lib/decimal.ex:882  ComparisonNegation  replace == with !=
+[102/456] survived  lib/decimal.ex:1874  Arithmetic  replace - with *
+[103/456] killed    lib/decimal.ex:273  Arithmetic  replace * with -
+[104/456] killed    lib/decimal.ex:1277  Arithmetic  replace - with +
+[105/456] survived  lib/decimal.ex:1640  ComparisonBoundary  replace >= with >
+[106/456] survived  lib/decimal.ex:1535  ComparisonBoundary  replace > with >=
+[107/456] killed    lib/decimal.ex:1843  Arithmetic  replace - with +
+[108/456] killed    lib/decimal.ex:1761  Arithmetic  replace + with -
+[109/456] killed    lib/decimal.ex:1797  ComparisonNegation  replace > with <=
+[110/456] killed    lib/decimal.ex:1700  Arithmetic  replace + with *
+[111/456] killed    lib/decimal.ex:994  ComparisonNegation  replace > with <=
+[112/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with +
+[113/456] killed    lib/decimal.ex:652  ComparisonNegation  replace == with !=
+[114/456] killed    lib/decimal.ex:1760  ComparisonNegation  replace >= with <
+[115/456] killed    lib/decimal.ex:1766  ComparisonNegation  replace >= with <
+[116/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with +
+[117/456] killed    lib/decimal.ex:1830  ComparisonNegation  replace == with !=
+[118/456] killed    lib/decimal.ex:1331  ComparisonNegation  replace < with >=
+[119/456] killed    lib/decimal.ex:1524  Arithmetic  replace - with +
+[120/456] killed    lib/decimal.ex:1725  Boolean  replace and with or
+[121/456] survived  lib/decimal.ex:441  Arithmetic  replace + with *
+[122/456] killed    lib/decimal.ex:1811  Arithmetic  replace + with -
+[123/456] killed    lib/decimal.ex:938  ComparisonNegation  replace != with ==
+[124/456] killed    lib/decimal.ex:1249  ComparisonNegation  replace >= with <
+[125/456] survived  lib/decimal.ex:655  Arithmetic  replace - with *
+[126/456] killed    lib/decimal.ex:1692  Arithmetic  replace + with -
+[127/456] killed    lib/decimal.ex:1572  Arithmetic  replace * with -
+[128/456] killed    lib/decimal.ex:1761  Arithmetic  replace - with +
+[129/456] survived  lib/decimal.ex:431  Arithmetic  replace - with *
+[130/456] killed    lib/decimal.ex:1874  Arithmetic  replace - with +
+[131/456] killed    lib/decimal.ex:2004  Arithmetic  replace - with *
+[132/456] killed    lib/decimal.ex:1923  Boolean  replace and with or
+[133/456] killed    lib/decimal.ex:1251  Arithmetic  replace * with +
+[134/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with /
+[135/456] killed    lib/decimal.ex:1605  Arithmetic  replace * with +
+[136/456] killed    lib/decimal.ex:530  ComparisonNegation  replace == with !=
+[137/456] killed    lib/decimal.ex:1605  Arithmetic  replace - with +
+[138/456] killed    lib/decimal.ex:1700  ComparisonBoundary  replace < with <=
+[139/456] survived  lib/decimal.ex:2100  Boolean  replace and with or
+[140/456] killed    lib/decimal.ex:406  ComparisonNegation  replace == with !=
+[141/456] killed    lib/decimal.ex:1779  Arithmetic  replace - with *
+[142/456] survived  lib/decimal.ex:1116  Arithmetic  replace + with -
+[143/456] killed    lib/decimal.ex:1827  Arithmetic  replace * with /
+[144/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with -
+[145/456] survived  lib/decimal.ex:1255  ComparisonNegation  replace === with !==
+[146/456] killed    lib/decimal.ex:1751  Arithmetic  replace + with *
+[147/456] timeout   lib/decimal.ex:1790  Arithmetic  replace - with +
+[148/456] survived  lib/decimal.ex:991  ComparisonBoundary  replace < with <=
+[149/456] killed    lib/decimal.ex:1843  Arithmetic  replace - with *
+[150/456] killed    lib/decimal.ex:1721  ComparisonNegation  replace >= with <
+[151/456] survived  lib/decimal.ex:987  ComparisonNegation  replace != with ==
+[152/456] survived  lib/decimal.ex:861  ComparisonNegation  replace == with !=
+[153/456] killed    lib/decimal.ex:990  ComparisonNegation  replace == with !=
+[154/456] killed    lib/decimal.ex:1738  Arithmetic  replace * with +
+[155/456] killed    lib/decimal.ex:1700  ComparisonNegation  replace < with >=
+[156/456] killed    lib/decimal.ex:1498  ComparisonNegation  replace == with !=
+[157/456] killed    lib/decimal.ex:339  ComparisonNegation  replace == with !=
+[158/456] killed    lib/decimal.ex:1763  Boolean  replace and with or
+[159/456] killed    lib/decimal.ex:738  ComparisonNegation  replace == with !=
+[160/456] killed    lib/decimal.ex:273  Arithmetic  replace + with *
+[161/456] killed    lib/decimal.ex:1123  Arithmetic  replace + with -
+[162/456] killed    lib/decimal.ex:942  ComparisonNegation  replace > with <=
+[163/456] survived  lib/decimal.ex:886  Arithmetic  replace - with *
+[164/456] killed    lib/decimal.ex:885  ComparisonNegation  replace == with !=
+[165/456] killed    lib/decimal.ex:1233  Arithmetic  replace + with *
+[166/456] killed    lib/decimal.ex:1605  Arithmetic  replace * with -
+[167/456] killed    lib/decimal.ex:1674  Arithmetic  replace - with +
+[168/456] killed    lib/decimal.ex:273  Arithmetic  replace + with -
+[169/456] survived  lib/decimal.ex:1331  ComparisonBoundary  replace < with <=
+[170/456] killed    lib/decimal.ex:1251  Arithmetic  replace * with -
+[171/456] killed    lib/decimal.ex:273  Arithmetic  replace * with +
+[172/456] killed    lib/decimal.ex:1505  ComparisonNegation  replace >= with <
+[173/456] killed    lib/decimal.ex:402  Arithmetic  replace - with +
+[174/456] survived  lib/decimal.ex:864  Arithmetic  replace - with +
+[175/456] killed    lib/decimal.ex:1939  ComparisonNegation  replace != with ==
+[176/456] killed    lib/decimal.ex:888  ComparisonNegation  replace == with !=
+[177/456] killed    lib/decimal.ex:411  ComparisonNegation  replace < with >=
+[178/456] killed    lib/decimal.ex:337  Boolean  replace and with or
+[179/456] killed    lib/decimal.ex:1761  Arithmetic  replace - with *
+[180/456] killed    lib/decimal.ex:1688  Arithmetic  replace - with *
+[181/456] killed    lib/decimal.ex:713  ComparisonNegation  replace == with !=
+[182/456] killed    lib/decimal.ex:1743  ComparisonNegation  replace < with >=
+[183/456] survived  lib/decimal.ex:678  Arithmetic  replace - with +
+[184/456] killed    lib/decimal.ex:1251  Arithmetic  replace * with /
+[185/456] timeout   lib/decimal.ex:1779  Arithmetic  replace - with +
+[186/456] killed    lib/decimal.ex:1601  Arithmetic  replace * with +
+[187/456] killed    lib/decimal.ex:1233  Arithmetic  replace - with +
+[188/456] killed    lib/decimal.ex:735  ComparisonNegation  replace == with !=
+[189/456] survived  lib/decimal.ex:1110  Arithmetic  replace + with -
+[190/456] killed    lib/decimal.ex:662  ComparisonNegation  replace == with !=
+[191/456] killed    lib/decimal.ex:1984  ComparisonNegation  replace == with !=
+[192/456] killed    lib/decimal.ex:1572  Arithmetic  replace - with *
+[193/456] killed    lib/decimal.ex:1239  Arithmetic  replace - with *
+[194/456] killed    lib/decimal.ex:1735  Arithmetic  replace * with +
+[195/456] killed    lib/decimal.ex:2000  ComparisonNegation  replace == with !=
+[196/456] killed    lib/decimal.ex:1744  ComparisonNegation  replace == with !=
+[197/456] killed    lib/decimal.ex:1266  Arithmetic  replace * with /
+[198/456] survived  lib/decimal.ex:1531  ComparisonBoundary  replace < with <=
+[199/456] killed    lib/decimal.ex:1601  Arithmetic  replace * with -
+[200/456] killed    lib/decimal.ex:1543  ComparisonNegation  replace > with <=
+[201/456] survived  lib/decimal.ex:873  ComparisonNegation  replace == with !=
+[202/456] killed    lib/decimal.ex:1932  ComparisonNegation  replace == with !=
+[203/456] killed    lib/decimal.ex:1219  Arithmetic  replace + with *
+[204/456] survived  lib/decimal.ex:864  Arithmetic  replace - with *
+[205/456] killed    lib/decimal.ex:741  ComparisonNegation  replace == with !=
+[206/456] killed    lib/decimal.ex:993  ComparisonNegation  replace == with !=
+[207/456] killed    lib/decimal.ex:945  ComparisonNegation  replace < with >=
+[208/456] survived  lib/decimal.ex:411  ComparisonBoundary  replace < with <=
+[209/456] killed    lib/decimal.ex:1850  Arithmetic  replace - with *
+[210/456] survived  lib/decimal.ex:2080  ComparisonNegation  replace == with !=
+[211/456] killed    lib/decimal.ex:1738  Arithmetic  replace - with +
+[212/456] killed    lib/decimal.ex:273  Arithmetic  replace * with /
+[213/456] killed    lib/decimal.ex:1240  Arithmetic  replace * with +
+[214/456] killed    lib/decimal.ex:1781  ComparisonNegation  replace != with ==
+[215/456] killed    lib/decimal.ex:1937  ComparisonBoundary  replace > with >=
+[216/456] killed    lib/decimal.ex:1240  Arithmetic  replace * with -
+[217/456] killed    lib/decimal.ex:1849  ComparisonNegation  replace < with >=
+[218/456] killed    lib/decimal.ex:487  ComparisonNegation  replace == with !=
+[219/456] killed    lib/decimal.ex:1533  Arithmetic  replace + with *
+[220/456] killed    lib/decimal.ex:1754  Arithmetic  replace * with /
+[221/456] killed    lib/decimal.ex:1699  Arithmetic  replace - with +
+[222/456] killed    lib/decimal.ex:1911  Arithmetic  replace + with -
+[223/456] killed    lib/decimal.ex:1763  ComparisonNegation  replace == with !=
+[224/456] killed    lib/decimal.ex:1817  Arithmetic  replace * with +
+[225/456] killed    lib/decimal.ex:1266  ComparisonNegation  replace === with !==
+[226/456] killed    lib/decimal.ex:337  Boolean  replace or with and
+[227/456] killed    lib/decimal.ex:1843  Arithmetic  replace - with *
+[228/456] timeout   lib/decimal.ex:1782  Arithmetic  replace + with -
+[229/456] killed    lib/decimal.ex:669  ComparisonNegation  replace == with !=
+[230/456] killed    lib/decimal.ex:1725  Arithmetic  replace + with -
+[231/456] survived  lib/decimal.ex:1797  ComparisonBoundary  replace > with >=
+[232/456] killed    lib/decimal.ex:1744  Boolean  replace and with or
+[233/456] killed    lib/decimal.ex:1579  Arithmetic  replace + with -
+[234/456] killed    lib/decimal.ex:1945  Arithmetic  replace + with -
+[235/456] killed    lib/decimal.ex:1772  Arithmetic  replace + with *
+[236/456] killed    lib/decimal.ex:1263  Arithmetic  replace + with *
+[237/456] killed    lib/decimal.ex:2004  Arithmetic  replace - with +
+[238/456] killed    lib/decimal.ex:1539  Arithmetic  replace - with +
+[239/456] killed    lib/decimal.ex:1934  ComparisonNegation  replace > with <=
+[240/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with -
+[241/456] killed    lib/decimal.ex:1539  Arithmetic  replace - with *
+[242/456] killed    lib/decimal.ex:988  ComparisonNegation  replace == with !=
+[243/456] survived  lib/decimal.ex:1545  ComparisonBoundary  replace >= with >
+[244/456] survived  lib/decimal.ex:853  ComparisonNegation  replace == with !=
+[245/456] timeout   lib/decimal.ex:1572  Arithmetic  replace - with +
+[246/456] survived  lib/decimal.ex:1271  Arithmetic  replace * with +
+[247/456] killed    lib/decimal.ex:338  ComparisonNegation  replace == with !=
+[248/456] killed    lib/decimal.ex:1862  ComparisonBoundary  replace >= with >
+[249/456] killed    lib/decimal.ex:438  Arithmetic  replace + with -
+[250/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with -
+[251/456] survived  lib/decimal.ex:1721  ComparisonBoundary  replace >= with >
+[252/456] killed    lib/decimal.ex:1937  ComparisonNegation  replace > with <=
+[253/456] killed    lib/decimal.ex:1728  ComparisonNegation  replace == with !=
+[254/456] survived  lib/decimal.ex:1849  ComparisonBoundary  replace < with <=
+[255/456] killed    lib/decimal.ex:1873  ComparisonNegation  replace > with <=
+[256/456] killed    lib/decimal.ex:1699  Arithmetic  replace - with *
+[257/456] killed    lib/decimal.ex:1996  ComparisonNegation  replace == with !=
+[258/456] survived  lib/decimal.ex:1895  ComparisonBoundary  replace > with >=
+[259/456] survived  lib/decimal.ex:886  Arithmetic  replace - with +
+[260/456] survived  lib/decimal.ex:678  Arithmetic  replace - with *
+[261/456] killed    lib/decimal.ex:1927  ComparisonNegation  replace >= with <
+[262/456] killed    lib/decimal.ex:1937  Boolean  replace and with or
+[263/456] survived  lib/decimal.ex:721  Arithmetic  replace - with +
+[264/456] killed    lib/decimal.ex:1533  Arithmetic  replace + with *
+[265/456] killed    lib/decimal.ex:254  ComparisonNegation  replace > with <=
+[266/456] killed    lib/decimal.ex:1923  ComparisonNegation  replace == with !=
+[267/456] killed    lib/decimal.ex:1849  Boolean  replace and with or
+[268/456] survived  lib/decimal.ex:1824  Arithmetic  replace * with +
+[269/456] killed    lib/decimal.ex:1751  Arithmetic  replace * with +
+[270/456] killed    lib/decimal.ex:1738  Arithmetic  replace * with /
+[271/456] killed    lib/decimal.ex:510  ComparisonNegation  replace == with !=
+[272/456] killed    lib/decimal.ex:337  Boolean  replace or with and
+[273/456] killed    lib/decimal.ex:431  Arithmetic  replace + with -
+[274/456] killed    lib/decimal.ex:1233  Arithmetic  replace + with -
+[275/456] killed    lib/decimal.ex:273  Arithmetic  replace * with /
+[276/456] killed    lib/decimal.ex:1735  Arithmetic  replace - with +
+[277/456] killed    lib/decimal.ex:402  Arithmetic  replace - with *
+[278/456] killed    lib/decimal.ex:1779  Arithmetic  replace + with *
+[279/456] timeout   lib/decimal.ex:1751  Arithmetic  replace * with -
+[280/456] killed    lib/decimal.ex:1725  Arithmetic  replace + with *
+[281/456] killed    lib/decimal.ex:1219  Arithmetic  replace + with -
+[282/456] killed    lib/decimal.ex:1849  ComparisonBoundary  replace < with <=
+[283/456] killed    lib/decimal.ex:273  Arithmetic  replace * with -
+[284/456] killed    lib/decimal.ex:1728  ComparisonNegation  replace == with !=
+[285/456] survived  lib/decimal.ex:942  ComparisonBoundary  replace > with >=
+[286/456] killed    lib/decimal.ex:1266  Boolean  replace and with or
+[287/456] killed    lib/decimal.ex:1760  ComparisonBoundary  replace >= with >
+[288/456] killed    lib/decimal.ex:1533  Arithmetic  replace + with -
+[289/456] killed    lib/decimal.ex:1751  Arithmetic  replace + with -
+[290/456] killed    lib/decimal.ex:1937  ComparisonNegation  replace == with !=
+[291/456] survived  lib/decimal.ex:739  Arithmetic  replace - with +
+[292/456] killed    lib/decimal.ex:1937  Boolean  replace or with and
+[293/456] killed    lib/decimal.ex:1505  ComparisonBoundary  replace >= with >
+[294/456] killed    lib/decimal.ex:1692  Arithmetic  replace + with *
+[295/456] killed    lib/decimal.ex:1735  Arithmetic  replace - with *
+[296/456] killed    lib/decimal.ex:441  Arithmetic  replace + with -
+[297/456] killed    lib/decimal.ex:1778  ComparisonNegation  replace >= with <
+[298/456] killed    lib/decimal.ex:407  ComparisonNegation  replace < with >=
+[299/456] killed    lib/decimal.ex:1609  Arithmetic  replace + with -
+[300/456] killed    lib/decimal.ex:1682  Arithmetic  replace + with *
+[301/456] killed    lib/decimal.ex:1688  Arithmetic  replace * with /
+[302/456] killed    lib/decimal.ex:1862  ComparisonNegation  replace < with >=
+[303/456] killed    lib/decimal.ex:678  Arithmetic  replace - with +
+[304/456] killed    lib/decimal.ex:1572  Arithmetic  replace * with /
+[305/456] killed    lib/decimal.ex:1742  ComparisonBoundary  replace > with >=
+[306/456] killed    lib/decimal.ex:1266  Arithmetic  replace * with +
+[307/456] killed    lib/decimal.ex:1925  ComparisonNegation  replace == with !=
+[308/456] killed    lib/decimal.ex:1233  Arithmetic  replace - with *
+[309/456] killed    lib/decimal.ex:403  Arithmetic  replace - with +
+[310/456] killed    lib/decimal.ex:1827  Arithmetic  replace * with +
+[311/456] killed    lib/decimal.ex:1682  Arithmetic  replace + with -
+[312/456] killed    lib/decimal.ex:1609  Arithmetic  replace + with *
+[313/456] killed    lib/decimal.ex:1601  Arithmetic  replace * with /
+[314/456] survived  lib/decimal.ex:994  ComparisonBoundary  replace > with >=
+[315/456] killed    lib/decimal.ex:1763  ComparisonBoundary  replace >= with >
+[316/456] timeout   lib/decimal.ex:1827  Arithmetic  replace - with +
+[317/456] killed    lib/decimal.ex:1927  ComparisonBoundary  replace >= with >
+[318/456] killed    lib/decimal.ex:1122  ComparisonNegation  replace == with !=
+[319/456] killed    lib/decimal.ex:1725  ComparisonNegation  replace == with !=
+[320/456] killed    lib/decimal.ex:1605  Arithmetic  replace - with *
+[321/456] killed    lib/decimal.ex:1531  ComparisonNegation  replace < with >=
+[322/456] killed    lib/decimal.ex:1531  ComparisonBoundary  replace >= with >
+[323/456] killed    lib/decimal.ex:1721  Boolean  replace or with and
+[324/456] killed    lib/decimal.ex:1510  ComparisonBoundary  replace > with >=
+[325/456] killed    lib/decimal.ex:1745  Boolean  replace and with or
+[326/456] killed    lib/decimal.ex:1108  ComparisonNegation  replace == with !=
+[327/456] killed    lib/decimal.ex:273  Arithmetic  replace * with +
+[328/456] survived  lib/decimal.ex:431  Arithmetic  replace - with +
+[329/456] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[330/456] killed    lib/decimal.ex:431  Arithmetic  replace + with *
+[331/456] killed    lib/decimal.ex:1738  Arithmetic  replace - with *
+[332/456] survived  lib/decimal.ex:1873  ComparisonBoundary  replace > with >=
+[333/456] killed    lib/decimal.ex:1524  Arithmetic  replace - with *
+[334/456] killed    lib/decimal.ex:1266  Arithmetic  replace * with -
+[335/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with +
+[336/456] killed    lib/decimal.ex:1761  Arithmetic  replace + with *
+[337/456] killed    lib/decimal.ex:1782  Arithmetic  replace * with /
+[338/456] killed    lib/decimal.ex:441  Arithmetic  replace * with /
+[339/456] killed    lib/decimal.ex:1123  Arithmetic  replace * with +
+[340/456] killed    lib/decimal.ex:1123  Arithmetic  replace * with -
+[341/456] killed    lib/decimal.ex:1811  Arithmetic  replace + with *
+[342/456] killed    lib/decimal.ex:939  ComparisonNegation  replace == with !=
+[343/456] killed    lib/decimal.ex:1517  ComparisonNegation  replace == with !=
+[344/456] killed    lib/decimal.ex:1932  Boolean  replace or with and
+[345/456] killed    lib/decimal.ex:1285  ComparisonNegation  replace <= with >
+[346/456] killed    lib/decimal.ex:1827  Arithmetic  replace * with -
+[347/456] killed    lib/decimal.ex:1700  Arithmetic  replace + with -
+[348/456] killed    lib/decimal.ex:1745  ComparisonNegation  replace == with !=
+[349/456] killed    lib/decimal.ex:1862  Boolean  replace and with or
+[350/456] survived  lib/decimal.ex:1694  Arithmetic  replace + with -
+[351/456] killed    lib/decimal.ex:1568  Arithmetic  replace * with -
+[352/456] killed    lib/decimal.ex:441  Arithmetic  replace * with +
+[353/456] killed    lib/decimal.ex:1535  ComparisonNegation  replace > with <=
+[354/456] timeout   lib/decimal.ex:1827  Arithmetic  replace - with *
+[355/456] timeout   lib/decimal.ex:1754  Arithmetic  replace - with +
+[356/456] timeout   lib/decimal.ex:1817  Arithmetic  replace * with -
+[357/456] killed    lib/decimal.ex:1779  Arithmetic  replace + with -
+[358/456] survived  lib/decimal.ex:728  ComparisonNegation  replace == with !=
+[359/456] killed    lib/decimal.ex:1735  Arithmetic  replace * with /
+[360/456] killed    lib/decimal.ex:1810  ComparisonNegation  replace == with !=
+[361/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with +
+[362/456] killed    lib/decimal.ex:1543  ComparisonBoundary  replace > with >=
+[363/456] survived  lib/decimal.ex:1862  ComparisonBoundary  replace < with <=
+[364/456] killed    lib/decimal.ex:1568  Arithmetic  replace * with +
+[365/456] killed    lib/decimal.ex:1674  Arithmetic  replace - with *
+[366/456] survived  lib/decimal.ex:1694  Arithmetic  replace + with *
+[367/456] survived  lib/decimal.ex:1249  ComparisonBoundary  replace >= with >
+[368/456] killed    lib/decimal/error.ex:21  Boolean  replace && with ||
+[369/456] survived  lib/decimal.ex:1934  ComparisonBoundary  replace > with >=
+[370/456] killed    lib/decimal.ex:1240  Arithmetic  replace * with /
+[371/456] survived  lib/decimal.ex:254  ComparisonBoundary  replace > with >=
+[372/456] survived  lib/decimal.ex:1271  Arithmetic  replace * with /
+[373/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with /
+[374/456] killed    lib/decimal.ex:802  ComparisonNegation  replace == with !=
+[375/456] killed    lib/decimal.ex:1744  ComparisonNegation  replace == with !=
+[376/456] killed    lib/decimal.ex:1754  Arithmetic  replace * with +
+[377/456] killed    lib/decimal.ex:1754  Arithmetic  replace * with -
+[378/456] timeout   lib/decimal.ex:1782  Arithmetic  replace + with *
+[379/456] killed    lib/decimal.ex:1288  Arithmetic  replace + with *
+[380/456] killed    lib/decimal.ex:1751  Arithmetic  replace * with /
+[381/456] killed    lib/decimal.ex:1285  ComparisonBoundary  replace <= with <
+[382/456] killed    lib/decimal.ex:1737  GuardComparisonNegation  replace guard < with >=
+[383/456] killed    lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_integer
+[384/456] survived  lib/decimal.ex:1571  GuardComparisonBoundary  replace guard > with >=
+[385/456] survived  lib/decimal.ex:1753  GuardComparisonBoundary  replace guard >= with >
+[386/456] killed    lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_float
+[387/456] killed    lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_integer
+[388/456] killed    lib/decimal.ex:1817  GuardComparisonBoundary  replace guard >= with >
+[389/456] killed    lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_float
+[390/456] killed    lib/decimal.ex:1829  GuardComparisonNegation  replace guard >= with <
+[391/456] survived  lib/decimal.ex:1608  GuardComparisonBoundary  replace guard < with <=
+[392/456] killed    lib/decimal.ex:1608  GuardComparisonNegation  replace guard == with !=
+[393/456] survived  lib/decimal.ex:1326  GuardComparisonBoundary  replace guard >= with >
+[394/456] killed    lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_number
+[395/456] survived  lib/decimal.ex:1827  GuardComparisonBoundary  replace guard > with >=
+[396/456] killed    lib/decimal.ex:1724  GuardComparisonNegation  replace guard < with >=
+[397/456] survived  lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_number
+[398/456] killed    lib/decimal.ex:1694  GuardComparisonNegation  replace guard === with !==
+[399/456] killed    lib/decimal.ex:1724  GuardComparisonBoundary  replace guard < with <=
+[400/456] survived  lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_number
+[401/456] survived  lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_number
+[402/456] killed    lib/decimal.ex:1829  GuardComparisonBoundary  replace guard >= with >
+[403/456] survived  lib/decimal.ex:1604  GuardComparisonBoundary  replace guard > with >=
+[404/456] killed    lib/decimal.ex:1732  GuardComparisonNegation  replace guard == with !=
+[405/456] killed    lib/decimal.ex:366  GuardComparisonNegation  replace guard < with >=
+[406/456] killed    lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_float
+[407/456] killed    lib/decimal.ex:1692  GuardComparisonNegation  replace guard > with <=
+[408/456] killed    lib/decimal.ex:1724  GuardComparisonNegation  replace guard >= with <
+[409/456] killed    lib/decimal.ex:1957  GuardTypeTest  replace guard is_list with is_tuple
+[410/456] survived  lib/decimal.ex:370  GuardComparisonBoundary  replace guard > with >=
+[411/456] killed    lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_float
+[412/456] killed    lib/decimal.ex:1692  GuardComparisonBoundary  replace guard > with >=
+[413/456] killed    lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_float
+[414/456] survived  lib/decimal.ex:1355  GuardComparisonBoundary  replace guard >= with >
+[415/456] killed    lib/decimal.ex:1608  GuardComparisonNegation  replace guard < with >=
+[416/456] killed    lib/decimal.ex:1817  GuardComparisonNegation  replace guard >= with <
+[417/456] survived  lib/decimal.ex:1734  GuardComparisonBoundary  replace guard > with >=
+[418/456] killed    lib/decimal.ex:1326  GuardComparisonNegation  replace guard >= with <
+[419/456] killed    lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_float
+[420/456] survived  lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_number
+[421/456] killed    lib/decimal.ex:1818  GuardComparisonNegation  replace guard < with >=
+[422/456] killed    lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_float
+[423/456] survived  lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_number
+[424/456] survived  lib/decimal.ex:1818  GuardComparisonBoundary  replace guard < with <=
+[425/456] survived  lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_number
+[426/456] survived  lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_number
+[427/456] survived  lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_number
+[428/456] killed    lib/decimal.ex:1575  GuardComparisonNegation  replace guard != with ==
+[429/456] survived  lib/decimal.ex:1693  GuardComparisonBoundary  replace guard < with <=
+[430/456] survived  lib/decimal.ex:1737  GuardComparisonBoundary  replace guard < with <=
+[431/456] survived  lib/decimal.ex:370  GuardComparisonNegation  replace guard > with <=
+[432/456] killed    lib/decimal.ex:1734  GuardComparisonNegation  replace guard > with <=
+[433/456] survived  lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_number
+[434/456] killed    lib/decimal.ex:1724  GuardComparisonBoundary  replace guard >= with >
+[435/456] survived  lib/decimal.ex:1673  GuardComparisonBoundary  replace guard >= with >
+[436/456] survived  lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_number
+[437/456] killed    lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_float
+[438/456] killed    lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_number
+[439/456] survived  lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_number
+[440/456] survived  lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_number
+[441/456] killed    lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_float
+[442/456] killed    lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_float
+[443/456] killed    lib/decimal.ex:1355  GuardComparisonNegation  replace guard >= with <
+[444/456] killed    lib/decimal.ex:1827  GuardComparisonNegation  replace guard > with <=
+[445/456] killed    lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_float
+[446/456] killed    lib/decimal.ex:1673  GuardComparisonNegation  replace guard >= with <
+[447/456] survived  lib/decimal.ex:366  GuardComparisonBoundary  replace guard < with <=
+[448/456] killed    lib/decimal.ex:1693  GuardComparisonNegation  replace guard < with >=
+[449/456] killed    lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_float
+[450/456] survived  lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_number
+[451/456] killed    lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_integer
+[452/456] timeout   lib/decimal.ex:1604  GuardComparisonNegation  replace guard > with <=
+[453/456] timeout   lib/decimal.ex:1750  GuardComparisonNegation  replace guard < with >=
+[454/456] timeout   lib/decimal.ex:1753  GuardComparisonNegation  replace guard >= with <
+[455/456] timeout   lib/decimal.ex:1571  GuardComparisonNegation  replace guard > with <=
+[456/456] timeout   lib/decimal.ex:1750  GuardComparisonBoundary  replace guard < with <=
+Mutation score: 349/441 = 79.1%
+
+Surviving mutants:
+  lib/decimal.ex:1824 Arithmetic               replace * with /
+  lib/decimal.ex:1114 ComparisonNegation       replace == with !=
+  lib/decimal.ex:672 Arithmetic               replace - with +
+  lib/decimal.ex:721 Arithmetic               replace - with *
+  lib/decimal.ex:672 Arithmetic               replace - with *
+  lib/decimal.ex:1269 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1116 Arithmetic               replace + with *
+  lib/decimal.ex:1745 ComparisonNegation       replace != with ==
+  lib/decimal.ex:1271 Arithmetic               replace * with -
+  lib/decimal.ex:945 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1110 Arithmetic               replace + with *
+  lib/decimal.ex:655 Arithmetic               replace - with +
+  lib/decimal.ex:407 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1679 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1824 Arithmetic               replace * with -
+  lib/decimal.ex:1239 Arithmetic               replace + with *
+  lib/decimal.ex:1766 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:739 Arithmetic               replace - with *
+  lib/decimal.ex:1874 Arithmetic               replace - with *
+  lib/decimal.ex:1640 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1535 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:441 Arithmetic               replace + with *
+  lib/decimal.ex:655 Arithmetic               replace - with *
+  lib/decimal.ex:431 Arithmetic               replace - with *
+  lib/decimal.ex:2100 Boolean                  replace and with or
+  lib/decimal.ex:1116 Arithmetic               replace + with -
+  lib/decimal.ex:1255 ComparisonNegation       replace === with !==
+  lib/decimal.ex:991 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:987 ComparisonNegation       replace != with ==
+  lib/decimal.ex:861 ComparisonNegation       replace == with !=
+  lib/decimal.ex:886 Arithmetic               replace - with *
+  lib/decimal.ex:1331 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:864 Arithmetic               replace - with +
+  lib/decimal.ex:678 Arithmetic               replace - with +
+  lib/decimal.ex:1110 Arithmetic               replace + with -
+  lib/decimal.ex:1531 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:873 ComparisonNegation       replace == with !=
+  lib/decimal.ex:864 Arithmetic               replace - with *
+  lib/decimal.ex:411 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:2080 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1797 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1545 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:853 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1271 Arithmetic               replace * with +
+  lib/decimal.ex:1721 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1849 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1895 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:886 Arithmetic               replace - with +
+  lib/decimal.ex:678 Arithmetic               replace - with *
+  lib/decimal.ex:721 Arithmetic               replace - with +
+  lib/decimal.ex:1824 Arithmetic               replace * with +
+  lib/decimal.ex:942 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:739 Arithmetic               replace - with +
+  lib/decimal.ex:994 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:431 Arithmetic               replace - with +
+  lib/decimal.ex:1873 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1694 Arithmetic               replace + with -
+  lib/decimal.ex:728 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1862 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1694 Arithmetic               replace + with *
+  lib/decimal.ex:1249 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1934 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:254 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1271 Arithmetic               replace * with /
+  lib/decimal.ex:1571 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1753 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1608 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1326 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1827 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1356 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1326 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1600 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1604 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:370 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1355 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1734 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1355 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1327 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1818 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:2045 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1386 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1414 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1693 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1737 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:370 GuardComparisonNegation  replace guard > with <=
+  lib/decimal.ex:1330 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1673 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1629 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1611 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1608 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:366 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1604 GuardTypeTest            replace guard is_integer with is_number
+
+Schema:    307/381 killed (80.6%)   wall: 2333.4s
+Fallback:  42/75 killed (56.0%)   wall: 570.0s
+  guard_comparison_boundary:    5/20 killed
+  guard_comparison_negation:    19/24 killed
+  guard_type_test:              18/31 killed
+Skipped:   1133 (attribute_engine_disabled: 3, missing_oracle_site: 76, no_applicable_mutator: 4, unsupported_dispatch: 1050)
+Invalid:   0
+Errors:    0
+Timeouts:  15
+
+Run time: 2903.4s
+Fallback wall-clock: 19.6% of total
+Fallback mutants: 16.4% of executed
+
+Phases:
+  oracle build:          3176 ms
+  baseline tests:         839 ms
+  plan generation:         31 ms
+  schema build:          3350 ms
+  schema workers:      317444 ms
+  fallback workers:    115305 ms
+  report writing:          65 ms
+  total:               440905 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          456
+  avg tests/mutant: 2.0
+  median tests/mutant: 2
+  coverage collection: 0 ms
+
+Concurrency: 8 workers
+
+Mutalisk run complete in 441444ms
+bench.wall_ms=444000

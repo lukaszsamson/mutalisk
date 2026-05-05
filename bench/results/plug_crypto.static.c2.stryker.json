@@ -1,0 +1,1893 @@
+{
+  "files": {
+    "lib/plug/crypto.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 1111,
+          "id": "1088fd6b7e384418a7be4f7f46147a7f",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 221
+            },
+            "start": {
+              "column": 70,
+              "line": 221
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "signed_at_seconds - 1000",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 485,
+          "id": "18f394c7abf0912e7e45ea10866fb63f",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 356
+            },
+            "start": {
+              "column": 51,
+              "line": 356
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "signed - trunc(max_age_secs * 1000)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 642,
+          "id": "1c0ee0f70c07ddd6a6240e6f1c633b20",
+          "killedBy": [
+            "Plug.CryptoTest:compares masked binaries securely"
+          ],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 115
+            },
+            "start": {
+              "column": 62,
+              "line": 115
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "byte_size(right) != byte_size(mask)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 590,
+          "id": "23a4a2ff98a0547d5498f1bd1e08c4ce",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify fails on invalid token"
+          ],
+          "location": {
+            "end": {
+              "column": 41,
+              "line": 130
+            },
+            "start": {
+              "column": 41,
+              "line": 130
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "byte_size(left) == byte_size(right) or crypto_hash_equals(left, right)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 886,
+          "id": "247162bd17f72b8740f1bdc01f3cded2",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports :infinity for max age"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 48
+            },
+            "start": {
+              "column": 40,
+              "line": 48
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(list)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 451,
+          "id": "2bd252a04ba99d8428c6e9cbdb9238cb",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 72,
+              "line": 356
+            },
+            "start": {
+              "column": 72,
+              "line": 356
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "max_age_secs + 1000",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard <= with >",
+          "duration": 883,
+          "id": "43d1db5789f1e678ac4900f267bd7670",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports max age in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 355
+            },
+            "start": {
+              "column": 45,
+              "line": 355
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "max_age_secs > 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1240,
+          "id": "6d07ca71ee2ad9112ff703a2ccc00eaf",
+          "killedBy": [
+            "Plug.CryptoTest:prunes stacktrace"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 23
+            },
+            "start": {
+              "column": 51,
+              "line": 23
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(stacktrace)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_number with is_float",
+          "duration": 784,
+          "id": "73807e2ee8403f3778a06ee0423fb0fe",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 47,
+              "line": 67
+            },
+            "start": {
+              "column": 31,
+              "line": 67
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(other)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1438,
+          "id": "85de055e2876e238a984f486cbeed1b1",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt fails on missing token"
+          ],
+          "location": {
+            "end": {
+              "column": 71,
+              "line": 312
+            },
+            "start": {
+              "column": 58,
+              "line": 312
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(opts)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1072,
+          "id": "86ee88ab6d391629e74dfcb7e2eb22ea",
+          "killedBy": [
+            "Plug.CryptoTest:non_executable_binary_to_term"
+          ],
+          "location": {
+            "end": {
+              "column": 27,
+              "line": 67
+            },
+            "start": {
+              "column": 13,
+              "line": 67
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(other)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace < with <=",
+          "duration": 1072,
+          "id": "874deaec68ca12d6d585db1585bf9111",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 80,
+              "line": 356
+            },
+            "start": {
+              "column": 80,
+              "line": 356
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "signed + trunc(max_age_secs * 1000) <= now_ms()",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1404,
+          "id": "89404c1bedd3da0700c17f716b17a583",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 52,
+              "line": 79
+            },
+            "start": {
+              "column": 42,
+              "line": 79
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(t)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 1395,
+          "id": "8b5c232ee7c6b4094572a44e349ef604",
+          "killedBy": [
+            "Plug.CryptoTest:non_executable_binary_to_term"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 56
+            },
+            "start": {
+              "column": 39,
+              "line": 56
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(map)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1049,
+          "id": "985651f36aa1c0629b1a91c15f05305f",
+          "killedBy": [
+            "Plug.CryptoTest:compares masked binaries securely"
+          ],
+          "location": {
+            "end": {
+              "column": 41,
+              "line": 115
+            },
+            "start": {
+              "column": 41,
+              "line": 115
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "byte_size(left) == byte_size(right) or byte_size(right) == byte_size(mask)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace === with !==",
+          "duration": 1066,
+          "id": "a3d327d7a582abeb8da6ccef595af7a2",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 9,
+              "line": 159
+            },
+            "start": {
+              "column": 9,
+              "line": 159
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "acc !== 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 466,
+          "id": "aaf6be9b0da9d0c088e25f4039d3ac17",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify token with string"
+          ],
+          "location": {
+            "end": {
+              "column": 80,
+              "line": 356
+            },
+            "start": {
+              "column": 80,
+              "line": 356
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "signed + trunc(max_age_secs * 1000) >= now_ms()",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 743,
+          "id": "ad7269d27a3b88d9a1051c0e1c0573c9",
+          "killedBy": [
+            "Plug.CryptoTest:compares masked binaries securely"
+          ],
+          "location": {
+            "end": {
+              "column": 81,
+              "line": 115
+            },
+            "start": {
+              "column": 81,
+              "line": 115
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(byte_size(left) == byte_size(right) and byte_size(right) == byte_size(mask)) or\n  crypto_exor_hash_equals(left, right, mask)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 464,
+          "id": "b18769d310e10dc9c5256734b9793d1e",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 221
+            },
+            "start": {
+              "column": 70,
+              "line": 221
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "signed_at_seconds + 1000",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1068,
+          "id": "b75908f16571e4f07ae94b8483cfd5be",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 134
+            },
+            "start": {
+              "column": 35,
+              "line": 134
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "Code.ensure_loaded?(:crypto) or function_exported?(:crypto, :hash_equals, 2)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 603,
+          "id": "b7b41d445b3f753f829b12bbf758a3bf",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 130
+            },
+            "start": {
+              "column": 21,
+              "line": 130
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "byte_size(left) != byte_size(right)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard <= with <",
+          "duration": 1393,
+          "id": "b82b4bd79836bf79bb9af0180a39e686",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 355
+            },
+            "start": {
+              "column": 45,
+              "line": 355
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "max_age_secs < 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_tuple with is_list",
+          "duration": 785,
+          "id": "ba0b3b87a2cf20bc55ddf70b9b37bf3f",
+          "killedBy": [
+            "Plug.CryptoTest:non_executable_binary_to_term"
+          ],
+          "location": {
+            "end": {
+              "column": 56,
+              "line": 52
+            },
+            "start": {
+              "column": 41,
+              "line": 52
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(tuple)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 449,
+          "id": "c0cd54a5f0e7d66bc8f1ed8d5a246226",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports max age in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 93
+            },
+            "start": {
+              "column": 35,
+              "line": 93
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "n + 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 750,
+          "id": "c24ba1b78a4986c43b55764748b95290",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 221
+            },
+            "start": {
+              "column": 70,
+              "line": 221
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "signed_at_seconds / 1000",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 895,
+          "id": "cd83ac0f87ba1b0a2087c08bf7268119",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 71,
+              "line": 317
+            },
+            "start": {
+              "column": 58,
+              "line": 317
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(opts)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 598,
+          "id": "d0a8a772d59a87307a8454a71312030c",
+          "killedBy": [
+            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 356
+            },
+            "start": {
+              "column": 51,
+              "line": 356
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "signed * trunc(max_age_secs * 1000)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 622,
+          "id": "d730854c2e4e3f17f96d2df98a2bb756",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports max age in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 72,
+              "line": 356
+            },
+            "start": {
+              "column": 72,
+              "line": 356
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "max_age_secs / 1000",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 60456,
+          "id": "e02937e1b7dc31827f1b4b482599065b",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 93
+            },
+            "start": {
+              "column": 35,
+              "line": 93
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "n * 1",
+          "status": "Timeout"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 891,
+          "id": "f03bc20f4f37216de7931af85b7baede",
+          "killedBy": [
+            "Plug.CryptoTest:compares masked binaries securely"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 115
+            },
+            "start": {
+              "column": 21,
+              "line": 115
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "byte_size(left) != byte_size(right)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace guard is_number with is_integer",
+          "duration": 885,
+          "id": "f1ac0cf0820d7257379c9bb6bdf081f4",
+          "killedBy": [
+            "Plug.CryptoTest:non_executable_binary_to_term"
+          ],
+          "location": {
+            "end": {
+              "column": 47,
+              "line": 67
+            },
+            "start": {
+              "column": 31,
+              "line": 67
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_integer(other)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 444,
+          "id": "fecb5c7546fcbf80ffe48a1718592505",
+          "killedBy": [
+            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+          ],
+          "location": {
+            "end": {
+              "column": 72,
+              "line": 356
+            },
+            "start": {
+              "column": 72,
+              "line": 356
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "max_age_secs - 1000",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Plug.Crypto do\n  @moduledoc \"\"\"\n  Namespace and module for crypto-related functionality.\n\n  For low-level functionality, see `Plug.Crypto.KeyGenerator`,\n  `Plug.Crypto.MessageEncryptor`, and `Plug.Crypto.MessageVerifier`.\n  \"\"\"\n\n  alias Plug.Crypto.{KeyGenerator, MessageVerifier, MessageEncryptor}\n\n  @doc \"\"\"\n  Prunes the stacktrace to remove any argument trace.\n\n  This is useful when working with functions that receives secrets\n  and we want to make sure those secrets do not leak on error messages.\n  \"\"\"\n  @spec prune_args_from_stacktrace(Exception.stacktrace()) :: Exception.stacktrace()\n  def prune_args_from_stacktrace(stacktrace)\n\n  def prune_args_from_stacktrace([{mod, fun, [_ | _] = args, info} | rest]),\n    do: [{mod, fun, length(args), info} | rest]\n\n  def prune_args_from_stacktrace(stacktrace) when is_list(stacktrace),\n    do: stacktrace\n\n  @doc \"\"\"\n  A restricted version of `:erlang.binary_to_term/2` that forbids\n  *executable* terms, such as anonymous functions.\n\n  The `opts` are given to the underlying `:erlang.binary_to_term/2`\n  call, with an empty list as a default.\n\n  By default this function does not restrict atoms, as an atom\n  interned in one node may not yet have been interned on another\n  (except for releases, which preload all code).\n\n  If you want to avoid atoms from being created, then you can pass\n  `[:safe]` as options, as that will also enable the safety mechanisms\n  from `:erlang.binary_to_term/2` itself.\n  \"\"\"\n  @spec non_executable_binary_to_term(binary(), [atom()]) :: term()\n  def non_executable_binary_to_term(binary, opts \\\\ []) when is_binary(binary) do\n    term = :erlang.binary_to_term(binary, opts)\n    non_executable_terms(term)\n    term\n  end\n\n  defp non_executable_terms(list) when is_list(list) do\n    non_executable_list(list)\n  end\n\n  defp non_executable_terms(tuple) when is_tuple(tuple) do\n    non_executable_tuple(tuple, tuple_size(tuple))\n  end\n\n  defp non_executable_terms(map) when is_map(map) do\n    folder = fn key, value, acc ->\n      non_executable_terms(key)\n      non_executable_terms(value)\n      acc\n    end\n\n    :maps.fold(folder, map, map)\n  end\n\n  defp non_executable_terms(other)\n       when is_atom(other) or is_number(other) or is_bitstring(other) or is_pid(other) or\n              is_reference(other) do\n    other\n  end\n\n  defp non_executable_terms(other) do\n    raise ArgumentError,\n          \"cannot deserialize #{inspect(other)}, the term is not safe for deserialization\"\n  end\n\n  defp non_executable_list([]), do: :ok\n\n  defp non_executable_list([h | t]) when is_list(t) do\n    non_executable_terms(h)\n    non_executable_list(t)\n  end\n\n  defp non_executable_list([h | t]) do\n    non_executable_terms(h)\n    non_executable_terms(t)\n  end\n\n  defp non_executable_tuple(_tuple, 0), do: :ok\n\n  defp non_executable_tuple(tuple, n) do\n    non_executable_terms(:erlang.element(n, tuple))\n    non_executable_tuple(tuple, n - 1)\n  end\n\n  @doc \"\"\"\n  Masks the token on the left with the token on the right.\n\n  Both tokens are required to have the same size.\n  \"\"\"\n  @spec mask(binary(), binary()) :: binary()\n  def mask(left, right) do\n    :crypto.exor(left, right)\n  end\n\n  @doc \"\"\"\n  Compares the two binaries (one being masked) in constant-time to avoid\n  timing attacks.\n\n  It is assumed the right token is masked according to the given mask.\n  \"\"\"\n  @spec masked_compare(binary(), binary(), binary()) :: boolean()\n  def masked_compare(left, right, mask)\n      when is_binary(left) and is_binary(right) and is_binary(mask) do\n    byte_size(left) == byte_size(right) and byte_size(right) == byte_size(mask) and\n      crypto_exor_hash_equals(left, right, mask)\n  end\n\n  defp crypto_exor_hash_equals(x, y, z) do\n    crypto_hash_equals(mask(x, y), z)\n  end\n\n  @doc \"\"\"\n  Compares the two binaries in constant-time to avoid timing attacks.\n\n  See: http://codahale.com/a-lesson-in-timing-attacks/\n  \"\"\"\n  @spec secure_compare(binary(), binary()) :: boolean()\n  def secure_compare(left, right) when is_binary(left) and is_binary(right) do\n    byte_size(left) == byte_size(right) and crypto_hash_equals(left, right)\n  end\n\n  # TODO: remove when we require OTP 25.0\n  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :hash_equals, 2) do\n    defp crypto_hash_equals(x, y) do\n      # Depending on the linked OpenSSL library hash_equals is available.\n      # If not, we fall back to the legacy implementation.\n      try do\n        :crypto.hash_equals(x, y)\n      rescue\n        # Still can throw \"Unsupported CRYPTO_memcmp\"\n        ErlangError ->\n          legacy_secure_compare(x, y, 0)\n      end\n    end\n  else\n    defp crypto_hash_equals(x, y) do\n      legacy_secure_compare(x, y, 0)\n    end\n  end\n\n  defp legacy_secure_compare(<<x, left::binary>>, <<y, right::binary>>, acc) do\n    import Bitwise\n    xorred = bxor(x, y)\n    legacy_secure_compare(left, right, acc ||| xorred)\n  end\n\n  defp legacy_secure_compare(<<>>, <<>>, acc) do\n    acc === 0\n  end\n\n  @doc \"\"\"\n  Encodes and signs data into a token you can send to clients.\n\n      Plug.Crypto.sign(conn.secret_key_base, \"user-secret\", {:elixir, :terms})\n\n  A key will be derived from the secret key base and the given user secret.\n  The key will also be cached for performance reasons on future calls.\n\n  ## Options\n\n    * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 1000\n    * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 32\n    * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to `:sha256`\n    * `:signed_at` - set the timestamp of the token in seconds.\n      Defaults to `System.os_time(:millisecond)`\n    * `:max_age` - the default maximum age of the token. Defaults to\n      `86400` seconds (1 day) and it may be overridden on `verify/4`.\n\n  \"\"\"\n  def sign(key_base, salt, data, opts \\\\ []) when is_binary(key_base) and is_binary(salt) do\n    data\n    |> encode(opts)\n    |> MessageVerifier.sign(get_secret(key_base, salt, opts))\n  end\n\n  @doc \"\"\"\n  Encodes, encrypts, and signs data into a token you can send to clients.\n\n      Plug.Crypto.encrypt(conn.secret_key_base, \"user-secret\", {:elixir, :terms})\n\n  A key will be derived from the secret key base and the given user secret.\n  The key will also be cached for performance reasons on future calls.\n\n  ## Options\n\n    * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 1000\n    * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 32\n    * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to `:sha256`\n    * `:signed_at` - set the timestamp of the token in seconds.\n      Defaults to `System.os_time(:millisecond)`\n    * `:max_age` - the default maximum age of the token. Defaults to\n      `86400` seconds (1 day) and it may be overridden on `decrypt/4`.\n\n  \"\"\"\n  def encrypt(key_base, secret, data, opts \\\\ [])\n      when is_binary(key_base) and is_binary(secret) do\n    data\n    |> encode(opts)\n    |> MessageEncryptor.encrypt(get_secret(key_base, secret, opts), \"\")\n  end\n\n  defp encode(data, opts) do\n    signed_at_seconds = Keyword.get(opts, :signed_at)\n    signed_at_ms = if signed_at_seconds, do: trunc(signed_at_seconds * 1000), else: now_ms()\n    max_age_in_seconds = Keyword.get(opts, :max_age, 86400)\n    :erlang.term_to_binary({data, signed_at_ms, max_age_in_seconds})\n  end\n\n  @doc \"\"\"\n  Decodes the original data from the token and verifies its integrity.\n\n  ## Examples\n\n  In this scenario we will create a token, sign it, then provide it to a client\n  application. The client will then use this token to authenticate requests for\n  resources from the server. See `Plug.Crypto` summary for more info about\n  creating tokens.\n\n      iex> user_id    = 99\n      iex> secret     = \"kjoy3o1zeidquwy1398juxzldjlksahdk3\"\n      iex> user_salt  = \"user salt\"\n      iex> token      = Plug.Crypto.sign(secret, user_salt, user_id)\n\n  The mechanism for passing the token to the client is typically through a\n  cookie, a JSON response body, or HTTP header. For now, assume the client has\n  received a token it can use to validate requests for protected resources.\n\n  When the server receives a request, it can use `verify/4` to determine if it\n  should provide the requested resources to the client:\n\n      iex> Plug.Crypto.verify(secret, user_salt, token, max_age: 86400)\n      {:ok, 99}\n\n  In this example, we know the client sent a valid token because `verify/4`\n  returned a tuple of type `{:ok, user_id}`. The server can now proceed with\n  the request.\n\n  However, if the client had sent an expired or otherwise invalid token\n  `verify/4` would have returned an error instead:\n\n      iex> Plug.Crypto.verify(secret, user_salt, expired, max_age: 86400)\n      {:error, :expired}\n\n      iex> Plug.Crypto.verify(secret, user_salt, invalid, max_age: 86400)\n      {:error, :invalid}\n\n  ## Options\n\n    * `:max_age` - verifies the token only if it has been generated\n      \"max age\" ago in seconds. Defaults to the max age signed in the\n      token (86400)\n    * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 1000\n    * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 32\n    * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to `:sha256`\n\n  \"\"\"\n  def verify(key_base, salt, token, opts \\\\ [])\n\n  def verify(key_base, salt, token, opts)\n      when is_binary(key_base) and is_binary(salt) and is_binary(token) do\n    secret = get_secret(key_base, salt, opts)\n\n    case MessageVerifier.verify(token, secret) do\n      {:ok, message} -> decode(message, opts)\n      :error -> {:error, :invalid}\n    end\n  end\n\n  def verify(_key_base, salt, nil, _opts) when is_binary(salt) do\n    {:error, :missing}\n  end\n\n  @doc \"\"\"\n  Decrypts the original data from the token and verifies its integrity.\n\n  ## Options\n\n    * `:max_age` - verifies the token only if it has been generated\n      \"max age\" ago in seconds. A reasonable value is 1 day (86400\n      seconds)\n    * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 1000\n    * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to 32\n    * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`\n      when generating the encryption and signing keys. Defaults to `:sha256`\n\n  \"\"\"\n  def decrypt(key_base, secret, token, opts \\\\ [])\n\n  def decrypt(key_base, secret, nil, opts)\n      when is_binary(key_base) and is_binary(secret) and is_list(opts) do\n    {:error, :missing}\n  end\n\n  def decrypt(key_base, secret, token, opts)\n      when is_binary(key_base) and is_binary(secret) and is_list(opts) do\n    secret = get_secret(key_base, secret, opts)\n\n    case MessageEncryptor.decrypt(token, secret, \"\") do\n      {:ok, message} -> decode(message, opts)\n      :error -> {:error, :invalid}\n    end\n  end\n\n  defp decode(message, opts) do\n    {data, signed, max_age} =\n      case non_executable_binary_to_term(message) do\n        {data, signed, max_age} -> {data, signed, max_age}\n        # For backwards compatibility with Plug.Crypto v1.1\n        {data, signed} -> {data, signed, 86400}\n        # For backwards compatibility with Phoenix which had the original code\n        %{data: data, signed: signed} -> {data, signed, 86400}\n      end\n\n    if expired?(signed, Keyword.get(opts, :max_age, max_age)) do\n      {:error, :expired}\n    else\n      {:ok, data}\n    end\n  end\n\n  ## Helpers\n\n  # Gathers configuration and generates the key secrets and signing secrets.\n  defp get_secret(secret_key_base, salt, opts) do\n    iterations = Keyword.get(opts, :key_iterations, 1000)\n    length = Keyword.get(opts, :key_length, 32)\n    digest = Keyword.get(opts, :key_digest, :sha256)\n    cache = Keyword.get(opts, :cache, Plug.Crypto.Keys)\n    KeyGenerator.generate(secret_key_base, salt, iterations, length, digest, cache)\n  end\n\n  defp expired?(_signed, :infinity), do: false\n  defp expired?(_signed, max_age_secs) when max_age_secs <= 0, do: true\n  defp expired?(signed, max_age_secs), do: signed + trunc(max_age_secs * 1000) < now_ms()\n\n  defp now_ms, do: System.os_time(:millisecond)\nend\n"
+    },
+    "lib/plug/crypto/key_generator.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1081,
+          "id": "4061955b5855b461288b862a2b1660aa",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 74
+            },
+            "start": {
+              "column": 35,
+              "line": 74
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "Code.ensure_loaded?(:crypto) or function_exported?(:crypto, :pbkdf2_hmac, 5)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace < with <=",
+          "duration": 487,
+          "id": "51e07ded47f32e453f065c141984ec73",
+          "killedBy": [
+            "Plug.Crypto.KeyGeneratorTest:digest :sha512 works"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 44
+            },
+            "start": {
+              "column": 48,
+              "line": 44
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "iterations <= 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace > with <=",
+          "duration": 467,
+          "id": "9f5e27573bfdf071d2d1d96fc6bc37ea",
+          "killedBy": [
+            "Plug.Crypto.KeyGeneratorTest:digest :sha512 works"
+          ],
+          "location": {
+            "end": {
+              "column": 14,
+              "line": 47
+            },
+            "start": {
+              "column": 14,
+              "line": 47
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "length <= @max_length",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 1055,
+          "id": "ae34e267e3e6d23abe6a341ff6babe17",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 14,
+              "line": 47
+            },
+            "start": {
+              "column": 14,
+              "line": 47
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "length >= @max_length",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 468,
+          "id": "e09e1c89134502d14be0e218cfd6eea8",
+          "killedBy": [
+            "Plug.Crypto.KeyGeneratorTest:returns an error if iterations is not an integer >= 1"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 44
+            },
+            "start": {
+              "column": 34,
+              "line": 44
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "not is_integer(iterations) and iterations < 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 436,
+          "id": "e7e1c40aaff862483db62c74a0cc0278",
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:doctest module Plug.Crypto.MessageEncryptor (1)"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 44
+            },
+            "start": {
+              "column": 48,
+              "line": 44
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "iterations >= 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/key_generator_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 430,
+          "id": "e960eba612df19476da69e7b9ca089e9",
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:doctest module Plug.Crypto.MessageEncryptor (1)"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 44
+            },
+            "start": {
+              "column": 7,
+              "line": 44
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "is_integer(iterations)",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Plug.Crypto.KeyGenerator do\n  @moduledoc \"\"\"\n  `KeyGenerator` implements PBKDF2 (Password-Based Key Derivation Function 2),\n  part of PKCS #5 v2.0 (Password-Based Cryptography Specification).\n\n  It can be used to derive a number of keys for various purposes from a given\n  secret. This lets applications have a single secure secret, but avoid reusing\n  that key in multiple incompatible contexts.\n\n  The returned key is a binary. You may invoke functions in the `Base` module,\n  such as `Base.url_encode64/2`, to convert this binary into a textual\n  representation.\n\n  See http://tools.ietf.org/html/rfc2898#section-5.2\n  \"\"\"\n\n  import Bitwise\n  @max_length bsl(1, 32) - 1\n\n  @doc \"\"\"\n  Returns a derived key suitable for use.\n\n  ## Options\n\n    * `:iterations` - defaults to 1000 (increase to at least 2^16 if used for passwords);\n    * `:length`     - a length in octets for the derived key. Defaults to 32;\n    * `:digest`     - an hmac function to use as the pseudo-random function. Defaults to `:sha256`;\n    * `:cache`      - an ETS table name to be used as cache.\n      Only use an ETS table as cache if the secret and salt is a bound set of values.\n      For example: `:ets.new(:your_name, [:named_table, :public, read_concurrency: true])`\n\n  \"\"\"\n  def generate(secret, salt, opts \\\\ []) do\n    iterations = Keyword.get(opts, :iterations, 1000)\n    length = Keyword.get(opts, :length, 32)\n    digest = Keyword.get(opts, :digest, :sha256)\n    cache = Keyword.get(opts, :cache)\n    generate(secret, salt, iterations, length, digest, cache)\n  end\n\n  @doc false\n  def generate(secret, salt, iterations, length, digest, cache) do\n    cond do\n      not is_integer(iterations) or iterations < 1 ->\n        raise ArgumentError, \"iterations must be an integer >= 1\"\n\n      length > @max_length ->\n        raise ArgumentError, \"length must be less than or equal to #{@max_length}\"\n\n      true ->\n        with_cache(cache, {secret, salt, iterations, length, digest}, fn ->\n          pbkdf2_hmac(digest, secret, salt, iterations, length)\n        end)\n    end\n  rescue\n    e -> reraise e, Plug.Crypto.prune_args_from_stacktrace(__STACKTRACE__)\n  end\n\n  defp with_cache(nil, _key, fun), do: fun.()\n\n  defp with_cache(ets, key, fun) do\n    case :ets.lookup(ets, key) do\n      [{_key, value}] ->\n        value\n\n      [] ->\n        value = fun.()\n        :ets.insert(ets, [{key, value}])\n        value\n    end\n  end\n\n  # TODO: remove when we require OTP 24.2\n  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :pbkdf2_hmac, 5) do\n    defp pbkdf2_hmac(digest, secret, salt, iterations, length) do\n      :crypto.pbkdf2_hmac(digest, secret, salt, iterations, length)\n    end\n  else\n    defp pbkdf2_hmac(digest, secret, salt, iterations, length) do\n      legacy_pbkdf2_hmac(hmac_fun(digest, secret), salt, iterations, length, 1, [], 0)\n    end\n\n    defp legacy_pbkdf2_hmac(_fun, _salt, _iterations, max_length, _block_index, acc, length)\n         when length >= max_length do\n      acc\n      |> IO.iodata_to_binary()\n      |> binary_part(0, max_length)\n    end\n\n    defp legacy_pbkdf2_hmac(fun, salt, iterations, max_length, block_index, acc, length) do\n      initial = fun.(<<salt::binary, block_index::integer-size(32)>>)\n      block = iterate(fun, iterations - 1, initial, initial)\n      length = byte_size(block) + length\n\n      legacy_pbkdf2_hmac(\n        fun,\n        salt,\n        iterations,\n        max_length,\n        block_index + 1,\n        [acc | block],\n        length\n      )\n    end\n\n    defp iterate(_fun, 0, _prev, acc), do: acc\n\n    defp iterate(fun, iteration, prev, acc) do\n      next = fun.(prev)\n      iterate(fun, iteration - 1, next, :crypto.exor(next, acc))\n    end\n\n    defp hmac_fun(digest, key), do: &:crypto.mac(:hmac, digest, key, &1)\n  end\nend\n"
+    },
+    "lib/plug/crypto/message_encryptor.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1107,
+          "id": "116226ec66923bff5611eff82a76c70d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 164
+            },
+            "start": {
+              "column": 11,
+              "line": 164
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x12 + y12",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1067,
+          "id": "42c36211ac039c1f4c5145440a075ef7",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 163
+            },
+            "start": {
+              "column": 11,
+              "line": 163
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x03 + y03",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1101,
+          "id": "56b76b002856f4accb3f5079b459f837",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 160
+            },
+            "start": {
+              "column": 11,
+              "line": 160
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x00 + y00",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 791,
+          "id": "5ac3c1f23ab077546582c7ae3094826b",
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:it encrypts/decrypts with iodata aad"
+          ],
+          "location": {
+            "end": {
+              "column": 68,
+              "line": 52
+            },
+            "start": {
+              "column": 56,
+              "line": 52
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(aad)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1039,
+          "id": "5d6bc4112c70716ccebddccd0d0a0afc",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 161
+            },
+            "start": {
+              "column": 11,
+              "line": 161
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x01 + y01",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1074,
+          "id": "62d94e489bd4625db72967d2a9e9c8a9",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 167
+            },
+            "start": {
+              "column": 11,
+              "line": 167
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x15 * y15",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1037,
+          "id": "69397ec38b22077148484d078056d462",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 160
+            },
+            "start": {
+              "column": 11,
+              "line": 160
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x00 * y00",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 785,
+          "id": "7f6b1d7a59479a4757a78fadea3b1069",
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:it encrypts/decrypts with iodata aad"
+          ],
+          "location": {
+            "end": {
+              "column": 66,
+              "line": 37
+            },
+            "start": {
+              "column": 54,
+              "line": 37
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(aad)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 812,
+          "id": "84d5b4f221e75a3d2febd2b8b2806479",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 37,
+              "line": 38
+            },
+            "start": {
+              "column": 14,
+              "line": 38
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "bit_size(secret) != 256",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1042,
+          "id": "9325ee6ca333e0394a608bf1b7180f33",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 166
+            },
+            "start": {
+              "column": 11,
+              "line": 166
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x14 + y14",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard === with !==",
+          "duration": 787,
+          "id": "941c46695f46f3952bb29790c71f5d7a",
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:it decodes messages from earlier versions"
+          ],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 78
+            },
+            "start": {
+              "column": 33,
+              "line": 78
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "bit_size(cipher_tag) !== 128",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1062,
+          "id": "983339a6ef87dfa7ddd83d39d9be647d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 167
+            },
+            "start": {
+              "column": 11,
+              "line": 167
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x15 + y15",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1087,
+          "id": "a0bed325399f56177a275bd901f57709",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 165
+            },
+            "start": {
+              "column": 11,
+              "line": 165
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x13 + y13",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1081,
+          "id": "a7e81501258e67f7f6aa33dad40e77b6",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 162
+            },
+            "start": {
+              "column": 11,
+              "line": 162
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x02 * y02",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard === with !==",
+          "duration": 795,
+          "id": "abff45ac5dd140cb5511f5f533c85ed3",
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:it decodes messages from earlier versions"
+          ],
+          "location": {
+            "end": {
+              "column": 44,
+              "line": 76
+            },
+            "start": {
+              "column": 25,
+              "line": 76
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "bit_size(iv) !== 96",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1068,
+          "id": "add19ed7bff52ff987f977b5049703a3",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 166
+            },
+            "start": {
+              "column": 11,
+              "line": 166
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x14 * y14",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1092,
+          "id": "b2c9413c0e9815e4ec2259b08646cdd2",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 165
+            },
+            "start": {
+              "column": 11,
+              "line": 165
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x13 * y13",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1077,
+          "id": "b6f4d4d56019b649e1f67d900e67917a",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 164
+            },
+            "start": {
+              "column": 11,
+              "line": 164
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x12 * y12",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1052,
+          "id": "b97bf3bb5fbbfbf38045044b2d852203",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 162
+            },
+            "start": {
+              "column": 11,
+              "line": 162
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x02 + y02",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1058,
+          "id": "d3dfa5cf452d8c1e8be34cf872bc3648",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 161
+            },
+            "start": {
+              "column": 11,
+              "line": 161
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x01 * y01",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1074,
+          "id": "f451fe57ac6c9ea54979d6233d1d9f7f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 163
+            },
+            "start": {
+              "column": 11,
+              "line": 163
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "x03 * y03",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Plug.Crypto.MessageEncryptor do\n  @moduledoc ~S\"\"\"\n  `MessageEncryptor` is a simple way to encrypt values which get stored\n  somewhere you don't trust.\n\n  The encrypted key, initialization vector, cipher text, and cipher tag\n  are base64url encoded and returned to you.\n\n  This can be used in situations similar to the `Plug.Crypto.MessageVerifier`,\n  but where you don't want users to be able to determine the value of the payload.\n\n  The current algorithm used is XChaCha20-Poly1305.\n\n  ## Example\n\n      iex> secret_key_base = \"072d1e0157c008193fe48a670cce031faa4e...\"\n      ...> encrypted_cookie_salt = \"encrypted cookie\"\n      ...> secret = KeyGenerator.generate(secret_key_base, encrypted_cookie_salt)\n      ...>\n      ...> data = \"José\"\n      ...> encrypted = MessageEncryptor.encrypt(data, secret, \"UNUSED\")\n      ...> MessageEncryptor.decrypt(encrypted, secret, \"UNUSED\")\n      {:ok, \"José\"}\n\n  \"\"\"\n\n  @doc \"\"\"\n  Encrypts a message using authenticated encryption.\n\n  The `sign_secret` is currently only used on decryption\n  for backwards compatibility.\n\n  A custom authentication message can be provided.\n  It defaults to \"A128GCM\" for backwards compatibility.\n  \"\"\"\n  def encrypt(message, aad \\\\ \"A128GCM\", secret, sign_secret)\n      when is_binary(message) and (is_binary(aad) or is_list(aad)) and\n             bit_size(secret) == 256 and\n             is_binary(sign_secret) do\n    iv = :crypto.strong_rand_bytes(24)\n    {subkey, nonce} = xchacha20_subkey_and_nonce(secret, iv)\n    {cipher_text, cipher_tag} = block_encrypt(:chacha20_poly1305, subkey, nonce, {aad, message})\n    \"XCP.\" <> Base.url_encode64(iv <> cipher_tag <> cipher_text, padding: false)\n  rescue\n    e -> reraise e, Plug.Crypto.prune_args_from_stacktrace(__STACKTRACE__)\n  end\n\n  @doc \"\"\"\n  Decrypts a message using authenticated encryption.\n  \"\"\"\n  def decrypt(encrypted, aad \\\\ \"A128GCM\", secret, sign_secret)\n      when is_binary(encrypted) and (is_binary(aad) or is_list(aad)) and\n             bit_size(secret) in [128, 192, 256] and\n             is_binary(sign_secret) do\n    unguarded_decrypt(encrypted, aad, secret, sign_secret)\n  rescue\n    e -> reraise e, Plug.Crypto.prune_args_from_stacktrace(__STACKTRACE__)\n  end\n\n  defp unguarded_decrypt(\"XCP.\" <> iv_cipher_text_cipher_tag, aad, secret, _sign_secret) do\n    with {:ok, <<iv::192-bits, cipher_tag::128-bits, cipher_text::binary>>} <-\n           Base.url_decode64(iv_cipher_text_cipher_tag, padding: false),\n         {subkey, nonce} = xchacha20_subkey_and_nonce(secret, iv),\n         plain_text when is_binary(plain_text) <-\n           block_decrypt(:chacha20_poly1305, subkey, nonce, {aad, cipher_text, cipher_tag}) do\n      {:ok, plain_text}\n    else\n      _ -> :error\n    end\n  end\n\n  # Messages from Plug.Crypto v1.x\n  defp unguarded_decrypt(\"QTEyOEdDTQ.\" <> rest, aad, secret, sign_secret) do\n    with [encrypted_key, iv, cipher_text, cipher_tag] <- :binary.split(rest, \".\", [:global]),\n         {:ok, encrypted_key} <- Base.url_decode64(encrypted_key, padding: false),\n         {:ok, iv} when bit_size(iv) === 96 <- Base.url_decode64(iv, padding: false),\n         {:ok, cipher_text} <- Base.url_decode64(cipher_text, padding: false),\n         {:ok, cipher_tag} when bit_size(cipher_tag) === 128 <-\n           Base.url_decode64(cipher_tag, padding: false),\n         {:ok, key} <- aes_gcm_key_unwrap(encrypted_key, secret, sign_secret),\n         plain_text when is_binary(plain_text) <-\n           block_decrypt(:aes_gcm, key, iv, {aad, cipher_text, cipher_tag}) do\n      {:ok, plain_text}\n    else\n      _ -> :error\n    end\n  end\n\n  defp unguarded_decrypt(_rest, _aad, _secret, _sign_secret) do\n    :error\n  end\n\n  defp block_encrypt(cipher, key, iv, {aad, payload}) do\n    cipher = cipher_alias(cipher, bit_size(key))\n    :crypto.crypto_one_time_aead(cipher, key, iv, payload, aad, true)\n  catch\n    :error, :notsup -> raise_notsup(cipher)\n  end\n\n  defp block_decrypt(cipher, key, iv, {aad, payload, tag}) do\n    cipher = cipher_alias(cipher, bit_size(key))\n    :crypto.crypto_one_time_aead(cipher, key, iv, payload, aad, tag, false)\n  catch\n    :error, :notsup -> raise_notsup(cipher)\n  end\n\n  defp cipher_alias(:aes_gcm, 128), do: :aes_128_gcm\n  defp cipher_alias(:aes_gcm, 192), do: :aes_192_gcm\n  defp cipher_alias(:aes_gcm, 256), do: :aes_256_gcm\n  defp cipher_alias(other, _), do: other\n\n  defp raise_notsup(algo) do\n    raise \"the algorithm #{inspect(algo)} is not supported by your Erlang/OTP installation. \" <>\n            \"Please make sure it was compiled with the correct OpenSSL/BoringSSL bindings\"\n  end\n\n  defp xchacha20_subkey_and_nonce(<<key::256-bits>>, <<nonce0::128-bits, nonce1::64-bits>>) do\n    subkey = hchacha20(key, nonce0)\n    nonce = <<0::32, nonce1::64-bits>>\n    {subkey, nonce}\n  end\n\n  defp hchacha20(<<key::256-bits>>, <<nonce::128-bits>>) do\n    # ChaCha20 has an internal blocksize of 512-bits (64-bytes).\n    # Let's use a Mask of random 64-bytes to blind the intermediate keystream.\n    mask = <<mask_h::128-bits, _::256-bits, mask_t::128-bits>> = :crypto.strong_rand_bytes(64)\n\n    <<state_2h::128-bits, _::256-bits, state_2t::128-bits>> =\n      :crypto.crypto_one_time(:chacha20, key, nonce, mask, true)\n\n    <<\n      x00::32-unsigned-little-integer,\n      x01::32-unsigned-little-integer,\n      x02::32-unsigned-little-integer,\n      x03::32-unsigned-little-integer,\n      x12::32-unsigned-little-integer,\n      x13::32-unsigned-little-integer,\n      x14::32-unsigned-little-integer,\n      x15::32-unsigned-little-integer\n    >> =\n      :crypto.exor(\n        <<mask_h::128-bits, mask_t::128-bits>>,\n        <<state_2h::128-bits, state_2t::128-bits>>\n      )\n\n    ## The final step of ChaCha20 is `State2 = State0 + State1', so let's\n    ## recover `State1' with subtraction: `State1 = State2 - State0'\n    <<\n      y00::32-unsigned-little-integer,\n      y01::32-unsigned-little-integer,\n      y02::32-unsigned-little-integer,\n      y03::32-unsigned-little-integer,\n      y12::32-unsigned-little-integer,\n      y13::32-unsigned-little-integer,\n      y14::32-unsigned-little-integer,\n      y15::32-unsigned-little-integer\n    >> = <<\"expand 32-byte k\", nonce::128-bits>>\n\n    <<\n      x00 - y00::32-unsigned-little-integer,\n      x01 - y01::32-unsigned-little-integer,\n      x02 - y02::32-unsigned-little-integer,\n      x03 - y03::32-unsigned-little-integer,\n      x12 - y12::32-unsigned-little-integer,\n      x13 - y13::32-unsigned-little-integer,\n      x14 - y14::32-unsigned-little-integer,\n      x15 - y15::32-unsigned-little-integer\n    >>\n  end\n\n  # Unwraps an encrypted content encryption key (CEK) with secret and\n  # sign_secret using AES GCM mode. Accepts keys of 128, 192, or 256\n  # bits based on the length of the secret key.\n  #\n  # See: https://tools.ietf.org/html/rfc7518#section-4.7\n  defp aes_gcm_key_unwrap(wrapped_cek, secret, sign_secret)\n       when bit_size(secret) in [128, 192, 256] and is_binary(sign_secret) do\n    wrapped_cek\n    |> case do\n      <<cipher_text::128-bitstring, cipher_tag::128-bitstring, iv::96-bitstring>> ->\n        block_decrypt(:aes_gcm, secret, iv, {sign_secret, cipher_text, cipher_tag})\n\n      <<cipher_text::192-bitstring, cipher_tag::128-bitstring, iv::96-bitstring>> ->\n        block_decrypt(:aes_gcm, secret, iv, {sign_secret, cipher_text, cipher_tag})\n\n      <<cipher_text::256-bitstring, cipher_tag::128-bitstring, iv::96-bitstring>> ->\n        block_decrypt(:aes_gcm, secret, iv, {sign_secret, cipher_text, cipher_tag})\n\n      _ ->\n        :error\n    end\n    |> case do\n      cek when bit_size(cek) in [128, 192, 256] -> {:ok, cek}\n      _ -> :error\n    end\n  end\nend\n"
+    },
+    "lib/plug/crypto/message_verifier.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_verifier_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard > with <=",
+          "duration": 774,
+          "id": "56d3599a2494de716a3450539f1b6206",
+          "killedBy": [
+            "Plug.Crypto.MessageVerifierTest:verifies a signed message"
+          ],
+          "location": {
+            "end": {
+              "column": 78,
+              "line": 31
+            },
+            "start": {
+              "column": 57,
+              "line": 31
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "byte_size(secret) <= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_verifier_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard > with <=",
+          "duration": 763,
+          "id": "d2c4050f553aada8dc409ae43f254692",
+          "killedBy": [
+            "Plug.Crypto.MessageVerifierTest:verifies a signed message"
+          ],
+          "location": {
+            "end": {
+              "column": 56,
+              "line": 21
+            },
+            "start": {
+              "column": 35,
+              "line": 21
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "byte_size(secret) <= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_verifier_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard > with >=",
+          "duration": 1396,
+          "id": "d676da3cacb5d462daac5448dc1cd32d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 78,
+              "line": 31
+            },
+            "start": {
+              "column": 57,
+              "line": 31
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "byte_size(secret) >= 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/plug/crypto/message_verifier_test.exs",
+            "test/plug/crypto/message_encryptor_test.exs",
+            "test/plug/crypto_test.exs"
+          ],
+          "description": "replace guard > with >=",
+          "duration": 1349,
+          "id": "d689770d7494db299ba17ee6f337c9b9",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 56,
+              "line": 21
+            },
+            "start": {
+              "column": 35,
+              "line": 21
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "byte_size(secret) >= 0",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Plug.Crypto.MessageVerifier do\n  @moduledoc \"\"\"\n  `MessageVerifier` makes it easy to generate and verify messages\n  which are signed to prevent tampering.\n\n  For example, the cookie store uses this verifier to send data\n  to the client. The data can be read by the client, but cannot be\n  tampered with.\n\n  The message and its verification are base64url encoded and returned\n  to you.\n\n  The current algorithm used is HMAC-SHA, with SHA256, SHA384, and\n  SHA512 as supported digest types.\n  \"\"\"\n\n  @doc \"\"\"\n  Signs a message according to the given secret.\n  \"\"\"\n  def sign(message, secret, digest_type \\\\ :sha256)\n      when is_binary(message) and byte_size(secret) > 0 and\n             digest_type in [:sha256, :sha384, :sha512] do\n    hmac_sha2_sign(message, secret, digest_type)\n  rescue\n    e -> reraise e, Plug.Crypto.prune_args_from_stacktrace(__STACKTRACE__)\n  end\n\n  @doc \"\"\"\n  Decodes and verifies the encoded binary was not tampered with.\n  \"\"\"\n  def verify(signed, secret) when is_binary(signed) and byte_size(secret) > 0 do\n    hmac_sha2_verify(signed, secret)\n  rescue\n    e -> reraise e, Plug.Crypto.prune_args_from_stacktrace(__STACKTRACE__)\n  end\n\n  ## Signature Algorithms\n\n  defp hmac_sha2_to_protected(:sha256), do: \"SFMyNTY\"\n  defp hmac_sha2_to_protected(:sha384), do: \"SFMzODQ\"\n  defp hmac_sha2_to_protected(:sha512), do: \"SFM1MTI\"\n\n  defp hmac_sha2_to_digest_type(\"SFMyNTY\"), do: :sha256\n  defp hmac_sha2_to_digest_type(\"SFMzODQ\"), do: :sha384\n  defp hmac_sha2_to_digest_type(\"SFM1MTI\"), do: :sha512\n\n  defp hmac_sha2_sign(payload, key, digest_type) do\n    protected = hmac_sha2_to_protected(digest_type)\n    plain_text = [protected, ?., Base.url_encode64(payload, padding: false)]\n    signature = :crypto.mac(:hmac, digest_type, key, plain_text)\n    IO.iodata_to_binary([plain_text, \".\", Base.url_encode64(signature, padding: false)])\n  end\n\n  defp hmac_sha2_verify(signed, key) when is_binary(signed) and is_binary(key) do\n    with [protected, payload, signature] when protected in [\"SFMyNTY\", \"SFMzODQ\", \"SFM1MTI\"] <-\n           :binary.split(signed, \".\", [:global]),\n         plain_text = [protected, ?., payload],\n         {:ok, payload} <- Base.url_decode64(payload, padding: false),\n         {:ok, signature} <- Base.url_decode64(signature, padding: false) do\n      digest_type = hmac_sha2_to_digest_type(protected)\n      challenge = :crypto.mac(:hmac, digest_type, key, plain_text)\n\n      if Plug.Crypto.secure_compare(challenge, signature) do\n        {:ok, payload}\n      else\n        :error\n      end\n    else\n      _ ->\n        :error\n    end\n  end\nend\n"
+    }
+  },
+  "mutalisk": {
+    "engine": {
+      "b97bf3bb5fbbfbf38045044b2d852203": "schema",
+      "5d6bc4112c70716ccebddccd0d0a0afc": "schema",
+      "4061955b5855b461288b862a2b1660aa": "schema",
+      "1c0ee0f70c07ddd6a6240e6f1c633b20": "schema",
+      "e7e1c40aaff862483db62c74a0cc0278": "schema",
+      "2bd252a04ba99d8428c6e9cbdb9238cb": "schema",
+      "7f6b1d7a59479a4757a78fadea3b1069": "fallback",
+      "d3dfa5cf452d8c1e8be34cf872bc3648": "schema",
+      "56d3599a2494de716a3450539f1b6206": "fallback",
+      "42c36211ac039c1f4c5145440a075ef7": "schema",
+      "c24ba1b78a4986c43b55764748b95290": "schema",
+      "62d94e489bd4625db72967d2a9e9c8a9": "schema",
+      "84d5b4f221e75a3d2febd2b8b2806479": "fallback",
+      "18f394c7abf0912e7e45ea10866fb63f": "schema",
+      "9f5e27573bfdf071d2d1d96fc6bc37ea": "schema",
+      "23a4a2ff98a0547d5498f1bd1e08c4ce": "schema",
+      "ba0b3b87a2cf20bc55ddf70b9b37bf3f": "fallback",
+      "ad7269d27a3b88d9a1051c0e1c0573c9": "schema",
+      "5ac3c1f23ab077546582c7ae3094826b": "fallback",
+      "d676da3cacb5d462daac5448dc1cd32d": "fallback",
+      "a0bed325399f56177a275bd901f57709": "schema",
+      "43d1db5789f1e678ac4900f267bd7670": "fallback",
+      "e960eba612df19476da69e7b9ca089e9": "schema",
+      "9325ee6ca333e0394a608bf1b7180f33": "schema",
+      "56b76b002856f4accb3f5079b459f837": "schema",
+      "d2c4050f553aada8dc409ae43f254692": "fallback",
+      "f1ac0cf0820d7257379c9bb6bdf081f4": "fallback",
+      "e02937e1b7dc31827f1b4b482599065b": "schema",
+      "ae34e267e3e6d23abe6a341ff6babe17": "schema",
+      "8b5c232ee7c6b4094572a44e349ef604": "fallback",
+      "874deaec68ca12d6d585db1585bf9111": "schema",
+      "a7e81501258e67f7f6aa33dad40e77b6": "schema",
+      "abff45ac5dd140cb5511f5f533c85ed3": "fallback",
+      "d689770d7494db299ba17ee6f337c9b9": "fallback",
+      "116226ec66923bff5611eff82a76c70d": "schema",
+      "b6f4d4d56019b649e1f67d900e67917a": "schema",
+      "b82b4bd79836bf79bb9af0180a39e686": "fallback",
+      "985651f36aa1c0629b1a91c15f05305f": "schema",
+      "f451fe57ac6c9ea54979d6233d1d9f7f": "schema",
+      "247162bd17f72b8740f1bdc01f3cded2": "fallback",
+      "fecb5c7546fcbf80ffe48a1718592505": "schema",
+      "b18769d310e10dc9c5256734b9793d1e": "schema",
+      "b2c9413c0e9815e4ec2259b08646cdd2": "schema",
+      "d730854c2e4e3f17f96d2df98a2bb756": "schema",
+      "f03bc20f4f37216de7931af85b7baede": "schema",
+      "73807e2ee8403f3778a06ee0423fb0fe": "fallback",
+      "b7b41d445b3f753f829b12bbf758a3bf": "schema",
+      "69397ec38b22077148484d078056d462": "schema",
+      "1088fd6b7e384418a7be4f7f46147a7f": "schema",
+      "add19ed7bff52ff987f977b5049703a3": "schema",
+      "a3d327d7a582abeb8da6ccef595af7a2": "schema",
+      "cd83ac0f87ba1b0a2087c08bf7268119": "fallback",
+      "aaf6be9b0da9d0c088e25f4039d3ac17": "schema",
+      "e09e1c89134502d14be0e218cfd6eea8": "schema",
+      "941c46695f46f3952bb29790c71f5d7a": "fallback",
+      "51e07ded47f32e453f065c141984ec73": "schema",
+      "85de055e2876e238a984f486cbeed1b1": "fallback",
+      "d0a8a772d59a87307a8454a71312030c": "schema",
+      "86ee88ab6d391629e74dfcb7e2eb22ea": "fallback",
+      "983339a6ef87dfa7ddd83d39d9be647d": "schema",
+      "89404c1bedd3da0700c17f716b17a583": "fallback",
+      "c0cd54a5f0e7d66bc8f1ed8d5a246226": "schema",
+      "6d07ca71ee2ad9112ff703a2ccc00eaf": "fallback",
+      "b75908f16571e4f07ae94b8483cfd5be": "schema"
+    },
+    "metrics": {
+      "fallback_count": 21,
+      "fallback_time_ms": 21312,
+      "fanout": {
+        "b97bf3bb5fbbfbf38045044b2d852203": 2,
+        "5d6bc4112c70716ccebddccd0d0a0afc": 2,
+        "4061955b5855b461288b862a2b1660aa": 3,
+        "1c0ee0f70c07ddd6a6240e6f1c633b20": 2,
+        "e7e1c40aaff862483db62c74a0cc0278": 3,
+        "2bd252a04ba99d8428c6e9cbdb9238cb": 2,
+        "7f6b1d7a59479a4757a78fadea3b1069": 2,
+        "d3dfa5cf452d8c1e8be34cf872bc3648": 2,
+        "56d3599a2494de716a3450539f1b6206": 3,
+        "42c36211ac039c1f4c5145440a075ef7": 2,
+        "c24ba1b78a4986c43b55764748b95290": 2,
+        "62d94e489bd4625db72967d2a9e9c8a9": 2,
+        "84d5b4f221e75a3d2febd2b8b2806479": 2,
+        "18f394c7abf0912e7e45ea10866fb63f": 2,
+        "9f5e27573bfdf071d2d1d96fc6bc37ea": 3,
+        "23a4a2ff98a0547d5498f1bd1e08c4ce": 2,
+        "ba0b3b87a2cf20bc55ddf70b9b37bf3f": 2,
+        "ad7269d27a3b88d9a1051c0e1c0573c9": 2,
+        "5ac3c1f23ab077546582c7ae3094826b": 2,
+        "d676da3cacb5d462daac5448dc1cd32d": 3,
+        "a0bed325399f56177a275bd901f57709": 2,
+        "43d1db5789f1e678ac4900f267bd7670": 2,
+        "e960eba612df19476da69e7b9ca089e9": 3,
+        "9325ee6ca333e0394a608bf1b7180f33": 2,
+        "56b76b002856f4accb3f5079b459f837": 2,
+        "d2c4050f553aada8dc409ae43f254692": 3,
+        "f1ac0cf0820d7257379c9bb6bdf081f4": 2,
+        "e02937e1b7dc31827f1b4b482599065b": 2,
+        "ae34e267e3e6d23abe6a341ff6babe17": 3,
+        "8b5c232ee7c6b4094572a44e349ef604": 2,
+        "874deaec68ca12d6d585db1585bf9111": 2,
+        "a7e81501258e67f7f6aa33dad40e77b6": 2,
+        "abff45ac5dd140cb5511f5f533c85ed3": 2,
+        "d689770d7494db299ba17ee6f337c9b9": 3,
+        "116226ec66923bff5611eff82a76c70d": 2,
+        "b6f4d4d56019b649e1f67d900e67917a": 2,
+        "b82b4bd79836bf79bb9af0180a39e686": 2,
+        "985651f36aa1c0629b1a91c15f05305f": 2,
+        "f451fe57ac6c9ea54979d6233d1d9f7f": 2,
+        "247162bd17f72b8740f1bdc01f3cded2": 2,
+        "fecb5c7546fcbf80ffe48a1718592505": 2,
+        "b18769d310e10dc9c5256734b9793d1e": 2,
+        "b2c9413c0e9815e4ec2259b08646cdd2": 2,
+        "d730854c2e4e3f17f96d2df98a2bb756": 2,
+        "f03bc20f4f37216de7931af85b7baede": 2,
+        "73807e2ee8403f3778a06ee0423fb0fe": 2,
+        "b7b41d445b3f753f829b12bbf758a3bf": 2,
+        "69397ec38b22077148484d078056d462": 2,
+        "1088fd6b7e384418a7be4f7f46147a7f": 2,
+        "add19ed7bff52ff987f977b5049703a3": 2,
+        "a3d327d7a582abeb8da6ccef595af7a2": 2,
+        "cd83ac0f87ba1b0a2087c08bf7268119": 2,
+        "aaf6be9b0da9d0c088e25f4039d3ac17": 2,
+        "e09e1c89134502d14be0e218cfd6eea8": 3,
+        "941c46695f46f3952bb29790c71f5d7a": 2,
+        "51e07ded47f32e453f065c141984ec73": 3,
+        "85de055e2876e238a984f486cbeed1b1": 2,
+        "d0a8a772d59a87307a8454a71312030c": 2,
+        "86ee88ab6d391629e74dfcb7e2eb22ea": 2,
+        "983339a6ef87dfa7ddd83d39d9be647d": 2,
+        "89404c1bedd3da0700c17f716b17a583": 2,
+        "c0cd54a5f0e7d66bc8f1ed8d5a246226": 2,
+        "6d07ca71ee2ad9112ff703a2ccc00eaf": 2,
+        "b75908f16571e4f07ae94b8483cfd5be": 2
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "missing_oracle_site": 149,
+        "no_applicable_mutator": 33,
+        "unsupported_dispatch": 289
+      }
+    },
+    "mutation_kind": {
+      "b97bf3bb5fbbfbf38045044b2d852203": "arithmetic_op",
+      "5d6bc4112c70716ccebddccd0d0a0afc": "arithmetic_op",
+      "4061955b5855b461288b862a2b1660aa": "boolean_op",
+      "1c0ee0f70c07ddd6a6240e6f1c633b20": "comparison_negation",
+      "e7e1c40aaff862483db62c74a0cc0278": "comparison_negation",
+      "2bd252a04ba99d8428c6e9cbdb9238cb": "arithmetic_op",
+      "7f6b1d7a59479a4757a78fadea3b1069": "guard_type_test",
+      "d3dfa5cf452d8c1e8be34cf872bc3648": "arithmetic_op",
+      "56d3599a2494de716a3450539f1b6206": "guard_comparison_negation",
+      "42c36211ac039c1f4c5145440a075ef7": "arithmetic_op",
+      "c24ba1b78a4986c43b55764748b95290": "arithmetic_op",
+      "62d94e489bd4625db72967d2a9e9c8a9": "arithmetic_op",
+      "84d5b4f221e75a3d2febd2b8b2806479": "guard_comparison_negation",
+      "18f394c7abf0912e7e45ea10866fb63f": "arithmetic_op",
+      "9f5e27573bfdf071d2d1d96fc6bc37ea": "comparison_negation",
+      "23a4a2ff98a0547d5498f1bd1e08c4ce": "boolean_op",
+      "ba0b3b87a2cf20bc55ddf70b9b37bf3f": "guard_type_test",
+      "ad7269d27a3b88d9a1051c0e1c0573c9": "boolean_op",
+      "5ac3c1f23ab077546582c7ae3094826b": "guard_type_test",
+      "d676da3cacb5d462daac5448dc1cd32d": "guard_comparison_boundary",
+      "a0bed325399f56177a275bd901f57709": "arithmetic_op",
+      "43d1db5789f1e678ac4900f267bd7670": "guard_comparison_negation",
+      "e960eba612df19476da69e7b9ca089e9": "unary_not_removal",
+      "9325ee6ca333e0394a608bf1b7180f33": "arithmetic_op",
+      "56b76b002856f4accb3f5079b459f837": "arithmetic_op",
+      "d2c4050f553aada8dc409ae43f254692": "guard_comparison_negation",
+      "f1ac0cf0820d7257379c9bb6bdf081f4": "guard_type_test",
+      "e02937e1b7dc31827f1b4b482599065b": "arithmetic_op",
+      "ae34e267e3e6d23abe6a341ff6babe17": "comparison_boundary",
+      "8b5c232ee7c6b4094572a44e349ef604": "guard_type_test",
+      "874deaec68ca12d6d585db1585bf9111": "comparison_boundary",
+      "a7e81501258e67f7f6aa33dad40e77b6": "arithmetic_op",
+      "abff45ac5dd140cb5511f5f533c85ed3": "guard_comparison_negation",
+      "d689770d7494db299ba17ee6f337c9b9": "guard_comparison_boundary",
+      "116226ec66923bff5611eff82a76c70d": "arithmetic_op",
+      "b6f4d4d56019b649e1f67d900e67917a": "arithmetic_op",
+      "b82b4bd79836bf79bb9af0180a39e686": "guard_comparison_boundary",
+      "985651f36aa1c0629b1a91c15f05305f": "boolean_op",
+      "f451fe57ac6c9ea54979d6233d1d9f7f": "arithmetic_op",
+      "247162bd17f72b8740f1bdc01f3cded2": "guard_type_test",
+      "fecb5c7546fcbf80ffe48a1718592505": "arithmetic_op",
+      "b18769d310e10dc9c5256734b9793d1e": "arithmetic_op",
+      "b2c9413c0e9815e4ec2259b08646cdd2": "arithmetic_op",
+      "d730854c2e4e3f17f96d2df98a2bb756": "arithmetic_op",
+      "f03bc20f4f37216de7931af85b7baede": "comparison_negation",
+      "73807e2ee8403f3778a06ee0423fb0fe": "guard_type_test",
+      "b7b41d445b3f753f829b12bbf758a3bf": "comparison_negation",
+      "69397ec38b22077148484d078056d462": "arithmetic_op",
+      "1088fd6b7e384418a7be4f7f46147a7f": "arithmetic_op",
+      "add19ed7bff52ff987f977b5049703a3": "arithmetic_op",
+      "a3d327d7a582abeb8da6ccef595af7a2": "comparison_negation",
+      "cd83ac0f87ba1b0a2087c08bf7268119": "guard_type_test",
+      "aaf6be9b0da9d0c088e25f4039d3ac17": "comparison_negation",
+      "e09e1c89134502d14be0e218cfd6eea8": "boolean_op",
+      "941c46695f46f3952bb29790c71f5d7a": "guard_comparison_negation",
+      "51e07ded47f32e453f065c141984ec73": "comparison_boundary",
+      "85de055e2876e238a984f486cbeed1b1": "guard_type_test",
+      "d0a8a772d59a87307a8454a71312030c": "arithmetic_op",
+      "86ee88ab6d391629e74dfcb7e2eb22ea": "guard_type_test",
+      "983339a6ef87dfa7ddd83d39d9be647d": "arithmetic_op",
+      "89404c1bedd3da0700c17f716b17a583": "guard_type_test",
+      "c0cd54a5f0e7d66bc8f1ed8d5a246226": "arithmetic_op",
+      "6d07ca71ee2ad9112ff703a2ccc00eaf": "guard_type_test",
+      "b75908f16571e4f07ae94b8483cfd5be": "boolean_op"
+    },
+    "phase_timings": {
+      "baseline_tests_ms": 1060,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 11596,
+      "oracle_build_ms": 2441,
+      "plan_generation_ms": 15,
+      "report_writing_ms": 8,
+      "schema_build_ms": 2449,
+      "schema_workers_ms": 76108,
+      "total_ms": 93832
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 0,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 64
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 64
+      },
+      "mode": "static",
+      "selected_tests_avg": 2.171875,
+      "selected_tests_median": 2
+    },
+    "stable_id_to_integer": {
+      "b97bf3bb5fbbfbf38045044b2d852203": 46,
+      "5d6bc4112c70716ccebddccd0d0a0afc": 15,
+      "4061955b5855b461288b862a2b1660aa": 8,
+      "1c0ee0f70c07ddd6a6240e6f1c633b20": 4,
+      "e7e1c40aaff862483db62c74a0cc0278": 59,
+      "2bd252a04ba99d8428c6e9cbdb9238cb": 7,
+      "7f6b1d7a59479a4757a78fadea3b1069": 20,
+      "d3dfa5cf452d8c1e8be34cf872bc3648": 53,
+      "56d3599a2494de716a3450539f1b6206": 13,
+      "42c36211ac039c1f4c5145440a075ef7": 9,
+      "c24ba1b78a4986c43b55764748b95290": 49,
+      "62d94e489bd4625db72967d2a9e9c8a9": 16,
+      "84d5b4f221e75a3d2febd2b8b2806479": 21,
+      "18f394c7abf0912e7e45ea10866fb63f": 3,
+      "9f5e27573bfdf071d2d1d96fc6bc37ea": 31,
+      "23a4a2ff98a0547d5498f1bd1e08c4ce": 5,
+      "ba0b3b87a2cf20bc55ddf70b9b37bf3f": 47,
+      "ad7269d27a3b88d9a1051c0e1c0573c9": 37,
+      "5ac3c1f23ab077546582c7ae3094826b": 14,
+      "d676da3cacb5d462daac5448dc1cd32d": 54,
+      "a0bed325399f56177a275bd901f57709": 32,
+      "43d1db5789f1e678ac4900f267bd7670": 10,
+      "e960eba612df19476da69e7b9ca089e9": 60,
+      "9325ee6ca333e0394a608bf1b7180f33": 27,
+      "56b76b002856f4accb3f5079b459f837": 12,
+      "d2c4050f553aada8dc409ae43f254692": 52,
+      "f1ac0cf0820d7257379c9bb6bdf081f4": 62,
+      "e02937e1b7dc31827f1b4b482599065b": 57,
+      "ae34e267e3e6d23abe6a341ff6babe17": 39,
+      "8b5c232ee7c6b4094572a44e349ef604": 26,
+      "874deaec68ca12d6d585db1585bf9111": 24,
+      "a7e81501258e67f7f6aa33dad40e77b6": 34,
+      "abff45ac5dd140cb5511f5f533c85ed3": 36,
+      "d689770d7494db299ba17ee6f337c9b9": 55,
+      "116226ec66923bff5611eff82a76c70d": 2,
+      "b6f4d4d56019b649e1f67d900e67917a": 42,
+      "b82b4bd79836bf79bb9af0180a39e686": 45,
+      "985651f36aa1c0629b1a91c15f05305f": 30,
+      "f451fe57ac6c9ea54979d6233d1d9f7f": 63,
+      "247162bd17f72b8740f1bdc01f3cded2": 6,
+      "fecb5c7546fcbf80ffe48a1718592505": 64,
+      "b18769d310e10dc9c5256734b9793d1e": 40,
+      "b2c9413c0e9815e4ec2259b08646cdd2": 41,
+      "d730854c2e4e3f17f96d2df98a2bb756": 56,
+      "f03bc20f4f37216de7931af85b7baede": 61,
+      "73807e2ee8403f3778a06ee0423fb0fe": 19,
+      "b7b41d445b3f753f829b12bbf758a3bf": 44,
+      "69397ec38b22077148484d078056d462": 17,
+      "1088fd6b7e384418a7be4f7f46147a7f": 1,
+      "add19ed7bff52ff987f977b5049703a3": 38,
+      "a3d327d7a582abeb8da6ccef595af7a2": 33,
+      "cd83ac0f87ba1b0a2087c08bf7268119": 50,
+      "aaf6be9b0da9d0c088e25f4039d3ac17": 35,
+      "e09e1c89134502d14be0e218cfd6eea8": 58,
+      "941c46695f46f3952bb29790c71f5d7a": 28,
+      "51e07ded47f32e453f065c141984ec73": 11,
+      "85de055e2876e238a984f486cbeed1b1": 22,
+      "d0a8a772d59a87307a8454a71312030c": 51,
+      "86ee88ab6d391629e74dfcb7e2eb22ea": 23,
+      "983339a6ef87dfa7ddd83d39d9be647d": 29,
+      "89404c1bedd3da0700c17f716b17a583": 25,
+      "c0cd54a5f0e7d66bc8f1ed8d5a246226": 48,
+      "6d07ca71ee2ad9112ff703a2ccc00eaf": 18,
+      "b75908f16571e4f07ae94b8483cfd5be": 43
+    }
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

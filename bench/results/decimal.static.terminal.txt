@@ -1,8 +1,8 @@
-target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=static
+target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=static concurrency=1
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.014s
+Resolution completed in 0.013s
 New:
   jason 1.4.4
 Unchanged:
@@ -34,7 +34,7 @@ Generated stream_data app
 Compiling 10 files (.ex)
 Generated jason app
 ==> mutalisk
-Compiling 67 files (.ex)
+Compiling 68 files (.ex)
 Generated mutalisk app
 ==> decimal
 Compiling 4 files (.ex)
@@ -114,7 +114,7 @@ Schema build complete
 [71/456] killed    lib/decimal.ex:1688  Arithmetic  replace - with +
 [72/456] killed    lib/decimal.ex:1510  ComparisonNegation  replace > with <=
 [73/456] survived  lib/decimal.ex:407  ComparisonBoundary  replace < with <=
-[74/456] killed    lib/decimal.ex:1637  ComparisonNegation  replace == with !=
+[74/456] timeout   lib/decimal.ex:1637  ComparisonNegation  replace == with !=
 [75/456] killed    lib/decimal.ex:1738  Arithmetic  replace * with -
 [76/456] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
 [77/456] killed    lib/decimal.ex:671  ComparisonNegation  replace == with !=
@@ -153,9 +153,9 @@ Schema build complete
 [110/456] killed    lib/decimal.ex:1277  Arithmetic  replace - with +
 [111/456] survived  lib/decimal.ex:1640  ComparisonBoundary  replace >= with >
 [112/456] survived  lib/decimal.ex:1535  ComparisonBoundary  replace > with >=
-[113/456] timeout   lib/decimal.ex:1790  Arithmetic  replace - with +
+[113/456] killed    lib/decimal.ex:1790  Arithmetic  replace - with +
 [114/456] killed    lib/decimal.ex:1843  Arithmetic  replace - with +
-[115/456] killed    lib/decimal.ex:1779  Arithmetic  replace - with *
+[115/456] timeout   lib/decimal.ex:1779  Arithmetic  replace - with *
 [116/456] killed    lib/decimal.ex:1797  ComparisonNegation  replace > with <=
 [117/456] killed    lib/decimal.ex:1700  Arithmetic  replace + with *
 [118/456] killed    lib/decimal.ex:994  ComparisonNegation  replace > with <=
@@ -217,7 +217,7 @@ Schema build complete
 [174/456] killed    lib/decimal.ex:273  Arithmetic  replace + with -
 [175/456] survived  lib/decimal.ex:1331  ComparisonBoundary  replace < with <=
 [176/456] killed    lib/decimal.ex:1251  Arithmetic  replace * with -
-[177/456] killed    lib/decimal.ex:1572  Arithmetic  replace - with +
+[177/456] timeout   lib/decimal.ex:1572  Arithmetic  replace - with +
 [178/456] killed    lib/decimal.ex:273  Arithmetic  replace * with +
 [179/456] killed    lib/decimal.ex:1505  ComparisonNegation  replace >= with <
 [180/456] killed    lib/decimal.ex:402  Arithmetic  replace - with +
@@ -342,7 +342,7 @@ Schema build complete
 [299/456] killed    lib/decimal.ex:1735  Arithmetic  replace - with *
 [300/456] killed    lib/decimal.ex:441  Arithmetic  replace + with -
 [301/456] killed    lib/decimal.ex:1778  ComparisonNegation  replace >= with <
-[302/456] killed    lib/decimal.ex:407  ComparisonNegation  replace < with >=
+[302/456] timeout   lib/decimal.ex:407  ComparisonNegation  replace < with >=
 [303/456] killed    lib/decimal.ex:1609  Arithmetic  replace + with -
 [304/456] timeout   lib/decimal.ex:1817  Arithmetic  replace * with -
 [305/456] killed    lib/decimal.ex:1754  Arithmetic  replace - with +
@@ -422,82 +422,82 @@ Schema build complete
 [379/456] killed    lib/decimal.ex:1772  Arithmetic  replace * with /
 [380/456] killed    lib/decimal.ex:802  ComparisonNegation  replace == with !=
 [381/456] killed    lib/decimal.ex:1744  ComparisonNegation  replace == with !=
-[381/456] invalid   lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_integer
-[381/456] invalid   lib/decimal.ex:1817  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1753  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_integer
-[381/456] invalid   lib/decimal.ex:1571  GuardComparisonBoundary  replace guard > with >=
-[381/456] invalid   lib/decimal.ex:1604  GuardComparisonNegation  replace guard > with <=
-[381/456] invalid   lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1737  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1608  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:1829  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:1608  GuardComparisonNegation  replace guard == with !=
-[381/456] invalid   lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1326  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1827  GuardComparisonBoundary  replace guard > with >=
-[381/456] invalid   lib/decimal.ex:1724  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1694  GuardComparisonNegation  replace guard === with !==
-[381/456] invalid   lib/decimal.ex:1829  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1724  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1604  GuardComparisonBoundary  replace guard > with >=
-[381/456] invalid   lib/decimal.ex:1732  GuardComparisonNegation  replace guard == with !=
-[381/456] invalid   lib/decimal.ex:366  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1750  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1692  GuardComparisonNegation  replace guard > with <=
-[381/456] invalid   lib/decimal.ex:1724  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:1957  GuardTypeTest  replace guard is_list with is_tuple
-[381/456] invalid   lib/decimal.ex:370  GuardComparisonBoundary  replace guard > with >=
-[381/456] invalid   lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1692  GuardComparisonBoundary  replace guard > with >=
-[381/456] invalid   lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1355  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1734  GuardComparisonBoundary  replace guard > with >=
-[381/456] invalid   lib/decimal.ex:1817  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:1608  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1326  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1818  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1818  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_number
-[381/456] invalid   lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_number
-[381/456] invalid   lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_number
-[381/456] invalid   lib/decimal.ex:1693  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:1575  GuardComparisonNegation  replace guard != with ==
-[381/456] invalid   lib/decimal.ex:370  GuardComparisonNegation  replace guard > with <=
-[381/456] invalid   lib/decimal.ex:1737  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:1753  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:1734  GuardComparisonNegation  replace guard > with <=
-[381/456] invalid   lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1724  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1673  GuardComparisonBoundary  replace guard >= with >
-[381/456] invalid   lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1571  GuardComparisonNegation  replace guard > with <=
-[381/456] invalid   lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1355  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:1827  GuardComparisonNegation  replace guard > with <=
-[381/456] invalid   lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1673  GuardComparisonNegation  replace guard >= with <
-[381/456] invalid   lib/decimal.ex:366  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:1693  GuardComparisonNegation  replace guard < with >=
-[381/456] invalid   lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_float
-[381/456] invalid   lib/decimal.ex:1750  GuardComparisonBoundary  replace guard < with <=
-[381/456] invalid   lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_number
-[381/456] invalid   lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_integer
-Mutation score: 306/370 = 82.7%
+[382/456] killed    lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_integer
+[383/456] killed    lib/decimal.ex:1817  GuardComparisonBoundary  replace guard >= with >
+[384/456] survived  lib/decimal.ex:1753  GuardComparisonBoundary  replace guard >= with >
+[385/456] killed    lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_integer
+[386/456] survived  lib/decimal.ex:1571  GuardComparisonBoundary  replace guard > with >=
+[387/456] killed    lib/decimal.ex:1604  GuardComparisonNegation  replace guard > with <=
+[388/456] killed    lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_float
+[389/456] killed    lib/decimal.ex:1737  GuardComparisonNegation  replace guard < with >=
+[390/456] survived  lib/decimal.ex:1608  GuardComparisonBoundary  replace guard < with <=
+[391/456] killed    lib/decimal.ex:1829  GuardComparisonNegation  replace guard >= with <
+[392/456] killed    lib/decimal.ex:1608  GuardComparisonNegation  replace guard == with !=
+[393/456] killed    lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_float
+[394/456] killed    lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_number
+[395/456] survived  lib/decimal.ex:1326  GuardComparisonBoundary  replace guard >= with >
+[396/456] survived  lib/decimal.ex:1827  GuardComparisonBoundary  replace guard > with >=
+[397/456] killed    lib/decimal.ex:1724  GuardComparisonNegation  replace guard < with >=
+[398/456] survived  lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_number
+[399/456] survived  lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_number
+[400/456] killed    lib/decimal.ex:1694  GuardComparisonNegation  replace guard === with !==
+[401/456] killed    lib/decimal.ex:1829  GuardComparisonBoundary  replace guard >= with >
+[402/456] killed    lib/decimal.ex:1724  GuardComparisonBoundary  replace guard < with <=
+[403/456] survived  lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_number
+[404/456] survived  lib/decimal.ex:1604  GuardComparisonBoundary  replace guard > with >=
+[405/456] killed    lib/decimal.ex:1732  GuardComparisonNegation  replace guard == with !=
+[406/456] killed    lib/decimal.ex:366  GuardComparisonNegation  replace guard < with >=
+[407/456] killed    lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_float
+[408/456] timeout   lib/decimal.ex:1750  GuardComparisonNegation  replace guard < with >=
+[409/456] killed    lib/decimal.ex:1692  GuardComparisonNegation  replace guard > with <=
+[410/456] killed    lib/decimal.ex:1724  GuardComparisonNegation  replace guard >= with <
+[411/456] killed    lib/decimal.ex:1957  GuardTypeTest  replace guard is_list with is_tuple
+[412/456] survived  lib/decimal.ex:370  GuardComparisonBoundary  replace guard > with >=
+[413/456] killed    lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_float
+[414/456] killed    lib/decimal.ex:1692  GuardComparisonBoundary  replace guard > with >=
+[415/456] killed    lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_float
+[416/456] survived  lib/decimal.ex:1355  GuardComparisonBoundary  replace guard >= with >
+[417/456] survived  lib/decimal.ex:1734  GuardComparisonBoundary  replace guard > with >=
+[418/456] killed    lib/decimal.ex:1817  GuardComparisonNegation  replace guard >= with <
+[419/456] killed    lib/decimal.ex:1608  GuardComparisonNegation  replace guard < with >=
+[420/456] survived  lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_number
+[421/456] killed    lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_float
+[422/456] killed    lib/decimal.ex:1326  GuardComparisonNegation  replace guard >= with <
+[423/456] killed    lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_float
+[424/456] survived  lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_number
+[425/456] killed    lib/decimal.ex:1818  GuardComparisonNegation  replace guard < with >=
+[426/456] survived  lib/decimal.ex:1818  GuardComparisonBoundary  replace guard < with <=
+[427/456] survived  lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_number
+[428/456] survived  lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_number
+[429/456] survived  lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_number
+[430/456] survived  lib/decimal.ex:1693  GuardComparisonBoundary  replace guard < with <=
+[431/456] killed    lib/decimal.ex:1575  GuardComparisonNegation  replace guard != with ==
+[432/456] survived  lib/decimal.ex:370  GuardComparisonNegation  replace guard > with <=
+[433/456] survived  lib/decimal.ex:1737  GuardComparisonBoundary  replace guard < with <=
+[434/456] timeout   lib/decimal.ex:1753  GuardComparisonNegation  replace guard >= with <
+[435/456] killed    lib/decimal.ex:1734  GuardComparisonNegation  replace guard > with <=
+[436/456] survived  lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_number
+[437/456] killed    lib/decimal.ex:1724  GuardComparisonBoundary  replace guard >= with >
+[438/456] survived  lib/decimal.ex:1673  GuardComparisonBoundary  replace guard >= with >
+[439/456] survived  lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_number
+[440/456] killed    lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_float
+[441/456] killed    lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_number
+[442/456] survived  lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_number
+[443/456] survived  lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_number
+[444/456] killed    lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_float
+[445/456] timeout   lib/decimal.ex:1571  GuardComparisonNegation  replace guard > with <=
+[446/456] killed    lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_float
+[447/456] killed    lib/decimal.ex:1355  GuardComparisonNegation  replace guard >= with <
+[448/456] killed    lib/decimal.ex:1827  GuardComparisonNegation  replace guard > with <=
+[449/456] killed    lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_float
+[450/456] killed    lib/decimal.ex:1673  GuardComparisonNegation  replace guard >= with <
+[451/456] survived  lib/decimal.ex:366  GuardComparisonBoundary  replace guard < with <=
+[452/456] killed    lib/decimal.ex:1693  GuardComparisonNegation  replace guard < with >=
+[453/456] killed    lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_float
+[454/456] timeout   lib/decimal.ex:1750  GuardComparisonBoundary  replace guard < with <=
+[455/456] survived  lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_number
+[456/456] killed    lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_integer
+Mutation score: 346/438 = 79.0%
 
 Surviving mutants:
   lib/decimal.ex:1824 Arithmetic               replace * with /
@@ -564,30 +564,58 @@ Surviving mutants:
   lib/decimal.ex:1934 ComparisonBoundary       replace > with >=
   lib/decimal.ex:254 ComparisonBoundary       replace > with >=
   lib/decimal.ex:1271 Arithmetic               replace * with /
+  lib/decimal.ex:1753 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1571 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1608 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1326 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1827 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1356 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1326 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1600 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1604 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:370 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1355 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1734 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1355 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1327 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1818 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:2045 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1386 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1414 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1693 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:370 GuardComparisonNegation  replace guard > with <=
+  lib/decimal.ex:1737 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1330 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1673 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1629 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1611 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1608 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:366 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1604 GuardTypeTest            replace guard is_integer with is_number
 
-Schema:    306/381 killed (80.3%)   wall: 1969.9s
-Fallback:  0/75 killed (0.0%)   wall: 26.7s
-  guard_comparison_boundary:    0/20 killed
-  guard_comparison_negation:    0/24 killed
-  guard_type_test:              0/31 killed
+Schema:    303/381 killed (79.5%)   wall: 2080.2s
+Fallback:  43/75 killed (57.3%)   wall: 351.6s
+  guard_comparison_boundary:    5/20 killed
+  guard_comparison_negation:    20/24 killed
+  guard_type_test:              18/31 killed
 Skipped:   1133 (attribute_engine_disabled: 3, missing_oracle_site: 76, no_applicable_mutator: 4, unsupported_dispatch: 1050)
-Invalid:   75
+Invalid:   0
 Errors:    0
-Timeouts:  11
+Timeouts:  18
 
-Run time: 1996.6s
-Fallback wall-clock: 1.3% of total
+Run time: 2431.8s
+Fallback wall-clock: 14.5% of total
 Fallback mutants: 16.4% of executed
 
 Phases:
-  oracle build:           3332 ms
-  baseline tests:          849 ms
-  plan generation:          30 ms
-  schema build:           3493 ms
-  schema workers:      1973937 ms
-  fallback workers:      28887 ms
-  report writing:           82 ms
-  total:               2010702 ms
+  oracle build:           2906 ms
+  baseline tests:          757 ms
+  plan generation:          27 ms
+  schema build:           2979 ms
+  schema workers:      2084739 ms
+  fallback workers:     358431 ms
+  report writing:           66 ms
+  total:               2449992 ms
 
 Selection:
   mode: static
@@ -600,5 +628,7 @@ Selection:
   median tests/mutant: 2
   coverage collection: 0 ms
 
-Mutalisk run complete in 2010835ms
-bench.wall_ms=2014000
+Concurrency: 1 workers (sequential)
+
+Mutalisk run complete in 2450164ms
+bench.wall_ms=5062000

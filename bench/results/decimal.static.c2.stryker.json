@@ -9,10 +9,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 741,
+          "duration": 846,
           "id": "007df44b4b375d8b18f34d40cbc776fa",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half down"
+            "Decimal.ContextTest:with_context/2: ceiling"
           ],
           "location": {
             "end": {
@@ -34,10 +34,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 739,
+          "duration": 864,
           "id": "00a3ab033de44830de75a714e007942c",
           "killedBy": [
-            "DecimalTest:issue #82"
+            "DecimalTest:doctest Decimal.to_float/1 (87)"
           ],
           "location": {
             "end": {
@@ -59,10 +59,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 734,
+          "duration": 855,
           "id": "0112a69704c039c3754c2b3fe9142cb8",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (26)"
+            "DecimalTest:max/2"
           ],
           "location": {
             "end": {
@@ -84,7 +84,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 744,
+          "duration": 848,
           "id": "011fd51978995ff79b933b4af992d1e8",
           "killedBy": [
             "DecimalTest:min/2"
@@ -109,7 +109,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 749,
+          "duration": 858,
           "id": "01b4eac8945ae9316dc5d7a0e918f970",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -134,10 +134,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 728,
+          "duration": 849,
           "id": "01c19ac760d2473f863567373add76e3",
           "killedBy": [
-            "DecimalTest:to_string/2 xsd"
+            "DecimalTest:to_string/2 raw"
           ],
           "location": {
             "end": {
@@ -159,10 +159,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 744,
+          "duration": 863,
           "id": "0270798245e7f14675ac389d1d5ce97d",
           "killedBy": [
-            "DecimalTest:to_string/2 raw"
+            "DecimalTest:doctest Decimal.to_string/2 (83)"
           ],
           "location": {
             "end": {
@@ -184,7 +184,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 1477,
+          "duration": 1449,
           "id": "02cc370f350c4b3bfaf0d0437aa92c68",
           "killedBy": [
             "DecimalTest:add/2"
@@ -209,7 +209,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 60748,
+          "duration": 60870,
           "id": "0398246f214acc5eabc3c58ac09757ce",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -234,7 +234,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1558,
+          "duration": 1451,
           "id": "03c504b3badfe137337259c803d6bfa1",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -259,7 +259,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 792,
+          "duration": 830,
           "id": "0455bb8076ee0a4205c38c602b558a6a",
           "killedBy": [],
           "location": {
@@ -282,10 +282,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 758,
+          "duration": 916,
           "id": "0493a630d3ccdcf390395c0059224b74",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2 set flags"
+            "Decimal.ContextTest:with_context/2 traps"
           ],
           "location": {
             "end": {
@@ -307,10 +307,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 757,
+          "duration": 807,
           "id": "050f3cc8460de89960c4395ecd25fbda",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (80)"
+            "DecimalTest:to_string/2 scientific"
           ],
           "location": {
             "end": {
@@ -332,7 +332,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1463,
+          "duration": 1444,
           "id": "05665b0cec1a207be6b04774b44cb261",
           "killedBy": [],
           "location": {
@@ -355,10 +355,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 1454,
+          "duration": 1441,
           "id": "05e47369f67a975dce6cafe33ff6ccba",
           "killedBy": [
-            "DecimalTest:cast/1"
+            "DecimalTest:issue #62"
           ],
           "location": {
             "end": {
@@ -380,7 +380,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 770,
+          "duration": 829,
           "id": "07acf66d5c3009e7c65e4b5d952e918a",
           "killedBy": [
             "DecimalTest:to_string/2 raw"
@@ -405,7 +405,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 1447,
+          "duration": 1448,
           "id": "07e8311f92323b3e0bd324e2496597a1",
           "killedBy": [],
           "location": {
@@ -428,7 +428,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 1435,
+          "duration": 1441,
           "id": "08787f6d70b74ae1d74805e0e014778f",
           "killedBy": [
             "DecimalTest:to_integer/1"
@@ -453,7 +453,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 753,
+          "duration": 788,
           "id": "089c3deb8a09c1345d47fa8844548bfd",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -478,7 +478,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 754,
+          "duration": 830,
           "id": "0922666d8ec947d68e4d7576c8a2558f",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -503,10 +503,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1445,
+          "duration": 1460,
           "id": "092d86665b59d80c3dd818dc8562098f",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_float/1 (87)"
+            "DecimalTest:to_float/1"
           ],
           "location": {
             "end": {
@@ -528,7 +528,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 755,
+          "duration": 820,
           "id": "0957329259b6e94e8b3ae9e990f972a1",
           "killedBy": [],
           "location": {
@@ -551,7 +551,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 797,
+          "duration": 840,
           "id": "095bdfd16047ed35e284dae32b17e41f",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -576,10 +576,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 750,
+          "duration": 864,
           "id": "09ec025977711eb403c9667494d8c292",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_float/1 (87)"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -601,10 +601,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 796,
+          "duration": 808,
           "id": "0a0ca572c36fd30db9027fac3a96011a",
           "killedBy": [
-            "DecimalTest:issue #82"
+            "DecimalTest:doctest Decimal.to_float/1 (87)"
           ],
           "location": {
             "end": {
@@ -626,7 +626,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 773,
+          "duration": 820,
           "id": "0b026055c0ee3d994cf3f2169c0061ab",
           "killedBy": [
             "DecimalTest:to_string/2 xsd"
@@ -651,10 +651,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 759,
+          "duration": 797,
           "id": "0c5071594a88fbbf9ca060311507f725",
           "killedBy": [
-            "DecimalTest:issue #57"
+            "DecimalTest:issue #63"
           ],
           "location": {
             "end": {
@@ -676,10 +676,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 753,
+          "duration": 844,
           "id": "0cb8c48cff2da74fa8963f59df6e9bbc",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: floor"
+            "Decimal.ContextTest:with_context/2: down"
           ],
           "location": {
             "end": {
@@ -701,7 +701,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1468,
+          "duration": 1513,
           "id": "0e62af0eac18e73f0a31da000113cfcc",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -726,7 +726,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1485,
+          "duration": 1434,
           "id": "0ea5fd9522928fe3e25b9e79443fcc8e",
           "killedBy": [],
           "location": {
@@ -749,10 +749,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 761,
+          "duration": 897,
           "id": "110e0a4a9f3a17b20ac951a4b750814e",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div/2 (38)"
+            "DecimalTest:div/2"
           ],
           "location": {
             "end": {
@@ -774,10 +774,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 755,
+          "duration": 833,
           "id": "115cceaa55bb6398db743633bd2376be",
           "killedBy": [
-            "DecimalTest:doctest Decimal.rem/2 (42)"
+            "DecimalTest:rem/2"
           ],
           "location": {
             "end": {
@@ -799,10 +799,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 750,
+          "duration": 814,
           "id": "1178d4f1588615af6f03fbe7f4f26c9a",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -824,7 +824,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 771,
+          "duration": 843,
           "id": "1297e7be541c75c9801654b714cd1d5c",
           "killedBy": [
             "DecimalTest:to_string/2 xsd"
@@ -849,7 +849,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 760,
+          "duration": 823,
           "id": "12beb0339ec4de2507c95b535c96c5c9",
           "killedBy": [
             "DecimalTest:issue #82"
@@ -874,7 +874,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 756,
+          "duration": 855,
           "id": "136ce99721360fa5546a3aa84b3271fa",
           "killedBy": [],
           "location": {
@@ -897,7 +897,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1481,
+          "duration": 1419,
           "id": "136efbcfe22dba8a6e4061fdb74c31bb",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -922,10 +922,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 762,
+          "duration": 823,
           "id": "13bb42b27de6c0ec58753dab8a4c5ed7",
           "killedBy": [
-            "DecimalTest:doctest Decimal.lte?/2 (36)"
+            "DecimalTest:doctest Decimal.compare/3 (17)"
           ],
           "location": {
             "end": {
@@ -947,10 +947,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 764,
+          "duration": 841,
           "id": "14eee8026b4901fc9df1135039c8c228",
           "killedBy": [
-            "DecimalTest:doctest Decimal.round/3 (65)"
+            "DecimalTest:round/3: floor"
           ],
           "location": {
             "end": {
@@ -972,7 +972,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 60763,
+          "duration": 60827,
           "id": "14effb68373eccdf94b8835f23eebb4d",
           "killedBy": [],
           "location": {
@@ -995,7 +995,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 814,
+          "duration": 912,
           "id": "153dff094aed87e5bedf78dfbed0c4ea",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -1020,7 +1020,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 60437,
+          "duration": 60503,
           "id": "15947e96e6b1e955be30e6ef76b5e216",
           "killedBy": [
             "DecimalTest:div/2"
@@ -1045,10 +1045,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 749,
+          "duration": 782,
           "id": "1748e353c7504ee6723135909229d740",
           "killedBy": [
-            "DecimalTest:to_string/2 xsd"
+            "DecimalTest:to_string/2 normal"
           ],
           "location": {
             "end": {
@@ -1070,7 +1070,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 745,
+          "duration": 766,
           "id": "1757bb3e439a7cd66b37c93e515fbb77",
           "killedBy": [],
           "location": {
@@ -1093,7 +1093,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 733,
+          "duration": 794,
           "id": "1850f31489f4c3fb85c365c9fbd118eb",
           "killedBy": [],
           "location": {
@@ -1116,7 +1116,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 751,
+          "duration": 816,
           "id": "187d9ed356541c24bbad99a0999f1ee0",
           "killedBy": [],
           "location": {
@@ -1139,10 +1139,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 728,
+          "duration": 808,
           "id": "18cd89107fc966898334d5252d346bc9",
           "killedBy": [
-            "DecimalTest:doctest Decimal.add/2 (12)"
+            "DecimalTest:doctest Decimal.div_int/2 (41)"
           ],
           "location": {
             "end": {
@@ -1164,7 +1164,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 753,
+          "duration": 774,
           "id": "18e66f059b15d44ba9e78283c0601a2c",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: floor"
@@ -1189,10 +1189,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1573,
+          "duration": 1428,
           "id": "19252d153db2fa9b3ead23663d3f08b1",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (85)"
+            "DecimalTest:doctest Decimal.to_integer/1 (86)"
           ],
           "location": {
             "end": {
@@ -1214,7 +1214,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 752,
+          "duration": 767,
           "id": "19edd1346c92a9bfcb82c907a4d0f6f8",
           "killedBy": [
             "DecimalTest:issue #57"
@@ -1239,7 +1239,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1932,
+          "duration": 1411,
           "id": "1a101c060982b6861a4eedd16a77a159",
           "killedBy": [
             "DecimalTest:doctest Decimal.scale/1 (89)"
@@ -1264,7 +1264,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 734,
+          "duration": 819,
           "id": "1b04eede13aaf0d7863cbbccb4033031",
           "killedBy": [
             "DecimalTest:rem/2"
@@ -1289,10 +1289,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 737,
+          "duration": 815,
           "id": "1b548c6de1a523a122a699c8065d6ed9",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (80)"
+            "DecimalTest:doctest Decimal.to_string/2 (79)"
           ],
           "location": {
             "end": {
@@ -1314,7 +1314,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 761,
+          "duration": 845,
           "id": "1d519f15a36d20a585ef4b1e89b4f9d1",
           "killedBy": [],
           "location": {
@@ -1337,7 +1337,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 747,
+          "duration": 817,
           "id": "1d6872b319df0f04b4936f724a6c33a4",
           "killedBy": [
             "DecimalTest:issue #29"
@@ -1362,10 +1362,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 748,
+          "duration": 817,
           "id": "1da21c67c45474a857db8687d1873ffd",
           "killedBy": [
-            "DecimalTest:div_int/2"
+            "DecimalTest:rem/2"
           ],
           "location": {
             "end": {
@@ -1387,10 +1387,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 752,
+          "duration": 811,
           "id": "1e2229b82cde53e96b4117532d277374",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half even"
+            "Decimal.ContextTest:with_context/2: up"
           ],
           "location": {
             "end": {
@@ -1412,7 +1412,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 749,
+          "duration": 821,
           "id": "1e778f30cc4c18bbbb64f035f0554b56",
           "killedBy": [],
           "location": {
@@ -1435,7 +1435,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 729,
+          "duration": 884,
           "id": "1f0b889652ebb10717d2b7961be7959e",
           "killedBy": [],
           "location": {
@@ -1458,7 +1458,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 745,
+          "duration": 851,
           "id": "1fa27d1c17e6cb54e82a3348c8523505",
           "killedBy": [
             "DecimalTest:rem/2"
@@ -1483,7 +1483,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1463,
+          "duration": 1473,
           "id": "2017d933006fcea0931b9b6cc8920317",
           "killedBy": [
             "DecimalTest:cast/1"
@@ -1508,7 +1508,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1644,
+          "duration": 1446,
           "id": "207196b037ba9334f19a50da4baec705",
           "killedBy": [],
           "location": {
@@ -1531,10 +1531,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 742,
+          "duration": 835,
           "id": "207309f09d66770a6f9acff2fd0f7d72",
           "killedBy": [
-            "DecimalTest:to_integer/1"
+            "DecimalTest:doctest Decimal.to_string/2 (79)"
           ],
           "location": {
             "end": {
@@ -1556,7 +1556,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 743,
+          "duration": 814,
           "id": "2356db17d475e0468f7c5c86ea8ce411",
           "killedBy": [
             "DecimalTest:doctest Decimal.eq?/3 (24)"
@@ -1581,10 +1581,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 802,
+          "duration": 952,
           "id": "2387cce4d1eabc78b3a5e6047e6e6644",
           "killedBy": [
-            "DecimalTest:doctest Decimal.compare/3 (16)"
+            "DecimalTest:doctest Decimal.eq?/3 (25)"
           ],
           "location": {
             "end": {
@@ -1606,7 +1606,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 757,
+          "duration": 970,
           "id": "23fe7aeda72b346ce469df40299e6d66",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -1631,7 +1631,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 747,
+          "duration": 1022,
           "id": "2439d3e17eaafe42334c109f7ac13e85",
           "killedBy": [],
           "location": {
@@ -1654,7 +1654,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 749,
+          "duration": 957,
           "id": "24ffc9ed255c1150c1306df4f393633f",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: down"
@@ -1679,7 +1679,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 1562,
+          "duration": 1333,
           "id": "2608873412ce3955246789cdab689922",
           "killedBy": [],
           "location": {
@@ -1702,7 +1702,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 743,
+          "duration": 855,
           "id": "26acf61eb1e07b274b19a5ae533f2189",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -1727,7 +1727,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1478,
+          "duration": 1340,
           "id": "26f41fd3b00120aad69d2d71892e6456",
           "killedBy": [
             "DecimalTest:doctest Decimal.integer?/1 (92)"
@@ -1752,7 +1752,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1466,
+          "duration": 1377,
           "id": "27458da53fab2a52e43be7c366408365",
           "killedBy": [],
           "location": {
@@ -1775,10 +1775,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 743,
+          "duration": 847,
           "id": "27fb72fec67de0fea8efc683acbe7958",
           "killedBy": [
-            "DecimalTest:rem/2"
+            "DecimalTest:mult/2"
           ],
           "location": {
             "end": {
@@ -1800,7 +1800,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 748,
+          "duration": 887,
           "id": "2801244469dec3b15be0e536e64153ac",
           "killedBy": [
             "DecimalTest:cast/1"
@@ -1825,10 +1825,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 763,
+          "duration": 868,
           "id": "280e8e86db6199915dfaac6b25f9d455",
           "killedBy": [
-            "DecimalTest:to_integer/1"
+            "DecimalTest:doctest Decimal.to_integer/1 (86)"
           ],
           "location": {
             "end": {
@@ -1850,7 +1850,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 762,
+          "duration": 869,
           "id": "2909871c0ce4db163e4f8fb462695ac7",
           "killedBy": [
             "DecimalTest:lt?/2"
@@ -1875,7 +1875,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 753,
+          "duration": 911,
           "id": "291ba45ea26ae9288c8400a5da54c3a1",
           "killedBy": [],
           "location": {
@@ -1898,10 +1898,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 742,
+          "duration": 862,
           "id": "2a66f348782e3693beceae4615cee967",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (26)"
+            "DecimalTest:compare/2"
           ],
           "location": {
             "end": {
@@ -1923,7 +1923,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 750,
+          "duration": 836,
           "id": "2ae7f626bb728fe265671e2d6d056d60",
           "killedBy": [
             "DecimalTest:div_int/2"
@@ -1948,7 +1948,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 760,
+          "duration": 849,
           "id": "2bb566f455c7901bf7737d8184d51a6b",
           "killedBy": [
             "DecimalTest:doctest Decimal.sqrt/1 (66)"
@@ -1973,10 +1973,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 743,
+          "duration": 856,
           "id": "2c6ba964ad7ae4386ba84e970708fad3",
           "killedBy": [
-            "DecimalTest:to_string/2 xsd"
+            "DecimalTest:doctest Decimal.to_string/2 (82)"
           ],
           "location": {
             "end": {
@@ -1998,10 +1998,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 744,
+          "duration": 843,
           "id": "2d90dcbb21b0120ad135feaeb5b42e4b",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half even"
+            "Decimal.ContextTest:with_context/2 set flags"
           ],
           "location": {
             "end": {
@@ -2023,7 +2023,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 755,
+          "duration": 905,
           "id": "2e1a6c0d32d840410f8aff4b9a755481",
           "killedBy": [
             "DecimalTest:to_integer/1"
@@ -2048,7 +2048,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 774,
+          "duration": 863,
           "id": "2fb0c6fe5c657be4c4d10e09efbe9a80",
           "killedBy": [],
           "location": {
@@ -2071,10 +2071,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 749,
+          "duration": 923,
           "id": "30ef0549f1fcd83813186f4ea964b469",
           "killedBy": [
-            "DecimalTest:div/2"
+            "DecimalTest:doctest Decimal.div/2 (39)"
           ],
           "location": {
             "end": {
@@ -2096,7 +2096,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 738,
+          "duration": 842,
           "id": "3282d81839c09c742ed31913adad3ade",
           "killedBy": [
             "DecimalTest:div/2"
@@ -2121,7 +2121,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 762,
+          "duration": 878,
           "id": "32ca9a921bc512f1e34e7ef8a81ad6a6",
           "killedBy": [
             "DecimalTest:rem/2"
@@ -2146,10 +2146,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 740,
+          "duration": 898,
           "id": "32ed5afb0e6048fdc18f1931f6adcaab",
           "killedBy": [
-            "DecimalTest:issue #82"
+            "DecimalTest:to_float/1"
           ],
           "location": {
             "end": {
@@ -2171,10 +2171,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 762,
+          "duration": 877,
           "id": "331bd4ccb6586986b98af58b8c403102",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (81)"
+            "DecimalTest:doctest Decimal.to_string/2 (82)"
           ],
           "location": {
             "end": {
@@ -2196,7 +2196,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 748,
+          "duration": 857,
           "id": "3388c7846b7bad8d562ede44a7fd698d",
           "killedBy": [],
           "location": {
@@ -2219,9 +2219,11 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 60735,
+          "duration": 871,
           "id": "33c745b4e7bdee655acf1c0f07dfd5fc",
-          "killedBy": [],
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_float/1 (87)"
+          ],
           "location": {
             "end": {
               "column": 11,
@@ -2234,7 +2236,7 @@
           },
           "mutatorName": "ComparisonNegation",
           "replacement": "num != 0",
-          "status": "Timeout"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -2242,7 +2244,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 775,
+          "duration": 911,
           "id": "34532ac6c7b49ea69e92d8842f190439",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -2267,10 +2269,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 736,
+          "duration": 889,
           "id": "34885317a9aed0c7baa7b2e233b11b05",
           "killedBy": [
-            "DecimalTest:eq/3?"
+            "DecimalTest:compare/3"
           ],
           "location": {
             "end": {
@@ -2292,7 +2294,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 732,
+          "duration": 853,
           "id": "34dd663109254aaf1d6ec406ef412e9a",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -2317,10 +2319,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 804,
+          "duration": 862,
           "id": "34efecd3fcb47cea908f62027be81ffb",
           "killedBy": [
-            "DecimalTest:integer?/1"
+            "DecimalTest:doctest Decimal.integer?/1 (92)"
           ],
           "location": {
             "end": {
@@ -2342,10 +2344,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 812,
+          "duration": 870,
           "id": "35610626391279d3ac5074c909e6fa38",
           "killedBy": [
-            "DecimalTest:round/3: ceiling"
+            "DecimalTest:issue #35"
           ],
           "location": {
             "end": {
@@ -2367,10 +2369,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 758,
+          "duration": 855,
           "id": "356e2a88d39eb3aff3d40b93223dcde8",
           "killedBy": [
-            "DecimalTest:issue #29"
+            "DecimalTest:doctest Decimal.rem/2 (42)"
           ],
           "location": {
             "end": {
@@ -2392,7 +2394,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1458,
+          "duration": 1372,
           "id": "35af221a4696328efcb256c8fbc8d058",
           "killedBy": [],
           "location": {
@@ -2415,7 +2417,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 1441,
+          "duration": 1360,
           "id": "3623dc3165b0c940a414c585d700baf9",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -2440,10 +2442,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 732,
+          "duration": 931,
           "id": "372570dda310dd6fd21010fa138a7c98",
           "killedBy": [
-            "DecimalTest:round/3: half up"
+            "DecimalTest:round/3: down"
           ],
           "location": {
             "end": {
@@ -2465,7 +2467,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 741,
+          "duration": 951,
           "id": "3781fb12fa2f432e00e028e3dc86e779",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -2490,7 +2492,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 735,
+          "duration": 911,
           "id": "3924b38cd8024023124e4a64326b3c9c",
           "killedBy": [
             "DecimalTest:rem/2"
@@ -2515,7 +2517,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 740,
+          "duration": 901,
           "id": "39a0a09bd3b29aee7097ce94787345cd",
           "killedBy": [],
           "location": {
@@ -2538,7 +2540,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 741,
+          "duration": 901,
           "id": "39fceacc8f2e58542752aad56e06ff11",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -2563,10 +2565,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 732,
+          "duration": 892,
           "id": "3b631c56e4943d02c952af7686434163",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (80)"
+            "DecimalTest:JSON.Encoder implementation"
           ],
           "location": {
             "end": {
@@ -2588,7 +2590,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 747,
+          "duration": 900,
           "id": "3c34566627341a89017a3278890e3abd",
           "killedBy": [],
           "location": {
@@ -2611,7 +2613,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 742,
+          "duration": 880,
           "id": "3c893e52821d5da9ff6be2cc9d422627",
           "killedBy": [
             "DecimalTest:doctest Decimal.div/2 (38)"
@@ -2636,7 +2638,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 60720,
+          "duration": 60932,
           "id": "3d25a50ae3ea13cf8be83405504dff60",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -2661,7 +2663,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 814,
+          "duration": 950,
           "id": "3d4b2e364126b20b29d6fdc35297986e",
           "killedBy": [
             "DecimalTest:max/2"
@@ -2686,10 +2688,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 861,
+          "duration": 852,
           "id": "3ea1588bbd994101cae919e741d8afc5",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half down"
+            "Decimal.ContextTest:with_context/2: ceiling"
           ],
           "location": {
             "end": {
@@ -2711,7 +2713,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 831,
+          "duration": 846,
           "id": "3ea3dad5b038e052e9be208091c118ac",
           "killedBy": [],
           "location": {
@@ -2734,10 +2736,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 813,
+          "duration": 862,
           "id": "3eac19ae2ed20d66b7d1a92751b00d05",
           "killedBy": [
-            "DecimalTest:to_string/2 xsd"
+            "DecimalTest:to_string/2 normal"
           ],
           "location": {
             "end": {
@@ -2759,7 +2761,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 867,
+          "duration": 857,
           "id": "3eed59783c60e7c4c8d7a46f81fd8be8",
           "killedBy": [],
           "location": {
@@ -2782,10 +2784,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 875,
+          "duration": 863,
           "id": "42bdd45eb623f6324ccae843e9cfd99e",
           "killedBy": [
-            "DecimalTest:to_string/2 scientific"
+            "DecimalTest:to_integer/1"
           ],
           "location": {
             "end": {
@@ -2807,7 +2809,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 832,
+          "duration": 917,
           "id": "42d40bf3bbeea4289c0155ef85d300ab",
           "killedBy": [],
           "location": {
@@ -2830,7 +2832,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 898,
+          "duration": 880,
           "id": "43b6e60acb6df98941ad63a35575e534",
           "killedBy": [
             "DecimalTest:sub/2"
@@ -2855,7 +2857,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 785,
+          "duration": 847,
           "id": "43e82452c1d05f50d1795c4dab40c9a6",
           "killedBy": [
             "DecimalTest:max/2"
@@ -2880,7 +2882,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1516,
+          "duration": 1356,
           "id": "43e939e07384a4e2c4e62c65f22249b7",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -2905,10 +2907,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 803,
+          "duration": 848,
           "id": "43f12a188c68005a124eba36cff736ec",
           "killedBy": [
-            "DecimalTest:issue #13"
+            "DecimalTest:round/3: down"
           ],
           "location": {
             "end": {
@@ -2930,10 +2932,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 894,
+          "duration": 899,
           "id": "44aa55d36d32f5fe691b47d3c389c463",
           "killedBy": [
-            "DecimalTest:lt?/2"
+            "DecimalTest:doctest Decimal.compare/3 (15)"
           ],
           "location": {
             "end": {
@@ -2955,10 +2957,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 800,
+          "duration": 859,
           "id": "45328a3d49c7c829a3ce2b851bd91d52",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: floor"
+            "Decimal.ContextTest:with_context/2: up"
           ],
           "location": {
             "end": {
@@ -2980,7 +2982,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 822,
+          "duration": 855,
           "id": "4581419bad393779506ecad193c99d0d",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_string/2 (80)"
@@ -3005,7 +3007,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 821,
+          "duration": 839,
           "id": "4635818b189202e5314c3b9d425da737",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 traps"
@@ -3030,7 +3032,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 60822,
+          "duration": 60899,
           "id": "47cbd14fee2fa427f92ab7b2adaa243f",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -3055,7 +3057,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 826,
+          "duration": 903,
           "id": "480c56828e33ad96a6e1d8b0545da777",
           "killedBy": [
             "DecimalTest:doctest Decimal.div_rem/2 (43)"
@@ -3080,7 +3082,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 59310,
+          "duration": 60863,
           "id": "4934cf24011acf8b8a4964ed7e13a5c8",
           "killedBy": [],
           "location": {
@@ -3095,7 +3097,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "exp + 1",
-          "status": "Killed"
+          "status": "Timeout"
         },
         {
           "coveredBy": [
@@ -3103,7 +3105,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 774,
+          "duration": 934,
           "id": "4a4e91bf75861c1dac1a6f06eb5aa745",
           "killedBy": [],
           "location": {
@@ -3126,10 +3128,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 770,
+          "duration": 909,
           "id": "4a8030d0eff70dc4cf10b53f3b73c113",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half up"
+            "Decimal.ContextTest:with_context/2: half even"
           ],
           "location": {
             "end": {
@@ -3151,7 +3153,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 791,
+          "duration": 948,
           "id": "4aa8a55e94ab99ac9116c59099d2564d",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -3176,7 +3178,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 766,
+          "duration": 910,
           "id": "4acb0ad6b028dd8126af384b029d9e65",
           "killedBy": [],
           "location": {
@@ -3199,7 +3201,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 775,
+          "duration": 890,
           "id": "4aea536c4d5e9e82e984384fdfea38bc",
           "killedBy": [],
           "location": {
@@ -3222,7 +3224,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 57415,
+          "duration": 60883,
           "id": "4b1b1777285caa7000cf12cbbea94b75",
           "killedBy": [],
           "location": {
@@ -3237,7 +3239,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "exp1 + exp2",
-          "status": "Killed"
+          "status": "Timeout"
         },
         {
           "coveredBy": [
@@ -3245,7 +3247,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1581,
+          "duration": 1338,
           "id": "4b9b57c2f5591e64394954f6bd292fa8",
           "killedBy": [
             "DecimalTest:integer?/1"
@@ -3270,10 +3272,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 762,
+          "duration": 895,
           "id": "4bff12c950eec9121a5144330d2c05ff",
           "killedBy": [
-            "DecimalTest:round/3: half up"
+            "DecimalTest:round/3: up"
           ],
           "location": {
             "end": {
@@ -3295,7 +3297,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 60739,
+          "duration": 60898,
           "id": "4d9690050927f133969ef37987186465",
           "killedBy": [],
           "location": {
@@ -3318,10 +3320,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 759,
+          "duration": 805,
           "id": "4ebc32419befe3dc0f473f8eba1c4b58",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div_rem/2 (43)"
+            "DecimalTest:issue #29"
           ],
           "location": {
             "end": {
@@ -3343,7 +3345,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 748,
+          "duration": 775,
           "id": "4f67ac5278cec4b8570c81bf16e709a1",
           "killedBy": [
             "DecimalTest:issue #82"
@@ -3368,7 +3370,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1454,
+          "duration": 1333,
           "id": "4fd48ee0057eb88b9e78e6e321dc4f9c",
           "killedBy": [],
           "location": {
@@ -3391,7 +3393,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 736,
+          "duration": 808,
           "id": "50815cbce4c7805c31f002b49bac4f80",
           "killedBy": [
             "DecimalTest:min/2"
@@ -3416,7 +3418,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 1512,
+          "duration": 1348,
           "id": "5096f11ed6c01b811b18dc0e6862d843",
           "killedBy": [],
           "location": {
@@ -3439,10 +3441,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1441,
+          "duration": 1394,
           "id": "50c31c03e5801d2eaa5ca6c265cf0302",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2 set flags"
+            "Decimal.ContextTest:with_context/2: floor"
           ],
           "location": {
             "end": {
@@ -3464,7 +3466,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 761,
+          "duration": 1488,
           "id": "50ffd969180635511ea87b70dd9737d5",
           "killedBy": [
             "DecimalTest:div/2"
@@ -3489,7 +3491,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 752,
+          "duration": 1255,
           "id": "51a2c6dc35b229b14956bab6969c50a3",
           "killedBy": [
             "DecimalTest:div_int/2"
@@ -3514,7 +3516,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 744,
+          "duration": 1153,
           "id": "5341e5fe406d541e9fbce452db229381",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -3539,7 +3541,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 60442,
+          "duration": 60951,
           "id": "537d9dd2634a02628634a46526554d0d",
           "killedBy": [],
           "location": {
@@ -3562,10 +3564,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 759,
+          "duration": 945,
           "id": "53b1b401bf365952cbd08ad9e410be72",
           "killedBy": [
-            "DecimalTest:doctest Decimal.max/2 (45)"
+            "DecimalTest:doctest Decimal.eq?/3 (26)"
           ],
           "location": {
             "end": {
@@ -3587,7 +3589,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 744,
+          "duration": 918,
           "id": "542e350ccedcda9657071979a080bbc8",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -3612,7 +3614,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 755,
+          "duration": 907,
           "id": "5485cedbc4aaee0d8181c910565996e1",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_string/2 (80)"
@@ -3637,7 +3639,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 790,
+          "duration": 889,
           "id": "54b55fdecdfbe6ec42e608538a0b2c9e",
           "killedBy": [
             "DecimalTest:integer?/1"
@@ -3662,7 +3664,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 747,
+          "duration": 927,
           "id": "54c03d48a63c4ac9e711316c9461ebae",
           "killedBy": [],
           "location": {
@@ -3685,10 +3687,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1464,
+          "duration": 1352,
           "id": "55dd1b4c97d1772c238b911529a44cb8",
           "killedBy": [
-            "DecimalTest:compare/2"
+            "DecimalTest:compare/3"
           ],
           "location": {
             "end": {
@@ -3710,7 +3712,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 739,
+          "duration": 901,
           "id": "56016b9f05601a73ff8ccae7ec329d48",
           "killedBy": [
             "DecimalTest:issue #63"
@@ -3735,7 +3737,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 735,
+          "duration": 918,
           "id": "561f10e49470eddc8dbd65fa18f41855",
           "killedBy": [
             "DecimalTest:max/2"
@@ -3760,10 +3762,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 747,
+          "duration": 891,
           "id": "566a541e05276dd068ccdace55fcabda",
           "killedBy": [
-            "DecimalTest:sqrt/1"
+            "DecimalTest:doctest Decimal.sqrt/1 (66)"
           ],
           "location": {
             "end": {
@@ -3785,7 +3787,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 60742,
+          "duration": 60883,
           "id": "57ebe8f21fbd9c92915000fb49de52d6",
           "killedBy": [],
           "location": {
@@ -3808,7 +3810,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 751,
+          "duration": 803,
           "id": "585aa4b9a22259c34d5b8df89ae4c34a",
           "killedBy": [],
           "location": {
@@ -3831,7 +3833,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 745,
+          "duration": 789,
           "id": "5a5c348297cad2a83ba043d15e98ce99",
           "killedBy": [
             "DecimalTest:issue #82"
@@ -3856,7 +3858,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 739,
+          "duration": 784,
           "id": "5a76ead8852aa1f9f0ce404c603074fa",
           "killedBy": [
             "DecimalTest:to_string/2 xsd"
@@ -3881,7 +3883,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 56670,
+          "duration": 60772,
           "id": "5a805421b2663eac41fabede40f8c5aa",
           "killedBy": [],
           "location": {
@@ -3896,7 +3898,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "exp * 1",
-          "status": "Killed"
+          "status": "Timeout"
         },
         {
           "coveredBy": [
@@ -3904,7 +3906,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 750,
+          "duration": 778,
           "id": "5a9023d500e1d955d9384c5b59eba576",
           "killedBy": [],
           "location": {
@@ -3927,10 +3929,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 732,
+          "duration": 764,
           "id": "5af677eb9072aed20e3bdae0f2636e40",
           "killedBy": [
-            "DecimalTest:round/3: up"
+            "DecimalTest:round/3: down"
           ],
           "location": {
             "end": {
@@ -3952,10 +3954,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 744,
+          "duration": 813,
           "id": "5b129dd411145477f5f324ee858e9eb4",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: ceiling"
+            "Decimal.ContextTest:with_context/2: half up"
           ],
           "location": {
             "end": {
@@ -3977,7 +3979,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 737,
+          "duration": 779,
           "id": "5b24aa016abe425494b90bf855eea142",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: ceiling"
@@ -4002,7 +4004,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 743,
+          "duration": 789,
           "id": "5bab90721f3f2a56ba9edc691b222c6b",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -4027,7 +4029,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 735,
+          "duration": 793,
           "id": "5c121505cb713064fa18b9003e73cc36",
           "killedBy": [
             "DecimalTest:to_integer/1"
@@ -4052,10 +4054,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1443,
+          "duration": 1351,
           "id": "5cefde3124aba1d6457e05414275cbcb",
           "killedBy": [
-            "DecimalTest:doctest Decimal.compare/3 (15)"
+            "DecimalTest:doctest Decimal.div_rem/2 (43)"
           ],
           "location": {
             "end": {
@@ -4077,7 +4079,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 62425,
+          "duration": 65987,
           "id": "5d1248d3750029dffbc45d0848ce232e",
           "killedBy": [],
           "location": {
@@ -4092,7 +4094,7 @@
           },
           "mutatorName": "GuardComparisonNegation",
           "replacement": "coef1 >= coef2",
-          "status": "Timeout"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -4100,7 +4102,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 741,
+          "duration": 764,
           "id": "5d56095a0aa2b18b1dfa2031a823def8",
           "killedBy": [
             "DecimalTest:doctest Decimal.gt?/2 (28)"
@@ -4125,10 +4127,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 2260,
+          "duration": 1366,
           "id": "5de38222228f6c67546c398faa6d2b45",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -4150,7 +4152,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 60758,
+          "duration": 60772,
           "id": "5e7bf0f9c5a4b99cb4858f5434b5a9dc",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -4175,7 +4177,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 791,
+          "duration": 779,
           "id": "5f9e5e92db8b8d7a01db562586b7b1bf",
           "killedBy": [
             "DecimalTest:issue #82"
@@ -4200,7 +4202,7 @@
             "test/decimal_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 765,
+          "duration": 800,
           "id": "602d57373c994861f71ae4e70cafeff2",
           "killedBy": [],
           "location": {
@@ -4223,10 +4225,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 750,
+          "duration": 806,
           "id": "605728d2a068e68a0eeaca3bdbdd45d9",
           "killedBy": [
-            "DecimalTest:eq/2?"
+            "DecimalTest:doctest Decimal.eq?/2 (22)"
           ],
           "location": {
             "end": {
@@ -4248,7 +4250,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 743,
+          "duration": 824,
           "id": "60a63d106d3f7ddeff4765c8788b2647",
           "killedBy": [],
           "location": {
@@ -4271,10 +4273,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1549,
+          "duration": 1362,
           "id": "6110515d7ea1308ea1c88365def1791d",
           "killedBy": [
-            "DecimalTest:integer?/1"
+            "DecimalTest:doctest Decimal.integer?/1 (92)"
           ],
           "location": {
             "end": {
@@ -4296,7 +4298,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 754,
+          "duration": 785,
           "id": "62281687c6fe58d96f8bb9f93ef4077e",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -4321,7 +4323,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 745,
+          "duration": 775,
           "id": "62b1c43336fde328226cfbb53beabfde",
           "killedBy": [
             "DecimalTest:rem/2"
@@ -4346,7 +4348,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1510,
+          "duration": 1367,
           "id": "6370e1829937e5cf15372e786ce5ce48",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -4371,7 +4373,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace === with !==",
-          "duration": 745,
+          "duration": 787,
           "id": "64970a1858884ff69994e18ac69702b8",
           "killedBy": [],
           "location": {
@@ -4394,7 +4396,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 755,
+          "duration": 776,
           "id": "64973806e701c9ed230e0c13c27cf659",
           "killedBy": [
             "DecimalTest:div/2"
@@ -4419,7 +4421,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 745,
+          "duration": 786,
           "id": "64a3c0d3b6f6e3199d1269b8821b59ff",
           "killedBy": [],
           "location": {
@@ -4442,10 +4444,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 742,
+          "duration": 787,
           "id": "6554e8356053e0d7c818ec58549f6103",
           "killedBy": [
-            "DecimalTest:round/3: half up"
+            "DecimalTest:round/3: ceiling"
           ],
           "location": {
             "end": {
@@ -4467,7 +4469,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 1441,
+          "duration": 1383,
           "id": "65bbe32d2f28f1cc17dc9c033fc25c38",
           "killedBy": [],
           "location": {
@@ -4490,7 +4492,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 60739,
+          "duration": 59695,
           "id": "6613b8fd80d4ee43d916f7f5a80dd8ef",
           "killedBy": [],
           "location": {
@@ -4513,7 +4515,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 1148,
+          "duration": 785,
           "id": "66797b38e767ff8f40e89449daedb2e8",
           "killedBy": [
             "DecimalTest:doctest Decimal.integer?/1 (93)"
@@ -4538,7 +4540,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 1109,
+          "duration": 774,
           "id": "66f47db5724cc5f63ab522fe9ca4e2c9",
           "killedBy": [],
           "location": {
@@ -4561,7 +4563,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1099,
+          "duration": 772,
           "id": "67c26a5d85f555654b1b7528ecacfd46",
           "killedBy": [],
           "location": {
@@ -4584,7 +4586,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1112,
+          "duration": 824,
           "id": "67f8095b4b6b254bd647b615f5ab8acd",
           "killedBy": [
             "DecimalTest:min/2"
@@ -4609,7 +4611,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1076,
+          "duration": 780,
           "id": "688b083c04ba6e4df74523aeab8baf14",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -4634,10 +4636,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1488,
+          "duration": 1344,
           "id": "68c918113cb7b3a7211e293fa4beae4c",
           "killedBy": [
-            "DecimalTest:doctest Decimal.sub/2 (13)"
+            "DecimalTest:doctest Decimal.eq?/3 (24)"
           ],
           "location": {
             "end": {
@@ -4659,10 +4661,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1139,
+          "duration": 845,
           "id": "699beb8e6062d09c9ee48eac6f07e206",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_float/1 (87)"
+            "DecimalTest:to_float/1"
           ],
           "location": {
             "end": {
@@ -4684,10 +4686,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1105,
+          "duration": 783,
           "id": "6adf637ab2c471258bdb82d0cd821560",
           "killedBy": [
-            "DecimalTest:to_string/2 normal"
+            "DecimalTest:to_string/2 scientific"
           ],
           "location": {
             "end": {
@@ -4709,7 +4711,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 1429,
+          "duration": 1334,
           "id": "6b6782c8b4b73d46779737a8f615421d",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -4734,7 +4736,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1050,
+          "duration": 807,
           "id": "6d60dddb2f386037305754d675faca18",
           "killedBy": [
             "DecimalTest:doctest Decimal.compare/3 (17)"
@@ -4759,7 +4761,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1093,
+          "duration": 771,
           "id": "6e53ff56177d63fc01bbca6c876bb059",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -4784,7 +4786,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1063,
+          "duration": 796,
           "id": "6efc2190cabb1c97b0c3c26f6c15adb8",
           "killedBy": [
             "DecimalTest:div_int/2"
@@ -4809,10 +4811,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1058,
+          "duration": 785,
           "id": "6f2da235db8c428f79b71d656bd74f90",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half up"
+            "Decimal.ContextTest:with_context/2: half even"
           ],
           "location": {
             "end": {
@@ -4834,10 +4836,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1464,
+          "duration": 1397,
           "id": "6f6b2cd07bfa96d164c0a341eedb8310",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (85)"
+            "DecimalTest:doctest Decimal.to_integer/1 (84)"
           ],
           "location": {
             "end": {
@@ -4859,7 +4861,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1435,
+          "duration": 1350,
           "id": "6ff1fd8c652e3a3a428b78d4ad7cfebd",
           "killedBy": [],
           "location": {
@@ -4882,7 +4884,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1044,
+          "duration": 780,
           "id": "70afae2815b66b04fea383e44858f6ae",
           "killedBy": [
             "DecimalTest:mult/2"
@@ -4907,7 +4909,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 1054,
+          "duration": 774,
           "id": "70b72a2a918ae50fd995c05483c20083",
           "killedBy": [
             "DecimalTest:max/2"
@@ -4932,7 +4934,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1087,
+          "duration": 757,
           "id": "712d52e0141adaa6f461461a4eeb34dc",
           "killedBy": [],
           "location": {
@@ -4955,7 +4957,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1071,
+          "duration": 777,
           "id": "716783d5d69b436613cd081f32cf7502",
           "killedBy": [
             "DecimalTest:doctest Decimal.div_rem/2 (43)"
@@ -4980,7 +4982,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1108,
+          "duration": 846,
           "id": "720f9278d7250292428bd67004ad5e84",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -5005,7 +5007,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 1123,
+          "duration": 788,
           "id": "724c1936cb6e352ca0b0e6ceb0055895",
           "killedBy": [
             "DecimalTest:to_integer/1"
@@ -5030,7 +5032,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 1652,
+          "duration": 1357,
           "id": "740e757e1de00938c9e877bcae415099",
           "killedBy": [],
           "location": {
@@ -5053,7 +5055,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1048,
+          "duration": 747,
           "id": "74468c4381b8d381a3261cdd17126dde",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_float/1 (87)"
@@ -5078,7 +5080,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 61069,
+          "duration": 60768,
           "id": "74645f23b72d69adf76342db75c3e0ea",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -5103,10 +5105,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1102,
+          "duration": 769,
           "id": "756e280ef307d4ad86d673ffdf947a4d",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: floor"
+            "Decimal.ContextTest:with_context/2: down"
           ],
           "location": {
             "end": {
@@ -5128,7 +5130,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 1147,
+          "duration": 774,
           "id": "7840bfda6997ae2f39b2eea321af83a4",
           "killedBy": [],
           "location": {
@@ -5151,10 +5153,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 1048,
+          "duration": 772,
           "id": "78bfc784b5c0ed981b6bee4c3166d619",
           "killedBy": [
-            "DecimalTest:sqrt/1"
+            "DecimalTest:doctest Decimal.sqrt/1 (66)"
           ],
           "location": {
             "end": {
@@ -5176,10 +5178,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1488,
+          "duration": 1337,
           "id": "7b3ebfde189a1c5a587e7c9c838757da",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:doctest Decimal.to_float/1 (87)"
           ],
           "location": {
             "end": {
@@ -5201,7 +5203,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 61033,
+          "duration": 60193,
           "id": "7b5504073899887d0850157870fb7f7f",
           "killedBy": [],
           "location": {
@@ -5216,7 +5218,7 @@
           },
           "mutatorName": "Arithmetic",
           "replacement": "exp + 1",
-          "status": "Timeout"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -5224,10 +5226,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1048,
+          "duration": 840,
           "id": "7c872a8beb0bf3e1b478fdca31af32a6",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: ceiling"
+            "Decimal.ContextTest:with_context/2: half even"
           ],
           "location": {
             "end": {
@@ -5249,10 +5251,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 1041,
+          "duration": 840,
           "id": "7cd95a5bfc1dae218fe5d0c522aaeb2a",
           "killedBy": [
-            "DecimalTest:to_string/2 xsd"
+            "DecimalTest:doctest Decimal.to_string/2 (81)"
           ],
           "location": {
             "end": {
@@ -5274,10 +5276,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1043,
+          "duration": 857,
           "id": "7cdb80fb984eab81600f55605cd0328e",
           "killedBy": [
-            "DecimalTest:eq/3?"
+            "DecimalTest:equal?/2"
           ],
           "location": {
             "end": {
@@ -5299,7 +5301,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1079,
+          "duration": 883,
           "id": "7cf55c78a9a62f1b8896f0c27f4947c8",
           "killedBy": [],
           "location": {
@@ -5322,10 +5324,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 1038,
+          "duration": 861,
           "id": "7d7fc4fa0dd16c362f3044f927c89d39",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half even"
+            "Decimal.ContextTest:with_context/2: ceiling"
           ],
           "location": {
             "end": {
@@ -5347,7 +5349,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1447,
+          "duration": 1381,
           "id": "7f1ac1627dce737a0ac928b8d065ccfa",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_integer/1 (85)"
@@ -5372,7 +5374,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1040,
+          "duration": 848,
           "id": "7f3bb7472a8faf478efbd50f7ba7c15a",
           "killedBy": [
             "DecimalTest:doctest Decimal.div_rem/2 (43)"
@@ -5397,7 +5399,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1408,
+          "duration": 1348,
           "id": "7f5dd126a05bb59c39d0d98817502268",
           "killedBy": [],
           "location": {
@@ -5420,7 +5422,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1033,
+          "duration": 886,
           "id": "7f915030628d4d8816b5cef1c3f24b8b",
           "killedBy": [
             "DecimalTest:rem/2"
@@ -5445,10 +5447,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1050,
+          "duration": 964,
           "id": "7fb0c7d76bd6d5a5b1c402aad2700a91",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (27)"
+            "DecimalTest:doctest Decimal.compare/3 (16)"
           ],
           "location": {
             "end": {
@@ -5470,10 +5472,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1040,
+          "duration": 885,
           "id": "7fc457a18d464aab8e97994538e1fcc6",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_float/1 (87)"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -5495,10 +5497,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1038,
+          "duration": 890,
           "id": "8043c31bac3d96fde1450e6485d19d6f",
           "killedBy": [
-            "DecimalTest:div_int/2"
+            "DecimalTest:doctest Decimal.div_int/2 (41)"
           ],
           "location": {
             "end": {
@@ -5520,7 +5522,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1031,
+          "duration": 965,
           "id": "815541e0ace029a630782b442b60d1d0",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half up"
@@ -5545,7 +5547,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1393,
+          "duration": 1314,
           "id": "819cd8d3056f440294465caf13ba9d22",
           "killedBy": [
             "DecimalTest:new/1 conversion"
@@ -5570,10 +5572,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1485,
+          "duration": 1351,
           "id": "81a306156627181b8b0f4c85463cb4ff",
           "killedBy": [
-            "DecimalTest:issue wrong coef or sign value"
+            "DecimalTest:new/1 conversion"
           ],
           "location": {
             "end": {
@@ -5595,7 +5597,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 61010,
+          "duration": 60897,
           "id": "8265085d9deac4d53e08c4d0ceacda0a",
           "killedBy": [],
           "location": {
@@ -5618,10 +5620,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1473,
+          "duration": 1301,
           "id": "82a9b4746e4ebf6c515cd99af7f59dcc",
           "killedBy": [
-            "DecimalTest:to_integer/1"
+            "DecimalTest:doctest Decimal.to_integer/1 (85)"
           ],
           "location": {
             "end": {
@@ -5643,7 +5645,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1041,
+          "duration": 884,
           "id": "82eeb02a941e52028ece160ef1d5e4be",
           "killedBy": [],
           "location": {
@@ -5666,7 +5668,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1043,
+          "duration": 874,
           "id": "838d2ed93c20ff1983f70713e6150a96",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -5691,7 +5693,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1433,
+          "duration": 1354,
           "id": "84cdbd21b3ca26c914180d0626e0ad5d",
           "killedBy": [],
           "location": {
@@ -5714,10 +5716,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1052,
+          "duration": 851,
           "id": "8604e96a4d06e7ff58f45cc2956d5f24",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (84)"
+            "DecimalTest:doctest Decimal.to_integer/1 (85)"
           ],
           "location": {
             "end": {
@@ -5739,10 +5741,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1050,
+          "duration": 839,
           "id": "866f35b343114dbdaa37f56682638174",
           "killedBy": [
-            "DecimalTest:doctest Decimal.sqrt/1 (66)"
+            "DecimalTest:sqrt/1"
           ],
           "location": {
             "end": {
@@ -5764,10 +5766,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1445,
+          "duration": 1344,
           "id": "873b2600c4c8336cdd26dffc82c66910",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -5789,10 +5791,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1070,
+          "duration": 832,
           "id": "8876482ee0db97b79241cebe8c0dc1bd",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div_int/2 (40)"
+            "DecimalTest:div_int/2"
           ],
           "location": {
             "end": {
@@ -5814,7 +5816,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1050,
+          "duration": 853,
           "id": "89be6b07ed73771df2396d42063960c0",
           "killedBy": [],
           "location": {
@@ -5837,7 +5839,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1033,
+          "duration": 849,
           "id": "89d2055e50fd9ec3a38e3b5793294fad",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 traps"
@@ -5862,10 +5864,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1046,
+          "duration": 853,
           "id": "8ae3ba290b45dda01724e41c91500af3",
           "killedBy": [
-            "DecimalTest:is_decimal/1 guard"
+            "DecimalTest:doctest Decimal.nan?/1 (1)"
           ],
           "location": {
             "end": {
@@ -5887,7 +5889,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1418,
+          "duration": 1331,
           "id": "8b007a2357e76dbb5b805f2f32bd1f39",
           "killedBy": [],
           "location": {
@@ -5910,7 +5912,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1048,
+          "duration": 843,
           "id": "8c1d3d2750eee27b89d8bfa5f2cc04b9",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -5935,10 +5937,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1054,
+          "duration": 836,
           "id": "8c3f5db07fda95344e4177c5d170dde6",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half up"
+            "Decimal.ContextTest:with_context/2: down"
           ],
           "location": {
             "end": {
@@ -5960,10 +5962,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1094,
+          "duration": 858,
           "id": "8c84f16ab8a72da503ff2894e1b2c730",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: down"
+            "Decimal.ContextTest:with_context/2 set flags"
           ],
           "location": {
             "end": {
@@ -5985,7 +5987,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1047,
+          "duration": 908,
           "id": "8d04a8189fbdb4f2f3a067050003398a",
           "killedBy": [
             "DecimalTest:add/2"
@@ -6010,10 +6012,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1046,
+          "duration": 924,
           "id": "8ea0a416dfa45094538f3182429e6dc9",
           "killedBy": [
-            "DecimalTest:sqrt/1"
+            "DecimalTest:doctest Decimal.sqrt/1 (66)"
           ],
           "location": {
             "end": {
@@ -6035,7 +6037,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 1046,
+          "duration": 1062,
           "id": "8f4fb3c8abff6730ec160fd9fec0f6a6",
           "killedBy": [],
           "location": {
@@ -6058,10 +6060,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 1042,
+          "duration": 852,
           "id": "8fe23af4ea38df9bbb62eefee23ddb1c",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (84)"
+            "DecimalTest:to_integer/1"
           ],
           "location": {
             "end": {
@@ -6083,7 +6085,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 1408,
+          "duration": 1317,
           "id": "8ff6ab02074757c831918ca10562e8c3",
           "killedBy": [],
           "location": {
@@ -6106,10 +6108,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 1118,
+          "duration": 838,
           "id": "8ffd51820090af1d3b926d015d0a9172",
           "killedBy": [
-            "DecimalTest:to_string/2 scientific"
+            "DecimalTest:doctest Decimal.to_string/2 (80)"
           ],
           "location": {
             "end": {
@@ -6131,7 +6133,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1043,
+          "duration": 817,
           "id": "90079df29ca8a551344cc3580ae3237b",
           "killedBy": [],
           "location": {
@@ -6154,10 +6156,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1041,
+          "duration": 887,
           "id": "906bd55c7b376bb3379186ac9f455be0",
           "killedBy": [
-            "DecimalTest:round/3: half even"
+            "DecimalTest:issue #57"
           ],
           "location": {
             "end": {
@@ -6179,7 +6181,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1048,
+          "duration": 817,
           "id": "9199e92577a2728a131a4acdfb34b7e2",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -6204,7 +6206,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 1409,
+          "duration": 1335,
           "id": "92ccb3a05e9e636661cdefff1c65ac35",
           "killedBy": [],
           "location": {
@@ -6227,7 +6229,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1044,
+          "duration": 852,
           "id": "9307a0cefa88417b17c35973c3f2deb6",
           "killedBy": [],
           "location": {
@@ -6250,7 +6252,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 1468,
+          "duration": 1354,
           "id": "93c86b462ac5986d6715a63c95c06350",
           "killedBy": [],
           "location": {
@@ -6273,10 +6275,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1042,
+          "duration": 819,
           "id": "9495edeba34323925e7db3df9685753a",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div_int/2 (40)"
+            "DecimalTest:div_int/2"
           ],
           "location": {
             "end": {
@@ -6298,7 +6300,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1041,
+          "duration": 832,
           "id": "94d0672dbbe955be96321760c2329f73",
           "killedBy": [
             "DecimalTest:max/2"
@@ -6323,7 +6325,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1416,
+          "duration": 1360,
           "id": "9500c97024c920d7ce434524bf89715a",
           "killedBy": [],
           "location": {
@@ -6346,7 +6348,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1032,
+          "duration": 827,
           "id": "9560bbd8e36e3685f5742fafbf687653",
           "killedBy": [
             "DecimalTest:min/2"
@@ -6371,7 +6373,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 1031,
+          "duration": 816,
           "id": "95bf6d4c8333252f1bf25407e47714dc",
           "killedBy": [],
           "location": {
@@ -6394,10 +6396,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1045,
+          "duration": 808,
           "id": "974c7727213d8fabdadbe45619c2b67e",
           "killedBy": [
-            "DecimalTest:round/3: up"
+            "DecimalTest:round/3: ceiling"
           ],
           "location": {
             "end": {
@@ -6419,7 +6421,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1045,
+          "duration": 828,
           "id": "9794b3a3e16479b0100ac8418454d8bd",
           "killedBy": [],
           "location": {
@@ -6442,7 +6444,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1078,
+          "duration": 841,
           "id": "97ed5f63ecfbaaff67e1575fd8eca349",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -6467,10 +6469,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard != with ==",
-          "duration": 1434,
+          "duration": 1363,
           "id": "99321d6619c3af671fd542d977632a28",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (82)"
+            "DecimalTest:to_string/2 xsd"
           ],
           "location": {
             "end": {
@@ -6492,10 +6494,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1049,
+          "duration": 868,
           "id": "9a5509aab6d80e4b0497e35e988bebed",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half down"
+            "Decimal.ContextTest:with_context/2: half even"
           ],
           "location": {
             "end": {
@@ -6517,7 +6519,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1050,
+          "duration": 806,
           "id": "9ba31944315ce4b634f737e063210e08",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -6542,10 +6544,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 1056,
+          "duration": 822,
           "id": "9bfd997725db52c7fc777af2752107ab",
           "killedBy": [
-            "DecimalTest:doctest Decimal.rem/2 (42)"
+            "DecimalTest:div_int/2"
           ],
           "location": {
             "end": {
@@ -6567,7 +6569,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1094,
+          "duration": 807,
           "id": "9c88d63585f22473e17e2acda6f0b877",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half down"
@@ -6592,7 +6594,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 1040,
+          "duration": 814,
           "id": "9ce187ca8eda07fed9dd72ccabc97275",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -6617,7 +6619,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1042,
+          "duration": 838,
           "id": "9d8e2e91b794a833fe685a4d389736f4",
           "killedBy": [
             "DecimalTest:round/3: ceiling"
@@ -6642,10 +6644,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1054,
+          "duration": 803,
           "id": "9dd4d9ff7ad83beef07f1dc0b6368f96",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/2 (22)"
+            "DecimalTest:doctest Decimal.equal?/2 (20)"
           ],
           "location": {
             "end": {
@@ -6667,7 +6669,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 61179,
+          "duration": 60972,
           "id": "9e1e6e757b70649c564319c54486025b",
           "killedBy": [],
           "location": {
@@ -6690,7 +6692,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1102,
+          "duration": 1078,
           "id": "9e316f775899a601a9a974cdb7271dea",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -6715,7 +6717,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 61027,
+          "duration": 60864,
           "id": "9ef2ade92c2cc87b09a1706a03c13120",
           "killedBy": [],
           "location": {
@@ -6738,10 +6740,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1040,
+          "duration": 961,
           "id": "9f33c34384b7184021d2f3a77dc22ad4",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_float/1 (87)"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -6763,10 +6765,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1038,
+          "duration": 946,
           "id": "9f90ec33fb01ea2bd1b1c846fc53c901",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half down"
+            "Decimal.ContextTest:with_context/2: floor"
           ],
           "location": {
             "end": {
@@ -6788,7 +6790,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1038,
+          "duration": 908,
           "id": "9fd4525867085946984b2c6baf801275",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -6813,7 +6815,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1073,
+          "duration": 899,
           "id": "9ffd0a011c2792563e4bc2374fc1f3e6",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -6838,7 +6840,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace === with !==",
-          "duration": 1043,
+          "duration": 908,
           "id": "a042afb02e57a4d5edc858743ca9bbc2",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -6863,10 +6865,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 1034,
+          "duration": 883,
           "id": "a0bfc204419b61fc380e0bc08bbf8c38",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (26)"
+            "DecimalTest:eq/3?"
           ],
           "location": {
             "end": {
@@ -6888,7 +6890,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1045,
+          "duration": 894,
           "id": "a1031ad8bd00035bd8f050b3ba87fa89",
           "killedBy": [
             "DecimalTest:round/3: floor"
@@ -6913,7 +6915,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1040,
+          "duration": 853,
           "id": "a14ae0e2f1dc18feb167dbb31f7149ac",
           "killedBy": [
             "DecimalTest:div/2"
@@ -6938,10 +6940,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1035,
+          "duration": 858,
           "id": "a1771e11077e55ecd92ad867bb3e3cb1",
           "killedBy": [
-            "DecimalTest:doctest Decimal.integer?/1 (92)"
+            "DecimalTest:integer?/1"
           ],
           "location": {
             "end": {
@@ -6963,7 +6965,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1036,
+          "duration": 847,
           "id": "a1c57dbcb268015fb09826f5bb76331a",
           "killedBy": [],
           "location": {
@@ -6986,10 +6988,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1038,
+          "duration": 855,
           "id": "a23a4d8a5f356ab2c1a54628a105410a",
           "killedBy": [
-            "DecimalTest:sub/2"
+            "DecimalTest:rem/2"
           ],
           "location": {
             "end": {
@@ -7011,7 +7013,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1036,
+          "duration": 850,
           "id": "a2ea2ab133156cffcc0095e73c4f4d76",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_string/2 (82)"
@@ -7036,10 +7038,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1031,
+          "duration": 844,
           "id": "a2f1391dca96102fb90e9e7e21e9664b",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: floor"
+            "Decimal.ContextTest:with_context/2: half even"
           ],
           "location": {
             "end": {
@@ -7061,7 +7063,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1031,
+          "duration": 867,
           "id": "a36edee38f577e0e36fbdbc51364de23",
           "killedBy": [
             "DecimalTest:doctest Decimal.div/2 (38)"
@@ -7086,10 +7088,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 60608,
+          "duration": 60861,
           "id": "a373e6c77eb31bf08bab99de989a7225",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div/2 (38)"
+            "Decimal.ContextTest:with_context/2 set flags"
           ],
           "location": {
             "end": {
@@ -7111,7 +7113,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1047,
+          "duration": 860,
           "id": "a375f4ce384925cbf488f6768f92363a",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -7136,10 +7138,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1046,
+          "duration": 954,
           "id": "a453f39f4599291f9632ff06ab454293",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2 set flags"
+            "Decimal.ContextTest:with_context/2: half down"
           ],
           "location": {
             "end": {
@@ -7161,10 +7163,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1042,
+          "duration": 889,
           "id": "a4c48048797b8a79f7c7210a8d22dc09",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (79)"
+            "DecimalTest:to_string/2 scientific"
           ],
           "location": {
             "end": {
@@ -7186,7 +7188,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 1044,
+          "duration": 857,
           "id": "a4cd66afa765d2aa53d55b6ab6f26a79",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half even"
@@ -7211,7 +7213,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1039,
+          "duration": 854,
           "id": "a61ce61e08530bfa569d6b1ef2f16f53",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -7236,7 +7238,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1044,
+          "duration": 851,
           "id": "a716e3b2dc28ea833826a66b062e2fdb",
           "killedBy": [
             "DecimalTest:min/2"
@@ -7261,7 +7263,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1035,
+          "duration": 874,
           "id": "a7c218a74fbea40d518ad9b88199e626",
           "killedBy": [],
           "location": {
@@ -7284,7 +7286,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1036,
+          "duration": 861,
           "id": "a8838bcc33cd609ef62a3f341ed7e846",
           "killedBy": [],
           "location": {
@@ -7307,7 +7309,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1107,
+          "duration": 901,
           "id": "a8abb69d5883113d883bea2fc4ee3e0e",
           "killedBy": [],
           "location": {
@@ -7330,10 +7332,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1105,
+          "duration": 954,
           "id": "a9feaed1ebf25cafbbb377e2c9562baf",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (27)"
+            "DecimalTest:compare/3"
           ],
           "location": {
             "end": {
@@ -7355,7 +7357,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 1435,
+          "duration": 1336,
           "id": "ac58f955cfe32dd42a173acf1eff77e6",
           "killedBy": [],
           "location": {
@@ -7378,10 +7380,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1031,
+          "duration": 896,
           "id": "ae21812b337a6110926750d9e46a13e9",
           "killedBy": [
-            "DecimalTest:issue #57"
+            "DecimalTest:round/3: down"
           ],
           "location": {
             "end": {
@@ -7403,7 +7405,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1406,
+          "duration": 1366,
           "id": "af1f0a9fbc91185b836789922dcb9de1",
           "killedBy": [],
           "location": {
@@ -7426,10 +7428,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1034,
+          "duration": 920,
           "id": "af234a8b204d714ecd20865f36bab61d",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/2 (22)"
+            "DecimalTest:issue #29"
           ],
           "location": {
             "end": {
@@ -7451,7 +7453,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 1051,
+          "duration": 863,
           "id": "af811e83e6e878c33cbcc3cd05bce342",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -7476,7 +7478,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1043,
+          "duration": 894,
           "id": "afd91e47b21fe151b293e64fe3927e2e",
           "killedBy": [],
           "location": {
@@ -7499,7 +7501,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 1027,
+          "duration": 853,
           "id": "b10802355663cf7d18b21c0c2f1ab1b6",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half down"
@@ -7524,7 +7526,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 1024,
+          "duration": 867,
           "id": "b223560ce2b58864a177bdd5aa5db59c",
           "killedBy": [],
           "location": {
@@ -7547,7 +7549,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1042,
+          "duration": 849,
           "id": "b36d3cda200c979a818d9b3e741fe9e7",
           "killedBy": [
             "DecimalTest:integer?/1"
@@ -7572,10 +7574,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 1050,
+          "duration": 869,
           "id": "b375fcb36843bbfea835448df5dc2d1d",
           "killedBy": [
-            "DecimalTest:round/3: up"
+            "DecimalTest:round/3: down"
           ],
           "location": {
             "end": {
@@ -7597,10 +7599,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1029,
+          "duration": 863,
           "id": "b4cd8b3d20b3591f8dca86992eae5a39",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_float/1 (87)"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -7622,7 +7624,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 61392,
+          "duration": 61348,
           "id": "b543ae73dda715d58b4509a7ddf98c94",
           "killedBy": [],
           "location": {
@@ -7645,10 +7647,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1038,
+          "duration": 880,
           "id": "b682b5e697962b6a6fbcfe6a6cec2d82",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: down"
+            "Decimal.ContextTest:with_context/2: half down"
           ],
           "location": {
             "end": {
@@ -7670,7 +7672,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1038,
+          "duration": 858,
           "id": "b6d9f293198c702a726d980d9b6f9539",
           "killedBy": [],
           "location": {
@@ -7693,7 +7695,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1061,
+          "duration": 853,
           "id": "b85e82a21b44bf56c74691c8e779c715",
           "killedBy": [],
           "location": {
@@ -7716,10 +7718,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 1473,
+          "duration": 1363,
           "id": "b8c58992a0cae3d957078bb75d89ff91",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2 set flags"
+            "Decimal.ContextTest:with_context/2: floor"
           ],
           "location": {
             "end": {
@@ -7741,7 +7743,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1044,
+          "duration": 845,
           "id": "b8c7cf96bf0afe04996e94c389671c37",
           "killedBy": [],
           "location": {
@@ -7764,7 +7766,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 1024,
+          "duration": 850,
           "id": "b9ee44dd73130328d24802fe1dc939ac",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half up"
@@ -7789,7 +7791,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1406,
+          "duration": 1365,
           "id": "ba44cee739ef2251b47e5d62fef5f646",
           "killedBy": [],
           "location": {
@@ -7812,7 +7814,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1034,
+          "duration": 837,
           "id": "bab0e9980f03c7d4f863454adf407773",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half down"
@@ -7837,7 +7839,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1042,
+          "duration": 874,
           "id": "bbedbd3b2ddfe60abcd7210c71025012",
           "killedBy": [],
           "location": {
@@ -7860,7 +7862,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1033,
+          "duration": 855,
           "id": "bc3a54197fa62d43af7ce76c8632f81e",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -7885,7 +7887,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 1052,
+          "duration": 881,
           "id": "bcaa92d40ff41b12be63d657e56fb05e",
           "killedBy": [
             "DecimalTest:add/2"
@@ -7910,7 +7912,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1037,
+          "duration": 822,
           "id": "bd70d70c9649ce84380e908a286db98e",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: ceiling"
@@ -7935,10 +7937,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1037,
+          "duration": 868,
           "id": "be343431c710ba8e13ca5696a65443a8",
           "killedBy": [
-            "DecimalTest:round/3: floor"
+            "DecimalTest:round/3: half down"
           ],
           "location": {
             "end": {
@@ -7960,7 +7962,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1034,
+          "duration": 877,
           "id": "c0c3de10c628849f0061e474933c49a1",
           "killedBy": [],
           "location": {
@@ -7983,10 +7985,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1041,
+          "duration": 869,
           "id": "c0fa0762955fe6f036d8d6c98f3424f8",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div/2 (38)"
+            "DecimalTest:div/2"
           ],
           "location": {
             "end": {
@@ -8008,7 +8010,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1026,
+          "duration": 908,
           "id": "c1cd36fe7c9ed9d10616e14c4c179302",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -8033,7 +8035,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1043,
+          "duration": 906,
           "id": "c23536a3526dbfa1b398e02ff02c659b",
           "killedBy": [
             "DecimalTest:doctest Decimal.eq?/3 (27)"
@@ -8058,10 +8060,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 1046,
+          "duration": 862,
           "id": "c253a7b668ab2a2661d55aa400831e06",
           "killedBy": [
-            "DecimalTest:eq/3?"
+            "DecimalTest:doctest Decimal.eq?/3 (24)"
           ],
           "location": {
             "end": {
@@ -8083,10 +8085,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1036,
+          "duration": 879,
           "id": "c2dfefdf4028a5a348c25d0e3c5c7e92",
           "killedBy": [
-            "DecimalTest:doctest Decimal.compare/3 (16)"
+            "DecimalTest:doctest Decimal.compare/3 (15)"
           ],
           "location": {
             "end": {
@@ -8108,7 +8110,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1023,
+          "duration": 859,
           "id": "c3b85363d5ff6d79ffb7a2f1ea7875b9",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -8133,10 +8135,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1063,
+          "duration": 866,
           "id": "c3c5b41d734f8320edfb8fc1397a00ce",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half even"
+            "Decimal.ContextTest:with_context/2: down"
           ],
           "location": {
             "end": {
@@ -8158,10 +8160,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1029,
+          "duration": 867,
           "id": "c451f2baa04381caea3090a7a17a397b",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: floor"
+            "Decimal.ContextTest:with_context/2: half even"
           ],
           "location": {
             "end": {
@@ -8183,10 +8185,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1035,
+          "duration": 860,
           "id": "c4d5d7c8166736ebe115265dfd2815c8",
           "killedBy": [
-            "DecimalTest:doctest Decimal.gte?/2 (34)"
+            "DecimalTest:doctest Decimal.lte?/2 (36)"
           ],
           "location": {
             "end": {
@@ -8208,10 +8210,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1037,
+          "duration": 867,
           "id": "c4daca81be8849b5740f7bbd5e0a5122",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div_int/2 (40)"
+            "DecimalTest:doctest Decimal.div_rem/2 (43)"
           ],
           "location": {
             "end": {
@@ -8233,7 +8235,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1035,
+          "duration": 850,
           "id": "c506c12bce9b9ae21b5147cf1e022049",
           "killedBy": [
             "DecimalTest:doctest Decimal.integer?/1 (92)"
@@ -8258,7 +8260,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1030,
+          "duration": 864,
           "id": "c56eb64a5950c686d90e7ba5b0a4f570",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -8283,7 +8285,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 1046,
+          "duration": 841,
           "id": "c5aae7f6e329bb67abf762e819d6d439",
           "killedBy": [
             "DecimalTest:issue #57"
@@ -8308,7 +8310,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 61351,
+          "duration": 61049,
           "id": "c5f9fc752da2e5545358cdbc091fc37e",
           "killedBy": [],
           "location": {
@@ -8331,7 +8333,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1395,
+          "duration": 1359,
           "id": "c626f812c2fa0d5c1fc7f3b59886baa6",
           "killedBy": [
             "DecimalTest:doctest Decimal.integer?/1 (92)"
@@ -8356,10 +8358,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 1063,
+          "duration": 984,
           "id": "c8ce5e007bb28fcec2b8a1b82c08aedf",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2 set flags"
+            "Decimal.ContextTest:with_context/2: down"
           ],
           "location": {
             "end": {
@@ -8381,7 +8383,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1427,
+          "duration": 1355,
           "id": "c930c748edc3797753a471ad717fce5e",
           "killedBy": [],
           "location": {
@@ -8404,7 +8406,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1034,
+          "duration": 909,
           "id": "c960bbe333a9cc9a29e839c88bab9c51",
           "killedBy": [],
           "location": {
@@ -8427,7 +8429,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1028,
+          "duration": 966,
           "id": "c9fe1c70f1db338dd78355e383d35593",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -8452,10 +8454,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1074,
+          "duration": 1016,
           "id": "ca69f7de533115b6f953f0808b36a39e",
           "killedBy": [
-            "DecimalTest:doctest Decimal.integer?/1 (92)"
+            "DecimalTest:integer?/1"
           ],
           "location": {
             "end": {
@@ -8477,7 +8479,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1035,
+          "duration": 1069,
           "id": "caa0a227a48a9b65110eed060431a3d3",
           "killedBy": [
             "DecimalTest:doctest Decimal.div/2 (38)"
@@ -8502,7 +8504,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1029,
+          "duration": 952,
           "id": "cb1ff670cad0f16e72decb8fc4f97e3e",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -8527,10 +8529,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1043,
+          "duration": 937,
           "id": "cbc4eb5b7419376c992f0f1b2b7a030b",
           "killedBy": [
-            "DecimalTest:issue #35"
+            "DecimalTest:issue #63"
           ],
           "location": {
             "end": {
@@ -8552,7 +8554,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1040,
+          "duration": 911,
           "id": "cd091f519eaad61a588c9acfc966fc3f",
           "killedBy": [
             "DecimalTest:doctest Decimal.div/2 (38)"
@@ -8577,7 +8579,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1033,
+          "duration": 934,
           "id": "cd574380743f367eaef2dd6be23f5e6d",
           "killedBy": [],
           "location": {
@@ -8600,7 +8602,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1433,
+          "duration": 1345,
           "id": "cd7cea00fef8b7dfddd52036e258ae95",
           "killedBy": [],
           "location": {
@@ -8623,7 +8625,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1033,
+          "duration": 919,
           "id": "cdb780a69b2c7fc8bc78a37c3e947c31",
           "killedBy": [
             "DecimalTest:to_string/2 normal"
@@ -8648,7 +8650,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 1035,
+          "duration": 902,
           "id": "ce15aab33d70bfebeca2f7a7d4f87270",
           "killedBy": [
             "DecimalTest:issue #63"
@@ -8673,10 +8675,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1029,
+          "duration": 932,
           "id": "ce48fa23191eeadaa8c0fba97647f2d4",
           "killedBy": [
-            "DecimalTest:issue #82"
+            "DecimalTest:to_float/1"
           ],
           "location": {
             "end": {
@@ -8698,10 +8700,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1026,
+          "duration": 910,
           "id": "ceb946d97b96db7d16c23c9565023097",
           "killedBy": [
-            "DecimalTest:doctest Decimal.add/2 (11)"
+            "DecimalTest:rem/2"
           ],
           "location": {
             "end": {
@@ -8723,10 +8725,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1046,
+          "duration": 905,
           "id": "ced2b4532888275013bfd64795c244d1",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (24)"
+            "DecimalTest:doctest Decimal.lte?/2 (36)"
           ],
           "location": {
             "end": {
@@ -8748,10 +8750,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with <",
-          "duration": 1033,
+          "duration": 923,
           "id": "cf8ec6bd8393eca6b03c85a1c5909500",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div_int/2 (40)"
+            "DecimalTest:doctest Decimal.div_rem/2 (43)"
           ],
           "location": {
             "end": {
@@ -8773,9 +8775,11 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 60985,
+          "duration": 904,
           "id": "d0456812bf7df627eed8127fdf7cf6ad",
-          "killedBy": [],
+          "killedBy": [
+            "DecimalTest:doctest Decimal.div_int/2 (40)"
+          ],
           "location": {
             "end": {
               "column": 25,
@@ -8788,7 +8792,7 @@
           },
           "mutatorName": "ComparisonNegation",
           "replacement": "padded_num1 >= padded_num2",
-          "status": "Timeout"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -8796,10 +8800,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1030,
+          "duration": 910,
           "id": "d0624354369528a0db2f3c05ded9b10f",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (86)"
+            "DecimalTest:to_integer/1"
           ],
           "location": {
             "end": {
@@ -8821,7 +8825,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 61019,
+          "duration": 60931,
           "id": "d0659e5669c182da8d2148042c580f08",
           "killedBy": [],
           "location": {
@@ -8844,7 +8848,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1053,
+          "duration": 858,
           "id": "d16665333b7bb5636672c79e8caf164b",
           "killedBy": [
             "DecimalTest:div/2"
@@ -8869,7 +8873,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1048,
+          "duration": 870,
           "id": "d166d6a2a943a6ed29e52e08c39f3fa5",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -8894,7 +8898,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1421,
+          "duration": 1373,
           "id": "d19b7691003772aba0d3ec8c5750363c",
           "killedBy": [
             "DecimalTest:new/1 conversion"
@@ -8919,10 +8923,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1034,
+          "duration": 854,
           "id": "d1b2e6260f9880bfd73afd1863eea168",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:doctest Decimal.to_float/1 (87)"
           ],
           "location": {
             "end": {
@@ -8944,10 +8948,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1035,
+          "duration": 853,
           "id": "d2c2fb1b3f26e87453d156498ca4e3aa",
           "killedBy": [
-            "DecimalTest:round/3: up"
+            "DecimalTest:round/3: half even"
           ],
           "location": {
             "end": {
@@ -8969,10 +8973,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1038,
+          "duration": 850,
           "id": "d3938ed847d01cbdab8dcef59a3ce2ef",
           "killedBy": [
-            "DecimalTest:div/2"
+            "DecimalTest:doctest Decimal.div/2 (38)"
           ],
           "location": {
             "end": {
@@ -8994,7 +8998,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1039,
+          "duration": 839,
           "id": "d3b473197c3a703b9f3bffaefb7a677e",
           "killedBy": [
             "DecimalTest:to_string/2 xsd"
@@ -9019,10 +9023,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1037,
+          "duration": 847,
           "id": "d4f9620aacb113cd03843552c1c2ac44",
           "killedBy": [
-            "DecimalTest:add/2"
+            "DecimalTest:sub/2"
           ],
           "location": {
             "end": {
@@ -9044,10 +9048,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1033,
+          "duration": 870,
           "id": "d5032c95756edd1c44ff43bcd1ddc2de",
           "killedBy": [
-            "DecimalTest:sqrt/1"
+            "DecimalTest:doctest Decimal.sqrt/1 (66)"
           ],
           "location": {
             "end": {
@@ -9069,7 +9073,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1035,
+          "duration": 923,
           "id": "d5229e1c8aee036454322ec60d34be91",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: floor"
@@ -9094,7 +9098,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1038,
+          "duration": 842,
           "id": "d52ba9054e84125a96c242a229de66d4",
           "killedBy": [
             "DecimalTest:doctest Decimal.sqrt/1 (66)"
@@ -9119,7 +9123,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1413,
+          "duration": 1370,
           "id": "d6b1aab6fe96de063278dd802207c4f2",
           "killedBy": [
             "DecimalTest:add/2"
@@ -9144,10 +9148,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1031,
+          "duration": 850,
           "id": "d775fb615ad54ba5ccfdcd817cb872e4",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (24)"
+            "DecimalTest:min/2"
           ],
           "location": {
             "end": {
@@ -9169,7 +9173,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1029,
+          "duration": 847,
           "id": "d776a3fdd006b4ebe1811e70655c0362",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -9194,7 +9198,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 1036,
+          "duration": 847,
           "id": "d7d32b93168393a63f386d67e7e13480",
           "killedBy": [
             "DecimalTest:to_float/1"
@@ -9219,10 +9223,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1035,
+          "duration": 857,
           "id": "d8d970f1faf82971186836186574bf5a",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (85)"
+            "DecimalTest:to_integer/1"
           ],
           "location": {
             "end": {
@@ -9244,10 +9248,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1029,
+          "duration": 887,
           "id": "d8fbb7235ad485fe9a101e632560aadb",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_integer/1 (85)"
+            "DecimalTest:doctest Decimal.to_integer/1 (84)"
           ],
           "location": {
             "end": {
@@ -9269,7 +9273,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1042,
+          "duration": 861,
           "id": "d90139afba7fb9805db8ea25254c71e7",
           "killedBy": [],
           "location": {
@@ -9292,7 +9296,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1056,
+          "duration": 852,
           "id": "d935ccc68c7fbe8524eaaef0921118dd",
           "killedBy": [
             "DecimalTest:div/2"
@@ -9317,7 +9321,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1419,
+          "duration": 1354,
           "id": "d93cce8460fe9dbc8e358d13afff63c5",
           "killedBy": [],
           "location": {
@@ -9340,7 +9344,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1042,
+          "duration": 873,
           "id": "d9cfe7538494e184be761b9808a14af7",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half up"
@@ -9365,10 +9369,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1029,
+          "duration": 907,
           "id": "d9f6a50befb7ddfd9c4aaf1dadc3b378",
           "killedBy": [
-            "DecimalTest:integer?/1"
+            "DecimalTest:doctest Decimal.integer?/1 (92)"
           ],
           "location": {
             "end": {
@@ -9390,10 +9394,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1043,
+          "duration": 833,
           "id": "db42adfe3953c34e8987a69b8b781e4b",
           "killedBy": [
-            "DecimalTest:doctest Decimal.div_rem/2 (43)"
+            "DecimalTest:rem/2"
           ],
           "location": {
             "end": {
@@ -9415,10 +9419,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 1051,
+          "duration": 824,
           "id": "db990782f8b9d8fd75db4f0ccc1234ac",
           "killedBy": [
-            "DecimalTest:to_integer/1"
+            "DecimalTest:doctest Decimal.to_integer/1 (86)"
           ],
           "location": {
             "end": {
@@ -9440,10 +9444,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1043,
+          "duration": 898,
           "id": "dbfa03932e0e9e733dd5ca7c0b4c2427",
           "killedBy": [
-            "DecimalTest:to_string/2 normal"
+            "DecimalTest:to_string/2 xsd"
           ],
           "location": {
             "end": {
@@ -9465,7 +9469,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 1037,
+          "duration": 927,
           "id": "dc1b59e3f7db6ab1fbb582989bacca24",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -9490,10 +9494,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 1040,
+          "duration": 946,
           "id": "dc46239f472981de12f69f53546826e0",
           "killedBy": [
-            "DecimalTest:doctest Decimal.integer?/1 (92)"
+            "DecimalTest:integer?/1"
           ],
           "location": {
             "end": {
@@ -9515,10 +9519,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 1091,
+          "duration": 924,
           "id": "dca1b9b05f3da144a934f7d725c1f78b",
           "killedBy": [
-            "DecimalTest:rem/2"
+            "DecimalTest:sub/2"
           ],
           "location": {
             "end": {
@@ -9540,10 +9544,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1041,
+          "duration": 856,
           "id": "dce83e655c7feba63bd1696594564c74",
           "killedBy": [
-            "DecimalTest:mult/2"
+            "DecimalTest:doctest Decimal.mult/2 (61)"
           ],
           "location": {
             "end": {
@@ -9565,10 +9569,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1040,
+          "duration": 875,
           "id": "dd0333e57d2f7dfa7b0720716b21d020",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: half down"
+            "Decimal.ContextTest:with_context/2: up"
           ],
           "location": {
             "end": {
@@ -9590,7 +9594,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 1031,
+          "duration": 890,
           "id": "dd66b8c4f67e9eb10703d104258e873b",
           "killedBy": [],
           "location": {
@@ -9613,10 +9617,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1036,
+          "duration": 876,
           "id": "dddd1646d32b78ddf66901cdcdaa5119",
           "killedBy": [
-            "DecimalTest:doctest Decimal.eq?/3 (26)"
+            "DecimalTest:doctest Decimal.compare/3 (17)"
           ],
           "location": {
             "end": {
@@ -9638,7 +9642,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1029,
+          "duration": 882,
           "id": "de1ea92d6ccc9216c4fa38176ba42235",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -9663,10 +9667,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 1029,
+          "duration": 861,
           "id": "de26d96fe8c3eff9aaa3fc5f99c2618b",
           "killedBy": [
-            "DecimalTest:equal?/2"
+            "DecimalTest:compare/2"
           ],
           "location": {
             "end": {
@@ -9688,7 +9692,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 1036,
+          "duration": 927,
           "id": "def3e4d5b1f84aa0607e4541dd029583",
           "killedBy": [],
           "location": {
@@ -9711,10 +9715,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1035,
+          "duration": 924,
           "id": "e003967c372a218ca1dde43434e1decb",
           "killedBy": [
-            "DecimalTest:to_string/2 scientific"
+            "DecimalTest:doctest Decimal.to_string/2 (80)"
           ],
           "location": {
             "end": {
@@ -9736,7 +9740,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 61019,
+          "duration": 60490,
           "id": "e039b40af3e5f579808ac8365678b9e3",
           "killedBy": [
             "DecimalTest:div_int/2"
@@ -9761,7 +9765,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 66107,
+          "duration": 60849,
           "id": "e072b4a4ccf0fb629fee7e26b92d530b",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -9786,10 +9790,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 886,
+          "duration": 848,
           "id": "e233179752fc844e0c037c57658601a6",
           "killedBy": [
-            "DecimalTest:sqrt/1"
+            "DecimalTest:doctest Decimal.sqrt/1 (66)"
           ],
           "location": {
             "end": {
@@ -9811,7 +9815,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 57230,
+          "duration": 59388,
           "id": "e269916a0dc1829a525f196d38a44611",
           "killedBy": [],
           "location": {
@@ -9834,7 +9838,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 822,
+          "duration": 848,
           "id": "e2892b8e59d947c9bdac1eb09a1432f5",
           "killedBy": [
             "DecimalTest:div_int/2"
@@ -9859,7 +9863,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1454,
+          "duration": 1359,
           "id": "e2dacf7d5152fcf16b73657213d41c2b",
           "killedBy": [],
           "location": {
@@ -9882,7 +9886,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 60719,
+          "duration": 60866,
           "id": "e39b54ac9edd37f2b88e88585076f28e",
           "killedBy": [],
           "location": {
@@ -9905,10 +9909,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 994,
+          "duration": 906,
           "id": "e5735938fb3e2078b1c382e2a3d032d1",
           "killedBy": [
-            "DecimalTest:div_int/2"
+            "DecimalTest:rem/2"
           ],
           "location": {
             "end": {
@@ -9930,7 +9934,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 851,
+          "duration": 918,
           "id": "e5b489ce9b17a84e34f43d23ee924440",
           "killedBy": [
             "DecimalTest:min/2"
@@ -9955,7 +9959,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1398,
+          "duration": 1411,
           "id": "e71bd919e5973c61c9af3197b5425727",
           "killedBy": [
             "DecimalTest:to_integer/1"
@@ -9980,7 +9984,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 876,
+          "duration": 994,
           "id": "e77f08d290f1b9e09d183fcfdaababcb",
           "killedBy": [
             "DecimalTest:doctest Decimal.mult/2 (60)"
@@ -10005,7 +10009,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 61448,
+          "duration": 61326,
           "id": "e7cdbfe34bf9cff38a0cb35eba1c1af5",
           "killedBy": [],
           "location": {
@@ -10028,10 +10032,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 924,
+          "duration": 1042,
           "id": "ea96877337e72b31a47d08dcfcac8a37",
           "killedBy": [
-            "DecimalTest:rem/2"
+            "DecimalTest:to_integer/1"
           ],
           "location": {
             "end": {
@@ -10053,7 +10057,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1466,
+          "duration": 1424,
           "id": "ead7524ef41749cf1bd9428d31ad62cd",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_integer/1 (86)"
@@ -10078,10 +10082,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 909,
+          "duration": 1029,
           "id": "eaf710f3fa09e913a20b2092dadc6965",
           "killedBy": [
-            "DecimalTest:issue #63"
+            "DecimalTest:round/3: half up"
           ],
           "location": {
             "end": {
@@ -10103,7 +10107,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 862,
+          "duration": 929,
           "id": "eaf821a454e2268543169e334bdb6718",
           "killedBy": [
             "DecimalTest:max/2"
@@ -10128,7 +10132,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 900,
+          "duration": 901,
           "id": "ec25a7ac8e2b703fd349abab793e1e19",
           "killedBy": [
             "DecimalTest:doctest Decimal.to_string/2 (82)"
@@ -10153,7 +10157,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 915,
+          "duration": 961,
           "id": "ecd8315afb8a9545ba5034c16cb14532",
           "killedBy": [
             "Decimal.ContextTest:with_context/2: half even"
@@ -10178,7 +10182,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1484,
+          "duration": 1363,
           "id": "ed2c3e9d5e0f73e81c5ad705a9e6774d",
           "killedBy": [
             "DecimalTest:doctest Decimal.scale/1 (89)"
@@ -10203,7 +10207,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace <= with >",
-          "duration": 890,
+          "duration": 969,
           "id": "ed3a3e38970a01a6c26f1eb18f543ccf",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -10228,7 +10232,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 866,
+          "duration": 911,
           "id": "edd654a6617a92dd744bb49a79010fe4",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -10253,7 +10257,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 866,
+          "duration": 871,
           "id": "ee05096c62a15833fe6363404acda706",
           "killedBy": [
             "DecimalTest:issue #82"
@@ -10278,7 +10282,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 936,
+          "duration": 1007,
           "id": "ee2c1db95890c78b18ca570631e32af9",
           "killedBy": [
             "DecimalTest:add/2"
@@ -10303,7 +10307,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 1429,
+          "duration": 1334,
           "id": "ee8cb2fecbfca1386f34c84b89a7829b",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -10328,10 +10332,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 794,
+          "duration": 905,
           "id": "ee92724bb4819d6e12b3c2cdf39c6dbd",
           "killedBy": [
-            "DecimalTest:round/3: ceiling"
+            "DecimalTest:round/3: up"
           ],
           "location": {
             "end": {
@@ -10353,7 +10357,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 795,
+          "duration": 959,
           "id": "eeb6a0348dcefed9cc707f338d0e0f42",
           "killedBy": [],
           "location": {
@@ -10376,10 +10380,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 774,
+          "duration": 897,
           "id": "eec41f74b149abba2425386e3a145257",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (82)"
+            "DecimalTest:to_string/2 xsd"
           ],
           "location": {
             "end": {
@@ -10401,10 +10405,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 760,
+          "duration": 852,
           "id": "ef298d5b5dc4fda8b90d95cbbe4204b4",
           "killedBy": [
-            "DecimalTest:doctest Decimal.compare/3 (15)"
+            "DecimalTest:doctest Decimal.eq?/3 (26)"
           ],
           "location": {
             "end": {
@@ -10426,10 +10430,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1516,
+          "duration": 1330,
           "id": "ef86e72c428193b7858d99b5586714bf",
           "killedBy": [
-            "DecimalTest:doctest Decimal.new/3 (69)"
+            "DecimalTest:doctest Decimal.scale/1 (89)"
           ],
           "location": {
             "end": {
@@ -10451,10 +10455,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 777,
+          "duration": 919,
           "id": "ef9f3b541be9cf84ce506142712c2e37",
           "killedBy": [
-            "DecimalTest:to_string/2 scientific"
+            "DecimalTest:to_integer/1"
           ],
           "location": {
             "end": {
@@ -10476,7 +10480,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 60762,
+          "duration": 60855,
           "id": "efc9c2e4538f2f3fba2332901daf44c4",
           "killedBy": [],
           "location": {
@@ -10499,7 +10503,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace <= with <",
-          "duration": 60811,
+          "duration": 60854,
           "id": "eff9750925f3deb5c94fe520519cb5cc",
           "killedBy": [],
           "location": {
@@ -10522,10 +10526,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1525,
+          "duration": 1325,
           "id": "f075b20463d181ba5290a94c0d998b8b",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:doctest Decimal.to_float/1 (87)"
           ],
           "location": {
             "end": {
@@ -10547,10 +10551,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 952,
+          "duration": 856,
           "id": "f0db67d99c9911bf8c7b5c6cb961c81f",
           "killedBy": [
-            "DecimalTest:div_int/2"
+            "DecimalTest:doctest Decimal.rem/2 (42)"
           ],
           "location": {
             "end": {
@@ -10572,7 +10576,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 896,
+          "duration": 852,
           "id": "f0e57877b453697120ab30c784e4c78c",
           "killedBy": [],
           "location": {
@@ -10595,10 +10599,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 1082,
+          "duration": 885,
           "id": "f1978a3d0d230a74a4df1c8440ca6f17",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: ceiling"
+            "Decimal.ContextTest:with_context/2: up"
           ],
           "location": {
             "end": {
@@ -10620,10 +10624,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 919,
+          "duration": 922,
           "id": "f25d358220befec5cd65aa44f7b50bc5",
           "killedBy": [
-            "DecimalTest:issue #57"
+            "DecimalTest:issue #63"
           ],
           "location": {
             "end": {
@@ -10645,7 +10649,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 1042,
+          "duration": 953,
           "id": "f3d9b012f51605546f35c5876349d9d0",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -10670,7 +10674,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 915,
+          "duration": 878,
           "id": "f749539dd77094609978ee7b33269343",
           "killedBy": [
             "DecimalTest:to_string/2 scientific"
@@ -10695,7 +10699,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 913,
+          "duration": 905,
           "id": "f76c018721347149b2cfdd8c354c5d75",
           "killedBy": [],
           "location": {
@@ -10718,10 +10722,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 958,
+          "duration": 910,
           "id": "f78887b6987f950b7c503aca16766754",
           "killedBy": [
-            "DecimalTest:doctest Decimal.to_string/2 (82)"
+            "DecimalTest:to_string/2 xsd"
           ],
           "location": {
             "end": {
@@ -10743,10 +10747,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 925,
+          "duration": 850,
           "id": "f7e7586cceaa6e154135b78cab57d74e",
           "killedBy": [
-            "DecimalTest:to_float/1"
+            "DecimalTest:issue #82"
           ],
           "location": {
             "end": {
@@ -10768,7 +10772,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 923,
+          "duration": 847,
           "id": "f84c3d821ddcb6ad291fe2d38c4977b2",
           "killedBy": [],
           "location": {
@@ -10791,7 +10795,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace >= with >",
-          "duration": 874,
+          "duration": 883,
           "id": "f93318f0ed383bfd0d483259091029c0",
           "killedBy": [],
           "location": {
@@ -10814,7 +10818,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1443,
+          "duration": 1399,
           "id": "f973eb26aa7a7be890c29d0bff846543",
           "killedBy": [],
           "location": {
@@ -10837,7 +10841,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1493,
+          "duration": 1393,
           "id": "f9cd6ad8ff38d25c70ac0c4677cbb0d3",
           "killedBy": [
             "DecimalTest:issue #82"
@@ -10862,7 +10866,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 909,
+          "duration": 880,
           "id": "f9e4bc8698143b915b4eb03ed95f1038",
           "killedBy": [],
           "location": {
@@ -10885,7 +10889,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1428,
+          "duration": 1320,
           "id": "fa2cba680973ade60ad157aa7e0a2060",
           "killedBy": [
             "DecimalTest:cast/1"
@@ -10910,7 +10914,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 909,
+          "duration": 874,
           "id": "fb27b4836a1f61fe44039bc191ee8517",
           "killedBy": [
             "DecimalTest:sqrt/1"
@@ -10935,7 +10939,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 876,
+          "duration": 871,
           "id": "fb8d2e0a75ad20333eef7f75403e2b9e",
           "killedBy": [],
           "location": {
@@ -10958,7 +10962,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 61441,
+          "duration": 61360,
           "id": "fbb3053b31e268719e6f017057bad1c5",
           "killedBy": [],
           "location": {
@@ -10981,7 +10985,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 867,
+          "duration": 872,
           "id": "fbdcdf6385f6cd6d9458744e7030abb3",
           "killedBy": [],
           "location": {
@@ -11004,7 +11008,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 896,
+          "duration": 872,
           "id": "fd9ad94b7c667c0a7f87775c05f54256",
           "killedBy": [
             "Decimal.ContextTest:with_context/2 set flags"
@@ -11029,7 +11033,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1320,
+          "duration": 1303,
           "id": "fe20cde97320c5dd79ab188c45eb04d1",
           "killedBy": [],
           "location": {
@@ -11052,11 +11056,9 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 881,
+          "duration": 60896,
           "id": "feda4481a8183be392078201d53a74b3",
-          "killedBy": [
-            "DecimalTest:issue #29"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 53,
@@ -11069,7 +11071,7 @@
           },
           "mutatorName": "ComparisonNegation",
           "replacement": "compare(%{num1 | sign: 1}, %{num2 | sign: 1}) != :lt",
-          "status": "Killed"
+          "status": "Timeout"
         },
         {
           "coveredBy": [
@@ -11077,10 +11079,10 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 873,
+          "duration": 837,
           "id": "ff91a0a083a4036e357fe47d1b522843",
           "killedBy": [
-            "DecimalTest:sub/2"
+            "DecimalTest:add/2"
           ],
           "location": {
             "end": {
@@ -11102,7 +11104,7 @@
             "test/decimal/context_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 1260,
+          "duration": 1300,
           "id": "ffa53e40d9eb334dcff20e92c9620916",
           "killedBy": [
             "DecimalTest:cast/1"
@@ -11133,10 +11135,10 @@
             "test/decimal_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 775,
+          "duration": 906,
           "id": "34e28f2851abf91097e45db36bb5f429",
           "killedBy": [
-            "Decimal.ContextTest:with_context/2: floor"
+            "Decimal.ContextTest:with_context/2: half up"
           ],
           "location": {
             "end": {
@@ -11164,7 +11166,7 @@
             "test/decimal_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 952,
+          "duration": 876,
           "id": "f9b8c3db9f3a7a90e4c754cd831b45ad",
           "killedBy": [
             "DecimalTest:div/2"
@@ -11189,8 +11191,8 @@
   },
   "mutalisk": {
     "concurrency": {
-      "configured": 1,
-      "effective": 1,
+      "configured": 2,
+      "effective": 2,
       "schedulers_online": 12
     },
     "engine": {
@@ -11653,7 +11655,7 @@
     },
     "metrics": {
       "fallback_count": 75,
-      "fallback_time_ms": 351644,
+      "fallback_time_ms": 347430,
       "fanout": {
         "f749539dd77094609978ee7b33269343": 2,
         "82a9b4746e4ebf6c515cd99af7f59dcc": 2,
@@ -12580,15 +12582,20 @@
       "c451f2baa04381caea3090a7a17a397b": "arithmetic_op"
     },
     "phase_timings": {
-      "baseline_tests_ms": 757,
+      "baseline_tests_ms": 829,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 358431,
-      "oracle_build_ms": 2906,
-      "plan_generation_ms": 27,
-      "report_writing_ms": 66,
-      "schema_build_ms": 2979,
-      "schema_workers_ms": 2084739,
-      "total_ms": 2449992
+      "fallback_workers_ms": 189712,
+      "oracle_build_ms": 3241,
+      "plan_generation_ms": 31,
+      "report_writing_ms": 50,
+      "schema_build_ms": 3343,
+      "schema_workers_ms": 1035959,
+      "total_ms": 1233340
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
     },
     "selection": {
       "coverage_collection_wall_ms": 0,

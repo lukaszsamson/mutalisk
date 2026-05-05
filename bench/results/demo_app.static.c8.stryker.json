@@ -1,0 +1,933 @@
+{
+  "files": {
+    "lib/arith.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 1694,
+          "id": "139acf2b882c3cdfa8be790efda87030",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 5
+            },
+            "start": {
+              "column": 13,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "(a + b) / (a - b)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 1433,
+          "id": "14966a08023e637a7349711c44b348b3",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 8,
+              "line": 5
+            },
+            "start": {
+              "column": 8,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "a * b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1598,
+          "id": "1ee8e66705fd1f828fe7762bd33d2aab",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 5
+            },
+            "start": {
+              "column": 18,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "a * b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1797,
+          "id": "2c610211a71402b0d80a5f05e85b09ef",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 5
+            },
+            "start": {
+              "column": 18,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "a + b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace rem with div",
+          "duration": 1455,
+          "id": "883292c5cea6155e159fafa5623972a6",
+          "killedBy": [
+            "ArithTest:integer_parts returns quotient and remainder"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 9
+            },
+            "start": {
+              "column": 17,
+              "line": 9
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "div(a, b)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 1742,
+          "id": "8c6aca74d878982d0c2bf76c5c3df9a3",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 5
+            },
+            "start": {
+              "column": 13,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "a + b + (a - b)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 1801,
+          "id": "9fe22672c76c36a0fd1bfaf19f60cd99",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 5
+            },
+            "start": {
+              "column": 13,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "a + b - (a - b)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace div with rem",
+          "duration": 1676,
+          "id": "ead0057386314e63eb0624e5246c8e8b",
+          "killedBy": [
+            "ArithTest:integer_parts returns quotient and remainder"
+          ],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 9
+            },
+            "start": {
+              "column": 6,
+              "line": 9
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "rem(a, b)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/arith_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 1272,
+          "id": "f19d8b683235e84ef28fb8d9d139d852",
+          "killedBy": [
+            "ArithTest:score combines sum and difference"
+          ],
+          "location": {
+            "end": {
+              "column": 8,
+              "line": 5
+            },
+            "start": {
+              "column": 8,
+              "line": 5
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "a - b",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Arith do\n  @moduledoc \"Fixture arithmetic module.\"\n\n  def score(a, b) do\n    (a + b) * (a - b)\n  end\n\n  def integer_parts(a, b) do\n    {div(a, b), rem(a, b)}\n  end\nend\n"
+    },
+    "lib/attrs.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/attrs_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 1512,
+          "id": "732984a4c8db998c31901d5dbf99321c",
+          "killedBy": [
+            "AttrsTest:answer_offset adds the module attribute"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 7
+            },
+            "start": {
+              "column": 17,
+              "line": 7
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "@some_const - offset",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/attrs_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 1808,
+          "id": "e2fb72a797ba7bef7349f79fe3e6ee67",
+          "killedBy": [
+            "AttrsTest:answer_offset adds the module attribute"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 7
+            },
+            "start": {
+              "column": 17,
+              "line": 7
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "@some_const * offset",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Attrs do\n  @moduledoc \"Fixture attributes module.\"\n\n  @some_const 42\n\n  def answer_offset(offset) do\n    @some_const + offset\n  end\nend\n"
+    },
+    "lib/bool.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/bool_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 1700,
+          "id": "12adb3a11f2852ddd0019bfdff003037",
+          "killedBy": [
+            "BoolTest:strict? requires true and not false"
+          ],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 5
+            },
+            "start": {
+              "column": 11,
+              "line": 5
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/bool_test.exs"
+          ],
+          "description": "remove unary !",
+          "duration": 1881,
+          "id": "303188d6acf275464e9aba440bfc9ae7",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 9
+            },
+            "start": {
+              "column": 15,
+              "line": 9
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/bool_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 1888,
+          "id": "84ef21882f8025fc66e10623468ff95f",
+          "killedBy": [
+            "BoolTest:loose? accepts either side"
+          ],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 9
+            },
+            "start": {
+              "column": 12,
+              "line": 9
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(a || b) && !b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/bool_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1651,
+          "id": "b15e819710f4a60e2c5dc31377cc3c27",
+          "killedBy": [
+            "BoolTest:strict? requires true and not false"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 5
+            },
+            "start": {
+              "column": 7,
+              "line": 5
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "a or not b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/bool_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 1762,
+          "id": "c7083a9923c7a784314d16d15dc031ab",
+          "killedBy": [
+            "BoolTest:loose? accepts either side"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "a && b",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Bool do\n  @moduledoc \"Fixture boolean module.\"\n\n  def strict?(a, b) do\n    a and not b\n  end\n\n  def loose?(a, b) do\n    a || b || !b\n  end\nend\n"
+    },
+    "lib/cmp.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 1685,
+          "id": "02aa9d507d4fb03745ca73ba216be9c2",
+          "killedBy": [
+            "CmpTest:distinct_direction? covers both directions"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 9
+            },
+            "start": {
+              "column": 36,
+              "line": 9
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "a == b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace >= with >",
+          "duration": 1659,
+          "id": "2b0af076505c0d57b5149350500b3a8b",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 16,
+              "line": 9
+            },
+            "start": {
+              "column": 16,
+              "line": 9
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "a > b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 1767,
+          "id": "30faf763597b838805a39b068e3dc47d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 16,
+              "line": 9
+            },
+            "start": {
+              "column": 16,
+              "line": 9
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "a < b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace <= with >",
+          "duration": 2129,
+          "id": "57159b1a7b4c71b03bc54d9c8e458609",
+          "killedBy": [
+            "CmpTest:ordered? covers the <= boundary"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 5
+            },
+            "start": {
+              "column": 7,
+              "line": 5
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "a > b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 1714,
+          "id": "5fa459e86ebd868bb269278cc3dbab5f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 9
+            },
+            "start": {
+              "column": 11,
+              "line": 9
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "a > b and a >= b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 1885,
+          "id": "7a17ba7c5ad7017bd0e14764df9ade84",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 9
+            },
+            "start": {
+              "column": 21,
+              "line": 9
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(a > b or a >= b) and a == b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace <= with <",
+          "duration": 1535,
+          "id": "92b77fc07af95ac545a5145fb9fbb5f5",
+          "killedBy": [
+            "CmpTest:ordered? covers the <= boundary"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 5
+            },
+            "start": {
+              "column": 7,
+              "line": 5
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "a < b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 1509,
+          "id": "ce032fa56188da656443988ef4492637",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "a >= b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 1738,
+          "id": "d62033f3b3b56c0f03e17465dd65c8ef",
+          "killedBy": [
+            "CmpTest:distinct_direction? covers both directions"
+          ],
+          "location": {
+            "end": {
+              "column": 31,
+              "line": 9
+            },
+            "start": {
+              "column": 31,
+              "line": 9
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(a > b or a >= b or a == b) and a != b",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace > with <=",
+          "duration": 1106,
+          "id": "f207c6bb5b7e394e0c0cc92620617109",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "a <= b",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/cmp_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 1068,
+          "id": "f3afd42023a34774c43a27631691f4ec",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 9
+            },
+            "start": {
+              "column": 26,
+              "line": 9
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "a != b",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Cmp do\n  @moduledoc \"Fixture comparison module.\"\n\n  def ordered?(a, b) do\n    a <= b\n  end\n\n  def distinct_direction?(a, b) do\n    a > b or a >= b or a == b or a != b\n  end\nend\n"
+    },
+    "lib/guards.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/guards_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 2343,
+          "id": "45edaa4c59d00428222da80093414496",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 4
+            },
+            "start": {
+              "column": 25,
+              "line": 4
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(x)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/guards_test.exs"
+          ],
+          "description": "replace guard > with <=",
+          "duration": 2194,
+          "id": "6c0a95fb2e147bdddb88354363ae9f4e",
+          "killedBy": [
+            "GuardsTest:positive? accepts positive integers"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 4
+            },
+            "start": {
+              "column": 43,
+              "line": 4
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "x <= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/guards_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 2243,
+          "id": "6d375d71e93497a6b9f9e7b992e76bba",
+          "killedBy": [
+            "GuardsTest:positive? accepts positive integers"
+          ],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 4
+            },
+            "start": {
+              "column": 25,
+              "line": 4
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(x)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/guards_test.exs"
+          ],
+          "description": "replace guard > with >=",
+          "duration": 2067,
+          "id": "fec6b0dd35b70d4fb31ed7db9e690194",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 4
+            },
+            "start": {
+              "column": 43,
+              "line": 4
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "x >= 0",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Guards do\n  @moduledoc \"Fixture guards module.\"\n\n  def positive?(x) when is_integer(x) and x > 0 do\n    true\n  end\n\n  def positive?(_x) do\n    false\n  end\nend\n"
+    }
+  },
+  "mutalisk": {
+    "engine": {
+      "02aa9d507d4fb03745ca73ba216be9c2": "schema",
+      "12adb3a11f2852ddd0019bfdff003037": "schema",
+      "139acf2b882c3cdfa8be790efda87030": "schema",
+      "14966a08023e637a7349711c44b348b3": "schema",
+      "1ee8e66705fd1f828fe7762bd33d2aab": "schema",
+      "2b0af076505c0d57b5149350500b3a8b": "schema",
+      "2c610211a71402b0d80a5f05e85b09ef": "schema",
+      "303188d6acf275464e9aba440bfc9ae7": "schema",
+      "30faf763597b838805a39b068e3dc47d": "schema",
+      "45edaa4c59d00428222da80093414496": "fallback",
+      "57159b1a7b4c71b03bc54d9c8e458609": "schema",
+      "5fa459e86ebd868bb269278cc3dbab5f": "schema",
+      "6c0a95fb2e147bdddb88354363ae9f4e": "fallback",
+      "6d375d71e93497a6b9f9e7b992e76bba": "fallback",
+      "732984a4c8db998c31901d5dbf99321c": "schema",
+      "7a17ba7c5ad7017bd0e14764df9ade84": "schema",
+      "84ef21882f8025fc66e10623468ff95f": "schema",
+      "883292c5cea6155e159fafa5623972a6": "schema",
+      "8c6aca74d878982d0c2bf76c5c3df9a3": "schema",
+      "92b77fc07af95ac545a5145fb9fbb5f5": "schema",
+      "9fe22672c76c36a0fd1bfaf19f60cd99": "schema",
+      "b15e819710f4a60e2c5dc31377cc3c27": "schema",
+      "c7083a9923c7a784314d16d15dc031ab": "schema",
+      "ce032fa56188da656443988ef4492637": "schema",
+      "d62033f3b3b56c0f03e17465dd65c8ef": "schema",
+      "e2fb72a797ba7bef7349f79fe3e6ee67": "schema",
+      "ead0057386314e63eb0624e5246c8e8b": "schema",
+      "f19d8b683235e84ef28fb8d9d139d852": "schema",
+      "f207c6bb5b7e394e0c0cc92620617109": "schema",
+      "f3afd42023a34774c43a27631691f4ec": "schema",
+      "fec6b0dd35b70d4fb31ed7db9e690194": "fallback"
+    },
+    "metrics": {
+      "fallback_count": 4,
+      "fallback_time_ms": 8847,
+      "fanout": {
+        "02aa9d507d4fb03745ca73ba216be9c2": 1,
+        "12adb3a11f2852ddd0019bfdff003037": 1,
+        "139acf2b882c3cdfa8be790efda87030": 1,
+        "14966a08023e637a7349711c44b348b3": 1,
+        "1ee8e66705fd1f828fe7762bd33d2aab": 1,
+        "2b0af076505c0d57b5149350500b3a8b": 1,
+        "2c610211a71402b0d80a5f05e85b09ef": 1,
+        "303188d6acf275464e9aba440bfc9ae7": 1,
+        "30faf763597b838805a39b068e3dc47d": 1,
+        "45edaa4c59d00428222da80093414496": 1,
+        "57159b1a7b4c71b03bc54d9c8e458609": 1,
+        "5fa459e86ebd868bb269278cc3dbab5f": 1,
+        "6c0a95fb2e147bdddb88354363ae9f4e": 1,
+        "6d375d71e93497a6b9f9e7b992e76bba": 1,
+        "732984a4c8db998c31901d5dbf99321c": 1,
+        "7a17ba7c5ad7017bd0e14764df9ade84": 1,
+        "84ef21882f8025fc66e10623468ff95f": 1,
+        "883292c5cea6155e159fafa5623972a6": 1,
+        "8c6aca74d878982d0c2bf76c5c3df9a3": 1,
+        "92b77fc07af95ac545a5145fb9fbb5f5": 1,
+        "9fe22672c76c36a0fd1bfaf19f60cd99": 1,
+        "b15e819710f4a60e2c5dc31377cc3c27": 1,
+        "c7083a9923c7a784314d16d15dc031ab": 1,
+        "ce032fa56188da656443988ef4492637": 1,
+        "d62033f3b3b56c0f03e17465dd65c8ef": 1,
+        "e2fb72a797ba7bef7349f79fe3e6ee67": 1,
+        "ead0057386314e63eb0624e5246c8e8b": 1,
+        "f19d8b683235e84ef28fb8d9d139d852": 1,
+        "f207c6bb5b7e394e0c0cc92620617109": 1,
+        "f3afd42023a34774c43a27631691f4ec": 1,
+        "fec6b0dd35b70d4fb31ed7db9e690194": 1
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "attribute_engine_disabled": 1,
+        "unsupported_dispatch": 3
+      }
+    },
+    "mutation_kind": {
+      "02aa9d507d4fb03745ca73ba216be9c2": "comparison_negation",
+      "12adb3a11f2852ddd0019bfdff003037": "unary_not_removal",
+      "139acf2b882c3cdfa8be790efda87030": "arithmetic_op",
+      "14966a08023e637a7349711c44b348b3": "arithmetic_op",
+      "1ee8e66705fd1f828fe7762bd33d2aab": "arithmetic_op",
+      "2b0af076505c0d57b5149350500b3a8b": "comparison_boundary",
+      "2c610211a71402b0d80a5f05e85b09ef": "arithmetic_op",
+      "303188d6acf275464e9aba440bfc9ae7": "unary_not_removal",
+      "30faf763597b838805a39b068e3dc47d": "comparison_negation",
+      "45edaa4c59d00428222da80093414496": "guard_type_test",
+      "57159b1a7b4c71b03bc54d9c8e458609": "comparison_negation",
+      "5fa459e86ebd868bb269278cc3dbab5f": "boolean_op",
+      "6c0a95fb2e147bdddb88354363ae9f4e": "guard_comparison_negation",
+      "6d375d71e93497a6b9f9e7b992e76bba": "guard_type_test",
+      "732984a4c8db998c31901d5dbf99321c": "arithmetic_op",
+      "7a17ba7c5ad7017bd0e14764df9ade84": "boolean_op",
+      "84ef21882f8025fc66e10623468ff95f": "boolean_op",
+      "883292c5cea6155e159fafa5623972a6": "arithmetic_op",
+      "8c6aca74d878982d0c2bf76c5c3df9a3": "arithmetic_op",
+      "92b77fc07af95ac545a5145fb9fbb5f5": "comparison_boundary",
+      "9fe22672c76c36a0fd1bfaf19f60cd99": "arithmetic_op",
+      "b15e819710f4a60e2c5dc31377cc3c27": "boolean_op",
+      "c7083a9923c7a784314d16d15dc031ab": "boolean_op",
+      "ce032fa56188da656443988ef4492637": "comparison_boundary",
+      "d62033f3b3b56c0f03e17465dd65c8ef": "boolean_op",
+      "e2fb72a797ba7bef7349f79fe3e6ee67": "arithmetic_op",
+      "ead0057386314e63eb0624e5246c8e8b": "arithmetic_op",
+      "f19d8b683235e84ef28fb8d9d139d852": "arithmetic_op",
+      "f207c6bb5b7e394e0c0cc92620617109": "comparison_negation",
+      "f3afd42023a34774c43a27631691f4ec": "comparison_negation",
+      "fec6b0dd35b70d4fb31ed7db9e690194": "guard_comparison_boundary"
+    },
+    "phase_timings": {
+      "baseline_tests_ms": 728,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 2641,
+      "oracle_build_ms": 4395,
+      "plan_generation_ms": 38,
+      "report_writing_ms": 12,
+      "schema_build_ms": 4041,
+      "schema_workers_ms": 6158,
+      "total_ms": 18280
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 0,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 31
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 31
+      },
+      "mode": "static",
+      "selected_tests_avg": 1.0,
+      "selected_tests_median": 1
+    },
+    "stable_id_to_integer": {
+      "02aa9d507d4fb03745ca73ba216be9c2": 1,
+      "12adb3a11f2852ddd0019bfdff003037": 2,
+      "139acf2b882c3cdfa8be790efda87030": 3,
+      "14966a08023e637a7349711c44b348b3": 4,
+      "1ee8e66705fd1f828fe7762bd33d2aab": 5,
+      "2b0af076505c0d57b5149350500b3a8b": 6,
+      "2c610211a71402b0d80a5f05e85b09ef": 7,
+      "303188d6acf275464e9aba440bfc9ae7": 8,
+      "30faf763597b838805a39b068e3dc47d": 9,
+      "45edaa4c59d00428222da80093414496": 10,
+      "57159b1a7b4c71b03bc54d9c8e458609": 11,
+      "5fa459e86ebd868bb269278cc3dbab5f": 12,
+      "6c0a95fb2e147bdddb88354363ae9f4e": 13,
+      "6d375d71e93497a6b9f9e7b992e76bba": 14,
+      "732984a4c8db998c31901d5dbf99321c": 15,
+      "7a17ba7c5ad7017bd0e14764df9ade84": 16,
+      "84ef21882f8025fc66e10623468ff95f": 17,
+      "883292c5cea6155e159fafa5623972a6": 18,
+      "8c6aca74d878982d0c2bf76c5c3df9a3": 19,
+      "92b77fc07af95ac545a5145fb9fbb5f5": 20,
+      "9fe22672c76c36a0fd1bfaf19f60cd99": 21,
+      "b15e819710f4a60e2c5dc31377cc3c27": 22,
+      "c7083a9923c7a784314d16d15dc031ab": 23,
+      "ce032fa56188da656443988ef4492637": 24,
+      "d62033f3b3b56c0f03e17465dd65c8ef": 25,
+      "e2fb72a797ba7bef7349f79fe3e6ee67": 26,
+      "ead0057386314e63eb0624e5246c8e8b": 27,
+      "f19d8b683235e84ef28fb8d9d139d852": 28,
+      "f207c6bb5b7e394e0c0cc92620617109": 29,
+      "f3afd42023a34774c43a27631691f4ec": 30,
+      "fec6b0dd35b70d4fb31ed7db9e690194": 31
+    }
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

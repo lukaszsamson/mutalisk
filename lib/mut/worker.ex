@@ -81,14 +81,6 @@ defmodule Mut.Worker do
             recompile_category: category
           }
 
-        {:error, {:recompile_failed, _code, output} = reason} ->
-          %Result{
-            status: :invalid,
-            duration_ms: elapsed(started),
-            raw_output: recompile_output(output, reason),
-            recompile_category: :unknown
-          }
-
         {:error, reason} ->
           %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
       end

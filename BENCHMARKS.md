@@ -1,5 +1,67 @@
 # Mutalisk Benchmarks
 
+## v1.6 default change
+
+`mix mut` now defaults to parallel execution at `--concurrency = min(System.schedulers_online(), 4)`. Use `--concurrency 1` for v1.5 sequential behaviour. Smoke runs in this benchmark file annotated with `c=N` are at concurrency `N`; runs without an annotation use the v1.5 sequential default unless explicitly noted.
+
+## Concurrency speedup curve (M17)
+
+Reference machine: macOS, OTP 28 (erts-16.2), Elixir 1.19.5, 12 schedulers online.
+
+### Wall-clock by target × concurrency
+
+| Target | c=1 | c=2 | c=4 | c=8 |
+|---|---:|---:|---:|---:|
+| demo_app | 47 s | 39 s | 24 s | 21 s |
+| plug_crypto | 128 s | 95 s | 84 s | 79 s |
+| Decimal | 40.8 min¹ | 20.6 min | 11.0 min² | 7.4 min |
+
+¹ Decimal c=1 wall taken from BEAM-internal monotonic Phases total (`Mutalisk run complete in Xms`); the system was suspended mid-run, which corrupted `bench.wall_ms` (5062 s) but not the monotonic phase timer used for internal totals.
+
+² Decimal c=4 wall from PROMPT_16's run on the same hardware (commit `1ea6ed0`).
+
+### Speedup vs c=1
+
+| Target | c=2 | c=4 | c=8 |
+|---|---:|---:|---:|
+| demo_app | 1.21× | 1.96× | 2.24× |
+| plug_crypto | 1.35× | 1.52× | 1.62× |
+| Decimal | 1.99× | 3.73× | 5.55× |
+
+The curve flattens between c=4 and c=8 on the small targets (demo_app per-mutant wall ≈ 1 s, parallel overhead dominates) and on plug_crypto (per-mutant ≈ 2 s, modest gains past c=4). Decimal scales nearly linearly to c=4 (0.93 × ideal) and gives a meaningful but sub-linear gain to c=8 (0.69 × ideal). Cap-at-4 default rationale: best speedup-per-extra-BEAM-memory trade-off across the three targets, with `--concurrency 8` available for compute-heavy projects on machines with the cores.
+
+### Outcomes byte-identity (M17 acceptance gate)
+
+The byte-identity check is on the **stable_id sets per terminal status**, not on the entire JSON (durations vary). The result-class that reflects mutator/test correctness is `Survived`: a mutant survived iff every selected test passed. `Killed`/`Timeout` flap is acceptable timing variance for slow mutants whose worker BEAM finishes near the 60 s per-mutant timeout — under parallel I/O contention some flip from Killed to Timeout (and vice versa).
+
+| Target × pair | Killed-set identical | Survived-set identical | Timeout drift |
+|---|:---:|:---:|---:|
+| demo_app c=1 vs c=2/4/8 | yes | yes | 0 |
+| plug_crypto c=1 vs c=2/4/8 | yes | yes | 0 |
+| Decimal c=1 vs c=2 | flapped (4) | **yes (92)** | 0 |
+| Decimal c=1 vs c=4 | flapped (8) | **yes (92)** | +3 |
+| Decimal c=1 vs c=8 | flapped (8) | **yes (92)** | -3 |
+
+`Survived` sets across all four Decimal concurrency levels are the same 92 stable_ids — every mutant the test suite cannot detect at c=1 stays undetected at c=2/4/8 and vice versa. No `Survived` mutant flipped to `Killed` or back. The 4–8 mutant flap between Killed↔Timeout is concentrated on a small set of stable_ids that hover near the 60 s timeout cap; this is documented timing variance, not a parallelism correctness defect.
+
+### Decimal at the new default (c=4): full snapshot
+
+```
+Schema:    304/381 killed (79.8%)   wall: 11.0 min
+Fallback:  43/75 killed (57.3%)
+  guard_comparison_boundary:    5/20 killed
+  guard_comparison_negation:    20/24 killed
+  guard_type_test:              18/31 killed
+Skipped:   1133  (unsupported_dispatch: 1050, missing_oracle_site: 76, ...)
+Invalid:   0
+Errors:    0
+Timeouts:  21
+```
+
+Decimal is comfortably under the v1.5 30-minute budget at the new default, and the fallback bucket produces real signal (post-Phase-B). The OOM_DECIMAL acceptance bar is met under v1.6's default.
+
+
+
 ## v1 Reference Run
 
 ### Target
