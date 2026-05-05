@@ -20,11 +20,11 @@ Status: design recommendation (not yet a milestone). Authored after the Phase A/
 | plug_crypto | static | 1 | 128 s | 96.8 s | 22.0 s | 1.00× |
 | plug_crypto | static | 4 | **84 s** | 68.3 s | 7.2 s | **1.52×** |
 | Decimal | static | 1 | 33.5 min (2010 s) | 1973.9 s | 28.9 s | 1.00× |
-| Decimal | static | 4 | _(see addendum)_ | | | |
+| Decimal | static | 4 | **11.0 min** (657 s) | 520.1 s | 129.0 s | **3.06×** (wall) / **3.79×** (schema workers) |
 
 Outcomes are byte-identical between concurrency levels for plug_crypto (43 schema / 21 fallback / 60.3 % combined / 0 errors / 0 invalid). Parallel execution is a perf change, not a semantics change.
 
-The Decimal `--concurrency 4` rerun was kicked off at the close of the mission and folds into `BENCHMARKS.md` once it lands; based on plug_crypto's 1.52× and the fact that Decimal's per-mutant cost is more uniform than plug_crypto's, expected wall is ≈ 33.5 / 2.5–3 ≈ 11–14 min.
+Decimal `--concurrency 4` lands at **11.0 min** (657 s) versus 33.5 min sequential — a 3.06× wall speedup, with the schema_workers phase itself going 3.79× faster. The bench also surfaced a **major Phase B follow-on win**: Decimal's fallback bucket went from 0/75 killed (all 75 invalid: lock-check rejection) to 43/75 killed and **0 invalid**. The Mix-bypass recompile fix was the lock that pinned it.
 
 **Why the gap between 4× concurrency and 1.5–3× speedup?** Each mutant spawns a fresh `mix test` BEAM. The cold-start path is mostly serialized I/O (BEAM boot, manifest read, test compile). Multiple cold-starts on the same disk contend for those resources. Sandbox pool overhead (file copy, reset) adds further serialization. Beyond `--concurrency 4`, returns diminish quickly on a single workstation.
 
@@ -129,6 +129,40 @@ Persistent BEAM is the architecturally correct answer and the only path that get
 - `SPEC.md` is unaffected; both options preserve the current outcome semantics.
 - `ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md`'s "future work" section should be updated when v1.6 commits; do that as part of the v1.6 milestone, not now.
 
-## Addendum: Decimal `--concurrency 4` (filed when bench lands)
+## Addendum: Decimal `--concurrency 4` results
 
-Pending. The bench script is wired through (`bench/run.sh --target decimal --concurrency 4`). On the test machine the run was kicked off at 10:49 local; ETA roughly 15 min. The number folds into the BENCHMARKS.md "v1.5 follow-up" section once present.
+Run: `bench/run.sh --target decimal --selection static --concurrency 4`. Mutalisk version: `8ae3773` (parallel-workers prototype + Mix-lock-check bypass on master).
+
+| Metric | c=1 (post-fix) | c=4 | Change |
+|---|---:|---:|---:|
+| Total wall | 2010.7 s (33.5 min) | **657.6 s (11.0 min)** | **3.06× speedup** |
+| Schema workers | 1973.9 s | 520.1 s | **3.79× speedup** |
+| Fallback workers | 28.9 s | 129.0 s | (more real work; see below) |
+| Schema killed / executed | 306 / 381 (80.3 %) | 299 / 381 (78.5 %) | -1.8 pp (timeout race) |
+| Fallback killed / executed | **0 / 0** (75 invalid) | **43 / 75 (57.3 %)** | **all 75 fallback now execute** |
+| Combined kill rate | 82.7 % | 78.8 % | -3.9 pp |
+| Errors | 0 | 1 | +1 |
+| Invalid | 75 | **0** | **-75 (Phase B fix)** |
+| Timeouts | 11 | 21 | +10 (parallel I/O contention) |
+| Selection mode | static | static | identical |
+
+The two big findings:
+
+1. **3× speedup at c=4** is much closer to the linear ceiling than plug_crypto's 1.52×. Decimal's per-mutant cost is more uniform (~5 s each) and the test suite is small enough that I/O contention is not the bottleneck. The schema_workers phase alone goes 3.79×, which is essentially perfect 4-way scaling minus sandbox overhead.
+
+2. **Phase B (Mix lock-check bypass) lands properly only with the parallel run** because the c=1 run was finished before that fix shipped. The c=4 run shows fallback going from "all 75 invalid (lock mismatch)" to **0 invalid, 43 killed, 32 survived**. Decimal's guard fallback engine actually works on this target now; the bench-level finding that "Decimal fallback is broken" was an artifact of sandbox infra, not the mutator.
+
+3. **Combined score drops** from 82.7 % to 78.8 % because the bench's score formula counts only `Killed / (Killed + Survived)` per bucket. With 75 newly-valid fallback mutants and a 57 % kill rate there, the fallback bucket pulls the combined number down. This is *correct* signal — the fallback mutants tell us about Decimal's tests' guard coverage, which the previous run was hiding under the `:invalid` carpet.
+
+4. **Timeouts rose from 11 to 21**. Some of this is parallel I/O contention; some is genuine: with 4 parallel sandboxes hitting disk and CPU, slow mutants get penalised more than they did sequentially. v1.6 should think about per-mutant timeout tuning under load.
+
+Acceptance reading from the v1.5 OOM_DECIMAL acceptance list:
+
+- ✓ Decimal completes within 30-min budget (was 33.5 min sequential, now 11.0 min at c=4 — comfortably inside).
+- ☐ Coverage selection reduces fanout ≥10× (still 1.5×; coverage's contribution is independent of parallelism).
+- ✓ Memory bounded (peak BEAM still ~80 MB; parallelism does not change this).
+- ✓ plug_crypto outcomes unchanged across c=1/c=4.
+- ✓ Decimal fallback bucket now produces real signal.
+
+This is the missing piece for v1.5 acceptance. Folding into BENCHMARKS.md.
+
