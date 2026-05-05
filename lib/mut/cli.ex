@@ -195,12 +195,10 @@ defmodule Mut.Cli do
   end
 
   defp concurrency(parsed, config) do
-    value =
-      Keyword.get(
-        parsed,
-        :concurrency,
-        Keyword.get(config, :concurrency, System.schedulers_online())
-      )
+    # Default to 1 (sequential). Parallel workers are a v1.6 prototype path
+    # gated by `--concurrency N`; raising the default belongs to that
+    # milestone after the cross-target validation lands.
+    value = Keyword.get(parsed, :concurrency, Keyword.get(config, :concurrency, 1))
 
     case value do
       value when is_integer(value) and value >= 1 -> {:ok, value}

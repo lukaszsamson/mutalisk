@@ -16,9 +16,9 @@ defmodule Mix.Tasks.Mut do
                               (default: both)
     --output-path PATH       Stryker JSON output path
                               (default: stryker.report.json)
-    --concurrency N          Worker pool size; parsed for future parallel
-                              execution, but M13 runs mutants sequentially
-                              (default: System.schedulers_online/0)
+    --concurrency N          Worker pool size for parallel mutant execution.
+                              N>1 enables Task.async_stream + a per-task
+                              sandbox queue. Default: 1 (sequential).
     --max-mutants N          Cap total mutants (stable-id sorted sample if
                               exceeded)
     --debug-plan             Dump plan JSON to plan.debug.json and exit before
@@ -166,7 +166,9 @@ defmodule Mix.Tasks.Mut do
 
     IO.puts("Schema build complete")
 
-    {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: run_id, force: true)
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, opts.concurrency, run_id: run_id, force: true)
+
     {:ok, last_killer} = Mut.LastKiller.start_link([])
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
@@ -191,34 +193,24 @@ defmodule Mix.Tasks.Mut do
             all_test_files
           )
 
-        stream? = :terminal in opts.reporters
+        ctx = %{
+          selection_context: selection_context,
+          all_test_files: all_test_files,
+          work_copy: source_root,
+          metrics_pid: metrics_pid,
+          last_killer: last_killer,
+          stream?: :terminal in opts.reporters,
+          concurrency: opts.concurrency
+        }
 
         pool =
           Metrics.with_phase(metrics_pid, :schema_workers, fn ->
-            run_schema_mutants(
-              pool,
-              schema_result.plan,
-              selection_context,
-              all_test_files,
-              source_root,
-              metrics_pid,
-              last_killer,
-              stream?
-            )
+            run_schema_mutants(pool, schema_result.plan, ctx)
           end)
 
         final_pool =
           Metrics.with_phase(metrics_pid, :fallback_workers, fn ->
-            run_fallback_mutants(
-              pool,
-              schema_result.plan,
-              selection_context,
-              all_test_files,
-              source_root,
-              metrics_pid,
-              last_killer,
-              stream?
-            )
+            run_fallback_mutants(pool, schema_result.plan, ctx)
           end)
 
         snapshot =
@@ -392,78 +384,95 @@ defmodule Mix.Tasks.Mut do
       else: :static_fallback
   end
 
-  defp run_schema_mutants(
-         pool,
-         plan,
-         selection_context,
-         all_test_files,
-         work_copy,
-         metrics_pid,
-         last_killer,
-         stream?
-       ) do
-    plan.schema
+  defp run_schema_mutants(pool, plan, ctx) do
+    run_with_concurrency(pool, plan.schema, ctx.concurrency, fn mutant, sandbox ->
+      execute_schema_mutant(mutant, sandbox, ctx)
+    end)
+  end
+
+  defp run_fallback_mutants(pool, plan, ctx) do
+    run_with_concurrency(pool, plan.fallback, ctx.concurrency, fn mutant, sandbox ->
+      execute_fallback_mutant(mutant, sandbox, ctx)
+    end)
+  end
+
+  defp execute_schema_mutant(mutant, sandbox, ctx) do
+    selected = selected_tests(ctx.selection_context, mutant)
+    record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy)
+    worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
+
+    result =
+      Worker.run_schema(sandbox, mutant.id, worker_tests,
+        timeout_ms: @timeout_ms,
+        retry_on_error: true
+      )
+
+    record_after_run(ctx, mutant, selected, result)
+  end
+
+  defp execute_fallback_mutant(mutant, sandbox, ctx) do
+    selected = selected_tests(ctx.selection_context, mutant)
+    record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy)
+    worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
+
+    result =
+      Worker.run_fallback(sandbox, mutant, worker_tests,
+        app: app_name(sandbox.path),
+        timeout_ms: @timeout_ms
+      )
+
+    record_after_run(ctx, mutant, selected, result)
+  end
+
+  defp record_after_run(ctx, mutant, selected, result) do
+    record_result(
+      ctx.metrics_pid,
+      %{mutant | covering_tests: relative_tests(selected, ctx.work_copy)},
+      result
+    )
+
+    record_last_killer(ctx.last_killer, mutant, result, selected)
+    maybe_stream_event(ctx.stream?, ctx.metrics_pid, mutant, result)
+  end
+
+  defp run_with_concurrency(pool, mutants, 1, run_one) do
+    mutants
     |> Enum.sort_by(& &1.id)
     |> Enum.reduce(pool, fn mutant, pool ->
       {:ok, sandbox, checked_out} = Sandbox.checkout(pool)
-      selected = selected_tests(selection_context, mutant)
-      record_selection_metrics(metrics_pid, mutant, selected, work_copy)
-      worker_tests = worker_test_files(selected, all_test_files, work_copy)
-
-      result =
-        Worker.run_schema(sandbox, mutant.id, worker_tests,
-          timeout_ms: @timeout_ms,
-          retry_on_error: true
-        )
-
-      record_result(
-        metrics_pid,
-        %{mutant | covering_tests: relative_tests(selected, work_copy)},
-        result
-      )
-
-      record_last_killer(last_killer, mutant, result, selected)
-
-      maybe_stream_event(stream?, metrics_pid, mutant, result)
+      run_one.(mutant, sandbox)
       Sandbox.checkin(sandbox, checked_out)
     end)
   end
 
-  defp run_fallback_mutants(
-         pool,
-         plan,
-         selection_context,
-         all_test_files,
-         work_copy,
-         metrics_pid,
-         last_killer,
-         stream?
-       ) do
-    plan.fallback
-    |> Enum.sort_by(& &1.id)
-    |> Enum.reduce(pool, fn mutant, pool ->
-      {:ok, sandbox, checked_out} = Sandbox.checkout(pool)
-      selected = selected_tests(selection_context, mutant)
-      record_selection_metrics(metrics_pid, mutant, selected, work_copy)
-      worker_tests = worker_test_files(selected, all_test_files, work_copy)
+  defp run_with_concurrency(pool, mutants, concurrency, run_one) do
+    {:ok, queue} = Mut.SandboxQueue.start_link(pool)
 
-      result =
-        Worker.run_fallback(sandbox, mutant, worker_tests,
-          app: app_name(sandbox.path),
-          timeout_ms: @timeout_ms
-        )
+    try do
+      mutants
+      |> Enum.sort_by(& &1.id)
+      |> Task.async_stream(
+        fn mutant ->
+          {:ok, sandbox} = Mut.SandboxQueue.checkout(queue)
 
-      record_result(
-        metrics_pid,
-        %{mutant | covering_tests: relative_tests(selected, work_copy)},
-        result
+          try do
+            run_one.(mutant, sandbox)
+          after
+            Mut.SandboxQueue.checkin(queue, sandbox)
+          end
+        end,
+        max_concurrency: concurrency,
+        ordered: false,
+        timeout: :infinity
       )
+      |> Stream.run()
 
-      record_last_killer(last_killer, mutant, result, selected)
-
-      maybe_stream_event(stream?, metrics_pid, mutant, result)
-      Sandbox.checkin(sandbox, checked_out)
-    end)
+      Mut.SandboxQueue.finalize(queue)
+    rescue
+      exception ->
+        _ = Mut.SandboxQueue.finalize(queue)
+        reraise exception, __STACKTRACE__
+    end
   end
 
   defp maybe_stream_event(true, metrics_pid, mutant, result) do
