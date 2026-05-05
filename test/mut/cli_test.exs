@@ -15,6 +15,7 @@ defmodule Mut.CliTest do
     assert opts.reporters == [:terminal, :stryker_json]
     assert opts.output_path == "stryker.report.json"
     assert opts.concurrency == min(System.schedulers_online(), 4)
+    assert opts.worker_type == :mix
     assert opts.max_mutants == nil
     assert opts.debug_plan == false
     assert opts.selection == :static

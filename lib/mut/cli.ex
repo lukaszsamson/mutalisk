@@ -18,7 +18,8 @@ defmodule Mut.Cli do
             debug_plan: boolean,
             selection: atom,
             test_paths: [String.t()],
-            keep_work_copy: boolean
+            keep_work_copy: boolean,
+            worker_type: :mix | :persistent
           }
 
     defstruct [
@@ -33,7 +34,8 @@ defmodule Mut.Cli do
       :debug_plan,
       :selection,
       :test_paths,
-      :keep_work_copy
+      :keep_work_copy,
+      :worker_type
     ]
   end
 
@@ -97,7 +99,8 @@ defmodule Mut.Cli do
           max_mutants: :integer,
           selection: :string,
           debug_plan: :boolean,
-          keep_work_copy: :boolean
+          keep_work_copy: :boolean,
+          worker_type: :string
         ],
         aliases: []
       )
@@ -128,7 +131,8 @@ defmodule Mut.Cli do
          {:ok, concurrency} <- concurrency(parsed, config),
          {:ok, max_mutants} <- max_mutants(parsed),
          {:ok, selection} <- selection(parsed, config),
-         {:ok, test_paths} <- test_paths(config) do
+         {:ok, test_paths} <- test_paths(config),
+         {:ok, worker_type} <- worker_type(parsed, config) do
       {:ok,
        %Options{
          files: files,
@@ -142,8 +146,23 @@ defmodule Mut.Cli do
          debug_plan: Keyword.get(parsed, :debug_plan, false),
          selection: selection,
          test_paths: test_paths,
-         keep_work_copy: Keyword.get(parsed, :keep_work_copy, false)
+         keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
+         worker_type: worker_type
        }}
+    end
+  end
+
+  @known_worker_types [:mix, :persistent]
+
+  defp worker_type(parsed, config) do
+    value = Keyword.get(parsed, :worker_type, Keyword.get(config, :worker_type, :mix))
+    type = if is_atom(value), do: value, else: target_atom(value)
+
+    if type in @known_worker_types do
+      {:ok, type}
+    else
+      {:error,
+       "unknown --worker-type #{inspect(type)}; known: #{Enum.map_join(@known_worker_types, ", ", &Atom.to_string/1)}"}
     end
   end
 

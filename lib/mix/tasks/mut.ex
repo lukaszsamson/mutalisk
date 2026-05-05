@@ -60,6 +60,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.TestSelection.Coverage, as: CoverageSelection
   alias Mut.TestSelection.Static
   alias Mut.Worker
+  alias Mut.Worker.Persistent
 
   @requirements ["app.config"]
   @timeout_ms 60_000
@@ -174,6 +175,8 @@ defmodule Mix.Tasks.Mut do
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
+    persistent_servers = maybe_start_persistent_workers(opts, pool)
+
     {snapshot, final_pool} =
       try do
         record_schema_build_metadata(metrics_pid, schema_result)
@@ -201,7 +204,9 @@ defmodule Mix.Tasks.Mut do
           metrics_pid: metrics_pid,
           last_killer: last_killer,
           stream?: :terminal in opts.reporters,
-          concurrency: opts.concurrency
+          concurrency: opts.concurrency,
+          worker_type: opts.worker_type,
+          persistent_servers: persistent_servers
         }
 
         pool =
@@ -225,6 +230,8 @@ defmodule Mix.Tasks.Mut do
 
         {snapshot, final_pool}
       after
+        stop_persistent_workers(persistent_servers)
+
         if opts.keep_work_copy do
           IO.puts(
             :stderr,
@@ -402,13 +409,52 @@ defmodule Mix.Tasks.Mut do
     record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy)
     worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
 
-    result =
-      Worker.run_schema(sandbox, mutant.id, worker_tests,
-        timeout_ms: @timeout_ms,
-        retry_on_error: true
-      )
+    result = run_schema_via(ctx, sandbox, mutant, worker_tests)
 
     record_after_run(ctx, mutant, selected, result)
+  end
+
+  defp run_schema_via(%{worker_type: :persistent} = ctx, sandbox, mutant, worker_tests) do
+    case Map.get(ctx.persistent_servers, sandbox.id) do
+      nil ->
+        Worker.run_schema(sandbox, mutant.id, worker_tests,
+          timeout_ms: @timeout_ms,
+          retry_on_error: true
+        )
+
+      server ->
+        Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms)
+    end
+  end
+
+  defp run_schema_via(_ctx, sandbox, mutant, worker_tests) do
+    Worker.run_schema(sandbox, mutant.id, worker_tests,
+      timeout_ms: @timeout_ms,
+      retry_on_error: true
+    )
+  end
+
+  defp maybe_start_persistent_workers(%{worker_type: :persistent}, pool) do
+    pool.sandboxes
+    |> Enum.map(fn sandbox ->
+      case Persistent.start_link(sandbox) do
+        {:ok, pid} -> {sandbox.id, pid}
+        {:error, reason} -> Mix.raise("persistent worker start failed: #{inspect(reason)}")
+      end
+    end)
+    |> Map.new()
+  end
+
+  defp maybe_start_persistent_workers(_opts, _pool), do: %{}
+
+  defp stop_persistent_workers(servers) do
+    Enum.each(servers, fn {_id, pid} ->
+      try do
+        Persistent.stop(pid)
+      catch
+        :exit, _ -> :ok
+      end
+    end)
   end
 
   defp execute_fallback_mutant(mutant, sandbox, ctx) do
