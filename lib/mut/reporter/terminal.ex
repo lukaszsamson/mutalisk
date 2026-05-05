@@ -71,8 +71,27 @@ defmodule Mut.Reporter.Terminal do
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
       "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n",
       phase_block(snapshot),
-      selection_block(snapshot)
+      selection_block(snapshot),
+      concurrency_block(snapshot)
     ]
+  end
+
+  defp concurrency_block(%Snapshot{concurrency: nil}), do: ""
+
+  defp concurrency_block(%Snapshot{concurrency: c}) do
+    suffix =
+      cond do
+        c.configured > c.schedulers_online ->
+          " (capped at #{c.schedulers_online} schedulers_online)"
+
+        c.configured == 1 ->
+          " (sequential)"
+
+        true ->
+          ""
+      end
+
+    "\nConcurrency: #{c.effective} workers#{suffix}\n"
   end
 
   defp surviving_block(snapshot) do

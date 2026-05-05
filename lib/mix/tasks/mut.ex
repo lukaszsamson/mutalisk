@@ -17,8 +17,8 @@ defmodule Mix.Tasks.Mut do
     --output-path PATH       Stryker JSON output path
                               (default: stryker.report.json)
     --concurrency N          Worker pool size for parallel mutant execution.
-                              N>1 enables Task.async_stream + a per-task
-                              sandbox queue. Default: 1 (sequential).
+                              Default: min(schedulers_online, 4). Use
+                              --concurrency 1 for sequential execution.
     --max-mutants N          Cap total mutants (stable-id sorted sample if
                               exceeded)
     --debug-plan             Dump plan JSON to plan.debug.json and exit before
@@ -82,6 +82,7 @@ defmodule Mix.Tasks.Mut do
     run_id = run_id()
     started = System.monotonic_time(:millisecond)
     {:ok, metrics_pid} = Metrics.start_link([])
+    Metrics.set_concurrency(metrics_pid, opts.concurrency)
 
     {:ok, watchdog_pid} =
       Mut.MemoryWatchdog.start(Path.join([mutalisk_root, "tmp", "mut_memory.log"]))

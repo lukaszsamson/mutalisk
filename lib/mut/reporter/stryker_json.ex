@@ -105,7 +105,21 @@ defmodule Mut.Reporter.StrykerJson do
         end),
       "phase_timings" => stringify_keys(snapshot.phase_timings || %{}),
       "selection" => selection_extension(snapshot.selection || %{}),
-      "metrics" => metrics_extension(snapshot)
+      "metrics" => metrics_extension(snapshot),
+      "concurrency" => concurrency_extension(snapshot.concurrency)
+    }
+  end
+
+  defp concurrency_extension(nil) do
+    schedulers = System.schedulers_online()
+    %{"configured" => 1, "effective" => 1, "schedulers_online" => schedulers}
+  end
+
+  defp concurrency_extension(%{} = c) do
+    %{
+      "configured" => c.configured,
+      "effective" => c.effective,
+      "schedulers_online" => c.schedulers_online
     }
   end
 

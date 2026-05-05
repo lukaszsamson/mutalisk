@@ -77,6 +77,7 @@ defmodule Mut.Reporter.StrykerJsonGoldenTest do
         selected_tests_median: 1,
         coverage_collection_wall_ms: 5832
       },
+      concurrency: %{configured: 4, effective: 4, schedulers_online: 8},
       ledger: Enum.map(mutants, &entry/1)
     }
 

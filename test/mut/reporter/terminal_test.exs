@@ -162,6 +162,7 @@ defmodule Mut.Reporter.TerminalTest do
       test_selection_fanout: %{},
       phase_timings: Keyword.get(opts, :phase_timings, %{}),
       selection: Keyword.get(opts, :selection),
+      concurrency: Keyword.get(opts, :concurrency),
       ledger: entries
     }
   end

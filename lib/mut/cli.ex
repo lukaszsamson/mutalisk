@@ -195,10 +195,14 @@ defmodule Mut.Cli do
   end
 
   defp concurrency(parsed, config) do
-    # Default to 1 (sequential). Parallel workers are a v1.6 prototype path
-    # gated by `--concurrency N`; raising the default belongs to that
-    # milestone after the cross-target validation lands.
-    value = Keyword.get(parsed, :concurrency, Keyword.get(config, :concurrency, 1))
+    # v1.6 default: parallel workers, capped at 4 by the M17 milestone.
+    # Cap exists because the speedup curve flattens past 4 on the M17
+    # reference machine (Decimal: 3.06x at c=4 vs ~3.5x at c=8); each
+    # worker BEAM costs ~50-100MB baseline so 4 keeps memory pressure
+    # bounded across hardware. Users with more cores can raise it
+    # explicitly via `--concurrency 8` or higher.
+    default = min(System.schedulers_online(), 4)
+    value = Keyword.get(parsed, :concurrency, Keyword.get(config, :concurrency, default))
 
     case value do
       value when is_integer(value) and value >= 1 -> {:ok, value}

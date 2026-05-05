@@ -144,6 +144,11 @@
     }
   },
   "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 8
+    },
     "engine": {
       "stable-error": "fallback",
       "stable-invalid": "schema",

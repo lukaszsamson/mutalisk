@@ -23,6 +23,7 @@ defmodule Mut.Metrics do
       :test_selection_fanout,
       :phase_timings,
       :selection,
+      :concurrency,
       :ledger
     ]
 
@@ -65,6 +66,11 @@ defmodule Mut.Metrics do
             test_selection_fanout: %{String.t() => non_neg_integer()},
             phase_timings: %{atom() => non_neg_integer()},
             selection: %{atom() => term()},
+            concurrency: %{
+              configured: pos_integer(),
+              effective: pos_integer(),
+              schedulers_online: pos_integer()
+            },
             ledger: [ledger_entry()]
           }
   end
@@ -97,6 +103,7 @@ defmodule Mut.Metrics do
           coverage_match_distribution: map(),
           fallback_reason_distribution: map(),
           selected_test_counts: [non_neg_integer()],
+          concurrency: %{atom() => pos_integer()} | nil,
           started_ms: integer(),
           ledger: [Snapshot.ledger_entry()]
         }
@@ -166,6 +173,11 @@ defmodule Mut.Metrics do
     GenServer.cast(pid, {:set_coverage_collection_wall_ms, wall_ms})
   end
 
+  @spec set_concurrency(GenServer.server(), pos_integer()) :: :ok
+  def set_concurrency(pid, configured) when is_integer(configured) and configured > 0 do
+    GenServer.cast(pid, {:set_concurrency, configured})
+  end
+
   @spec record_selection(GenServer.server(), Mutant.t(), atom(), atom() | nil, non_neg_integer()) ::
           :ok
   def record_selection(pid, %Mutant{} = mutant, match_kind, fallback_reason, selected_count)
@@ -197,6 +209,7 @@ defmodule Mut.Metrics do
        coverage_match_distribution: base_match_distribution(),
        fallback_reason_distribution: %{},
        selected_test_counts: [],
+       concurrency: nil,
        started_ms: monotonic_ms(),
        ledger: []
      }}
@@ -281,6 +294,18 @@ defmodule Mut.Metrics do
     {:noreply, %{state | coverage_collection_wall_ms: wall_ms}}
   end
 
+  def handle_cast({:set_concurrency, configured}, state) do
+    schedulers = System.schedulers_online()
+
+    concurrency = %{
+      configured: configured,
+      effective: min(configured, schedulers),
+      schedulers_online: schedulers
+    }
+
+    {:noreply, %{state | concurrency: concurrency}}
+  end
+
   def handle_cast(
         {:record_selection, _mutant, match_kind, fallback_reason, selected_count},
         state
@@ -348,9 +373,17 @@ defmodule Mut.Metrics do
       test_selection_fanout: state.test_selection_fanout,
       phase_timings: phase_timings(state),
       selection: selection_snapshot(state),
+      concurrency: concurrency_snapshot(state.concurrency),
       ledger: ledger
     }
   end
+
+  defp concurrency_snapshot(nil) do
+    schedulers = System.schedulers_online()
+    %{configured: 1, effective: 1, schedulers_online: schedulers}
+  end
+
+  defp concurrency_snapshot(%{} = c), do: c
 
   defp phase_timings(state) do
     base =
