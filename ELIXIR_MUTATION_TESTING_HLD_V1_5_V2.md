@@ -481,6 +481,50 @@ v2 must report:
 - Smoke run on plug_crypto + Decimal retry; BENCHMARKS update.
 - Acceptance per criteria above.
 
+### v1.6 (two milestones — performance hardening)
+
+v1.6's theme: parallel workers as the production default. Empirical validation + hardening + light documentation. NOT new features.
+
+The PROMPT_16 mission landed parallel-worker prototype, fallback Mix-bypass, and persistent-BEAM measurement spike. v1.6 takes that prototype to production quality.
+
+**M17 — Parallel Hardening + Default + Fallback Recompile Tests**
+- Validate `--concurrency 1/2/4/8` on demo_app, plug_crypto, Decimal. Document speedup curve.
+- Outcomes byte-identical at c=1 vs c=4 across all targets.
+- Decimal `--concurrency 4` ≤ 15 min on the reference machine.
+- Zero invalid fallback mutants from recompile infrastructure on Decimal.
+- Audit + harden `Mut.LastKiller` and `Mut.Sandbox` for concurrency.
+- Flip default concurrency to `min(System.schedulers_online(), 4)`.
+- Reports include concurrency metadata.
+- Doc + targeted tests for elixir-direct fallback recompile path.
+- Improved diagnostics distinguishing compile / dependency / runtime failures.
+
+**M18 — v1.7 Persistent Worker Design**
+- Convert `bench/spike/persistent_beam.exs` measurements + V16 recommendation into `V17_PERSISTENT_WORKER.md`.
+- Define `Mut.Worker.Persistent` contract, lifecycle, isolation model.
+- ExUnit state reset strategy + unsupported test patterns.
+- Crash recovery + concurrency interaction.
+- v1.7 acceptance sketch + implementation cost estimate.
+- Single docs-only commit; no production code.
+
+### v1.7 (one milestone)
+
+**M19 — Persistent Worker Implementation**
+
+Per `V17_PERSISTENT_WORKER.md` (delivered in M18, on master). Persistent BEAM per sandbox; `:persistent_term` flip per mutant; in-process ExUnit re-run with explicit reset hooks for ETS / Application env / registered-process leak vectors; in-process fallback recompile via `Kernel.ParallelCompiler.compile_to_path/2` + `:code.load_binary/3`; crash detection via Port monitoring with fallback-to-mix-worker after a configurable retry threshold; new `--worker-type mix|persistent` flag.
+
+Target acceptance:
+
+- Per-mutant median wall <50 ms on demo_app (steady-state, post-warmup).
+- Decimal ≤ 2 min wall at `--concurrency 4` (vs M17's 11.0 min on the mix-spawn path).
+- Outcomes byte-identical to v1.6 on demo_app, plug_crypto, Decimal — same Survived stable_id sets at every concurrency level.
+- New `e2e_persistent` `bin/verify` layer runs demo_app at c=4 with persistent workers.
+- Decimal fallback bucket continues to land at 0 invalid (the M17 Phase B win must hold).
+- `--worker-type mix` opt-out is wired and tested.
+
+Implementation cost (refined in V17_PERSISTENT_WORKER.md): ~930 LOC total (worker + protocol + reset hooks + run filter + fallback recompile + crash recovery + flag + tests).
+
+Highest risk: `ExUnit.Server.modules_loaded/1` is private API in some Elixir versions. M19's first task is to verify the seam across our support range; fallback is to run each `ExUnit.run/0` in a fresh process inside the persistent BEAM (still avoids `mix test` boot, loses some cross-mutant cache).
+
 ### v2
 
 - Lean env walker.
