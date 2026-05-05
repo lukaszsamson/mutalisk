@@ -83,6 +83,55 @@ defmodule Mut.SandboxTest do
     sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
   end
 
+  test "8 concurrent workers checkout/touch/reset/checkin without interference" do
+    schema_result = schema_result("concurrent")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 8,
+        run_id: "unit-sandbox-concurrent",
+        force: true
+      )
+
+    {:ok, queue} = Mut.SandboxQueue.start_link(pool)
+    iterations = 32
+
+    tasks =
+      for i <- 1..iterations do
+        Task.async(fn ->
+          {:ok, sandbox} = Mut.SandboxQueue.checkout(queue)
+
+          try do
+            # Simulate a worker run by writing a unique stray + dirtying a tracked file.
+            stray = Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/stray_#{i}.beam")
+            File.write!(stray, "stray-#{i}")
+
+            tracked =
+              Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")
+
+            File.write!(tracked, "corrupt-#{i}")
+
+            assert :ok = Sandbox.reset(sandbox)
+            refute File.exists?(stray)
+            assert File.read!(tracked) == "beam"
+            sandbox.path
+          after
+            Mut.SandboxQueue.checkin(queue, sandbox)
+          end
+        end)
+      end
+
+    paths_touched = Task.await_many(tasks, 60_000)
+    assert length(paths_touched) == iterations
+    # Every task must have observed exactly one of the 8 sandbox paths.
+    distinct = paths_touched |> MapSet.new() |> MapSet.size()
+    assert distinct <= 8
+
+    final_pool = Mut.SandboxQueue.finalize(queue)
+    assert MapSet.size(final_pool.checked_out) == 0
+    assert MapSet.size(final_pool.sandboxes) == 8
+    Sandbox.destroy_pool(final_pool)
+  end
+
   defp schema_result(name) do
     root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
     File.rm_rf!(Path.dirname(root))
