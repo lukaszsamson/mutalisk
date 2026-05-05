@@ -43,7 +43,13 @@ defmodule Mut.Worker.Persistent do
 
   @spec start_link(Sandbox.t(), keyword) :: GenServer.on_start()
   def start_link(%Sandbox{} = sandbox, opts \\ []) do
-    GenServer.start_link(__MODULE__, {sandbox, opts})
+    # Intentionally `GenServer.start/3` (not `start_link`). When the
+    # persistent worker BEAM crashes, the GenServer stops with
+    # :worker_crashed. We want that crash to surface only via
+    # `Persistent.run_schema/4`'s GenServer.call exit (which the host
+    # catches and routes to mix) — NOT to propagate as a linked-exit
+    # signal that takes down the host's Task.async_stream worker.
+    GenServer.start(__MODULE__, {sandbox, opts})
   end
 
   @spec run_schema(server, non_neg_integer(), [Path.t()], keyword) :: Result.t()

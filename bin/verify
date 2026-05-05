@@ -26,6 +26,13 @@ ENABLED_LAYERS=(
   integration_fallback
   e2e_mut
 )
+# e2e_persistent is defined but not enabled in v1.7's first release.
+# `mix mut --worker-type persistent` runs cleanly on demo_app and
+# plug_crypto, but the mut.e2e wrapper (which spawns multiple mix mut
+# invocations via System.cmd) currently hangs when chained with
+# --worker-type persistent. Standalone runs are the supported entry
+# point; the e2e_persistent layer ships once the wrapper interaction
+# is diagnosed.
 
 ALL_LAYERS=(
   lint
@@ -36,6 +43,7 @@ ALL_LAYERS=(
   integration_schema
   integration_fallback
   e2e_mut
+  e2e_persistent
 )
 
 # layer -> milestone that enables it (for skipped messages)
@@ -48,6 +56,7 @@ declare -A LAYER_MILESTONE=(
   [integration_schema]=M8
   [integration_fallback]=M10
   [e2e_mut]=M13
+  [e2e_persistent]=M19
 )
 
 is_enabled() {
@@ -110,6 +119,11 @@ run_integration_fallback() {
 run_e2e_mut() {
   step e2e_mut
   mix mut.e2e
+}
+
+run_e2e_persistent() {
+  step e2e_persistent
+  mix mut.e2e --worker-type persistent
 }
 
 run_layer() {

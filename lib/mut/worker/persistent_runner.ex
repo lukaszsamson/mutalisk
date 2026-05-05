@@ -1,4 +1,6 @@
 defmodule Mut.Worker.PersistentRunner do
+  @dialyzer {:no_opaque, [apply_file_filter: 2]}
+
   alias Mut.Worker.PersistentRunner.Reset
 
   @moduledoc """
@@ -66,7 +68,6 @@ defmodule Mut.Worker.PersistentRunner do
     # unable to call ExUnit.run/0 cleanly.
     snapshot = %{
       ex_unit: capture_server_state(),
-      app_env: Reset.capture_app_env(),
       file_index: build_file_index(),
       leak_baseline: nil
     }
@@ -137,20 +138,30 @@ defmodule Mut.Worker.PersistentRunner do
     new_snapshot
   end
 
-  defp apply_file_filter([], _index) do
-    # Run everything that's loaded.
-    ExUnit.configure(only_test_ids: nil)
-  end
-
   defp apply_file_filter(files, index) do
-    test_ids =
-      files
-      |> Enum.flat_map(fn file ->
-        Map.get(index, Path.expand(file), []) ++ Map.get(index, file, [])
-      end)
-      |> MapSet.new()
+    # Always restore "no filter" first so a previous mutant's filter
+    # doesn't bleed across runs (defensive: ExUnit holds the config
+    # in :persistent_term).
+    ExUnit.configure(only_test_ids: nil)
 
-    ExUnit.configure(only_test_ids: test_ids)
+    case files do
+      [] ->
+        :ok
+
+      files when is_list(files) ->
+        test_ids =
+          files
+          |> Enum.flat_map(fn file ->
+            Map.get(index, Path.expand(file), []) ++ Map.get(index, file, [])
+          end)
+          |> MapSet.new()
+
+        if MapSet.size(test_ids) > 0 do
+          ExUnit.configure(only_test_ids: test_ids)
+        end
+
+        :ok
+    end
   end
 
   defp build_file_index do
@@ -203,6 +214,7 @@ defmodule Mut.Worker.PersistentRunner do
 
   defp capture_or_keep_leak_baseline(%{leak_baseline: nil} = snapshot) do
     Map.put(snapshot, :leak_baseline, %{
+      app_env: Reset.capture_app_env(),
       ets_tables: Reset.capture_ets_tables(),
       registered: Reset.capture_registered(),
       persistent_terms: Reset.capture_persistent_terms()
@@ -231,8 +243,8 @@ defmodule Mut.Worker.PersistentRunner do
 
   ## --- Leak-vector reset ---------------------------------------------------
 
-  defp reset_leaks(%{leak_baseline: %{} = baseline} = snapshot) do
-    Reset.reset_app_env(snapshot.app_env)
+  defp reset_leaks(%{leak_baseline: %{} = baseline}) do
+    Reset.reset_app_env(baseline.app_env)
     Reset.reset_ets_tables(baseline.ets_tables)
     Reset.reset_registered(baseline.registered)
     Reset.reset_persistent_terms(baseline.persistent_terms, [{Mut.Runtime, :active_mutant}])

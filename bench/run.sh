@@ -5,9 +5,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET="plug_crypto"
 SELECTION="static"
 CONCURRENCY="1"
+WORKER_TYPE="mix"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -25,6 +26,11 @@ while [ "$#" -gt 0 ]; do
     --concurrency)
       [ "$#" -ge 2 ] || { usage; exit 64; }
       CONCURRENCY="$2"
+      shift 2
+      ;;
+    --worker-type)
+      [ "$#" -ge 2 ] || { usage; exit 64; }
+      WORKER_TYPE="$2"
       shift 2
       ;;
     -h|--help)
@@ -63,6 +69,10 @@ if [ "$CONCURRENCY" = "1" ]; then
 else
   RESULT_PREFIX="$TARGET.$SELECTION.c$CONCURRENCY"
 fi
+
+if [ "$WORKER_TYPE" != "mix" ]; then
+  RESULT_PREFIX="$RESULT_PREFIX.$WORKER_TYPE"
+fi
 REPORT_PATH="$RESULTS_DIR/$RESULT_PREFIX.stryker.json"
 TERMINAL_PATH="$RESULTS_DIR/$RESULT_PREFIX.terminal.txt"
 REL_REPORT_PATH="bench/results/$RESULT_PREFIX.stryker.json"
@@ -97,7 +107,7 @@ mkdir -p "$WORK_DIR/bench/results"
   MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix deps.get
   printf 'mix mut starting\n'
   START_MS="$(date +%s)000"
-  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" --output-path "$REL_REPORT_PATH"
+  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" --worker-type "$WORKER_TYPE" --output-path "$REL_REPORT_PATH"
   END_MS="$(date +%s)000"
   printf 'bench.wall_ms=%s\n' "$((END_MS - START_MS))"
 ) > "$TERMINAL_PATH" 2>&1

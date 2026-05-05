@@ -27,6 +27,11 @@ defmodule Mix.Tasks.Mut do
                                coverage_with_static_fallback
     --keep-work-copy         Skip cleanup of tmp/mut_work/<run_id>/ on exit
                                (debug aid; default: false)
+    --worker-type TYPE       mix (default) | persistent. Persistent
+                               keeps an ExUnit BEAM alive per sandbox,
+                               flipping :persistent_term to swap mutants.
+                               Schema mutants only; fallback continues to
+                               use mix-spawn. v1.7 opt-in.
 
   Configuration via `config :mut`:
 
