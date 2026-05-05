@@ -8,7 +8,7 @@ defmodule Mut.Worker.PersistentRunner do
   Runs inside the SPAWNED worker BEAM, not the host. The host side is
   `Mut.Worker.Persistent`; together they implement the V17 contract.
 
-  ## Protocol (M19 step 1: minimal)
+  ## Protocol
 
   After loading ExUnit and the user's test files, the runner writes
   one line to stdout:
@@ -18,18 +18,21 @@ defmodule Mut.Worker.PersistentRunner do
   The host then writes one of these commands per line on stdin:
 
       RUN <mutant_id>
+      RUN <mutant_id> <file1>\\t<file2>...
       STOP
 
-  For each `RUN`, the runner sets `:persistent_term` to flip the
-  active mutant, calls `ExUnit.run/0` (running every loaded test
-  module — file-level filtering arrives in step 3), and writes one
-  final line summarising the run:
+  For each `RUN`, the runner:
 
-      MUT_RESULT killed|survived <duration_us>
+  1. Sets `:persistent_term` to flip the active mutant.
+  2. If the optional file list is non-empty, configures ExUnit's
+     `only_test_ids` to the intersection of `{module, test_name}`
+     pairs whose `tags.file` matches one of the supplied paths.
+     Empty list means "run every loaded test module".
+  3. Calls `ExUnit.run/0`.
+  4. Resets leak vectors (V17) before returning.
+  5. Writes one final line summarising the run:
 
-  Step 1 does not attribute killing tests; a placeholder of `-` is
-  used. Step 2 adds reset hooks; step 3 adds the `only_test_ids`
-  filter so we only run selected test files per mutant.
+         MUT_RESULT killed|survived <duration_us>
   """
 
   @ready_marker "MUT_READY"
@@ -64,6 +67,7 @@ defmodule Mut.Worker.PersistentRunner do
     snapshot = %{
       ex_unit: capture_server_state(),
       app_env: Reset.capture_app_env(),
+      file_index: build_file_index(),
       leak_baseline: nil
     }
 
@@ -89,8 +93,8 @@ defmodule Mut.Worker.PersistentRunner do
   defp handle_command(@stop_command, _snapshot), do: :ok
 
   defp handle_command("RUN " <> rest, snapshot) do
-    mutant_id = rest |> String.trim() |> String.to_integer()
-    new_snapshot = do_run(mutant_id, snapshot)
+    {mutant_id, test_files} = parse_run(rest)
+    new_snapshot = do_run(mutant_id, test_files, snapshot)
     loop(new_snapshot)
   rescue
     exception ->
@@ -100,11 +104,24 @@ defmodule Mut.Worker.PersistentRunner do
 
   defp handle_command(_unrecognized, snapshot), do: loop(snapshot)
 
-  defp do_run(mutant_id, snapshot) do
+  defp parse_run(rest) do
+    case String.split(rest, " ", parts: 2) do
+      [mutant_id_str] ->
+        {mutant_id_str |> String.trim() |> String.to_integer(), []}
+
+      [mutant_id_str, files_blob] ->
+        mutant_id = mutant_id_str |> String.trim() |> String.to_integer()
+        files = files_blob |> String.trim() |> String.split("\t", trim: true)
+        {mutant_id, files}
+    end
+  end
+
+  defp do_run(mutant_id, test_files, snapshot) do
     started = System.monotonic_time(:microsecond)
 
     :persistent_term.put({Mut.Runtime, :active_mutant}, mutant_id)
     restore_server_state(snapshot.ex_unit)
+    apply_file_filter(test_files, snapshot.file_index)
 
     if snapshot.leak_baseline, do: reset_leaks(snapshot)
 
@@ -118,6 +135,70 @@ defmodule Mut.Worker.PersistentRunner do
 
     write_marker("#{@result_marker} #{status} #{elapsed_us}")
     new_snapshot
+  end
+
+  defp apply_file_filter([], _index) do
+    # Run everything that's loaded.
+    ExUnit.configure(only_test_ids: nil)
+  end
+
+  defp apply_file_filter(files, index) do
+    test_ids =
+      files
+      |> Enum.flat_map(fn file ->
+        Map.get(index, Path.expand(file), []) ++ Map.get(index, file, [])
+      end)
+      |> MapSet.new()
+
+    ExUnit.configure(only_test_ids: test_ids)
+  end
+
+  defp build_file_index do
+    case Process.whereis(ExUnit.Server) do
+      nil ->
+        %{}
+
+      _pid ->
+        state = :sys.get_state(ExUnit.Server)
+        sync = state.sync_modules || []
+        # Async modules are stored as `{queue, list}`; flatten safely.
+        async = collect_async(state.async_modules)
+
+        (sync ++ async)
+        |> Enum.flat_map(&module_test_ids/1)
+        |> Enum.group_by(fn {file, _module, _name} -> file end, fn
+          {_file, module, name} -> {module, name}
+        end)
+    end
+  rescue
+    _ -> %{}
+  catch
+    _, _ -> %{}
+  end
+
+  defp collect_async({prefix, suffix}) when is_list(prefix) and is_list(suffix),
+    do: prefix ++ suffix
+
+  defp collect_async(list) when is_list(list), do: list
+  defp collect_async(_), do: []
+
+  defp module_test_ids({module, _meta}) do
+    with {:module, _} <- Code.ensure_loaded(module),
+         true <- function_exported?(module, :__ex_unit__, 0) do
+      tests = module.__ex_unit__().tests
+      Enum.flat_map(tests, &test_id_for_module(module, &1))
+    else
+      _ -> []
+    end
+  rescue
+    _ -> []
+  end
+
+  defp test_id_for_module(module, test) do
+    case Map.get(test.tags, :file) do
+      nil -> []
+      file -> [{file, module, test.name}]
+    end
   end
 
   defp capture_or_keep_leak_baseline(%{leak_baseline: nil} = snapshot) do

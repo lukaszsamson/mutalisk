@@ -82,9 +82,10 @@ defmodule Mut.Worker.Persistent do
   end
 
   @impl GenServer
-  def handle_call({:run_schema, mutant_id, _test_files, timeout_ms}, _from, state) do
+  def handle_call({:run_schema, mutant_id, test_files, timeout_ms}, _from, state) do
     started = System.monotonic_time(:millisecond)
-    Port.command(state.port, "RUN #{mutant_id}\n")
+    files_blob = encode_files(test_files, state.sandbox)
+    Port.command(state.port, "RUN #{mutant_id}#{files_blob}\n")
 
     case wait_for_result(state.port, state.leftover, timeout_ms) do
       {:ok, result, leftover} ->
@@ -304,6 +305,19 @@ defmodule Mut.Worker.Persistent do
   end
 
   defp parse_result_line(_other), do: :passthrough
+
+  defp encode_files([], _sandbox), do: ""
+
+  defp encode_files(files, sandbox) when is_list(files) do
+    " " <> Enum.map_join(files, "\t", &absolute_test_path(&1, sandbox))
+  end
+
+  defp absolute_test_path(file, sandbox) do
+    case Path.type(file) do
+      :absolute -> file
+      _ -> Path.join(sandbox.path, file)
+    end
+  end
 
   defp parse_duration(str) do
     case Integer.parse(String.trim(str)) do
