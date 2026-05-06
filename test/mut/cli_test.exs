@@ -85,6 +85,19 @@ defmodule Mut.CliTest do
     refute MutTask.pathological_coverage_collection?(10_000, 5_000)
   end
 
+  test "persistent worker is behind an experimental runtime gate" do
+    previous = System.get_env("MIX_ENV")
+    System.put_env("MIX_ENV", "test")
+
+    try do
+      assert_raise Mix.Error, ~r/MUTALISK_PERSISTENT_EXPERIMENTAL=1/, fn ->
+        MutTask.run(["--worker-type", "persistent"])
+      end
+    after
+      if previous, do: System.put_env("MIX_ENV", previous), else: System.delete_env("MIX_ENV")
+    end
+  end
+
   test "rejects invalid fail-at" do
     assert {:error, message} = Cli.parse(["--fail-at", "101"])
     assert message =~ "--fail-at must be between 0 and 100"

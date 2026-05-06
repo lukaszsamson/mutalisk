@@ -328,4 +328,18 @@ v1.5 acceptance: **met** under `--concurrency 4`. The 30-min wall budget and the
 2. **Decimal's fallback bucket compiles to 75/75 invalid** under both selection modes. This is independent of OOM but surfaced now that Decimal executes. Fallback engine on Decimal hits `CompileError` for every guard mutation; needs a separate diagnostic pass before fallback adds signal on this target.
 3. **Decimal-class targets exercise an app-name surface mutalisk had not handled.** Any future target that shares an app name with one of mutalisk's transitive deps' `optional_applications` would have hit the same hang. The fix (jason `runtime: false`) is general — but the wider class is worth keeping in mind: never let mutalisk transitively contribute to the target's runtime app graph.
 
+## Persistent Worker Status (M19 Follow-up)
+
+Persistent worker remains experimental and gated by `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
+
+The first M19 implementation produced byte-identical demo_app results but reported spurious kills on plug_crypto. Review identified a baseline bug: state created by the first mutant was captured as the persistent worker reset baseline. That has been fixed and covered with a regression test, but the required side-by-side plug_crypto and Decimal benchmark tables have not been regenerated in this changeset.
+
+Do not treat persistent benchmark claims as accepted until these rows are filled by a later validation pass:
+
+| Target | Worker | Concurrency | Outcome identity | Wall | Status |
+|---|---|---:|---|---:|---|
+| demo_app | mix vs persistent | 1 | previously byte-identical; needs rerun after baseline fix | TBD | pending |
+| demo_app | mix vs persistent | 4 | previously byte-identical; needs rerun after baseline fix | TBD | pending |
+| plug_crypto | mix vs persistent | 4 | failed before baseline fix | TBD | pending rerun |
+| Decimal | mix vs persistent | 4 | not yet measured | TBD | pending |
 

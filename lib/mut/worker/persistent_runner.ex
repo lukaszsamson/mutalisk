@@ -46,7 +46,7 @@ defmodule Mut.Worker.PersistentRunner do
     {:ok, _} = Application.ensure_all_started(:logger)
     {:ok, _} = Application.ensure_all_started(:ex_unit)
 
-    ExUnit.start(autorun: false, formatters: [])
+    ExUnit.start(autorun: false, formatters: [Mut.Worker.Formatter])
 
     if path = Keyword.get(opts, :test_helper) do
       if File.exists?(path), do: Code.require_file(path)
@@ -56,20 +56,19 @@ defmodule Mut.Worker.PersistentRunner do
       if File.exists?(file), do: Code.require_file(file)
     end)
 
+    ExUnit.configure(formatters: [Mut.Worker.Formatter])
+
     # Capture ExUnit.Server state with all test modules loaded.
     # ExUnit.run/0 drains `sync_modules`/`async_modules`; we reset
     # the server to this snapshot before every subsequent run.
     #
-    # ETS / registered-process / persistent_term snapshots are
-    # captured LAZILY on first do_run, *after* ExUnit's
-    # OnExitHandler / RunnerStats / async-test infra has been
-    # initialised. Otherwise the diff treats those as "new" tables
-    # and processes and tears them down, leaving the second run
-    # unable to call ExUnit.run/0 cleanly.
+    # Leak baselines must be captured before the first mutant runs.
+    # Otherwise state created by mutant 1 becomes the "clean" baseline
+    # for every later mutant, which can produce spurious kills.
     snapshot = %{
       ex_unit: capture_server_state(),
       file_index: build_file_index(),
-      leak_baseline: nil
+      leak_baseline: capture_leak_baseline()
     }
 
     write_marker(@ready_marker)
@@ -124,18 +123,16 @@ defmodule Mut.Worker.PersistentRunner do
     restore_server_state(snapshot.ex_unit)
     apply_file_filter(test_files, snapshot.file_index)
 
-    if snapshot.leak_baseline, do: reset_leaks(snapshot)
+    reset_leaks(snapshot)
 
     %{failures: failures} = ExUnit.run()
-
-    new_snapshot = capture_or_keep_leak_baseline(snapshot)
 
     elapsed_us = System.monotonic_time(:microsecond) - started
 
     status = if failures == 0, do: "survived", else: "killed"
 
     write_marker("#{@result_marker} #{status} #{elapsed_us}")
-    new_snapshot
+    snapshot
   end
 
   defp apply_file_filter(files, index) do
@@ -212,16 +209,14 @@ defmodule Mut.Worker.PersistentRunner do
     end
   end
 
-  defp capture_or_keep_leak_baseline(%{leak_baseline: nil} = snapshot) do
-    Map.put(snapshot, :leak_baseline, %{
+  defp capture_leak_baseline do
+    %{
       app_env: Reset.capture_app_env(),
       ets_tables: Reset.capture_ets_tables(),
       registered: Reset.capture_registered(),
       persistent_terms: Reset.capture_persistent_terms()
-    })
+    }
   end
-
-  defp capture_or_keep_leak_baseline(snapshot), do: snapshot
 
   defp capture_server_state do
     case Process.whereis(ExUnit.Server) do
@@ -251,8 +246,6 @@ defmodule Mut.Worker.PersistentRunner do
     Reset.clear_on_exit_handler()
     :ok
   end
-
-  defp reset_leaks(_snapshot), do: :ok
 
   defp escape(message) do
     message

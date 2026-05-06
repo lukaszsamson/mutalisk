@@ -774,3 +774,227 @@ The `coverage` (strict) mode's failure path is important: when collection is pat
 - Coverage data entering stable_id input.
 
 If coverage selection on Decimal proves insufficient, parallel workers are reconsidered as a v1.6 standalone milestone — NOT folded into v1.5 mid-milestone.
+
+---
+
+# v1.6 Milestones
+
+v1.6 is a performance-hardening release. Its theme: parallel workers as the reliable default path. The work is empirical (validate, measure, harden) plus light documentation. v1.6 is NOT new features.
+
+The PROMPT_16 mission landed:
+- Parallel-worker prototype behind `--concurrency N` (default 1).
+- Decimal at `--concurrency 4`: 33.5 min → 11.0 min (3.06× wall, byte-identical outcomes vs c=1 on plug_crypto).
+- Fallback recompile bypasses Mix entirely (elixir-direct invocation), eliminating the lock-check failure mode that produced 75/75 invalid on Decimal.
+- Persistent-BEAM spike measurements at `bench/spike/persistent_beam.exs` (cold 8.8ms, hot 80μs in-process).
+- Design recommendation in `V16_PERFORMANCE.md`: parallel default first (v1.6), persistent BEAM second (v1.7).
+
+v1.6 is two milestones: M17 hardens parallel execution to production quality; M18 lands the persistent-worker design contract for v1.7.
+
+## M17 — Parallel hardening + default + fallback recompile tests
+
+**Goal:** Make parallel execution correctness-preserving and durable across Decimal-class targets. Flip the default. Tighten the fallback recompile path that PROMPT_16 introduced. After M17, `mix mut` defaults to parallel, with sequential reachable via `--concurrency 1`, and Decimal-class projects complete comfortably under 30 minutes.
+
+**Inputs:** `V16_PERFORMANCE.md`; `BENCHMARKS.md` post-PROMPT_16; `lib/mut/sandbox_queue.ex`; `lib/mut/last_killer.ex`; `lib/mut/recompile.ex` and the new elixir-direct fallback path; existing M9 test selection; existing `Mix.Tasks.Mut`.
+
+**Deliverables:**
+
+- **Concurrency validation matrix.** Run `bin/verify` at `--concurrency 1`, then run smoke benchmarks at `--concurrency 1/2/4/8` against demo_app, plug_crypto, and Decimal. Capture wall-clock + outcomes per target per concurrency level. Document the speedup curve in BENCHMARKS.md.
+- **Correctness acceptance**: outcomes byte-identical at c=1 vs c=4 across all three targets. Same kill/survived/timeout/error/invalid counts. Same set of stable_ids in killed and survived buckets. Document any drift; fix any non-trivial drift.
+- **Wall-clock acceptance**: Decimal `--concurrency 4` ≤ 15 minutes on the reference machine (current: 11 min — non-regression bar, not aspirational).
+- **Fallback acceptance**: zero invalid fallback mutants from recompile infrastructure on Decimal at any concurrency level.
+- **`Mut.LastKiller` audit.** Currently an Agent; verify it's race-safe under c=8 sustained record_kill/lookup churn. If contention is observed, switch to `:persistent_term` or ETS with concurrent access. Add focused tests stress-running the killer with N concurrent producer processes.
+- **Sandbox correctness audit.** Inspect `Mut.Sandbox.checkout/checkin/reset` for shared mutable state, cross-worker build-path leakage, race conditions on directory creation/deletion, and `mix.lock` contention. Land focused tests for any issue found. The acceptance assertion is "two workers can checkout, run a mutant, checkin concurrently without observable interference."
+- **Default concurrency policy.** Flip default from `1` to `min(System.schedulers_online(), 4)`. Cap at 4 for the first v1.6 release; users with more cores can override with `--concurrency 8` or higher. Cap exists because the speedup curve flattens past 4 on the reference machine; safer ship state.
+- **Reports include concurrency metadata.** Terminal output and Stryker JSON's `mutalisk` extension key carry `configured_concurrency`, `effective_concurrency` (at most schedulers_online()), and `worker_count` (actual). Useful for users diagnosing parallelism issues.
+- **Fallback recompile hardening.**
+  - Doc comment in `Mut.Recompile` (or wherever the elixir-direct path lives) explaining why Mix is bypassed and what trade-off exists (no lock validation; runtime mismatches surface at test execution rather than recompile).
+  - Targeted regression tests for the elixir-direct path: deps loaded correctly, all sandbox ebins on `-pa`, transitive dep modules accessible.
+  - Improved error diagnostics: when fallback fails, distinguish (a) compile failure in the patched module, (b) missing dependency module, (c) test runtime failure unrelated to the patch. Each gets a distinct error message and `compile_error` field shape.
+- **CHANGELOG/BENCHMARKS guidance.** Add a top-of-BENCHMARKS section noting the v1.6 default change. CHANGELOG entry: "v1.6 defaults to parallel workers (`--concurrency 4` by default). Use `--concurrency 1` for sequential execution."
+
+**Verification gate:** `bin/verify` exits 0 with all 8 layers green at default concurrency (now parallel). All concurrency-validation acceptance criteria above met. Plug_crypto and Decimal smoke runs documented in BENCHMARKS.md at c=1/2/4/8.
+
+**Out of scope for M17:**
+
+- Persistent worker production code (M18 is design only; production is v1.7).
+- New mutators (any kind).
+- Coverage default flip (still opt-in in v1.6).
+- Per-test-case coverage attribution.
+- Oracle/schema build Mix bypass (only fallback recompile is bypassed; the rest stays Mix-driven).
+- Changing mutation semantics.
+- Changing stable_id input.
+
+**Subagent brief:**
+
+This milestone has three risk surfaces in priority order:
+
+1. **Sandbox concurrency correctness.** The PROMPT_16 mission validated parallel at c=4 on plug_crypto and Decimal but didn't audit the sandbox internals for race hazards. M17's audit is the load-bearing assertion. The auditor should construct a synthetic stress test (N=8 workers running mutants against a fixture for 5 minutes) and verify zero spurious failures. If failures surface, root-cause and fix BEFORE moving to other deliverables.
+
+2. **Fallback recompile correctness.** The elixir-direct path bypasses Mix's lock validation. On a sandbox with stale `mix.lock`, runtime errors surface during test execution instead of recompile. M17's diagnostics should distinguish these cleanly. Add a synthetic test that constructs a stale-lock sandbox and observes the failure path.
+
+3. **Default concurrency choice.** Flipping the default is user-visible. If the speedup curve shows c=2 is nearly as good as c=4 on the reference machine, default to c=2 instead — fewer workers means lower memory ceiling. Empirics decide; don't pre-commit.
+
+**Recommended commit pacing:** 5-6 commits.
+
+1. Concurrency validation runs + BENCHMARKS update with c=1/2/4/8 numbers per target.
+2. `Mut.LastKiller` audit + hardening + concurrent stress test.
+3. Sandbox checkout/checkin/reset audit + any fixes + concurrent stress test.
+4. Default concurrency flip + reports include metadata + CHANGELOG.
+5. Fallback recompile doc + regression tests + improved diagnostics.
+6. (If needed) Final pass: re-run validation at the new default, confirm BENCHMARKS still accurate.
+
+---
+
+## M18 — v1.7 persistent worker design
+
+**Goal:** Convert the PROMPT_16 spike measurements into a contract for `Mut.Worker.Persistent`. Identify ExUnit lifecycle hazards, define crash recovery, sketch unsupported test patterns. Single design document, no production code.
+
+**Inputs:** `bench/spike/persistent_beam.exs`; `V16_PERFORMANCE.md`; ExUnit internals (process lifecycle, async tests, formatter callbacks, setup/teardown).
+
+**Deliverables:**
+
+- **`V17_PERSISTENT_WORKER.md`** (new design doc), covering:
+  - **Contract**: `Mut.Worker.Persistent.start_link/1`, `run_mutant/3`, `stop/1`. Inputs, outputs, side effects.
+  - **Lifecycle**: when is the persistent BEAM started, how does it stay alive between mutants, when does it terminate.
+  - **Isolation model**: what state is reset between mutants (persistent_term flip), what state isn't (compiled modules, ExUnit configuration, loaded test files).
+  - **ExUnit state reset strategy**: enumerate the leak vectors (Application env mutations, ETS table writes, `Process.put`-style state, mocked-module residue, async test residue) and pin a reset approach for each. Cite specific ExUnit internals where the reset hooks live.
+  - **Unsupported test patterns**: tests that genuinely cannot run safely in a persistent worker (e.g., tests that mutate global ETS without cleanup, tests that depend on per-process compilation state). Document; recommend `--worker-type mix` fallback for these.
+  - **Crash recovery**: when the persistent BEAM dies mid-mutant, how does the host detect (heartbeat? exit signal?), restart (new BEAM, same sandbox), and resume (skip the killed mutant or retry it)?
+  - **Concurrency interaction**: persistent workers + parallel pool = N concurrent persistent BEAMs. Verify the multiplier is real (each BEAM at ~1ms/mutant × 4 BEAMs = 250 mutants/second sustained).
+  - **v1.7 acceptance criteria sketch**: per-mutant median <50ms on demo_app; Decimal ≤ 2 minutes at c=4 with persistent workers; demo_app and plug_crypto outcomes byte-identical to v1.6.
+  - **Implementation cost estimate**: PROMPT_16 estimated ~590 LOC. M18 refines.
+  - **Risks and unknowns**: what could derail v1.7. Not a defense; an honest map.
+- Update `ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md`'s v2 section to reference V17_PERSISTENT_WORKER.md and adjust the milestone naming if appropriate (v1.7 vs v2).
+
+**Verification gate:** `bin/verify` exits 0 (no code changes expected). M18 is a docs-only commit.
+
+**Out of scope for M18:**
+
+- Production `Mut.Worker.Persistent` code.
+- Modifying the existing M8 worker.
+- Modifying `Mix.Tasks.Mut`.
+- Modifying spike scripts (they're measurement tools; leave them).
+
+**Recommended commit pacing:** 1 commit. Title: "Add v1.7 persistent worker design (V17_PERSISTENT_WORKER.md)".
+
+---
+
+# Out of scope for v1.6 (do not let it sneak in)
+
+- Persistent worker production code (v1.7).
+- New mutators (any kind).
+- Coverage selection default flip (stays opt-in until v1.7+).
+- Per-test-case coverage attribution.
+- Oracle/schema build Mix bypass.
+- Changing mutation semantics or stable_id input.
+- New CLI flags beyond what's needed for concurrency reporting.
+- Persistent incremental history.
+
+If M17 surfaces a sandbox concurrency bug requiring rework >100 lines, escalate. Don't silently expand M17 into a refactor.
+
+---
+
+# v1.7 Milestones
+
+v1.7 ships persistent BEAM workers as an **opt-in** worker type. The goal is correctness-preserving per-mutant cost reduction (~50× per the V17 spike). Default stays `mix` for the first v1.7 release; flip to `persistent` after a follow-up release validates on real projects (same conservative discipline as v1.5's static-first / v1.6's concurrency-cap-4-first).
+
+**Important acceptance correction**: the original V17 sketch targeted "Decimal ≤2 min at c=4." That target is too aggressive as a hard gate. Decimal currently has 21 mutants that hit the 60s per-mutant timeout cap; even with infinitely-fast non-timeout mutants, the lower bound at c=4 is `21 × 60s / 4 ≈ 315s` (5.25 min). Treat ≤2 min as aspirational; gate on **material improvement over M17 c=4 (11 min)** instead. Reducing timeout duration or changing timeout classification is explicitly out of scope.
+
+v1.7 is a **single milestone** (M19) with 8 ordered commit-steps. The intermediate "schema-only persistent" state is not independently shippable to users — they need fallback support to test real projects. The 8 steps provide review structure within the single milestone; the public CLI flag (`--worker-type persistent`) is not exposed until step 7 (after schema + fallback both work).
+
+## M19 — Persistent worker (opt-in)
+
+**Current status after review:** partially landed but not accepted for v1.7.0 production use. Persistent is now treated as experimental infrastructure behind `MUTALISK_PERSISTENT_EXPERIMENTAL=1` until plug_crypto and Decimal byte-identity are revalidated and `e2e_persistent` is enabled. The first-mutant reset-baseline bug identified during review has a targeted fix and regression coverage, but the benchmark acceptance matrix below remains the promotion gate.
+
+**Goal:** Production-quality opt-in persistent workers. After M19, users can run `mix mut --worker-type persistent` and get ≥10× per-mutant cost reduction on supported projects, with `mix` remaining the default and validated escape hatch.
+
+**Minimum Elixir version**: v1.7 raises the project's required Elixir from `>= 1.17.0` to `>= 1.18.0`. Update mutalisk's `mix.exs` accordingly. Rationale: V17's reset strategy depends on ExUnit internals (`ExUnit.OnExitHandler`, `ExUnit.Server.modules_loaded/1`, `ExUnit.configure(only_test_ids: ...)`) that are stable from 1.18 onward. Pre-1.18 users stay on mutalisk 1.6.x. CHANGELOG records the bump as a breaking change.
+
+**Inputs:** `V17_PERSISTENT_WORKER.md` (M18's design contract); `bench/spike/persistent_beam.exs` (PROMPT_16's measurements); `lib/mut/worker.ex` (existing mix-spawn worker); M17's `--concurrency` plumbing; existing `Mut.Sandbox` and `Mut.LastKiller`.
+
+### Step-by-step deliverables (7 commits)
+
+**Step 1 — `Mut.Worker.Persistent` schema-only skeleton.** Host-side GenServer + Port-driven persistent BEAM. BEAM loads sandbox code, `test_helper.exs`, and selected test files once. Mutant runs flip `:persistent_term` and re-run ExUnit. NO fallback support yet (fallback mutants route to existing mix-spawn worker). NO crash recovery yet.
+
+Acceptance for step 1: demo_app schema mutants produce byte-identical outcomes vs mix worker. Per-mutant median <50ms on demo_app schema. Private `--worker-type` flag exists but is undocumented. Bumps `mix.exs` Elixir requirement to `>= 1.18.0` in this commit.
+
+**Step 2 — Reset hooks + leak fixture.** Implement V17's per-vector reset strategy (Application env, new ETS tables, registered processes, `:persistent_term` squatters, ExUnit state).
+
+Add a deliberate leak-fixture test: a constructed mutant whose body intentionally mutates Application env, creates an unnamed ETS table, registers a process, sets a persistent_term key, and writes to ExUnit's OnExitHandler. After running it through the persistent worker, the next mutant's run starts with all of those reset to baseline. Catches silent leaks that "byte-identical outcomes" alone would miss.
+
+**Step 3 — Test-file run filtering.** Persistent worker filters ExUnit to run only the selected test files per mutant via `ExUnit.configure(only_test_ids: ...)`.
+
+Acceptance for step 3: demo_app outcomes byte-identical between mix worker and persistent worker for ALL test-selection cases (exact_line, enclosing_function, static_fallback, all_tests).
+
+**Step 4 — Parallel persistent workers.** N concurrent persistent BEAMs through M17's `Mut.SandboxQueue`. Each worker is its own port + sandbox. Verify outcome identity at c=4 on demo_app and plug_crypto.
+
+Acceptance for step 4: plug_crypto outcomes byte-identical between mix and persistent at c=4. demo_app outcomes byte-identical at c=4. M17's killed-survived stable-id-set equality bar applies.
+
+**Step 5 — Fallback in-process recompile.** Until step 5, fallback mutants route to mix worker. Step 5 brings fallback into the persistent worker: the elixir-direct recompile path from PROMPT_16 (`84eaadf`) runs INSIDE the persistent BEAM rather than spawning a separate elixir process. The persistent worker patches the source, recompiles via `Kernel.ParallelCompiler.compile_to_path/2`, runs ExUnit, resets.
+
+Acceptance for step 5: Decimal fallback under persistent worker remains 0 invalid (the M17 + PROMPT_16 baseline). Fallback survived-set is byte-identical between mix and persistent. demo_app fallback outcomes byte-identical.
+
+**Step 6 — Crash detection + retry-then-fallback.** Port-exit signals attribute the mutant `:error`. Worker restarts in ~100ms (new BEAM, same sandbox). After N consecutive crashes (default 3), the sandbox falls back to mix worker for the remainder of the run. Configurable threshold via `--persistent-crash-threshold N` (advanced; default doesn't need tuning).
+
+Acceptance for step 6: synthetic crash test (a mutant that intentionally calls `:erlang.exit(self(), :kill)`) produces `:error` status, worker restarts, subsequent mutants run normally. Crash-threshold test: N+1 consecutive synthetic crashes triggers mix-worker fallback for that sandbox.
+
+**Step 7 — Public CLI flag + benches + docs.** Promote `--worker-type mix|persistent` to public CLI. Default stays `mix` for first v1.7 release. Add `e2e_persistent` verify layer that exercises demo_app schema + fallback under persistent worker. Run the smoke benchmarks at c=4: demo_app, plug_crypto, Decimal under both worker types. Update BENCHMARKS.md with side-by-side comparison. CHANGELOG v1.7 entry (including the Elixir 1.18+ requirement bump).
+
+Acceptance for step 7: all 8 v1.6 verify layers green AT v1.6 default (mix). New `e2e_persistent` layer green. BENCHMARKS table shows mix vs persistent at c=4 across all three targets with documented timing variance.
+
+### Acceptance gates (whole milestone)
+
+- All 8 v1.6 layers + `e2e_persistent` green at `--worker-type mix` (default).
+- `--worker-type mix` remains fully supported and is the default.
+- demo_app outcomes byte-identical between worker types at c=1 and c=4.
+- plug_crypto outcomes byte-identical between worker types at c=4.
+- Decimal: same survived stable-id set between worker types. Killed/timeout timing flaps documented separately and accepted as variance, not regression.
+- Decimal fallback under persistent: 0 invalid (matching M17 baseline).
+- demo_app per-mutant median <50ms under persistent worker (the V17 schema acceptance).
+- Decimal wall-clock under persistent at c=4 improves materially over M17's 11 min. **Do NOT hard-gate on ≤2 min**; the timeout-mutant lower bound is ~5.25 min. Document the actual number.
+- Reset-hook leak fixture passes (intentional leaks proven cleaned).
+- mutalisk's `mix.exs` requires `>= 1.18.0`. CHANGELOG notes the bump.
+
+### Subagent brief
+
+The single highest-risk surface:
+
+**Step 2's reset hooks.** Silent state leaks between mutants are the single biggest correctness risk for persistent workers. The leak fixture must be aggressive — multiple state vectors mutated by ONE constructed mutant, then verified clean before the next. If reset misses a vector, the next mutant's behavior depends on the previous mutant's residue. That's worse than a slow run; it's wrong results that look right.
+
+Lower-risk but worth attention:
+
+- **Step 3's test-file filtering** uses `ExUnit.configure(only_test_ids: ...)` which is stable from Elixir 1.18+. The minimum-version bump in step 1 makes this the supported primary path; no fallback needed.
+- **Step 5's in-process recompile.** `Kernel.ParallelCompiler.compile_to_path/2` running inside the persistent BEAM may interfere with the BEAM's already-loaded modules. Test this against demo_app fallback first; if module-conflict warnings or recompile failures appear, the in-process path may need to spawn a transient compile process even within the persistent BEAM.
+
+### Out of scope for M19
+
+- Persistent worker as default (stays `mix` in v1.7; flip after follow-up validation).
+- Reducing per-mutant timeout below 60s.
+- Changing timeout classification semantics.
+- Cross-run state persistence.
+- New mutators.
+- Coverage default flip.
+- Per-test-case coverage attribution.
+- Oracle/schema build Mix bypass.
+- Mutation semantics or stable_id input changes.
+- Wrapper guard schemata.
+- Supporting Elixir < 1.18.
+
+### Recommended commit pacing
+
+Exactly 7 commits, one per step. Each commit must pass `bin/verify` at all 9 layers (8 v1.6 + e2e_persistent once added). Steps 1-6 may keep the public flag undocumented; step 7 promotes it.
+
+# Out of scope for v1.7 (do not let it sneak in)
+
+- Persistent worker as default. Stays opt-in for first v1.7 release.
+- New mutators (any kind).
+- Coverage default flip (still opt-in even after v1.7).
+- Per-test-case coverage attribution.
+- Oracle/schema build Mix bypass.
+- Persistent worker for oracle/schema build phases (those are one-shot; persistent doesn't help).
+- Cross-run state persistence (v2).
+- Wrapper guard schemata (v2).
+- Reducing 60s per-mutant timeout (touches semantics, separate decision).
+- Mutation semantics or stable_id input changes.
+
+`--worker-type mix` is permanent — even after persistent becomes default in a v1.8+ follow-up, mix stays as the validated escape hatch and is regression-tested forever.

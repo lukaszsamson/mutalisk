@@ -22,10 +22,10 @@ Draft HLD/SPEC for a modern Elixir mutation testing library using source-level m
 
 ## Version Targets
 
-- Elixir `>= 1.17`.
+- Elixir `>= 1.18` (raised from `>= 1.17` at v1.7).
 - OTP `>= 26`.
 
-Rationale: modern parser metadata, reliable column metadata, good JIT behavior, and no backwards-compatibility burden for a new tool.
+Rationale: modern parser metadata, reliable column metadata, good JIT behavior, and no backwards-compatibility burden for a new tool. v1.7 raised the minimum from 1.17 to 1.18 because the persistent worker (M19) depends on `ExUnit.OnExitHandler`, `ExUnit.Server.modules_loaded/1`, and `ExUnit.configure(only_test_ids: ...)` which are stable from 1.18 onward. Users on Elixir 1.17 stay on mutalisk 1.6.x.
 
 ## High-Level Architecture
 

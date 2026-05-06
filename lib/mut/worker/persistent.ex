@@ -32,6 +32,7 @@ defmodule Mut.Worker.Persistent do
   use GenServer
 
   alias Mut.Sandbox
+  alias Mut.Worker.Formatter
   alias Mut.Worker.Result
 
   @ready_marker "MUT_READY"
@@ -99,22 +100,15 @@ defmodule Mut.Worker.Persistent do
         {:reply, %{result | duration_ms: duration_ms}, %{state | leftover: leftover}}
 
       {:error, :timeout, leftover} ->
+        _raw_output = leftover
         kill_port(state.port)
 
-        {:stop, :worker_crashed,
-         %Result{
-           status: :timeout,
-           duration_ms: System.monotonic_time(:millisecond) - started,
-           raw_output: leftover
-         }, %{state | leftover: ""}}
+        {:stop, :worker_crashed, %{state | leftover: ""}}
 
       {:error, :crashed, leftover} ->
-        {:stop, :worker_crashed,
-         %Result{
-           status: :error,
-           duration_ms: System.monotonic_time(:millisecond) - started,
-           raw_output: leftover
-         }, %{state | leftover: ""}}
+        _raw_output = leftover
+
+        {:stop, :worker_crashed, %{state | leftover: ""}}
     end
   end
 
@@ -174,7 +168,12 @@ defmodule Mut.Worker.Persistent do
       "Mut.Worker.PersistentRunner.run(#{inspect(test_files)}, " <>
         inspect_helper_opt(test_helper) <> ")"
 
-    pa_flags ++ ["--no-halt", "--eval", eval]
+    # No `--no-halt`: when the runner's loop exits (STOP command or
+    # stdin EOF), the BEAM should terminate naturally. With --no-halt
+    # the worker BEAM survives port closure forever and accumulates as
+    # an orphan, which breaks subsequent test runs that read from
+    # stale processes.
+    pa_flags ++ ["--eval", eval]
   end
 
   defp discover_test_files(sandbox, opts) do
@@ -274,7 +273,7 @@ defmodule Mut.Worker.Persistent do
                 status: status,
                 duration_ms: duration_ms,
                 raw_output: trim_output(acc),
-                killing_test: nil
+                killing_test: killing_test(acc)
               }
 
             {:ok, result, ""}
@@ -311,6 +310,21 @@ defmodule Mut.Worker.Persistent do
   end
 
   defp parse_result_line(_other), do: :passthrough
+
+  defp killing_test(output) do
+    case Formatter.parse_output(output) do
+      %{tests: tests} ->
+        tests
+        |> Enum.find(&(&1["status"] == "failed"))
+        |> case do
+          nil -> nil
+          test -> "#{test["module"]} #{test["test"]}"
+        end
+
+      _other ->
+        nil
+    end
+  end
 
   defp encode_files([], _sandbox), do: ""
 

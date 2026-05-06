@@ -506,24 +506,59 @@ The PROMPT_16 mission landed parallel-worker prototype, fallback Mix-bypass, and
 - v1.7 acceptance sketch + implementation cost estimate.
 - Single docs-only commit; no production code.
 
-### v1.7 (one milestone)
+### v1.7 (one milestone, opt-in)
 
-**M19 — Persistent Worker Implementation**
+**M19 — Persistent Worker (opt-in)**
 
 Per `V17_PERSISTENT_WORKER.md` (delivered in M18, on master). Persistent BEAM per sandbox; `:persistent_term` flip per mutant; in-process ExUnit re-run with explicit reset hooks for ETS / Application env / registered-process leak vectors; in-process fallback recompile via `Kernel.ParallelCompiler.compile_to_path/2` + `:code.load_binary/3`; crash detection via Port monitoring with fallback-to-mix-worker after a configurable retry threshold; new `--worker-type mix|persistent` flag.
 
-Target acceptance:
+**Default stays `mix` for first v1.7 release.** Conservative ship discipline: same pattern as v1.5's static-first / v1.6's concurrency-cap-4-first. Flip default to `persistent` in a follow-up release after real-project validation. Detailed scope in `PLAN.md` M19 section.
+
+**v1.7 raises minimum Elixir to 1.18.0** (from v1's `>= 1.17.0`). Rationale: V17's reset strategy depends on ExUnit internals (`ExUnit.OnExitHandler`, `ExUnit.Server.modules_loaded/1`, `ExUnit.configure(only_test_ids: ...)`) that are stable from 1.18 onward. Pre-1.18 users stay on mutalisk 1.6.x. Recorded as a breaking change in CHANGELOG.
+
+#### Acceptance correction from M18's draft
+
+V17 originally proposed "Decimal ≤2 min at c=4" as a hard gate. **That target is too aggressive.** Decimal currently has 21 timeout mutants at the 60s per-mutant cap; even with infinitely-fast non-timeout mutants, the lower bound at c=4 is `21 × 60s / 4 ≈ 315s` (5.25 min). Treat ≤2 min as aspirational. Gate on **material improvement over M17's 11 min** instead. Reducing per-mutant timeout duration or changing timeout classification semantics is explicitly out of scope.
+
+#### Outcome-identity bar tuned for timeouts
+
+Same Survived stable-id set as `mix` worker. Killed/timeout timing flaps near the 60s cap are documented as variance, not regression. M17 already saw 4-8 mutants flap on Decimal — that's a property of the test suite under cold-start variance, not a parallelism or worker-type bug. Persistent workers will see similar (different) flap patterns; document, don't gate.
+
+#### Target acceptance
 
 - Per-mutant median wall <50 ms on demo_app (steady-state, post-warmup).
-- Decimal ≤ 2 min wall at `--concurrency 4` (vs M17's 11.0 min on the mix-spawn path).
-- Outcomes byte-identical to v1.6 on demo_app, plug_crypto, Decimal — same Survived stable_id sets at every concurrency level.
-- New `e2e_persistent` `bin/verify` layer runs demo_app at c=4 with persistent workers.
-- Decimal fallback bucket continues to land at 0 invalid (the M17 Phase B win must hold).
-- `--worker-type mix` opt-out is wired and tested.
+- Decimal wall at `--concurrency 4` improves materially over M17's 11.0 min (no hard threshold; document the actual number).
+- Same Survived stable_id sets between worker types on demo_app, plug_crypto, Decimal.
+- New `e2e_persistent` `bin/verify` layer runs demo_app schema + fallback at c=4 with persistent workers.
+- Decimal fallback bucket continues to land at 0 invalid (the M17 Phase B win holds).
+- `--worker-type mix` is the default and is regression-tested forever.
+- Reset-hook leak fixture (intentional Application env / ETS / registered-process / `:persistent_term` mutation) proven cleaned between mutants.
 
-Implementation cost (refined in V17_PERSISTENT_WORKER.md): ~930 LOC total (worker + protocol + reset hooks + run filter + fallback recompile + crash recovery + flag + tests).
+#### 7-step sequencing (commit pacing within M19)
 
-Highest risk: `ExUnit.Server.modules_loaded/1` is private API in some Elixir versions. M19's first task is to verify the seam across our support range; fallback is to run each `ExUnit.run/0` in a fresh process inside the persistent BEAM (still avoids `mix test` boot, loses some cross-mutant cache).
+1. Schema-only persistent worker skeleton (also bumps `mix.exs` Elixir requirement to `>= 1.18.0`).
+2. Reset hooks + leak fixture.
+3. Test-file run filtering via `ExUnit.configure(only_test_ids: ...)` (stable from 1.18+).
+4. Parallel persistent workers via M17's `SandboxQueue`.
+5. Fallback in-process recompile.
+6. Crash detection + retry-then-fallback to `mix`.
+7. Public `--worker-type` flag + `e2e_persistent` layer + benches + CHANGELOG (records both the new flag and the Elixir-version bump).
+
+The intermediate "schema-only persistent" state (steps 1-4) is not independently shippable to users. The public flag is exposed only at step 7 (after schema + fallback + crash recovery all work).
+
+#### Implementation cost (refined)
+
+~930 LOC total (worker + protocol + reset hooks + run filter + fallback recompile + crash recovery + flag + tests). M18's V17 doc enumerates per-vector reset hooks and crash recovery; the line count grew from PROMPT_16's 590 estimate accordingly.
+
+#### Highest risks
+
+1. **State leaks between mutants** from undiscovered reset vectors (the leak fixture in step 2 catches the obvious ones; subtle leaks may surface only on real projects). Single biggest correctness risk: silent leaks produce wrong results that look right.
+2. **In-process fallback recompile** (step 5) interfering with the persistent BEAM's already-loaded modules. Tested against demo_app fallback first; may need a transient compile process within the persistent BEAM if conflicts surface.
+3. **ExUnit private-API drift across patch releases**. Pinned to >= 1.18.0; a future Elixir minor that removes/renames `ExUnit.OnExitHandler` or `ExUnit.Server.modules_loaded/1` would break v1.7 entirely. Acceptable risk — mutalisk users can stay on the last-compatible mutalisk release until we adapt.
+
+#### `mix` worker is permanent
+
+Even after persistent becomes default in a v1.8+ follow-up, `mix` stays as the validated safety hatch and is regression-tested forever. Some user code patterns (ETS tables tests don't create, mocked modules without per-test cleanup, per-process compilation state, tests that crash the BEAM) genuinely cannot run safely in a persistent worker. `--worker-type mix` is the documented escape.
 
 ### v2
 
