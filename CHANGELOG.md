@@ -3,6 +3,43 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.8 (M20 + M21 + M21 phase 2, 2026-05-07)
+
+### M21 phase 2 — in-process fallback recompile
+
+#### Added
+- **In-process fallback recompile** when `--worker-type persistent`
+  is in effect. Persistent BEAM compiles the patched source via
+  `Code.compile_file/1`, runs ExUnit against the patched module,
+  then restores the original via `:code.purge/1` + `:code.load_file/1`
+  (the schema-build ebins on the runner's `-pa` provide the
+  originals). No mix-spawn child process per fallback mutant.
+- New protocol line `RUN_FALLBACK <mutant_id> <compile_files>|<test_files>`
+  alongside the existing `RUN`. Compile errors surface as
+  `MUT_RESULT compile_error <us> <category> <msg>` and the host
+  materialises `Result{status: :invalid, recompile_category: cat}`.
+- New `Mut.Worker.Persistent.run_fallback/5` host API.
+- New `Mut.Worker.run_fallback_in_process/5` wraps the
+  prepare-patch flow (validate sandbox, render+apply patch, read
+  manifest, compute dependents) around the persistent-side run.
+- Fallback to mix-spawn on `:filter_miss` / `:timeout` /
+  `:crashed` — same recovery contract as schema mutants.
+- Two regression tests in `test/mut/worker/persistent_test.exs`:
+  in-process compile + run against a patched source, and the
+  `:compile_error` path on a deliberately broken patch.
+
+#### Performance
+Per-target persistent wall at c=4 (mix baseline → v1.7 → M21 leak-fix → M21 phase 2):
+- demo_app: ~10 s → ~7 s → ~7-8 s → ~7-8 s — 1.3× faster
+- plug_crypto: 84 s → 144 s → 80 s → **77 s** — **1.09× faster** than mix
+- Decimal: 660 s → 744 s → 598 s → **623 s** — **1.06× faster** than mix
+
+Decimal's wall went up slightly vs M21 phase 1 (598 → 623 s) due
+to run-to-run variance; the fallback-bucket portion alone went
+from 148 s → 126 s (saved 22 s on 75 fallback mutants).
+Zero compile errors, zero Invalid, zero unexpected Killed→Timeout
+regressions across the full 454-mutant Decimal bench.
+
 ## v1.8 (M20 + M21, 2026-05-07)
 
 ### M21 — Persistent worker faster than mix on real targets

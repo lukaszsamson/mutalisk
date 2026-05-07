@@ -160,10 +160,160 @@ defmodule Mut.Worker.PersistentTest do
            end) =~ "worker_crashed"
   end
 
+  @tag timeout: 30_000
+  test "run_fallback compiles patched source in-process and restores original on success" do
+    # M21 in-process fallback: persistent BEAM compiles a patched
+    # source file via Code.compile_file/1, runs the test against the
+    # patched module, then restores the original via :code.load_file.
+    # No mix-spawn, no mix test child process.
+    sandbox_path = fake_fallback_project("inprocess_basic")
+    sandbox = %Sandbox{id: 1, path: sandbox_path}
+
+    {:ok, server} = Persistent.start_link(sandbox, test_files: ["test/calc_test.exs"])
+
+    try do
+      # Pre-condition: original module was loaded; tests pass.
+      result =
+        Persistent.run_fallback(
+          server,
+          0,
+          [],
+          ["test/calc_test.exs"]
+        )
+
+      assert %{status: :survived} = result
+
+      # Now write a "patched" source that breaks the test, ask the
+      # runner to recompile in-process and run.
+      File.write!(
+        Path.join(sandbox_path, "lib/calc.ex"),
+        """
+        defmodule Calc do
+          def add(a, b), do: a - b
+        end
+        """
+      )
+
+      result =
+        Persistent.run_fallback(
+          server,
+          1,
+          ["lib/calc.ex"],
+          ["test/calc_test.exs"]
+        )
+
+      assert %{status: :killed} = result
+
+      # Restore the original source (mirrors Mut.Worker.run_fallback_in_process's
+      # Sandbox.reset/1 in the `after` clause). The runner has already
+      # restored the ORIGINAL module via :code.load_file, so the next
+      # run with the original test should pass.
+      File.write!(
+        Path.join(sandbox_path, "lib/calc.ex"),
+        """
+        defmodule Calc do
+          def add(a, b), do: a + b
+        end
+        """
+      )
+
+      result =
+        Persistent.run_fallback(
+          server,
+          0,
+          [],
+          ["test/calc_test.exs"]
+        )
+
+      assert %{status: :survived} = result
+    after
+      stop(server)
+    end
+  end
+
+  @tag timeout: 30_000
+  test "run_fallback returns :compile_error when the patched source has a syntax error" do
+    sandbox_path = fake_fallback_project("inprocess_syntax")
+    sandbox = %Sandbox{id: 1, path: sandbox_path}
+
+    {:ok, server} = Persistent.start_link(sandbox, test_files: ["test/calc_test.exs"])
+
+    try do
+      File.write!(
+        Path.join(sandbox_path, "lib/calc.ex"),
+        "defmodule Calc do def add(a, b) :: a + b end\n"
+      )
+
+      reply =
+        Persistent.run_fallback(
+          server,
+          1,
+          ["lib/calc.ex"],
+          ["test/calc_test.exs"]
+        )
+
+      assert {:compile_error, _category, _message} = reply
+      assert Process.alive?(server)
+    after
+      stop(server)
+    end
+  end
+
   defp stop(server) do
     Persistent.stop(server)
   catch
     :exit, _ -> :ok
+  end
+
+  defp fake_fallback_project(name) do
+    root = Path.expand(Path.join(["tmp", "tests", "persistent", name]))
+    File.rm_rf!(root)
+    File.mkdir_p!(Path.join(root, "test"))
+    File.mkdir_p!(Path.join(root, "lib"))
+
+    File.write!(Path.join(root, "mix.exs"), "defmodule FallbackFixture.MixProject do\nend\n")
+    File.write!(Path.join(root, "test/test_helper.exs"), "")
+    link_current_ebins(root)
+
+    # Write the original module + a corresponding ebin so :code.load_file
+    # has something to restore from. The schema-build path used by
+    # `-pa _build/mut_schema/lib/*/ebin` is materialised by writing the
+    # compiled .beam alongside.
+    File.write!(
+      Path.join(root, "lib/calc.ex"),
+      """
+      defmodule Calc do
+        def add(a, b), do: a + b
+      end
+      """
+    )
+
+    [{Calc, beam}] =
+      Code.compile_string("defmodule Calc do def add(a, b), do: a + b end")
+
+    ebin = Path.join([root, "_build", "mut_schema", "lib", "fallback_fixture", "ebin"])
+    File.mkdir_p!(ebin)
+    File.write!(Path.join(ebin, "Elixir.Calc.beam"), beam)
+
+    # Ensure the test process unloads Calc so it doesn't pollute the
+    # fixture between runs.
+    :code.purge(Calc)
+    :code.delete(Calc)
+
+    File.write!(
+      Path.join(root, "test/calc_test.exs"),
+      """
+      defmodule CalcTest do
+        use ExUnit.Case, async: false
+
+        test "add/2 adds" do
+          assert Calc.add(2, 3) == 5
+        end
+      end
+      """
+    )
+
+    root
   end
 
   defp fake_persistent_project(name) do

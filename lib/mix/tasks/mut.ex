@@ -539,13 +539,40 @@ defmodule Mix.Tasks.Mut do
     record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy)
     worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
 
-    result =
-      Worker.run_fallback(sandbox, mutant, worker_tests,
-        app: app_name(sandbox.path),
-        timeout_ms: @timeout_ms
-      )
+    result = run_fallback_via(ctx, sandbox, mutant, worker_tests)
 
     record_after_run(ctx, mutant, selected, result)
+  end
+
+  # M21 in-process fallback recompile: when --worker-type persistent
+  # AND the sandbox has a live persistent server, route fallback
+  # mutants to the persistent BEAM (compile in-process via
+  # Code.compile_file, run ExUnit, restore originals via
+  # :code.load_file). Otherwise the v1.6 mix-spawn fallback.
+  defp run_fallback_via(%{worker_type: :persistent} = ctx, sandbox, mutant, worker_tests) do
+    case Map.get(ctx.persistent_servers, sandbox.id) do
+      nil ->
+        run_fallback_via_mix(sandbox, mutant, worker_tests)
+
+      server ->
+        Worker.run_fallback_in_process(server, sandbox, mutant, worker_tests,
+          app: app_name(sandbox.path),
+          timeout_ms: @timeout_ms
+        )
+    end
+  catch
+    :exit, _reason ->
+      run_fallback_via_mix(sandbox, mutant, worker_tests)
+  end
+
+  defp run_fallback_via(_ctx, sandbox, mutant, worker_tests),
+    do: run_fallback_via_mix(sandbox, mutant, worker_tests)
+
+  defp run_fallback_via_mix(sandbox, mutant, worker_tests) do
+    Worker.run_fallback(sandbox, mutant, worker_tests,
+      app: app_name(sandbox.path),
+      timeout_ms: @timeout_ms
+    )
   end
 
   defp record_after_run(ctx, mutant, selected, result) do

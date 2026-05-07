@@ -72,6 +72,42 @@ defmodule Mut.Worker.Persistent do
     GenServer.call(server, {:run_schema, mutant_id, test_files, timeout_ms}, :infinity)
   end
 
+  @doc """
+  M21 in-process fallback recompile. The host has already applied the
+  source patch to the sandbox (via `Mut.FallbackPatch.apply/2`). This
+  call asks the persistent BEAM to recompile the patched files
+  in-process, run ExUnit, and restore the originals from
+  `_build/mut_schema/lib/<app>/ebin/`.
+
+  Replies:
+
+    * `Result.t()` — the run completed (status: :killed | :survived).
+    * `{:compile_error, category, message}` — patch did not compile.
+      Category mirrors `Mut.Recompile.error_category/0`. Caller
+      materialises a `Result{status: :invalid, recompile_category: cat}`.
+    * `:filter_miss` — selected test files don't map to any loaded
+      tests. Caller routes via mix-spawn fallback.
+    * `:timeout` / `:crashed` — host-side deadline expired or the
+      worker BEAM died. Caller routes via mix-spawn fallback.
+  """
+  @spec run_fallback(server, non_neg_integer(), [Path.t()], [Path.t()], keyword) ::
+          Result.t()
+          | :filter_miss
+          | :crashed
+          | :timeout
+          | {:compile_error, atom(), String.t()}
+  def run_fallback(server, mutant_id, compile_files, test_files, opts \\ [])
+      when is_integer(mutant_id) and mutant_id >= 0 and is_list(compile_files) and
+             is_list(test_files) and is_list(opts) do
+    timeout_ms = Keyword.get(opts, :timeout_ms, @default_run_timeout_ms)
+
+    GenServer.call(
+      server,
+      {:run_fallback, mutant_id, compile_files, test_files, timeout_ms},
+      :infinity
+    )
+  end
+
   @spec stop(server, timeout()) :: :ok
   def stop(server, timeout \\ 5_000) do
     GenServer.stop(server, :normal, timeout)
@@ -149,11 +185,29 @@ defmodule Mut.Worker.Persistent do
     {:reply, metrics_view(state), state}
   end
 
+  def handle_call(
+        {:run_fallback, mutant_id, compile_files, test_files, timeout_ms},
+        _from,
+        state
+      ) do
+    started = System.monotonic_time(:millisecond)
+    compile_blob = encode_relative(compile_files)
+    test_blob = encode_relative(test_files)
+    Port.command(state.port, "RUN_FALLBACK #{mutant_id} #{compile_blob}|#{test_blob}\n")
+    handle_run_reply(state, started, timeout_ms)
+  end
+
   def handle_call({:run_schema, mutant_id, test_files, timeout_ms}, _from, state) do
     started = System.monotonic_time(:millisecond)
     files_blob = encode_files(test_files, state.sandbox)
     Port.command(state.port, "RUN #{mutant_id}#{files_blob}\n")
+    handle_run_reply(state, started, timeout_ms)
+  end
 
+  # Shared run-reply handler for both :run_schema and :run_fallback.
+  # The wire-protocol reply layouts match — both end in MUT_RESULT
+  # with status killed/survived/filter_miss/error/compile_error.
+  defp handle_run_reply(state, started, timeout_ms) do
     case wait_for_result(state.port, state.leftover, timeout_ms) do
       {:ok, %Result{status: :filter_miss}, _leftover, run_metrics} ->
         # Filter miss is recoverable: the worker BEAM is still
@@ -174,6 +228,15 @@ defmodule Mut.Worker.Persistent do
         duration_ms = System.monotonic_time(:millisecond) - started
         state = record_run_metrics(state, run_metrics)
         {:reply, %{result | duration_ms: duration_ms}, %{state | leftover: leftover}}
+
+      {:compile_error, category, message, _duration_ms} ->
+        # M21 in-process fallback: patch did not compile. The
+        # persistent BEAM is still healthy (we reset modules in the
+        # `after` clause regardless). Reply with the category +
+        # message so the host materialises Result{status: :invalid,
+        # recompile_category: category}. Mix-retry would just fail
+        # with the same compile error, so don't bother.
+        {:reply, {:compile_error, category, message}, %{state | leftover: ""}}
 
       {:error, kind, _leftover} when kind in [:timeout, :crashed] ->
         # F4 auto-restart + M20 timeout/crash split:
@@ -425,6 +488,10 @@ defmodule Mut.Worker.Persistent do
 
             {:ok, result, "", run_metrics}
 
+          {:compile_error, {duration_us, category, message}} ->
+            duration_ms = max(div(duration_us, 1000), 0)
+            {:compile_error, category, message, duration_ms}
+
           :passthrough ->
             case Diag.parse_line(line) do
               {:ok, :run, metrics} ->
@@ -463,12 +530,36 @@ defmodule Mut.Worker.Persistent do
         # the host reruns this mutant via mix.
         {:ok, :filter_miss, 0}
 
+      ["compile_error", rest] ->
+        # M21 in-process fallback: source patch failed to compile.
+        # Format: `<duration_us> <category> <message>`. Surface the
+        # category + message so the host can build a Result with
+        # status: :invalid + recompile_category set.
+        {:compile_error, parse_compile_error(rest)}
+
       _other ->
         :passthrough
     end
   end
 
   defp parse_result_line(_other), do: :passthrough
+
+  defp parse_compile_error(rest) do
+    case String.split(rest, " ", parts: 3) do
+      [duration_us_str, category, message] ->
+        {parse_duration(duration_us_str), parse_category(category), message}
+
+      [duration_us_str, category] ->
+        {parse_duration(duration_us_str), parse_category(category), ""}
+
+      _ ->
+        {0, :unknown, ""}
+    end
+  end
+
+  defp parse_category("compile_error"), do: :compile_error
+  defp parse_category("dep_path_error"), do: :dep_path_error
+  defp parse_category(_), do: :unknown
 
   defp killing_test(output) do
     case Formatter.parse_output(output) do
@@ -497,6 +588,14 @@ defmodule Mut.Worker.Persistent do
       _ -> Path.join(sandbox.path, file)
     end
   end
+
+  # M21 in-process fallback: the runner's CWD is the sandbox path,
+  # so it can read sandbox-relative paths directly. We pass relative
+  # paths (no Path.join with sandbox.path) so the runner doesn't need
+  # to know about the sandbox's absolute location.
+  defp encode_relative([]), do: ""
+
+  defp encode_relative(files) when is_list(files), do: Enum.join(files, "\t")
 
   defp parse_duration(str) do
     case Integer.parse(String.trim(str)) do

@@ -259,11 +259,11 @@ Fixed in `lib/mut/worker/persistent_runner.ex`,
 
 ### M21 results at c=4
 
-| Target | mix wall | persistent v1.7 | persistent v1.8 (M20) | persistent v1.8 (M21) | speedup vs mix |
-|---|---:|---:|---:|---:|---:|
-| demo_app | ~10 s | ~7 s | ~7-8 s | ~7-8 s | 1.3× |
-| plug_crypto | 84 s | 144 s | 142 s | **80 s** | **1.05× (faster)** |
-| Decimal | 660 s | 744 s | 744 s | **598 s** | **1.10× (faster)** |
+| Target | mix wall | persistent v1.7 | persistent v1.8 (M20) | persistent v1.8 (M21) | persistent v1.8 (M21 + in-process fallback) | speedup vs mix |
+|---|---:|---:|---:|---:|---:|---:|
+| demo_app | ~10 s | ~7 s | ~7-8 s | ~7-8 s | ~7-8 s | 1.3× |
+| plug_crypto | 84 s | 144 s | 142 s | 80 s | **77 s** | **1.09× (faster)** |
+| Decimal | 660 s | 744 s | 744 s | 598 s | **623 s** | **1.06× (faster)** |
 
 byte-identity preserved on every target — same Survived stable-id
 sets vs mix worker, with V17-acceptance flap (mutants mix marked
@@ -281,6 +281,42 @@ never about state accumulating across mutants — it was about
 ExUnit running a different test schedule under persistent than
 under mix-spawn. A single `max_failures: 1` config flip and a
 per-message timeout closed both gaps.
+
+## v1.8 M21 phase 2 — in-process fallback recompile
+
+After the leak-vector half of M21 closed the byte-identity gap,
+the in-process fallback half lands on top: instead of spawning a
+fresh `mix test` for every fallback mutant, the persistent BEAM
+recompiles the patched source in-process via `Code.compile_file/1`,
+runs ExUnit, then restores the originals via `:code.purge/1` +
+`:code.load_file/1` (the schema-build ebins on the runner's `-pa`
+provide the originals).
+
+New protocol line `RUN_FALLBACK <id> <compile_files>|<test_files>`.
+Compile errors surface as `MUT_RESULT compile_error <us> <category>
+<msg>` and become `Result{status: :invalid, recompile_category: cat}`
+on the host — no mix-spawn retry, since mix would just fail with
+the same compile error.
+
+Fallback to mix-spawn on `:filter_miss` / `:timeout` / `:crashed`
+(same recovery contract as schema mutants). Empirically this branch
+is rare on real targets — Decimal at c=4 produced **0 compile
+errors and 0 invalid mutants** across all 75 fallback mutants in
+the in-process bench.
+
+### Bench numbers at c=4 (M21 phase 2)
+
+| | mix wall | persistent (M21 + in-process fallback) | speedup |
+|---|---:|---:|---:|
+| demo_app | ~10 s | ~7-8 s | 1.3× |
+| plug_crypto | 84 s | 77 s | 1.09× |
+| Decimal | 660 s | 623 s | 1.06× |
+
+byte-identity preserved on every target; demo_app fixture's 4-6
+fallback mutants per variant verified through `bin/verify`'s
+`e2e_persistent` layer. Decimal: same V17-acceptance flap as M21
+phase 1 (persistent kills 17 mutants mix marks Timeout); zero
+unexpected Killed→Timeout regressions; zero Invalid; zero Errors.
 
 ### Diagnostics overhead
 

@@ -30,12 +30,12 @@ Compiling 5 files (.ex)
 Generated plug_crypto app
 Schema build starting
 Schema build complete
-[1/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
-[2/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with -
-[3/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with +
-[4/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with -
+[1/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with -
+[2/64] killed    lib/plug/crypto.ex:130  Boolean  replace and with or
+[3/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with -
+[4/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with +
 [5/64] survived  lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with +
-[6/64] killed    lib/plug/crypto.ex:130  Boolean  replace and with or
+[6/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
 [7/64] killed    lib/plug/crypto/key_generator.ex:44  ComparisonBoundary  replace < with <=
 [8/64] survived  lib/plug/crypto/key_generator.ex:74  Boolean  replace and with or
 [9/64] survived  lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with +
@@ -43,56 +43,368 @@ Schema build complete
 [11/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with +
 [12/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with *
 [13/64] survived  lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with *
-[14/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
+[14/64] survived  lib/plug/crypto.ex:356  ComparisonBoundary  replace < with <=
 [15/64] killed    lib/plug/crypto/key_generator.ex:47  ComparisonNegation  replace > with <=
-[16/64] survived  lib/plug/crypto.ex:356  ComparisonBoundary  replace < with <=
-[17/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with +
-[18/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with +
+[16/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with +
+[17/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with +
+[18/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
 [19/64] killed    lib/plug/crypto.ex:356  ComparisonNegation  replace < with >=
 [20/64] survived  lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with +
 [21/64] survived  lib/plug/crypto.ex:159  ComparisonNegation  replace === with !==
-[22/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
-[23/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with *
-[24/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with +
-[25/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with *
+[22/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with *
+[23/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
+[24/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with *
+[25/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with +
 [26/64] survived  lib/plug/crypto/key_generator.ex:47  ComparisonBoundary  replace > with >=
 [27/64] killed    lib/plug/crypto.ex:130  ComparisonNegation  replace == with !=
 [28/64] survived  lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with *
 [29/64] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with +
 [30/64] survived  lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with *
-[31/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with /
+[31/64] survived  lib/plug/crypto.ex:134  Boolean  replace and with or
 [32/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with *
-[33/64] survived  lib/plug/crypto.ex:134  Boolean  replace and with or
-[34/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with +
+[33/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with +
+[34/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with /
 [35/64] killed    lib/plug/crypto/key_generator.ex:44  Boolean  replace or with and
 [36/64] killed    lib/plug/crypto/key_generator.ex:44  ComparisonNegation  replace < with >=
 [37/64] killed    lib/plug/crypto/key_generator.ex:44  UnaryNot  remove unary not
-[38/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
+[38/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with *
 [39/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with /
 [40/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with -
-[41/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with *
+[41/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
 [42/64] survived  lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with *
 [43/64] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with *
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+    warning: redefining module Plug.Crypto.MessageVerifier (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageVerifier.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageVerifier do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_verifier.ex:1: Plug.Crypto.MessageVerifier (module)
+
+    warning: redefining module Plug.Crypto.MessageEncryptor (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageEncryptor.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageEncryptor do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_encryptor.ex:1: Plug.Crypto.MessageEncryptor (module)
+
+    warning: the following clause is redundant:
+
+        defp non_executable_terms(tuple) when is_tuple(tuple)
+
+    it has type:
+
+        dynamic({...})
+
+    previous clauses have already matched on the following types:
+
+        {...}
+
+    \x{2502}
+ 52 \x{2502}   defp non_executable_terms(tuple) when is_tuple(tuple) do
+    \x{2502}        ~
+    \x{2502}
+    \x{2514}\x{2500} (plug_crypto 2.1.1) lib/plug/crypto.ex:52:8: Plug.Crypto.non_executable_terms/1
+
+    warning: incompatible types given to non_executable_list/1:
+
+        non_executable_list(list)
+
+    given types:
+
+        -dynamic({...})-
+
+    but expected one of:
+
+        #1
+        empty_list()
+
+        #2
+        non_empty_list(term(), term())
+
+    where "list" was given the types:
+
+        # type: dynamic({...})
+        # from: lib/plug/crypto.ex:48:29
+        list
+
+        # type: {...}
+        # from: lib/plug/crypto.ex:48:40
+        is_tuple(list)
+
+    type warning found at:
+    \x{2502}
+ 49 \x{2502}     non_executable_list(list)
+    \x{2502}     ~
+    \x{2502}
+    \x{2514}\x{2500} (plug_crypto 2.1.1) lib/plug/crypto.ex:49:5: Plug.Crypto.non_executable_terms/1
+
 [44/64] killed    lib/plug/crypto/message_verifier.ex:31  GuardComparisonNegation  replace guard > with <=
-[45/64] killed    lib/plug/crypto.ex:48  GuardTypeTest  replace guard is_list with is_tuple
-[46/64] killed    lib/plug/crypto.ex:355  GuardComparisonNegation  replace guard <= with >
+[45/64] killed    lib/plug/crypto.ex:355  GuardComparisonNegation  replace guard <= with >
+[46/64] killed    lib/plug/crypto.ex:48  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+    warning: redefining module Plug.Crypto.MessageEncryptor (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageEncryptor.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageEncryptor do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_encryptor.ex:1: Plug.Crypto.MessageEncryptor (module)
+
 [47/64] killed    lib/plug/crypto/message_encryptor.ex:52  GuardTypeTest  replace guard is_list with is_tuple
-[48/64] killed    lib/plug/crypto/message_encryptor.ex:37  GuardTypeTest  replace guard is_list with is_tuple
-[49/64] killed    lib/plug/crypto/message_encryptor.ex:38  GuardComparisonNegation  replace guard == with !=
-[50/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_float
+    warning: redefining module Plug.Crypto.MessageEncryptor (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageEncryptor.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageEncryptor do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_encryptor.ex:1: Plug.Crypto.MessageEncryptor (module)
+
+[48/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_float
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+[49/64] killed    lib/plug/crypto/message_encryptor.ex:37  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+[50/64] killed    lib/plug/crypto/message_encryptor.ex:38  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
 [51/64] killed    lib/plug/crypto.ex:23  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
 [52/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_atom with is_nil
-[53/64] killed    lib/plug/crypto.ex:56  GuardTypeTest  replace guard is_map with is_list
-[54/64] killed    lib/plug/crypto.ex:312  GuardTypeTest  replace guard is_list with is_tuple
-[55/64] survived  lib/plug/crypto.ex:79  GuardTypeTest  replace guard is_list with is_tuple
-[56/64] killed    lib/plug/crypto/message_encryptor.ex:78  GuardComparisonNegation  replace guard === with !==
-[57/64] killed    lib/plug/crypto/message_encryptor.ex:76  GuardComparisonNegation  replace guard === with !==
-[58/64] killed    lib/plug/crypto.ex:52  GuardTypeTest  replace guard is_tuple with is_list
-[59/64] killed    lib/plug/crypto.ex:317  GuardTypeTest  replace guard is_list with is_tuple
-[60/64] survived  lib/plug/crypto.ex:355  GuardComparisonBoundary  replace guard <= with <
-[61/64] killed    lib/plug/crypto/message_verifier.ex:21  GuardComparisonNegation  replace guard > with <=
-[62/64] survived  lib/plug/crypto/message_verifier.ex:31  GuardComparisonBoundary  replace guard > with >=
-[63/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_integer
+    warning: redefining module Plug.Crypto.MessageEncryptor (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageEncryptor.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageEncryptor do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_encryptor.ex:1: Plug.Crypto.MessageEncryptor (module)
+
+    warning: the following clause is redundant:
+
+        defp non_executable_terms(map) when is_list(map)
+
+    it has type:
+
+        dynamic(empty_list() or non_empty_list(term(), term()))
+
+    previous clauses have already matched on the following types:
+
+        empty_list() or non_empty_list(term(), term())
+
+    \x{2502}
+ 56 \x{2502}   defp non_executable_terms(map) when is_list(map) do
+    \x{2502}        ~
+    \x{2502}
+    \x{2514}\x{2500} (plug_crypto 2.1.1) lib/plug/crypto.ex:56:8: Plug.Crypto.non_executable_terms/1
+
+[53/64] killed    lib/plug/crypto/message_encryptor.ex:78  GuardComparisonNegation  replace guard === with !==
+    warning: redefining module Plug.Crypto.MessageEncryptor (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageEncryptor.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageEncryptor do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_encryptor.ex:1: Plug.Crypto.MessageEncryptor (module)
+
+[54/64] killed    lib/plug/crypto/message_encryptor.ex:76  GuardComparisonNegation  replace guard === with !==
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+[55/64] killed    lib/plug/crypto.ex:312  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+    warning: the following clause is redundant:
+
+        defp non_executable_terms(tuple) when is_list(tuple)
+
+    it has type:
+
+        dynamic(empty_list() or non_empty_list(term(), term()))
+
+    previous clauses have already matched on the following types:
+
+        empty_list() or non_empty_list(term(), term())
+
+    \x{2502}
+ 52 \x{2502}   defp non_executable_terms(tuple) when is_list(tuple) do
+    \x{2502}        ~
+    \x{2502}
+    \x{2514}\x{2500} (plug_crypto 2.1.1) lib/plug/crypto.ex:52:8: Plug.Crypto.non_executable_terms/1
+
+    warning: incompatible types given to Kernel.tuple_size/1:
+
+        tuple_size(tuple)
+
+    given types:
+
+        -dynamic(empty_list() or non_empty_list(term(), term()))-
+
+    but expected one of:
+
+        {...}
+
+    where "tuple" was given the types:
+
+        # type: dynamic(empty_list() or non_empty_list(term(), term()))
+        # from: lib/plug/crypto.ex:52:29
+        tuple
+
+        # type: empty_list() or non_empty_list(term(), term())
+        # from: lib/plug/crypto.ex:52:41
+        is_list(tuple)
+
+    type warning found at:
+    \x{2502}
+ 53 \x{2502}     non_executable_tuple(tuple, tuple_size(tuple))
+    \x{2502}                                 ~
+    \x{2502}
+    \x{2514}\x{2500} (plug_crypto 2.1.1) lib/plug/crypto.ex:53:33: Plug.Crypto.non_executable_terms/1
+
+[56/64] killed    lib/plug/crypto.ex:52  GuardTypeTest  replace guard is_tuple with is_list
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+     warning: incompatible types given to get_secret/3:
+
+         get_secret(key_base, secret, opts)
+
+     given types:
+
+         binary(), binary(), -dynamic({...})-
+
+     but expected one of:
+
+         term(), term(), empty_list() or non_empty_list(term(), term())
+
+     where "key_base" was given the types:
+
+         # type: binary()
+         # from: lib/plug/crypto.ex:316:15
+         key_base
+
+         # type: binary()
+         # from: lib/plug/crypto.ex:317:12
+         is_binary(key_base)
+
+     where "opts" was given the types:
+
+         # type: dynamic({...})
+         # from: lib/plug/crypto.ex:316:40
+         opts
+
+         # type: {...}
+         # from: lib/plug/crypto.ex:317:58
+         is_tuple(opts)
+
+     where "secret" was given the types:
+
+         # type: binary()
+         # from: lib/plug/crypto.ex:316:25
+         secret
+
+         # type: binary()
+         # from: lib/plug/crypto.ex:317:36
+         is_binary(secret)
+
+     type warning found at:
+     \x{2502}
+ 318 \x{2502}     secret = get_secret(key_base, secret, opts)
+     \x{2502}              ~
+     \x{2502}
+     \x{2514}\x{2500} (plug_crypto 2.1.1) lib/plug/crypto.ex:318:14: Plug.Crypto.decrypt/4
+
+[57/64] killed    lib/plug/crypto.ex:317  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Plug.Crypto.MessageVerifier (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageVerifier.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageVerifier do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_verifier.ex:1: Plug.Crypto.MessageVerifier (module)
+
+[58/64] survived  lib/plug/crypto.ex:79  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Plug.Crypto.MessageVerifier (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageVerifier.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageVerifier do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_verifier.ex:1: Plug.Crypto.MessageVerifier (module)
+
+[59/64] killed    lib/plug/crypto/message_verifier.ex:21  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module Plug.Crypto.MessageVerifier (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageVerifier.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto.MessageVerifier do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto/message_verifier.ex:1: Plug.Crypto.MessageVerifier (module)
+
+[60/64] killed    lib/plug/crypto.ex:56  GuardTypeTest  replace guard is_map with is_list
+    warning: redefining module Plug.Crypto (current version loaded from _build/mut_schema/lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam)
+    \x{2502}
+  1 \x{2502} defmodule Plug.Crypto do
+    \x{2502} ~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} lib/plug/crypto.ex:1: Plug.Crypto (module)
+
+[61/64] survived  lib/plug/crypto.ex:355  GuardComparisonBoundary  replace guard <= with <
+[62/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_integer
+[63/64] survived  lib/plug/crypto/message_verifier.ex:31  GuardComparisonBoundary  replace guard > with >=
 [64/64] survived  lib/plug/crypto/message_verifier.ex:21  GuardComparisonBoundary  replace guard > with >=
 Mutation score: 39/64 = 60.9%
 
@@ -123,8 +435,8 @@ Surviving mutants:
   lib/plug/crypto/message_verifier.ex:31 GuardComparisonBoundary  replace guard > with >=
   lib/plug/crypto/message_verifier.ex:21 GuardComparisonBoundary  replace guard > with >=
 
-Schema:    22/43 killed (51.2%)   wall: 76.1s
-Fallback:  17/21 killed (81.0%)   wall: 22.8s
+Schema:    22/43 killed (51.2%)   wall: 78.0s
+Fallback:  17/21 killed (81.0%)   wall: 5.6s
   guard_comparison_boundary:    0/3 killed
   guard_comparison_negation:    6/6 killed
   guard_type_test:              11/12 killed
@@ -133,19 +445,19 @@ Invalid:   0
 Errors:    0
 Timeouts:  0
 
-Run time: 99.0s
-Fallback wall-clock: 23.1% of total
+Run time: 83.6s
+Fallback wall-clock: 6.7% of total
 Fallback mutants: 32.8% of executed
 
 Phases:
-  oracle build:         2461 ms
-  baseline tests:       1043 ms
-  plan generation:        15 ms
-  schema build:         2406 ms
-  schema workers:      63664 ms
-  fallback workers:     6511 ms
-  report writing:          8 ms
-  total:               77868 ms
+  oracle build:         2568 ms
+  baseline tests:       1089 ms
+  plan generation:        16 ms
+  schema build:         2591 ms
+  schema workers:      63937 ms
+  fallback workers:     2015 ms
+  report writing:         10 ms
+  total:               74153 ms
 
 Selection:
   mode: static
@@ -162,10 +474,10 @@ Concurrency: 4 workers
 
 Persistent worker:
   workers:     4
-  boot:        median 364.5 ms (max 369.0 ms)
-  app startup: median 3.7 ms (total apps: 12)
-  test load:   median 190.3 ms (total files: 20)
-  mutant run:  median 607.5 ms (p95 635.7 ms, n=43)
+  boot:        median 396.0 ms (max 417.0 ms)
+  app startup: median 4.4 ms (total apps: 12)
+  test load:   median 207.2 ms (total files: 20)
+  mutant run:  median 605.7 ms (p95 636.3 ms, n=43)
   reset hooks:
     application_env: 0.0 ms
     ets:             0.1 ms
@@ -174,7 +486,7 @@ Persistent worker:
     on_exit:         0.0 ms
   filter lookup: 0.1 ms
   crashes: 0  restarts: 0  filter-miss: 0  mix-fallback: 0
-  memory: peak 60.5 MB total, 14.7 MB processes
+  memory: peak 60.8 MB total, 15.2 MB processes
 
-Mutalisk run complete in 78098ms
-bench.wall_ms=80000
+Mutalisk run complete in 74430ms
+bench.wall_ms=77000

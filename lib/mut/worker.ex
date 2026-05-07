@@ -4,6 +4,7 @@ defmodule Mut.Worker do
   alias Mut.Mutant
   alias Mut.Sandbox
   alias Mut.Worker.Formatter
+  alias Mut.Worker.Persistent
 
   defmodule Result do
     @moduledoc "Worker execution result."
@@ -79,6 +80,106 @@ defmodule Mut.Worker do
             duration_ms: elapsed(started),
             raw_output: recompile_output(output, reason),
             recompile_category: category
+          }
+
+        {:error, reason} ->
+          %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
+      end
+    rescue
+      exception ->
+        %Result{
+          status: :error,
+          duration_ms: elapsed(started),
+          raw_output: Exception.message(exception)
+        }
+    after
+      Sandbox.reset(sandbox)
+    end
+  end
+
+  @doc """
+  M21 in-process fallback recompile path.
+
+  Same prepare-patch flow as `run_fallback/4` (validate sandbox,
+  render + apply patch, read manifest, compute dependents) but
+  delegates the recompile + test execution to the persistent BEAM
+  via `Mut.Worker.Persistent.run_fallback/5` instead of spawning
+  a fresh `mix test`. The persistent BEAM compiles the patched
+  files in-process, runs ExUnit, and restores originals from the
+  schema-build ebins.
+
+  On `:filter_miss` / `:timeout` / `:crashed`, falls back to the
+  mix-spawn path (`run_fallback/4`) for the same sandbox + mutant.
+  On `:compile_error`, materialises a Result with status: :invalid
+  and the appropriate `recompile_category` — mix-retry would just
+  fail with the same compile error.
+
+  Always calls `Sandbox.reset/1` in the `after` clause to revert
+  the source patch, matching `run_fallback/4`'s semantics.
+  """
+  @spec run_fallback_in_process(
+          GenServer.server(),
+          Sandbox.t(),
+          Mutant.t(),
+          [String.t()],
+          keyword
+        ) ::
+          Result.t()
+  def run_fallback_in_process(
+        server,
+        %Sandbox{} = sandbox,
+        %Mutant{} = mutant,
+        test_files,
+        opts \\ []
+      )
+      when is_list(test_files) and is_list(opts) do
+    started = System.monotonic_time(:millisecond)
+
+    try do
+      with :ok <- validate_sandbox(sandbox),
+           {:ok, patch} <- render_patch(sandbox, mutant),
+           :ok <- Mut.FallbackPatch.apply(patch, sandbox.path),
+           {:ok, manifest} <- read_manifest(sandbox, opts),
+           dependents <-
+             manifest
+             |> Mut.Recompile.dependents(dependent_modules(mutant), dep_kinds(mutant))
+             |> Enum.to_list() do
+        compile_files = [patch.file | dependents]
+
+        case Persistent.run_fallback(
+               server,
+               mutant.id,
+               compile_files,
+               test_files,
+               timeout_ms: Keyword.get(opts, :timeout_ms, @default_timeout_ms)
+             ) do
+          %Result{} = result ->
+            %{result | duration_ms: elapsed(started)}
+
+          {:compile_error, category, message} ->
+            %Result{
+              status: :invalid,
+              duration_ms: elapsed(started),
+              raw_output: message,
+              recompile_category: category
+            }
+
+          reply when reply in [:filter_miss, :timeout, :crashed] ->
+            # Persistent path couldn't deliver a verdict. Fall back to
+            # the mix-spawn fallback for this single mutant; the
+            # source patch is still applied and Sandbox.reset in the
+            # `after` clause will revert. We re-run the FULL prepare
+            # flow inside run_fallback/4 because Sandbox.reset has
+            # not yet fired — but that double-render is cheap, and
+            # this branch is rare on real targets.
+            run_fallback(sandbox, mutant, test_files, opts)
+        end
+      else
+        {:error, :missing_source_span} ->
+          %Result{
+            status: :invalid,
+            duration_ms: elapsed(started),
+            raw_output: "missing_source_span"
           }
 
         {:error, reason} ->

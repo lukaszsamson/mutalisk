@@ -152,6 +152,22 @@ defmodule Mut.Worker.PersistentRunner do
       loop(snapshot)
   end
 
+  defp handle_command("RUN_FALLBACK " <> rest, snapshot) do
+    case parse_run_fallback(rest) do
+      {:ok, mutant_id, compile_files, test_files} ->
+        new_snapshot = do_run_fallback(mutant_id, compile_files, test_files, snapshot)
+        loop(new_snapshot)
+
+      :error ->
+        write_marker("#{@result_marker} error 0 #{escape("RUN_FALLBACK parse error")}")
+        loop(snapshot)
+    end
+  rescue
+    exception ->
+      write_marker("#{@result_marker} error 0 #{escape(Exception.message(exception))}")
+      loop(snapshot)
+  end
+
   defp handle_command(_unrecognized, snapshot), do: loop(snapshot)
 
   defp parse_run(rest) do
@@ -163,6 +179,22 @@ defmodule Mut.Worker.PersistentRunner do
         mutant_id = mutant_id_str |> String.trim() |> String.to_integer()
         files = files_blob |> String.trim() |> String.split("\t", trim: true)
         {mutant_id, files}
+    end
+  end
+
+  # RUN_FALLBACK <mutant_id> <compile_files_tab>|<test_files_tab>
+  # `compile_files_tab` are sandbox-relative paths to recompile in
+  # the persistent BEAM (the host has already applied the source
+  # patch). `test_files_tab` mirrors the existing RUN command.
+  defp parse_run_fallback(rest) do
+    with [mutant_id_str, payload] <- String.split(rest, " ", parts: 2),
+         {mutant_id, ""} <- Integer.parse(String.trim(mutant_id_str)),
+         [compile_blob, tests_blob] <- String.split(payload, "|", parts: 2) do
+      compile_files = compile_blob |> String.trim() |> String.split("\t", trim: true)
+      test_files = tests_blob |> String.trim() |> String.split("\t", trim: true)
+      {:ok, mutant_id, compile_files, test_files}
+    else
+      _ -> :error
     end
   end
 
@@ -214,9 +246,91 @@ defmodule Mut.Worker.PersistentRunner do
     snapshot
   end
 
-  @doc false
-  @spec apply_file_filter([Path.t()], %{Path.t() => [{module(), atom()}]}) ::
-          :ok | {:error, {:filter_miss, [Path.t()]}}
+  # M21 in-process fallback recompile.
+  #
+  # The host has already applied the fallback source patch to the
+  # sandbox (`Mut.FallbackPatch.apply`). This function:
+  # 1. Compiles the patched files in the persistent BEAM, swapping
+  #    the new module bytecode in place via Code.compile_file/1.
+  # 2. Runs ExUnit against the patched modules.
+  # 3. Restores the originals via :code.purge + :code.load_file
+  #    (which reloads from `_build/mut_schema/lib/<app>/ebin/`,
+  #    the schema-compiled baseline that's on the runner's `-pa`).
+  #
+  # Compile failures emit `MUT_RESULT compile_error <category>` so
+  # the host can surface them with the same `recompile_category`
+  # taxonomy the mix-spawn fallback uses. The host does NOT
+  # mix-retry compile errors — they're a property of the patch, not
+  # of the worker, and would just fail the same way out-of-process.
+  defp do_run_fallback(mutant_id, compile_files, test_files, snapshot) do
+    started = Diag.now_us()
+
+    case compile_in_process(compile_files) do
+      {:ok, loaded_modules} ->
+        try do
+          :persistent_term.put({Mut.Runtime, :active_mutant}, mutant_id)
+          restore_server_state(snapshot.ex_unit)
+
+          case apply_file_filter(test_files, snapshot.file_index) do
+            :ok ->
+              reset_leaks(snapshot, false)
+              %{failures: failures} = ExUnit.run()
+              elapsed_us = Diag.elapsed_us(started)
+              status = if failures == 0, do: "survived", else: "killed"
+              write_marker("#{@result_marker} #{status} #{elapsed_us}")
+
+            {:error, {:filter_miss, missing}} ->
+              elapsed_us = Diag.elapsed_us(started)
+
+              write_marker(
+                "#{@result_marker} filter_miss #{elapsed_us} #{escape(inspect(missing))}"
+              )
+          end
+        after
+          restore_modules(loaded_modules)
+        end
+
+      {:error, category, message} ->
+        elapsed_us = Diag.elapsed_us(started)
+
+        write_marker(
+          "#{@result_marker} compile_error #{elapsed_us} #{Atom.to_string(category)} #{escape(message)}"
+        )
+    end
+
+    snapshot
+  end
+
+  defp compile_in_process(files) do
+    {modules, _binaries_or_other} =
+      Enum.reduce(files, {[], []}, fn file, {modules_acc, _} ->
+        compiled = Code.compile_file(file)
+        new_modules = Enum.map(compiled, fn {m, _bin} -> m end)
+        {modules_acc ++ new_modules, []}
+      end)
+
+    {:ok, Enum.uniq(modules)}
+  rescue
+    error in CompileError ->
+      {:error, :compile_error, Exception.message(error)}
+
+    error in [SyntaxError, TokenMissingError] ->
+      {:error, :compile_error, Exception.message(error)}
+
+    error in UndefinedFunctionError ->
+      {:error, :dep_path_error, Exception.message(error)}
+
+    error ->
+      {:error, :unknown, Exception.message(error)}
+  end
+
+  defp restore_modules(modules) do
+    Enum.each(modules, fn module ->
+      _ = :code.purge(module)
+      _ = :code.load_file(module)
+    end)
+  end
+
   def apply_file_filter(files, index) do
     # Always restore "no filter" first so a previous mutant's filter
     # doesn't bleed across runs (defensive: ExUnit holds the config
