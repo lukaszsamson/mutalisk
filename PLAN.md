@@ -904,7 +904,17 @@ v1.7 is a **single milestone** (M19) with 8 ordered commit-steps. The intermedia
 
 ## M19 — Persistent worker (opt-in)
 
-**Current status after review:** partially landed but not accepted for v1.7.0 production use. Persistent is now treated as experimental infrastructure behind `MUTALISK_PERSISTENT_EXPERIMENTAL=1` until plug_crypto and Decimal byte-identity are revalidated and `e2e_persistent` is enabled. The first-mutant reset-baseline bug identified during review has a targeted fix and regression coverage, but the benchmark acceptance matrix below remains the promotion gate.
+**Current status after review:** partially landed but not accepted for v1.7.0 production use. Persistent ships as experimental infrastructure behind `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
+
+Closed since the original status note:
+- `e2e_persistent` is enabled (9th `bin/verify` layer; runs `mix mut.e2e --worker-type persistent` and asserts demo_app byte-identity for default/coverage/attribute fixtures).
+- First-mutant reset-baseline bug fixed (`8af63d1`); regression test added.
+- `--no-halt` removed from the worker BEAM bootstrap so spawned BEAMs no longer survive port closure (`8af63d1`).
+- F1 filter-miss fix: `apply_file_filter/2` no longer silently runs every loaded test when the requested file list misses the index. It returns `{:error, {:filter_miss, files}}` and the host reroutes the mutant via the mix-spawn worker (`bf88bec`). Index keys + lookups are now both `Path.expand`'d so absolute-vs-relative path mismatches resolve.
+
+Still open before promotion:
+- plug_crypto persistent byte-identity at c=4. After F1 the over-kill (38 → 59 schema killed) survives empirically, so the cause is NOT filter widening. setup_all caching is also ruled out (a re-run spike confirmed setup_all DOES re-run on each `ExUnit.run/0`). The remaining suspect is ExUnit-internal test-suite state outside the four reset vectors. Diagnosis continues.
+- Decimal byte-identity at c=4. Deferred until the plug_crypto gap closes.
 
 **Goal:** Production-quality opt-in persistent workers. After M19, users can run `mix mut --worker-type persistent` and get ≥10× per-mutant cost reduction on supported projects, with `mix` remaining the default and validated escape hatch.
 

@@ -57,17 +57,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and persistent at c=4: 21 killed / 10 survived in default,
   21 / 10 in coverage, 23 / 10 in attribute mode (same stable-id
   sets).
+- **`apply_file_filter/2` no longer silently runs every loaded
+  test on filter miss** (Mission F1). Two paths produced this:
+    1. host sent absolute paths via `Path.join(sandbox.path, file)`
+       while the runner's index keyed test files on the *relative*
+       path that `Code.require_file` received, so `Map.get` missed
+       every entry;
+    2. real misses (e.g. mistyped filename) — same fall-through.
+  The runner now normalises both index keys and lookup keys via
+  `Path.expand`. Files that still resolve to zero loaded tests
+  return `{:error, {:filter_miss, files}}`; the runner emits a
+  `MUT_RESULT filter_miss` line; `Mut.Worker.Persistent` replies
+  `:filter_miss` and keeps the BEAM alive; `Mix.Tasks.Mut` reroutes
+  that one mutant through the mix-spawn worker. Three regression
+  tests (end-to-end + two direct unit tests) cover the path.
 
 ### Known limitations (v1.7.0)
 - **Default stays `--worker-type mix`.** Persistent worker is opt-in
   and additionally requires `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
 - **plug_crypto byte-identity NOT met.** Even after the
-  baseline-capture fix, persistent on plug_crypto at c=4 reports
-  schema 100% killed vs mix's ~50%. The leak is not in the four
-  vectors the reset module covers; we suspect it lives in
-  ExUnit-internal lifecycle state (`setup_all` context, ETS
-  metadata owned by ExUnit) that the snapshot/restore mechanism
-  does not normalise. Diagnosis is open.
+  baseline-capture fix AND the F1 filter-miss fix, persistent on
+  plug_crypto at c=4 still reports 21 mutants as killed that mix
+  marks survived (38 → 59 schema killed). The cause is NOT filter
+  widening (F1 surfaces filter misses; the plug_crypto selection
+  resolves cleanly). It is also NOT setup_all caching (a re-run
+  spike confirmed setup_all DOES re-run on each `ExUnit.run/0`).
+  The remaining suspect lives elsewhere in the test/ExUnit
+  lifecycle. Diagnosis is open; `--worker-type mix` remains the
+  correctness contract for plug_crypto-class targets.
 - **Decimal byte-identity NOT validated** in this release.
   Validation depends on the plug_crypto gap being closed first;
   bench evidence will land in `BENCHMARKS.md` once it is.
@@ -83,7 +100,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `lib/mut/worker/persistent.ex` (host).
 - `lib/mut/worker/persistent_runner.ex` (in-BEAM).
 - `lib/mut/worker/persistent_runner/reset.ex` (leak-vector helpers).
-- `bin/verify` defines `e2e_persistent` (disabled).
+- `bin/verify` enables `e2e_persistent` as a 9th layer that runs
+  `mix mut.e2e --worker-type persistent` (with the experimental env
+  gate set internally). Asserts demo_app byte-identity between mix
+  and persistent across default/coverage/attribute fixture variants.
 
 ## v1.6 (M17, 2026-05-05)
 
