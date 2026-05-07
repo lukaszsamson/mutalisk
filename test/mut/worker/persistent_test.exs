@@ -80,7 +80,12 @@ defmodule Mut.Worker.PersistentTest do
   end
 
   @tag timeout: 30_000
-  test "exits during run when the worker BEAM crashes so callers can rerun through mix" do
+  test "auto-restarts the BEAM after a crash and replies :crashed for the failing mutant" do
+    # F4 auto-restart: the worker BEAM crashes mid-run. The host
+    # rebuilds the port in-place rather than tearing the GenServer
+    # down. The current mutant gets `:crashed` (so the caller can
+    # rerun via mix); the GenServer stays alive for subsequent
+    # mutants on the same sandbox.
     sandbox_path = fake_persistent_project("worker_crash")
     shim = crash_elixir_shim()
 
@@ -90,8 +95,40 @@ defmodule Mut.Worker.PersistentTest do
         test_files: []
       )
 
+    try do
+      assert Persistent.run_schema(server, 1, []) == :crashed
+      assert Process.alive?(server)
+      # The shim always crashes; second call also returns :crashed,
+      # confirming the restart succeeded between calls.
+      assert Persistent.run_schema(server, 2, []) == :crashed
+    after
+      stop(server)
+    end
+  end
+
+  @tag timeout: 30_000
+  test "stops the GenServer when restart itself fails" do
+    # If boot of the replacement BEAM fails (port not spawnable,
+    # boot timeout), the GenServer stops with :worker_crashed and
+    # the caller's :exit catch in Mix.Tasks.Mut routes every
+    # subsequent mutant on this sandbox via the mix-spawn worker.
+    sandbox_path = fake_persistent_project("worker_crash_unrestartable")
+    shim = crash_elixir_shim()
+
+    {:ok, server} =
+      Persistent.start_link(%Sandbox{id: 1, path: sandbox_path},
+        elixir_path: shim,
+        test_files: []
+      )
+
+    # Replace the shim with a non-existent path between start_link
+    # and the run, so the auto-restart's open_port fails.
+    File.rm!(shim)
+
     assert capture_log(fn ->
-             assert catch_exit(Persistent.run_schema(server, 1, []))
+             assert Persistent.run_schema(server, 1, []) == :crashed
+             :timer.sleep(50)
+             refute Process.alive?(server)
            end) =~ "worker_crashed"
   end
 

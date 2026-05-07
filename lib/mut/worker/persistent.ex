@@ -53,7 +53,8 @@ defmodule Mut.Worker.Persistent do
     GenServer.start(__MODULE__, {sandbox, opts})
   end
 
-  @spec run_schema(server, non_neg_integer(), [Path.t()], keyword) :: Result.t() | :filter_miss
+  @spec run_schema(server, non_neg_integer(), [Path.t()], keyword) ::
+          Result.t() | :filter_miss | :crashed
   def run_schema(server, mutant_id, test_files, opts \\ [])
       when is_integer(mutant_id) and mutant_id >= 0 and is_list(test_files) and is_list(opts) do
     timeout_ms = Keyword.get(opts, :timeout_ms, @default_run_timeout_ms)
@@ -70,18 +71,10 @@ defmodule Mut.Worker.Persistent do
   @impl GenServer
   def init({%Sandbox{} = sandbox, opts}) do
     Process.flag(:trap_exit, true)
-    boot_timeout = Keyword.get(opts, :boot_timeout_ms, @default_boot_timeout_ms)
 
-    case open_port(sandbox, opts) do
+    case boot_port(sandbox, opts) do
       {:ok, port, leftover} ->
-        case wait_for_ready(port, leftover, boot_timeout) do
-          {:ok, leftover} ->
-            {:ok, %{port: port, sandbox: sandbox, leftover: leftover}}
-
-          {:error, reason} ->
-            kill_port(port)
-            {:stop, reason}
-        end
+        {:ok, %{port: port, sandbox: sandbox, leftover: leftover, opts: opts}}
 
       {:error, reason} ->
         {:stop, reason}
@@ -108,16 +101,24 @@ defmodule Mut.Worker.Persistent do
         duration_ms = System.monotonic_time(:millisecond) - started
         {:reply, %{result | duration_ms: duration_ms}, %{state | leftover: leftover}}
 
-      {:error, :timeout, leftover} ->
-        _raw_output = leftover
+      {:error, kind, _leftover} when kind in [:timeout, :crashed] ->
+        # F4 auto-restart: the worker BEAM died (timeout or port
+        # exit). Kill the dead port, attempt a fresh boot in the same
+        # sandbox so the rest of this sandbox's mutants can still run
+        # under persistent. The current mutant gets `:crashed`; the
+        # caller routes it through the mix-spawn worker. If the
+        # restart itself fails (boot timeout, port spawn error), we
+        # stop the GenServer and the caller's :exit catch routes
+        # every subsequent mutant on this sandbox via mix.
         kill_port(state.port)
 
-        {:stop, :worker_crashed, %{state | leftover: ""}}
+        case boot_port(state.sandbox, state.opts) do
+          {:ok, new_port, leftover} ->
+            {:reply, :crashed, %{state | port: new_port, leftover: leftover}}
 
-      {:error, :crashed, leftover} ->
-        _raw_output = leftover
-
-        {:stop, :worker_crashed, %{state | leftover: ""}}
+          {:error, _reason} ->
+            {:stop, :worker_crashed, :crashed, %{state | leftover: ""}}
+        end
     end
   end
 
@@ -134,6 +135,31 @@ defmodule Mut.Worker.Persistent do
   def terminate(_reason, _state), do: :ok
 
   ## Internals
+
+  defp boot_port(sandbox, opts) do
+    boot_timeout = Keyword.get(opts, :boot_timeout_ms, @default_boot_timeout_ms)
+
+    case open_port(sandbox, opts) do
+      {:ok, port, leftover} ->
+        case wait_for_ready(port, leftover, boot_timeout) do
+          {:ok, leftover} ->
+            {:ok, port, leftover}
+
+          {:error, reason} ->
+            kill_port(port)
+            {:error, reason}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  rescue
+    # `Port.open` raises ArgumentError / ErlangError when the
+    # executable can't be spawned (missing file, EACCES). Treat any
+    # such failure during auto-restart as a non-recoverable boot
+    # failure so the GenServer stops and the host falls back to mix.
+    error -> {:error, {:port_open_failed, Exception.message(error)}}
+  end
 
   defp open_port(sandbox, opts) do
     elixir = Keyword.get(opts, :elixir_path) || System.find_executable("elixir")

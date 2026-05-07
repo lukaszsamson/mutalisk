@@ -433,21 +433,21 @@ defmodule Mix.Tasks.Mut do
   defp run_schema_via(_ctx, sandbox, mutant, worker_tests),
     do: run_schema_via_mix(sandbox, mutant, worker_tests)
 
-  # Step 6: crash recovery. If the persistent BEAM dies during a run
-  # (Port exit, timeout-followed-by-kill, GenServer crash), fall back
-  # to the mix-spawn worker for this mutant and every subsequent
-  # mutant on the same sandbox. Threshold-based per-sandbox routing
-  # is implicit: once the server is dead, all future calls land on
-  # the catch clause and route to mix. The host doesn't auto-restart
-  # the BEAM in v1.7's first release; future work may add restart +
-  # retry-then-mix per V17 §"Crash recovery".
+  # Crash recovery (F4 auto-restart):
+  # - `:filter_miss` — runner couldn't resolve the selected files to
+  #   loaded test ids. BEAM is healthy; rerun this mutant via
+  #   mix-spawn.
+  # - `:crashed` — runner timed out or its port exited mid-run; the
+  #   `Persistent` GenServer auto-restarts the BEAM internally and
+  #   the next call to this server boots on the fresh port. Rerun
+  #   *this* mutant via mix-spawn; subsequent mutants on the same
+  #   sandbox stay on persistent.
+  # - `:exit` (defensive) — the GenServer itself stopped (auto-restart
+  #   failed). All future calls also hit this catch and route to
+  #   mix; per-sandbox fallback is implicit.
   defp run_schema_via_persistent(_ctx, server, sandbox, mutant, worker_tests) do
     case Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms) do
-      :filter_miss ->
-        # The persistent runner could not resolve the selected test
-        # files to any loaded test ids. Rerun this mutant on the
-        # mix-spawn worker, which loads tests by path. The worker
-        # BEAM stays up for subsequent mutants on this sandbox.
+      reply when reply in [:filter_miss, :crashed] ->
         run_schema_via_mix(sandbox, mutant, worker_tests)
 
       %Mut.Worker.Result{} = result ->
