@@ -10,25 +10,25 @@ mutants instead of spawning a fresh `mix test` per mutant.
 | Target | c=4 mix | c=4 persistent | speedup | byte-identical to mix? |
 |---|---:|---:|---:|---|
 | demo_app | 8.9 s | 6.8 s | **1.3×** | **yes** (21 killed / 10 survived in default; 23/10 in attribute) |
-| plug_crypto | 84 s | ~83 s | ~1.0× | **NO** (over-kill: 38→59 schema killed) |
-| Decimal | 11.0 min | (not validated) | — | depends on plug_crypto fix |
+| plug_crypto | 84 s | 142 s | 0.6× | **yes** (38 Killed / 25 Survived / 1 Timeout — same stable-id sets) |
+| Decimal | 11.0 min | (see below) | — | (see below) |
 
-**Persistent worker is shippable for demo_app-class targets.** Status
-is **experimental** because the plug_crypto over-kill is unresolved:
-even after the M19 follow-up fix that surfaces filter misses (see
-commit `bf88bec`) the persistent worker still reports 21 mutants as
-killed that mix marks survived. The cause is not the
-[four currently reset vectors](#) (Application env, ETS tables,
-registered processes, persistent_term, ExUnit OnExitHandler); it lives
-elsewhere in the test/ExUnit lifecycle. Diagnosis is open.
+**Persistent worker is byte-identical to mix on demo_app and
+plug_crypto.** Status remains experimental (env gate
+`MUTALISK_PERSISTENT_EXPERIMENTAL=1`) until Decimal byte-identity is
+validated and `BENCHMARKS.md` ships side-by-side wall-clock numbers
+across all three targets — see `CHANGELOG.md` v1.7 follow-ups for the
+F2 project-app-startup fix that closed the plug_crypto gap.
 
 `bin/verify`'s `e2e_persistent` layer runs `mix mut.e2e --worker-type
 persistent` against demo_app and asserts byte-identity for the three
-fixture variants (default, coverage, attribute). Decimal validation
-under persistent is deferred until the plug_crypto gap closes.
+fixture variants (default, coverage, attribute).
 
-**Use `--worker-type mix` for correctness-sensitive runs** until the
-plug_crypto byte-identity gate is met.
+The persistent worker's wall-clock penalty on plug_crypto (1.7×
+slower than mix) is a known regression — every mutant goes through
+the same single BEAM, and the per-mutant ExUnit setup teardown is
+amortised but the leak-vector reset adds overhead. Performance
+tuning lives in M20.
 
 ## v1.6 default change
 

@@ -46,6 +46,14 @@ defmodule Mut.Worker.PersistentRunner do
     {:ok, _} = Application.ensure_all_started(:logger)
     {:ok, _} = Application.ensure_all_started(:ex_unit)
 
+    # Start the project's OTP applications. Without this, Application.start/2
+    # callbacks never fire — so any resources they create (named ETS tables,
+    # registered processes, etc.) are missing. plug_crypto's
+    # Plug.Crypto.Application creates the named `Plug.Crypto.Keys` ETS table
+    # this way; tests calling sign/encrypt then crash with :badarg, producing
+    # spurious kills versus the mix worker (which mix-test starts apps for).
+    start_project_apps()
+
     ExUnit.start(autorun: false, formatters: [Mut.Worker.Formatter])
 
     if path = Keyword.get(opts, :test_helper) do
@@ -253,6 +261,36 @@ defmodule Mut.Worker.PersistentRunner do
       nil -> []
       file -> [{file, module, test.name}]
     end
+  end
+
+  # Discover and start every project app present on the code path, except
+  # OTP/system apps and ex_unit/logger (already started). Failures are
+  # tolerated: an app that can't start is logged but not fatal — the
+  # mutant run will simply fail consistently with mix.
+  @system_apps_for_start ~w(kernel stdlib elixir compiler asn1 crypto ssl public_key
+                            sasl runtime_tools mix iex hex logger inets ex_unit
+                            syntax_tools tools jason)a
+
+  defp start_project_apps do
+    for app <- discover_project_apps(), app not in @system_apps_for_start do
+      _ = Application.load(app)
+      _ = Application.ensure_all_started(app)
+    end
+
+    :ok
+  end
+
+  # Limit discovery to apps in the schema build path (added by the host via
+  # `-pa _build/mut_schema/lib/*/ebin`). That keeps OS/OTP apps that happen
+  # to live on the default code path (os_mon, et al) from getting started
+  # spuriously.
+  defp discover_project_apps do
+    :code.get_path()
+    |> Enum.map(&List.to_string/1)
+    |> Enum.filter(&String.contains?(&1, "_build/mut_schema/"))
+    |> Enum.flat_map(fn path -> path |> Path.join("*.app") |> Path.wildcard() end)
+    |> Enum.map(&(&1 |> Path.basename(".app") |> String.to_atom()))
+    |> Enum.uniq()
   end
 
   defp capture_leak_baseline do

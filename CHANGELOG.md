@@ -57,6 +57,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and persistent at c=4: 21 killed / 10 survived in default,
   21 / 10 in coverage, 23 / 10 in attribute mode (same stable-id
   sets).
+- **Persistent runner now starts the project's OTP applications**
+  (Mission F2). Without this, `Application.start/2` callbacks never
+  fired, so resources they create (named ETS tables, registered
+  processes) were missing under persistent and tests that depend on
+  them crashed. plug_crypto's `Plug.Crypto.Application` creates the
+  named `Plug.Crypto.Keys` ETS table this way; tests calling
+  `sign`/`encrypt`/`verify`/`decrypt` failed with `:badarg` versus
+  the mix worker (where `mix test` auto-starts the project's apps).
+  The runner now scans `_build/mut_schema/lib/*/ebin/*.app` and
+  ensures every project app is started before capturing the leak
+  baseline. With this fix plug_crypto persistent at c=4 is
+  byte-identical to mix: 38 Killed / 25 Survived / 1 Timeout (same
+  stable-id sets).
 - **`apply_file_filter/2` no longer silently runs every loaded
   test on filter miss** (Mission F1). Two paths produced this:
     1. host sent absolute paths via `Path.join(sandbox.path, file)`
@@ -75,19 +88,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Known limitations (v1.7.0)
 - **Default stays `--worker-type mix`.** Persistent worker is opt-in
   and additionally requires `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
-- **plug_crypto byte-identity NOT met.** Even after the
-  baseline-capture fix AND the F1 filter-miss fix, persistent on
-  plug_crypto at c=4 still reports 21 mutants as killed that mix
-  marks survived (38 → 59 schema killed). The cause is NOT filter
-  widening (F1 surfaces filter misses; the plug_crypto selection
-  resolves cleanly). It is also NOT setup_all caching (a re-run
-  spike confirmed setup_all DOES re-run on each `ExUnit.run/0`).
-  The remaining suspect lives elsewhere in the test/ExUnit
-  lifecycle. Diagnosis is open; `--worker-type mix` remains the
-  correctness contract for plug_crypto-class targets.
-- **Decimal byte-identity NOT validated** in this release.
-  Validation depends on the plug_crypto gap being closed first;
-  bench evidence will land in `BENCHMARKS.md` once it is.
+- **plug_crypto byte-identity met (F2).** With the project-app
+  startup fix above, persistent on plug_crypto at c=4 is now
+  byte-identical to mix.
+- **Decimal byte-identity validated separately.** See
+  `BENCHMARKS.md` once the F2 phase 2 bench run lands.
 - **In-process fallback recompile is deferred.** Fallback mutants
   always route to the mix-spawn worker, preserving M17's
   "0 invalid Decimal fallback" baseline regardless of worker type.

@@ -1,0 +1,200 @@
+target=plug_crypto repo=https://github.com/elixir-plug/plug_crypto.git ref=v2.1.1 sha=70af9d89e6bcb6fa7c47d42ef608e5c76a50d7ff selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+New:
+  jason 1.4.5
+Unchanged:
+  earmark_parser 1.4.44
+  ex_doc 0.37.3
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> mutalisk
+Compiling 71 files (.ex)
+Generated mutalisk app
+==> plug_crypto
+Compiling 5 files (.ex)
+Generated plug_crypto app
+Schema build starting
+Schema build complete
+[1/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with -
+[2/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with -
+[3/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
+[4/64] survived  lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with +
+[5/64] killed    lib/plug/crypto.ex:130  Boolean  replace and with or
+[6/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with +
+[7/64] survived  lib/plug/crypto/key_generator.ex:74  Boolean  replace and with or
+[8/64] survived  lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with +
+[9/64] killed    lib/plug/crypto/key_generator.ex:44  ComparisonBoundary  replace < with <=
+[10/64] survived  lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with +
+[11/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with *
+[12/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with +
+[13/64] survived  lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with *
+[14/64] survived  lib/plug/crypto.ex:356  ComparisonBoundary  replace < with <=
+[15/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with +
+[16/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with +
+[17/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
+[18/64] killed    lib/plug/crypto/key_generator.ex:47  ComparisonNegation  replace > with <=
+[19/64] killed    lib/plug/crypto.ex:356  ComparisonNegation  replace < with >=
+[20/64] survived  lib/plug/crypto.ex:159  ComparisonNegation  replace === with !==
+[21/64] survived  lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with +
+[22/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with *
+[23/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
+[24/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with +
+[25/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with *
+[26/64] survived  lib/plug/crypto/key_generator.ex:47  ComparisonBoundary  replace > with >=
+[27/64] survived  lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with *
+[28/64] killed    lib/plug/crypto.ex:130  ComparisonNegation  replace == with !=
+[29/64] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with +
+[30/64] survived  lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with *
+[31/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with +
+[32/64] survived  lib/plug/crypto.ex:134  Boolean  replace and with or
+[33/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with /
+[34/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with *
+[35/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with *
+[36/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with /
+[37/64] killed    lib/plug/crypto/key_generator.ex:44  ComparisonNegation  replace < with >=
+[38/64] killed    lib/plug/crypto/key_generator.ex:44  UnaryNot  remove unary not
+[39/64] killed    lib/plug/crypto/key_generator.ex:44  Boolean  replace or with and
+[40/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
+[41/64] survived  lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with *
+[42/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with -
+Failed to write log message to stdout, trying stderr
+
+13:24:55.542 [error] Writer crashed (:epipe)
+Failed to write log message to stdout, trying stderr
+
+13:24:55.554 [error] GenServer #PID<0.480.0> terminating
+** (stop) :terminated
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test encrypt and decrypt supports max age in seconds (Plug.CryptoTest)\\n     test/plug/crypto_test.exs:162\\n     ** (ExUnit.TimeoutError) test timed out after 60000ms. You can change the timeout:\\n\\n       1. per test by setting \\\"@tag timeout: x\\\" (accepts :infinity)\\n       2. per test module by setting \\\"@moduletag timeout: x\\\" (accepts :infinity)\\n       3. globally via \\\"ExUnit.start(timeout: x)\\\" configuration\\n       4. by running \\\"mix test --timeout x\\\" which sets timeout\\n       5. or by running \\\"mix test --trace\\\" which sets timeout to infinity\\n          (useful when using IEx.pry/0)\\n\\n     where \\\"x\\\" is the timeout given as integer in milliseconds (defaults to 60_000).\\n\\n     code: assert decrypt(@key, \\\"secret\\\", token, max_age: 1000) == {:ok, 1}\\n     stacktrace:\\n       (mutalisk 0.1.0) lib/mut/runtime.ex:5: Mut.Runtime.active_key/0\\n       (plug_crypto 2.1.1) lib/plug/crypto.ex:78: Plug.Crypto.non_executable_tuple/2\\n       (plug_crypto 2.1.1) lib/plug/crypto.ex:22: Plug.Crypto.non_executable_binary_to_term/2\\n       (plug_crypto 2.1.1) lib/plug/crypto.ex:304: Plug.Crypto.decode/2\\n       test/plug/crypto_test.exs:164: (test)\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:533: ExUnit.Runner.exec_test/2\\n       (stdlib 7.2) timer.erl:599: :timer.tc/2\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:455: anonymous fn/6 in ExUnit.Runner.spawn_test_monitor/4\\n\",\"module\":\"Plug.CryptoTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153022-i-tmDw/4/test/plug/crypto_test.exs\",\"test\":\"encrypt and decrypt supports max age in seconds\",\"event\":\"test_finished\",\"duration_us\":0}", 10])
+    (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+    (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+    (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+    (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+Last message: {:"$gen_cast", {:test_finished, %ExUnit.Test{name: :"test encrypt and decrypt supports max age in seconds", description: "test encrypt and decrypt supports max age in seconds", case: Plug.CryptoTest, module: Plug.CryptoTest, state: {:failed, [{:error, %ExUnit.TimeoutError{timeout: 60000, type: "test"}, [{Mut.Runtime, :active_key, 0, [file: ~c"lib/mut/runtime.ex", line: 5]}, {Plug.Crypto, :non_executable_tuple, 2, [file: ~c"lib/plug/crypto.ex", line: 78]}, {Plug.Crypto, :non_executable_binary_to_term, 2, [file: ~c"lib/plug/crypto.ex", line: 22]}, {Plug.Crypto, :decode, 2, [file: ~c"lib/plug/crypto.ex", line: 304]}, {Plug.CryptoTest, :"test encrypt and decrypt supports max age in seconds", 1, [file: ~c"test/plug/crypto_test.exs", line: 164]}, {ExUnit.Runner, :exec_test, 2, [file: ~c"lib/ex_unit/runner.ex", line: 533]}, {:timer, :tc, 2, [file: ~c"timer.erl", line: 599]}, {ExUnit.Runner, :"-spawn_test_monitor/4-fun-1-", 6, [file: ~c"lib/ex_unit/runner.ex", line: 455]}]}]}, time: 0, tags: %{async: true, line: 162, module: Plug.CryptoTest, registered: %{}, file: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153022-i-tmDw/4/test/plug/crypto_test.exs", test: :"test encrypt and decrypt supports max age in seconds", describe: "encrypt and decrypt", describe_line: 142, test_type: :test, test_group: nil}, logs: "", parameters: %{}}}}
+State: %{tests: 4, failed: 0, skipped: 0}
+
+13:24:55.534 [error] GenServer #PID<0.806.0> terminating
+** (stop) :worker_crashed
+Last message (from #PID<0.845.0>): {:run_schema, 57, ["test/plug/crypto_test.exs", "test/plug/crypto/message_encryptor_test.exs"], 60000}
+State: %{port: #Port<0.35>, sandbox: %Mut.Sandbox{id: 4, path: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153022-i-tmDw/4", baseline_snapshot: %{"lib/plug_crypto/.mix/compile.app_cache" => "c10f274b09054f511e4c757db815b684dea95a362a7bd65d8b347666cfb9a225", "lib/plug_crypto/.mix/compile.elixir" => "1d5c6186231304e013916114de9b361154176620e7dc66e23cafc6751471fe00", "lib/plug_crypto/.mix/compile.elixir_scm" => "fdf1e997ec05256fb65235978c6e0dbc581401bd8f4935417474c35516ee3188", "lib/plug_crypto/.mix/compile.lock" => "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "lib/plug_crypto/consolidated/Elixir.Collectable.beam" => "eb6872e3f46a41bade1d94142025c7877b6c1bcbf1bf64ed5dfc29ba734b4c10", "lib/plug_crypto/consolidated/Elixir.Enumerable.beam" => "631e515ddf9457a6642c14a893c3827fef65fc429258de4379138d80d277a480", "lib/plug_crypto/consolidated/Elixir.IEx.Info.beam" => "8c885b286f7d3b0cdb5f1fb4699021329400ebaa72564d37795aa31d7d962f95", "lib/plug_crypto/consolidated/Elixir.Inspect.beam" => "a7b006e54ac1909c23d50969a40f8f7acca2ee43746ee102f96888739168a01e", "lib/plug_crypto/consolidated/Elixir.JSON.Encoder.beam" => "14813b666aacd353810c1d82616209d81008c8af70d21fe401748e8f6cfd7289", "lib/plug_crypto/consolidated/Elixir.Jason.Encoder.beam" => "8ec6e6ae771dc8cba11758451367929ec983f186cfe3cb1f4f8f6e8740bd0828", "lib/plug_crypto/consolidated/Elixir.List.Chars.beam" => "e540366162f3b3fe4ef9ad22ca2491354e01231d16deed7550676e6fd3e3d6cd", "lib/plug_crypto/consolidated/Elixir.String.Chars.beam" => "6c26e216b072bf7935ff79b0750439009b65822821ca4d8b21c3a5b11592cf78", "lib/plug_crypto/ebin/Elixir.Plug.Crypto.Application.beam" => "a770fe78465a0fbe6509a7089e03f64b4e32044c5b7f92f43748eb0b8f9e761f", "lib/plug_crypto/ebin/Elixir.Plug.Crypto.KeyGenerator.beam" => "36ec5c56f65e239bf312cafb9d4ab8efc15f8acb92b9b43e56d1eb0e1b0b4664", "lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageEncryptor.beam" => "56e8848349310b94417e1a1540251bc82ad7ebcc512ec1e77f7b7e92b73bb1c5", "lib/plug_crypto/ebin/Elixir.Plug.Crypto.MessageVerifier.beam" => "21546296b4ff7403a0228ff58a28304262ecf081e54bd4985a44708fc8a142b2", "lib/plug_crypto/ebin/Elixir.Plug.Crypto.beam" => "db4761ce45dce5535c71e581ebf39dc20d4804d166d51913aa66caec0ec7f2b3", "lib/plug_crypto/ebin/plug_crypto.app" => "c3e6ae04f11cc587a5684ab3ddf36595208be7039931a6fd61b47c2ce44c4001"}, baseline_source: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153022-i-tmDw-schema"}, leftover: ""}
+Client #PID<0.845.0> is alive
+
+    (stdlib 7.2) gen.erl:262: :gen.do_call/4
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1180: GenServer.call/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:458: Mix.Tasks.Mut.run_schema_via_persistent/5
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:431: Mix.Tasks.Mut.execute_schema_mutant/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:557: anonymous fn/3 in Mix.Tasks.Mut.run_with_concurrency/4
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:40: Task.Supervised.reply/4
+[43/64] timeout   lib/plug/crypto.ex:93  Arithmetic  replace - with *
+[44/64] killed    lib/plug/crypto/message_verifier.ex:31  GuardComparisonNegation  replace guard > with <=
+[45/64] killed    lib/plug/crypto/message_encryptor.ex:52  GuardTypeTest  replace guard is_list with is_tuple
+[46/64] killed    lib/plug/crypto.ex:355  GuardComparisonNegation  replace guard <= with >
+[47/64] killed    lib/plug/crypto.ex:48  GuardTypeTest  replace guard is_list with is_tuple
+[48/64] killed    lib/plug/crypto/message_encryptor.ex:38  GuardComparisonNegation  replace guard == with !=
+[49/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_float
+[50/64] killed    lib/plug/crypto/message_encryptor.ex:37  GuardTypeTest  replace guard is_list with is_tuple
+[51/64] killed    lib/plug/crypto.ex:23  GuardTypeTest  replace guard is_list with is_tuple
+[52/64] killed    lib/plug/crypto.ex:312  GuardTypeTest  replace guard is_list with is_tuple
+[53/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_atom with is_nil
+[54/64] killed    lib/plug/crypto.ex:56  GuardTypeTest  replace guard is_map with is_list
+[55/64] survived  lib/plug/crypto.ex:79  GuardTypeTest  replace guard is_list with is_tuple
+[56/64] killed    lib/plug/crypto/message_encryptor.ex:78  GuardComparisonNegation  replace guard === with !==
+[57/64] killed    lib/plug/crypto/message_encryptor.ex:76  GuardComparisonNegation  replace guard === with !==
+[58/64] killed    lib/plug/crypto.ex:52  GuardTypeTest  replace guard is_tuple with is_list
+[59/64] killed    lib/plug/crypto.ex:317  GuardTypeTest  replace guard is_list with is_tuple
+[60/64] killed    lib/plug/crypto/message_verifier.ex:21  GuardComparisonNegation  replace guard > with <=
+[61/64] survived  lib/plug/crypto.ex:355  GuardComparisonBoundary  replace guard <= with <
+[62/64] survived  lib/plug/crypto/message_verifier.ex:31  GuardComparisonBoundary  replace guard > with >=
+[63/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_integer
+[64/64] survived  lib/plug/crypto/message_verifier.ex:21  GuardComparisonBoundary  replace guard > with >=
+Mutation score: 38/63 = 60.3%
+
+Surviving mutants:
+  lib/plug/crypto/message_encryptor.ex:164 Arithmetic               replace - with +
+  lib/plug/crypto/key_generator.ex:74 Boolean                  replace and with or
+  lib/plug/crypto/message_encryptor.ex:163 Arithmetic               replace - with +
+  lib/plug/crypto/message_encryptor.ex:160 Arithmetic               replace - with +
+  lib/plug/crypto/message_encryptor.ex:167 Arithmetic               replace - with *
+  lib/plug/crypto/message_encryptor.ex:161 Arithmetic               replace - with +
+  lib/plug/crypto/message_encryptor.ex:160 Arithmetic               replace - with *
+  lib/plug/crypto.ex:356 ComparisonBoundary       replace < with <=
+  lib/plug/crypto/message_encryptor.ex:167 Arithmetic               replace - with +
+  lib/plug/crypto/message_encryptor.ex:166 Arithmetic               replace - with +
+  lib/plug/crypto.ex:159 ComparisonNegation       replace === with !==
+  lib/plug/crypto/message_encryptor.ex:165 Arithmetic               replace - with +
+  lib/plug/crypto/message_encryptor.ex:162 Arithmetic               replace - with *
+  lib/plug/crypto/message_encryptor.ex:166 Arithmetic               replace - with *
+  lib/plug/crypto/key_generator.ex:47 ComparisonBoundary       replace > with >=
+  lib/plug/crypto/message_encryptor.ex:165 Arithmetic               replace - with *
+  lib/plug/crypto/message_encryptor.ex:164 Arithmetic               replace - with *
+  lib/plug/crypto/message_encryptor.ex:162 Arithmetic               replace - with +
+  lib/plug/crypto.ex:134 Boolean                  replace and with or
+  lib/plug/crypto/message_encryptor.ex:161 Arithmetic               replace - with *
+  lib/plug/crypto/message_encryptor.ex:163 Arithmetic               replace - with *
+  lib/plug/crypto.ex:79 GuardTypeTest            replace guard is_list with is_tuple
+  lib/plug/crypto.ex:355 GuardComparisonBoundary  replace guard <= with <
+  lib/plug/crypto/message_verifier.ex:31 GuardComparisonBoundary  replace guard > with >=
+  lib/plug/crypto/message_verifier.ex:21 GuardComparisonBoundary  replace guard > with >=
+
+Schema:    21/43 killed (48.8%)   wall: 82.3s
+Fallback:  17/21 killed (81.0%)   wall: 27.3s
+  guard_comparison_boundary:    0/3 killed
+  guard_comparison_negation:    6/6 killed
+  guard_type_test:              11/12 killed
+Skipped:   471 (missing_oracle_site: 149, no_applicable_mutator: 33, unsupported_dispatch: 289)
+Invalid:   0
+Errors:    0
+Timeouts:  1
+
+Run time: 109.6s
+Fallback wall-clock: 24.9% of total
+Fallback mutants: 32.8% of executed
+
+Phases:
+  oracle build:          2843 ms
+  baseline tests:        1085 ms
+  plan generation:         11 ms
+  schema build:          2680 ms
+  schema workers:      125588 ms
+  fallback workers:      7860 ms
+  report writing:          10 ms
+  total:               142071 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    64
+    all tests:          0
+  avg tests/mutant: 2.2
+  median tests/mutant: 2
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+
+Mutalisk run complete in 142330ms
+bench.wall_ms=144000
+** (ErlangError) Erlang error: :terminated:
+
+  * 1st argument: the device has terminated
+
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["MUT_RESULT error 0 Erlang error: :terminated", 10])
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:109: Mut.Worker.PersistentRunner.handle_command/2
+    (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7
+    (elixir 1.20.0-rc.4) lib/code.ex:649: Code.validated_eval_string/4
