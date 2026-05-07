@@ -169,26 +169,24 @@ defmodule Mut.Worker.Persistent do
         {:reply, %{result | duration_ms: duration_ms}, %{state | leftover: leftover}}
 
       {:error, kind, _leftover} when kind in [:timeout, :crashed] ->
-        # F4 auto-restart + M20 Phase B.1 timeout/crash split:
-        # - :timeout — runner exceeded the per-mutant deadline. The
-        #   mutant's outcome IS Timeout; mix-spawn retry would just
-        #   spend another @timeout_ms reaching the same conclusion.
-        #   Reply :timeout, restart the BEAM in-place, no mix retry.
-        # - :crashed — port exited mid-run (likely a BEAM crash, not a
-        #   stuck test). Replay through mix-spawn might succeed where
-        #   persistent died. Reply :crashed; host reroutes via mix.
-        # In both cases the persistent BEAM is rebooted so subsequent
-        # mutants on this sandbox stay on the persistent path. If the
-        # restart itself fails the GenServer stops with :worker_crashed
-        # and the host's :exit catch routes every remaining mutant on
-        # this sandbox via mix.
+        # F4 auto-restart + M20 timeout/crash split:
+        # - :timeout — host deadline expired. The persistent BEAM is
+        #   restarted in place so this sandbox's NEXT mutant stays on
+        #   persistent; the current mutant is replied as :timeout. The
+        #   host still routes to mix-spawn for byte-identity (M20
+        #   Phase A found ~30 Decimal mutants where persistent stalls
+        #   but mix kills them cleanly).
+        # - :crashed — port exited mid-run. Same restart-in-place; host
+        #   routes to mix-spawn.
+        # If the restart itself fails the GenServer stops with
+        # :worker_crashed; the host's :exit catch handles the rest.
         kill_port(state.port)
         reply = if kind == :timeout, do: :timeout, else: :crashed
 
         state =
           state
           |> Map.update!(:crash_count, &(&1 + 1))
-          |> maybe_count_mix_fallback(reply)
+          |> Map.update!(:mix_fallback_count, &(&1 + 1))
 
         case boot_port(state.sandbox, state.opts) do
           {:ok, new_port, leftover, _boot_ms, boot_metrics} ->
@@ -204,15 +202,6 @@ defmodule Mut.Worker.Persistent do
         end
     end
   end
-
-  # mix_fallback_count tracks "how many mutants this worker's
-  # persistent path could not handle and the host had to reroute via
-  # mix". :timeout no longer triggers a mix reroute, so it doesn't
-  # bump the counter. :crashed and :filter_miss still do.
-  defp maybe_count_mix_fallback(state, :crashed),
-    do: Map.update!(state, :mix_fallback_count, &(&1 + 1))
-
-  defp maybe_count_mix_fallback(state, _other), do: state
 
   @impl GenServer
   def terminate(_reason, %{port: port}) when is_port(port) do

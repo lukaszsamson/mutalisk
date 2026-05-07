@@ -439,25 +439,26 @@ defmodule Mix.Tasks.Mut do
   defp run_schema_via(_ctx, sandbox, mutant, worker_tests),
     do: run_schema_via_mix(sandbox, mutant, worker_tests)
 
-  # Recovery contract (F4 auto-restart + M20 Phase B.1 timeout split):
+  # Recovery contract (F4 auto-restart + M20 timeout/crash split):
   # - `:filter_miss` — runner couldn't resolve the selected files to
   #   loaded test ids. BEAM is healthy; rerun this mutant via
   #   mix-spawn.
-  # - `:timeout` — runner exceeded per-mutant deadline. Outcome IS
-  #   Timeout; mix-spawn retry would just timeout again. Materialise
-  #   a Result{status: :timeout} directly; the BEAM has already been
-  #   restarted by the GenServer.
+  # - `:timeout` — host deadline expired waiting for MUT_RESULT.
+  #   Mix-retry at the same deadline. M20 Phase B explored skipping
+  #   the retry (BENCHMARKS.md "Phase B notes") but Decimal
+  #   regressed: ~30 mutants are killed in mix-spawn but stall
+  #   under persistent's accumulated state. The retry is correct
+  #   even though it costs perf — per-sandbox auto-restart still
+  #   happens internally, so this sandbox's *next* mutant stays on
+  #   persistent.
   # - `:crashed` — runner port exited mid-run (likely a BEAM-level
-  #   crash). Mix-spawn retry might succeed where persistent died.
-  # - `:exit` (defensive) — the GenServer itself stopped (auto-restart
-  #   failed). All future calls also hit this catch and route to
-  #   mix; per-sandbox fallback is implicit.
+  #   crash). Mix-retry might succeed where persistent died.
+  # - `:exit` (defensive) — the GenServer itself stopped
+  #   (auto-restart failed). All future calls also hit this catch
+  #   and route to mix; per-sandbox fallback is implicit.
   defp run_schema_via_persistent(_ctx, server, sandbox, mutant, worker_tests) do
     case Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms) do
-      :timeout ->
-        %Mut.Worker.Result{status: :timeout, duration_ms: @timeout_ms, raw_output: ""}
-
-      reply when reply in [:filter_miss, :crashed] ->
+      reply when reply in [:filter_miss, :timeout, :crashed] ->
         run_schema_via_mix(sandbox, mutant, worker_tests)
 
       %Mut.Worker.Result{} = result ->

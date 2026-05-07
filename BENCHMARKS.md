@@ -79,8 +79,30 @@ are all sub-10 ms — none is the bottleneck on plug_crypto.
 
 ### Decimal
 
-(c=4 persistent run with diagnostics is in flight; numbers
-land in the Phase B section below.)
+| | c=4 mix | c=4 persistent |
+|---|---:|---:|
+| total wall | 660 s | 744 s |
+| schema_workers wall | — | ~610 s |
+| fallback_workers wall | — | ~130 s |
+| boot per worker (median) | — | ~920 ms |
+| app startup per boot (median) | — | 3 ms |
+| test load per boot (median) | — | 713 ms |
+| ExUnit.run per mutant (median) | — | 36 ms |
+| ExUnit.run per mutant (p95) | — | 215 ms |
+| reset hooks (sum of medians) | — | <0.5 ms |
+| filter lookup (median) | — | <0.1 ms |
+| crashes / restarts | — | ~30 / ~30 |
+| memory peak (per worker) | — | 69 MB |
+
+**Dominant overhead at c=4**: ~30 mutants stall under persistent's
+accumulated state and require a mix-spawn retry for byte-identity
+(otherwise they flip Killed→Timeout — a correctness regression).
+The persistent BEAM hits its 60 s deadline, mix-spawn re-runs the
+mutant in a fresh BEAM and kills it. Each such mutant costs
+~63 s. The schema_workers wall is dominated by these retries.
+
+ExUnit.run itself is fast on Decimal (36 ms median, 215 ms p95) —
+per-mutant work is not the bottleneck.
 
 ### demo_app
 
@@ -101,17 +123,113 @@ checked: 21 killed / 10 survived in default and coverage,
 
 ### Dominant overhead summary
 
-- **plug_crypto** (c=4): wasted 60 s mix-spawn retry on the 1
-  timeout mutant. The retry runs even though the persistent
-  worker already gave us the same answer (Timeout). Phase B.1
-  removes the retry.
-- **Decimal** (c=4): pending.
+- **plug_crypto** (c=4): the lone timeout mutant costs persistent
+  60 s in-BEAM + 60 s mix-spawn retry = 120 s on one worker, vs
+  60 s in mix. The retry is correctness-required (see Phase B
+  attempts below).
+- **Decimal** (c=4): ~30 mutants stall in persistent due to
+  accumulated state across mutants; each requires a 60 s
+  mix-spawn retry to preserve byte-identity. Reset hooks
+  (Application env / ETS / processes / persistent_term /
+  OnExitHandler) don't catch this leak vector — diagnosis is
+  M21-conditional.
 - **demo_app**: no dominant overhead — already faster than mix.
 
 App startup (median 4 ms) is NOT the bottleneck on any
 target — F2's "scan and start every project app" is cheap in
 practice, so the originally-hypothesised B.1 (scoped app
 startup) is deferred unless Phase B Decimal data resurrects it.
+
+## v1.8 M20 Phase B: optimisation attempts and results
+
+Phase A showed the dominant per-mutant overhead in persistent
+mode is **already very small** — boot is amortised, app
+startup is ~4 ms, reset hooks are sub-millisecond, the
+filter lookup is sub-millisecond, ExUnit.run wall is the
+real per-mutant cost (median 36–600 ms across the three
+targets). The persistent vs mix gap on plug_crypto and
+Decimal is concentrated entirely in the **timeout/crash
+recovery path**.
+
+### Attempt B.1a — skip mix-spawn retry on persistent timeouts
+
+Hypothesis: when persistent times out, the outcome IS
+Timeout. Mix-spawn would just hit the same 60 s deadline.
+Skipping the retry saves 60 s per timeout mutant on the
+worker that hit it.
+
+**Result on plug_crypto at c=4: 144 s → 93 s** (1.07× of
+mix; was 1.71× slower in v1.7). byte-identical to mix.
+
+**Result on Decimal at c=4: byte-identity regression.**
+v1.7 had ~30 Decimal mutants where persistent stalled (state
+leak across mutants) but the mix retry succeeded as Killed.
+Skipping the retry flipped 31 Killed (in mix) to Timeout (in
+persistent). Per the M20 prompt's "do not ship a Phase B
+optimisation that breaks byte-identity" rule, **rolled back**.
+
+### Attempt B.1b — shorter persistent deadline + mix retry
+
+Hypothesis: if persistent times out faster (30 s instead of
+60 s) the wasted-wait portion shrinks; mix retry still runs
+at the full 60 s for byte-identity. State-leak timeouts
+should resolve quickly in mix-spawn so the retry is cheap.
+
+**Result on Decimal at c=4: 744 s → 988 s** (1.50× SLOWER).
+The shorter deadline triggered ~9 *additional* timeouts on
+mutants that legitimately complete in 30–60 s (not stuck,
+just slow). Each extra false-timeout cost (30 s persistent +
+60 s mix retry) − 35 s genuine ≈ 55 s wasted. Rolled back.
+
+### Phase B summary
+
+The persistent vs mix gap is dominated by timeout-class
+mutants that need mix-retry for byte-identity (state leaks
+that v1.7's `Mut.Worker.PersistentRunner.Reset` doesn't
+catch). Closing the gap requires either:
+
+1. **Plugging the state leak.** ~30 Decimal mutants stall
+   under persistent's accumulated ExUnit/process state in a
+   way the four reset vectors (Application env, ETS,
+   processes, persistent_term, OnExitHandler) don't cover.
+   This is a focused diagnosis task with the same shape as
+   v1.7 F2 — instrument, find the leak vector, write a
+   reset hook for it. Phase A diagnostics give the
+   instrumentation; the diagnosis itself is M21-conditional
+   work (gated on whether the leak is a single vector or
+   many).
+
+2. **Pipelining schema and fallback buckets.** When a
+   persistent worker is blocked on a 60 s timeout mutant,
+   the other 3 workers idle waiting for `run_schema_mutants`
+   to drain before `run_fallback_mutants` starts. Letting
+   idle workers pick up fallback work would absorb that
+   wasted parallelism. Architectural change to
+   `Mix.Tasks.Mut.run_with_concurrency`; deferred.
+
+Per the M20 prompt's Phase B fallback acceptance, **M20
+ships Phase A diagnostics and the timeout/crash code-clarity
+split**, with this section documenting the residual
+overhead and root cause. The 1.5× speedup bar is **not** met.
+
+### Final bench numbers at v1.8 HEAD (c=4)
+
+| Target | mix wall | persistent wall | speedup |
+|---|---:|---:|---:|
+| demo_app | ~10 s | ~7-8 s | 1.3× |
+| plug_crypto | 84 s | 142 s | 0.59× (slower) |
+| Decimal | 660 s | 744 s | 0.89× (slower) |
+
+byte-identity preserved on every target between mix and
+persistent (Decimal within V17 acceptance for the existing
+timeout-class flap). `bin/verify`'s `e2e_persistent` layer
+exercises this on demo_app every CI run.
+
+### Diagnostics overhead
+
+Measured on plug_crypto at c=4: 143 s with diagnostics on
+vs 147 s with `MUT_PERSISTENT_DIAG=0`. Within run-to-run
+noise, well under the 5% bar required by M20 acceptance.
 
 ## v1.6 default change
 

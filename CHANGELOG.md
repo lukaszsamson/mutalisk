@@ -3,6 +3,88 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.8 (M20, 2026-05-07)
+
+### Added
+- **`mutalisk.persistent` extension key in Stryker JSON.** When
+  `--worker-type persistent` is in effect, the report's
+  `mutalisk` block carries a new `persistent` sub-block with
+  per-phase median timings (boot, app startup, test load,
+  per-mutant ExUnit run, reset hooks per vector, filter
+  lookup), counts (workers, crashes, restarts, filter-miss,
+  mix-fallback), and memory peak per worker. `null` when
+  `--worker-type mix` is in effect.
+- **"Persistent worker:" terminal summary section.** Same data
+  rendered as a human-readable block.
+- `Mut.Worker.PersistentRunner.Diag` — in-BEAM helper for
+  microsecond timing capture, memory snapshots, and the
+  `MUT_BOOT_METRICS` / `MUT_RUN_METRICS` wire-protocol lines
+  alongside the existing `MUT_READY` / `MUT_RESULT` markers.
+- `Mut.Worker.Persistent.metrics/1` — host-side per-server
+  view of accumulated diagnostics. Mix.Tasks.Mut drains every
+  Persistent server before stopping it and folds the views
+  into `Mut.Metrics`.
+- New `Mut.Metrics.Snapshot.persistent` typespec block +
+  `record_persistent_workers/2` accumulator API.
+
+### Changed
+- `Mut.Worker.Persistent.handle_call/3` distinguishes
+  `{:error, :timeout, _}` from `{:error, :crashed, _}` and
+  replies `:timeout` vs `:crashed` accordingly. Both still
+  trigger BEAM auto-restart and mix-spawn retry on the host
+  side (a Phase B attempt to skip the timeout retry regressed
+  Decimal byte-identity by 31 mutants — see BENCHMARKS.md
+  "v1.8 M20 Phase B"). The new API distinction is for code
+  clarity and future targeted optimisation.
+
+### Diagnostics gating
+- `MUT_PERSISTENT_DIAG=0` disables per-mutant metrics emission
+  in the runner (boot metrics always emit — boot happens once).
+  Diagnostics overhead measured at c=4 on plug_crypto: 143 s
+  with diag on vs 147 s with diag off, within noise (well
+  under M20's 5% bar).
+
+### Known limitations (v1.8.0)
+- **Default stays `--worker-type mix`.** Persistent worker
+  remains opt-in. Per-target perf at c=4: demo_app 1.3×
+  faster, plug_crypto 0.59× (slower), Decimal 0.89×
+  (slower). Default flip is gated on closing the perf gap
+  on real targets.
+- **The plug_crypto / Decimal slowness is concentrated in
+  the timeout-recovery path.** ~30 Decimal mutants stall in
+  persistent due to accumulated ExUnit/process state and
+  require a mix-spawn retry for byte-identity. The four
+  reset vectors (Application env / ETS / processes /
+  persistent_term / OnExitHandler) don't catch this leak
+  vector. Diagnosis is M21-conditional work.
+
+### Internal
+- `lib/mut/worker/persistent_runner/diag.ex` (new — diagnostic
+  helper).
+- `lib/mut/worker/persistent_runner.ex` — boot, app-startup,
+  test-load, per-mutant, per-reset-vector instrumentation.
+  `Diag.emit_boot/1` and `Diag.emit_run/1` write JSON
+  protocol lines parsed by the host.
+- `lib/mut/worker/persistent.ex` — host parses the new
+  protocol lines, accumulates per-server metrics, exposes
+  `metrics/1` for the host pipeline. `boot_port/2` returns
+  boot wall + parsed boot metrics.
+- `lib/mut/metrics.ex` — `Snapshot.persistent_block/0`
+  typespec, `record_persistent_workers/2` cast,
+  `persistent_snapshot/1` reducer (medians/p95s across all
+  workers).
+- `lib/mut/reporter/terminal.ex` — `persistent_block/1`
+  renderer.
+- `lib/mut/reporter/stryker_json.ex` — `persistent_extension/1`
+  serialiser.
+- `lib/mix/tasks/mut.ex` — `collect_persistent_metrics/2`
+  drains workers before snapshot rendering.
+- `test/mut/worker/persistent_test.exs` — new test for the
+  `:timeout` vs `:crashed` reply distinction.
+- `bench/run.sh` benches for plug_crypto and Decimal at c=1
+  and c=4 with diagnostics enabled produced the per-target
+  Phase A tables in BENCHMARKS.md.
+
 ## v1.7 (M19, 2026-05-06)
 
 ### Added
