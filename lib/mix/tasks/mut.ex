@@ -69,7 +69,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Worker.Persistent
 
   @requirements ["app.config"]
-  @timeout_ms 60_000
+  @timeout_ms 70_000
   @coverage_pathology_floor_ms 10_000
   @mutalisk_root Path.expand("../../..", __DIR__)
 
@@ -458,7 +458,20 @@ defmodule Mix.Tasks.Mut do
   #   and route to mix; per-sandbox fallback is implicit.
   defp run_schema_via_persistent(_ctx, server, sandbox, mutant, worker_tests) do
     case Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms) do
-      reply when reply in [:filter_miss, :timeout, :crashed] ->
+      :timeout ->
+        # M21: persistent's `:timeout` is the authoritative result —
+        # the test exceeded the per-message deadline and no progress
+        # was emitted for `@timeout_ms`. After M21's two fixes
+        # (max_failures: 1 in the runner + per-message wait_for_result),
+        # persistent is byte-identical to mix on Decimal at c=4
+        # (within V17 acceptance). Mix-retry is no longer needed and
+        # would cost an extra @timeout_ms per timeout. Materialise
+        # Result{status: :timeout} directly. The persistent BEAM has
+        # already been auto-restarted by the GenServer, so subsequent
+        # mutants on this sandbox stay on persistent.
+        %Mut.Worker.Result{status: :timeout, duration_ms: @timeout_ms, raw_output: ""}
+
+      reply when reply in [:filter_miss, :crashed] ->
         run_schema_via_mix(sandbox, mutant, worker_tests)
 
       %Mut.Worker.Result{} = result ->

@@ -57,7 +57,14 @@ defmodule Mut.Worker.PersistentRunner do
     # spurious kills versus the mix worker (which mix-test starts apps for).
     {app_startup_us, app_startup_count} = time_app_startup()
 
-    ExUnit.start(autorun: false, formatters: [Mut.Worker.Formatter])
+    # max_failures: 1 mirrors `mix test --max-failures 1` that the
+    # mix-spawn worker passes. Without this, ExUnit runs every
+    # selected test even after one fails — and some Decimal mutants
+    # (~30 of them) cause an early test to fail AND a later test to
+    # infinite-loop. mix would have aborted after the first failure;
+    # persistent (without max_failures) ran the loop to the 60s
+    # deadline and reported Timeout. This was the M21 leak vector.
+    ExUnit.start(autorun: false, formatters: [Mut.Worker.Formatter], max_failures: 1)
 
     test_helper = Keyword.get(opts, :test_helper)
 

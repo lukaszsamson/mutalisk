@@ -225,6 +225,63 @@ persistent (Decimal within V17 acceptance for the existing
 timeout-class flap). `bin/verify`'s `e2e_persistent` layer
 exercises this on demo_app every CI run.
 
+## v1.8 M21 — Test-runtime parity bug fixed
+
+**Root cause.** Phase A's hypothesis ("persistent has a state leak
+that v1.7 reset hooks don't catch") was wrong. The actual cause was
+a *test-runtime parity bug*: persistent ran tests under a different
+ExUnit configuration than mix-spawn does. Two divergences:
+
+1. **`max_failures: 1` was missing** in `PersistentRunner`'s
+   `ExUnit.start/1`. The mix-spawn worker passes `mix test
+   --max-failures 1`. Without it, persistent ran *every* selected
+   test even after one failed — and ~30 Decimal mutants caused an
+   early test to fail AND a later test to infinite-loop. Mix
+   aborted at the first failure (1.5 s); persistent reached the
+   loopy test and wedged the BEAM until the 60 s deadline.
+
+2. **`wait_for_result` used an absolute deadline.** Mix-spawn's
+   `Worker.collect/3` uses a *per-message* timeout — the deadline
+   resets every time the worker BEAM produces output. Tests that
+   take 60.5 s but emit per-test JSONL events while running survive
+   in mix as long as the silence between messages stays under
+   `timeout_ms`. Persistent's old absolute deadline killed those
+   same tests at 60 s.
+
+3. **`@timeout_ms` was 60 000 ms,** identical to ExUnit's per-test
+   default. Race condition between "ExUnit notices and aborts" and
+   "host fires deadline." Bumped to 70 000 ms — gives ExUnit's
+   `:max_failures_reached` event time to land before the host gives
+   up.
+
+Fixed in `lib/mut/worker/persistent_runner.ex`,
+`lib/mut/worker/persistent.ex`, and `lib/mix/tasks/mut.ex`.
+
+### M21 results at c=4
+
+| Target | mix wall | persistent v1.7 | persistent v1.8 (M20) | persistent v1.8 (M21) | speedup vs mix |
+|---|---:|---:|---:|---:|---:|
+| demo_app | ~10 s | ~7 s | ~7-8 s | ~7-8 s | 1.3× |
+| plug_crypto | 84 s | 144 s | 142 s | **80 s** | **1.05× (faster)** |
+| Decimal | 660 s | 744 s | 744 s | **598 s** | **1.10× (faster)** |
+
+byte-identity preserved on every target — same Survived stable-id
+sets vs mix worker, with V17-acceptance flap (mutants mix marked
+Timeout that persistent kills via `max_failures: 1` aborting the
+first failing test fast). On Decimal, persistent now produces 16
+*more* Killed than mix (was 11 in v1.7 with mix-retry, persistent
+gets there directly via the runtime parity fix). Zero Killed→Timeout
+regressions.
+
+### Why M21 didn't need a new reset hook
+
+The four existing reset vectors (Application env / ETS / processes
+/ persistent_term / OnExitHandler) ARE complete. The "leak" was
+never about state accumulating across mutants — it was about
+ExUnit running a different test schedule under persistent than
+under mix-spawn. A single `max_failures: 1` config flip and a
+per-message timeout closed both gaps.
+
 ### Diagnostics overhead
 
 Measured on plug_crypto at c=4: 143 s with diagnostics on

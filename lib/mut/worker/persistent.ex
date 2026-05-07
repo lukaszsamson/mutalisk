@@ -62,7 +62,14 @@ defmodule Mut.Worker.Persistent do
   def run_schema(server, mutant_id, test_files, opts \\ [])
       when is_integer(mutant_id) and mutant_id >= 0 and is_list(test_files) and is_list(opts) do
     timeout_ms = Keyword.get(opts, :timeout_ms, @default_run_timeout_ms)
-    GenServer.call(server, {:run_schema, mutant_id, test_files, timeout_ms}, timeout_ms + 5_000)
+    # GenServer.call timeout is :infinity because the in-handle_call
+    # wait_for_result uses a PER-MESSAGE (relative) timeout — a slow
+    # but data-producing worker can legitimately exceed timeout_ms of
+    # absolute wall-clock. The handle_call's own deadline is the
+    # authority on when to declare timeout/crash; we never want
+    # GenServer.call to fire its own caller-side timeout and crash
+    # the calling Task with :exit.
+    GenServer.call(server, {:run_schema, mutant_id, test_files, timeout_ms}, :infinity)
   end
 
   @spec stop(server, timeout()) :: :ok
@@ -327,6 +334,13 @@ defmodule Mut.Worker.Persistent do
   defp inspect_helper_opt(nil), do: "[]"
   defp inspect_helper_opt(path), do: "[test_helper: #{inspect(path)}]"
 
+  defp forward_env(key) do
+    case System.get_env(key) do
+      nil -> nil
+      value -> {key, value}
+    end
+  end
+
   defp port_env(opts) do
     base = [
       {"MIX_ENV", "test"},
@@ -338,10 +352,8 @@ defmodule Mut.Worker.Persistent do
     ]
 
     forwarded =
-      case System.get_env("MUT_PERSISTENT_DIAG") do
-        nil -> []
-        value -> [{"MUT_PERSISTENT_DIAG", value}]
-      end
+      [forward_env("MUT_PERSISTENT_DIAG")]
+      |> Enum.reject(&is_nil/1)
 
     extra = Keyword.get(opts, :env, [])
     merged = base ++ forwarded ++ extra
@@ -384,14 +396,19 @@ defmodule Mut.Worker.Persistent do
     end
   end
 
+  # M21 fix: per-message timeout, mirroring `Mut.Worker.collect/3`.
+  # The deadline resets every time the worker BEAM produces output
+  # (any port {:data, _} or test-progress line). A test that legitimately
+  # takes 60.5s but emits per-test JSONL while running survives the
+  # 60s deadline as long as silence between messages stays under
+  # `timeout_ms`. This matches mix-spawn's behaviour exactly and was
+  # one of the M21 leak vectors: persistent's old absolute deadline
+  # killed tests that mix's relative deadline kept alive.
   defp wait_for_result(port, leftover, timeout_ms) do
-    deadline = System.monotonic_time(:millisecond) + timeout_ms
-    do_wait_for_result(port, leftover, deadline, nil)
+    do_wait_for_result(port, leftover, timeout_ms, nil)
   end
 
-  defp do_wait_for_result(port, acc, deadline, run_metrics) do
-    timeout = max(deadline - System.monotonic_time(:millisecond), 0)
-
+  defp do_wait_for_result(port, acc, timeout_ms, run_metrics) do
     receive do
       {^port, {:data, {:eol, line}}} ->
         case parse_result_line(line) do
@@ -411,20 +428,20 @@ defmodule Mut.Worker.Persistent do
           :passthrough ->
             case Diag.parse_line(line) do
               {:ok, :run, metrics} ->
-                do_wait_for_result(port, acc, deadline, metrics)
+                do_wait_for_result(port, acc, timeout_ms, metrics)
 
               _ ->
-                do_wait_for_result(port, acc <> line <> "\n", deadline, run_metrics)
+                do_wait_for_result(port, acc <> line <> "\n", timeout_ms, run_metrics)
             end
         end
 
       {^port, {:data, {:noeol, partial}}} ->
-        do_wait_for_result(port, acc <> partial, deadline, run_metrics)
+        do_wait_for_result(port, acc <> partial, timeout_ms, run_metrics)
 
       {^port, {:exit_status, _code}} ->
         {:error, :crashed, acc}
     after
-      timeout ->
+      timeout_ms ->
         {:error, :timeout, acc}
     end
   end

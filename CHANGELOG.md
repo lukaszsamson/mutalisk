@@ -3,6 +3,71 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.8 (M20 + M21, 2026-05-07)
+
+### M21 — Persistent worker faster than mix on real targets
+
+M20 Phase B attempted (and rolled back) two perf optimisations
+because Decimal regressed byte-identity. M21 found the actual
+root cause: a *test-runtime parity bug*, not a state leak. Three
+small fixes restore parity AND deliver the perf win the M20 spec
+targeted.
+
+#### Fixed
+- **`PersistentRunner` now starts ExUnit with `max_failures: 1`**
+  to mirror `mix test --max-failures 1` that the mix-spawn worker
+  passes. Without it, persistent ran every selected test even
+  after one failed — and ~30 Decimal mutants caused an early test
+  to fail AND a later test to infinite-loop. Mix aborted at the
+  first failure; persistent reached the loopy test and wedged the
+  BEAM until the 60 s deadline. With the fix, persistent matches
+  mix's "abort fast" behaviour exactly.
+- **`Mut.Worker.Persistent.wait_for_result` now uses a
+  per-message (relative) timeout** instead of an absolute deadline.
+  Mix-spawn's `Worker.collect/3` resets its timeout every time the
+  worker emits output; tests that legitimately take 60.5 s but
+  emit per-test JSONL events while running survive in mix as long
+  as silence stays under `timeout_ms`. Persistent's old absolute
+  deadline killed those same tests at 60 s. Now it matches mix's
+  semantics.
+- **`@timeout_ms` bumped from 60 000 ms to 70 000 ms** to give
+  ExUnit's `:max_failures_reached` event time to land before the
+  host's deadline fires. Removes the 60 s == 60 s race between
+  ExUnit's per-test default timeout and the host's wait.
+- **`Mut.Worker.Persistent.run_schema/4` GenServer.call timeout is
+  now `:infinity`.** With per-message host-side timeout, a
+  legitimately slow but data-producing worker can exceed
+  `timeout_ms` of absolute wall-clock; we never want
+  GenServer.call to fire its own caller-side timeout and crash
+  the calling Task.
+
+#### Changed
+- **Persistent's `:timeout` reply now materialises
+  `Result{status: :timeout}` directly** without mix-spawn retry.
+  After M21's fixes, persistent is byte-identical to mix on
+  Decimal at c=4 within V17 acceptance — a mix-retry on timeout
+  is unnecessary and would cost an extra `@timeout_ms` per
+  timeout. Re-introduced the original Phase B.1a optimisation
+  (rolled back in M20 because of the byte-identity regression);
+  M21 fixed the regression's root cause so it's now safe.
+
+#### Performance
+Per-target persistent wall at c=4 (mix baseline → v1.7 → v1.8 M21):
+- demo_app: ~10 s → ~7 s → ~7-8 s — 1.3× faster than mix
+- plug_crypto: 84 s → 144 s → **80 s** — **1.05× faster** than mix
+  (was 1.71× SLOWER in v1.7)
+- Decimal: 660 s → 744 s → **598 s** — **1.10× faster** than mix
+  (was 1.13× SLOWER in v1.7)
+
+byte-identity preserved on all three targets; on Decimal,
+persistent now produces 16 more Killed than mix at v1.7 (mutants
+mix Timeout-ed but persistent kills fast via `max_failures: 1`).
+Zero Killed→Timeout regressions.
+
+The 1.5× perf bar from M20's Phase B acceptance is **not** met,
+but persistent is now faster than mix on every real target.
+Default flip remains a v1.9+ decision.
+
 ## v1.8 (M20, 2026-05-07)
 
 ### Added
