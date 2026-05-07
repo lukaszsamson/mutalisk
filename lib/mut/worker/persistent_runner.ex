@@ -1,6 +1,7 @@
 defmodule Mut.Worker.PersistentRunner do
   @dialyzer {:no_opaque, [apply_file_filter: 2]}
 
+  alias Mut.Worker.PersistentRunner.Diag
   alias Mut.Worker.PersistentRunner.Reset
 
   @moduledoc """
@@ -43,6 +44,8 @@ defmodule Mut.Worker.PersistentRunner do
 
   @spec run([Path.t()], keyword) :: :ok | no_return
   def run(test_files, opts \\ []) when is_list(test_files) do
+    boot_started_us = Diag.now_us()
+
     {:ok, _} = Application.ensure_all_started(:logger)
     {:ok, _} = Application.ensure_all_started(:ex_unit)
 
@@ -52,17 +55,14 @@ defmodule Mut.Worker.PersistentRunner do
     # Plug.Crypto.Application creates the named `Plug.Crypto.Keys` ETS table
     # this way; tests calling sign/encrypt then crash with :badarg, producing
     # spurious kills versus the mix worker (which mix-test starts apps for).
-    start_project_apps()
+    {app_startup_us, app_startup_count} = time_app_startup()
 
     ExUnit.start(autorun: false, formatters: [Mut.Worker.Formatter])
 
-    if path = Keyword.get(opts, :test_helper) do
-      if File.exists?(path), do: Code.require_file(path)
-    end
+    test_helper = Keyword.get(opts, :test_helper)
 
-    Enum.each(test_files, fn file ->
-      if File.exists?(file), do: Code.require_file(file)
-    end)
+    {test_load_us, test_load_count} =
+      Diag.time(fn -> require_files(test_helper, test_files) end)
 
     ExUnit.configure(formatters: [Mut.Worker.Formatter])
 
@@ -79,8 +79,43 @@ defmodule Mut.Worker.PersistentRunner do
       leak_baseline: capture_leak_baseline()
     }
 
+    {memory_total, memory_processes} = Diag.memory_snapshot()
+    boot_us = Diag.elapsed_us(boot_started_us)
+
+    Diag.emit_boot(%{
+      boot_us: boot_us,
+      app_startup_us: app_startup_us,
+      app_startup_count: app_startup_count,
+      test_load_us: test_load_us,
+      test_load_count: test_load_count,
+      memory_total: memory_total,
+      memory_processes: memory_processes
+    })
+
     write_marker(@ready_marker)
     loop(snapshot)
+  end
+
+  defp time_app_startup do
+    started = Diag.now_us()
+    count = start_project_apps()
+    {Diag.elapsed_us(started), count}
+  end
+
+  defp require_files(test_helper, test_files) do
+    helper_count = require_one(test_helper)
+    Enum.reduce(test_files, helper_count, fn file, count -> count + require_one(file) end)
+  end
+
+  defp require_one(nil), do: 0
+
+  defp require_one(file) do
+    if File.exists?(file) do
+      Code.require_file(file)
+      1
+    else
+      0
+    end
   end
 
   defp loop(snapshot) do
@@ -125,23 +160,41 @@ defmodule Mut.Worker.PersistentRunner do
   end
 
   defp do_run(mutant_id, test_files, snapshot) do
-    started = System.monotonic_time(:microsecond)
+    started = Diag.now_us()
+    diag_enabled? = Diag.enabled?()
 
     :persistent_term.put({Mut.Runtime, :active_mutant}, mutant_id)
     restore_server_state(snapshot.ex_unit)
 
-    case apply_file_filter(test_files, snapshot.file_index) do
+    {filter, filter_us} = Diag.time(fn -> apply_file_filter(test_files, snapshot.file_index) end)
+
+    case filter do
       :ok ->
-        reset_leaks(snapshot)
+        reset_timings = reset_leaks(snapshot, diag_enabled?)
 
-        %{failures: failures} = ExUnit.run()
+        {%{failures: failures}, run_us} = Diag.time(fn -> ExUnit.run() end)
 
-        elapsed_us = System.monotonic_time(:microsecond) - started
+        elapsed_us = Diag.elapsed_us(started)
+
+        if diag_enabled? do
+          {memory_total, memory_processes} = Diag.memory_snapshot()
+
+          Diag.emit_run(
+            %{
+              run_us: run_us,
+              filter_us: filter_us,
+              memory_total: memory_total,
+              memory_processes: memory_processes
+            }
+            |> Map.merge(reset_timings)
+          )
+        end
+
         status = if failures == 0, do: "survived", else: "killed"
         write_marker("#{@result_marker} #{status} #{elapsed_us}")
 
       {:error, {:filter_miss, missing}} ->
-        elapsed_us = System.monotonic_time(:microsecond) - started
+        elapsed_us = Diag.elapsed_us(started)
 
         # Tell the host this mutant could not be run with the
         # requested file selection. The host catches this and reruns
@@ -272,12 +325,18 @@ defmodule Mut.Worker.PersistentRunner do
                             syntax_tools tools jason)a
 
   defp start_project_apps do
-    for app <- discover_project_apps(), app not in @system_apps_for_start do
-      _ = Application.load(app)
-      _ = Application.ensure_all_started(app)
-    end
+    discover_project_apps()
+    |> Enum.reject(&(&1 in @system_apps_for_start))
+    |> Enum.reduce(0, fn app, started -> started + start_one_app(app) end)
+  end
 
-    :ok
+  defp start_one_app(app) do
+    _ = Application.load(app)
+
+    case Application.ensure_all_started(app) do
+      {:ok, list} when is_list(list) -> length(list)
+      _ -> 0
+    end
   end
 
   # Limit discovery to apps in the schema build path (added by the host via
@@ -322,13 +381,39 @@ defmodule Mut.Worker.PersistentRunner do
 
   ## --- Leak-vector reset ---------------------------------------------------
 
-  defp reset_leaks(%{leak_baseline: %{} = baseline}) do
-    Reset.reset_app_env(baseline.app_env)
-    Reset.reset_ets_tables(baseline.ets_tables)
-    Reset.reset_registered(baseline.registered)
-    Reset.reset_persistent_terms(baseline.persistent_terms, [{Mut.Runtime, :active_mutant}])
-    Reset.clear_on_exit_handler()
-    :ok
+  # Returns a map of per-vector microsecond timings when diag_enabled? is
+  # true, an empty map otherwise. The map is shaped to merge directly
+  # into the per-mutant metrics payload.
+  defp reset_leaks(%{leak_baseline: %{} = baseline}, diag_enabled?) do
+    if diag_enabled? do
+      {_, app_env_us} = Diag.time(fn -> Reset.reset_app_env(baseline.app_env) end)
+      {_, ets_us} = Diag.time(fn -> Reset.reset_ets_tables(baseline.ets_tables) end)
+      {_, processes_us} = Diag.time(fn -> Reset.reset_registered(baseline.registered) end)
+
+      {_, persistent_term_us} =
+        Diag.time(fn ->
+          Reset.reset_persistent_terms(baseline.persistent_terms, [
+            {Mut.Runtime, :active_mutant}
+          ])
+        end)
+
+      {_, on_exit_us} = Diag.time(fn -> Reset.clear_on_exit_handler() end)
+
+      %{
+        reset_app_env_us: app_env_us,
+        reset_ets_us: ets_us,
+        reset_processes_us: processes_us,
+        reset_persistent_term_us: persistent_term_us,
+        reset_on_exit_us: on_exit_us
+      }
+    else
+      Reset.reset_app_env(baseline.app_env)
+      Reset.reset_ets_tables(baseline.ets_tables)
+      Reset.reset_registered(baseline.registered)
+      Reset.reset_persistent_terms(baseline.persistent_terms, [{Mut.Runtime, :active_mutant}])
+      Reset.clear_on_exit_handler()
+      %{}
+    end
   end
 
   defp escape(message) do

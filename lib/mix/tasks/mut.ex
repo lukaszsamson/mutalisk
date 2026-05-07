@@ -236,6 +236,7 @@ defmodule Mix.Tasks.Mut do
 
         {snapshot, final_pool}
       after
+        collect_persistent_metrics(persistent_servers, metrics_pid)
         stop_persistent_workers(persistent_servers)
 
         if opts.keep_work_copy do
@@ -493,6 +494,21 @@ defmodule Mix.Tasks.Mut do
         :exit, _ -> :ok
       end
     end)
+  end
+
+  # Drains diagnostic metrics from every live persistent worker before
+  # stopping them, then folds the per-worker views into Mut.Metrics
+  # so the snapshot's `persistent` block reflects the run.
+  defp collect_persistent_metrics(servers, _metrics_pid) when servers == %{}, do: :ok
+
+  defp collect_persistent_metrics(servers, metrics_pid) do
+    workers =
+      servers
+      |> Enum.map(fn {_id, pid} -> Persistent.metrics(pid) end)
+      |> Enum.reject(&is_nil/1)
+
+    Metrics.record_persistent_workers(metrics_pid, workers)
+    :ok
   end
 
   defp execute_fallback_mutant(mutant, sandbox, ctx) do

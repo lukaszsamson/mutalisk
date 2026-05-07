@@ -73,9 +73,49 @@ defmodule Mut.Reporter.Terminal do
       "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n",
       phase_block(snapshot),
       selection_block(snapshot),
-      concurrency_block(snapshot)
+      concurrency_block(snapshot),
+      persistent_block(snapshot)
     ]
   end
+
+  defp persistent_block(%Snapshot{persistent: nil}), do: ""
+
+  defp persistent_block(%Snapshot{persistent: p}) do
+    boot = Map.get(p, :boot_ms, %{})
+    app = Map.get(p, :app_startup_ms, %{})
+    test_load = Map.get(p, :test_load_ms, %{})
+    run = Map.get(p, :mutant_run_ms, %{})
+    reset = Map.get(p, :reset_ms, %{})
+    memory = Map.get(p, :memory, %{})
+
+    [
+      "\nPersistent worker:\n",
+      "  workers:     #{Map.get(p, :worker_count, 0)}\n",
+      "  boot:        median #{format_ms(Map.get(boot, :median, 0))} (max #{format_ms(Map.get(boot, :max, 0))})\n",
+      "  app startup: median #{format_ms(Map.get(app, :median, 0))} (total apps: #{Map.get(app, :total_apps, 0)})\n",
+      "  test load:   median #{format_ms(Map.get(test_load, :median, 0))} (total files: #{Map.get(test_load, :total_files, 0)})\n",
+      "  mutant run:  median #{format_ms(Map.get(run, :median, 0))} (p95 #{format_ms(Map.get(run, :p95, 0))}, n=#{Map.get(run, :count, 0)})\n",
+      "  reset hooks:\n",
+      "    application_env: #{format_ms(Map.get(reset, :application_env, 0))}\n",
+      "    ets:             #{format_ms(Map.get(reset, :ets, 0))}\n",
+      "    processes:       #{format_ms(Map.get(reset, :processes, 0))}\n",
+      "    persistent_term: #{format_ms(Map.get(reset, :persistent_term, 0))}\n",
+      "    on_exit:         #{format_ms(Map.get(reset, :on_exit, 0))}\n",
+      "  filter lookup: #{format_ms(Map.get(p, :filter_lookup_ms, 0))}\n",
+      "  crashes: #{Map.get(p, :crash_count, 0)}  restarts: #{Map.get(p, :restart_count, 0)}  filter-miss: #{Map.get(p, :filter_miss_count, 0)}  mix-fallback: #{Map.get(p, :mix_fallback_count, 0)}\n",
+      "  memory: peak #{format_mb(Map.get(memory, :peak_total_mb, 0.0))} total, #{format_mb(Map.get(memory, :peak_processes_mb, 0.0))} processes\n"
+    ]
+  end
+
+  defp format_ms(value) when is_number(value),
+    do: :erlang.float_to_binary(value * 1.0, decimals: 1) <> " ms"
+
+  defp format_ms(_), do: "0.0 ms"
+
+  defp format_mb(value) when is_number(value),
+    do: :erlang.float_to_binary(value * 1.0, decimals: 1) <> " MB"
+
+  defp format_mb(_), do: "0.0 MB"
 
   defp recompile_categories_block(%Snapshot{recompile_categories: nil}), do: ""
 

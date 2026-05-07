@@ -36,6 +36,7 @@ defmodule Mut.Worker.Persistent do
 
   alias Mut.Sandbox
   alias Mut.Worker.Formatter
+  alias Mut.Worker.PersistentRunner.Diag
   alias Mut.Worker.Result
 
   @ready_marker "MUT_READY"
@@ -69,6 +70,43 @@ defmodule Mut.Worker.Persistent do
     GenServer.stop(server, :normal, timeout)
   end
 
+  @doc """
+  Returns this worker's accumulated diagnostic metrics. Always safe
+  to call; returns the empty/zero-shape when no runs have happened
+  yet. The host calls this at run end on every Persistent server it
+  started, then folds the per-worker metrics into `Mut.Metrics`.
+  """
+  @spec metrics(server) :: %{
+          boot_ms: non_neg_integer(),
+          boot_metrics: map() | nil,
+          run_metrics: [map()],
+          crash_count: non_neg_integer(),
+          restart_count: non_neg_integer(),
+          filter_miss_count: non_neg_integer(),
+          mix_fallback_count: non_neg_integer(),
+          memory_peak_total: non_neg_integer(),
+          memory_peak_processes: non_neg_integer()
+        }
+  def metrics(server) do
+    GenServer.call(server, :metrics, 5_000)
+  catch
+    # If the server is dead, return whatever shape callers expect so
+    # the host's metrics fold doesn't blow up. The host already
+    # tracked the crash via run_schema_via_persistent's :exit catch.
+    :exit, _ ->
+      %{
+        boot_ms: 0,
+        boot_metrics: nil,
+        run_metrics: [],
+        crash_count: 0,
+        restart_count: 0,
+        filter_miss_count: 0,
+        mix_fallback_count: 0,
+        memory_peak_total: 0,
+        memory_peak_processes: 0
+      }
+  end
+
   ## GenServer
 
   @impl GenServer
@@ -76,8 +114,23 @@ defmodule Mut.Worker.Persistent do
     Process.flag(:trap_exit, true)
 
     case boot_port(sandbox, opts) do
-      {:ok, port, leftover} ->
-        {:ok, %{port: port, sandbox: sandbox, leftover: leftover, opts: opts}}
+      {:ok, port, leftover, boot_ms, boot_metrics} ->
+        {:ok,
+         %{
+           port: port,
+           sandbox: sandbox,
+           leftover: leftover,
+           opts: opts,
+           boot_ms: boot_ms,
+           boot_metrics: boot_metrics,
+           run_metrics: [],
+           crash_count: 0,
+           restart_count: 0,
+           filter_miss_count: 0,
+           mix_fallback_count: 0,
+           memory_peak_total: peak_total(boot_metrics, 0),
+           memory_peak_processes: peak_processes(boot_metrics, 0)
+         }}
 
       {:error, reason} ->
         {:stop, reason}
@@ -85,23 +138,34 @@ defmodule Mut.Worker.Persistent do
   end
 
   @impl GenServer
+  def handle_call(:metrics, _from, state) do
+    {:reply, metrics_view(state), state}
+  end
+
   def handle_call({:run_schema, mutant_id, test_files, timeout_ms}, _from, state) do
     started = System.monotonic_time(:millisecond)
     files_blob = encode_files(test_files, state.sandbox)
     Port.command(state.port, "RUN #{mutant_id}#{files_blob}\n")
 
     case wait_for_result(state.port, state.leftover, timeout_ms) do
-      {:ok, %Result{status: :filter_miss}, _leftover} ->
+      {:ok, %Result{status: :filter_miss}, _leftover, run_metrics} ->
         # Filter miss is recoverable: the worker BEAM is still
         # healthy, but the host needs to rerun this mutant via mix
         # because the persistent runner could not resolve the
         # selected files to any loaded test ids. Reply with
         # :filter_miss; the caller treats it the same as a crash
         # exit and re-routes via mix without tearing the BEAM down.
+        state =
+          state
+          |> Map.update!(:filter_miss_count, &(&1 + 1))
+          |> Map.update!(:mix_fallback_count, &(&1 + 1))
+          |> record_run_metrics(run_metrics)
+
         {:reply, :filter_miss, %{state | leftover: ""}}
 
-      {:ok, result, leftover} ->
+      {:ok, result, leftover, run_metrics} ->
         duration_ms = System.monotonic_time(:millisecond) - started
+        state = record_run_metrics(state, run_metrics)
         {:reply, %{result | duration_ms: duration_ms}, %{state | leftover: leftover}}
 
       {:error, kind, _leftover} when kind in [:timeout, :crashed] ->
@@ -115,8 +179,18 @@ defmodule Mut.Worker.Persistent do
         # every subsequent mutant on this sandbox via mix.
         kill_port(state.port)
 
+        state =
+          state
+          |> Map.update!(:crash_count, &(&1 + 1))
+          |> Map.update!(:mix_fallback_count, &(&1 + 1))
+
         case boot_port(state.sandbox, state.opts) do
-          {:ok, new_port, leftover} ->
+          {:ok, new_port, leftover, _boot_ms, boot_metrics} ->
+            state =
+              state
+              |> Map.update!(:restart_count, &(&1 + 1))
+              |> bump_memory_peaks(boot_metrics)
+
             {:reply, :crashed, %{state | port: new_port, leftover: leftover}}
 
           {:error, _reason} ->
@@ -141,12 +215,14 @@ defmodule Mut.Worker.Persistent do
 
   defp boot_port(sandbox, opts) do
     boot_timeout = Keyword.get(opts, :boot_timeout_ms, @default_boot_timeout_ms)
+    boot_started_ms = System.monotonic_time(:millisecond)
 
     case open_port(sandbox, opts) do
       {:ok, port, leftover} ->
         case wait_for_ready(port, leftover, boot_timeout) do
-          {:ok, leftover} ->
-            {:ok, port, leftover}
+          {:ok, leftover, boot_metrics} ->
+            boot_ms = System.monotonic_time(:millisecond) - boot_started_ms
+            {:ok, port, leftover, boot_ms, boot_metrics}
 
           {:error, reason} ->
             kill_port(port)
@@ -267,22 +343,28 @@ defmodule Mut.Worker.Persistent do
 
   defp wait_for_ready(port, leftover, timeout_ms) do
     deadline = System.monotonic_time(:millisecond) + timeout_ms
-    do_wait_for_ready(port, leftover, deadline)
+    do_wait_for_ready(port, leftover, deadline, nil)
   end
 
-  defp do_wait_for_ready(port, acc, deadline) do
+  defp do_wait_for_ready(port, acc, deadline, boot_metrics) do
     timeout = max(deadline - System.monotonic_time(:millisecond), 0)
 
     receive do
       {^port, {:data, {:eol, line}}} ->
         if line == @ready_marker do
-          {:ok, ""}
+          {:ok, "", boot_metrics}
         else
-          do_wait_for_ready(port, acc <> line <> "\n", deadline)
+          case Diag.parse_line(line) do
+            {:ok, :boot, metrics} ->
+              do_wait_for_ready(port, acc, deadline, metrics)
+
+            _ ->
+              do_wait_for_ready(port, acc <> line <> "\n", deadline, boot_metrics)
+          end
         end
 
       {^port, {:data, {:noeol, partial}}} ->
-        do_wait_for_ready(port, acc <> partial, deadline)
+        do_wait_for_ready(port, acc <> partial, deadline, boot_metrics)
 
       {^port, {:exit_status, code}} ->
         {:error, {:worker_exited_during_boot, code, acc}}
@@ -294,10 +376,10 @@ defmodule Mut.Worker.Persistent do
 
   defp wait_for_result(port, leftover, timeout_ms) do
     deadline = System.monotonic_time(:millisecond) + timeout_ms
-    do_wait_for_result(port, leftover, deadline)
+    do_wait_for_result(port, leftover, deadline, nil)
   end
 
-  defp do_wait_for_result(port, acc, deadline) do
+  defp do_wait_for_result(port, acc, deadline, run_metrics) do
     timeout = max(deadline - System.monotonic_time(:millisecond), 0)
 
     receive do
@@ -314,14 +396,20 @@ defmodule Mut.Worker.Persistent do
                 killing_test: killing_test(acc)
               }
 
-            {:ok, result, ""}
+            {:ok, result, "", run_metrics}
 
           :passthrough ->
-            do_wait_for_result(port, acc <> line <> "\n", deadline)
+            case Diag.parse_line(line) do
+              {:ok, :run, metrics} ->
+                do_wait_for_result(port, acc, deadline, metrics)
+
+              _ ->
+                do_wait_for_result(port, acc <> line <> "\n", deadline, run_metrics)
+            end
         end
 
       {^port, {:data, {:noeol, partial}}} ->
-        do_wait_for_result(port, acc <> partial, deadline)
+        do_wait_for_result(port, acc <> partial, deadline, run_metrics)
 
       {^port, {:exit_status, _code}} ->
         {:error, :crashed, acc}
@@ -412,4 +500,52 @@ defmodule Mut.Worker.Persistent do
   end
 
   defp kill_port(_), do: :ok
+
+  ## --- Diagnostic accumulators ---------------------------------------------
+
+  defp record_run_metrics(state, nil), do: state
+
+  defp record_run_metrics(state, metrics) when is_map(metrics) do
+    state
+    |> Map.update!(:run_metrics, &[metrics | &1])
+    |> bump_memory_peaks(metrics)
+  end
+
+  defp bump_memory_peaks(state, nil), do: state
+
+  defp bump_memory_peaks(state, metrics) when is_map(metrics) do
+    %{
+      state
+      | memory_peak_total: peak_total(metrics, state.memory_peak_total),
+        memory_peak_processes: peak_processes(metrics, state.memory_peak_processes)
+    }
+  end
+
+  defp peak_total(nil, current), do: current
+
+  defp peak_total(%{memory_total: m}, current) when is_integer(m) and m > 0,
+    do: max(m, current)
+
+  defp peak_total(_, current), do: current
+
+  defp peak_processes(nil, current), do: current
+
+  defp peak_processes(%{memory_processes: m}, current) when is_integer(m) and m > 0,
+    do: max(m, current)
+
+  defp peak_processes(_, current), do: current
+
+  defp metrics_view(state) do
+    %{
+      boot_ms: state.boot_ms,
+      boot_metrics: state.boot_metrics,
+      run_metrics: Enum.reverse(state.run_metrics),
+      crash_count: state.crash_count,
+      restart_count: state.restart_count,
+      filter_miss_count: state.filter_miss_count,
+      mix_fallback_count: state.mix_fallback_count,
+      memory_peak_total: state.memory_peak_total,
+      memory_peak_processes: state.memory_peak_processes
+    }
+  end
 end
