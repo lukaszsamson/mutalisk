@@ -52,12 +52,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `--no-halt`, the BEAM terminates cleanly and the e2e wrapper
   completes.
 - **`e2e_persistent` verify layer enabled.** `bin/verify` now runs
-  `mix mut.e2e --worker-type persistent` (with the
-  `MUTALISK_PERSISTENT_EXPERIMENTAL=1` env gate forwarded
-  internally) as a 9th layer. demo_app byte-identical between mix
-  and persistent at c=4: 21 killed / 10 survived in default,
-  21 / 10 in coverage, 23 / 10 in attribute mode (same stable-id
-  sets).
+  `mix mut.e2e --worker-type persistent` as a 9th layer. demo_app
+  byte-identical between mix and persistent at c=4: 21 killed / 10
+  survived in default, 21 / 10 in coverage, 23 / 10 in attribute
+  mode (same stable-id sets).
 - **Persistent runner now starts the project's OTP applications**
   (Mission F2). Without this, `Application.start/2` callbacks never
   fired, so resources they create (named ETS tables, registered
@@ -94,23 +92,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Known limitations (v1.7.0)
 - **Default stays `--worker-type mix`.** Persistent worker is
-  opt-in.
-- **In-process fallback recompile is deferred** (Mission F4).
-  Fallback mutants always route to the mix-spawn worker,
-  preserving M17's "0 invalid Decimal fallback" baseline
+  opt-in. v1.7 ships persistent as a correctness-safe opt-in,
+  not a default/perf release: persistent is currently slower
+  than mix on plug_crypto (1.7×) and Decimal (1.13×) at c=4, so
+  the default flip waits on M20 perf work. demo_app is faster
+  under persistent (1.3×).
+- **In-process fallback recompile is deferred** (Mission F4
+  phase 2). Fallback mutants always route to the mix-spawn
+  worker, preserving M17's "0 invalid Decimal fallback" baseline
   regardless of worker type.
-- **No automatic worker-restart after crash** (Mission F4).
-  Per-sandbox fallback to mix happens after the first crash;
-  V17's full restart-then-fallback design is post-v1.7.0 work.
 
 ### Internal
 - `lib/mut/worker/persistent.ex` (host).
 - `lib/mut/worker/persistent_runner.ex` (in-BEAM).
 - `lib/mut/worker/persistent_runner/reset.ex` (leak-vector helpers).
 - `bin/verify` enables `e2e_persistent` as a 9th layer that runs
-  `mix mut.e2e --worker-type persistent` (with the experimental env
-  gate set internally). Asserts demo_app byte-identity between mix
-  and persistent across default/coverage/attribute fixture variants.
+  `mix mut.e2e --worker-type persistent` directly. Asserts
+  demo_app byte-identity between mix and persistent across
+  default/coverage/attribute fixture variants.
+- F4 phase 1: when the worker BEAM dies (port exit / run timeout),
+  `Mut.Worker.Persistent` reboots the BEAM in-place; the crashing
+  mutant gets `:crashed` and the host reruns it via mix-spawn,
+  but subsequent mutants on the same sandbox stay on persistent.
+  Two regression tests cover the success and unrecoverable-boot
+  paths.
 
 ## v1.6 (M17, 2026-05-05)
 

@@ -3,30 +3,33 @@ defmodule Mut.Worker.Persistent do
   Host-side controller for a persistent ExUnit worker BEAM.
 
   See `V17_PERSISTENT_WORKER.md` and `Mut.Worker.PersistentRunner`.
-  M19 step 1 implements the schema-only path: spawn one BEAM per
-  sandbox, hold ExUnit + the user's test files in memory, flip
-  `:persistent_term` per mutant. Subsequent steps add reset hooks
-  (step 2), file-level filtering (step 3), parallel pool integration
-  (step 4), in-process fallback recompile (step 5), and crash
-  recovery (step 6).
+  Spawns one worker BEAM per sandbox, holds ExUnit + the user's
+  test files in memory, and flips `:persistent_term` per mutant
+  instead of paying mix-test boot cost on every mutant.
 
   ## Lifecycle
 
       {:ok, server} = Mut.Worker.Persistent.start_link(sandbox)
-      result = Mut.Worker.Persistent.run_schema(server, mutant_id, [])
+      result = Mut.Worker.Persistent.run_schema(server, mutant_id, files)
       :ok = Mut.Worker.Persistent.stop(server)
 
-  ## Notes for step 1
+  ## Behaviour
 
-  - Only schema mutants run here; fallback still routes to
+  - Only schema mutants run here; fallback always routes to
     `Mut.Worker.run_fallback/4` (the mix-spawn path).
-  - The `test_files` argument is currently ignored (step 3 wires the
-    `only_test_ids` filter); the worker runs every loaded test
-    module on each `run_schema` call. This matches v1.5/v1.6
-    selection on demo_app where the per-mutant set is small enough
-    that running everything is still cheap.
-  - `--worker-type persistent` is undocumented in step 1; the public
-    flag promotion is step 7.
+  - The `test_files` argument scopes ExUnit's `only_test_ids` to
+    the tests in those files. An empty list runs every loaded test
+    module.
+  - On filter miss (selected files map to zero loaded tests), the
+    server replies `:filter_miss` and the host reruns the mutant
+    via the mix-spawn worker.
+  - On crash (port exit / run timeout), the server reboots the BEAM
+    in-place and replies `:crashed` for the failing mutant. The
+    host reruns that mutant via mix-spawn but subsequent mutants
+    on the same sandbox stay on persistent. If the restart itself
+    fails, the GenServer stops with `:worker_crashed` and the host
+    falls back to mix-spawn for every remaining mutant on this
+    sandbox.
   """
 
   use GenServer

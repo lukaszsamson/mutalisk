@@ -18,17 +18,18 @@ targets** (Decimal within V17 acceptance for the existing
 timeout-class flap). The experimental env gate
 `MUTALISK_PERSISTENT_EXPERIMENTAL=1` was removed in F3.
 
+**Persistent is currently slower than mix on plug_crypto (1.7×)
+and Decimal (1.13×) at c=4.** v1.7 ships persistent as a
+correctness-safe opt-in worker — not a speed win on real
+projects. demo_app is faster under persistent (1.3×) because its
+per-mutant work is dominated by BEAM boot cost, but the leak-vector
+reset overhead exceeds the saved boot cost on plug_crypto and
+Decimal. Use `--worker-type mix` for production runs until M20's
+perf work flips the default. Performance tuning lives in M20.
+
 `bin/verify`'s `e2e_persistent` layer runs `mix mut.e2e --worker-type
 persistent` against demo_app and asserts byte-identity for the three
 fixture variants (default, coverage, attribute).
-
-The persistent worker's wall-clock cost on plug_crypto (1.7× slower)
-and on Decimal (1.13× slower) is a known regression versus mix at
-c=4 — every mutant goes through the same single BEAM and the
-leak-vector reset adds overhead that mix amortises across fresh
-spawns. The win is correctness preservation under reduced per-mutant
-boot cost on smaller targets (demo_app: 1.3× faster). Performance
-tuning lives in M20.
 
 ## v1.6 default change
 
