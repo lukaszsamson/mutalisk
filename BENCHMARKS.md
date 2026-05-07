@@ -31,6 +31,88 @@ perf work flips the default. Performance tuning lives in M20.
 persistent` against demo_app and asserts byte-identity for the three
 fixture variants (default, coverage, attribute).
 
+## v1.8 M20 Phase A: per-phase overhead breakdown
+
+Phase A landed instrumentation inside the persistent worker so we
+can answer "where does the time go" before optimising. Per-phase
+microsecond timings are captured by
+`Mut.Worker.PersistentRunner.Diag` and surfaced in the
+`mutalisk.persistent` block of every Stryker JSON written under
+`--worker-type persistent` (also rendered as a "Persistent worker:"
+section in the terminal summary).
+
+Diagnostics overhead measured on plug_crypto at c=4: 143 s with
+diag on vs 147 s with `MUT_PERSISTENT_DIAG=0`. Within run-to-run
+noise, well under the 5% bar.
+
+Numbers below are from M20 Phase A bench runs at HEAD (commit
+`fc31c7f` and follow-ups). Wall-clock columns are bench-script
+totals; per-phase columns are medians across all persistent
+workers (max where useful).
+
+### plug_crypto
+
+| | c=1 mix | c=1 persistent | c=4 mix | c=4 persistent |
+|---|---:|---:|---:|---:|
+| total wall | 128 s | 328 s | 84 s | 143 s |
+| schema_workers wall | — | 152 s | — | 125 s |
+| fallback_workers wall | — | 169 s | — | 7 s |
+| boot per worker (median) | — | 421 ms | — | 392 ms |
+| app startup per boot (median) | — | 4.2 ms | — | 4.0 ms |
+| test load per boot (median) | — | 205 ms | — | 205 ms |
+| ExUnit.run per mutant (median) | — | 605 ms | — | 604 ms |
+| reset hooks (sum of medians) | — | <0.5 ms | — | <0.5 ms |
+| filter lookup (median) | — | 0.1 ms | — | 0.1 ms |
+| crashes / restarts | — | 1 / 1 | — | 1 / 1 |
+| memory peak (per worker) | — | 61 MB | — | 62 MB |
+
+**Dominant overhead at c=4**: the single timeout mutant in
+plug_crypto's bench costs persistent 60 s of in-BEAM run +
+60 s of mix-spawn retry (= 120 s on one worker). Mix only pays
+the 60 s once. Because Task.async_stream waits for every
+schema mutant before fallback starts, the other 3 workers
+finish their share of normal mutants in ~5 s and then idle for
+~115 s waiting on the timeout-blocked worker.
+
+Reset hooks, filter lookup, app startup, and per-worker boot
+are all sub-10 ms — none is the bottleneck on plug_crypto.
+
+### Decimal
+
+(c=4 persistent run with diagnostics is in flight; numbers
+land in the Phase B section below.)
+
+### demo_app
+
+demo_app numbers come from `bin/verify`'s `e2e_persistent`
+layer (`mix mut.e2e --worker-type persistent` at default
+concurrency, c=4 in CI):
+
+| | mix wall | persistent wall | speedup |
+|---|---:|---:|---:|
+| default fixture | ~10.1 s | ~7.9 s | 1.28× |
+| attribute fixture | ~11.0 s | ~8.4 s | 1.31× |
+| coverage fixture | ~14.9 s | ~12.2 s | 1.22× |
+
+demo_app is small enough that BEAM-boot dominates per-mutant
+work in mix; persistent amortises that and wins. byte-identity
+checked: 21 killed / 10 survived in default and coverage,
+23 killed / 10 survived in attribute (matches mix exactly).
+
+### Dominant overhead summary
+
+- **plug_crypto** (c=4): wasted 60 s mix-spawn retry on the 1
+  timeout mutant. The retry runs even though the persistent
+  worker already gave us the same answer (Timeout). Phase B.1
+  removes the retry.
+- **Decimal** (c=4): pending.
+- **demo_app**: no dominant overhead — already faster than mix.
+
+App startup (median 4 ms) is NOT the bottleneck on any
+target — F2's "scan and start every project app" is cheap in
+practice, so the originally-hypothesised B.1 (scoped app
+startup) is deferred unless Phase B Decimal data resurrects it.
+
 ## v1.6 default change
 
 `mix mut` now defaults to parallel execution at `--concurrency = min(System.schedulers_online(), 4)`. Use `--concurrency 1` for v1.5 sequential behaviour. Smoke runs in this benchmark file annotated with `c=N` are at concurrency `N`; runs without an annotation use the v1.5 sequential default unless explicitly noted.

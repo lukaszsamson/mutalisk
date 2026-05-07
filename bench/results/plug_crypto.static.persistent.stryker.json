@@ -9,10 +9,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 671,
+          "duration": 626,
           "id": "1088fd6b7e384418a7be4f7f46147a7f",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+            "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
           ],
           "location": {
             "end": {
@@ -34,10 +34,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 41,
+          "duration": 4,
           "id": "18f394c7abf0912e7e45ea10866fb63f",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds on encryption"
+            "Plug.CryptoTest:sign and verify token with string"
           ],
           "location": {
             "end": {
@@ -59,7 +59,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 653,
+          "duration": 605,
           "id": "1c0ee0f70c07ddd6a6240e6f1c633b20",
           "killedBy": [
             "Plug.CryptoTest:compares masked binaries securely"
@@ -84,7 +84,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 617,
+          "duration": 604,
           "id": "23a4a2ff98a0547d5498f1bd1e08c4ce",
           "killedBy": [
             "Plug.CryptoTest:compares binaries securely"
@@ -109,10 +109,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1948,
+          "duration": 16168,
           "id": "247162bd17f72b8740f1bdc01f3cded2",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+            "Plug.CryptoTest:sign and verify token with string"
           ],
           "location": {
             "end": {
@@ -134,10 +134,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 609,
+          "duration": 605,
           "id": "2bd252a04ba99d8428c6e9cbdb9238cb",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports max age in seconds on encryption"
+            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
           ],
           "location": {
             "end": {
@@ -159,10 +159,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 2018,
+          "duration": 1343,
           "id": "43d1db5789f1e678ac4900f267bd7670",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+            "Plug.CryptoTest:sign and verify supports max age in seconds on encryption"
           ],
           "location": {
             "end": {
@@ -184,7 +184,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 2463,
+          "duration": 1157,
           "id": "6d07ca71ee2ad9112ff703a2ccc00eaf",
           "killedBy": [
             "Plug.CryptoTest:prunes stacktrace"
@@ -209,10 +209,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_number with is_float",
-          "duration": 2369,
+          "duration": 994,
           "id": "73807e2ee8403f3778a06ee0423fb0fe",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt token with string"
+            "Plug.CryptoTest:sign and verify supports max age in seconds"
           ],
           "location": {
             "end": {
@@ -234,7 +234,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 2140,
+          "duration": 10245,
           "id": "85de055e2876e238a984f486cbeed1b1",
           "killedBy": [
             "Plug.CryptoTest:encrypt and decrypt fails on missing token"
@@ -259,7 +259,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 2623,
+          "duration": 8407,
           "id": "86ee88ab6d391629e74dfcb7e2eb22ea",
           "killedBy": [
             "Plug.CryptoTest:non_executable_binary_to_term"
@@ -284,7 +284,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 610,
+          "duration": 605,
           "id": "874deaec68ca12d6d585db1585bf9111",
           "killedBy": [],
           "location": {
@@ -307,7 +307,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 2673,
+          "duration": 12563,
           "id": "89404c1bedd3da0700c17f716b17a583",
           "killedBy": [],
           "location": {
@@ -330,7 +330,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 2686,
+          "duration": 1900,
           "id": "8b5c232ee7c6b4094572a44e349ef604",
           "killedBy": [
             "Plug.CryptoTest:non_executable_binary_to_term"
@@ -355,7 +355,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 613,
+          "duration": 605,
           "id": "985651f36aa1c0629b1a91c15f05305f",
           "killedBy": [
             "Plug.CryptoTest:compares masked binaries securely"
@@ -380,7 +380,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace === with !==",
-          "duration": 607,
+          "duration": 605,
           "id": "a3d327d7a582abeb8da6ccef595af7a2",
           "killedBy": [],
           "location": {
@@ -403,10 +403,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 4,
+          "duration": 3,
           "id": "aaf6be9b0da9d0c088e25f4039d3ac17",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
+            "Plug.CryptoTest:sign and verify token with string"
           ],
           "location": {
             "end": {
@@ -428,7 +428,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 619,
+          "duration": 605,
           "id": "ad7269d27a3b88d9a1051c0e1c0573c9",
           "killedBy": [
             "Plug.CryptoTest:compares masked binaries securely"
@@ -453,7 +453,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace * with +",
-          "duration": 610,
+          "duration": 605,
           "id": "b18769d310e10dc9c5256734b9793d1e",
           "killedBy": [
             "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
@@ -478,7 +478,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 608,
+          "duration": 605,
           "id": "b75908f16571e4f07ae94b8483cfd5be",
           "killedBy": [],
           "location": {
@@ -504,7 +504,7 @@
           "duration": 304,
           "id": "b7b41d445b3f753f829b12bbf758a3bf",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports max age in seconds"
+            "Plug.CryptoTest:sign and verify token with string"
           ],
           "location": {
             "end": {
@@ -526,7 +526,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 2481,
+          "duration": 1841,
           "id": "b82b4bd79836bf79bb9af0180a39e686",
           "killedBy": [],
           "location": {
@@ -549,7 +549,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 1807,
+          "duration": 25067,
           "id": "ba0b3b87a2cf20bc55ddf70b9b37bf3f",
           "killedBy": [
             "Plug.CryptoTest:sign and verify supports max age in seconds"
@@ -574,10 +574,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 9,
+          "duration": 15,
           "id": "c0cd54a5f0e7d66bc8f1ed8d5a246226",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds on encryption"
+            "Plug.CryptoTest:sign and verify token with string"
           ],
           "location": {
             "end": {
@@ -599,7 +599,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 612,
+          "duration": 605,
           "id": "c24ba1b78a4986c43b55764748b95290",
           "killedBy": [
             "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
@@ -624,7 +624,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1855,
+          "duration": 7944,
           "id": "cd83ac0f87ba1b0a2087c08bf7268119",
           "killedBy": [
             "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
@@ -649,10 +649,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 616,
+          "duration": 605,
           "id": "d0a8a772d59a87307a8454a71312030c",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
           ],
           "location": {
             "end": {
@@ -674,10 +674,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace * with /",
-          "duration": 626,
+          "duration": 605,
           "id": "d730854c2e4e3f17f96d2df98a2bb756",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+            "Plug.CryptoTest:encrypt and decrypt supports signed_at in seconds"
           ],
           "location": {
             "end": {
@@ -699,7 +699,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 60000,
+          "duration": 60948,
           "id": "e02937e1b7dc31827f1b4b482599065b",
           "killedBy": [],
           "location": {
@@ -722,7 +722,7 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 606,
+          "duration": 2257,
           "id": "f03bc20f4f37216de7931af85b7baede",
           "killedBy": [
             "Plug.CryptoTest:compares masked binaries securely"
@@ -747,10 +747,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace guard is_number with is_integer",
-          "duration": 1521,
+          "duration": 10609,
           "id": "f1ac0cf0820d7257379c9bb6bdf081f4",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds on encryption"
+            "Plug.CryptoTest:sign and verify supports max age in seconds on encryption"
           ],
           "location": {
             "end": {
@@ -772,10 +772,10 @@
             "test/plug/crypto/message_encryptor_test.exs"
           ],
           "description": "replace * with -",
-          "duration": 153,
+          "duration": 776,
           "id": "fecb5c7546fcbf80ffe48a1718592505",
           "killedBy": [
-            "Plug.CryptoTest:sign and verify supports signed_at in seconds"
+            "Plug.CryptoTest:sign and verify supports max age in seconds"
           ],
           "location": {
             "end": {
@@ -804,7 +804,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 614,
+          "duration": 605,
           "id": "4061955b5855b461288b862a2b1660aa",
           "killedBy": [],
           "location": {
@@ -828,10 +828,10 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 607,
+          "duration": 606,
           "id": "51e07ded47f32e453f065c141984ec73",
           "killedBy": [
-            "Plug.Crypto.KeyGeneratorTest:digest :sha512 works"
+            "Plug.Crypto.KeyGeneratorTest:digest :sha384 works"
           ],
           "location": {
             "end": {
@@ -854,10 +854,10 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 16,
+          "duration": 9,
           "id": "9f5e27573bfdf071d2d1d96fc6bc37ea",
           "killedBy": [
-            "Plug.Crypto.MessageEncryptorTest:doctest module Plug.Crypto.MessageEncryptor (1)"
+            "Plug.Crypto.KeyGeneratorTest:digest :sha384 works"
           ],
           "location": {
             "end": {
@@ -880,7 +880,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 612,
+          "duration": 604,
           "id": "ae34e267e3e6d23abe6a341ff6babe17",
           "killedBy": [],
           "location": {
@@ -904,7 +904,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 609,
+          "duration": 2089,
           "id": "e09e1c89134502d14be0e218cfd6eea8",
           "killedBy": [
             "Plug.Crypto.KeyGeneratorTest:returns an error if iterations is not an integer >= 1"
@@ -930,10 +930,10 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 54,
+          "duration": 1520,
           "id": "e7e1c40aaff862483db62c74a0cc0278",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt supports :infinity for max age"
+            "Plug.Crypto.KeyGeneratorTest:digest :sha384 works"
           ],
           "location": {
             "end": {
@@ -956,10 +956,10 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 48,
+          "duration": 1856,
           "id": "e960eba612df19476da69e7b9ca089e9",
           "killedBy": [
-            "Plug.CryptoTest:encrypt and decrypt supports max age in seconds"
+            "Plug.Crypto.KeyGeneratorTest:digest :sha384 works"
           ],
           "location": {
             "end": {
@@ -987,7 +987,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 639,
+          "duration": 605,
           "id": "116226ec66923bff5611eff82a76c70d",
           "killedBy": [],
           "location": {
@@ -1010,7 +1010,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 610,
+          "duration": 605,
           "id": "42c36211ac039c1f4c5145440a075ef7",
           "killedBy": [],
           "location": {
@@ -1033,7 +1033,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 609,
+          "duration": 605,
           "id": "56b76b002856f4accb3f5079b459f837",
           "killedBy": [],
           "location": {
@@ -1056,7 +1056,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1945,
+          "duration": 1097,
           "id": "5ac3c1f23ab077546582c7ae3094826b",
           "killedBy": [
             "Plug.Crypto.MessageEncryptorTest:it encrypts/decrypts with iodata aad"
@@ -1081,7 +1081,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 606,
+          "duration": 605,
           "id": "5d6bc4112c70716ccebddccd0d0a0afc",
           "killedBy": [],
           "location": {
@@ -1104,7 +1104,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 607,
+          "duration": 617,
           "id": "62d94e489bd4625db72967d2a9e9c8a9",
           "killedBy": [],
           "location": {
@@ -1127,7 +1127,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 607,
+          "duration": 605,
           "id": "69397ec38b22077148484d078056d462",
           "killedBy": [],
           "location": {
@@ -1150,7 +1150,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 2414,
+          "duration": 1350,
           "id": "7f6b1d7a59479a4757a78fadea3b1069",
           "killedBy": [
             "Plug.Crypto.MessageEncryptorTest:it encrypts/decrypts with iodata aad"
@@ -1175,9 +1175,11 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 2393,
+          "duration": 6129,
           "id": "84d5b4f221e75a3d2febd2b8b2806479",
-          "killedBy": [],
+          "killedBy": [
+            "Plug.Crypto.MessageEncryptorTest:it encrypts/decrypts with iodata aad"
+          ],
           "location": {
             "end": {
               "column": 37,
@@ -1198,7 +1200,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 613,
+          "duration": 605,
           "id": "9325ee6ca333e0394a608bf1b7180f33",
           "killedBy": [],
           "location": {
@@ -1221,7 +1223,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 1639,
+          "duration": 1437,
           "id": "941c46695f46f3952bb29790c71f5d7a",
           "killedBy": [
             "Plug.Crypto.MessageEncryptorTest:it decodes messages from earlier versions"
@@ -1246,7 +1248,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 608,
+          "duration": 605,
           "id": "983339a6ef87dfa7ddd83d39d9be647d",
           "killedBy": [],
           "location": {
@@ -1269,7 +1271,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 609,
+          "duration": 605,
           "id": "a0bed325399f56177a275bd901f57709",
           "killedBy": [],
           "location": {
@@ -1292,7 +1294,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 614,
+          "duration": 605,
           "id": "a7e81501258e67f7f6aa33dad40e77b6",
           "killedBy": [],
           "location": {
@@ -1315,7 +1317,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 1774,
+          "duration": 1073,
           "id": "abff45ac5dd140cb5511f5f533c85ed3",
           "killedBy": [
             "Plug.Crypto.MessageEncryptorTest:it decodes messages from earlier versions"
@@ -1340,7 +1342,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 611,
+          "duration": 605,
           "id": "add19ed7bff52ff987f977b5049703a3",
           "killedBy": [],
           "location": {
@@ -1363,7 +1365,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 609,
+          "duration": 605,
           "id": "b2c9413c0e9815e4ec2259b08646cdd2",
           "killedBy": [],
           "location": {
@@ -1386,7 +1388,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 606,
+          "duration": 605,
           "id": "b6f4d4d56019b649e1f67d900e67917a",
           "killedBy": [],
           "location": {
@@ -1409,7 +1411,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 609,
+          "duration": 605,
           "id": "b97bf3bb5fbbfbf38045044b2d852203",
           "killedBy": [],
           "location": {
@@ -1432,7 +1434,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 613,
+          "duration": 605,
           "id": "d3dfa5cf452d8c1e8be34cf872bc3648",
           "killedBy": [],
           "location": {
@@ -1455,7 +1457,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 607,
+          "duration": 1648,
           "id": "f451fe57ac6c9ea54979d6233d1d9f7f",
           "killedBy": [],
           "location": {
@@ -1485,10 +1487,10 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 2056,
+          "duration": 1014,
           "id": "56d3599a2494de716a3450539f1b6206",
           "killedBy": [
-            "Plug.Crypto.MessageVerifierTest:does not verify a signed message if secret changed"
+            "Plug.Crypto.MessageVerifierTest:does not verify a tampered message"
           ],
           "location": {
             "end": {
@@ -1511,10 +1513,10 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard > with <=",
-          "duration": 1630,
+          "duration": 3563,
           "id": "d2c4050f553aada8dc409ae43f254692",
           "killedBy": [
-            "Plug.Crypto.MessageVerifierTest:generates a signed message"
+            "Plug.Crypto.MessageVerifierTest:does not verify a tampered message"
           ],
           "location": {
             "end": {
@@ -1537,7 +1539,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 2305,
+          "duration": 1857,
           "id": "d676da3cacb5d462daac5448dc1cd32d",
           "killedBy": [],
           "location": {
@@ -1561,7 +1563,7 @@
             "test/plug/crypto_test.exs"
           ],
           "description": "replace guard > with >=",
-          "duration": 2228,
+          "duration": 41167,
           "id": "d689770d7494db299ba17ee6f337c9b9",
           "killedBy": [],
           "location": {
@@ -1584,8 +1586,8 @@
   },
   "mutalisk": {
     "concurrency": {
-      "configured": 4,
-      "effective": 4,
+      "configured": 1,
+      "effective": 1,
       "schedulers_online": 12
     },
     "engine": {
@@ -1656,7 +1658,7 @@
     },
     "metrics": {
       "fallback_count": 21,
-      "fallback_time_ms": 44968,
+      "fallback_time_ms": 156925,
       "fanout": {
         "b97bf3bb5fbbfbf38045044b2d852203": 2,
         "5d6bc4112c70716ccebddccd0d0a0afc": 2,
@@ -1799,51 +1801,51 @@
     },
     "persistent": {
       "app_startup_ms": {
-        "median": 5.3,
-        "total_apps": 12
+        "median": 4.2,
+        "total_apps": 3
       },
       "boot_ms": {
-        "max": 627,
-        "median": 508.0,
-        "p95": 627
+        "max": 421,
+        "median": 421,
+        "p95": 421
       },
       "crash_count": 1,
       "filter_lookup_ms": 0.1,
       "filter_miss_count": 0,
       "memory": {
-        "peak_processes_mb": 15.8,
-        "peak_total_mb": 61.6
+        "peak_processes_mb": 15.4,
+        "peak_total_mb": 61.2
       },
-      "mix_fallback_count": 0,
+      "mix_fallback_count": 1,
       "mutant_run_ms": {
         "count": 42,
-        "median": 607.4,
-        "p95": 636.5
+        "median": 604.5,
+        "p95": 1813.8
       },
       "reset_ms": {
         "application_env": 0.0,
-        "ets": 0.2,
+        "ets": 0.1,
         "on_exit": 0.0,
         "persistent_term": 0.0,
         "processes": 0.0
       },
       "restart_count": 1,
       "test_load_ms": {
-        "median": 265.0,
-        "total_files": 20
+        "median": 205.1,
+        "total_files": 5
       },
-      "worker_count": 4
+      "worker_count": 1
     },
     "phase_timings": {
-      "baseline_tests_ms": 1375,
+      "baseline_tests_ms": 1066,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 13221,
-      "oracle_build_ms": 3580,
+      "fallback_workers_ms": 168732,
+      "oracle_build_ms": 2542,
       "plan_generation_ms": 10,
-      "report_writing_ms": 14,
-      "schema_build_ms": 3614,
-      "schema_workers_ms": 65282,
-      "total_ms": 89695
+      "report_writing_ms": 20,
+      "schema_build_ms": 2744,
+      "schema_workers_ms": 152296,
+      "total_ms": 327919
     },
     "recompile_categories": {
       "compile_error": 0,

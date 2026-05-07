@@ -107,6 +107,34 @@ defmodule Mut.Worker.PersistentTest do
   end
 
   @tag timeout: 30_000
+  test "replies :timeout (not :crashed) when host deadline expires mid-run" do
+    # M20 Phase B.1: distinguish timeout from crash. A run that
+    # exceeds `timeout_ms` is a host-side deadline expiry, not a
+    # BEAM crash. The persistent BEAM is still rebooted (so the
+    # rest of this sandbox's mutants stay on persistent), but the
+    # caller does NOT mix-spawn retry — the mutant outcome is
+    # Timeout and a mix retry would just timeout again.
+    sandbox_path = fake_persistent_project("worker_timeout")
+    shim = silent_elixir_shim()
+
+    {:ok, server} =
+      Persistent.start_link(%Sandbox{id: 1, path: sandbox_path},
+        elixir_path: shim,
+        test_files: []
+      )
+
+    try do
+      # Tight timeout — the shim writes MUT_READY then never
+      # responds, so RUN waits the full deadline before reporting
+      # back as :timeout.
+      assert Persistent.run_schema(server, 1, [], timeout_ms: 200) == :timeout
+      assert Process.alive?(server)
+    after
+      stop(server)
+    end
+  end
+
+  @tag timeout: 30_000
   test "stops the GenServer when restart itself fails" do
     # If boot of the replacement BEAM fails (port not spawnable,
     # boot timeout), the GenServer stops with :worker_crashed and
@@ -193,6 +221,24 @@ defmodule Mut.Worker.PersistentTest do
     printf 'MUT_READY\n'
     IFS= read -r _line
     exit 99
+    """)
+
+    File.chmod!(path, 0o755)
+    path
+  end
+
+  defp silent_elixir_shim do
+    # Reads RUN, then sleeps. Used to drive a host-side timeout
+    # without the runner crashing. The shim exits cleanly when
+    # stdin closes (host kills the port).
+    path = Path.expand(Path.join(["tmp", "tests", "persistent", "silent_elixir.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    printf 'MUT_READY\n'
+    IFS= read -r _line
+    sleep 60
     """)
 
     File.chmod!(path, 0o755)

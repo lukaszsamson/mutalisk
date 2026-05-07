@@ -130,17 +130,31 @@ defmodule Mut.Worker.PersistentRunner.Diag do
   defp decode(rest, kind) do
     case Jason.decode(String.trim(rest)) do
       {:ok, map} when is_map(map) ->
-        {:ok, kind, atomize_keys(map)}
+        {:ok, kind, atomize_keys(map, kind)}
 
       _ ->
         :error
     end
   end
 
-  defp atomize_keys(map) do
-    Map.new(map, fn {k, v} -> {String.to_existing_atom(k), v} end)
-  rescue
-    ArgumentError -> map
+  # Maps the wire-format string keys to the host-side atom keys.
+  # We list every key explicitly rather than `String.to_existing_atom/1`
+  # because the host hasn't necessarily interned them yet at the time
+  # the first metrics line lands. Unknown keys are dropped silently —
+  # forward compatibility for runners emitting fields the host doesn't
+  # know about.
+  @boot_keys ~w(boot_us app_startup_us app_startup_count test_load_us test_load_count memory_total memory_processes)
+  @run_keys ~w(run_us filter_us reset_app_env_us reset_ets_us reset_processes_us reset_persistent_term_us reset_on_exit_us memory_total memory_processes)
+
+  defp atomize_keys(map, kind) do
+    keys = if kind == :boot, do: @boot_keys, else: @run_keys
+
+    Enum.reduce(keys, %{}, fn k, acc ->
+      case Map.fetch(map, k) do
+        {:ok, value} -> Map.put(acc, String.to_atom(k), value)
+        :error -> acc
+      end
+    end)
   end
 
   defp emit_line(marker, metrics) do

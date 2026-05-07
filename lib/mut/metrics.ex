@@ -473,14 +473,14 @@ defmodule Mut.Metrics do
 
   defp app_startup_block(boot_metrics) do
     %{
-      median: us_to_ms(median(for(m <- boot_metrics, do: m[:app_startup_us]))),
+      median: us_to_ms(median(field(boot_metrics, :app_startup_us))),
       total_apps: boot_metrics |> Enum.map(&(&1[:app_startup_count] || 0)) |> Enum.sum()
     }
   end
 
   defp test_load_block(boot_metrics) do
     %{
-      median: us_to_ms(median(for(m <- boot_metrics, do: m[:test_load_us]))),
+      median: us_to_ms(median(field(boot_metrics, :test_load_us))),
       total_files: boot_metrics |> Enum.map(&(&1[:test_load_count] || 0)) |> Enum.sum()
     }
   end

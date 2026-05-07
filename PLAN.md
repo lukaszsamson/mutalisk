@@ -1006,3 +1006,171 @@ Exactly 7 commits, one per step. Each commit must pass `bin/verify` at all 9 lay
 - Mutation semantics or stable_id input changes.
 
 `--worker-type mix` is permanent — even after persistent becomes default in a v1.8+ follow-up, mix stays as the validated escape hatch and is regression-tested forever.
+
+---
+
+# v1.8 Milestones
+
+v1.8's theme: **make persistent workers worth using, not just correct.**
+
+v1.7 shipped persistent worker as opt-in supported with byte-identity proven on demo_app, plug_crypto, and Decimal. But BENCHMARKS shows persistent is currently SLOWER than mix on plug_crypto and Decimal at c=4. v1.7 delivered correctness without a perf win on real targets.
+
+v1.8 closes that gap. Diagnose the dominant overhead, apply targeted optimizations, re-measure. The user-visible win is "persistent is faster than mix on real projects, not just demo_app."
+
+**Default does NOT flip in v1.8** unless persistent beats mix on plug_crypto AND Decimal at c=4. Default flip is a separate v1.9+ decision based on v1.8's empirical results.
+
+v1.8 is two milestones: M20 combines diagnostics with targeted optimization; M21 ships in-process fallback recompile only if M20 reveals fallback is dominant overhead.
+
+## M20 — Persistent performance diagnostics + targeted optimization
+
+**Goal:** identify the dominant per-phase overhead in persistent worker on real-world targets and apply targeted fixes that bring at least one of plug_crypto or Decimal to ≥1.5× faster than mix at c=4.
+
+**Inputs:** v1.7 BENCHMARKS (current "persistent slower" baseline); `lib/mut/worker/persistent.ex`; `lib/mut/worker/persistent_runner.ex`; `lib/mut/worker/persistent_runner/reset.ex`; `lib/mut/metrics.ex`; existing `mutalisk` JSON extension key infrastructure.
+
+### Phase A — Diagnostics (lands first)
+
+Per-phase timing instrumentation inside the persistent worker:
+
+- **Boot time per sandbox**: from port open to MUT_READY.
+- **Project app startup time**: how long `Application.ensure_all_started/1` takes per app, summed.
+- **Test file load time**: how long `Code.require_file/2` takes for the discovered test files.
+- **Per-mutant ExUnit run time**: median, p95, count.
+- **Reset hook time**: per-vector breakdown (Application env, ETS, processes, persistent_term, OnExit).
+- **Filter lookup time**: time to translate requested files to `only_test_ids`.
+- **Crash / restart / filter-miss fallback counts**: cumulative.
+- **Memory dimension**: peak BEAM memory per persistent worker via `:erlang.memory(:total)` snapshots at boot, post-each-mutant, before-restart.
+
+Surface in:
+- `Mut.Metrics.Snapshot.persistent` block (host-side accumulation from worker reports).
+- `mutalisk.persistent` extension key in Stryker JSON output.
+- Terminal summary section "Persistent worker:" with per-phase median + total.
+
+**Phase A acceptance:**
+- Diagnostics shipped end-to-end. Stryker JSON validates. Terminal output readable.
+- Initial bench at c=1/4 on demo_app, plug_crypto, Decimal documents the dominant overhead per target.
+- Diagnostics overhead itself is <5% of run wall-clock.
+
+### Phase B — Targeted optimization (based on Phase A findings)
+
+Phase B's specific work depends on what Phase A reveals. Likely candidates ranked by hypothesis:
+
+- **Most likely**: project app startup is dominant overhead per persistent boot. F2 (v1.7 followup) added `Application.ensure_all_started/1` for ALL `.app` files in `_build/mut_schema/lib/*/ebin/`. plug_crypto only needs `:plug_crypto`; Decimal only needs `:decimal`. **Fix**: start only the target project's apps + their declared `applications:` from mix.exs, not every `.app` in deps.
+- **Possible**: reset_leaks/1 overhead exceeds savings on fast tests. **Fix**: profile each reset implementation, optimize the slow ones (NOT skip them — optimization, not conditional bypass).
+- **Possible**: formatter overhead in the persistent-result protocol exceeds savings. **Fix**: design lighter in-BEAM result protocol that still preserves `killedBy`. Only if measurements indicate.
+- **Possible**: ExUnit's iteration-N startup cost is non-trivial. **Fix**: TBD based on diagnostics.
+
+Discovery cost optimization:
+- Cache discovered app list per sandbox.
+- Cache test file list per sandbox.
+
+**Explicitly forbidden Phase B items:**
+- Skipping reset vectors with dirty flags. Re-introduces the F2 failure mode (incomplete state reset → wrong results). Optimize implementations of reset hooks; do not conditionally bypass them.
+- Disabling `Application.ensure_all_started/1` entirely. F2 proved this is required for correctness on plug_crypto-class projects. The fix is to start fewer apps, not zero apps.
+
+**Phase B acceptance:**
+- Persistent at default c=4 is **≥1.5× faster than mix** on at least one of plug_crypto or Decimal.
+- demo_app remains faster (already true at v1.7).
+- byte-identity preserved on all three targets — same Survived stable-id sets vs mix worker.
+- `e2e_persistent` in bin/verify stays green.
+- BENCHMARKS shows per-phase overhead before and after Phase B optimizations.
+
+### Phase B fallback acceptance (if 1.5× isn't reachable)
+
+If Phase B's optimizations don't reach 1.5× on any real target:
+- Phase A diagnostics released regardless.
+- BENCHMARKS documents residual overhead per target with root cause.
+- M21 decision based on whether fallback is dominant overhead on Decimal-class projects.
+- v1.8 ships as "diagnostics released, persistent stays opt-in, perf gap documented."
+
+### Acceptance gates (whole milestone)
+
+- All 9 v1.7 verify layers green at default (`--worker-type mix`).
+- byte-identity preserved on demo_app, plug_crypto, Decimal between worker types.
+- Phase A diagnostics shipped (non-negotiable).
+- Phase B either reaches 1.5× on a real target OR clearly documents residual overhead with root cause.
+- Memory pressure under persistent c=8 documented (don't ship if any target OOMs).
+
+### Subagent brief
+
+**Highest risk surface:** byte-identity regression. Phase B's optimizations touch the persistent worker's hot path. ANY change that affects what state the worker resets, what apps it starts, or how it reports results can cause silent outcome drift. The byte-identity check at the end of Phase B is load-bearing.
+
+**Workflow discipline:** Phase A lands BEFORE any Phase B optimization. Diagnostics tell you what to optimize; optimizing without measuring is guessing.
+
+**Don't optimize the wrong thing.** If Phase A shows boot time is 80% of overhead on plug_crypto, optimizing reset_leaks gives 0 user-visible win. Pick the dominant overhead per target; ignore the others until they become dominant.
+
+### Out of scope for M20
+
+- Default flip from `mix` to `persistent` (v1.9+ decision).
+- In-process fallback recompile (M21, conditional).
+- New mutators.
+- Coverage default flip.
+- Per-test-case coverage attribution.
+- Oracle/schema build Mix bypass.
+- Reducing per-mutant timeout below 60s.
+- Cross-run state persistence.
+- Skipping reset vectors with dirty flags (correctness hazard).
+- Disabling Application.ensure_all_started (correctness hazard).
+- Mutation semantics or stable_id input changes.
+
+### Recommended commit pacing
+
+5-7 commits.
+
+1. Per-phase timing instrumentation in `Mut.Worker.Persistent` + `Mut.Worker.PersistentRunner`.
+2. `Mut.Metrics.Snapshot.persistent` block + reporter integration + JSON `mutalisk.persistent` key + terminal display.
+3. Initial bench measurements + BENCHMARKS Phase A table identifying dominant overhead per target.
+4. Phase B optimization #1 (most likely: scoped app startup).
+5. Phase B optimization #2 (driven by measurements).
+6. Re-bench + BENCHMARKS Phase B table showing before/after per target.
+7. Final verify + CHANGELOG + cleanup.
+
+If Phase A measurements clearly show one optimization closes the gap, stop after step 4. Don't over-optimize for diminishing returns.
+
+---
+
+## M21 — In-process fallback recompile (conditional)
+
+**Conditional milestone.** Run only if M20 Phase A measurements show fallback recompile is dominant overhead on Decimal-class projects. Otherwise defer indefinitely.
+
+**Goal:** bring fallback mutants into the persistent worker, eliminating per-fallback-mutant child Mix process spawns.
+
+### Deliverables (if executed)
+
+- `:code.purge/1` + `:code.load_binary/3` flow inside the persistent BEAM with module-conflict handling.
+- Source patch applied in-process, recompiled via `Kernel.ParallelCompiler.compile_to_path/2`, loaded into the persistent BEAM.
+- On purge/recompile failure: restart persistent BEAM (v1.7 F4 phase 1's restart machinery) and rerun the mutant via mix-spawn fallback.
+- Reset hooks extended to handle module-redefinition state.
+
+### Acceptance gates
+
+- byte-identity preserved on demo_app, plug_crypto, Decimal for fallback bucket.
+- Decimal fallback wall-clock improves measurably.
+- No increase in invalid/error mutants on any target.
+- demo_app and plug_crypto fallback outcomes byte-identical between mix-spawn and in-process recompile.
+
+### Decision criteria for executing M21
+
+- M20 Phase A measurements show fallback overhead >25% of total wall-clock on Decimal at c=4.
+- AND M20 Phase B optimizations alone don't close the v1.8 perf gate.
+
+If either condition fails, M21 defers to v1.9 or later. v1.8 ships with M20 alone.
+
+### Recommended commit pacing
+
+3-4 commits if executed.
+
+# Out of scope for v1.8 (do not let it sneak in)
+
+- Default flip from `mix` to `persistent`. Decision deferred to v1.9+.
+- New mutators (any kind).
+- Coverage default flip.
+- Per-test-case coverage attribution.
+- Oracle/schema build Mix bypass.
+- Cross-run state persistence (v2).
+- Wrapper guard schemata (v2).
+- Reducing 60s per-mutant timeout.
+- Mutation semantics or stable_id input changes.
+- Skipping reset vectors via dirty flags (correctness hazard reintroduced from v1.7 F2).
+- Disabling `Application.ensure_all_started/1` for project apps.
+
+`--worker-type mix` remains permanent regardless of v1.8 perf outcomes.

@@ -560,6 +560,58 @@ The intermediate "schema-only persistent" state (steps 1-4) is not independently
 
 Even after persistent becomes default in a v1.8+ follow-up, `mix` stays as the validated safety hatch and is regression-tested forever. Some user code patterns (ETS tables tests don't create, mocked modules without per-test cleanup, per-process compilation state, tests that crash the BEAM) genuinely cannot run safely in a persistent worker. `--worker-type mix` is the documented escape.
 
+### v1.8 (two milestones — perf-realization for persistent worker)
+
+v1.7 shipped persistent worker as opt-in supported with byte-identity proven on demo_app, plug_crypto, Decimal. But v1.7 BENCHMARKS shows persistent is SLOWER than mix on plug_crypto and Decimal at c=4. v1.8 closes that gap.
+
+**Theme**: make persistent workers worth using, not just correct.
+
+**Default does NOT flip in v1.8.** Default flip is a separate v1.9+ decision based on v1.8's empirical results. Persistent stays opt-in via `--worker-type persistent`.
+
+**M20 — Persistent performance diagnostics + targeted optimization**
+
+Combined diagnostic-and-fix milestone. Phase A measures per-phase overhead; Phase B applies targeted optimizations based on findings.
+
+Phase A (diagnostics, lands first):
+- Per-phase timings: boot, project app startup, test file load, per-mutant ExUnit run, reset hooks (per-vector), filter lookup.
+- Crash / restart / filter-miss counts.
+- Memory dimension via `:erlang.memory(:total)` snapshots.
+- New `mutalisk.persistent` block in Stryker JSON + terminal output.
+- Initial bench at c=1/4 on demo_app, plug_crypto, Decimal identifies dominant overhead per target.
+
+Phase B (targeted optimization based on Phase A findings):
+- Most likely fix: scope `Application.ensure_all_started/1` to project app + declared deps only, not every `.app` in `_build/mut_schema/lib/*/ebin/`. v1.7 F2 added the start-everything path for correctness; the optimization is starting fewer apps without breaking that correctness.
+- Profile and optimize reset_leaks/1 implementations (NOT skip them).
+- Cache discovered app list and test file list per sandbox.
+- Lighter result protocol if formatter is dominant overhead.
+
+Phase B acceptance: persistent at default c=4 ≥1.5× faster than mix on at least one of plug_crypto or Decimal. demo_app remains faster. byte-identity preserved.
+
+Fallback acceptance (if 1.5× isn't reachable): Phase A diagnostics ship anyway; BENCHMARKS documents residual overhead with root cause; v1.8 ships as "diagnostics released, perf gap documented."
+
+**M21 — In-process fallback recompile (conditional)**
+
+Run only if M20 Phase A measurements show fallback recompile is dominant overhead on Decimal-class projects (>25% of total wall-clock at c=4). Otherwise defer indefinitely.
+
+If executed: `:code.purge/1` + `:code.load_binary/3` inside persistent BEAM; restart-then-mix-fallback on purge/recompile failure; module-redefinition state added to reset hooks.
+
+Acceptance: byte-identity for fallback bucket on all three targets; measurable Decimal fallback wall-clock improvement; no increase in invalid/error mutants.
+
+**Default flip gate (carried forward to v1.9+)**
+
+Persistent becomes default only when:
+- byte-identity on all three targets ✓ (already met in v1.7).
+- Persistent FASTER than mix at c=4 on plug_crypto AND Decimal.
+- bin/verify green at default.
+- `--worker-type mix` permanent escape hatch.
+
+If v1.8 lands the speed bar, default flip is v1.9 work. If v1.8 documents a fundamental limitation, persistent stays opt-in indefinitely.
+
+**Explicitly forbidden in v1.8 (correctness hazards)**
+
+- Skipping reset vectors via dirty flags. Re-introduces the v1.7 F2 failure mode.
+- Disabling `Application.ensure_all_started/1` for project apps. v1.7 F2 proved this is required for correctness on plug_crypto-class projects.
+
 ### v2
 
 - Lean env walker.

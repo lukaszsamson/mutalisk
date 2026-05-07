@@ -61,7 +61,7 @@ defmodule Mut.Worker.PersistentRunner do
 
     test_helper = Keyword.get(opts, :test_helper)
 
-    {test_load_us, test_load_count} =
+    {test_load_count, test_load_us} =
       Diag.time(fn -> require_files(test_helper, test_files) end)
 
     ExUnit.configure(formatters: [Mut.Worker.Formatter])
