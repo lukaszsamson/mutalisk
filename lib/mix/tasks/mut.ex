@@ -455,7 +455,17 @@ defmodule Mix.Tasks.Mut do
   # the BEAM in v1.7's first release; future work may add restart +
   # retry-then-mix per V17 §"Crash recovery".
   defp run_schema_via_persistent(_ctx, server, sandbox, mutant, worker_tests) do
-    Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms)
+    case Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms) do
+      :filter_miss ->
+        # The persistent runner could not resolve the selected test
+        # files to any loaded test ids. Rerun this mutant on the
+        # mix-spawn worker, which loads tests by path. The worker
+        # BEAM stays up for subsequent mutants on this sandbox.
+        run_schema_via_mix(sandbox, mutant, worker_tests)
+
+      %Mut.Worker.Result{} = result ->
+        result
+    end
   catch
     :exit, _reason ->
       run_schema_via_mix(sandbox, mutant, worker_tests)

@@ -53,7 +53,7 @@ defmodule Mut.Worker.Persistent do
     GenServer.start(__MODULE__, {sandbox, opts})
   end
 
-  @spec run_schema(server, non_neg_integer(), [Path.t()], keyword) :: Result.t()
+  @spec run_schema(server, non_neg_integer(), [Path.t()], keyword) :: Result.t() | :filter_miss
   def run_schema(server, mutant_id, test_files, opts \\ [])
       when is_integer(mutant_id) and mutant_id >= 0 and is_list(test_files) and is_list(opts) do
     timeout_ms = Keyword.get(opts, :timeout_ms, @default_run_timeout_ms)
@@ -95,6 +95,15 @@ defmodule Mut.Worker.Persistent do
     Port.command(state.port, "RUN #{mutant_id}#{files_blob}\n")
 
     case wait_for_result(state.port, state.leftover, timeout_ms) do
+      {:ok, %Result{status: :filter_miss}, _leftover} ->
+        # Filter miss is recoverable: the worker BEAM is still
+        # healthy, but the host needs to rerun this mutant via mix
+        # because the persistent runner could not resolve the
+        # selected files to any loaded test ids. Reply with
+        # :filter_miss; the caller treats it the same as a crash
+        # exit and re-routes via mix without tearing the BEAM down.
+        {:reply, :filter_miss, %{state | leftover: ""}}
+
       {:ok, result, leftover} ->
         duration_ms = System.monotonic_time(:millisecond) - started
         {:reply, %{result | duration_ms: duration_ms}, %{state | leftover: leftover}}
@@ -303,6 +312,12 @@ defmodule Mut.Worker.Persistent do
 
       ["error", _rest] ->
         {:ok, :error, 0}
+
+      ["filter_miss", _rest] ->
+        # Persistent runner could not resolve the requested test
+        # files to any loaded test ids. Surface as :filter_miss so
+        # the host reruns this mutant via mix.
+        {:ok, :filter_miss, 0}
 
       _other ->
         :passthrough

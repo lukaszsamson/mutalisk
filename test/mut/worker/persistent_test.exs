@@ -3,6 +3,7 @@ defmodule Mut.Worker.PersistentTest do
 
   alias Mut.Sandbox
   alias Mut.Worker.Persistent
+  alias Mut.Worker.PersistentRunner
 
   @moduledoc false
 
@@ -38,6 +39,44 @@ defmodule Mut.Worker.PersistentTest do
     after
       stop(server)
     end
+  end
+
+  @tag timeout: 30_000
+  test "returns :filter_miss when selected files do not map to any loaded test" do
+    sandbox_path = fake_persistent_project("filter_miss")
+    sandbox = %Sandbox{id: 1, path: sandbox_path}
+
+    {:ok, server} = Persistent.start_link(sandbox, test_files: ["test/leak_test.exs"])
+
+    try do
+      assert Persistent.run_schema(server, 0, ["test/missing_test.exs"]) == :filter_miss
+    after
+      stop(server)
+    end
+  end
+
+  test "apply_file_filter rejects unknown files instead of running everything" do
+    # Index has only one known test file; a request for an unrelated
+    # file must surface as a filter_miss, NOT silently fall through to
+    # "no filter" (which would run every loaded test).
+    index = %{"/abs/known_test.exs" => [{KnownTest, :test_a}]}
+
+    assert {:error, {:filter_miss, ["/abs/missing_test.exs"]}} =
+             PersistentRunner.apply_file_filter(
+               ["/abs/missing_test.exs"],
+               index
+             )
+  end
+
+  test "apply_file_filter accepts files that map through Path.expand" do
+    abs = Path.expand("test/leak_test.exs")
+    index = %{abs => [{LeakTest, :test_a}]}
+
+    assert :ok =
+             PersistentRunner.apply_file_filter(
+               ["test/leak_test.exs"],
+               index
+             )
   end
 
   @tag timeout: 30_000

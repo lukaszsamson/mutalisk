@@ -121,21 +121,35 @@ defmodule Mut.Worker.PersistentRunner do
 
     :persistent_term.put({Mut.Runtime, :active_mutant}, mutant_id)
     restore_server_state(snapshot.ex_unit)
-    apply_file_filter(test_files, snapshot.file_index)
 
-    reset_leaks(snapshot)
+    case apply_file_filter(test_files, snapshot.file_index) do
+      :ok ->
+        reset_leaks(snapshot)
 
-    %{failures: failures} = ExUnit.run()
+        %{failures: failures} = ExUnit.run()
 
-    elapsed_us = System.monotonic_time(:microsecond) - started
+        elapsed_us = System.monotonic_time(:microsecond) - started
+        status = if failures == 0, do: "survived", else: "killed"
+        write_marker("#{@result_marker} #{status} #{elapsed_us}")
 
-    status = if failures == 0, do: "survived", else: "killed"
+      {:error, {:filter_miss, missing}} ->
+        elapsed_us = System.monotonic_time(:microsecond) - started
 
-    write_marker("#{@result_marker} #{status} #{elapsed_us}")
+        # Tell the host this mutant could not be run with the
+        # requested file selection. The host catches this and reruns
+        # the mutant via the mix-spawn worker with the same selection.
+        # Without this the runner would silently fall back to "run
+        # every loaded test" and produce spurious kills.
+        write_marker("#{@result_marker} filter_miss #{elapsed_us} #{escape(inspect(missing))}")
+    end
+
     snapshot
   end
 
-  defp apply_file_filter(files, index) do
+  @doc false
+  @spec apply_file_filter([Path.t()], %{Path.t() => [{module(), atom()}]}) ::
+          :ok | {:error, {:filter_miss, [Path.t()]}}
+  def apply_file_filter(files, index) do
     # Always restore "no filter" first so a previous mutant's filter
     # doesn't bleed across runs (defensive: ExUnit holds the config
     # in :persistent_term).
@@ -146,22 +160,54 @@ defmodule Mut.Worker.PersistentRunner do
         :ok
 
       files when is_list(files) ->
-        test_ids =
-          files
-          |> Enum.flat_map(fn file ->
-            Map.get(index, Path.expand(file), []) ++ Map.get(index, file, [])
-          end)
-          |> MapSet.new()
+        {test_ids, missing_files} = lookup_files_in_index(files, index)
 
-        if MapSet.size(test_ids) > 0 do
-          ExUnit.configure(only_test_ids: test_ids)
+        cond do
+          missing_files != [] ->
+            # F1 fix: a non-empty selection that resolves to ZERO loaded
+            # tests for any of its files used to silently fall through
+            # to "no filter" (run everything). On plug_crypto-class
+            # targets that widened persistent's effective test set
+            # versus mix and produced spurious kills. Surface the miss
+            # so the host can rerun the mutant via the mix-spawn worker
+            # with the same selected files.
+            {:error, {:filter_miss, missing_files}}
+
+          MapSet.size(test_ids) == 0 ->
+            # All requested files mapped to zero test ids (no tests in
+            # those files at all). Treat the same as "filter miss" so
+            # the host doesn't fall back to running everything.
+            {:error, {:filter_miss, files}}
+
+          true ->
+            ExUnit.configure(only_test_ids: test_ids)
+            :ok
         end
-
-        :ok
     end
   end
 
-  defp build_file_index do
+  defp lookup_files_in_index(files, index) do
+    Enum.reduce(files, {MapSet.new(), []}, fn file, {acc_ids, missing} ->
+      case index_lookup(index, file) do
+        [] ->
+          {acc_ids, [file | missing]}
+
+        ids ->
+          {Enum.reduce(ids, acc_ids, &MapSet.put(&2, &1)), missing}
+      end
+    end)
+    |> then(fn {ids, missing} -> {ids, Enum.reverse(missing)} end)
+  end
+
+  defp index_lookup(index, file) do
+    expanded = Path.expand(file)
+
+    Map.get(index, expanded, []) ++ Map.get(index, file, [])
+  end
+
+  @doc false
+  @spec build_file_index() :: %{Path.t() => [{module(), atom()}]}
+  def build_file_index do
     case Process.whereis(ExUnit.Server) do
       nil ->
         %{}
@@ -174,7 +220,7 @@ defmodule Mut.Worker.PersistentRunner do
 
         (sync ++ async)
         |> Enum.flat_map(&module_test_ids/1)
-        |> Enum.group_by(fn {file, _module, _name} -> file end, fn
+        |> Enum.group_by(fn {file, _module, _name} -> Path.expand(file) end, fn
           {_file, module, name} -> {module, name}
         end)
     end
