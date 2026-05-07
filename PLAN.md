@@ -904,7 +904,7 @@ v1.7 is a **single milestone** (M19) with 8 ordered commit-steps. The intermedia
 
 ## M19 — Persistent worker (opt-in)
 
-**Current status after review:** partially landed but not accepted for v1.7.0 production use. Persistent ships as experimental infrastructure behind `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
+**Current status after review:** landed and accepted for v1.7.0. Persistent ships as opt-in supported (`--worker-type persistent`); the `MUTALISK_PERSISTENT_EXPERIMENTAL=1` env gate was removed in Mission F3.
 
 Closed since the original status note:
 - `e2e_persistent` is enabled (9th `bin/verify` layer; runs `mix mut.e2e --worker-type persistent` and asserts demo_app byte-identity for default/coverage/attribute fixtures).

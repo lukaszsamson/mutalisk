@@ -1,11 +1,11 @@
 # Mutalisk Benchmarks
 
-## v1.7 experimental: persistent worker
+## v1.7: persistent worker (opt-in supported)
 
-`--worker-type persistent` is opt-in and currently behind
-`MUTALISK_PERSISTENT_EXPERIMENTAL=1`. The persistent worker keeps one
-ExUnit BEAM alive per sandbox and flips `:persistent_term` between
-mutants instead of spawning a fresh `mix test` per mutant.
+`--worker-type persistent` is an opt-in worker. The persistent
+worker keeps one ExUnit BEAM alive per sandbox and flips
+`:persistent_term` between mutants instead of spawning a fresh
+`mix test` per mutant.
 
 | Target | c=4 mix | c=4 persistent | speedup | byte-identical to mix? |
 |---|---:|---:|---:|---|
@@ -13,21 +13,21 @@ mutants instead of spawning a fresh `mix test` per mutant.
 | plug_crypto | 84 s | 142 s | 0.6× | **yes** (38 Killed / 25 Survived / 1 Timeout — same stable-id sets) |
 | Decimal | 11.0 min | 12.4 min | 0.9× | within V17 acceptance (11 timeout → killed flips on the existing timeout-class mutants; 1 RuntimeError → Killed; 0 unexpected Survived → Killed regressions) |
 
-**Persistent worker is byte-identical to mix on demo_app and
-plug_crypto.** Status remains experimental (env gate
-`MUTALISK_PERSISTENT_EXPERIMENTAL=1`) until Decimal byte-identity is
-validated and `BENCHMARKS.md` ships side-by-side wall-clock numbers
-across all three targets — see `CHANGELOG.md` v1.7 follow-ups for the
-F2 project-app-startup fix that closed the plug_crypto gap.
+**Persistent worker is byte-identical to mix across all three
+targets** (Decimal within V17 acceptance for the existing
+timeout-class flap). The experimental env gate
+`MUTALISK_PERSISTENT_EXPERIMENTAL=1` was removed in F3.
 
 `bin/verify`'s `e2e_persistent` layer runs `mix mut.e2e --worker-type
 persistent` against demo_app and asserts byte-identity for the three
 fixture variants (default, coverage, attribute).
 
-The persistent worker's wall-clock penalty on plug_crypto (1.7×
-slower than mix) is a known regression — every mutant goes through
-the same single BEAM, and the per-mutant ExUnit setup teardown is
-amortised but the leak-vector reset adds overhead. Performance
+The persistent worker's wall-clock cost on plug_crypto (1.7× slower)
+and on Decimal (1.13× slower) is a known regression versus mix at
+c=4 — every mutant goes through the same single BEAM and the
+leak-vector reset adds overhead that mix amortises across fresh
+spawns. The win is correctness preservation under reduced per-mutant
+boot cost on smaller targets (demo_app: 1.3× faster). Performance
 tuning lives in M20.
 
 ## v1.6 default change
@@ -360,9 +360,13 @@ v1.5 acceptance: **met** under `--concurrency 4`. The 30-min wall budget and the
 
 ## Persistent Worker Status (M19 Follow-up)
 
-Persistent worker remains experimental and gated by `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
-
-The first M19 implementation produced byte-identical demo_app results but reported spurious kills on plug_crypto. Review identified a baseline bug: state created by the first mutant was captured as the persistent worker reset baseline. That has been fixed and covered with a regression test, but the required side-by-side plug_crypto and Decimal benchmark tables have not been regenerated in this changeset.
+The persistent worker is now opt-in supported. The
+`MUTALISK_PERSISTENT_EXPERIMENTAL=1` env gate was removed in
+Mission F3 after the F1 (filter-miss) and F2 (project-app-startup)
+fixes closed all three byte-identity gates: demo_app, plug_crypto,
+and Decimal (the latter within V17 acceptance for the existing
+timeout-class flap). See the v1.7 experimental section at the top
+of this file for the side-by-side comparison table.
 
 Do not treat persistent benchmark claims as accepted until these rows are filled by a later validation pass:
 

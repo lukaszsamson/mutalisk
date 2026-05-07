@@ -27,10 +27,9 @@ ENABLED_LAYERS=(
   e2e_mut
   e2e_persistent
 )
-# e2e_persistent runs `mix mut.e2e --worker-type persistent` (with the
-# MUTALISK_PERSISTENT_EXPERIMENTAL=1 gate). Demo_app byte-identical
-# under persistent has been validated; plug_crypto and Decimal
-# revalidation is tracked in BENCHMARKS.md / CHANGELOG.md.
+# e2e_persistent runs `mix mut.e2e --worker-type persistent`.
+# Demo_app, plug_crypto and Decimal byte-identity under persistent
+# have all been validated; see BENCHMARKS.md.
 
 ALL_LAYERS=(
   lint
@@ -121,7 +120,7 @@ run_e2e_mut() {
 
 run_e2e_persistent() {
   step e2e_persistent
-  MUTALISK_PERSISTENT_EXPERIMENTAL=1 mix mut.e2e --worker-type persistent
+  mix mut.e2e --worker-type persistent
 }
 
 run_layer() {

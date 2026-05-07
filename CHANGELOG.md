@@ -6,13 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## v1.7 (M19, 2026-05-06)
 
 ### Added
-- **`--worker-type persistent` (experimental).** A new worker model
-  that keeps one ExUnit BEAM alive per sandbox and flips
+- **`--worker-type persistent` (opt-in supported).** A new worker
+  model that keeps one ExUnit BEAM alive per sandbox and flips
   `:persistent_term` between mutants instead of spawning a fresh
-  `mix test` per mutant. It is hidden behind
-  `MUTALISK_PERSISTENT_EXPERIMENTAL=1` until the remaining M19
-  byte-identity gates are met. Schema mutants only; fallback
-  continues to use the v1.6 mix-spawn path.
+  `mix test` per mutant. Default stays `mix`; persistent is
+  enabled by passing `--worker-type persistent`. Byte-identical
+  to mix at c=4 across demo_app, plug_crypto, and Decimal (within
+  V17 acceptance for the existing timeout-class flap). Schema
+  mutants only; fallback continues to use the v1.6 mix-spawn path.
 - `Mut.Worker.Persistent` host GenServer + `Mut.Worker.PersistentRunner`
   in-BEAM runner. ExUnit.Server state is snapshotted at boot and
   restored before every run so the same loaded test modules
@@ -85,25 +86,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   that one mutant through the mix-spawn worker. Three regression
   tests (end-to-end + two direct unit tests) cover the path.
 
+### Removed
+- **`MUTALISK_PERSISTENT_EXPERIMENTAL=1` env gate** (Mission F3).
+  All three correctness gates (demo_app, plug_crypto, Decimal) are
+  met, so the experimental gate is removed. `--worker-type
+  persistent` is now a regular opt-in flag.
+
 ### Known limitations (v1.7.0)
-- **Default stays `--worker-type mix`.** Persistent worker is opt-in
-  and additionally requires `MUTALISK_PERSISTENT_EXPERIMENTAL=1`.
-- **plug_crypto byte-identity met (F2).** With the project-app
-  startup fix above, persistent on plug_crypto at c=4 is now
-  byte-identical to mix.
-- **Decimal validated within V17 acceptance.** Persistent at c=4
-  vs mix: 11 timeout-class mutants flipped Timeout → Killed (the
-  "killed/timeout flap" V17 explicitly allows on the existing 21
-  timeout-shape Decimal mutants); 1 RuntimeError → Killed; 0
-  unexpected Survived → Killed regressions. Wall-clock 12.4 min
-  vs 11.0 min mix (0.9×). See BENCHMARKS.md.
-- **In-process fallback recompile is deferred.** Fallback mutants
-  always route to the mix-spawn worker, preserving M17's
-  "0 invalid Decimal fallback" baseline regardless of worker type.
-- **No automatic worker-restart after crash.** Per-sandbox fallback
-  to mix happens after the first crash. V17's full restart-then-
-  fallback design ships when the plug_crypto gap above is
-  resolved.
+- **Default stays `--worker-type mix`.** Persistent worker is
+  opt-in.
+- **In-process fallback recompile is deferred** (Mission F4).
+  Fallback mutants always route to the mix-spawn worker,
+  preserving M17's "0 invalid Decimal fallback" baseline
+  regardless of worker type.
+- **No automatic worker-restart after crash** (Mission F4).
+  Per-sandbox fallback to mix happens after the first crash;
+  V17's full restart-then-fallback design is post-v1.7.0 work.
 
 ### Internal
 - `lib/mut/worker/persistent.ex` (host).

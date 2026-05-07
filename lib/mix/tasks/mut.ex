@@ -28,10 +28,11 @@ defmodule Mix.Tasks.Mut do
     --keep-work-copy         Skip cleanup of tmp/mut_work/<run_id>/ on exit
                                (debug aid; default: false)
     --worker-type TYPE       mix (default) | persistent. Persistent is
-                               experimental and requires
-                               MUTALISK_PERSISTENT_EXPERIMENTAL=1.
-                               Schema mutants only; fallback continues to
-                               use mix-spawn.
+                               an opt-in worker that keeps one ExUnit
+                               BEAM alive per sandbox and flips
+                               :persistent_term per mutant. Schema
+                               mutants only; fallback continues to use
+                               mix-spawn.
 
   Configuration via `config :mut`:
 
@@ -83,8 +84,6 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp run_pipeline(opts) do
-    enforce_persistent_experimental_gate!(opts)
-
     target_root = File.cwd!()
     mutalisk_root = @mutalisk_root
     run_id = run_id()
@@ -150,18 +149,6 @@ defmodule Mix.Tasks.Mut do
       end
     end
   end
-
-  defp enforce_persistent_experimental_gate!(%{worker_type: :persistent}) do
-    unless System.get_env("MUTALISK_PERSISTENT_EXPERIMENTAL") == "1" do
-      Mix.raise(
-        "--worker-type persistent is experimental and currently fails the M19 " <>
-          "byte-identity gates on setup_all-heavy projects. Set " <>
-          "MUTALISK_PERSISTENT_EXPERIMENTAL=1 to run it anyway."
-      )
-    end
-  end
-
-  defp enforce_persistent_experimental_gate!(_opts), do: :ok
 
   defp execute_plan(
          plan,
