@@ -23,6 +23,8 @@ defmodule Mut.WorkerTest do
              "--no-archives-check",
              "--max-failures",
              "1",
+             "--timeout",
+             "10000",
              "--formatter",
              "Mut.Worker.Formatter",
              "test/arith_test.exs"

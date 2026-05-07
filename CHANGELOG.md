@@ -3,6 +3,47 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.8 (M20 + M21 + M21 phase 2 + M21 phase 3, 2026-05-07)
+
+### M21 phase 3 — Per-test timeout dropped to 10 s
+
+The remaining wall-clock on plug_crypto and Decimal under
+persistent was dominated by ExUnit's 60 s per-test default
+deadline. Mutation-introduced bugs are CPU-bound infinite loops
+or unbounded recursion that don't need 60 s of evidence to
+classify — 1-10 s is plenty.
+
+#### Changed
+- **Persistent runner** now passes `timeout: 10_000` to
+  `ExUnit.start/1` alongside `max_failures: 1`. Per-test
+  timeout is 10 s (was ExUnit's 60 s default).
+- **Mix-spawn worker** now passes `--timeout 10000` on its
+  `mix test` command line for parity.
+- Tests with legitimately long-running scenarios can override
+  per-test via `@tag timeout: ms` (the standard ExUnit knob).
+
+#### Performance
+Per-target persistent wall at c=4 vs v1.7 mix baseline:
+- demo_app: ~10 s → ~7-8 s — 1.3× faster (unchanged)
+- plug_crypto: 84 s → **26 s** — **3.23× faster than v1.7 mix**
+  (84 s → 53 s mix at c=4 with new --timeout; 26 s persistent;
+  persistent vs mix at fair --timeout = 2.04×)
+- Decimal: 660 s → **130 s** — **5.08× faster than v1.7 mix**
+  (660 s → 259 s mix at c=4 with new --timeout; 130 s
+  persistent; persistent vs mix at fair --timeout = 1.99×)
+
+#### Byte-identity
+On Decimal: mix and persistent now produce IDENTICAL
+status counts (363 Killed / 91 Survived / 0 Timeout — the V17
+"killed/timeout flap" disappears at 10 s because both workers
+catch infinite-loop mutants fast enough that `max_failures: 1`
+aborts via the first failed test). Same 2-mutant
+mutator-generation difference at line 1874 as v1.7.
+
+The 1.5× M20 acceptance bar is comfortably met on both real
+targets (1.99–2.04× at fair comparison; 3.23–5.08× vs v1.7
+mix baseline).
+
 ## v1.8 (M20 + M21 + M21 phase 2, 2026-05-07)
 
 ### M21 phase 2 — in-process fallback recompile

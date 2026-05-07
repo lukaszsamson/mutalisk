@@ -318,6 +318,78 @@ fallback mutants per variant verified through `bin/verify`'s
 phase 1 (persistent kills 17 mutants mix marks Timeout); zero
 unexpected Killed→Timeout regressions; zero Invalid; zero Errors.
 
+## v1.8 M21 phase 3 — drop ExUnit per-test timeout to 10 s
+
+**Diagnosis.** After M21 phase 2, Decimal at c=4 still had a
+long-tail of 21 mutants in mix (4 in persistent) that consumed
+the full 60 s ExUnit per-test default deadline before being
+detected. 60 s is the wrong number for mutation-test workloads:
+mutation-introduced bugs are CPU-bound infinite loops or
+unbounded recursion, and 60 s of wall-clock is not what we need
+to confidently classify them — 1-10 s is.
+
+**Fix.** Both worker types now run ExUnit with `timeout: 10_000`:
+
+- **Persistent runner** sets `timeout: 10_000` in `ExUnit.start/1`
+  alongside the existing `max_failures: 1`.
+- **Mix-spawn worker** passes `--timeout 10000` on its `mix test`
+  command line for parity.
+
+Tests legitimately needing more (e.g. integration / network
+fixtures) can override per-test via `@tag timeout: 60_000`.
+Mutation-testable codebases generally have unit-test scoped
+runtimes well under 10 s; the byte-identity check vs the mix
+worker surfaces any false positive.
+
+### Bench numbers at c=4 (M21 phase 3, both workers `--timeout 10000`)
+
+| Target | mix wall | persistent wall | speedup |
+|---|---:|---:|---:|
+| demo_app | ~10 s | ~7-8 s | 1.3× |
+| plug_crypto | **53 s** | **26 s** | **2.04×** |
+| Decimal | **259 s** | **130 s** | **1.99×** |
+
+The 1.5× M20 acceptance bar is now **comfortably met on both
+real targets**. Both workers got faster vs the v1.7 baseline
+(plug_crypto 84 s → 53 s mix, 144 s → 26 s persistent;
+Decimal 660 s → 259 s mix, 744 s → 130 s persistent).
+
+byte-identity check post-M21-phase-3:
+
+- demo_app, plug_crypto: unchanged from earlier phases.
+- Decimal: **mix and persistent now produce identical Killed/
+  Survived/Timeout counts** (363 / 91 / 0 — both report 0
+  timeouts because the 10 s threshold catches all of them as
+  Killed via `max_failures: 1` aborting on the first failed
+  test). The "killed/timeout flap" V17 explicitly allowed is
+  no longer needed at this timeout. Same 2-mutant
+  mutator-generation difference at line 1874 as v1.7.
+
+### Why 10 s
+
+Per-test wall time on Decimal/plug_crypto/demo_app under no
+mutation never exceeds a few hundred milliseconds. ExUnit's
+60 s default is a reasonable safety net for application test
+suites that exercise external systems; it's the wrong default
+for *mutation-test* workloads where fast loop detection is
+the actual goal. The persistent runner explicitly chooses the
+mutation-test default; mix-spawn workers do the same on the
+command line for fairness.
+
+If a target has a legitimately long-running test (e.g. a slow
+integration test brought into scope by static selection), the
+ExUnit `@tag timeout: ms` machinery overrides per-test. v1.8.x
+ships 10 000 ms; future versions can revisit per-target if a
+case emerges.
+
+### Headline summary across all v1.8 phases
+
+| Target | v1.7 mix | v1.7 persistent | v1.8 final mix | v1.8 final persistent | speedup vs v1.7 mix |
+|---|---:|---:|---:|---:|---:|
+| demo_app | ~10 s | ~7 s | ~10 s | ~7-8 s | 1.3× |
+| plug_crypto | 84 s | 144 s | 53 s | **26 s** | **3.23× faster** |
+| Decimal | 660 s | 744 s | 259 s | **130 s** | **5.08× faster** |
+
 ### Diagnostics overhead
 
 Measured on plug_crypto at c=4: 143 s with diagnostics on

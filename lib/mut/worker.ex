@@ -218,6 +218,15 @@ defmodule Mut.Worker do
       "--no-archives-check",
       "--max-failures",
       "1",
+      # Match the persistent runner's per-test timeout so mix and
+      # persistent are comparable apples-to-apples. Mutation-test
+      # workloads need fast detection of infinite loops in mutants;
+      # ExUnit's default 60 s was per-target-test, not per-mutant,
+      # and dominated wall-clock on Decimal (21 timeouts * 60 s).
+      # Tests legitimately needing more can override per-test via
+      # @tag timeout:.
+      "--timeout",
+      "10000",
       "--formatter",
       "Mut.Worker.Formatter"
     ] ++ test_files

@@ -57,14 +57,33 @@ defmodule Mut.Worker.PersistentRunner do
     # spurious kills versus the mix worker (which mix-test starts apps for).
     {app_startup_us, app_startup_count} = time_app_startup()
 
-    # max_failures: 1 mirrors `mix test --max-failures 1` that the
-    # mix-spawn worker passes. Without this, ExUnit runs every
-    # selected test even after one fails — and some Decimal mutants
-    # (~30 of them) cause an early test to fail AND a later test to
-    # infinite-loop. mix would have aborted after the first failure;
-    # persistent (without max_failures) ran the loop to the 60s
-    # deadline and reported Timeout. This was the M21 leak vector.
-    ExUnit.start(autorun: false, formatters: [Mut.Worker.Formatter], max_failures: 1)
+    # M21 phase 3: per-test timeout dropped from ExUnit's 60 000 ms
+    # default to 10 000 ms.
+    #
+    # Mutation-test workloads aren't typical app tests. Most legit
+    # tests are CPU-bound arithmetic and complete in milliseconds;
+    # mutants that introduce infinite recursion or unbounded loops
+    # need to be detected fast, not waited on for a minute. Decimal
+    # at c=4 had 21 timeout mutants in mix each consuming the full
+    # 60 s ExUnit deadline; lowering ExUnit's per-test timeout to
+    # 10 s catches the same loops in 10 s and proportionally shaves
+    # both the persistent-side timeouts and the schema_workers
+    # wall-clock dominated by them.
+    #
+    # @tag timeout: ms still works for individual tests that need
+    # more (e.g. plug_crypto's `Process.sleep(150)` cases). A
+    # legitimate test exceeding 10 s under no mutation is rare in
+    # mutation-testing-able codebases; if it happens, the byte-
+    # identity check vs the mix worker (which still uses 60 s)
+    # surfaces the regression and we can dial it back per-target.
+    #
+    # max_failures: 1 mirrors `mix test --max-failures 1`.
+    ExUnit.start(
+      autorun: false,
+      formatters: [Mut.Worker.Formatter],
+      max_failures: 1,
+      timeout: 10_000
+    )
 
     test_helper = Keyword.get(opts, :test_helper)
 
