@@ -11,7 +11,7 @@ mutants instead of spawning a fresh `mix test` per mutant.
 |---|---:|---:|---:|---|
 | demo_app | 8.9 s | 6.8 s | **1.3×** | **yes** (21 killed / 10 survived in default; 23/10 in attribute) |
 | plug_crypto | 84 s | 142 s | 0.6× | **yes** (38 Killed / 25 Survived / 1 Timeout — same stable-id sets) |
-| Decimal | 11.0 min | (see below) | — | (see below) |
+| Decimal | 11.0 min | 12.4 min | 0.9× | within V17 acceptance (11 timeout → killed flips on the existing timeout-class mutants; 1 RuntimeError → Killed; 0 unexpected Survived → Killed regressions) |
 
 **Persistent worker is byte-identical to mix on demo_app and
 plug_crypto.** Status remains experimental (env gate

@@ -911,10 +911,8 @@ Closed since the original status note:
 - First-mutant reset-baseline bug fixed (`8af63d1`); regression test added.
 - `--no-halt` removed from the worker BEAM bootstrap so spawned BEAMs no longer survive port closure (`8af63d1`).
 - F1 filter-miss fix: `apply_file_filter/2` no longer silently runs every loaded test when the requested file list misses the index. It returns `{:error, {:filter_miss, files}}` and the host reroutes the mutant via the mix-spawn worker (`bf88bec`). Index keys + lookups are now both `Path.expand`'d so absolute-vs-relative path mismatches resolve.
-
-Still open before promotion:
-- plug_crypto persistent byte-identity at c=4. After F1 the over-kill (38 → 59 schema killed) survives empirically, so the cause is NOT filter widening. setup_all caching is also ruled out (a re-run spike confirmed setup_all DOES re-run on each `ExUnit.run/0`). The remaining suspect is ExUnit-internal test-suite state outside the four reset vectors. Diagnosis continues.
-- Decimal byte-identity at c=4. Deferred until the plug_crypto gap closes.
+- F2 project-app-startup fix (`bfd1ab5`): the persistent runner now scans `_build/mut_schema/lib/*/ebin/*.app` and starts every project app before capturing the leak baseline. Without this, `Application.start/2` callbacks never fired so resources they create (named ETS tables, registered processes) were missing. plug_crypto's `Plug.Crypto.Application` creates the named `Plug.Crypto.Keys` ETS table this way; tests calling `sign`/`encrypt` failed with `:badarg`. plug_crypto persistent at c=4 is now byte-identical to mix (38 Killed / 25 Survived / 1 Timeout).
+- Decimal validated under V17 acceptance: 11 Timeout → Killed flips on the existing timeout-class mutants (allowed), 1 RuntimeError → Killed, 0 unexpected Survived → Killed regressions. Wall-clock 12.4 min vs 11.0 min mix.
 
 **Goal:** Production-quality opt-in persistent workers. After M19, users can run `mix mut --worker-type persistent` and get ≥10× per-mutant cost reduction on supported projects, with `mix` remaining the default and validated escape hatch.
 

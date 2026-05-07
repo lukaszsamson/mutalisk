@@ -1,0 +1,1456 @@
+target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+New:
+  jason 1.4.5
+Unchanged:
+  earmark_parser 1.4.41
+  ex_doc 0.35.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.1
+  nimble_parsec 1.4.0
+  stream_data 0.5.0
+* Getting ex_doc (Hex package)
+* Getting stream_data (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+warning: the application name :decimal is the same as one of its dependencies
+mix mut starting
+warning: the application name :decimal is the same as one of its dependencies
+warning: the application name :decimal is the same as one of its dependencies
+==> stream_data
+Compiling 3 files (.ex)
+warning: left..right inside match is deprecated, you must always match on the step: left..right//var or left..right//_ if you want to ignore it
+  lib/stream_data.ex:508: StreamData.integer/1
+
+warning: min..max inside match is deprecated, you must always match on the step: min..max//var or min..max//_ if you want to ignore it
+  lib/stream_data.ex:894: StreamData.list_length_range_fun/1
+
+Generated stream_data app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> mutalisk
+Compiling 71 files (.ex)
+Generated mutalisk app
+==> decimal
+warning: the application name :decimal is the same as one of its dependencies
+Compiling 4 files (.ex)
+Generated decimal app
+Schema build starting
+Schema build complete
+warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+    _ ->
+
+it attempts to match on the result of:
+
+    Decimal.new(42)
+
+which has the already matched type:
+
+    dynamic(%Decimal{sign: integer(), coef: integer(), exp: integer()})
+
+\x{2514}\x{2500} (for doctest at) /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema/lib/decimal.ex:85: DecimalTest."doctest Decimal.is_decimal/1 (6)"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"nan">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 89 \x{2502}     assert Decimal.is_decimal(~d"nan")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:89: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"inf">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 90 \x{2502}     assert Decimal.is_decimal(~d"inf")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:90: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"0">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 91 \x{2502}     assert Decimal.is_decimal(~d"0")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:91: DecimalTest."test is_decimal/1 expression"/1
+
+     warning: incompatible types given to Decimal.new/1:
+
+         Decimal.new(:atom)
+
+     given types:
+
+         -:atom-
+
+     but expected one of:
+
+         #1
+         %Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()}
+
+         #2
+         integer()
+
+         #3
+         binary()
+
+     type warning found at:
+     \x{2502}
+ 116 \x{2502}       Decimal.new(:atom)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:116:15: DecimalTest."test new/1 conversion"/1
+
+     warning: incompatible types given to Decimal.to_integer/1:
+
+         Decimal.to_integer(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         #1
+         %Decimal{coef: integer(), exp: integer()}
+
+         #2
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 660 \x{2502}         Decimal.to_integer(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:660:17: DecimalTest."test to_integer/1"/1
+
+     warning: incompatible types given to Decimal.to_float/1:
+
+         Decimal.to_float(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 686 \x{2502}         Decimal.to_float(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:686:17: DecimalTest."test to_float/1"/1
+
+     warning: incompatible types given to Decimal.round/1:
+
+         Decimal.round(nil)
+
+     given types:
+
+         -nil-
+
+     but expected one of:
+
+         %Decimal{} or binary() or float() or integer()
+
+     type warning found at:
+     \x{2502}
+ 898 \x{2502}       Decimal.round(nil)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:898:15: DecimalTest."test issue #60"/1
+
+warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+    _ ->
+
+it attempts to match on the result of:
+
+    Decimal.new(42)
+
+which has the already matched type:
+
+    dynamic(%Decimal{sign: integer(), coef: integer(), exp: integer()})
+
+\x{2514}\x{2500} (for doctest at) /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema/lib/decimal.ex:85: DecimalTest."doctest Decimal.is_decimal/1 (6)"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"nan">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 89 \x{2502}     assert Decimal.is_decimal(~d"nan")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:89: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"inf">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 90 \x{2502}     assert Decimal.is_decimal(~d"inf")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:90: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"0">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 91 \x{2502}     assert Decimal.is_decimal(~d"0")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:91: DecimalTest."test is_decimal/1 expression"/1
+
+     warning: incompatible types given to Decimal.new/1:
+
+         Decimal.new(:atom)
+
+     given types:
+
+         -:atom-
+
+     but expected one of:
+
+         #1
+         %Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()}
+
+         #2
+         integer()
+
+         #3
+         binary()
+
+     type warning found at:
+     \x{2502}
+ 116 \x{2502}       Decimal.new(:atom)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:116:15: DecimalTest."test new/1 conversion"/1
+
+     warning: incompatible types given to Decimal.to_integer/1:
+
+         Decimal.to_integer(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         #1
+         %Decimal{coef: integer(), exp: integer()}
+
+         #2
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 660 \x{2502}         Decimal.to_integer(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:660:17: DecimalTest."test to_integer/1"/1
+
+     warning: incompatible types given to Decimal.to_float/1:
+
+         Decimal.to_float(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 686 \x{2502}         Decimal.to_float(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:686:17: DecimalTest."test to_float/1"/1
+
+     warning: incompatible types given to Decimal.round/1:
+
+         Decimal.round(nil)
+
+     given types:
+
+         -nil-
+
+     but expected one of:
+
+         %Decimal{} or binary() or float() or integer()
+
+     type warning found at:
+     \x{2502}
+ 898 \x{2502}       Decimal.round(nil)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:898:15: DecimalTest."test issue #60"/1
+
+warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+    _ ->
+
+it attempts to match on the result of:
+
+    Decimal.new(42)
+
+which has the already matched type:
+
+    dynamic(%Decimal{sign: integer(), coef: integer(), exp: integer()})
+
+\x{2514}\x{2500} (for doctest at) /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema/lib/decimal.ex:85: DecimalTest."doctest Decimal.is_decimal/1 (6)"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"nan">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 89 \x{2502}     assert Decimal.is_decimal(~d"nan")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:89: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"inf">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 90 \x{2502}     assert Decimal.is_decimal(~d"inf")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:90: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"0">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 91 \x{2502}     assert Decimal.is_decimal(~d"0")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:91: DecimalTest."test is_decimal/1 expression"/1
+
+     warning: incompatible types given to Decimal.new/1:
+
+         Decimal.new(:atom)
+
+     given types:
+
+         -:atom-
+
+     but expected one of:
+
+         #1
+         %Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()}
+
+         #2
+         integer()
+
+         #3
+         binary()
+
+     type warning found at:
+     \x{2502}
+ 116 \x{2502}       Decimal.new(:atom)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:116:15: DecimalTest."test new/1 conversion"/1
+
+     warning: incompatible types given to Decimal.to_integer/1:
+
+         Decimal.to_integer(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         #1
+         %Decimal{coef: integer(), exp: integer()}
+
+         #2
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 660 \x{2502}         Decimal.to_integer(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:660:17: DecimalTest."test to_integer/1"/1
+
+     warning: incompatible types given to Decimal.to_float/1:
+
+         Decimal.to_float(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 686 \x{2502}         Decimal.to_float(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:686:17: DecimalTest."test to_float/1"/1
+
+     warning: incompatible types given to Decimal.round/1:
+
+         Decimal.round(nil)
+
+     given types:
+
+         -nil-
+
+     but expected one of:
+
+         %Decimal{} or binary() or float() or integer()
+
+     type warning found at:
+     \x{2502}
+ 898 \x{2502}       Decimal.round(nil)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:898:15: DecimalTest."test issue #60"/1
+
+warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+    _ ->
+
+it attempts to match on the result of:
+
+    Decimal.new(42)
+
+which has the already matched type:
+
+    dynamic(%Decimal{sign: integer(), coef: integer(), exp: integer()})
+
+\x{2514}\x{2500} (for doctest at) /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema/lib/decimal.ex:85: DecimalTest."doctest Decimal.is_decimal/1 (6)"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"nan">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 89 \x{2502}     assert Decimal.is_decimal(~d"nan")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:89: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"inf">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 90 \x{2502}     assert Decimal.is_decimal(~d"inf")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:90: DecimalTest."test is_decimal/1 expression"/1
+
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        Decimal.new(<<"0">>)
+
+    which has the already matched type:
+
+        dynamic(%Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()})
+
+    type warning found at:
+    \x{2502}
+ 91 \x{2502}     assert Decimal.is_decimal(~d"0")
+    \x{2502}     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    \x{2502}
+    \x{2514}\x{2500} test/decimal_test.exs:91: DecimalTest."test is_decimal/1 expression"/1
+
+     warning: incompatible types given to Decimal.new/1:
+
+         Decimal.new(:atom)
+
+     given types:
+
+         -:atom-
+
+     but expected one of:
+
+         #1
+         %Decimal{sign: integer(), coef: :NaN or :inf or integer(), exp: integer()}
+
+         #2
+         integer()
+
+         #3
+         binary()
+
+     type warning found at:
+     \x{2502}
+ 116 \x{2502}       Decimal.new(:atom)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:116:15: DecimalTest."test new/1 conversion"/1
+
+     warning: incompatible types given to Decimal.to_integer/1:
+
+         Decimal.to_integer(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         #1
+         %Decimal{coef: integer(), exp: integer()}
+
+         #2
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 660 \x{2502}         Decimal.to_integer(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:660:17: DecimalTest."test to_integer/1"/1
+
+     warning: incompatible types given to Decimal.to_float/1:
+
+         Decimal.to_float(%Decimal{..., coef: :NaN})
+
+     given types:
+
+         -%Decimal{sign: integer(), coef: :NaN, exp: integer()}-
+
+     but expected one of:
+
+         %Decimal{coef: integer()}
+
+     type warning found at:
+     \x{2502}
+ 686 \x{2502}         Decimal.to_float(d(1, :NaN, 0))
+     \x{2502}                 ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:686:17: DecimalTest."test to_float/1"/1
+
+     warning: incompatible types given to Decimal.round/1:
+
+         Decimal.round(nil)
+
+     given types:
+
+         -nil-
+
+     but expected one of:
+
+         %Decimal{} or binary() or float() or integer()
+
+     type warning found at:
+     \x{2502}
+ 898 \x{2502}       Decimal.round(nil)
+     \x{2502}               ~
+     \x{2502}
+     \x{2514}\x{2500} test/decimal_test.exs:898:15: DecimalTest."test issue #60"/1
+
+[1/454] killed    lib/decimal.ex:991  ComparisonNegation  replace < with >=
+[2/454] killed    lib/decimal.ex:1701  Arithmetic  replace + with -
+[3/454] killed    lib/decimal.ex:1999  ComparisonNegation  replace == with !=
+[4/454] killed    lib/decimal.ex:1239  Arithmetic  replace + with -
+[5/454] killed    lib/decimal.ex:1494  ComparisonNegation  replace == with !=
+[6/454] killed    lib/decimal.ex:1556  ComparisonNegation  replace != with ==
+[7/454] survived  lib/decimal.ex:1824  Arithmetic  replace * with /
+[8/454] killed    lib/decimal.ex:2051  Boolean  replace || with &&
+[9/454] killed    lib/decimal.ex:1545  ComparisonNegation  replace >= with <
+[10/454] killed    lib/decimal.ex:1555  ComparisonNegation  replace == with !=
+[11/454] killed    lib/decimal.ex:1679  ComparisonNegation  replace < with >=
+[12/454] killed    lib/decimal.ex:1817  Arithmetic  replace * with /
+[13/454] survived  lib/decimal.ex:1114  ComparisonNegation  replace == with !=
+[14/454] killed    lib/decimal.ex:1533  Arithmetic  replace + with -
+[15/454] killed    lib/decimal.ex:1701  Arithmetic  replace + with *
+[16/454] killed    lib/decimal.ex:1688  Arithmetic  replace * with -
+[17/454] killed    lib/decimal.ex:1568  Arithmetic  replace * with /
+[18/454] killed    lib/decimal.ex:1153  ComparisonNegation  replace == with !=
+[19/454] killed    lib/decimal.ex:1763  ComparisonNegation  replace >= with <
+[20/454] killed    lib/decimal.ex:1911  Arithmetic  replace + with *
+[21/454] killed    lib/decimal.ex:809  ComparisonNegation  replace == with !=
+[22/454] killed    lib/decimal.ex:1688  Arithmetic  replace * with +
+[23/454] killed    lib/decimal.ex:1572  Arithmetic  replace * with +
+[24/454] killed    lib/decimal.ex:1640  ComparisonNegation  replace >= with <
+[25/454] survived  lib/decimal.ex:672  Arithmetic  replace - with +
+[26/454] killed    lib/decimal.ex:1846  ComparisonNegation  replace == with !=
+
+13:31:35.041 [error] GenServer #PID<0.877.0> terminating
+** (stop) :worker_crashed
+Last message (from #PID<0.883.0>): {:run_schema, 3, [], 60000}
+State: %{port: #Port<0.40>, sandbox: %Mut.Sandbox{id: 3, path: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/3", baseline_snapshot: %{"lib/decimal/.mix/compile.app_cache" => "aab3ff1ff185058fbd06f8a8932f70ac93a20dde7d0bed1cdcdbed566e8c499b", "lib/decimal/.mix/compile.elixir" => "ed79397f07818710c624c305be53d4b17e074b57f543bd0d3e4ac8d21d185c48", "lib/decimal/.mix/compile.elixir_scm" => "fdf1e997ec05256fb65235978c6e0dbc581401bd8f4935417474c35516ee3188", "lib/decimal/.mix/compile.lock" => "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "lib/decimal/consolidated/Elixir.Collectable.beam" => "8b8da3b4b0f837177f124c6f338e578d0d0433bd03d278507c822642190ebdf2", "lib/decimal/consolidated/Elixir.Enumerable.beam" => "4235e8d3cc7837564c535aa48e8ef62a296bda91a1111b322854210a271626a9", "lib/decimal/consolidated/Elixir.IEx.Info.beam" => "184b1ad7b10245c1a209d0acc80480d75f627dc050e1224981a562b91c066ef8", "lib/decimal/consolidated/Elixir.Inspect.beam" => "56d0e33b47649c6fbb8c29cc1960e90f5fb9a4a452317e2840fb00d786a06664", "lib/decimal/consolidated/Elixir.JSON.Encoder.beam" => "2235c4fdf912ba7426c38fabca6b8a80905a363282c54a7a563016d3412b6222", "lib/decimal/consolidated/Elixir.Jason.Encoder.beam" => "bb4de22ef4ea2ca16d946f6fc5c7c0f24d24f80f886bfd1108b437635bb27f37", "lib/decimal/consolidated/Elixir.List.Chars.beam" => "1430250a661e47e5ea9815bb5536995ba3b91594d72d1bd41d78ddaad2a0220e", "lib/decimal/consolidated/Elixir.String.Chars.beam" => "e91180fa37a2b1e4634778900b18c6ffda03c20c93f15e1c21071ca19468596c", "lib/decimal/ebin/Elixir.Decimal.Context.beam" => "e7528ffb36f7a5fe7b15b5862cca41272b3df8f82463717b732a0e6606e00c83", "lib/decimal/ebin/Elixir.Decimal.Error.beam" => "401ae9a12fbcc688229850431ca306da09873976e922d6d3b977e71a0e757a3b", "lib/decimal/ebin/Elixir.Decimal.Macros.beam" => "fe4f37aa2cb8324b70e63d27a72a653f7a37baebb12c35f5deadddd8025e9831", "lib/decimal/ebin/Elixir.Decimal.beam" => "7479e5924674591d7ad9a4b3071ae800ca295dfdc7dae92a759ffae75257359f", "lib/decimal/ebin/Elixir.Inspect.Decimal.beam" => "c1bb8af05afc17e57ae779eb7412509ce0f6eda432a08891f859aaa593a38361", "lib/decimal/ebin/Elixir.JSON.Encoder.Decimal.beam" => "7838aafaf2f1be63e4665e9a69414149915b612f906b71ff1a9766a0de609895", "lib/decimal/ebin/Elixir.String.Chars.Decimal.beam" => "f2c2b36dfc99a58a84a8187d271543bbcb20f2647d8a9b901fe3da1ef64ba3ba", "lib/decimal/ebin/decimal.app" => "d26d9dff5efc9a61448ccad2a5d0e8a0a2e65ffda5043191c54c4f99ae4620be"}, baseline_source: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema"}, leftover: ""}
+Client #PID<0.883.0> is alive
+
+    (stdlib 7.2) gen.erl:262: :gen.do_call/4
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1180: GenServer.call/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:458: Mix.Tasks.Mut.run_schema_via_persistent/5
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:431: Mix.Tasks.Mut.execute_schema_mutant/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:557: anonymous fn/3 in Mix.Tasks.Mut.run_with_concurrency/4
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:40: Task.Supervised.reply/4
+
+13:31:35.129 [error] GenServer #PID<0.876.0> terminating
+** (stop) :worker_crashed
+Last message (from #PID<0.888.0>): {:run_schema, 9, [], 60000}
+State: %{port: #Port<0.39>, sandbox: %Mut.Sandbox{id: 2, path: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/2", baseline_snapshot: %{"lib/decimal/.mix/compile.app_cache" => "aab3ff1ff185058fbd06f8a8932f70ac93a20dde7d0bed1cdcdbed566e8c499b", "lib/decimal/.mix/compile.elixir" => "ed79397f07818710c624c305be53d4b17e074b57f543bd0d3e4ac8d21d185c48", "lib/decimal/.mix/compile.elixir_scm" => "fdf1e997ec05256fb65235978c6e0dbc581401bd8f4935417474c35516ee3188", "lib/decimal/.mix/compile.lock" => "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "lib/decimal/consolidated/Elixir.Collectable.beam" => "8b8da3b4b0f837177f124c6f338e578d0d0433bd03d278507c822642190ebdf2", "lib/decimal/consolidated/Elixir.Enumerable.beam" => "4235e8d3cc7837564c535aa48e8ef62a296bda91a1111b322854210a271626a9", "lib/decimal/consolidated/Elixir.IEx.Info.beam" => "184b1ad7b10245c1a209d0acc80480d75f627dc050e1224981a562b91c066ef8", "lib/decimal/consolidated/Elixir.Inspect.beam" => "56d0e33b47649c6fbb8c29cc1960e90f5fb9a4a452317e2840fb00d786a06664", "lib/decimal/consolidated/Elixir.JSON.Encoder.beam" => "2235c4fdf912ba7426c38fabca6b8a80905a363282c54a7a563016d3412b6222", "lib/decimal/consolidated/Elixir.Jason.Encoder.beam" => "bb4de22ef4ea2ca16d946f6fc5c7c0f24d24f80f886bfd1108b437635bb27f37", "lib/decimal/consolidated/Elixir.List.Chars.beam" => "1430250a661e47e5ea9815bb5536995ba3b91594d72d1bd41d78ddaad2a0220e", "lib/decimal/consolidated/Elixir.String.Chars.beam" => "e91180fa37a2b1e4634778900b18c6ffda03c20c93f15e1c21071ca19468596c", "lib/decimal/ebin/Elixir.Decimal.Context.beam" => "e7528ffb36f7a5fe7b15b5862cca41272b3df8f82463717b732a0e6606e00c83", "lib/decimal/ebin/Elixir.Decimal.Error.beam" => "401ae9a12fbcc688229850431ca306da09873976e922d6d3b977e71a0e757a3b", "lib/decimal/ebin/Elixir.Decimal.Macros.beam" => "fe4f37aa2cb8324b70e63d27a72a653f7a37baebb12c35f5deadddd8025e9831", "lib/decimal/ebin/Elixir.Decimal.beam" => "7479e5924674591d7ad9a4b3071ae800ca295dfdc7dae92a759ffae75257359f", "lib/decimal/ebin/Elixir.Inspect.Decimal.beam" => "c1bb8af05afc17e57ae779eb7412509ce0f6eda432a08891f859aaa593a38361", "lib/decimal/ebin/Elixir.JSON.Encoder.Decimal.beam" => "7838aafaf2f1be63e4665e9a69414149915b612f906b71ff1a9766a0de609895", "lib/decimal/ebin/Elixir.String.Chars.Decimal.beam" => "f2c2b36dfc99a58a84a8187d271543bbcb20f2647d8a9b901fe3da1ef64ba3ba", "lib/decimal/ebin/decimal.app" => "d26d9dff5efc9a61448ccad2a5d0e8a0a2e65ffda5043191c54c4f99ae4620be"}, baseline_source: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema"}, leftover: ""}
+Client #PID<0.888.0> is alive
+
+    (stdlib 7.2) gen.erl:262: :gen.do_call/4
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1180: GenServer.call/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:458: Mix.Tasks.Mut.run_schema_via_persistent/5
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:431: Mix.Tasks.Mut.execute_schema_mutant/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:557: anonymous fn/3 in Mix.Tasks.Mut.run_with_concurrency/4
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:40: Task.Supervised.reply/4
+Failed to write log message to stdout, trying stderr
+
+13:31:35.145 [error] Writer crashed (:epipe)
+Failed to write log message to stdout, trying stderr
+
+13:31:35.150 [error] GenServer #PID<0.468.0> terminating
+** (stop) :terminated
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test with_context/2 set flags (Decimal.ContextTest)\\n     test/decimal/context_test.exs:83\\n     ** (ExUnit.TimeoutError) test timed out after 60000ms. You can change the timeout:\\n\\n       1. per test by setting \\\"@tag timeout: x\\\" (accepts :infinity)\\n       2. per test module by setting \\\"@moduletag timeout: x\\\" (accepts :infinity)\\n       3. globally via \\\"ExUnit.start(timeout: x)\\\" configuration\\n       4. by running \\\"mix test --timeout x\\\" which sets timeout\\n       5. or by running \\\"mix test --trace\\\" which sets timeout to infinity\\n          (useful when using IEx.pry/0)\\n\\n     where \\\"x\\\" is the timeout given as integer in milliseconds (defaults to 60_000).\\n\\n     code: Context.with(%Context{precision: 111}, fn ->\\n     stacktrace:\\n       (decimal 2.3.0) lib/decimal.ex:2882: Decimal.div_calc/5\\n       (decimal 2.3.0) lib/decimal.ex:855: Decimal.div/2\\n       test/decimal/context_test.exs:97: anonymous fn/0 in Decimal.ContextTest.\\\"test with_context/2 set flags\\\"/1\\n       (decimal 2.3.0) lib/decimal/context.ex:27: Decimal.Context.with/2\\n       test/decimal/context_test.exs:94: (test)\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:533: ExUnit.Runner.exec_test/2\\n       (stdlib 7.2) timer.erl:599: :timer.tc/2\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:455: anonymous fn/6 in ExUnit.Runner.spawn_test_monitor/4\\n\",\"module\":\"Decimal.ContextTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/2/test/decimal/context_test.exs\",\"test\":\"with_context/2 set flags\",\"event\":\"test_finished\",\"duration_us\":0}", 10])
+    (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+    (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+    (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+    (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+Last message: {:"$gen_cast", {:test_finished, %ExUnit.Test{name: :"test with_context/2 set flags", description: "test with_context/2 set flags", case: Decimal.ContextTest, module: Decimal.ContextTest, state: {:failed, [{:error, %ExUnit.TimeoutError{timeout: 60000, type: "test"}, [{Decimal, :div_calc, 5, [file: ~c"lib/decimal.ex", line: 2882]}, {Decimal, :div, 2, [file: ~c"lib/decimal.ex", line: 855]}, {Decimal.ContextTest, :"-test with_context/2 set flags/1-fun-1-", 0, [file: ~c"test/decimal/context_test.exs", line: 97]}, {Decimal.Context, :with, 2, [file: ~c"lib/decimal/context.ex", line: 27]}, {Decimal.ContextTest, :"test with_context/2 set flags", 1, [file: ~c"test/decimal/context_test.exs", line: 94]}, {ExUnit.Runner, :exec_test, 2, [file: ~c"lib/ex_unit/runner.ex", line: 533]}, {:timer, :tc, 2, [file: ~c"timer.erl", line: 599]}, {ExUnit.Runner, :"-spawn_test_monitor/4-fun-1-", 6, [file: ~c"lib/ex_unit/runner.ex", line: 455]}]}]}, time: 0, tags: %{async: true, line: 83, module: Decimal.ContextTest, registered: %{}, file: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/2/test/decimal/context_test.exs", test: :"test with_context/2 set flags", describe: nil, describe_line: nil, test_type: :test, test_group: nil}, logs: "", parameters: %{}}}}
+State: %{tests: 92, failed: 0, skipped: 0}
+** (exit) exited in: GenServer.stop(#PID<0.468.0>, :normal, :infinity)
+    ** (EXIT) exited in: :sys.terminate(#PID<0.468.0>, :normal, :infinity)
+        ** (EXIT) an exception was raised:
+            ** (ErlangError) Erlang error: :terminated:
+
+  * 1st argument: the device has terminated
+
+                (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test with_context/2 set flags (Decimal.ContextTest)\\n     test/decimal/context_test.exs:83\\n     ** (ExUnit.TimeoutError) test timed out after 60000ms. You can change the timeout:\\n\\n       1. per test by setting \\\"@tag timeout: x\\\" (accepts :infinity)\\n       2. per test module by setting \\\"@moduletag timeout: x\\\" (accepts :infinity)\\n       3. globally via \\\"ExUnit.start(timeout: x)\\\" configuration\\n       4. by running \\\"mix test --timeout x\\\" which sets timeout\\n       5. or by running \\\"mix test --trace\\\" which sets timeout to infinity\\n          (useful when using IEx.pry/0)\\n\\n     where \\\"x\\\" is the timeout given as integer in milliseconds (defaults to 60_000).\\n\\n     code: Context.with(%Context{precision: 111}, fn ->\\n     stacktrace:\\n       (decimal 2.3.0) lib/decimal.ex:2882: Decimal.div_calc/5\\n       (decimal 2.3.0) lib/decimal.ex:855: Decimal.div/2\\n       test/decimal/context_test.exs:97: anonymous fn/0 in Decimal.ContextTest.\\\"test with_context/2 set flags\\\"/1\\n       (decimal 2.3.0) lib/decimal/context.ex:27: Decimal.Context.with/2\\n       test/decimal/context_test.exs:94: (test)\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:533: ExUnit.Runner.exec_test/2\\n       (stdlib 7.2) timer.erl:599: :timer.tc/2\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:455: anonymous fn/6 in ExUnit.Runner.spawn_test_monitor/4\\n\",\"module\":\"Decimal.ContextTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/2/test/decimal/context_test.exs\",\"test\":\"with_context/2 set flags\",\"event\":\"test_finished\",\"duration_us\":0}", 10])
+                (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+                (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+                (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+                (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1144: GenServer.stop/3
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/event_manager.ex:26: anonymous fn/2 in ExUnit.EventManager.stop/1
+    (elixir 1.20.0-rc.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/event_manager.ex:25: ExUnit.EventManager.stop/1
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:69: ExUnit.Runner.run_with_trap/2
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:34: ExUnit.Runner.run/2
+    (ex_unit 1.20.0-rc.4) lib/ex_unit.ex:575: ExUnit.maybe_repeated_run/4
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:137: Mut.Worker.PersistentRunner.do_run/3
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:105: Mut.Worker.PersistentRunner.handle_command/2
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:106: Mut.Worker.PersistentRunner.handle_command/2
+    (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7
+    (elixir 1.20.0-rc.4) lib/code.ex:649: Code.validated_eval_string/4
+
+13:31:35.428 [error] GenServer #PID<0.878.0> terminating
+** (stop) :worker_crashed
+Last message (from #PID<0.908.0>): {:run_schema, 38, [], 60000}
+State: %{port: #Port<0.41>, sandbox: %Mut.Sandbox{id: 4, path: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/4", baseline_snapshot: %{"lib/decimal/.mix/compile.app_cache" => "aab3ff1ff185058fbd06f8a8932f70ac93a20dde7d0bed1cdcdbed566e8c499b", "lib/decimal/.mix/compile.elixir" => "ed79397f07818710c624c305be53d4b17e074b57f543bd0d3e4ac8d21d185c48", "lib/decimal/.mix/compile.elixir_scm" => "fdf1e997ec05256fb65235978c6e0dbc581401bd8f4935417474c35516ee3188", "lib/decimal/.mix/compile.lock" => "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "lib/decimal/consolidated/Elixir.Collectable.beam" => "8b8da3b4b0f837177f124c6f338e578d0d0433bd03d278507c822642190ebdf2", "lib/decimal/consolidated/Elixir.Enumerable.beam" => "4235e8d3cc7837564c535aa48e8ef62a296bda91a1111b322854210a271626a9", "lib/decimal/consolidated/Elixir.IEx.Info.beam" => "184b1ad7b10245c1a209d0acc80480d75f627dc050e1224981a562b91c066ef8", "lib/decimal/consolidated/Elixir.Inspect.beam" => "56d0e33b47649c6fbb8c29cc1960e90f5fb9a4a452317e2840fb00d786a06664", "lib/decimal/consolidated/Elixir.JSON.Encoder.beam" => "2235c4fdf912ba7426c38fabca6b8a80905a363282c54a7a563016d3412b6222", "lib/decimal/consolidated/Elixir.Jason.Encoder.beam" => "bb4de22ef4ea2ca16d946f6fc5c7c0f24d24f80f886bfd1108b437635bb27f37", "lib/decimal/consolidated/Elixir.List.Chars.beam" => "1430250a661e47e5ea9815bb5536995ba3b91594d72d1bd41d78ddaad2a0220e", "lib/decimal/consolidated/Elixir.String.Chars.beam" => "e91180fa37a2b1e4634778900b18c6ffda03c20c93f15e1c21071ca19468596c", "lib/decimal/ebin/Elixir.Decimal.Context.beam" => "e7528ffb36f7a5fe7b15b5862cca41272b3df8f82463717b732a0e6606e00c83", "lib/decimal/ebin/Elixir.Decimal.Error.beam" => "401ae9a12fbcc688229850431ca306da09873976e922d6d3b977e71a0e757a3b", "lib/decimal/ebin/Elixir.Decimal.Macros.beam" => "fe4f37aa2cb8324b70e63d27a72a653f7a37baebb12c35f5deadddd8025e9831", "lib/decimal/ebin/Elixir.Decimal.beam" => "7479e5924674591d7ad9a4b3071ae800ca295dfdc7dae92a759ffae75257359f", "lib/decimal/ebin/Elixir.Inspect.Decimal.beam" => "c1bb8af05afc17e57ae779eb7412509ce0f6eda432a08891f859aaa593a38361", "lib/decimal/ebin/Elixir.JSON.Encoder.Decimal.beam" => "7838aafaf2f1be63e4665e9a69414149915b612f906b71ff1a9766a0de609895", "lib/decimal/ebin/Elixir.String.Chars.Decimal.beam" => "f2c2b36dfc99a58a84a8187d271543bbcb20f2647d8a9b901fe3da1ef64ba3ba", "lib/decimal/ebin/decimal.app" => "d26d9dff5efc9a61448ccad2a5d0e8a0a2e65ffda5043191c54c4f99ae4620be"}, baseline_source: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema"}, leftover: ""}
+Client #PID<0.908.0> is alive
+
+    (stdlib 7.2) gen.erl:262: :gen.do_call/4
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1180: GenServer.call/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:458: Mix.Tasks.Mut.run_schema_via_persistent/5
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:431: Mix.Tasks.Mut.execute_schema_mutant/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:557: anonymous fn/3 in Mix.Tasks.Mut.run_with_concurrency/4
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:40: Task.Supervised.reply/4
+Failed to write log message to stdout, trying stderr
+
+13:31:35.440 [error] Writer crashed (:epipe)
+Failed to write log message to stdout, trying stderr
+
+13:31:35.447 [error] GenServer #PID<0.2000.0> terminating
+** (stop) :terminated
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test div_int/2 (DecimalTest)\\n     test/decimal_test.exs:384\\n     ** (ExUnit.TimeoutError) test timed out after 60000ms. You can change the timeout:\\n\\n       1. per test by setting \\\"@tag timeout: x\\\" (accepts :infinity)\\n       2. per test module by setting \\\"@moduletag timeout: x\\\" (accepts :infinity)\\n       3. globally via \\\"ExUnit.start(timeout: x)\\\" configuration\\n       4. by running \\\"mix test --timeout x\\\" which sets timeout\\n       5. or by running \\\"mix test --trace\\\" which sets timeout to infinity\\n          (useful when using IEx.pry/0)\\n\\n     where \\\"x\\\" is the timeout given as integer in milliseconds (defaults to 60_000).\\n\\n     code: assert Decimal.div_int(~d\\\"2\\\", ~d\\\"3\\\") == d(1, 0, 0)\\n     stacktrace:\\n       (decimal 2.3.0) lib/decimal.ex:2987: Decimal.div_int_calc/5\\n       (decimal 2.3.0) lib/decimal.ex:3063: Decimal.integer_division/5\\n       (decimal 2.3.0) lib/decimal.ex:1012: Decimal.div_int/2\\n       test/decimal_test.exs:386: (test)\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:533: ExUnit.Runner.exec_test/2\\n       (stdlib 7.2) timer.erl:599: :timer.tc/2\\n       (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:455: anonymous fn/6 in ExUnit.Runner.spawn_test_monitor/4\\n\",\"module\":\"DecimalTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/4/test/decimal_test.exs\",\"test\":\"div_int/2\",\"event\":\"test_finished\",\"duration_us\":0}", 10])
+    (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+    (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+    (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+    (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+Last message: {:"$gen_cast", {:test_finished, %ExUnit.Test{name: :"test div_int/2", description: "test div_int/2", case: DecimalTest, module: DecimalTest, state: {:failed, [{:error, %ExUnit.TimeoutError{timeout: 60000, type: "test"}, [{Decimal, :div_int_calc, 5, [file: ~c"lib/decimal.ex", line: 2987]}, {Decimal, :integer_division, 5, [file: ~c"lib/decimal.ex", line: 3063]}, {Decimal, :div_int, 2, [file: ~c"lib/decimal.ex", line: 1012]}, {DecimalTest, :"test div_int/2", 1, [file: ~c"test/decimal_test.exs", line: 386]}, {ExUnit.Runner, :exec_test, 2, [file: ~c"lib/ex_unit/runner.ex", line: 533]}, {:timer, :tc, 2, [file: ~c"timer.erl", line: 599]}, {ExUnit.Runner, :"-spawn_test_monitor/4-fun-1-", 6, [file: ~c"lib/ex_unit/runner.ex", line: 455]}]}]}, time: 0, tags: %{async: true, line: 384, module: DecimalTest, registered: %{}, file: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/4/test/decimal_test.exs", test: :"test div_int/2", describe: nil, describe_line: nil, test_type: :test, test_group: nil}, logs: "", parameters: %{}}}}
+State: %{tests: 95, failed: 17, skipped: 0}
+
+13:31:35.511 [error] GenServer #PID<0.875.0> terminating
+** (stop) :worker_crashed
+Last message (from #PID<0.910.0>): {:run_schema, 40, [], 60000}
+State: %{port: #Port<0.38>, sandbox: %Mut.Sandbox{id: 1, path: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778153422-EwQI1Q/1", baseline_snapshot: %{"lib/decimal/.mix/compile.app_cache" => "aab3ff1ff185058fbd06f8a8932f70ac93a20dde7d0bed1cdcdbed566e8c499b", "lib/decimal/.mix/compile.elixir" => "ed79397f07818710c624c305be53d4b17e074b57f543bd0d3e4ac8d21d185c48", "lib/decimal/.mix/compile.elixir_scm" => "fdf1e997ec05256fb65235978c6e0dbc581401bd8f4935417474c35516ee3188", "lib/decimal/.mix/compile.lock" => "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "lib/decimal/consolidated/Elixir.Collectable.beam" => "8b8da3b4b0f837177f124c6f338e578d0d0433bd03d278507c822642190ebdf2", "lib/decimal/consolidated/Elixir.Enumerable.beam" => "4235e8d3cc7837564c535aa48e8ef62a296bda91a1111b322854210a271626a9", "lib/decimal/consolidated/Elixir.IEx.Info.beam" => "184b1ad7b10245c1a209d0acc80480d75f627dc050e1224981a562b91c066ef8", "lib/decimal/consolidated/Elixir.Inspect.beam" => "56d0e33b47649c6fbb8c29cc1960e90f5fb9a4a452317e2840fb00d786a06664", "lib/decimal/consolidated/Elixir.JSON.Encoder.beam" => "2235c4fdf912ba7426c38fabca6b8a80905a363282c54a7a563016d3412b6222", "lib/decimal/consolidated/Elixir.Jason.Encoder.beam" => "bb4de22ef4ea2ca16d946f6fc5c7c0f24d24f80f886bfd1108b437635bb27f37", "lib/decimal/consolidated/Elixir.List.Chars.beam" => "1430250a661e47e5ea9815bb5536995ba3b91594d72d1bd41d78ddaad2a0220e", "lib/decimal/consolidated/Elixir.String.Chars.beam" => "e91180fa37a2b1e4634778900b18c6ffda03c20c93f15e1c21071ca19468596c", "lib/decimal/ebin/Elixir.Decimal.Context.beam" => "e7528ffb36f7a5fe7b15b5862cca41272b3df8f82463717b732a0e6606e00c83", "lib/decimal/ebin/Elixir.Decimal.Error.beam" => "401ae9a12fbcc688229850431ca306da09873976e922d6d3b977e71a0e757a3b", "lib/decimal/ebin/Elixir.Decimal.Macros.beam" => "fe4f37aa2cb8324b70e63d27a72a653f7a37baebb12c35f5deadddd8025e9831", "lib/decimal/ebin/Elixir.Decimal.beam" => "7479e5924674591d7ad9a4b3071ae800ca295dfdc7dae92a759ffae75257359f", "lib/decimal/ebin/Elixir.Inspect.Decimal.beam" => "c1bb8af05afc17e57ae779eb7412509ce0f6eda432a08891f859aaa593a38361", "lib/decimal/ebin/Elixir.JSON.Encoder.Decimal.beam" => "7838aafaf2f1be63e4665e9a69414149915b612f906b71ff1a9766a0de609895", "lib/decimal/ebin/Elixir.String.Chars.Decimal.beam" => "f2c2b36dfc99a58a84a8187d271543bbcb20f2647d8a9b901fe3da1ef64ba3ba", "lib/decimal/ebin/decimal.app" => "d26d9dff5efc9a61448ccad2a5d0e8a0a2e65ffda5043191c54c4f99ae4620be"}, baseline_source: "/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778153422-EwQI1Q-schema"}, leftover: ""}
+Client #PID<0.910.0> is alive
+
+    (stdlib 7.2) gen.erl:262: :gen.do_call/4
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1180: GenServer.call/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:458: Mix.Tasks.Mut.run_schema_via_persistent/5
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:431: Mix.Tasks.Mut.execute_schema_mutant/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:557: anonymous fn/3 in Mix.Tasks.Mut.run_with_concurrency/4
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2
+    (elixir 1.20.0-rc.4) lib/task/supervised.ex:40: Task.Supervised.reply/4
+[27/454] killed    lib/decimal.ex:441  Arithmetic  replace * with -
+[28/454] killed    lib/decimal.ex:401  ComparisonNegation  replace == with !=
+[29/454] killed    lib/decimal.ex:1288  Arithmetic  replace + with -
+[30/454] killed    lib/decimal.ex:1508  Arithmetic  replace + with -
+[31/454] survived  lib/decimal.ex:721  Arithmetic  replace - with *
+Failed to write log message to stdout, trying stderr
+
+13:31:44.881 [error] Writer crashed (:epipe)
+[32/454] survived  lib/decimal.ex:672  Arithmetic  replace - with *
+[33/454] survived  lib/decimal.ex:1269  ComparisonBoundary  replace >= with >
+[34/454] killed    lib/decimal.ex:1968  ComparisonNegation  replace == with !=
+[35/454] killed    lib/decimal.ex:1925  Boolean  replace and with or
+[36/454] killed    lib/decimal.ex:1862  ComparisonNegation  replace >= with <
+[37/454] killed    lib/decimal.ex:1782  Arithmetic  replace * with /
+[38/454] killed    lib/decimal.ex:1524  Arithmetic  replace + with *
+[39/454] survived  lib/decimal.ex:1116  Arithmetic  replace + with *
+[40/454] killed    lib/decimal.ex:1790  Arithmetic  replace - with *
+[41/454] killed    lib/decimal.ex:1754  Arithmetic  replace - with *
+[42/454] killed    lib/decimal.ex:1742  ComparisonNegation  replace > with <=
+[43/454] survived  lib/decimal.ex:1745  ComparisonNegation  replace != with ==
+Failed to write log message to stdout, trying stderr
+
+13:32:08.143 [error] Writer crashed (:epipe)
+[44/454] survived  lib/decimal.ex:1271  Arithmetic  replace * with -
+[45/454] killed    lib/decimal.ex:1782  Arithmetic  replace * with -
+[46/454] killed    lib/decimal.ex:1528  ComparisonNegation  replace == with !=
+[47/454] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[48/454] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[49/454] killed    lib/decimal.ex:1698  ComparisonNegation  replace == with !=
+Failed to write log message to stdout, trying stderr
+
+13:31:44.903 [error] GenServer #PID<0.130.0> terminating
+** (stop) :terminated
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test rem/2 (DecimalTest)\\n     test/decimal_test.exs:412\\n     ** (SystemLimitError) a system limit has been reached\\n     code: assert Decimal.rem(~d\\\"2.1\\\", ~d\\\"3\\\") == d(1, 21, -1)\\n     stacktrace:\\n       :erlang.*(700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" <> ..., 10])
+    (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+    (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+    (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+    (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+Last message: {:"$gen_cast", {:test_finished, %ExUnit.Test{name: :"test rem/2", description: "test rem/2", case: DecimalTest, module: DecimalTest, state: {:failed, [{:error, %SystemLimitError{message: "a system limit has been reached"}, [{:erlang, :*, [700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 (truncated)
+** (exit) exited in: GenServer.stop(#PID<0.130.0>, :normal, :infinity)
+    ** (EXIT) exited in: :sys.terminate(#PID<0.130.0>, :normal, :infinity)
+        ** (EXIT) an exception was raised:
+            ** (ErlangError) Erlang error: :terminated:
+
+  * 1st argument: the device has terminated
+
+                (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test rem/2 (DecimalTest)\\n     test/decimal_test.exs:412\\n     ** (SystemLimitError) a system limit has been reached\\n     code: assert Decimal.rem(~d\\\"2.1\\\", ~d\\\"3\\\") == d(1, 21, -1)\\n     stacktrace:\\n       :erlang.*(700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" <> ..., 10])
+                (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+                (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+                (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+                (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1144: GenServer.stop/3
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/event_manager.ex:26: anonymous fn/2 in ExUnit.EventManager.stop/1
+    (elixir 1.20.0-rc.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/event_manager.ex:25: ExUnit.EventManager.stop/1
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:69: ExUnit.Runner.run_with_trap/2
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:34: ExUnit.Runner.run/2
+    (ex_unit 1.20.0-rc.4) lib/ex_unit.ex:575: ExUnit.maybe_repeated_run/4
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:137: Mut.Worker.PersistentRunner.do_run/3
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:105: Mut.Worker.PersistentRunner.handle_command/2
+    (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7
+    (elixir 1.20.0-rc.4) lib/code.ex:649: Code.validated_eval_string/4
+[50/454] survived  lib/decimal.ex:945  ComparisonBoundary  replace < with <=
+[51/454] killed    lib/decimal.ex:1735  Arithmetic  replace * with -
+[52/454] killed    lib/decimal.ex:1269  ComparisonNegation  replace >= with <
+[53/454] killed    lib/decimal.ex:1123  Arithmetic  replace + with *
+[54/454] killed    lib/decimal.ex:1996  ComparisonNegation  replace == with !=
+[55/454] killed    lib/decimal.ex:1531  ComparisonNegation  replace >= with <
+[56/454] killed    lib/decimal.ex:550  ComparisonNegation  replace == with !=
+[57/454] survived  lib/decimal.ex:1110  Arithmetic  replace + with *
+[58/454] killed    lib/decimal.ex:403  Arithmetic  replace - with *
+[59/454] killed    lib/decimal.ex:718  ComparisonNegation  replace == with !=
+[60/454] killed    lib/decimal.ex:1263  Arithmetic  replace + with -
+** (ErlangError) Erlang error: :terminated:
+
+  * 1st argument: the device has terminated
+
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["MUT_RESULT error 0 Erlang error: :terminated", 10])
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:109: Mut.Worker.PersistentRunner.handle_command/2
+    (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7
+    (elixir 1.20.0-rc.4) lib/code.ex:649: Code.validated_eval_string/4
+[61/454] killed    lib/decimal.ex:1579  Arithmetic  replace + with *
+[62/454] killed    lib/decimal.ex:1761  Arithmetic  replace + with -
+[63/454] killed    lib/decimal.ex:1895  ComparisonNegation  replace > with <=
+[64/454] killed    lib/decimal.ex:1760  ComparisonNegation  replace >= with <
+[65/454] killed    lib/decimal.ex:1605  Arithmetic  replace * with /
+[66/454] survived  lib/decimal.ex:655  Arithmetic  replace - with +
+[67/454] killed    lib/decimal.ex:647  ComparisonNegation  replace == with !=
+[68/454] killed    lib/decimal.ex:678  Arithmetic  replace - with *
+[69/454] killed    lib/decimal.ex:1772  Arithmetic  replace * with +
+[70/454] killed    lib/decimal.ex:805  ComparisonNegation  replace == with !=
+Failed to write log message to stdout, trying stderr
+
+13:32:08.156 [error] GenServer #PID<0.2406.0> terminating
+** (stop) :terminated
+    (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test div/2 (DecimalTest)\\n     test/decimal_test.exs:344\\n     ** (SystemLimitError) a system limit has been reached\\n     code: Context.with(%Context{precision: 5, rounding: :half_up}, fn ->\\n     stacktrace:\\n       :erlang.*(1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" <> ..., 10])
+    (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+    (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+    (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+    (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+Last message: {:"$gen_cast", {:test_finished, %ExUnit.Test{name: :"test div/2", description: "test div/2", case: DecimalTest, module: DecimalTest, state: {:failed, [{:error, %SystemLimitError{message: "a system limit has been reached"}, [{:erlang, :*, [1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 (truncated)
+** (exit) exited in: GenServer.stop(#PID<0.2406.0>, :normal, :infinity)
+    ** (EXIT) exited in: :sys.terminate(#PID<0.2406.0>, :normal, :infinity)
+        ** (EXIT) an exception was raised:
+            ** (ErlangError) Erlang error: :terminated:
+
+  * 1st argument: the device has terminated
+
+                (stdlib 7.2) io.erl:202: :io.put_chars(:standard_io, ["{\"error\":\"  1) test div/2 (DecimalTest)\\n     test/decimal_test.exs:344\\n     ** (SystemLimitError) a system limit has been reached\\n     code: Context.with(%Context{precision: 5, rounding: :half_up}, fn ->\\n     stacktrace:\\n       :erlang.*(1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" <> ..., 10])
+                (mutalisk 0.1.0) lib/mut/worker/formatter.ex:31: Mut.Worker.Formatter.handle_cast/2
+                (stdlib 7.2) gen_server.erl:2460: :gen_server.try_handle_cast/3
+                (stdlib 7.2) gen_server.erl:2418: :gen_server.handle_msg/3
+                (stdlib 7.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+    (elixir 1.20.0-rc.4) lib/gen_server.ex:1144: GenServer.stop/3
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/event_manager.ex:26: anonymous fn/2 in ExUnit.EventManager.stop/1
+    (elixir 1.20.0-rc.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/event_manager.ex:25: ExUnit.EventManager.stop/1
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:69: ExUnit.Runner.run_with_trap/2
+    (ex_unit 1.20.0-rc.4) lib/ex_unit/runner.ex:34: ExUnit.Runner.run/2
+    (ex_unit 1.20.0-rc.4) lib/ex_unit.ex:575: ExUnit.maybe_repeated_run/4
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:137: Mut.Worker.PersistentRunner.do_run/3
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:105: Mut.Worker.PersistentRunner.handle_command/2
+    (mutalisk 0.1.0) lib/mut/worker/persistent_runner.ex:106: Mut.Worker.PersistentRunner.handle_command/2
+    (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7
+    (elixir 1.20.0-rc.4) lib/code.ex:649: Code.validated_eval_string/4
+[71/454] killed    lib/decimal.ex:1688  Arithmetic  replace - with +
+[72/454] survived  lib/decimal.ex:407  ComparisonBoundary  replace < with <=
+[73/454] killed    lib/decimal.ex:1510  ComparisonNegation  replace > with <=
+[74/454] killed    lib/decimal.ex:1637  ComparisonNegation  replace == with !=
+[75/454] killed    lib/decimal.ex:1738  Arithmetic  replace * with -
+[76/454] killed    lib/decimal.ex:671  ComparisonNegation  replace == with !=
+[77/454] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[78/454] killed    lib/decimal/context.ex:94  Boolean  replace || with &&
+[79/454] killed    lib/decimal.ex:1728  Boolean  replace or with and
+[80/454] killed    lib/decimal.ex:1850  Arithmetic  replace - with +
+[81/454] killed    lib/decimal.ex:1123  Arithmetic  replace * with /
+[82/454] killed    lib/decimal.ex:1843  Arithmetic  replace - with +
+[83/454] killed    lib/decimal.ex:1239  Arithmetic  replace - with +
+[84/454] killed    lib/decimal.ex:1778  ComparisonBoundary  replace >= with >
+[85/454] survived  lib/decimal.ex:1679  ComparisonBoundary  replace < with <=
+[86/454] killed    lib/decimal.ex:1277  Arithmetic  replace - with *
+[87/454] killed    lib/decimal.ex:1549  ComparisonNegation  replace == with !=
+[88/454] survived  lib/decimal.ex:1824  Arithmetic  replace * with -
+[89/454] killed    lib/decimal.ex:1772  Arithmetic  replace + with -
+[90/454] killed    lib/decimal.ex:944  ComparisonNegation  replace == with !=
+[91/454] killed    lib/decimal.ex:1996  Boolean  replace and with or
+[92/454] survived  lib/decimal.ex:1239  Arithmetic  replace + with *
+[93/454] killed    lib/decimal.ex:1508  Arithmetic  replace + with *
+[94/454] survived  lib/decimal.ex:1766  ComparisonBoundary  replace >= with >
+[95/454] killed    lib/decimal.ex:1524  Arithmetic  replace + with -
+[96/454] survived  lib/decimal.ex:739  Arithmetic  replace - with *
+[97/454] killed    lib/decimal.ex:1743  ComparisonBoundary  replace < with <=
+[98/454] killed    lib/decimal.ex:941  ComparisonNegation  replace == with !=
+[99/454] killed    lib/decimal.ex:1849  ComparisonNegation  replace < with >=
+[100/454] killed    lib/decimal.ex:438  Arithmetic  replace + with *
+[101/454] killed    lib/decimal.ex:1945  Arithmetic  replace + with *
+[102/454] killed    lib/decimal.ex:1531  Boolean  replace and with or
+[103/454] killed    lib/decimal.ex:1976  ComparisonNegation  replace == with !=
+[104/454] killed    lib/decimal.ex:882  ComparisonNegation  replace == with !=
+[105/454] killed    lib/decimal.ex:273  Arithmetic  replace * with -
+[106/454] killed    lib/decimal.ex:1277  Arithmetic  replace - with +
+[107/454] survived  lib/decimal.ex:1640  ComparisonBoundary  replace >= with >
+[108/454] survived  lib/decimal.ex:1535  ComparisonBoundary  replace > with >=
+[109/454] killed    lib/decimal.ex:1761  Arithmetic  replace - with +
+[110/454] killed    lib/decimal.ex:1843  Arithmetic  replace - with +
+[111/454] killed    lib/decimal.ex:1772  Arithmetic  replace * with /
+[112/454] killed    lib/decimal.ex:1797  ComparisonNegation  replace > with <=
+[113/454] timeout   lib/decimal.ex:1605  Arithmetic  replace - with +
+[114/454] killed    lib/decimal.ex:1700  Arithmetic  replace + with *
+[115/454] killed    lib/decimal.ex:994  ComparisonNegation  replace > with <=
+[116/454] killed    lib/decimal.ex:652  ComparisonNegation  replace == with !=
+[117/454] killed    lib/decimal.ex:1782  Arithmetic  replace * with +
+[118/454] killed    lib/decimal.ex:1766  ComparisonNegation  replace >= with <
+[119/454] killed    lib/decimal.ex:1331  ComparisonNegation  replace < with >=
+[120/454] killed    lib/decimal.ex:1830  ComparisonNegation  replace == with !=
+[121/454] killed    lib/decimal.ex:1790  Arithmetic  replace - with +
+[122/454] killed    lib/decimal.ex:1524  Arithmetic  replace - with +
+[123/454] killed    lib/decimal.ex:1725  Boolean  replace and with or
+[124/454] survived  lib/decimal.ex:441  Arithmetic  replace + with *
+[125/454] killed    lib/decimal.ex:1811  Arithmetic  replace + with -
+[126/454] killed    lib/decimal.ex:938  ComparisonNegation  replace != with ==
+[127/454] killed    lib/decimal.ex:1249  ComparisonNegation  replace >= with <
+[128/454] survived  lib/decimal.ex:655  Arithmetic  replace - with *
+[129/454] killed    lib/decimal.ex:1692  Arithmetic  replace + with -
+[130/454] killed    lib/decimal.ex:1572  Arithmetic  replace * with -
+[131/454] killed    lib/decimal.ex:1779  Arithmetic  replace - with *
+[132/454] survived  lib/decimal.ex:431  Arithmetic  replace - with *
+[133/454] killed    lib/decimal.ex:2004  Arithmetic  replace - with *
+[134/454] killed    lib/decimal.ex:1923  Boolean  replace and with or
+[135/454] killed    lib/decimal.ex:1251  Arithmetic  replace * with +
+[136/454] killed    lib/decimal.ex:1605  Arithmetic  replace * with +
+[137/454] killed    lib/decimal.ex:530  ComparisonNegation  replace == with !=
+[138/454] killed    lib/decimal.ex:1761  Arithmetic  replace - with *
+[139/454] killed    lib/decimal.ex:1700  ComparisonBoundary  replace < with <=
+[140/454] survived  lib/decimal.ex:2100  Boolean  replace and with or
+[141/454] killed    lib/decimal.ex:406  ComparisonNegation  replace == with !=
+[142/454] survived  lib/decimal.ex:1116  Arithmetic  replace + with -
+[143/454] killed    lib/decimal.ex:1827  Arithmetic  replace * with /
+[144/454] killed    lib/decimal.ex:1779  Arithmetic  replace - with +
+[145/454] killed    lib/decimal.ex:1782  Arithmetic  replace * with -
+[146/454] survived  lib/decimal.ex:1255  ComparisonNegation  replace === with !==
+[147/454] killed    lib/decimal.ex:1751  Arithmetic  replace + with *
+[148/454] survived  lib/decimal.ex:991  ComparisonBoundary  replace < with <=
+[149/454] killed    lib/decimal.ex:1843  Arithmetic  replace - with *
+[150/454] killed    lib/decimal.ex:1721  ComparisonNegation  replace >= with <
+[151/454] timeout   lib/decimal.ex:1572  Arithmetic  replace - with *
+[152/454] survived  lib/decimal.ex:987  ComparisonNegation  replace != with ==
+[153/454] survived  lib/decimal.ex:861  ComparisonNegation  replace == with !=
+[154/454] killed    lib/decimal.ex:990  ComparisonNegation  replace == with !=
+[155/454] killed    lib/decimal.ex:1738  Arithmetic  replace * with +
+[156/454] killed    lib/decimal.ex:1700  ComparisonNegation  replace < with >=
+[157/454] killed    lib/decimal.ex:1498  ComparisonNegation  replace == with !=
+[158/454] killed    lib/decimal.ex:339  ComparisonNegation  replace == with !=
+[159/454] killed    lib/decimal.ex:1763  Boolean  replace and with or
+[160/454] killed    lib/decimal.ex:738  ComparisonNegation  replace == with !=
+[161/454] killed    lib/decimal.ex:273  Arithmetic  replace + with *
+[162/454] killed    lib/decimal.ex:1123  Arithmetic  replace + with -
+[163/454] killed    lib/decimal.ex:942  ComparisonNegation  replace > with <=
+[164/454] survived  lib/decimal.ex:886  Arithmetic  replace - with *
+[165/454] killed    lib/decimal.ex:885  ComparisonNegation  replace == with !=
+[166/454] killed    lib/decimal.ex:1233  Arithmetic  replace + with *
+[167/454] killed    lib/decimal.ex:1605  Arithmetic  replace * with -
+[168/454] killed    lib/decimal.ex:1674  Arithmetic  replace - with +
+[169/454] killed    lib/decimal.ex:273  Arithmetic  replace + with -
+[170/454] survived  lib/decimal.ex:1331  ComparisonBoundary  replace < with <=
+[171/454] killed    lib/decimal.ex:1251  Arithmetic  replace * with -
+[172/454] killed    lib/decimal.ex:1754  Arithmetic  replace * with /
+[173/454] killed    lib/decimal.ex:273  Arithmetic  replace * with +
+[174/454] killed    lib/decimal.ex:1505  ComparisonNegation  replace >= with <
+[175/454] killed    lib/decimal.ex:402  Arithmetic  replace - with +
+[176/454] survived  lib/decimal.ex:864  Arithmetic  replace - with +
+[177/454] killed    lib/decimal.ex:1939  ComparisonNegation  replace != with ==
+[178/454] killed    lib/decimal.ex:888  ComparisonNegation  replace == with !=
+[179/454] killed    lib/decimal.ex:411  ComparisonNegation  replace < with >=
+[180/454] killed    lib/decimal.ex:337  Boolean  replace and with or
+[181/454] killed    lib/decimal.ex:1688  Arithmetic  replace - with *
+[182/454] killed    lib/decimal.ex:713  ComparisonNegation  replace == with !=
+[183/454] timeout   lib/decimal.ex:1782  Arithmetic  replace + with -
+[184/454] killed    lib/decimal.ex:1743  ComparisonNegation  replace < with >=
+[185/454] survived  lib/decimal.ex:678  Arithmetic  replace - with +
+[186/454] killed    lib/decimal.ex:1251  Arithmetic  replace * with /
+[187/454] killed    lib/decimal.ex:1601  Arithmetic  replace * with +
+[188/454] killed    lib/decimal.ex:1233  Arithmetic  replace - with +
+[189/454] killed    lib/decimal.ex:735  ComparisonNegation  replace == with !=
+[190/454] survived  lib/decimal.ex:1110  Arithmetic  replace + with -
+[191/454] killed    lib/decimal.ex:662  ComparisonNegation  replace == with !=
+[192/454] killed    lib/decimal.ex:1984  ComparisonNegation  replace == with !=
+[193/454] killed    lib/decimal.ex:1239  Arithmetic  replace - with *
+[194/454] killed    lib/decimal.ex:1735  Arithmetic  replace * with +
+[195/454] killed    lib/decimal.ex:1772  Arithmetic  replace * with -
+[196/454] killed    lib/decimal.ex:2000  ComparisonNegation  replace == with !=
+[197/454] killed    lib/decimal.ex:1744  ComparisonNegation  replace == with !=
+[198/454] killed    lib/decimal.ex:1266  Arithmetic  replace * with /
+[199/454] survived  lib/decimal.ex:1531  ComparisonBoundary  replace < with <=
+[200/454] killed    lib/decimal.ex:1601  Arithmetic  replace * with -
+[201/454] killed    lib/decimal.ex:1543  ComparisonNegation  replace > with <=
+[202/454] survived  lib/decimal.ex:873  ComparisonNegation  replace == with !=
+[203/454] timeout   lib/decimal.ex:1572  Arithmetic  replace - with +
+[204/454] killed    lib/decimal.ex:1932  ComparisonNegation  replace == with !=
+[205/454] killed    lib/decimal.ex:1219  Arithmetic  replace + with *
+[206/454] survived  lib/decimal.ex:864  Arithmetic  replace - with *
+[207/454] killed    lib/decimal.ex:741  ComparisonNegation  replace == with !=
+[208/454] killed    lib/decimal.ex:945  ComparisonNegation  replace < with >=
+[209/454] killed    lib/decimal.ex:993  ComparisonNegation  replace == with !=
+[210/454] survived  lib/decimal.ex:411  ComparisonBoundary  replace < with <=
+[211/454] killed    lib/decimal.ex:1850  Arithmetic  replace - with *
+[212/454] survived  lib/decimal.ex:2080  ComparisonNegation  replace == with !=
+[213/454] killed    lib/decimal.ex:1738  Arithmetic  replace - with +
+[214/454] killed    lib/decimal.ex:273  Arithmetic  replace * with /
+[215/454] killed    lib/decimal.ex:1240  Arithmetic  replace * with +
+[216/454] killed    lib/decimal.ex:1781  ComparisonNegation  replace != with ==
+[217/454] killed    lib/decimal.ex:1937  ComparisonBoundary  replace > with >=
+[218/454] killed    lib/decimal.ex:1240  Arithmetic  replace * with -
+[219/454] killed    lib/decimal.ex:1849  ComparisonNegation  replace < with >=
+[220/454] killed    lib/decimal.ex:487  ComparisonNegation  replace == with !=
+[221/454] killed    lib/decimal.ex:1533  Arithmetic  replace + with *
+[222/454] killed    lib/decimal.ex:1699  Arithmetic  replace - with +
+[223/454] killed    lib/decimal.ex:1911  Arithmetic  replace + with -
+[224/454] killed    lib/decimal.ex:1763  ComparisonNegation  replace == with !=
+[225/454] killed    lib/decimal.ex:1817  Arithmetic  replace * with +
+[226/454] killed    lib/decimal.ex:1266  ComparisonNegation  replace === with !==
+[227/454] killed    lib/decimal.ex:337  Boolean  replace or with and
+[228/454] killed    lib/decimal.ex:1843  Arithmetic  replace - with *
+[229/454] killed    lib/decimal.ex:669  ComparisonNegation  replace == with !=
+[230/454] killed    lib/decimal.ex:1725  Arithmetic  replace + with -
+[231/454] survived  lib/decimal.ex:1797  ComparisonBoundary  replace > with >=
+[232/454] killed    lib/decimal.ex:1744  Boolean  replace and with or
+[233/454] killed    lib/decimal.ex:1579  Arithmetic  replace + with -
+[234/454] killed    lib/decimal.ex:1945  Arithmetic  replace + with -
+[235/454] killed    lib/decimal.ex:1772  Arithmetic  replace + with *
+[236/454] killed    lib/decimal.ex:1751  Arithmetic  replace * with -
+[237/454] killed    lib/decimal.ex:1263  Arithmetic  replace + with *
+[238/454] killed    lib/decimal.ex:2004  Arithmetic  replace - with +
+[239/454] killed    lib/decimal.ex:1539  Arithmetic  replace - with +
+[240/454] killed    lib/decimal.ex:1934  ComparisonNegation  replace > with <=
+[241/454] killed    lib/decimal.ex:1539  Arithmetic  replace - with *
+[242/454] killed    lib/decimal.ex:988  ComparisonNegation  replace == with !=
+[243/454] survived  lib/decimal.ex:1545  ComparisonBoundary  replace >= with >
+[244/454] survived  lib/decimal.ex:853  ComparisonNegation  replace == with !=
+[245/454] survived  lib/decimal.ex:1271  Arithmetic  replace * with +
+[246/454] killed    lib/decimal.ex:338  ComparisonNegation  replace == with !=
+[247/454] killed    lib/decimal.ex:1862  ComparisonBoundary  replace >= with >
+[248/454] killed    lib/decimal.ex:438  Arithmetic  replace + with -
+[249/454] killed    lib/decimal.ex:1772  Arithmetic  replace * with -
+[250/454] survived  lib/decimal.ex:1721  ComparisonBoundary  replace >= with >
+[251/454] timeout   lib/decimal.ex:1827  Arithmetic  replace - with +
+[252/454] killed    lib/decimal.ex:1937  ComparisonNegation  replace > with <=
+[253/454] timeout   lib/decimal.ex:1605  Arithmetic  replace - with *
+[254/454] survived  lib/decimal.ex:1849  ComparisonBoundary  replace < with <=
+[255/454] killed    lib/decimal.ex:1728  ComparisonNegation  replace == with !=
+[256/454] killed    lib/decimal.ex:1873  ComparisonNegation  replace > with <=
+[257/454] killed    lib/decimal.ex:1699  Arithmetic  replace - with *
+[258/454] killed    lib/decimal.ex:1996  ComparisonNegation  replace == with !=
+[259/454] survived  lib/decimal.ex:1895  ComparisonBoundary  replace > with >=
+[260/454] survived  lib/decimal.ex:886  Arithmetic  replace - with +
+[261/454] survived  lib/decimal.ex:678  Arithmetic  replace - with *
+[262/454] killed    lib/decimal.ex:1927  ComparisonNegation  replace >= with <
+[263/454] killed    lib/decimal.ex:1937  Boolean  replace and with or
+[264/454] survived  lib/decimal.ex:721  Arithmetic  replace - with +
+[265/454] killed    lib/decimal.ex:1533  Arithmetic  replace + with *
+[266/454] killed    lib/decimal.ex:254  ComparisonNegation  replace > with <=
+[267/454] killed    lib/decimal.ex:1923  ComparisonNegation  replace == with !=
+[268/454] killed    lib/decimal.ex:1849  Boolean  replace and with or
+[269/454] survived  lib/decimal.ex:1824  Arithmetic  replace * with +
+[270/454] killed    lib/decimal.ex:1751  Arithmetic  replace * with +
+[271/454] killed    lib/decimal.ex:1738  Arithmetic  replace * with /
+[272/454] killed    lib/decimal.ex:510  ComparisonNegation  replace == with !=
+[273/454] killed    lib/decimal.ex:337  Boolean  replace or with and
+[274/454] killed    lib/decimal.ex:431  Arithmetic  replace + with -
+[275/454] killed    lib/decimal.ex:1233  Arithmetic  replace + with -
+[276/454] killed    lib/decimal.ex:273  Arithmetic  replace * with /
+[277/454] killed    lib/decimal.ex:1735  Arithmetic  replace - with +
+[278/454] killed    lib/decimal.ex:402  Arithmetic  replace - with *
+[279/454] killed    lib/decimal.ex:1779  Arithmetic  replace + with *
+[280/454] killed    lib/decimal.ex:1725  Arithmetic  replace + with *
+[281/454] killed    lib/decimal.ex:1219  Arithmetic  replace + with -
+[282/454] killed    lib/decimal.ex:1849  ComparisonBoundary  replace < with <=
+[283/454] killed    lib/decimal.ex:273  Arithmetic  replace * with -
+[284/454] survived  lib/decimal.ex:942  ComparisonBoundary  replace > with >=
+[285/454] killed    lib/decimal.ex:1266  Boolean  replace and with or
+[286/454] killed    lib/decimal.ex:1728  ComparisonNegation  replace == with !=
+[287/454] killed    lib/decimal.ex:1760  ComparisonBoundary  replace >= with >
+[288/454] killed    lib/decimal.ex:1533  Arithmetic  replace + with -
+[289/454] killed    lib/decimal.ex:1937  ComparisonNegation  replace == with !=
+[290/454] killed    lib/decimal.ex:1751  Arithmetic  replace + with -
+[291/454] survived  lib/decimal.ex:739  Arithmetic  replace - with +
+[292/454] killed    lib/decimal.ex:1505  ComparisonBoundary  replace >= with >
+[293/454] killed    lib/decimal.ex:1937  Boolean  replace or with and
+[294/454] killed    lib/decimal.ex:1692  Arithmetic  replace + with *
+[295/454] killed    lib/decimal.ex:1735  Arithmetic  replace - with *
+[296/454] killed    lib/decimal.ex:1761  Arithmetic  replace + with *
+[297/454] killed    lib/decimal.ex:441  Arithmetic  replace + with -
+[298/454] killed    lib/decimal.ex:1778  ComparisonNegation  replace >= with <
+[299/454] killed    lib/decimal.ex:407  ComparisonNegation  replace < with >=
+[300/454] killed    lib/decimal.ex:1609  Arithmetic  replace + with -
+[301/454] killed    lib/decimal.ex:1754  Arithmetic  replace - with +
+[302/454] killed    lib/decimal.ex:1682  Arithmetic  replace + with *
+[303/454] killed    lib/decimal.ex:1688  Arithmetic  replace * with /
+[304/454] killed    lib/decimal.ex:1862  ComparisonNegation  replace < with >=
+[305/454] killed    lib/decimal.ex:678  Arithmetic  replace - with +
+[306/454] killed    lib/decimal.ex:1572  Arithmetic  replace * with /
+[307/454] killed    lib/decimal.ex:1742  ComparisonBoundary  replace > with >=
+[308/454] killed    lib/decimal.ex:1266  Arithmetic  replace * with +
+[309/454] killed    lib/decimal.ex:1925  ComparisonNegation  replace == with !=
+[310/454] killed    lib/decimal.ex:1233  Arithmetic  replace - with *
+[311/454] killed    lib/decimal.ex:403  Arithmetic  replace - with +
+[312/454] killed    lib/decimal.ex:1827  Arithmetic  replace * with +
+[313/454] killed    lib/decimal.ex:1682  Arithmetic  replace + with -
+[314/454] killed    lib/decimal.ex:1609  Arithmetic  replace + with *
+[315/454] killed    lib/decimal.ex:1601  Arithmetic  replace * with /
+[316/454] survived  lib/decimal.ex:994  ComparisonBoundary  replace > with >=
+[317/454] killed    lib/decimal.ex:1763  ComparisonBoundary  replace >= with >
+[318/454] killed    lib/decimal.ex:1927  ComparisonBoundary  replace >= with >
+[319/454] killed    lib/decimal.ex:1725  ComparisonNegation  replace == with !=
+[320/454] killed    lib/decimal.ex:1122  ComparisonNegation  replace == with !=
+[321/454] killed    lib/decimal.ex:1531  ComparisonNegation  replace < with >=
+[322/454] killed    lib/decimal.ex:1510  ComparisonBoundary  replace > with >=
+[323/454] killed    lib/decimal.ex:1531  ComparisonBoundary  replace >= with >
+[324/454] killed    lib/decimal.ex:1721  Boolean  replace or with and
+[325/454] killed    lib/decimal.ex:1745  Boolean  replace and with or
+[326/454] killed    lib/decimal.ex:1108  ComparisonNegation  replace == with !=
+[327/454] killed    lib/decimal.ex:273  Arithmetic  replace * with +
+[328/454] survived  lib/decimal.ex:431  Arithmetic  replace - with +
+[329/454] killed    lib/decimal.ex:337  ComparisonNegation  replace == with !=
+[330/454] killed    lib/decimal.ex:1738  Arithmetic  replace - with *
+[331/454] killed    lib/decimal.ex:431  Arithmetic  replace + with *
+[332/454] survived  lib/decimal.ex:1873  ComparisonBoundary  replace > with >=
+[333/454] killed    lib/decimal.ex:1524  Arithmetic  replace - with *
+[334/454] timeout   lib/decimal.ex:1827  Arithmetic  replace - with *
+[335/454] killed    lib/decimal.ex:1266  Arithmetic  replace * with -
+[336/454] timeout   lib/decimal.ex:1817  Arithmetic  replace * with -
+[337/454] killed    lib/decimal.ex:1782  Arithmetic  replace * with +
+[338/454] killed    lib/decimal.ex:1754  Arithmetic  replace * with +
+[339/454] killed    lib/decimal.ex:1754  Arithmetic  replace * with -
+[340/454] killed    lib/decimal.ex:1782  Arithmetic  replace * with /
+[341/454] killed    lib/decimal.ex:441  Arithmetic  replace * with /
+[342/454] killed    lib/decimal.ex:1123  Arithmetic  replace * with +
+[343/454] killed    lib/decimal.ex:1123  Arithmetic  replace * with -
+[344/454] killed    lib/decimal.ex:1811  Arithmetic  replace + with *
+[345/454] killed    lib/decimal.ex:939  ComparisonNegation  replace == with !=
+[346/454] killed    lib/decimal.ex:1517  ComparisonNegation  replace == with !=
+[347/454] killed    lib/decimal.ex:1932  Boolean  replace or with and
+[348/454] killed    lib/decimal.ex:1285  ComparisonNegation  replace <= with >
+[349/454] killed    lib/decimal.ex:1827  Arithmetic  replace * with -
+[350/454] killed    lib/decimal.ex:1700  Arithmetic  replace + with -
+[351/454] killed    lib/decimal.ex:1745  ComparisonNegation  replace == with !=
+[352/454] killed    lib/decimal.ex:1862  Boolean  replace and with or
+[353/454] survived  lib/decimal.ex:1694  Arithmetic  replace + with -
+[354/454] killed    lib/decimal.ex:1568  Arithmetic  replace * with -
+[355/454] killed    lib/decimal.ex:441  Arithmetic  replace * with +
+[356/454] killed    lib/decimal.ex:1535  ComparisonNegation  replace > with <=
+[357/454] timeout   lib/decimal.ex:1782  Arithmetic  replace + with *
+[358/454] killed    lib/decimal.ex:1779  Arithmetic  replace + with -
+[359/454] survived  lib/decimal.ex:728  ComparisonNegation  replace == with !=
+[360/454] killed    lib/decimal.ex:1735  Arithmetic  replace * with /
+[361/454] killed    lib/decimal.ex:1810  ComparisonNegation  replace == with !=
+[362/454] killed    lib/decimal.ex:1772  Arithmetic  replace * with +
+[363/454] killed    lib/decimal.ex:1543  ComparisonBoundary  replace > with >=
+[364/454] survived  lib/decimal.ex:1862  ComparisonBoundary  replace < with <=
+[365/454] killed    lib/decimal.ex:1568  Arithmetic  replace * with +
+[366/454] killed    lib/decimal.ex:1288  Arithmetic  replace + with *
+[367/454] killed    lib/decimal.ex:1674  Arithmetic  replace - with *
+[368/454] survived  lib/decimal.ex:1694  Arithmetic  replace + with *
+[369/454] survived  lib/decimal.ex:1249  ComparisonBoundary  replace >= with >
+[370/454] killed    lib/decimal/error.ex:21  Boolean  replace && with ||
+[371/454] survived  lib/decimal.ex:1934  ComparisonBoundary  replace > with >=
+[372/454] killed    lib/decimal.ex:1240  Arithmetic  replace * with /
+[373/454] survived  lib/decimal.ex:254  ComparisonBoundary  replace > with >=
+[374/454] survived  lib/decimal.ex:1271  Arithmetic  replace * with /
+[375/454] killed    lib/decimal.ex:1772  Arithmetic  replace * with /
+[376/454] killed    lib/decimal.ex:802  ComparisonNegation  replace == with !=
+[377/454] killed    lib/decimal.ex:1744  ComparisonNegation  replace == with !=
+[378/454] killed    lib/decimal.ex:1751  Arithmetic  replace * with /
+[379/454] killed    lib/decimal.ex:1285  ComparisonBoundary  replace <= with <
+[380/454] survived  lib/decimal.ex:1753  GuardComparisonBoundary  replace guard >= with >
+[381/454] killed    lib/decimal.ex:1817  GuardComparisonBoundary  replace guard >= with >
+[382/454] killed    lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_integer
+[383/454] killed    lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_integer
+[384/454] killed    lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_float
+[385/454] killed    lib/decimal.ex:1604  GuardComparisonNegation  replace guard > with <=
+[386/454] survived  lib/decimal.ex:1571  GuardComparisonBoundary  replace guard > with >=
+[387/454] killed    lib/decimal.ex:1737  GuardComparisonNegation  replace guard < with >=
+[388/454] killed    lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_float
+[389/454] survived  lib/decimal.ex:1608  GuardComparisonBoundary  replace guard < with <=
+[390/454] killed    lib/decimal.ex:1608  GuardComparisonNegation  replace guard == with !=
+[391/454] killed    lib/decimal.ex:1829  GuardComparisonNegation  replace guard >= with <
+[392/454] killed    lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_number
+[393/454] survived  lib/decimal.ex:1326  GuardComparisonBoundary  replace guard >= with >
+[394/454] survived  lib/decimal.ex:1827  GuardComparisonBoundary  replace guard > with >=
+[395/454] killed    lib/decimal.ex:1724  GuardComparisonNegation  replace guard < with >=
+[396/454] survived  lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_number
+[397/454] survived  lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_number
+[398/454] killed    lib/decimal.ex:1694  GuardComparisonNegation  replace guard === with !==
+[399/454] killed    lib/decimal.ex:1829  GuardComparisonBoundary  replace guard >= with >
+[400/454] killed    lib/decimal.ex:1724  GuardComparisonBoundary  replace guard < with <=
+[401/454] survived  lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_number
+[402/454] survived  lib/decimal.ex:1604  GuardComparisonBoundary  replace guard > with >=
+[403/454] killed    lib/decimal.ex:1732  GuardComparisonNegation  replace guard == with !=
+[404/454] killed    lib/decimal.ex:366  GuardComparisonNegation  replace guard < with >=
+[405/454] killed    lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_float
+[406/454] killed    lib/decimal.ex:1692  GuardComparisonNegation  replace guard > with <=
+[407/454] killed    lib/decimal.ex:1724  GuardComparisonNegation  replace guard >= with <
+[408/454] killed    lib/decimal.ex:1957  GuardTypeTest  replace guard is_list with is_tuple
+[409/454] survived  lib/decimal.ex:370  GuardComparisonBoundary  replace guard > with >=
+[410/454] killed    lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_float
+[411/454] killed    lib/decimal.ex:1692  GuardComparisonBoundary  replace guard > with >=
+[412/454] killed    lib/decimal.ex:1600  GuardTypeTest  replace guard is_integer with is_float
+[413/454] survived  lib/decimal.ex:1355  GuardComparisonBoundary  replace guard >= with >
+[414/454] survived  lib/decimal.ex:1734  GuardComparisonBoundary  replace guard > with >=
+[415/454] killed    lib/decimal.ex:1817  GuardComparisonNegation  replace guard >= with <
+[416/454] killed    lib/decimal.ex:1608  GuardComparisonNegation  replace guard < with >=
+[417/454] survived  lib/decimal.ex:1355  GuardTypeTest  replace guard is_integer with is_number
+[418/454] killed    lib/decimal.ex:1326  GuardTypeTest  replace guard is_integer with is_float
+[419/454] killed    lib/decimal.ex:1326  GuardComparisonNegation  replace guard >= with <
+[420/454] killed    lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_float
+[421/454] survived  lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_number
+[422/454] killed    lib/decimal.ex:1818  GuardComparisonNegation  replace guard < with >=
+[423/454] survived  lib/decimal.ex:1818  GuardComparisonBoundary  replace guard < with <=
+[424/454] survived  lib/decimal.ex:2045  GuardTypeTest  replace guard is_float with is_number
+[425/454] survived  lib/decimal.ex:1386  GuardTypeTest  replace guard is_float with is_number
+[426/454] survived  lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_number
+[427/454] survived  lib/decimal.ex:1693  GuardComparisonBoundary  replace guard < with <=
+[428/454] killed    lib/decimal.ex:1575  GuardComparisonNegation  replace guard != with ==
+[429/454] survived  lib/decimal.ex:370  GuardComparisonNegation  replace guard > with <=
+[430/454] survived  lib/decimal.ex:1737  GuardComparisonBoundary  replace guard < with <=
+[431/454] killed    lib/decimal.ex:1734  GuardComparisonNegation  replace guard > with <=
+[432/454] survived  lib/decimal.ex:1330  GuardTypeTest  replace guard is_integer with is_number
+[433/454] killed    lib/decimal.ex:1724  GuardComparisonBoundary  replace guard >= with >
+[434/454] survived  lib/decimal.ex:1673  GuardComparisonBoundary  replace guard >= with >
+[435/454] survived  lib/decimal.ex:1629  GuardTypeTest  replace guard is_integer with is_number
+[436/454] killed    lib/decimal.ex:1327  GuardTypeTest  replace guard is_integer with is_float
+[437/454] killed    lib/decimal.ex:2042  GuardTypeTest  replace guard is_integer with is_number
+[438/454] survived  lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_number
+[439/454] survived  lib/decimal.ex:1608  GuardTypeTest  replace guard is_integer with is_number
+[440/454] killed    lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_float
+[441/454] killed    lib/decimal.ex:1750  GuardComparisonNegation  replace guard < with >=
+[442/454] killed    lib/decimal.ex:1611  GuardTypeTest  replace guard is_integer with is_float
+[443/454] killed    lib/decimal.ex:1355  GuardComparisonNegation  replace guard >= with <
+[444/454] killed    lib/decimal.ex:1827  GuardComparisonNegation  replace guard > with <=
+[445/454] killed    lib/decimal.ex:1356  GuardTypeTest  replace guard is_integer with is_float
+[446/454] killed    lib/decimal.ex:1673  GuardComparisonNegation  replace guard >= with <
+[447/454] survived  lib/decimal.ex:366  GuardComparisonBoundary  replace guard < with <=
+[448/454] killed    lib/decimal.ex:1693  GuardComparisonNegation  replace guard < with >=
+[449/454] killed    lib/decimal.ex:1412  GuardTypeTest  replace guard is_integer with is_float
+[450/454] survived  lib/decimal.ex:1604  GuardTypeTest  replace guard is_integer with is_number
+[451/454] killed    lib/decimal.ex:1414  GuardTypeTest  replace guard is_float with is_integer
+[452/454] killed    lib/decimal.ex:1753  GuardComparisonNegation  replace guard >= with <
+[453/454] timeout   lib/decimal.ex:1571  GuardComparisonNegation  replace guard > with <=
+[454/454] killed    lib/decimal.ex:1750  GuardComparisonBoundary  replace guard < with <=
+Mutation score: 353/444 = 79.5%
+
+Surviving mutants:
+  lib/decimal.ex:1824 Arithmetic               replace * with /
+  lib/decimal.ex:1114 ComparisonNegation       replace == with !=
+  lib/decimal.ex:672 Arithmetic               replace - with +
+  lib/decimal.ex:721 Arithmetic               replace - with *
+  lib/decimal.ex:672 Arithmetic               replace - with *
+  lib/decimal.ex:1269 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1116 Arithmetic               replace + with *
+  lib/decimal.ex:1745 ComparisonNegation       replace != with ==
+  lib/decimal.ex:1271 Arithmetic               replace * with -
+  lib/decimal.ex:945 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1110 Arithmetic               replace + with *
+  lib/decimal.ex:655 Arithmetic               replace - with +
+  lib/decimal.ex:407 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1679 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1824 Arithmetic               replace * with -
+  lib/decimal.ex:1239 Arithmetic               replace + with *
+  lib/decimal.ex:1766 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:739 Arithmetic               replace - with *
+  lib/decimal.ex:1640 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1535 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:441 Arithmetic               replace + with *
+  lib/decimal.ex:655 Arithmetic               replace - with *
+  lib/decimal.ex:431 Arithmetic               replace - with *
+  lib/decimal.ex:2100 Boolean                  replace and with or
+  lib/decimal.ex:1116 Arithmetic               replace + with -
+  lib/decimal.ex:1255 ComparisonNegation       replace === with !==
+  lib/decimal.ex:991 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:987 ComparisonNegation       replace != with ==
+  lib/decimal.ex:861 ComparisonNegation       replace == with !=
+  lib/decimal.ex:886 Arithmetic               replace - with *
+  lib/decimal.ex:1331 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:864 Arithmetic               replace - with +
+  lib/decimal.ex:678 Arithmetic               replace - with +
+  lib/decimal.ex:1110 Arithmetic               replace + with -
+  lib/decimal.ex:1531 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:873 ComparisonNegation       replace == with !=
+  lib/decimal.ex:864 Arithmetic               replace - with *
+  lib/decimal.ex:411 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:2080 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1797 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1545 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:853 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1271 Arithmetic               replace * with +
+  lib/decimal.ex:1721 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1849 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1895 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:886 Arithmetic               replace - with +
+  lib/decimal.ex:678 Arithmetic               replace - with *
+  lib/decimal.ex:721 Arithmetic               replace - with +
+  lib/decimal.ex:1824 Arithmetic               replace * with +
+  lib/decimal.ex:942 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:739 Arithmetic               replace - with +
+  lib/decimal.ex:994 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:431 Arithmetic               replace - with +
+  lib/decimal.ex:1873 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1694 Arithmetic               replace + with -
+  lib/decimal.ex:728 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1862 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1694 Arithmetic               replace + with *
+  lib/decimal.ex:1249 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1934 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:254 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1271 Arithmetic               replace * with /
+  lib/decimal.ex:1753 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1571 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1608 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1326 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1827 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1356 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1326 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1600 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1604 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:370 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1355 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1734 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1355 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1327 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1818 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:2045 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1386 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1414 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1693 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:370 GuardComparisonNegation  replace guard > with <=
+  lib/decimal.ex:1737 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1330 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1673 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1629 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1611 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:1608 GuardTypeTest            replace guard is_integer with is_number
+  lib/decimal.ex:366 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1604 GuardTypeTest            replace guard is_integer with is_number
+
+Schema:    307/379 killed (81.0%)   wall: 2041.7s
+Fallback:  46/75 killed (61.3%)   wall: 473.0s
+  guard_comparison_boundary:    6/20 killed
+  guard_comparison_negation:    22/24 killed
+  guard_type_test:              18/31 killed
+Skipped:   1134 (ambiguous_oracle_match: 1, attribute_engine_disabled: 3, missing_oracle_site: 76, no_applicable_mutator: 4, unsupported_dispatch: 1050)
+Invalid:   0
+Errors:    0
+Timeouts:  10
+
+Run time: 2514.8s
+Fallback wall-clock: 18.8% of total
+Fallback mutants: 16.5% of executed
+
+Phases:
+  oracle build:          3255 ms
+  baseline tests:         851 ms
+  plan generation:         30 ms
+  schema build:          3905 ms
+  schema workers:      583864 ms
+  fallback workers:    147845 ms
+  report writing:          75 ms
+  total:               743913 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          454
+  avg tests/mutant: 2.0
+  median tests/mutant: 2
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+
+Mutalisk run complete in 744231ms
+bench.wall_ms=747000

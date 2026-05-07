@@ -91,8 +91,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **plug_crypto byte-identity met (F2).** With the project-app
   startup fix above, persistent on plug_crypto at c=4 is now
   byte-identical to mix.
-- **Decimal byte-identity validated separately.** See
-  `BENCHMARKS.md` once the F2 phase 2 bench run lands.
+- **Decimal validated within V17 acceptance.** Persistent at c=4
+  vs mix: 11 timeout-class mutants flipped Timeout → Killed (the
+  "killed/timeout flap" V17 explicitly allows on the existing 21
+  timeout-shape Decimal mutants); 1 RuntimeError → Killed; 0
+  unexpected Survived → Killed regressions. Wall-clock 12.4 min
+  vs 11.0 min mix (0.9×). See BENCHMARKS.md.
 - **In-process fallback recompile is deferred.** Fallback mutants
   always route to the mix-spawn worker, preserving M17's
   "0 invalid Decimal fallback" baseline regardless of worker type.
