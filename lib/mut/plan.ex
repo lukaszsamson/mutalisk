@@ -16,6 +16,7 @@ defmodule Mut.Plan do
           | :dsl_or_generated
           | :guard_engine_disabled
           | :attribute_engine_disabled
+          | :body_literal_engine_disabled
 
   @type skipped_entry :: %{
           file: Path.t(),

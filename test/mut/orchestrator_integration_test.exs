@@ -17,6 +17,7 @@ defmodule Mut.OrchestratorIntegrationTest do
 
     assert Enum.frequencies_by(plan.skipped, & &1.reason) == %{
              attribute_engine_disabled: 1,
+             body_literal_engine_disabled: 5,
              unsupported_dispatch: 3
            }
 
@@ -28,7 +29,11 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert length(opt_in_plan.schema) == 27
     assert length(opt_in_plan.fallback) == 6
     assert opt_in_plan.invalid == []
-    assert Enum.frequencies_by(opt_in_plan.skipped, & &1.reason) == %{unsupported_dispatch: 3}
+
+    assert Enum.frequencies_by(opt_in_plan.skipped, & &1.reason) == %{
+             body_literal_engine_disabled: 5,
+             unsupported_dispatch: 3
+           }
 
     stable_ids =
       opt_in_plan

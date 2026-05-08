@@ -51,6 +51,45 @@ defmodule Mut.AstWalk do
     |> Enum.sort_by(&span_start_byte/1)
   end
 
+  @doc """
+  M23: Body-context literal candidates.
+
+  Re-parses the source with `literal_encoder` so integer / boolean
+  literals carry parser metadata (line, column, token), then walks
+  the encoded AST and emits `AstCandidate{}` for each integer or
+  boolean literal that sits in a function-body position.
+
+  A "body position" means: inside a `def` / `defp` body (NOT
+  defmacro/defmacrop bodies — those run at compile time), NOT
+  inside a `when` guard, NOT inside a pattern (LHS of `=`,
+  function-head args, clause-head patterns), NOT inside
+  `quote` / `unquote` / `unquote_splicing`, and NOT inside a
+  module-attribute value (the existing AttributeLiteral mutator
+  handles those).
+
+  Source is required; without it, no spans can be computed for
+  the bare literals.
+  """
+  @spec body_literal_candidates(opts :: keyword) :: [AstCandidate.t()]
+  def body_literal_candidates(opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    case parse_with_literal_encoder(source, file) do
+      {:ok, ast} ->
+        acc = body_literal_acc(file, source, line_offsets)
+        {_ast, acc} = Macro.traverse(ast, acc, &body_literal_pre/2, &post/2)
+
+        acc.candidates
+        |> Enum.reverse()
+        |> Enum.sort_by(&span_start_byte/1)
+
+      {:error, _reason} ->
+        []
+    end
+  end
+
   @spec guard_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
   def guard_candidates(ast, opts) do
     file = Keyword.fetch!(opts, :file)
@@ -64,6 +103,192 @@ defmodule Mut.AstWalk do
     |> Enum.reverse()
     |> Enum.sort_by(&span_start_byte/1)
   end
+
+  defp parse_with_literal_encoder(source, file) do
+    Code.string_to_quoted(source,
+      file: file,
+      columns: true,
+      token_metadata: true,
+      emit_warnings: false,
+      literal_encoder: fn lit, meta -> {:ok, {:__block__, meta, [lit]}} end
+    )
+  end
+
+  defp body_literal_acc(file, source, line_offsets) do
+    %{
+      frames: [],
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      module_stack: [],
+      span_fallback?: false
+    }
+  end
+
+  defp body_literal_pre(node, acc) do
+    {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
+    acc = maybe_body_literal_candidate(node, path, acc)
+
+    if no_descend?(node) or body_literal_block?(node) do
+      {prune_body_literal(node), push_frame(node, path, acc)}
+    else
+      {node, push_frame(node, path, acc)}
+    end
+  end
+
+  defp maybe_body_literal_candidate({:__block__, meta, [value]} = node, path, acc) do
+    cond do
+      not (is_integer(value) or is_boolean(value)) ->
+        acc
+
+      not body_position?(path) ->
+        acc
+
+      true ->
+        add_body_literal(acc, node, value, path, meta)
+    end
+  end
+
+  defp maybe_body_literal_candidate(_node, _path, acc), do: acc
+
+  defp add_body_literal(acc, node, value, path, meta) do
+    case Keyword.fetch(meta, :line) do
+      {:ok, line} ->
+        column = Keyword.get(meta, :column)
+        span = literal_span(meta, value, acc)
+
+        candidate = %AstCandidate{
+          file: acc.file,
+          line: line,
+          column: column,
+          syntactic_name: literal_syntactic_name(value),
+          syntactic_arity: 0,
+          source_span: span,
+          env_context: nil,
+          enclosing_module: current_module(acc),
+          ast_path: path,
+          ast_path_hash: path_hash(path),
+          node: node
+        }
+
+        %{acc | candidates: [candidate | acc.candidates]}
+
+      :error ->
+        acc
+    end
+  end
+
+  defp literal_syntactic_name(value) when is_integer(value), do: :integer_literal
+  defp literal_syntactic_name(value) when is_boolean(value), do: :boolean_literal
+
+  defp literal_span(meta, value, acc) do
+    with line when is_integer(line) <- Keyword.get(meta, :line),
+         column when is_integer(column) <- Keyword.get(meta, :column) do
+      token = literal_token(meta, value)
+      end_column = column + String.length(token)
+
+      %Mut.SourceSpan{
+        file: acc.file,
+        start_line: line,
+        start_column: column,
+        end_line: line,
+        end_column: end_column,
+        start_byte: byte_offset(acc.source, acc.line_offsets, line, column),
+        end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
+      }
+    else
+      _missing -> nil
+    end
+  end
+
+  defp literal_token(meta, value) do
+    case Keyword.get(meta, :token) do
+      bin when is_binary(bin) and bin != "" -> bin
+      _ -> to_string(value)
+    end
+  end
+
+  # Don't double-traverse the inner literal value — the __block__
+  # wrapper IS the candidate; descending into [value] just emits
+  # spurious frames.
+  defp body_literal_block?({:__block__, _meta, [value]})
+       when is_integer(value) or is_boolean(value),
+       do: true
+
+  defp body_literal_block?(_), do: false
+
+  defp prune_body_literal({:__block__, meta, [value]})
+       when is_integer(value) or is_boolean(value),
+       do: {:__block__, meta, []}
+
+  defp prune_body_literal(node), do: prune(node)
+
+  # Body position = inside a def/defp body block, and not inside any
+  # refused context (guard, pattern, macro body, quote, attribute
+  # value, match LHS, clause head pattern).
+  defp body_position?(path) do
+    in_function_body?(path) and not refused_body_context?(path)
+  end
+
+  defp in_function_body?(path) do
+    path
+    |> Enum.with_index()
+    |> Enum.any?(fn
+      # def/defp body lives at args-index 1 of the def node, then
+      # inside the kw-list `[do: ...]`. The inner body path includes
+      # `{:elem, :def, 1}` or `{:elem, :defp, 1}` somewhere.
+      {{:elem, kind, 1}, _} when kind in [:def, :defp] -> true
+      _ -> false
+    end)
+  end
+
+  defp refused_body_context?(path) do
+    Enum.any?(path, &match?({:elem, :when, 1}, &1)) or
+      Enum.any?(path, &match?({:elem, :@, _}, &1)) or
+      Enum.any?(path, fn
+        {:elem, kind, _}
+        when kind in [:defmacro, :defmacrop, :quote, :unquote, :unquote_splicing] ->
+          true
+
+        _ ->
+          false
+      end) or
+      lhs_match_path_walk?(path) or
+      clause_head_pattern_path_walk?(path) or
+      function_head_walk?(path)
+  end
+
+  defp lhs_match_path_walk?(path), do: Enum.any?(path, &match?({:elem, :=, 0}, &1))
+
+  defp clause_head_pattern_path_walk?(path) do
+    path
+    |> Enum.chunk_every(3, 1, :discard)
+    |> Enum.any?(fn
+      [{:elem, parent, _}, {:elem, :->, 0}, {:elem, :do_block, _}]
+      when parent in [:case, :with, :fn, :for] ->
+        true
+
+      _ ->
+        false
+    end)
+  end
+
+  defp function_head_walk?(path) do
+    function_head_walk_tail?(Enum.take(path, -1)) or
+      function_head_walk_tail?(Enum.take(path, -2))
+  end
+
+  defp function_head_walk_tail?([{:elem, parent, 0}])
+       when parent in [:def, :defp, :defmacro, :defmacrop],
+       do: true
+
+  defp function_head_walk_tail?([{:elem, parent, 0}, {:elem, :when, 0}])
+       when parent in [:def, :defp, :defmacro, :defmacrop],
+       do: true
+
+  defp function_head_walk_tail?(_), do: false
 
   defp acc(file, source, line_offsets, span_fallback?) do
     %{

@@ -9,7 +9,7 @@ defmodule Mut.Orchestrator do
   alias Mut.Oracle.DispatchSite
   alias Mut.Plan
 
-  @type target :: :dispatch | :guard | :module_attribute
+  @type target :: :dispatch | :guard | :module_attribute | :body_literal
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -54,6 +54,9 @@ defmodule Mut.Orchestrator do
     attribute_candidates =
       Mut.AstWalk.attribute_candidates(ast, file: relative_file, source: source)
 
+    body_literal_candidates =
+      Mut.AstWalk.body_literal_candidates(file: relative_file, source: source)
+
     {matched, diagnostics} = Mut.Match.attach(dispatch_candidates, oracle, mutators)
 
     {schema, dispatch_skips} = dispatch_results(matched, mutators, source)
@@ -64,17 +67,34 @@ defmodule Mut.Orchestrator do
     {guard_fallback, guard_skips} =
       guard_fallback_results(guard_candidates, oracle, enabled_targets, mutators, source)
 
+    {body_literal_fallback, body_literal_skips} =
+      body_literal_fallback_results(
+        body_literal_candidates,
+        enabled_targets,
+        mutators,
+        source
+      )
+
     %Plan{
       schema: schema,
-      fallback: attribute_fallback ++ guard_fallback,
+      fallback: attribute_fallback ++ guard_fallback ++ body_literal_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
           dispatch_skips ++
           attribute_skips ++
-          guard_skips,
+          guard_skips ++
+          body_literal_skips,
       matched_pairs: matched
     }
+  end
+
+  defp body_literal_fallback_results(candidates, enabled_targets, mutators, source) do
+    if :body_literal in enabled_targets do
+      enabled_fallback_results(candidates, :body_literal, nil, mutators, source)
+    else
+      {[], Enum.map(candidates, &skip(&1, :body_literal_engine_disabled, nil))}
+    end
   end
 
   defp guard_candidate?(%AstCandidate{ast_path: path}) do
@@ -262,6 +282,7 @@ defmodule Mut.Orchestrator do
     do: (site && site.env_context) || candidate.env_context
 
   defp fallback_env_context(_candidate, _site, :module_attribute), do: nil
+  defp fallback_env_context(_candidate, _site, :body_literal), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

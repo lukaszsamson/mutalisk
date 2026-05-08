@@ -43,7 +43,7 @@ defmodule Mut.Cli do
 
   @known_reporters [:terminal, :stryker_json]
   @known_selection_modes [:static, :coverage, :coverage_with_static_fallback]
-  @known_targets [:dispatch, :guard, :module_attribute]
+  @known_targets [:dispatch, :guard, :module_attribute, :body_literal]
   @known_mutators [
     "arithmetic",
     "comparison_boundary",
@@ -54,8 +54,11 @@ defmodule Mut.Cli do
     "guard_comparison_negation",
     "guard_type_test",
     "attribute_literal",
+    "integer_literal",
+    "boolean_literal",
     "comparison",
-    "guard_comparison"
+    "guard_comparison",
+    "body_literal"
   ]
 
   @spec parse([String.t()], keyword) :: {:ok, Options.t()} | {:error, String.t()}
@@ -384,7 +387,10 @@ defmodule Mut.Cli do
       "guard_comparison" => [
         Mut.Mutator.GuardComparisonBoundary,
         Mut.Mutator.GuardComparisonNegation
-      ]
+      ],
+      "integer_literal" => Mut.Mutator.IntegerLiteral,
+      "boolean_literal" => Mut.Mutator.BooleanLiteral,
+      "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
     }
   end
 

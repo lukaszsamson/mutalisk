@@ -25,7 +25,7 @@ defmodule Mut.CoverageRunnerIntegrationTest do
 
       assert MapSet.member?(Map.fetch!(oracle.by_line, {"lib/arith.ex", 5}), canary)
       assert MapSet.member?(Map.fetch!(oracle.by_function, {Arith, :score, 2}), canary)
-      assert map_size(oracle.test_runtime_ms) == 6
+      assert map_size(oracle.test_runtime_ms) == 7
       assert oracle.collection_wall_ms > 0
     after
       File.rm_rf!(work_copy)

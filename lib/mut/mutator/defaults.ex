@@ -12,7 +12,9 @@ defmodule Mut.Mutator.Defaults do
       Mut.Mutator.GuardComparisonBoundary,
       Mut.Mutator.GuardComparisonNegation,
       Mut.Mutator.GuardTypeTest,
-      Mut.Mutator.AttributeLiteral
+      Mut.Mutator.AttributeLiteral,
+      Mut.Mutator.IntegerLiteral,
+      Mut.Mutator.BooleanLiteral
     ]
   end
 

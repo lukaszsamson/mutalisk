@@ -741,30 +741,6 @@
   {
     "file": "lib/bool.ex",
     "line": 5,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": null,
-    "module": "Elixir.Bool",
-    "function": [
-      "strict?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "error",
-    "resolved_arity": 1,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        5
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 5,
     "column": 7,
     "end_line": null,
     "end_column": null,
@@ -889,294 +865,6 @@
       [
         "column",
         7
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "=:=",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "=:=",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "=:=",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "=:=",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "=:=",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "=:=",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "orelse",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "orelse",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_function",
-    "resolved_module": "erlang",
-    "resolved_name": "orelse",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_macro",
-    "resolved_module": "Elixir.Kernel",
-    "resolved_name": "in",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_macro",
-    "resolved_module": "Elixir.Kernel",
-    "resolved_name": "in",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
-      ]
-    ]
-  },
-  {
-    "file": "lib/bool.ex",
-    "line": 9,
-    "column": null,
-    "end_line": null,
-    "end_column": null,
-    "env_context": "guard",
-    "module": "Elixir.Bool",
-    "function": [
-      "loose?",
-      2
-    ],
-    "dispatch_kind": "remote_macro",
-    "resolved_module": "Elixir.Kernel",
-    "resolved_name": "in",
-    "resolved_arity": 2,
-    "event_file": "lib/bool.ex",
-    "meta": [
-      [
-        "line",
-        9
       ]
     ]
   },
@@ -2449,6 +2137,295 @@
       [
         "line",
         8
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 1,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_utils",
+    "resolved_name": "noop",
+    "resolved_arity": 0,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 2,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "__put_attribute__",
+    "resolved_arity": 5,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 2,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "@",
+    "resolved_arity": 1,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        2
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 8,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 8,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 8,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": [
+      "magic",
+      0
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        8
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 10,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        10
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 10,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        10
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 10,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": [
+      "origin",
+      0
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        10
+      ],
+      [
+        "column",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 12,
+    "column": null,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "remote_function",
+    "resolved_module": "elixir_def",
+    "resolved_name": "store_definition",
+    "resolved_arity": 3,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        12
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 12,
+    "column": 3,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": null,
+    "dispatch_kind": "imported_macro",
+    "resolved_module": "Elixir.Kernel",
+    "resolved_name": "def",
+    "resolved_arity": 2,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        12
+      ],
+      [
+        "column",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "lib/literals.ex",
+    "line": 12,
+    "column": 7,
+    "end_line": null,
+    "end_column": null,
+    "env_context": null,
+    "module": "Elixir.Literals",
+    "function": [
+      "feature_enabled?",
+      0
+    ],
+    "dispatch_kind": "remote_function",
+    "resolved_module": "Elixir.Module",
+    "resolved_name": "compile_definition_attributes",
+    "resolved_arity": 6,
+    "event_file": "lib/literals.ex",
+    "meta": [
+      [
+        "line",
+        12
       ],
       [
         "column",
