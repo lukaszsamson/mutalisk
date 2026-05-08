@@ -147,6 +147,100 @@ defmodule Mut.Reporter.TerminalTest do
            """
   end
 
+  describe "persistent worker warning hint" do
+    test "emits crash-rate hint when crash rate > 10%" do
+      summary = render_with_persistent(%{crash_count: 2, mix_fallback_count: 2}, total_schema: 10)
+      assert summary =~ "Hint: persistent worker had high crash rate"
+      assert summary =~ "Consider --worker-type mix"
+    end
+
+    test "emits filter-miss hint when rate > 25%" do
+      summary =
+        render_with_persistent(%{filter_miss_count: 3, mix_fallback_count: 3}, total_schema: 10)
+
+      assert summary =~ "Hint: persistent worker had high filter-miss rate"
+    end
+
+    test "emits in-process compile-error hint when rate > 5%" do
+      summary =
+        render_with_persistent(%{}, total_schema: 8, total_fallback: 10, compile_error: 1)
+
+      assert summary =~ "in-process fallback compile-error rate"
+    end
+
+    test "no hint when all metrics under threshold" do
+      summary = render_with_persistent(%{crash_count: 0}, total_schema: 10)
+      refute summary =~ "Hint:"
+    end
+
+    test "operational counters line omitted when all zero" do
+      summary = render_with_persistent(%{}, total_schema: 10)
+      refute summary =~ "crashes:"
+    end
+
+    test "operational counters line shown when nonzero" do
+      summary = render_with_persistent(%{crash_count: 1}, total_schema: 10)
+      assert summary =~ "crashes: 1"
+      assert summary =~ "in-process compile errors: 0"
+    end
+  end
+
+  defp render_with_persistent(persistent_overrides, ctx) do
+    schema_killed = ctx[:total_schema] || 0
+    fallback_killed = ctx[:total_fallback] || 0
+    compile_errors = ctx[:compile_error] || 0
+
+    persistent =
+      Map.merge(
+        %{
+          worker_count: 1,
+          boot_ms: %{median: 0, p95: 0, max: 0},
+          app_startup_ms: %{median: 0, total_apps: 0},
+          test_load_ms: %{median: 0, total_files: 0},
+          mutant_run_ms: %{median: 0, p95: 0, count: 0},
+          reset_ms: %{
+            application_env: 0,
+            ets: 0,
+            processes: 0,
+            persistent_term: 0,
+            on_exit: 0
+          },
+          filter_lookup_ms: 0,
+          crash_count: 0,
+          restart_count: 0,
+          filter_miss_count: 0,
+          mix_fallback_count: 0,
+          memory: %{peak_total_mb: 0.0, peak_processes_mb: 0.0}
+        },
+        persistent_overrides
+      )
+
+    snap = %Snapshot{
+      total: schema_killed + fallback_killed,
+      score: 100.0,
+      by_status: %{killed: schema_killed + fallback_killed},
+      by_engine_status: %{
+        {:schema, :killed} => schema_killed,
+        {:fallback, :killed} => fallback_killed
+      },
+      fallback_count_pct: 0.0,
+      wall_clock_ms: %{schema: 0, fallback: 0, total: 0},
+      rollback_per_file: %{},
+      invalid_by_mutator: %{},
+      skipped_by_reason: %{},
+      test_selection_fanout: %{},
+      phase_timings: %{},
+      selection: nil,
+      concurrency: nil,
+      recompile_categories: %{compile_error: compile_errors, dep_path_error: 0, unknown: 0},
+      persistent: persistent,
+      test_timeout_ms: 10_000,
+      ledger: []
+    }
+
+    snap |> Terminal.render_summary() |> IO.iodata_to_binary()
+  end
+
   defp snapshot(entries, opts) do
     %Snapshot{
       total: Keyword.get(opts, :total, length(entries)),

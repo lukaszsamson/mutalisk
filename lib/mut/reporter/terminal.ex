@@ -74,13 +74,74 @@ defmodule Mut.Reporter.Terminal do
       phase_block(snapshot),
       selection_block(snapshot),
       concurrency_block(snapshot),
-      persistent_block(snapshot)
+      test_timeout_block(snapshot),
+      persistent_block(snapshot),
+      persistent_warning(snapshot)
     ]
+  end
+
+  defp test_timeout_block(%Snapshot{test_timeout_ms: nil}), do: ""
+
+  defp test_timeout_block(%Snapshot{test_timeout_ms: ms}) when is_integer(ms),
+    do: "Test timeout: #{ms} ms\n"
+
+  # M22 warning hint: emit a single line at run end if persistent
+  # worker exceeded any threshold. Informational only — no
+  # auto-fallback. First-tripped metric wins; the user looks at the
+  # metrics block above for the full picture.
+  defp persistent_warning(%Snapshot{persistent: nil}), do: ""
+
+  defp persistent_warning(%Snapshot{persistent: p} = snapshot) do
+    total_persistent = persistent_total_count(snapshot, p)
+    fallback_total = engine_total(snapshot, :fallback)
+
+    crash_rate = safe_rate(Map.get(p, :crash_count, 0), total_persistent)
+    filter_miss_rate = safe_rate(Map.get(p, :filter_miss_count, 0), total_persistent)
+
+    compile_errors =
+      snapshot.recompile_categories
+      |> case do
+        nil -> 0
+        %{} = cats -> Map.get(cats, :compile_error, 0)
+      end
+
+    compile_error_rate = safe_rate(compile_errors, fallback_total)
+
+    cond do
+      crash_rate > 10.0 ->
+        warning_line("crash rate", crash_rate)
+
+      filter_miss_rate > 25.0 ->
+        warning_line("filter-miss rate", filter_miss_rate)
+
+      compile_error_rate > 5.0 ->
+        warning_line("in-process fallback compile-error rate", compile_error_rate)
+
+      true ->
+        ""
+    end
+  end
+
+  defp persistent_total_count(snapshot, persistent_block) do
+    schema = engine_total(snapshot, :schema)
+    fallback = engine_total(snapshot, :fallback)
+
+    case schema + fallback do
+      0 -> Map.get(persistent_block, :mix_fallback_count, 0)
+      n -> n
+    end
+  end
+
+  defp safe_rate(_count, 0), do: 0.0
+  defp safe_rate(count, total), do: count / total * 100.0
+
+  defp warning_line(metric, rate) do
+    "\nHint: persistent worker had high #{metric} (#{format_pct(rate)}). Consider --worker-type mix.\n"
   end
 
   defp persistent_block(%Snapshot{persistent: nil}), do: ""
 
-  defp persistent_block(%Snapshot{persistent: p}) do
+  defp persistent_block(%Snapshot{persistent: p} = snapshot) do
     boot = Map.get(p, :boot_ms, %{})
     app = Map.get(p, :app_startup_ms, %{})
     test_load = Map.get(p, :test_load_ms, %{})
@@ -102,9 +163,32 @@ defmodule Mut.Reporter.Terminal do
       "    persistent_term: #{format_ms(Map.get(reset, :persistent_term, 0))}\n",
       "    on_exit:         #{format_ms(Map.get(reset, :on_exit, 0))}\n",
       "  filter lookup: #{format_ms(Map.get(p, :filter_lookup_ms, 0))}\n",
-      "  crashes: #{Map.get(p, :crash_count, 0)}  restarts: #{Map.get(p, :restart_count, 0)}  filter-miss: #{Map.get(p, :filter_miss_count, 0)}  mix-fallback: #{Map.get(p, :mix_fallback_count, 0)}\n",
+      operational_counters_line(p, snapshot),
       "  memory: peak #{format_mb(Map.get(memory, :peak_total_mb, 0.0))} total, #{format_mb(Map.get(memory, :peak_processes_mb, 0.0))} processes\n"
     ]
+  end
+
+  # M22: surface operational counters. Compile errors come from the
+  # snapshot-wide recompile_categories (set by in-process fallback path).
+  # Omit the line entirely when all five are zero — boring is the
+  # signal we want.
+  defp operational_counters_line(p, snapshot) do
+    crashes = Map.get(p, :crash_count, 0)
+    restarts = Map.get(p, :restart_count, 0)
+    filter_miss = Map.get(p, :filter_miss_count, 0)
+    mix_fallback = Map.get(p, :mix_fallback_count, 0)
+
+    compile_errors =
+      case snapshot.recompile_categories do
+        nil -> 0
+        %{} = cats -> Map.get(cats, :compile_error, 0)
+      end
+
+    if crashes + restarts + filter_miss + mix_fallback + compile_errors == 0 do
+      ""
+    else
+      "  crashes: #{crashes}  restarts: #{restarts}  filter-miss: #{filter_miss}  in-process compile errors: #{compile_errors}  mix fallbacks: #{mix_fallback}\n"
+    end
   end
 
   defp format_ms(value) when is_number(value),
