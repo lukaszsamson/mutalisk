@@ -3,6 +3,57 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.9 unreleased (M22, 2026-05-08)
+
+Reliability/observability/config milestone for the persistent
+worker. No new mutators, no default flips, no validation surface
+expansion — those land in M23 / M24. M22's purpose is to make
+`--worker-type persistent` operationally boring: visible metrics,
+documented contract, configurable timeouts, and a regression
+fixture that locks in v1.7's F2 fix.
+
+### Added
+- **`--test-timeout-ms N` flag** plus `:test_timeout_ms` config
+  key. Replaces the v1.8 hardcoded 10 s ExUnit timeout.
+  Range 1000..600000 ms; default 10000. Applied to both
+  worker types so they remain comparable.
+- **Persistent metrics in terminal summary.** The
+  `Persistent worker:` block now surfaces the operational
+  counters M20 had been collecting silently: crashes,
+  restarts, filter-misses, in-process compile errors, and
+  mix fallbacks. Line is omitted when all five are zero.
+- **Warning hint** at run end if persistent worker exceeded
+  any threshold (crash rate >10%, filter-miss rate >25%,
+  in-process fallback compile-error rate >5%). Informational
+  only; no auto-fallback.
+- **Coverage + persistent byte-identity assertion** in the
+  `e2e_persistent` layer. Tightens the existing
+  `assert_coverage_non_regression!` to compare killed/survived
+  stable_id sets, not just totals — closes a silent-drift
+  class between coverage selection's narrowed test list and
+  the persistent worker's reset hooks.
+- **Application.start/2 regression fixture** at
+  [`test/fixtures/overlay_cases/app_start_callback/`](test/fixtures/overlay_cases/app_start_callback/)
+  plus an integration test in
+  [`test/mut/worker/persistent_test.exs`](test/mut/worker/persistent_test.exs)
+  that locks v1.7 F2 in: an OTP app whose `start/2` creates a
+  named ETS table the tests read from. Without F2, this fails
+  under persistent.
+- **`mutalisk.test_timeout_ms`** key in the Stryker JSON
+  report (mirrors what the terminal shows).
+- **[docs/PERSISTENT_WORKER_GUIDE.md](docs/PERSISTENT_WORKER_GUIDE.md)** —
+  user-facing guide to the persistent worker: when to use,
+  what works, what doesn't, how to read the metrics, when to
+  fall back.
+
+### Changed
+- `Mut.Worker.args/1` is now `args/2`, accepting a
+  `test_timeout_ms` second argument. Default kept at 10 000
+  for backwards compatibility on existing direct callers.
+- Host-deadline constant in `Mix.Tasks.Mut` is now
+  `test_timeout_ms + 10 000` (computed per run) instead of a
+  hardcoded 70 000.
+
 ## v1.8 (M20 + M21 + M21 phase 2 + M21 phase 3, 2026-05-07)
 
 ### M21 phase 3 — Per-test timeout dropped to 10 s

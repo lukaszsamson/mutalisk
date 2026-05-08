@@ -74,3 +74,4 @@ Authoritative project documents:
 - [ELIXIR_MUTATION_TESTING_SPEC.md](ELIXIR_MUTATION_TESTING_SPEC.md)
 - [PLAN.md](PLAN.md)
 - [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md)
+- [docs/PERSISTENT_WORKER_GUIDE.md](docs/PERSISTENT_WORKER_GUIDE.md)
