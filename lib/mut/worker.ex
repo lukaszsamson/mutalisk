@@ -24,6 +24,7 @@ defmodule Mut.Worker do
   end
 
   @default_timeout_ms 60_000
+  @default_test_timeout_ms 10_000
   @max_output_bytes 512_000
 
   @spec run_schema(Sandbox.t(), non_neg_integer, [String.t()], keyword) :: Result.t()
@@ -209,8 +210,9 @@ defmodule Mut.Worker do
     ]
   end
 
-  @spec args([String.t()]) :: [String.t()]
-  def args(test_files) when is_list(test_files) do
+  @spec args([String.t()], pos_integer()) :: [String.t()]
+  def args(test_files, test_timeout_ms \\ @default_test_timeout_ms)
+      when is_list(test_files) and is_integer(test_timeout_ms) and test_timeout_ms > 0 do
     [
       "test",
       "--no-compile",
@@ -224,9 +226,9 @@ defmodule Mut.Worker do
       # ExUnit's default 60 s was per-target-test, not per-mutant,
       # and dominated wall-clock on Decimal (21 timeouts * 60 s).
       # Tests legitimately needing more can override per-test via
-      # @tag timeout:.
+      # @tag timeout:, or raise the global with --test-timeout-ms.
       "--timeout",
-      "10000",
+      Integer.to_string(test_timeout_ms),
       "--formatter",
       "Mut.Worker.Formatter"
     ] ++ test_files
@@ -257,7 +259,12 @@ defmodule Mut.Worker do
     case mix_path(opts) do
       {:ok, mix_path} ->
         port =
-          open_mix_port(mix_path, args(test_files), sandbox.path, env(mutant_id))
+          open_mix_port(
+            mix_path,
+            args(test_files, test_timeout(opts)),
+            sandbox.path,
+            env(mutant_id)
+          )
 
         port
         |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
@@ -272,7 +279,12 @@ defmodule Mut.Worker do
     case mix_path(opts) do
       {:ok, mix_path} ->
         port =
-          open_mix_port(mix_path, args(test_files), sandbox.path, fallback_env())
+          open_mix_port(
+            mix_path,
+            args(test_files, test_timeout(opts)),
+            sandbox.path,
+            fallback_env()
+          )
 
         port
         |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
@@ -282,6 +294,8 @@ defmodule Mut.Worker do
         %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
     end
   end
+
+  defp test_timeout(opts), do: Keyword.get(opts, :test_timeout_ms, @default_test_timeout_ms)
 
   defp render_patch(sandbox, mutant) do
     sandbox.path

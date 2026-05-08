@@ -19,7 +19,8 @@ defmodule Mut.Cli do
             selection: atom,
             test_paths: [String.t()],
             keep_work_copy: boolean,
-            worker_type: :mix | :persistent
+            worker_type: :mix | :persistent,
+            test_timeout_ms: pos_integer
           }
 
     defstruct [
@@ -35,7 +36,8 @@ defmodule Mut.Cli do
       :selection,
       :test_paths,
       :keep_work_copy,
-      :worker_type
+      :worker_type,
+      :test_timeout_ms
     ]
   end
 
@@ -100,7 +102,8 @@ defmodule Mut.Cli do
           selection: :string,
           debug_plan: :boolean,
           keep_work_copy: :boolean,
-          worker_type: :string
+          worker_type: :string,
+          test_timeout_ms: :integer
         ],
         aliases: []
       )
@@ -132,7 +135,8 @@ defmodule Mut.Cli do
          {:ok, max_mutants} <- max_mutants(parsed),
          {:ok, selection} <- selection(parsed, config),
          {:ok, test_paths} <- test_paths(config),
-         {:ok, worker_type} <- worker_type(parsed, config) do
+         {:ok, worker_type} <- worker_type(parsed, config),
+         {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config) do
       {:ok,
        %Options{
          files: files,
@@ -147,12 +151,40 @@ defmodule Mut.Cli do
          selection: selection,
          test_paths: test_paths,
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
-         worker_type: worker_type
+         worker_type: worker_type,
+         test_timeout_ms: test_timeout_ms
        }}
     end
   end
 
   @known_worker_types [:mix, :persistent]
+
+  # Test timeout bounds:
+  # - 1_000 ms lower bound: ExUnit setup_all hooks alone can take
+  #   100s of ms; below 1s leaves no room for actual test execution.
+  # - 600_000 ms (10 min) upper bound: anything more is pathological;
+  #   the user should rethink the test, not the timeout.
+  @test_timeout_min_ms 1_000
+  @test_timeout_max_ms 600_000
+  @test_timeout_default_ms 10_000
+
+  defp test_timeout_ms(parsed, config) do
+    value =
+      Keyword.get(
+        parsed,
+        :test_timeout_ms,
+        Keyword.get(config, :test_timeout_ms, @test_timeout_default_ms)
+      )
+
+    case value do
+      n when is_integer(n) and n >= @test_timeout_min_ms and n <= @test_timeout_max_ms ->
+        {:ok, n}
+
+      _other ->
+        {:error,
+         "--test-timeout-ms must be an integer between #{@test_timeout_min_ms} and #{@test_timeout_max_ms}; run `mix help mut`"}
+    end
+  end
 
   defp worker_type(parsed, config) do
     value = Keyword.get(parsed, :worker_type, Keyword.get(config, :worker_type, :mix))

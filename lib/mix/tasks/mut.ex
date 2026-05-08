@@ -32,7 +32,10 @@ defmodule Mix.Tasks.Mut do
                                BEAM alive per sandbox and flips
                                :persistent_term per mutant. Schema
                                mutants only; fallback continues to use
-                               mix-spawn.
+                               mix-spawn. See docs/PERSISTENT_WORKER_GUIDE.md.
+    --test-timeout-ms N      Per-test ExUnit timeout in milliseconds.
+                               Default 10000. Range 1000..600000. Applied
+                               to both worker types.
 
   Configuration via `config :mut`:
 
@@ -69,7 +72,11 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Worker.Persistent
 
   @requirements ["app.config"]
-  @timeout_ms 70_000
+  # Buffer added on top of `--test-timeout-ms` for the host-side
+  # deadline. ExUnit fires its per-test timeout first and emits a
+  # MUT_RESULT line; the host then needs time to drain the port and
+  # classify. 10s matches v1.8 (the old 70 000 = 60 000 + 10 000).
+  @host_deadline_buffer_ms 10_000
   @coverage_pathology_floor_ms 10_000
   @mutalisk_root Path.expand("../../..", __DIR__)
 
@@ -90,6 +97,7 @@ defmodule Mix.Tasks.Mut do
     started = System.monotonic_time(:millisecond)
     {:ok, metrics_pid} = Metrics.start_link([])
     Metrics.set_concurrency(metrics_pid, opts.concurrency)
+    Metrics.set_test_timeout_ms(metrics_pid, opts.test_timeout_ms)
 
     {:ok, watchdog_pid} =
       Mut.MemoryWatchdog.start(Path.join([mutalisk_root, "tmp", "mut_memory.log"]))
@@ -212,7 +220,9 @@ defmodule Mix.Tasks.Mut do
           stream?: :terminal in opts.reporters,
           concurrency: opts.concurrency,
           worker_type: opts.worker_type,
-          persistent_servers: persistent_servers
+          persistent_servers: persistent_servers,
+          test_timeout_ms: opts.test_timeout_ms,
+          host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
         }
 
         pool =
@@ -429,15 +439,15 @@ defmodule Mix.Tasks.Mut do
   defp run_schema_via(%{worker_type: :persistent} = ctx, sandbox, mutant, worker_tests) do
     case Map.get(ctx.persistent_servers, sandbox.id) do
       nil ->
-        run_schema_via_mix(sandbox, mutant, worker_tests)
+        run_schema_via_mix(ctx, sandbox, mutant, worker_tests)
 
       server ->
         run_schema_via_persistent(ctx, server, sandbox, mutant, worker_tests)
     end
   end
 
-  defp run_schema_via(_ctx, sandbox, mutant, worker_tests),
-    do: run_schema_via_mix(sandbox, mutant, worker_tests)
+  defp run_schema_via(ctx, sandbox, mutant, worker_tests),
+    do: run_schema_via_mix(ctx, sandbox, mutant, worker_tests)
 
   # Recovery contract (F4 auto-restart + M20 timeout/crash split):
   # - `:filter_miss` — runner couldn't resolve the selected files to
@@ -456,35 +466,37 @@ defmodule Mix.Tasks.Mut do
   # - `:exit` (defensive) — the GenServer itself stopped
   #   (auto-restart failed). All future calls also hit this catch
   #   and route to mix; per-sandbox fallback is implicit.
-  defp run_schema_via_persistent(_ctx, server, sandbox, mutant, worker_tests) do
-    case Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: @timeout_ms) do
+  defp run_schema_via_persistent(ctx, server, sandbox, mutant, worker_tests) do
+    case Persistent.run_schema(server, mutant.id, worker_tests, timeout_ms: ctx.host_deadline_ms) do
       :timeout ->
         # M21: persistent's `:timeout` is the authoritative result —
         # the test exceeded the per-message deadline and no progress
-        # was emitted for `@timeout_ms`. After M21's two fixes
-        # (max_failures: 1 in the runner + per-message wait_for_result),
-        # persistent is byte-identical to mix on Decimal at c=4
-        # (within V17 acceptance). Mix-retry is no longer needed and
-        # would cost an extra @timeout_ms per timeout. Materialise
-        # Result{status: :timeout} directly. The persistent BEAM has
-        # already been auto-restarted by the GenServer, so subsequent
-        # mutants on this sandbox stay on persistent.
-        %Mut.Worker.Result{status: :timeout, duration_ms: @timeout_ms, raw_output: ""}
+        # was emitted for `ctx.host_deadline_ms`. After M21's two
+        # fixes (max_failures: 1 in the runner + per-message
+        # wait_for_result), persistent is byte-identical to mix on
+        # Decimal at c=4 (within V17 acceptance). Mix-retry is no
+        # longer needed and would cost an extra deadline per timeout.
+        # Materialise Result{status: :timeout} directly. The
+        # persistent BEAM has already been auto-restarted by the
+        # GenServer, so subsequent mutants on this sandbox stay on
+        # persistent.
+        %Mut.Worker.Result{status: :timeout, duration_ms: ctx.host_deadline_ms, raw_output: ""}
 
       reply when reply in [:filter_miss, :crashed] ->
-        run_schema_via_mix(sandbox, mutant, worker_tests)
+        run_schema_via_mix(ctx, sandbox, mutant, worker_tests)
 
       %Mut.Worker.Result{} = result ->
         result
     end
   catch
     :exit, _reason ->
-      run_schema_via_mix(sandbox, mutant, worker_tests)
+      run_schema_via_mix(ctx, sandbox, mutant, worker_tests)
   end
 
-  defp run_schema_via_mix(sandbox, mutant, worker_tests) do
+  defp run_schema_via_mix(ctx, sandbox, mutant, worker_tests) do
     Worker.run_schema(sandbox, mutant.id, worker_tests,
-      timeout_ms: @timeout_ms,
+      timeout_ms: ctx.host_deadline_ms,
+      test_timeout_ms: ctx.test_timeout_ms,
       retry_on_error: true
     )
   end
@@ -496,10 +508,12 @@ defmodule Mix.Tasks.Mut do
   # Deferred to follow-up. The mix-spawn fallback path preserves the
   # M17 "0 invalid Decimal fallback" baseline across worker types.
 
-  defp maybe_start_persistent_workers(%{worker_type: :persistent}, pool) do
+  defp maybe_start_persistent_workers(%{worker_type: :persistent} = opts, pool) do
+    server_opts = [test_timeout_ms: opts.test_timeout_ms]
+
     pool.sandboxes
     |> Enum.map(fn sandbox ->
-      case Persistent.start_link(sandbox) do
+      case Persistent.start_link(sandbox, server_opts) do
         {:ok, pid} -> {sandbox.id, pid}
         {:error, reason} -> Mix.raise("persistent worker start failed: #{inspect(reason)}")
       end
@@ -552,26 +566,27 @@ defmodule Mix.Tasks.Mut do
   defp run_fallback_via(%{worker_type: :persistent} = ctx, sandbox, mutant, worker_tests) do
     case Map.get(ctx.persistent_servers, sandbox.id) do
       nil ->
-        run_fallback_via_mix(sandbox, mutant, worker_tests)
+        run_fallback_via_mix(ctx, sandbox, mutant, worker_tests)
 
       server ->
         Worker.run_fallback_in_process(server, sandbox, mutant, worker_tests,
           app: app_name(sandbox.path),
-          timeout_ms: @timeout_ms
+          timeout_ms: ctx.host_deadline_ms
         )
     end
   catch
     :exit, _reason ->
-      run_fallback_via_mix(sandbox, mutant, worker_tests)
+      run_fallback_via_mix(ctx, sandbox, mutant, worker_tests)
   end
 
-  defp run_fallback_via(_ctx, sandbox, mutant, worker_tests),
-    do: run_fallback_via_mix(sandbox, mutant, worker_tests)
+  defp run_fallback_via(ctx, sandbox, mutant, worker_tests),
+    do: run_fallback_via_mix(ctx, sandbox, mutant, worker_tests)
 
-  defp run_fallback_via_mix(sandbox, mutant, worker_tests) do
+  defp run_fallback_via_mix(ctx, sandbox, mutant, worker_tests) do
     Worker.run_fallback(sandbox, mutant, worker_tests,
       app: app_name(sandbox.path),
-      timeout_ms: @timeout_ms
+      timeout_ms: ctx.host_deadline_ms,
+      test_timeout_ms: ctx.test_timeout_ms
     )
   end
 

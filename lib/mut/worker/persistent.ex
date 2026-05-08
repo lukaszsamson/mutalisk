@@ -417,13 +417,16 @@ defmodule Mut.Worker.Persistent do
   end
 
   defp port_env(opts) do
+    test_timeout_ms = Keyword.get(opts, :test_timeout_ms, 10_000)
+
     base = [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_schema"},
       {"MIX_DEPS_PATH", "_build/mut_schema/deps"},
       {"MUTALISK_ROLE", "persistent"},
       {"MUTALISK_PATH", Path.expand(File.cwd!())},
-      {"MUT_ACTIVE", "0"}
+      {"MUT_ACTIVE", "0"},
+      {"MUT_TEST_TIMEOUT_MS", Integer.to_string(test_timeout_ms)}
     ]
 
     forwarded =

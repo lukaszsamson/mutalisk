@@ -82,7 +82,7 @@ defmodule Mut.Worker.PersistentRunner do
       autorun: false,
       formatters: [Mut.Worker.Formatter],
       max_failures: 1,
-      timeout: 10_000
+      timeout: ex_unit_timeout()
     )
 
     test_helper = Keyword.get(opts, :test_helper)
@@ -120,6 +120,19 @@ defmodule Mut.Worker.PersistentRunner do
 
     write_marker(@ready_marker)
     loop(snapshot)
+  end
+
+  defp ex_unit_timeout do
+    case System.get_env("MUT_TEST_TIMEOUT_MS") do
+      nil ->
+        10_000
+
+      value ->
+        case Integer.parse(value) do
+          {n, ""} when n > 0 -> n
+          _ -> 10_000
+        end
+    end
   end
 
   defp time_app_startup do

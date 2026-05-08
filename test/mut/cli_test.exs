@@ -120,6 +120,24 @@ defmodule Mut.CliTest do
     assert message =~ "--concurrency must be at least 1"
   end
 
+  test "test_timeout_ms defaults to 10_000 and accepts overrides" do
+    assert {:ok, %Options{test_timeout_ms: 10_000}} = Cli.parse([])
+    assert {:ok, %Options{test_timeout_ms: 30_000}} = Cli.parse(["--test-timeout-ms", "30000"])
+    assert {:ok, %Options{test_timeout_ms: 5_000}} = Cli.parse([], test_timeout_ms: 5_000)
+
+    # CLI overrides config.
+    assert {:ok, %Options{test_timeout_ms: 20_000}} =
+             Cli.parse(["--test-timeout-ms", "20000"], test_timeout_ms: 5_000)
+  end
+
+  test "rejects out-of-range --test-timeout-ms" do
+    assert {:error, message} = Cli.parse(["--test-timeout-ms", "100"])
+    assert message =~ "--test-timeout-ms must be an integer between"
+
+    assert {:error, message} = Cli.parse(["--test-timeout-ms", "700000"])
+    assert message =~ "--test-timeout-ms must be an integer between"
+  end
+
   test "resolves mutators and aliases" do
     assert Cli.resolve_mutators(["arithmetic"]) == [Mut.Mutator.Arithmetic]
 

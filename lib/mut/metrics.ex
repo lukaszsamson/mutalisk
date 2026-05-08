@@ -26,6 +26,7 @@ defmodule Mut.Metrics do
       :concurrency,
       :recompile_categories,
       :persistent,
+      :test_timeout_ms,
       :ledger
     ]
 
@@ -75,6 +76,7 @@ defmodule Mut.Metrics do
             },
             recompile_categories: %{atom() => non_neg_integer()},
             persistent: persistent_block() | nil,
+            test_timeout_ms: pos_integer() | nil,
             ledger: [ledger_entry()]
           }
 
@@ -238,6 +240,11 @@ defmodule Mut.Metrics do
     GenServer.cast(pid, {:record_persistent_workers, workers})
   end
 
+  @spec set_test_timeout_ms(GenServer.server(), pos_integer()) :: :ok
+  def set_test_timeout_ms(pid, ms) when is_integer(ms) and ms > 0 do
+    GenServer.cast(pid, {:set_test_timeout_ms, ms})
+  end
+
   @impl GenServer
   def init(_opts) do
     {:ok,
@@ -261,6 +268,7 @@ defmodule Mut.Metrics do
        concurrency: nil,
        recompile_categories: %{compile_error: 0, dep_path_error: 0, unknown: 0},
        persistent_workers: nil,
+       test_timeout_ms: nil,
        started_ms: monotonic_ms(),
        ledger: []
      }}
@@ -362,6 +370,10 @@ defmodule Mut.Metrics do
     {:noreply, %{state | persistent_workers: workers}}
   end
 
+  def handle_cast({:set_test_timeout_ms, ms}, state) do
+    {:noreply, %{state | test_timeout_ms: ms}}
+  end
+
   def handle_cast(
         {:record_selection, _mutant, match_kind, fallback_reason, selected_count},
         state
@@ -439,6 +451,7 @@ defmodule Mut.Metrics do
       concurrency: concurrency_snapshot(state.concurrency),
       recompile_categories: state.recompile_categories,
       persistent: persistent_snapshot(state.persistent_workers),
+      test_timeout_ms: state.test_timeout_ms,
       ledger: ledger
     }
   end

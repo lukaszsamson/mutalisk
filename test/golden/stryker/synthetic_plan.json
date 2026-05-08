@@ -224,7 +224,8 @@
       "stable-skipped": 5,
       "stable-survived": 2,
       "stable-timeout": 3
-    }
+    },
+    "test_timeout_ms": 10000
   },
   "schemaVersion": "2",
   "thresholds": {

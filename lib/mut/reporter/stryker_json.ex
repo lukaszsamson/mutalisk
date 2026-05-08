@@ -108,7 +108,8 @@ defmodule Mut.Reporter.StrykerJson do
       "metrics" => metrics_extension(snapshot),
       "concurrency" => concurrency_extension(snapshot.concurrency),
       "recompile_categories" => recompile_categories_extension(snapshot.recompile_categories),
-      "persistent" => persistent_extension(snapshot.persistent)
+      "persistent" => persistent_extension(snapshot.persistent),
+      "test_timeout_ms" => snapshot.test_timeout_ms || 10_000
     }
   end
 
