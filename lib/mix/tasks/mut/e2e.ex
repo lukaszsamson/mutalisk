@@ -137,6 +137,22 @@ defmodule Mix.Tasks.Mut.E2e do
       if static_count != coverage_count do
         raise "coverage #{status} count drift: static=#{static_count} coverage=#{coverage_count}"
       end
+
+      # M22: byte-identity check on the actual stable_id partitioning,
+      # not just count totals. Catches the silent-drift class where
+      # coverage selection's narrowed test list under persistent
+      # would flip a specific mutant from killed to survived while
+      # leaving the totals unchanged.
+      static_set = stable_ids_by_status(static.report, status)
+      coverage_set = stable_ids_by_status(coverage.report, status)
+
+      if static_set != coverage_set do
+        missing = Enum.reject(static_set, &(&1 in coverage_set))
+        extra = Enum.reject(coverage_set, &(&1 in static_set))
+
+        raise "coverage #{status} stable_id set drift: " <>
+                "missing=#{inspect(missing)} extra=#{inspect(extra)}"
+      end
     end
 
     selection = coverage.report["mutalisk"]["selection"]
@@ -304,6 +320,14 @@ defmodule Mix.Tasks.Mut.E2e do
   end
 
   defp stable_ids(report), do: report |> mutants() |> Enum.map(& &1["id"]) |> Enum.sort()
+
+  defp stable_ids_by_status(report, status) do
+    report
+    |> mutants()
+    |> Enum.filter(&(&1["status"] == status))
+    |> Enum.map(& &1["id"])
+    |> Enum.sort()
+  end
 
   defp score(statuses) do
     killed = Map.get(statuses, "Killed", 0)
