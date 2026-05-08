@@ -259,10 +259,104 @@ defmodule Mut.Worker.PersistentTest do
     end
   end
 
+  @tag timeout: 60_000
+  test "Application.start/2 callback fires before tests run (M22 F2 regression)" do
+    # M22: locks in the v1.7 F2 fix. The fixture's AppStartCallback
+    # module has a `start/2` callback that creates a named ETS table
+    # the tests read from. Without F2 (start_project_apps before
+    # ExUnit.start), the test triggers `:badarg` on the ETS read and
+    # surfaces as a spurious kill in the persistent worker even
+    # though mix-spawn handles it cleanly.
+    sandbox_path = fake_app_start_callback_project()
+    sandbox = %Sandbox{id: 1, path: sandbox_path}
+
+    {:ok, server} =
+      Persistent.start_link(sandbox, test_files: ["test/app_start_callback_test.exs"])
+
+    try do
+      result = Persistent.run_schema(server, 0, ["test/app_start_callback_test.exs"])
+
+      assert match?(%Mut.Worker.Result{status: :survived}, result),
+             "expected :survived (F2 fix means start/2 ran), got #{inspect(result)}"
+    after
+      stop(server)
+    end
+  end
+
   defp stop(server) do
     Persistent.stop(server)
   catch
     :exit, _ -> :ok
+  end
+
+  defp fake_app_start_callback_project do
+    root = Path.expand(Path.join(["tmp", "tests", "persistent", "app_start_callback"]))
+    File.rm_rf!(root)
+    File.mkdir_p!(Path.join(root, "test"))
+    File.mkdir_p!(Path.join(root, "lib/app_start_callback"))
+
+    File.write!(Path.join(root, "mix.exs"), "defmodule AppStartCallback.MixProject do\nend\n")
+
+    File.write!(
+      Path.join(root, "test/test_helper.exs"),
+      "ExUnit.start()\n"
+    )
+
+    link_current_ebins(root)
+
+    fixture_root =
+      Path.expand(Path.join(["test", "fixtures", "overlay_cases", "app_start_callback"]))
+
+    File.cp!(
+      Path.join(fixture_root, "lib/app_start_callback.ex"),
+      Path.join(root, "lib/app_start_callback.ex")
+    )
+
+    File.cp!(
+      Path.join(fixture_root, "lib/app_start_callback/repo.ex"),
+      Path.join(root, "lib/app_start_callback/repo.ex")
+    )
+
+    File.cp!(
+      Path.join(fixture_root, "test/app_start_callback_test.exs"),
+      Path.join(root, "test/app_start_callback_test.exs")
+    )
+
+    ebin = Path.join([root, "_build", "mut_schema", "lib", "app_start_callback", "ebin"])
+    File.mkdir_p!(ebin)
+
+    compiled =
+      Code.compile_file(Path.join(fixture_root, "lib/app_start_callback.ex")) ++
+        Code.compile_file(Path.join(fixture_root, "lib/app_start_callback/repo.ex"))
+
+    Enum.each(compiled, fn {module, beam} ->
+      File.write!(Path.join(ebin, "#{module}.beam"), beam)
+    end)
+
+    modules = Enum.map(compiled, fn {module, _} -> module end)
+
+    app_resource =
+      :io_lib.format(
+        ~c"{application, app_start_callback,~n" ++
+          ~c" [{description, \"\"},~n" ++
+          ~c"  {modules, ~p},~n" ++
+          ~c"  {registered, []},~n" ++
+          ~c"  {applications, [kernel, stdlib, elixir, logger]},~n" ++
+          ~c"  {mod, {'Elixir.AppStartCallback', []}},~n" ++
+          ~c"  {vsn, \"0.1.0\"}]}.~n",
+        [modules]
+      )
+      |> IO.iodata_to_binary()
+
+    File.write!(Path.join(ebin, "app_start_callback.app"), app_resource)
+
+    # Test process unloads modules so subsequent runs see a clean slate.
+    Enum.each(modules, fn module ->
+      :code.purge(module)
+      :code.delete(module)
+    end)
+
+    root
   end
 
   defp fake_fallback_project(name) do
