@@ -3,6 +3,42 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.9 unreleased (M22 + M23, 2026-05-08)
+
+### M23 — Body-context literal mutators
+
+First new mutator surface since v1.5. Two focused mutators for
+function-body integer and boolean literals.
+
+#### Added
+- **`Mut.Mutator.IntegerLiteral`** with replacement table:
+  `0 → 1`, `1 → 0`, `n → 0`, `n → n+1`.
+- **`Mut.Mutator.BooleanLiteral`** with `true → false`,
+  `false → true`.
+- **`Mut.AstWalk.body_literal_candidates/1`** walker. Re-parses
+  source with `literal_encoder` so bare literals carry parser
+  metadata, then walks the encoded AST. Emits candidates only
+  for literals in body position (inside `def`/`defp` body, NOT
+  in patterns / guards / macro bodies / `quote` / attribute
+  values).
+- **`:body_literal` target** in the orchestrator and CLI. Opt-in
+  via `--enable body_literal`. `--mutators body_literal` is an
+  alias for both literal mutators.
+- **demo_app fixture** gains `lib/literals.ex` and
+  `test/literals_test.exs` exercising 3 body literals with
+  pinned-value tests; all 4 generated mutants are killed.
+
+#### Note on engine routing
+PLAN.md M23 spec called for schema-engine routing. Body literals
+ship via the **fallback engine** (source-patch) instead, because
+schema placement requires the AST shape walker and placer agree,
+and the literal walker uses `literal_encoder` while the placer
+uses bare-literal AST. Reconciling forces `literal_encoder`
+globally — that re-keys every existing mutant's `ast_path_hash`
+and regenerates every golden stable-id. Fallback routing is the
+clean v1.9 path; schema placement is a follow-up if perf
+warrants.
+
 ## v1.9 unreleased (M22, 2026-05-08)
 
 Reliability/observability/config milestone for the persistent
