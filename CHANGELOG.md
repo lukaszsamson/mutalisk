@@ -187,19 +187,12 @@ Default flip remains a v1.9+ decision.
   with diag on vs 147 s with diag off, within noise (well
   under M20's 5% bar).
 
-### Known limitations (v1.8.0)
-- **Default stays `--worker-type mix`.** Persistent worker
-  remains opt-in. Per-target perf at c=4: demo_app 1.3×
-  faster, plug_crypto 0.59× (slower), Decimal 0.89×
-  (slower). Default flip is gated on closing the perf gap
-  on real targets.
-- **The plug_crypto / Decimal slowness is concentrated in
-  the timeout-recovery path.** ~30 Decimal mutants stall in
-  persistent due to accumulated ExUnit/process state and
-  require a mix-spawn retry for byte-identity. The four
-  reset vectors (Application env / ETS / processes /
-  persistent_term / OnExitHandler) don't catch this leak
-  vector. Diagnosis is M21-conditional work.
+### Known limitations (M20 baseline, all closed by M21 follow-ups)
+At M20's commit point persistent was 0.59× plug_crypto / 0.89×
+Decimal (slower than mix). M21 phase 1 (test-runtime parity bug
+fix), M21 phase 2 (in-process fallback recompile), and M21 phase
+3 (per-test timeout policy) each landed below; see those sections
+for current numbers. The M20 perf-acceptance gap is closed.
 
 ### Internal
 - `lib/mut/worker/persistent_runner/diag.ex` (new — diagnostic

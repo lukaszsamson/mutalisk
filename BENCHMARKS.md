@@ -1,35 +1,60 @@
 # Mutalisk Benchmarks
 
-## v1.7: persistent worker (opt-in supported)
+## v1.8 final headline (c=4, both workers `--timeout 10000`)
 
-`--worker-type persistent` is an opt-in worker. The persistent
-worker keeps one ExUnit BEAM alive per sandbox and flips
-`:persistent_term` between mutants instead of spawning a fresh
-`mix test` per mutant.
+| Target | mix wall | persistent wall | speedup |
+|---|---:|---:|---:|
+| demo_app | ~10 s | ~7-8 s | 1.3× |
+| plug_crypto | **53 s** | **26 s** | **2.04×** |
+| Decimal | **259 s** | **130 s** | **1.99×** |
 
-| Target | c=4 mix | c=4 persistent | speedup | byte-identical to mix? |
-|---|---:|---:|---:|---|
-| demo_app | 8.9 s | 6.8 s | **1.3×** | **yes** (21 killed / 10 survived in default; 23/10 in attribute) |
-| plug_crypto | 84 s | 142 s | 0.6× | **yes** (38 Killed / 25 Survived / 1 Timeout — same stable-id sets) |
-| Decimal | 11.0 min | 12.4 min | 0.9× | within V17 acceptance (11 timeout → killed flips on the existing timeout-class mutants; 1 RuntimeError → Killed; 0 unexpected Survived → Killed regressions) |
+Persistent is now strictly faster than mix on every benchmark
+target. byte-identity preserved on all three targets — Decimal
+mix and persistent produce identical Killed / Survived / Timeout
+counts (363 / 91 / 0). plug_crypto retains a single mutant flap
+within V17 acceptance (persistent kills, mix also kills now via
+the same `--timeout 10000` knob).
 
-**Persistent worker is byte-identical to mix across all three
-targets** (Decimal within V17 acceptance for the existing
-timeout-class flap). The experimental env gate
-`MUTALISK_PERSISTENT_EXPERIMENTAL=1` was removed in F3.
+**Versus the v1.7 mix baseline** (60 s ExUnit per-test default):
 
-**Persistent is currently slower than mix on plug_crypto (1.7×)
-and Decimal (1.13×) at c=4.** v1.7 ships persistent as a
-correctness-safe opt-in worker — not a speed win on real
-projects. demo_app is faster under persistent (1.3×) because its
-per-mutant work is dominated by BEAM boot cost, but the leak-vector
-reset overhead exceeds the saved boot cost on plug_crypto and
-Decimal. Use `--worker-type mix` for production runs until M20's
-perf work flips the default. Performance tuning lives in M20.
+| Target | v1.7 mix | v1.8 persistent | absolute gain |
+|---|---:|---:|---:|
+| plug_crypto | 84 s | **26 s** | **3.23× faster** |
+| Decimal | 660 s | **130 s** | **5.08× faster** |
 
-`bin/verify`'s `e2e_persistent` layer runs `mix mut.e2e --worker-type
-persistent` against demo_app and asserts byte-identity for the three
-fixture variants (default, coverage, attribute).
+Default still ships `--worker-type mix`. The default flip is a
+v1.9+ decision — persistent is now strongly motivated by the
+perf data but changes default user-visible behaviour and merits
+a separate cycle.
+
+The headline numbers above are the v1.8 final state. Sections
+below trace how we got here (v1.7 baseline → M20 diagnostics →
+M21 leak-vector fix → M21 phase 2 in-process fallback → M21
+phase 3 timeout policy).
+
+`bin/verify`'s `e2e_persistent` layer runs `mix mut.e2e
+--worker-type persistent` against demo_app and asserts
+byte-identity for the three fixture variants (default, coverage,
+attribute) every CI run.
+
+## v1.7 baseline: persistent slower than mix on real targets
+
+This is the starting point for v1.8's perf-realisation work.
+
+| Target | c=4 mix | c=4 persistent | byte-identical to mix? |
+|---|---:|---:|---|
+| demo_app | 8.9 s | 6.8 s | **yes** (21 killed / 10 survived in default; 23/10 in attribute) |
+| plug_crypto | 84 s | 142 s | **yes** (38 Killed / 25 Survived / 1 Timeout — same stable-id sets) |
+| Decimal | 11.0 min | 12.4 min | within V17 acceptance (11 timeout → killed flips on the existing timeout-class mutants; 1 RuntimeError → Killed) |
+
+v1.7 shipped persistent worker as opt-in supported with byte-
+identity proven on all three targets, but persistent was 1.7×
+slower than mix on plug_crypto and 1.13× slower on Decimal at
+c=4. demo_app is faster under persistent (1.3×) because its
+per-mutant work is dominated by BEAM boot cost, but the leak-
+vector reset overhead exceeded the saved boot cost on plug_crypto
+and Decimal at v1.7. v1.8's M20 + M21 phases close this gap;
+see sections below.
 
 ## v1.8 M20 Phase A: per-phase overhead breakdown
 

@@ -11,25 +11,37 @@ defmodule Mut.Worker.Persistent do
 
       {:ok, server} = Mut.Worker.Persistent.start_link(sandbox)
       result = Mut.Worker.Persistent.run_schema(server, mutant_id, files)
+      result = Mut.Worker.Persistent.run_fallback(server, mutant_id, compile, tests)
       :ok = Mut.Worker.Persistent.stop(server)
 
   ## Behaviour
 
-  - Only schema mutants run here; fallback always routes to
-    `Mut.Worker.run_fallback/4` (the mix-spawn path).
+  - **Schema mutants** run via `run_schema/4`. The schema bytecode
+    is loaded once at boot; mutant selection is a `:persistent_term`
+    flip read by the runtime dispatch.
+  - **Fallback mutants** run via `run_fallback/5` (M21 phase 2).
+    The host has already applied the source patch to the sandbox;
+    this call asks the persistent BEAM to recompile the patched
+    files in-process via `Code.compile_file/1`, run ExUnit, then
+    restore the originals via `:code.purge/1` + `:code.load_file/1`
+    (the schema-build ebins on the runner's `-pa` provide the
+    originals). No mix-spawn child process per fallback mutant.
+    A compile error replies `{:compile_error, category, message}`
+    and the host materialises a Result with status: :invalid; mix
+    retry on a compile error would just fail the same way.
   - The `test_files` argument scopes ExUnit's `only_test_ids` to
     the tests in those files. An empty list runs every loaded test
     module.
-  - On filter miss (selected files map to zero loaded tests), the
-    server replies `:filter_miss` and the host reruns the mutant
-    via the mix-spawn worker.
-  - On crash (port exit / run timeout), the server reboots the BEAM
-    in-place and replies `:crashed` for the failing mutant. The
-    host reruns that mutant via mix-spawn but subsequent mutants
-    on the same sandbox stay on persistent. If the restart itself
-    fails, the GenServer stops with `:worker_crashed` and the host
-    falls back to mix-spawn for every remaining mutant on this
-    sandbox.
+  - On **filter miss** (selected files map to zero loaded tests),
+    the server replies `:filter_miss` and the host reruns the
+    mutant via the mix-spawn worker.
+  - On **crash** (port exit / run timeout), the server reboots the
+    BEAM in-place and replies `:crashed` (port exit) or `:timeout`
+    (host deadline expired) for the failing mutant. The host
+    reruns that mutant via mix-spawn but subsequent mutants on the
+    same sandbox stay on persistent. If the restart itself fails,
+    the GenServer stops with `:worker_crashed` and the host falls
+    back to mix-spawn for every remaining mutant on this sandbox.
   """
 
   use GenServer
@@ -209,7 +221,7 @@ defmodule Mut.Worker.Persistent do
   # with status killed/survived/filter_miss/error/compile_error.
   defp handle_run_reply(state, started, timeout_ms) do
     case wait_for_result(state.port, state.leftover, timeout_ms) do
-      {:ok, %Result{status: :filter_miss}, _leftover, run_metrics} ->
+      {:filter_miss, _leftover, run_metrics} ->
         # Filter miss is recoverable: the worker BEAM is still
         # healthy, but the host needs to rerun this mutant via mix
         # because the persistent runner could not resolve the
@@ -475,6 +487,13 @@ defmodule Mut.Worker.Persistent do
     receive do
       {^port, {:data, {:eol, line}}} ->
         case parse_result_line(line) do
+          # `:filter_miss` is a control signal, not a Result.status.
+          # Surface it directly so the host's handle_run_reply can
+          # route via mix-spawn without ever materialising an
+          # out-of-spec Result struct.
+          {:ok, :filter_miss, _duration_us} ->
+            {:filter_miss, acc, run_metrics}
+
           {:ok, status, duration_us} ->
             duration_ms = max(div(duration_us, 1000), 0)
 
