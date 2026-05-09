@@ -1,0 +1,37 @@
+# M24 demo_app body-literal validation
+# Captured 2026-05-09 against demo_app fixture at HEAD.
+# Both runs --worker-type mix --selection static --concurrency 4.
+
+## Baseline: --enable dispatch,guard,module_attribute
+Mutation score: 23/33 = 69.7%
+Schema:    19/27 killed (70.4%)   wall: 17.0s
+Fallback:  4/6 killed (66.7%)     wall:  5.7s
+Run time: 22.7s
+Fallback mutants: 18.2% of executed
+
+## With body_literal: --enable dispatch,guard,module_attribute,body_literal
+Mutation score: 28/39 = 71.8%
+Schema:    19/27 killed (70.4%)   wall: 16.5s
+Fallback:  9/12 killed (75.0%)    wall: 12.7s
+Run time: 29.1s
+Fallback mutants: 30.8% of executed
+
+## Delta
+- Mutants:    +6 fallback (5 from lib/literals.ex's 3 literals,
+                          2 from lib/guards.ex's positive?/1 true/false body returns)
+- Schema:     unchanged (body literals route through fallback)
+- Killed:     +5 of +6 (83% kill rate on body-literal additions)
+- Survived:   +1 (one Guards body literal — not test-distinguishable
+                  given the existing test's narrow assertions)
+- Wall delta: +6.4s (28% of baseline; one extra fallback cycle per
+                     new mutant under mix-spawn).
+
+## Recommendation
+Keep body_literal opt-in for v1.9. 83% kill rate on a small
+fixture is encouraging but not yet conclusive — the guards.ex
+survivor is a tell that some real-world bodies will produce
+equivalent mutants the suite can't distinguish (e.g., a guarded
+function whose only test case exercises the truthy clause).
+The 28% wall-clock cost is acceptable for users who opt in,
+unacceptable as a default tax. Re-evaluate flipping default-on
+after M24's planned OSS-target validation completes.

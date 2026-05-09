@@ -67,8 +67,9 @@ If your suite uses any of these, stay on the default mix worker:
   takes the whole worker down. The host auto-restarts the BEAM and
   routes the failing mutant via mix-spawn, so correctness is
   preserved — but performance suffers if a project crashes often.
-- **Heavy `Mox` usage.** Not yet validated end-to-end. M24 tests
-  this; until then, mix is safer if your suite leans on Mox.
+- **Heavy `Mox` usage.** Not yet validated end-to-end. The next
+  validation milestone should cover this; until then, mix is safer
+  if your suite leans on Mox.
 - **Tests depending on global per-test setup ordering.** ExUnit's
   module load order is captured once at boot; if your suite
   mutates that order at runtime, the persistent worker won't see
@@ -151,6 +152,10 @@ Relevant flags:
 - `--selection coverage_with_static_fallback` — coverage-based test
   selection. Validated against persistent in the e2e test suite;
   byte-identical with mix+static.
+- `--enable body_literal` — opt in to integer / boolean body-literal
+  mutators (M23). These route through the fallback engine; expect
+  added fallback wall-clock proportional to the literal count.
+  Currently opt-in pending the M24 OSS-target validation matrix.
 
 Configuration via `config :mut`:
 

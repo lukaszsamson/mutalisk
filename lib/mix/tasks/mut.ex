@@ -9,7 +9,8 @@ defmodule Mix.Tasks.Mut do
     --mutators NAMES         Comma-separated mutator name list
     --enable TARGETS         Comma-separated enabled targets:
                               dispatch (default), guard (default),
-                              module_attribute (opt-in)
+                              module_attribute (opt-in),
+                              body_literal (opt-in)
     --fail-at SCORE          Mutation score threshold; exit 1 below
                               (default: 80)
     --reporters NAMES        Comma-separated: terminal, stryker-json
@@ -31,8 +32,10 @@ defmodule Mix.Tasks.Mut do
                                an opt-in worker that keeps one ExUnit
                                BEAM alive per sandbox and flips
                                :persistent_term per mutant. Schema
-                               mutants only; fallback continues to use
-                               mix-spawn. See docs/PERSISTENT_WORKER_GUIDE.md.
+                               and fallback mutants run in-process;
+                               persistent falls back to mix on crash,
+                               timeout, or filter miss. See
+                               docs/PERSISTENT_WORKER_GUIDE.md.
     --test-timeout-ms N      Per-test ExUnit timeout in milliseconds.
                                Default 10000. Range 1000..600000. Applied
                                to both worker types.

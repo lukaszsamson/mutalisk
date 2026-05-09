@@ -3,6 +3,50 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.9 unreleased (M22 + M23 + M24 partial, 2026-05-09)
+
+### M24 — Body-literal real-world validation (in progress)
+
+#### Added
+- **`bench/run.sh --enable-body-literal`** — runs the bench under
+  `--enable dispatch,guard,module_attribute,body_literal` so the
+  body-literal additions can be measured against the dispatch /
+  guard / attribute baseline.
+- **`bench/run.sh` target stubs** for `nimble_options`, `gettext`,
+  `ecto`, `mox`, `jason`. Repos pinned by URL; the SHA must be
+  provided via `BENCH_SHA=<sha>` env so the harness refuses to
+  drift against a moving HEAD.
+- **demo_app body-literal validation** captured at
+  `bench/results/demo_app.body_literal.terminal.txt`. 5 of 6 added
+  body-literal mutants killed; +28% wall-clock; 1 equivalent-class
+  survivor in `Guards.positive?/1`.
+- **BENCHMARKS.md "v1.10 body-literal validation" section**
+  tracking the per-target validation matrix as runs land. Includes
+  the v1.10 default `--worker-type` flip gate criteria.
+- **PERSISTENT_WORKER_GUIDE.md** documents `--enable body_literal`
+  in the Configuration section.
+
+#### Recommendation (interim)
+Keep `body_literal` opt-in. The demo_app data alone is too narrow
+to motivate a default flip. Re-evaluate after the OSS matrix is
+captured.
+
+#### Deferred
+The OSS-target validation matrix (plug_crypto, Decimal,
+nimble_options, gettext, ecto, mox, jason) is harness-ready but
+not run in this commit. Each target needs:
+1. A pinned `BENCH_SHA` (verified against the upstream repo).
+2. `bench/run.sh --target <t> --concurrency 4 --worker-type mix`
+   for the baseline.
+3. Same with `--worker-type persistent` for byte-identity check.
+4. Same with `--enable-body-literal` on each worker.
+5. Findings recorded in `bench/results/` and rolled into the
+   BENCHMARKS.md status table.
+
+The `mox` target is the highest-priority remaining run — module
+replacement is the persistent reset model's hardest case and may
+surface a new unsupported-pattern entry for the worker guide.
+
 ## v1.9 unreleased (M22 + M23, 2026-05-08)
 
 ### M23 — Body-context literal mutators
@@ -39,7 +83,7 @@ and regenerates every golden stable-id. Fallback routing is the
 clean v1.9 path; schema placement is a follow-up if perf
 warrants.
 
-## v1.9 unreleased (M22, 2026-05-08)
+### M22 — Persistent reliability, observability, and config
 
 Reliability/observability/config milestone for the persistent
 worker. No new mutators, no default flips, no validation surface

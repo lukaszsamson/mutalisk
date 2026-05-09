@@ -6,9 +6,10 @@ TARGET="plug_crypto"
 SELECTION="static"
 CONCURRENCY="1"
 WORKER_TYPE="mix"
+ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -33,6 +34,10 @@ while [ "$#" -gt 0 ]; do
       WORKER_TYPE="$2"
       shift 2
       ;;
+    --enable-body-literal)
+      ENABLE_BODY_LITERAL="1"
+      shift 1
+      ;;
     -h|--help)
       usage
       exit 0
@@ -55,12 +60,47 @@ case "$TARGET" in
     REF="v2.1.1"
     SHA="70af9d89e6bcb6fa7c47d42ef608e5c76a50d7ff"
     ;;
+  # M24 OSS targets. SHAs left blank — pin and verify before running
+  # against the byte-identity gates. The harness will refuse to run
+  # without a SHA so a bench operator can't accidentally drift
+  # against a moving HEAD.
+  nimble_options)
+    REPO="https://github.com/dashbitco/nimble_options.git"
+    REF="${BENCH_REF:-main}"
+    SHA="${BENCH_SHA:-}"
+    ;;
+  gettext)
+    REPO="https://github.com/elixir-gettext/gettext.git"
+    REF="${BENCH_REF:-main}"
+    SHA="${BENCH_SHA:-}"
+    ;;
+  ecto)
+    REPO="https://github.com/elixir-ecto/ecto.git"
+    REF="${BENCH_REF:-master}"
+    SHA="${BENCH_SHA:-}"
+    ;;
+  mox)
+    REPO="https://github.com/dashbitco/mox.git"
+    REF="${BENCH_REF:-main}"
+    SHA="${BENCH_SHA:-}"
+    ;;
+  jason)
+    REPO="https://github.com/michalmuskala/jason.git"
+    REF="${BENCH_REF:-master}"
+    SHA="${BENCH_SHA:-}"
+    ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
     usage
     exit 64
     ;;
 esac
+
+if [ -z "$SHA" ]; then
+  printf 'BENCH_SHA must be set (export BENCH_SHA=<commit-sha>) for target %s\n' "$TARGET" >&2
+  printf 'M24: pin a commit before benchmarking; do not run against moving HEAD.\n' >&2
+  exit 64
+fi
 
 WORK_DIR="$ROOT/tmp/bench/$TARGET"
 RESULTS_DIR="$ROOT/bench/results"
@@ -72,6 +112,12 @@ fi
 
 if [ "$WORKER_TYPE" != "mix" ]; then
   RESULT_PREFIX="$RESULT_PREFIX.$WORKER_TYPE"
+fi
+if [ "$ENABLE_BODY_LITERAL" = "1" ]; then
+  RESULT_PREFIX="$RESULT_PREFIX.body_literal"
+  ENABLE_FLAGS=(--enable dispatch,guard,module_attribute,body_literal)
+else
+  ENABLE_FLAGS=()
 fi
 REPORT_PATH="$RESULTS_DIR/$RESULT_PREFIX.stryker.json"
 TERMINAL_PATH="$RESULTS_DIR/$RESULT_PREFIX.terminal.txt"
@@ -107,7 +153,7 @@ mkdir -p "$WORK_DIR/bench/results"
   MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix deps.get
   printf 'mix mut starting\n'
   START_MS="$(date +%s)000"
-  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" --worker-type "$WORKER_TYPE" --output-path "$REL_REPORT_PATH"
+  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" --worker-type "$WORKER_TYPE" "${ENABLE_FLAGS[@]}" --output-path "$REL_REPORT_PATH"
   END_MS="$(date +%s)000"
   printf 'bench.wall_ms=%s\n' "$((END_MS - START_MS))"
 ) > "$TERMINAL_PATH" 2>&1

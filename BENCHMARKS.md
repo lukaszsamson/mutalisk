@@ -1,5 +1,67 @@
 # Mutalisk Benchmarks
 
+## v1.10 body-literal validation (M24, work in progress)
+
+M24 introduces `--enable body_literal` (M23 mutators routed through
+the fallback engine) and validates it against real OSS targets
+before considering a default flip. The expanded validation matrix
+runs each target under `--worker-type mix` and `--worker-type
+persistent`, with and without `--enable body_literal`, at
+`--concurrency 4`. The full matrix appears below as runs complete.
+
+### Status
+
+- **demo_app**: ✅ baseline + body_literal captured (see
+  `bench/results/demo_app.body_literal.terminal.txt`). 6 added
+  fallback mutants from 5 body literals; 5 killed / 1 survived.
+  +28% wall-clock vs the dispatch+guard+attribute baseline.
+- **plug_crypto**: ⏳ pending. Harness ready
+  (`bench/run.sh --target plug_crypto --enable-body-literal`);
+  pinned at v2.1.1 (SHA `70af9d8…`).
+- **Decimal**: ⏳ pending. Harness ready
+  (`bench/run.sh --target decimal --enable-body-literal`).
+- **nimble_options**: ⏳ pending. Harness scaffold present;
+  bench operator must export `BENCH_SHA` to a verified commit
+  before running.
+- **gettext**: ⏳ pending. Same SHA-pin requirement.
+- **ecto**: ⏳ pending. Macro-heavy; will exercise schema build
+  AND persistent reset hooks (Ecto.Repo state).
+- **mox**: ⏳ pending. Module-replacement mocking — the riskiest
+  target for persistent's reset hooks.
+- **jason**: ⏳ pending. StreamData property tests. Mutation
+  outcomes intrinsically non-deterministic; report as
+  informational rather than gating.
+
+### v1.10 default `--worker-type` flip gate (forward-looking)
+
+`--worker-type` flips from `mix` → `persistent` in v1.10 IFF:
+
+- ≥4 of ≥5 new OSS targets clean (byte-identical, persistent
+  faster or comparable) under `--enable body_literal`.
+- Zero new unsupported-pattern categories that affect common
+  Elixir project shapes (Phoenix, Ecto, GenServer-heavy).
+- Persistent ≥1.5× faster than mix at `--concurrency 4` on at
+  least plug_crypto, Decimal, AND 2 of M24's new targets.
+- `--worker-type mix` remains the documented escape hatch.
+
+If validation surfaces unsupported patterns, default stays `mix`
+and v1.10 scope shifts to addressing those patterns.
+
+### body_literal default recommendation
+
+**M24 interim recommendation: keep `body_literal` opt-in.**
+The demo_app result (5/6 kill rate) is encouraging but the
+fixture is small. The single body-literal survivor in
+`Guards.positive?/1` foreshadows the equivalent-mutant
+problem with `n → n+1`-class replacements: real-world bodies
+often have literal returns whose specific value isn't
+test-distinguishable. Re-evaluate after the OSS-target matrix
+is captured. If the cross-target average kill rate on body
+literals tracks the existing dispatch/guard rate (~65-75%), a
+v1.10+ default flip is reasonable. If it materially drops the
+project-level mutation score (lots of equivalent-mutant
+survivors), trim the replacement table or keep opt-in.
+
 ## v1.8 final headline (c=4, both workers `--timeout 10000`)
 
 | Target | mix wall | persistent wall | speedup |
