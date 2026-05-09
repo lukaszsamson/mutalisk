@@ -139,6 +139,39 @@ defmodule Mut.SchemaPlacerTest do
     assert start_line <= end_line
   end
 
+  test "instrument_file tolerates target source with case arms inside unquote/macro bodies" do
+    # M25 follow-up: gettext (and jason post-deps-fix) crashed mid-instrumentation
+    # because the rendered AST contains `case x do unquote(arms) end` shapes where
+    # the arms slot is an `{:unquote, _, _}` AST node rather than a list of
+    # `:->` clauses. The placement-map walker called `Enum.flat_map(arms, ...)`
+    # on the unquote node and triggered `Enumerable.impl_for!/1`. We now guard
+    # the arms-shape check with `is_list/1` and bail out cleanly.
+    source = """
+    defmodule Sample do
+      defmacro pick(value) do
+        quote do
+          case unquote(value) do
+            unquote(__MODULE__.arms())
+          end
+        end
+      end
+
+      def arms, do: [{:->, [], [[1], :one]}, {:->, [], [[2], :two]}]
+    end
+    """
+
+    path = Path.expand("tmp/schema_placer_unquote_arms.ex")
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, source)
+    on_exit(fn -> File.rm(path) end)
+
+    # Empty mutants -- exercises only the placement_map walk over the
+    # rendered AST. With the bug in place, this raises Protocol.UndefinedError
+    # from Enumerable.impl_for!/1 on the unquote node.
+    assert {:ok, _rendered, %SchemaPlacer.PlacementMap{entries: []}, []} =
+             SchemaPlacer.instrument_file(path, [])
+  end
+
   test "rendered hoist variable does not collide with a user mut_active binding" do
     source =
       "defmodule Sample do\n  def f(a), do: (mut_active = a + 1; mut_active * (a - 1))\nend"

@@ -167,7 +167,37 @@ case "$TARGET" in
     # Exclude DB-backed integration tests when no Postgres/MySQL is up.
     # Inject into the existing test_helper.exs (which loads Ecto.TestRepo
     # support file) rather than overwriting; preserves project setup.
-    perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(exclude: [:integration, :postgres, :mysql], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(exclude: [:integration, :postgres, :mysql, :elixir_19_regex_drift], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+
+    # M25 follow-up: Elixir 1.19 changed Regex internals so ~r/x/ == ~r/x/
+    # is now false (the re_pattern field carries a unique reference per
+    # compile). v3.13.6's changeset_test.exs has 9 tests that assert
+    # `constraints(changeset) == [%{constraint: ~r/.../}]`; they fail on
+    # 1.19 but pass on <=1.18. Upstream master fixed this by switching to
+    # pattern-match form, but the fix is bundled with non-bench-relevant
+    # API changes (reorder_assoc, trim_values vs empty_values) so we don't
+    # cherry-pick. Instead, tag the 9 tests with :elixir_19_regex_drift
+    # and exclude the tag in test_helper.exs above. Mutation surface
+    # (lib/ecto/changeset.ex) is unchanged; the killing-test denominator
+    # shrinks by 9 of ~1500. Document any change to this list in
+    # BENCHMARKS.md.
+    perl -pi -e '
+      BEGIN {
+        @skip = (
+          "fetch_change!/2",
+          "validate_format/4",
+          "check_constraint/3",
+          "unique_constraint/3",
+          "unique_constraint/3 on field with :source",
+          "foreign_key_constraint/3",
+          "assoc_constraint/3",
+          "no_assoc_constraint/3",
+          "exclusion_constraint/3"
+        );
+        $pat = join("|", map { quotemeta } @skip);
+      }
+      s/^(\s+)(test "(?:$pat)" do\b)/$1\@tag :elixir_19_regex_drift\n$1$2/;
+    ' "$WORK_DIR/test/ecto/changeset_test.exs"
     ;;
   jason)
     # Pin StreamData seed for reproducibility across mix/persistent diffs.

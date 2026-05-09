@@ -368,7 +368,13 @@ defmodule Mut.SchemaPlacer do
     ast
     |> Macro.prewalker()
     |> Enum.reduce([], fn
-      {:case, meta, [scrutinee, [do: arms]]}, entries when is_list(meta) ->
+      # Schema-injected cases always have a literal list of arms. Target
+      # source can also contain `case x do unquote(arms) end` (in macro
+      # bodies) where the arms slot is an `{:unquote, _, _}` AST node,
+      # not a list -- guard with `is_list(arms)` so we never feed those
+      # to `schema_arm_ids/1`.
+      {:case, meta, [scrutinee, [do: arms]]}, entries
+      when is_list(meta) and is_list(arms) ->
         ids = schema_arm_ids(arms)
 
         if ids == [] or not schema_scrutinee?(scrutinee) do
@@ -383,7 +389,7 @@ defmodule Mut.SchemaPlacer do
     |> Enum.reverse()
   end
 
-  defp schema_arm_ids(arms) do
+  defp schema_arm_ids(arms) when is_list(arms) do
     ids =
       Enum.flat_map(arms, fn
         {:->, _meta, [[id], _body]} when is_integer(id) and id > 0 -> [id]
@@ -393,7 +399,9 @@ defmodule Mut.SchemaPlacer do
     if original_and_wildcard_arms?(arms), do: Enum.sort(ids), else: []
   end
 
-  defp schema_arm_entries(arms) do
+  defp schema_arm_ids(_arms), do: []
+
+  defp schema_arm_entries(arms) when is_list(arms) do
     Enum.flat_map(arms, fn
       {:->, _meta, [[id], body]} when is_integer(id) and id > 0 ->
         {start_line, end_line, column} = line_range(body)
@@ -403,6 +411,8 @@ defmodule Mut.SchemaPlacer do
         []
     end)
   end
+
+  defp schema_arm_entries(_arms), do: []
 
   defp line_range({_name, meta, _args}) when is_list(meta) do
     start_line = Keyword.fetch!(meta, :line)
