@@ -1,0 +1,1568 @@
+{
+  "files": {
+    "lib/mox.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 918,
+          "id": "028140767d66376ef79cd91e4b6e58e1",
+          "killedBy": [
+            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
+          ],
+          "location": {
+            "end": {
+              "column": 22,
+              "line": 443
+            },
+            "start": {
+              "column": 22,
+              "line": 443
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "{fun, arity} in callbacks_to_skip",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace boolean literal false with true",
+          "duration": 1453,
+          "id": "0446c4affb4b80d8e459f1897d53c350",
+          "killedBy": [
+            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
+          ],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 394
+            },
+            "start": {
+              "column": 50,
+              "line": 394
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "true",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1915,
+          "id": "11cbce8a9c5a77584d65184d54e399f6",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 656
+            },
+            "start": {
+              "column": 12,
+              "line": 656
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1433,
+          "id": "1360d751f30091b830065bc72eda812e",
+          "killedBy": [
+            "MoxTest:defmock/2 raises if :skip_optional_callbacks is not a list or boolean"
+          ],
+          "location": {
+            "end": {
+              "column": 56,
+              "line": 411
+            },
+            "start": {
+              "column": 55,
+              "line": 411
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 911,
+          "id": "15083cc3497dac0faf7bdf7c8f8ba9d9",
+          "killedBy": [
+            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+          ],
+          "location": {
+            "end": {
+              "column": 24,
+              "line": 857
+            },
+            "start": {
+              "column": 24,
+              "line": 857
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "total * pending",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1463,
+          "id": "1f4713614a50fd28713b1259d99322c6",
+          "killedBy": [
+            "MoxTest:allow/3 allowances support lazy calls for processes registered through a Registry"
+          ],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 758
+            },
+            "start": {
+              "column": 48,
+              "line": 758
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mock)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1226,
+          "id": "268327b5d0475b6833182dcf18e60270",
+          "killedBy": [
+            "MoxTest:stub_with/2 Leaves behaviours not implemented by the module un-stubbed"
+          ],
+          "location": {
+            "end": {
+              "column": 69,
+              "line": 632
+            },
+            "start": {
+              "column": 54,
+              "line": 632
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(module)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 878,
+          "id": "290aec500216e46180841bd0eab3333b",
+          "killedBy": [
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 850
+            },
+            "start": {
+              "column": 48,
+              "line": 850
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "mock_or_all != :all",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 866,
+          "id": "320623ef37a1aa89c241068e3e778b46",
+          "killedBy": [
+            "MoxTest:allow/3 allowances support locally registered processes"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 861
+            },
+            "start": {
+              "column": 17,
+              "line": 861
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "messages == []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1255,
+          "id": "3f8721021c575dcd6fbd7da33a639feb",
+          "killedBy": [
+            "MoxTest:deny/3 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 65,
+              "line": 571
+            },
+            "start": {
+              "column": 48,
+              "line": 571
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(arity)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1246,
+          "id": "46ea55007958d0e880d0a1e14c7b23e6",
+          "killedBy": [
+            "MoxTest:defmock/2 defines a mock function for all callbacks by default"
+          ],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 468
+            },
+            "start": {
+              "column": 22,
+              "line": 468
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(skip_list)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1308,
+          "id": "495fca562da8c896a8d6f2d15bc364d3",
+          "killedBy": [
+            "MoxTest:expect/4 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 546
+            },
+            "start": {
+              "column": 12,
+              "line": 546
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mock)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_nil with is_atom",
+          "duration": 1842,
+          "id": "4e5f8845fceb6af841549521a8bb0583",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 57,
+              "line": 1015
+            },
+            "start": {
+              "column": 37,
+              "line": 1015
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_atom(current_exps)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 836,
+          "id": "4f1b623323df6c0028e2210959100216",
+          "killedBy": [
+            "MoxTest:expect/4 raises if all expectations are consumed"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 1018
+            },
+            "start": {
+              "column": 20,
+              "line": 1018
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "current_n * n",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1390,
+          "id": "55261fb0cf661bded7e162cdaa191aaf",
+          "killedBy": [
+            "MoxTest:defmock/2 defines a mock function for all callbacks by default"
+          ],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 444
+            },
+            "start": {
+              "column": 14,
+              "line": 444
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace boolean literal true with false",
+          "duration": 1388,
+          "id": "6c4dec116ac7e6a6b0337373e7ece652",
+          "killedBy": [
+            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
+          ],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 465
+            },
+            "start": {
+              "column": 7,
+              "line": 465
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "false",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1386,
+          "id": "6eae7c60cdf225d83f533c9729aab278",
+          "killedBy": [
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
+          ],
+          "location": {
+            "end": {
+              "column": 80,
+              "line": 571
+            },
+            "start": {
+              "column": 70,
+              "line": 571
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "arity > 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1211,
+          "id": "7e5af2097fb9705e66d2e5671ef1df0b",
+          "killedBy": [
+            "MoxTest:defmock/2 raises if :skip_optional_callbacks is not a list or boolean"
+          ],
+          "location": {
+            "end": {
+              "column": 69,
+              "line": 386
+            },
+            "start": {
+              "column": 53,
+              "line": 386
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(options)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1177,
+          "id": "82b8f0a48ca47d50ce47a1171ae82bb8",
+          "killedBy": [
+            "MoxTest:allow/3 allowances support processes registered through a Registry"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 873
+            },
+            "start": {
+              "column": 52,
+              "line": 873
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 872,
+          "id": "97945a919ec7ba25968a69b386134a2a",
+          "killedBy": [
+            "MoxTest:deny/3 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 911
+            },
+            "start": {
+              "column": 39,
+              "line": 911
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "count * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1210,
+          "id": "992e8d3228ca2ac82afd68b93f74813d",
+          "killedBy": [
+            "MoxTest:deny/3 raises if a non-mock is given"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 571
+            },
+            "start": {
+              "column": 12,
+              "line": 571
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mock)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1208,
+          "id": "9a5ce6dffe3248a4ce8a6aef82791271",
+          "killedBy": [
+            "MoxTest:defmock/2 accepts a list of behaviours"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 386
+            },
+            "start": {
+              "column": 35,
+              "line": 386
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace attribute literal 30000 with 30001",
+          "duration": 1757,
+          "id": "a1779da38b942527fbc82059727d9104",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 272
+            },
+            "start": {
+              "column": 12,
+              "line": 272
+            }
+          },
+          "mutatorName": "AttributeLiteral",
+          "replacement": "30001",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1223,
+          "id": "a1c283b3932e4d08cfa921c017a83c37",
+          "killedBy": [
+            "MoxTest:deny/3 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 572
+            },
+            "start": {
+              "column": 42,
+              "line": 572
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 816,
+          "id": "a6a75841bf3bc69c4d7e88a4864d0eb8",
+          "killedBy": [
+            "MoxTest:stub_with/2 stubs functions which are optional callbacks"
+          ],
+          "location": {
+            "end": {
+              "column": 31,
+              "line": 1017
+            },
+            "start": {
+              "column": 31,
+              "line": 1017
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "current_exps && %{}",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1318,
+          "id": "ad7284d7bc1afba8484969e0d0a6b08b",
+          "killedBy": [
+            "MoxTest:stub/3 raises if a non-mock is given"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 596
+            },
+            "start": {
+              "column": 12,
+              "line": 596
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mock)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1322,
+          "id": "ad72dd8113716102a4c94cd15269b4e7",
+          "killedBy": [
+            "MoxTest:allow/3 raises if you try to define expectations on allowed process"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 546
+            },
+            "start": {
+              "column": 30,
+              "line": 546
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard >= with <",
+          "duration": 1219,
+          "id": "adbdcf5b3c696f27c6c87c8500245558",
+          "killedBy": [
+            "MoxTest:deny/3 raises if you try to add expectations from non global process"
+          ],
+          "location": {
+            "end": {
+              "column": 80,
+              "line": 571
+            },
+            "start": {
+              "column": 70,
+              "line": 571
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "arity < 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1750,
+          "id": "aeebda250921ffbed8adadc32b1973c0",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 883
+            },
+            "start": {
+              "column": 52,
+              "line": 883
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1236,
+          "id": "b8131bb577d5766b7849db765890036c",
+          "killedBy": [
+            "MoxTest:stub_with/2 stubs functions which are optional callbacks"
+          ],
+          "location": {
+            "end": {
+              "column": 49,
+              "line": 632
+            },
+            "start": {
+              "column": 36,
+              "line": 632
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mock)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 833,
+          "id": "ba7149b1f4a576b7802756c48914fe54",
+          "killedBy": [
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+          ],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 850
+            },
+            "start": {
+              "column": 18,
+              "line": 850
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "module != mock_or_all",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 1260,
+          "id": "bb2b60be0022f26594e3fbaaec18bb29",
+          "killedBy": [
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
+          ],
+          "location": {
+            "end": {
+              "column": 56,
+              "line": 1026
+            },
+            "start": {
+              "column": 34,
+              "line": 1026
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "node(source) != node()",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 783,
+          "id": "bc967d1873e23926feb1951e4109c270",
+          "killedBy": [
+            "MoxTest:expect/4 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 911
+            },
+            "start": {
+              "column": 39,
+              "line": 911
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "count - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace boolean literal false with true",
+          "duration": 1280,
+          "id": "c234b6c05d85dbf482fa4510b9e89841",
+          "killedBy": [
+            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
+          ],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 462
+            },
+            "start": {
+              "column": 7,
+              "line": 462
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "true",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 782,
+          "id": "c26b511de9ee6bd613c93a59944e65fa",
+          "killedBy": [
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 1018
+            },
+            "start": {
+              "column": 20,
+              "line": 1018
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "current_n - n",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard >= with <",
+          "duration": 1318,
+          "id": "c32c7305b8288615f9c79fa781a07afd",
+          "killedBy": [
+            "MoxTest:expect/4 is invoked n times by a sub-process in private mode on Elixir 1.8"
+          ],
+          "location": {
+            "end": {
+              "column": 72,
+              "line": 546
+            },
+            "start": {
+              "column": 66,
+              "line": 546
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "n < 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1370,
+          "id": "c8d2a9fbbc096d0c9db39b1a43177fd8",
+          "killedBy": [
+            "MoxTest:expect/4 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 72,
+              "line": 546
+            },
+            "start": {
+              "column": 66,
+              "line": 546
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "n > 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1995,
+          "id": "cb455fd273de6b29b04faf6d15a77a84",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 598
+            },
+            "start": {
+              "column": 42,
+              "line": 598
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1408,
+          "id": "cc0be5e06ae4c703bee0f92e23841fb3",
+          "killedBy": [
+            "MoxTest:stub/3 does not fail verification if not called"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 596
+            },
+            "start": {
+              "column": 30,
+              "line": 596
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1285,
+          "id": "cf53e63f854b2db908e8958ca8dcced7",
+          "killedBy": [
+            "MoxTest:defmock/2 accepts a list of callbacks to skip"
+          ],
+          "location": {
+            "end": {
+              "column": 37,
+              "line": 444
+            },
+            "start": {
+              "column": 36,
+              "line": 444
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 742,
+          "id": "d3954c9c82add592f7ac86a43fb69267",
+          "killedBy": [
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+          ],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 850
+            },
+            "start": {
+              "column": 33,
+              "line": 850
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "module == mock_or_all and mock_or_all == :all",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 1308,
+          "id": "d41639a74d48ae07454bdcccf0b25b1c",
+          "killedBy": [
+            "MoxTest:allow/3 allowances are transitive"
+          ],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 1015
+            },
+            "start": {
+              "column": 13,
+              "line": 1015
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(current_exps)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 781,
+          "id": "d90d5cb3b4649efde1bfdc9f836711af",
+          "killedBy": [
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
+          ],
+          "location": {
+            "end": {
+              "column": 59,
+              "line": 469
+            },
+            "start": {
+              "column": 59,
+              "line": 469
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "callback in all_optional_callbacks",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1727,
+          "id": "da4d06faee12f73c7b5c701b0e52436c",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 65,
+              "line": 571
+            },
+            "start": {
+              "column": 48,
+              "line": 571
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(arity)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1312,
+          "id": "e156c949962d0aba8fb749e42186643d",
+          "killedBy": [
+            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+          ],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 546
+            },
+            "start": {
+              "column": 48,
+              "line": 546
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(n)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1791,
+          "id": "e2f46bf1c1a6fcca3988c5be07a8efe0",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 546
+            },
+            "start": {
+              "column": 48,
+              "line": 546
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(n)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1280,
+          "id": "e5a006e5aa26cff4a8353808556c8161",
+          "killedBy": [
+            "MoxTest:verify_on_exit!/0 verifies all mocks for current process on exit in global mode"
+          ],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 946
+            },
+            "start": {
+              "column": 17,
+              "line": 946
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(pids)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1180,
+          "id": "ea6d36dd69ca69882f4a98355533da35",
+          "killedBy": [
+            "MoxTest:deny/3 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 571
+            },
+            "start": {
+              "column": 30,
+              "line": 571
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 666,
+          "id": "eab60343ebdd703bef08097ee2523ecb",
+          "killedBy": [
+            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+          ],
+          "location": {
+            "end": {
+              "column": 24,
+              "line": 857
+            },
+            "start": {
+              "column": 24,
+              "line": 857
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "total + pending",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1157,
+          "id": "eb8900e88b5308032fd25c1bb57ada85",
+          "killedBy": [
+            "MoxTest:expect/4 allows asserting that function is not called"
+          ],
+          "location": {
+            "end": {
+              "column": 42,
+              "line": 911
+            },
+            "start": {
+              "column": 41,
+              "line": 911
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 658,
+          "id": "ed1ded3093bc0b87ac98d3c4801cc18a",
+          "killedBy": [
+            "MoxTest:allow/3 allowances are transitive"
+          ],
+          "location": {
+            "end": {
+              "column": 32,
+              "line": 765
+            },
+            "start": {
+              "column": 32,
+              "line": 765
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "allowed_pid_or_function != owner_pid",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mox_test.exs",
+            "test/cluster_test.exs"
+          ],
+          "description": "replace attribute literal 30000 with 0",
+          "duration": 1125,
+          "id": "f5d34ebe5bbf5b814ed2a59d6f618b97",
+          "killedBy": [
+            "MoxTest:expect/4 can be recharged"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 272
+            },
+            "start": {
+              "column": 12,
+              "line": 272
+            }
+          },
+          "mutatorName": "AttributeLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Mox do\n  @moduledoc ~S\"\"\"\n  Mox is a library for defining concurrent mocks in Elixir.\n\n  The library follows the principles outlined in\n  [\"Mocks and explicit contracts\"](https://dashbit.co/blog/mocks-and-explicit-contracts),\n  summarized below:\n\n    1. No ad-hoc mocks. You can only create mocks based on behaviours\n\n    2. No dynamic generation of modules during tests. Mocks are preferably defined\n       in your `test_helper.exs` or in a `setup_all` block and not per test\n\n    3. Concurrency support. Tests using the same mock can still use `async: true`\n\n    4. Rely on pattern matching and function clauses for asserting on the\n       input instead of complex expectation rules\n\n  ## Example\n\n  Imagine that you have an app that has to display the weather. At first,\n  you use an external API to give you the data given a lat/long pair:\n\n      defmodule MyApp.HumanizedWeather do\n        def display_temp({lat, long}) do\n          {:ok, temp} = MyApp.WeatherAPI.temp({lat, long})\n          \"Current temperature is #{temp} degrees\"\n        end\n\n        def display_humidity({lat, long}) do\n          {:ok, humidity} = MyApp.WeatherAPI.humidity({lat, long})\n          \"Current humidity is #{humidity}%\"\n        end\n      end\n\n  However, you want to test the code above without performing external\n  API calls. How to do so?\n\n  First, it is important to define the `WeatherAPI` behaviour that we want\n  to mock. And we will define a proxy function that will dispatch to\n  the desired implementation:\n\n      defmodule MyApp.WeatherAPI do\n        @callback temp(MyApp.LatLong.t()) :: {:ok, integer()}\n        @callback humidity(MyApp.LatLong.t()) :: {:ok, integer()}\n\n        def temp(lat_long), do: impl().temp(lat_long)\n        def humidity(lat_long), do: impl().humidity(lat_long)\n        defp impl, do: Application.get_env(:my_app, :weather, MyApp.ExternalWeatherAPI)\n      end\n\n  By default, we will dispatch to MyApp.ExternalWeatherAPI, which now contains\n  the external API implementation.\n\n  If you want to mock the WeatherAPI behaviour during tests, the first step\n  is to define the mock with `defmock/2`, usually in your `test_helper.exs`,\n  and configure your application to use it:\n\n      Mox.defmock(MyApp.MockWeatherAPI, for: MyApp.WeatherAPI)\n      Application.put_env(:my_app, :weather, MyApp.MockWeatherAPI)\n\n  Now in your tests, you can define expectations with `expect/4` and verify\n  them via `verify_on_exit!/1`:\n\n      defmodule MyApp.HumanizedWeatherTest do\n        use ExUnit.Case, async: true\n\n        import Mox\n\n        # Make sure mocks are verified when the test exits\n        setup :verify_on_exit!\n\n        test \"gets and formats temperature and humidity\" do\n          MyApp.MockWeatherAPI\n          |> expect(:temp, fn {_lat, _long} -> {:ok, 30} end)\n          |> expect(:humidity, fn {_lat, _long} -> {:ok, 60} end)\n\n          assert MyApp.HumanizedWeather.display_temp({50.06, 19.94}) ==\n                   \"Current temperature is 30 degrees\"\n\n          assert MyApp.HumanizedWeather.display_humidity({50.06, 19.94}) ==\n                   \"Current humidity is 60%\"\n        end\n      end\n\n  All expectations are defined based on the current process. This\n  means multiple tests using the same mock can still run concurrently\n  unless the Mox is set to global mode. See the \"Multi-process collaboration\"\n  section.\n\n  One last note, if the mock is used throughout the test suite, you might want\n  the implementation to fall back to a stub (or actual) implementation when no\n  expectations are defined. You can use `stub_with/2` in a case template that\n  is used throughout your test suite:\n\n      defmodule MyApp.Case do\n        use ExUnit.CaseTemplate\n\n        setup _ do\n          Mox.stub_with(MyApp.MockWeatherAPI, MyApp.StubWeatherAPI)\n          :ok\n        end\n      end\n\n  Now, for every test case that uses `ExUnit.Case`, it can use `MyApp.Case`\n  instead. Then, if no expectations are defined it will call the implementation\n  in `MyApp.StubWeatherAPI`.\n\n  ## Multiple behaviours\n\n  Mox supports defining mocks for multiple behaviours.\n\n  Suppose your library also defines a behaviour for getting past weather:\n\n      defmodule MyApp.PastWeather do\n        @callback past_temp(MyApp.LatLong.t(), DateTime.t()) :: {:ok, integer()}\n      end\n\n  You can mock both the weather and past weather behaviour:\n\n      Mox.defmock(MyApp.MockWeatherAPI, for: [MyApp.Weather, MyApp.PastWeather])\n\n  ## Compile-time requirements\n\n  If the mock needs to be available during the project compilation, for\n  instance because you get undefined function warnings, then instead of\n  defining the mock in your `test_helper.exs`, you should instead define\n  it under `test/support/mocks.ex`:\n\n      Mox.defmock(MyApp.MockWeatherAPI, for: MyApp.WeatherAPI)\n\n  Then you need to make sure that files in `test/support` get compiled\n  with the rest of the project. Edit your `mix.exs` file to add the\n  `test/support` directory to compilation paths:\n\n      def project do\n        [\n          ...\n          elixirc_paths: elixirc_paths(Mix.env),\n          ...\n        ]\n      end\n\n      defp elixirc_paths(:test), do: [\"test/support\", \"lib\"]\n      defp elixirc_paths(_),     do: [\"lib\"]\n\n  ## Multi-process collaboration\n\n  Mox supports multi-process collaboration via two mechanisms:\n\n    1. explicit allowances\n    2. global mode\n\n  The allowance mechanism can still run tests concurrently while\n  the global one doesn't. We explore both next.\n\n  ### Explicit allowances\n\n  An allowance permits a child process to use the expectations and stubs\n  defined in the parent process while still being safe for async tests.\n\n      test \"invokes add and mult from a task\" do\n        MyApp.MockWeatherAPI\n        |> expect(:temp, fn _loc -> {:ok, 30} end)\n        |> expect(:humidity, fn _loc -> {:ok, 60} end)\n\n        parent_pid = self()\n\n        Task.async(fn ->\n          MyApp.MockWeatherAPI |> allow(parent_pid, self())\n\n          assert MyApp.HumanizedWeather.display_temp({50.06, 19.94}) ==\n                   \"Current temperature is 30 degrees\"\n\n          assert MyApp.HumanizedWeather.display_humidity({50.06, 19.94}) ==\n                   \"Current humidity is 60%\"\n        end)\n        |> Task.await\n      end\n\n  Note: if you're running on Elixir 1.8.0 or greater and your concurrency comes\n  from a `Task` then you don't need to add explicit allowances. Instead\n  `$callers` is used to determine the process that actually defined the\n  expectations.\n\n  #### Explicit allowances as lazy/deferred functions\n\n  Under some circumstances, the process might not have been already started\n  when the allowance happens. In such a case, you might specify the allowance\n  as a function in the form `(-> pid())`. This function would be resolved late,\n  at the very moment of dispatch. If the function does not return an existing\n  PID, Mox will raise a `Mox.UnexpectedCallError` exception.\n\n  ### Global mode\n\n  Mox supports global mode, where any process can consume mocks and stubs\n  defined in your tests. `set_mox_from_context/0` automatically calls\n  `set_mox_global/1` but only if the test context **doesn't** include\n  `async: true`.\n\n  By default the mode is `:private`.\n\n      setup :set_mox_from_context\n      setup :verify_on_exit!\n\n      test \"invokes add and mult from a task\" do\n        MyApp.MockWeatherAPI\n        |> expect(:temp, fn _loc -> {:ok, 30} end)\n        |> expect(:humidity, fn _loc -> {:ok, 60} end)\n\n        Task.async(fn ->\n          assert MyApp.HumanizedWeather.display_temp({50.06, 19.94}) ==\n                    \"Current temperature is 30 degrees\"\n\n          assert MyApp.HumanizedWeather.display_humidity({50.06, 19.94}) ==\n                    \"Current humidity is 60%\"\n        end)\n        |> Task.await\n      end\n\n  ### Blocking on expectations\n\n  If your mock is called in a different process than the test process,\n  in some cases there is a chance that the test will finish executing\n  before it has a chance to call the mock and meet the expectations.\n  Imagine this:\n\n      test \"calling a mock from a different process\" do\n        expect(MyApp.MockWeatherAPI, :temp, fn _loc -> {:ok, 30} end)\n\n        spawn(fn -> MyApp.HumanizedWeather.temp({50.06, 19.94}) end)\n\n        verify!()\n      end\n\n  The test above has a race condition because there is a chance that the\n  `verify!/0` call will happen before the spawned process calls the mock.\n  In most cases, you don't control the spawning of the process so you can't\n  simply monitor the process to know when it dies in order to avoid this\n  race condition. In those cases, the way to go is to \"sync up\" with the\n  process that calls the mock by sending a message to the test process\n  from the expectation and using that to know when the expectation has been\n  called.\n\n      test \"calling a mock from a different process\" do\n        parent = self()\n        ref = make_ref()\n\n        expect(MyApp.MockWeatherAPI, :temp, fn _loc ->\n          send(parent, {ref, :temp})\n          {:ok, 30}\n        end)\n\n        spawn(fn -> MyApp.HumanizedWeather.temp({50.06, 19.94}) end)\n\n        assert_receive {^ref, :temp}\n\n        verify!()\n      end\n\n  This way, we'll wait until the expectation is called before calling\n  `verify!/0`.\n  \"\"\"\n\n  @typedoc \"\"\"\n  A mock module.\n\n  This type is available since version 1.1+ of Mox.\n  \"\"\"\n  @type t() :: module()\n\n  @timeout 30000\n  @this {:global, Mox.Server}\n\n  defmodule UnexpectedCallError do\n    defexception [:message]\n  end\n\n  defmodule VerificationError do\n    defexception [:message]\n  end\n\n  @doc \"\"\"\n  Sets the Mox to private mode.\n\n  In private mode, mocks can be set and consumed by the same\n  process unless other processes are explicitly allowed.\n\n  ## Examples\n\n      setup :set_mox_private\n\n  \"\"\"\n  @spec set_mox_private(term()) :: :ok\n  def set_mox_private(_context \\\\ %{}) do\n    NimbleOwnership.set_mode_to_private(@this)\n  end\n\n  @doc \"\"\"\n  Sets the Mox to global mode.\n\n  In global mode, mocks can be consumed by any process.\n\n  An ExUnit case where tests use Mox in global mode cannot be\n  `async: true`.\n\n  ## Examples\n\n      setup :set_mox_global\n  \"\"\"\n  @spec set_mox_global(term()) :: :ok\n  def set_mox_global(context \\\\ %{})\n\n  def set_mox_global(%{async: true}) do\n    raise \"Mox cannot be set to global mode when the ExUnit case is async. \" <>\n            \"If you want to use Mox in global mode, remove \\\"async: true\\\" when using ExUnit.Case\"\n  end\n\n  def set_mox_global(_context) do\n    NimbleOwnership.set_mode_to_shared(@this, self())\n  end\n\n  @doc \"\"\"\n  Chooses the Mox mode based on context.\n\n  When `async: true` is used, `set_mox_private/1` is called,\n  otherwise `set_mox_global/1` is used.\n\n  ## Examples\n\n      setup :set_mox_from_context\n\n  \"\"\"\n  @spec set_mox_from_context(term()) :: :ok\n  def set_mox_from_context(%{async: true} = _context), do: set_mox_private()\n  def set_mox_from_context(_context), do: set_mox_global()\n\n  @doc \"\"\"\n  Defines a mock with the given name `:for` the given behaviour(s).\n\n      Mox.defmock(MyMock, for: MyBehaviour)\n\n  With multiple behaviours:\n\n      Mox.defmock(MyMock, for: [MyBehaviour, MyOtherBehaviour])\n\n  ## Options\n\n    * `:for` - module or list of modules to define the mock module for.\n\n    * `:moduledoc` - `@moduledoc` for the defined mock module.\n\n    * `:skip_optional_callbacks` - boolean to determine whether to skip\n      or generate optional callbacks in the mock module.\n\n  ## Skipping optional callbacks\n\n  By default, functions are created for all the behaviour's callbacks,\n  including optional ones. But if for some reason you want to skip one or more\n  of its `@optional_callbacks`, you can provide the list of callback names to\n  skip (along with their arities) as `:skip_optional_callbacks`:\n\n      Mox.defmock(MyMock, for: MyBehaviour, skip_optional_callbacks: [on_success: 2])\n\n  This will define a new mock (`MyMock`) that has a defined function for each\n  callback on `MyBehaviour` except for `on_success/2`. Note: you can only skip\n  optional callbacks, not required callbacks.\n\n  You can also pass `true` to skip all optional callbacks, or `false` to keep\n  the default of generating functions for all optional callbacks.\n\n  ## Passing `@moduledoc`\n\n  You can provide value for `@moduledoc` with `:moduledoc` option.\n\n      Mox.defmock(MyMock, for: MyBehaviour, moduledoc: false)\n      Mox.defmock(MyMock, for: MyBehaviour, moduledoc: \"My mock module.\")\n\n  \"\"\"\n  @spec defmock(mock, [option]) :: mock\n        when mock: t(),\n             option:\n               {:for, module() | [module()]}\n               | {:skip_optional_callbacks, boolean()}\n               | {:moduledoc, false | String.t()}\n  def defmock(name, options) when is_atom(name) and is_list(options) do\n    behaviours =\n      case Keyword.fetch(options, :for) do\n        {:ok, mocks} -> List.wrap(mocks)\n        :error -> raise ArgumentError, \":for option is required on defmock\"\n      end\n\n    skip_optional_callbacks = Keyword.get(options, :skip_optional_callbacks, [])\n    moduledoc = Keyword.get(options, :moduledoc, false)\n\n    doc_header = generate_doc_header(moduledoc)\n    compile_header = generate_compile_time_dependency(behaviours)\n    callbacks_to_skip = validate_skip_optional_callbacks!(behaviours, skip_optional_callbacks)\n    mock_funs = generate_mock_funs(behaviours, callbacks_to_skip)\n\n    define_mock_module(name, behaviours, doc_header ++ compile_header ++ mock_funs)\n\n    name\n  end\n\n  defp validate_module!(behaviour) do\n    ensure_compiled!(behaviour)\n  end\n\n  defp validate_behaviour!(behaviour) do\n    if function_exported?(behaviour, :behaviour_info, 1) do\n      behaviour\n    else\n      raise ArgumentError,\n            \"module #{inspect(behaviour)} is not a behaviour, please pass a behaviour to :for\"\n    end\n  end\n\n  defp generate_doc_header(moduledoc) do\n    [\n      quote do\n        @moduledoc unquote(moduledoc)\n      end\n    ]\n  end\n\n  defp generate_compile_time_dependency(behaviours) do\n    for behaviour <- behaviours do\n      behaviour\n      |> validate_module!()\n      |> validate_behaviour!()\n\n      quote do\n        @behaviour unquote(behaviour)\n        unquote(behaviour).module_info(:module)\n      end\n    end\n  end\n\n  defp generate_mock_funs(behaviours, callbacks_to_skip) do\n    for behaviour <- behaviours,\n        {fun, arity} <- behaviour.behaviour_info(:callbacks),\n        {fun, arity} not in callbacks_to_skip do\n      args = 0..arity |> Enum.drop(1) |> Enum.map(&Macro.var(:\"arg#{&1}\", Elixir))\n\n      quote do\n        def unquote(fun)(unquote_splicing(args)) do\n          Mox.__dispatch__(__MODULE__, unquote(fun), unquote(arity), unquote(args))\n        end\n      end\n    end\n  end\n\n  defp validate_skip_optional_callbacks!(behaviours, skip_optional_callbacks) do\n    all_optional_callbacks =\n      for behaviour <- behaviours,\n          {fun, arity} <- behaviour.behaviour_info(:optional_callbacks) do\n        {fun, arity}\n      end\n\n    case skip_optional_callbacks do\n      false ->\n        []\n\n      true ->\n        all_optional_callbacks\n\n      skip_list when is_list(skip_list) ->\n        for callback <- skip_optional_callbacks, callback not in all_optional_callbacks do\n          raise ArgumentError,\n                \"all entries in :skip_optional_callbacks must be an optional callback in one \" <>\n                  \"of the behaviours specified in :for. #{inspect(callback)} was not in the \" <>\n                  \"list of all optional callbacks: #{inspect(all_optional_callbacks)}\"\n        end\n\n        skip_list\n\n      _ ->\n        raise ArgumentError, \":skip_optional_callbacks is required to be a list or boolean\"\n    end\n  end\n\n  defp define_mock_module(name, behaviours, body) do\n    info =\n      quote do\n        def __mock_for__ do\n          unquote(behaviours)\n        end\n      end\n\n    Module.create(name, [info | body], Macro.Env.location(__ENV__))\n  end\n\n  @doc \"\"\"\n  Expects the `name` in `mock` with arity given by `code`\n  to be invoked `n` times.\n\n  If you're calling your mock from an asynchronous process and want\n  to wait for the mock to be called, see the \"Blocking on expectations\"\n  section in the module documentation.\n\n  When `expect/4` is invoked, any previously declared `stub` for the same `name` and arity will\n  be removed. This ensures that `expect` will fail if the function is called more than `n` times.\n  If a `stub/3` is invoked **after** `expect/4` for the same `name` and arity, the stub will be\n  used after all expectations are fulfilled.\n\n  ## Examples\n\n  To expect `MockWeatherAPI.get_temp/1` to be called once:\n\n      expect(MockWeatherAPI, :get_temp, fn _ -> {:ok, 30} end)\n\n  To expect `MockWeatherAPI.get_temp/1` to be called five times:\n\n      expect(MockWeatherAPI, :get_temp, 5, fn _ -> {:ok, 30} end)\n\n  To expect `MockWeatherAPI.get_temp/1` not to be called (see also `deny/3`):\n\n      expect(MockWeatherAPI, :get_temp, 0, fn _ -> {:ok, 30} end)\n\n  `expect/4` can also be invoked multiple times for the same name/arity,\n  allowing you to give different behaviours on each invocation. For instance,\n  you could test that your code will try an API call three times before giving\n  up:\n\n      MockWeatherAPI\n      |> expect(:get_temp, 2, fn _loc -> {:error, :unreachable} end)\n      |> expect(:get_temp, 1, fn _loc -> {:ok, 30} end)\n\n      log = capture_log(fn ->\n        assert Weather.current_temp(location)\n          == \"It's currently 30 degrees\"\n      end)\n\n      assert log =~ \"attempt 1 failed\"\n      assert log =~ \"attempt 2 failed\"\n      assert log =~ \"attempt 3 succeeded\"\n\n      MockWeatherAPI\n      |> expect(:get_temp, 3, fn _loc -> {:error, :unreachable} end)\n\n      assert Weather.current_temp(location) == \"Current temperature is unavailable\"\n  \"\"\"\n  @spec expect(mock, atom(), non_neg_integer(), function()) :: mock when mock: t()\n  def expect(mock, name, n \\\\ 1, code)\n      when is_atom(mock) and is_atom(name) and is_integer(n) and n >= 0 and is_function(code) do\n    calls = List.duplicate(code, n)\n    arity = arity(code)\n    add_expectation!(mock, name, arity, {n, calls, nil})\n    mock\n  end\n\n  @doc \"\"\"\n  Ensures that `name`/`arity` in `mock` is not invoked.\n\n  When `deny/3` is invoked, any previously declared `stub` for the same `name` and arity will\n  be removed. This ensures that `deny` will fail if the function is called. If a `stub/3` is\n  invoked **after** `deny/3` for the same `name` and `arity`, the stub will be used instead, so\n  `deny` will have no effect.\n\n  ## Examples\n\n  To expect `MockWeatherAPI.get_temp/1` to never be called:\n\n      deny(MockWeatherAPI, :get_temp, 1)\n\n  \"\"\"\n  @doc since: \"1.2.0\"\n  @spec deny(mock, atom(), non_neg_integer()) :: mock when mock: t()\n  def deny(mock, name, arity)\n      when is_atom(mock) and is_atom(name) and is_integer(arity) and arity >= 0 do\n    add_expectation!(mock, name, arity, {0, [], nil})\n    mock\n  end\n\n  @doc \"\"\"\n  Allows the `name` in `mock` with arity given by `code` to\n  be invoked zero or many times.\n\n  Unlike expectations, stubs are never verified.\n\n  If expectations and stubs are defined for the same function\n  and arity, the stub is invoked only after all expectations are\n  fulfilled.\n\n  ## Examples\n\n  To allow `MockWeatherAPI.get_temp/1` to be called any number of times:\n\n      stub(MockWeatherAPI, :get_temp, fn _loc -> {:ok, 30} end)\n\n  `stub/3` will overwrite any previous calls to `stub/3`.\n  \"\"\"\n  @spec stub(mock, atom(), function()) :: mock when mock: t()\n  def stub(mock, name, code)\n      when is_atom(mock) and is_atom(name) and is_function(code) do\n    arity = arity(code)\n    add_expectation!(mock, name, arity, {0, [], code})\n    mock\n  end\n\n  @doc \"\"\"\n  Stubs all functions described by the shared behaviours in the `mock` and `module`.\n\n  ## Examples\n\n      defmodule MyApp.WeatherAPI do\n        @callback temp(MyApp.LatLong.t()) :: {:ok, integer()}\n        @callback humidity(MyApp.LatLong.t()) :: {:ok, integer()}\n      end\n\n      defmodule MyApp.StubWeatherAPI do\n        @behaviour MyApp.WeatherAPI\n        def temp(_loc), do: {:ok, 30}\n        def humidity(_loc), do: {:ok, 60}\n      end\n\n      defmock(MyApp.MockWeatherAPI, for: MyApp.WeatherAPI)\n\n      setup do\n        stub_with(MyApp.MockWeatherAPI, MyApp.StubWeatherAPI)\n        :ok\n      end\n\n  This is the same as calling `stub/3` for each callback in `MyApp.MockWeatherAPI`:\n\n      stub(MyApp.MockWeatherAPI, :temp, &MyApp.StubWeatherAPI.temp/1)\n      stub(MyApp.MockWeatherAPI, :humidity, &MyApp.StubWeatherAPI.humidity/1)\n\n  \"\"\"\n  @spec stub_with(mock, module()) :: mock when mock: t()\n  def stub_with(mock, module) when is_atom(mock) and is_atom(module) do\n    behaviours = module_behaviours(module)\n    behaviours_mock = mock.__mock_for__()\n    behaviours_common = Enum.filter(behaviours, &(&1 in behaviours_mock))\n\n    do_stub_with(mock, module, behaviours, behaviours_common)\n  end\n\n  defp do_stub_with(_mock, module, [], _behaviours_common) do\n    raise ArgumentError, \"#{inspect(module)} does not implement any behaviour\"\n  end\n\n  defp do_stub_with(mock, module, _behaviours, []) do\n    raise ArgumentError,\n          \"#{inspect(module)} and #{inspect(mock)} do not share any behaviour\"\n  end\n\n  defp do_stub_with(mock, module, behaviours, _behaviours_common) do\n    key_expectation_list =\n      for behaviour <- behaviours,\n          {fun, arity} <- behaviour.behaviour_info(:callbacks),\n          function_exported?(mock, fun, arity) do\n        {\n          {mock, fun, arity},\n          {0, [], :erlang.make_fun(module, fun, arity)}\n        }\n      end\n\n    add_expectations!(mock, key_expectation_list)\n\n    mock\n  end\n\n  defp module_behaviours(module) do\n    module.module_info(:attributes)\n    |> Keyword.get_values(:behaviour)\n    |> List.flatten()\n  end\n\n  defp arity(code) do\n    {:arity, arity} = :erlang.fun_info(code, :arity)\n    arity\n  end\n\n  defp add_expectation!(mock, name, arity, value) do\n    validate_mock!(mock)\n    key = {mock, name, arity}\n\n    unless function_exported?(mock, name, arity) do\n      raise ArgumentError, \"unknown function #{name}/#{arity} for mock #{inspect(mock)}\"\n    end\n\n    case add_expectations(self(), mock, [{key, value}]) do\n      :ok ->\n        :ok\n\n      {:error, error} ->\n        raise_cannot_add_expectation!(error, mock)\n    end\n  end\n\n  defp add_expectations!(mock, key_expectation_list) do\n    validate_mock!(mock)\n\n    case add_expectations(self(), mock, key_expectation_list) do\n      :ok ->\n        :ok\n\n      {:error, error} ->\n        raise_cannot_add_expectation!(error, mock)\n    end\n  end\n\n  defp raise_cannot_add_expectation!(\n         %NimbleOwnership.Error{reason: {:already_allowed, owner_pid}},\n         mock\n       ) do\n    inspected = inspect(self())\n\n    raise ArgumentError, \"\"\"\n    cannot add expectations/stubs to #{inspect(mock)} in the current process (#{inspected}) \\\n    because the process has been allowed by #{inspect(owner_pid)}. \\\n    You cannot define expectations/stubs in a process that has been allowed\n    \"\"\"\n  end\n\n  defp raise_cannot_add_expectation!(\n         %NimbleOwnership.Error{reason: {:not_shared_owner, global_pid}},\n         mock\n       ) do\n    inspected = inspect(self())\n\n    raise ArgumentError, \"\"\"\n    cannot add expectations/stubs to #{inspect(mock)} in the current process (#{inspected}) \\\n    because Mox is in global mode and the global process is #{inspect(global_pid)}. \\\n    Only the process that set Mox to global can set expectations/stubs in global mode\n    \"\"\"\n  end\n\n  defp raise_cannot_add_expectation!(error, _mock) do\n    raise error\n  end\n\n  @doc \"\"\"\n  Allows other processes to share expectations and stubs\n  defined by owner process.\n\n  ## Examples\n\n  To allow `child_pid` to call any stubs or expectations defined for `MyMock`:\n\n      allow(MyMock, self(), child_pid)\n\n  `allow/3` also accepts named process or via references:\n\n      allow(MyMock, self(), SomeChildProcess)\n\n  If the process is not yet started at the moment of allowance definition,\n  it might be allowed as a function, assuming at the moment of invocation\n  it would have been started. If the function cannot be resolved to a `pid`\n  during invocation, the expectation will not succeed.\n\n      allow(MyMock, self(), fn -> GenServer.whereis(Deferred) end)\n\n  \"\"\"\n  @spec allow(mock, pid(), term()) :: mock when mock: t()\n  def allow(mock, owner_pid, allowed_via) when is_atom(mock) and is_pid(owner_pid) do\n    allowed_pid_or_function =\n      case allowed_via do\n        fun when is_function(fun, 0) -> fun\n        pid_or_name -> GenServer.whereis(pid_or_name)\n      end\n\n    if allowed_pid_or_function == owner_pid do\n      raise ArgumentError, \"owner_pid and allowed_pid must be different\"\n    end\n\n    case NimbleOwnership.allow(@this, owner_pid, allowed_pid_or_function, mock, @timeout) do\n      :ok ->\n        mock\n\n      {:error, %NimbleOwnership.Error{reason: :not_allowed}} ->\n        # Init the mock and re-allow.\n        _ = get_and_update!(owner_pid, mock, &{&1, %{}})\n        allow(mock, owner_pid, allowed_via)\n        mock\n\n      {:error, %NimbleOwnership.Error{reason: {:already_allowed, actual_pid}}} ->\n        raise ArgumentError, \"\"\"\n        cannot allow #{inspect(allowed_pid_or_function)} to use #{inspect(mock)} \\\n        from #{inspect(owner_pid)} \\\n        because it is already allowed by #{inspect(actual_pid)}.\n\n        If you are seeing this error message, it is because you are either \\\n        setting up allowances from different processes or your tests have \\\n        async: true and you found a race condition where two different tests \\\n        are allowing the same process\n        \"\"\"\n\n      {:error, %NimbleOwnership.Error{reason: :already_an_owner}} ->\n        raise ArgumentError, \"\"\"\n        cannot allow #{inspect(allowed_pid_or_function)} to use \\\n        #{inspect(mock)} from #{inspect(owner_pid)} \\\n        because the process has already defined its own expectations/stubs\n        \"\"\"\n\n      {:error, %NimbleOwnership.Error{reason: :cant_allow_in_shared_mode}} ->\n        # Already allowed\n        mock\n    end\n  end\n\n  @doc \"\"\"\n  Verifies the current process after it exits.\n\n  If you want to verify expectations for all tests, you can use\n  `verify_on_exit!/1` as a setup callback:\n\n      setup :verify_on_exit!\n\n  \"\"\"\n  @spec verify_on_exit!(term()) :: :ok\n  def verify_on_exit!(_context \\\\ %{}) do\n    pid = self()\n    NimbleOwnership.set_owner_to_manual_cleanup(@this, pid)\n\n    ExUnit.Callbacks.on_exit(Mox, fn ->\n      __verify_mock_or_all__(pid, :all)\n      NimbleOwnership.cleanup_owner(@this, pid)\n    end)\n  end\n\n  @doc \"\"\"\n  Verifies that all expectations set by the current process\n  have been called.\n  \"\"\"\n  @spec verify!() :: :ok\n  def verify! do\n    __verify_mock_or_all__(self(), :all)\n  end\n\n  @doc \"\"\"\n  Verifies that all expectations in `mock` have been called.\n  \"\"\"\n  @spec verify!(t()) :: :ok\n  def verify!(mock) do\n    validate_mock!(mock)\n    __verify_mock_or_all__(self(), mock)\n  end\n\n  # Made public for testing.\n  @doc false\n  def __verify_mock_or_all__(owner_pid, mock_or_all) do\n    all_expectations = NimbleOwnership.get_owned(@this, owner_pid, _default = %{}, @timeout)\n\n    pending =\n      for {_mock, expected_funs} <- all_expectations,\n          {{module, _, _} = key, {count, [_ | _] = calls, _stub}} <- expected_funs,\n          module == mock_or_all or mock_or_all == :all do\n        {key, count, length(calls)}\n      end\n\n    messages =\n      for {{module, name, arity}, total, pending} <- pending do\n        mfa = Exception.format_mfa(module, name, arity)\n        called = total - pending\n        \"  * expected #{mfa} to be invoked #{times(total)} but it was invoked #{times(called)}\"\n      end\n\n    if messages != [] do\n      raise VerificationError,\n            \"error while verifying mocks for #{inspect(owner_pid)}:\\n\\n\" <>\n              Enum.join(messages, \"\\n\")\n    end\n\n    :ok\n  end\n\n  defp validate_mock!(mock) do\n    ensure_compiled!(mock)\n\n    unless function_exported?(mock, :__mock_for__, 0) do\n      raise ArgumentError, \"module #{inspect(mock)} is not a mock\"\n    end\n\n    :ok\n  end\n\n  @compile {:no_warn_undefined, {Code, :ensure_compiled!, 1}}\n\n  defp ensure_compiled!(mod) do\n    if function_exported?(Code, :ensure_compiled!, 1) do\n      Code.ensure_compiled!(mod)\n    else\n      case Code.ensure_compiled(mod) do\n        {:module, mod} ->\n          mod\n\n        {:error, reason} ->\n          raise ArgumentError,\n                \"could not load module #{inspect(mod)} due to reason #{inspect(reason)}\"\n      end\n    end\n  end\n\n  @doc false\n  def __dispatch__(mock, name, arity, args) do\n    case fetch_fun_to_dispatch([self() | caller_pids()], {mock, name, arity}) do\n      :no_expectation ->\n        mfa = Exception.format_mfa(mock, name, arity)\n\n        raise UnexpectedCallError,\n              \"no expectation defined for #{mfa} in #{format_process()} with args #{inspect(args)}\"\n\n      {:out_of_expectations, count} ->\n        mfa = Exception.format_mfa(mock, name, arity)\n\n        raise UnexpectedCallError,\n              \"expected #{mfa} to be called #{times(count)} but it has been \" <>\n                \"called #{times(count + 1)} in #{format_process()}\"\n\n      {:remote, fun_to_call} ->\n        # It's possible that Mox.Server is running on a remote node in the cluster. Since the\n        # function that we passed is not guaranteed to exist on that node (it might have come\n        # from a .exs file), find the remote node that hosts Mox.Server, and run the function\n        # on that node.\n        Mox.Server\n        |> :global.whereis_name()\n        |> node()\n        |> :rpc.call(Kernel, :apply, [fun_to_call, args])\n\n      {:ok, fun_to_call} ->\n        apply(fun_to_call, args)\n    end\n  end\n\n  defp times(1), do: \"once\"\n  defp times(n), do: \"#{n} times\"\n\n  defp format_process do\n    callers = caller_pids()\n\n    \"process #{inspect(self())}\" <>\n      if Enum.empty?(callers) do\n        \"\"\n      else\n        \" (or in its callers #{inspect(callers)})\"\n      end\n  end\n\n  # Find the pid of the actual caller\n  defp caller_pids do\n    case Process.get(:\"$callers\") do\n      nil -> []\n      pids when is_list(pids) -> pids\n    end\n  end\n\n  ## Ownership\n\n  @doc false\n  def start_link_ownership do\n    case NimbleOwnership.start_link(name: @this) do\n      {:error, {:already_started, _}} -> :ignore\n      other -> other\n    end\n  end\n\n  defp add_expectations(owner_pid, mock, key_expectation_list) do\n    update_fun = &{:ok, init_or_merge_expectations(&1, key_expectation_list)}\n\n    case get_and_update(owner_pid, mock, update_fun) do\n      {:ok, _value} ->\n        :ok\n\n      {:error, error} ->\n        {:error, error}\n    end\n  end\n\n  defp fetch_fun_to_dispatch(caller_pids, {mock, _, _} = key) do\n    parent = self()\n\n    with {:ok, owner_pid} <- fetch_owner_from_callers(caller_pids, mock) do\n      get_and_update!(owner_pid, mock, fn expectations ->\n        case expectations[key] do\n          nil ->\n            {:no_expectation, expectations}\n\n          {total, [], nil} ->\n            {{:out_of_expectations, total}, expectations}\n\n          {_, [], stub} ->\n            {{ok_or_remote(parent), stub}, expectations}\n\n          {total, [call | calls], stub} ->\n            new_expectations = put_in(expectations[key], {total, calls, stub})\n            {{ok_or_remote(parent), call}, new_expectations}\n        end\n      end)\n    end\n  end\n\n  defp fetch_owner_from_callers(caller_pids, mock) do\n    # If the mock doesn't have an owner, it can't have expectations so we return :no_expectation.\n    case NimbleOwnership.fetch_owner(@this, caller_pids, mock, @timeout) do\n      {tag, owner_pid} when tag in [:shared_owner, :ok] -> {:ok, owner_pid}\n      :error -> :no_expectation\n    end\n  end\n\n  defp get_and_update(owner_pid, mock, update_fun) do\n    NimbleOwnership.get_and_update(@this, owner_pid, mock, update_fun, @timeout)\n  end\n\n  defp get_and_update!(owner_pid, mock, update_fun) do\n    case get_and_update(owner_pid, mock, update_fun) do\n      {:ok, return} -> return\n      {:error, %NimbleOwnership.Error{} = error} -> raise error\n    end\n  end\n\n  defp init_or_merge_expectations(current_exps, [{key, {n, calls, stub} = new_exp} | tail])\n       when is_map(current_exps) or is_nil(current_exps) do\n    init_or_merge_expectations(\n      Map.update(current_exps || %{}, key, new_exp, fn {current_n, current_calls, _current_stub} ->\n        {current_n + n, current_calls ++ calls, stub}\n      end),\n      tail\n    )\n  end\n\n  defp init_or_merge_expectations(current_exps, []), do: current_exps\n\n  defp ok_or_remote(source) when node(source) == node(), do: :ok\n  defp ok_or_remote(_source), do: :remote\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "495fca562da8c896a8d6f2d15bc364d3": "fallback",
+      "e5a006e5aa26cff4a8353808556c8161": "fallback",
+      "c234b6c05d85dbf482fa4510b9e89841": "fallback",
+      "ba7149b1f4a576b7802756c48914fe54": "schema",
+      "3f8721021c575dcd6fbd7da33a639feb": "fallback",
+      "ad72dd8113716102a4c94cd15269b4e7": "fallback",
+      "15083cc3497dac0faf7bdf7c8f8ba9d9": "schema",
+      "ea6d36dd69ca69882f4a98355533da35": "fallback",
+      "1360d751f30091b830065bc72eda812e": "fallback",
+      "7e5af2097fb9705e66d2e5671ef1df0b": "fallback",
+      "eb8900e88b5308032fd25c1bb57ada85": "fallback",
+      "b8131bb577d5766b7849db765890036c": "fallback",
+      "c32c7305b8288615f9c79fa781a07afd": "fallback",
+      "cc0be5e06ae4c703bee0f92e23841fb3": "fallback",
+      "aeebda250921ffbed8adadc32b1973c0": "fallback",
+      "268327b5d0475b6833182dcf18e60270": "fallback",
+      "55261fb0cf661bded7e162cdaa191aaf": "fallback",
+      "a1779da38b942527fbc82059727d9104": "fallback",
+      "290aec500216e46180841bd0eab3333b": "schema",
+      "6c4dec116ac7e6a6b0337373e7ece652": "fallback",
+      "c26b511de9ee6bd613c93a59944e65fa": "schema",
+      "4f1b623323df6c0028e2210959100216": "schema",
+      "992e8d3228ca2ac82afd68b93f74813d": "fallback",
+      "6eae7c60cdf225d83f533c9729aab278": "fallback",
+      "11cbce8a9c5a77584d65184d54e399f6": "fallback",
+      "a1c283b3932e4d08cfa921c017a83c37": "fallback",
+      "1f4713614a50fd28713b1259d99322c6": "fallback",
+      "ed1ded3093bc0b87ac98d3c4801cc18a": "schema",
+      "320623ef37a1aa89c241068e3e778b46": "schema",
+      "82b8f0a48ca47d50ce47a1171ae82bb8": "fallback",
+      "a6a75841bf3bc69c4d7e88a4864d0eb8": "schema",
+      "d90d5cb3b4649efde1bfdc9f836711af": "schema",
+      "eab60343ebdd703bef08097ee2523ecb": "schema",
+      "e156c949962d0aba8fb749e42186643d": "fallback",
+      "cb455fd273de6b29b04faf6d15a77a84": "fallback",
+      "9a5ce6dffe3248a4ce8a6aef82791271": "fallback",
+      "97945a919ec7ba25968a69b386134a2a": "schema",
+      "bc967d1873e23926feb1951e4109c270": "schema",
+      "4e5f8845fceb6af841549521a8bb0583": "fallback",
+      "0446c4affb4b80d8e459f1897d53c350": "fallback",
+      "028140767d66376ef79cd91e4b6e58e1": "schema",
+      "e2f46bf1c1a6fcca3988c5be07a8efe0": "fallback",
+      "da4d06faee12f73c7b5c701b0e52436c": "fallback",
+      "cf53e63f854b2db908e8958ca8dcced7": "fallback",
+      "bb2b60be0022f26594e3fbaaec18bb29": "fallback",
+      "d3954c9c82add592f7ac86a43fb69267": "schema",
+      "ad7284d7bc1afba8484969e0d0a6b08b": "fallback",
+      "f5d34ebe5bbf5b814ed2a59d6f618b97": "fallback",
+      "d41639a74d48ae07454bdcccf0b25b1c": "fallback",
+      "c8d2a9fbbc096d0c9db39b1a43177fd8": "fallback",
+      "46ea55007958d0e880d0a1e14c7b23e6": "fallback",
+      "adbdcf5b3c696f27c6c87c8500245558": "fallback"
+    },
+    "metrics": {
+      "fallback_count": 38,
+      "fallback_time_ms": 52732,
+      "fanout": {
+        "495fca562da8c896a8d6f2d15bc364d3": 2,
+        "e5a006e5aa26cff4a8353808556c8161": 2,
+        "c234b6c05d85dbf482fa4510b9e89841": 2,
+        "ba7149b1f4a576b7802756c48914fe54": 2,
+        "3f8721021c575dcd6fbd7da33a639feb": 2,
+        "ad72dd8113716102a4c94cd15269b4e7": 2,
+        "15083cc3497dac0faf7bdf7c8f8ba9d9": 2,
+        "ea6d36dd69ca69882f4a98355533da35": 2,
+        "1360d751f30091b830065bc72eda812e": 2,
+        "7e5af2097fb9705e66d2e5671ef1df0b": 2,
+        "eb8900e88b5308032fd25c1bb57ada85": 2,
+        "b8131bb577d5766b7849db765890036c": 2,
+        "c32c7305b8288615f9c79fa781a07afd": 2,
+        "cc0be5e06ae4c703bee0f92e23841fb3": 2,
+        "aeebda250921ffbed8adadc32b1973c0": 2,
+        "268327b5d0475b6833182dcf18e60270": 2,
+        "55261fb0cf661bded7e162cdaa191aaf": 2,
+        "a1779da38b942527fbc82059727d9104": 2,
+        "290aec500216e46180841bd0eab3333b": 2,
+        "6c4dec116ac7e6a6b0337373e7ece652": 2,
+        "c26b511de9ee6bd613c93a59944e65fa": 2,
+        "4f1b623323df6c0028e2210959100216": 2,
+        "992e8d3228ca2ac82afd68b93f74813d": 2,
+        "6eae7c60cdf225d83f533c9729aab278": 2,
+        "11cbce8a9c5a77584d65184d54e399f6": 2,
+        "a1c283b3932e4d08cfa921c017a83c37": 2,
+        "1f4713614a50fd28713b1259d99322c6": 2,
+        "ed1ded3093bc0b87ac98d3c4801cc18a": 2,
+        "320623ef37a1aa89c241068e3e778b46": 2,
+        "82b8f0a48ca47d50ce47a1171ae82bb8": 2,
+        "a6a75841bf3bc69c4d7e88a4864d0eb8": 2,
+        "d90d5cb3b4649efde1bfdc9f836711af": 2,
+        "eab60343ebdd703bef08097ee2523ecb": 2,
+        "e156c949962d0aba8fb749e42186643d": 2,
+        "cb455fd273de6b29b04faf6d15a77a84": 2,
+        "9a5ce6dffe3248a4ce8a6aef82791271": 2,
+        "97945a919ec7ba25968a69b386134a2a": 2,
+        "bc967d1873e23926feb1951e4109c270": 2,
+        "4e5f8845fceb6af841549521a8bb0583": 2,
+        "0446c4affb4b80d8e459f1897d53c350": 2,
+        "028140767d66376ef79cd91e4b6e58e1": 2,
+        "e2f46bf1c1a6fcca3988c5be07a8efe0": 2,
+        "da4d06faee12f73c7b5c701b0e52436c": 2,
+        "cf53e63f854b2db908e8958ca8dcced7": 2,
+        "bb2b60be0022f26594e3fbaaec18bb29": 2,
+        "d3954c9c82add592f7ac86a43fb69267": 2,
+        "ad7284d7bc1afba8484969e0d0a6b08b": 2,
+        "f5d34ebe5bbf5b814ed2a59d6f618b97": 2,
+        "d41639a74d48ae07454bdcccf0b25b1c": 2,
+        "c8d2a9fbbc096d0c9db39b1a43177fd8": 2,
+        "46ea55007958d0e880d0a1e14c7b23e6": 2,
+        "adbdcf5b3c696f27c6c87c8500245558": 2
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "missing_oracle_site": 38,
+        "no_applicable_mutator": 1,
+        "unsupported_dispatch": 314
+      }
+    },
+    "mutation_kind": {
+      "495fca562da8c896a8d6f2d15bc364d3": "guard_type_test",
+      "e5a006e5aa26cff4a8353808556c8161": "guard_type_test",
+      "c234b6c05d85dbf482fa4510b9e89841": "boolean_literal_flip",
+      "ba7149b1f4a576b7802756c48914fe54": "comparison_negation",
+      "3f8721021c575dcd6fbd7da33a639feb": "guard_type_test",
+      "ad72dd8113716102a4c94cd15269b4e7": "guard_type_test",
+      "15083cc3497dac0faf7bdf7c8f8ba9d9": "arithmetic_op",
+      "ea6d36dd69ca69882f4a98355533da35": "guard_type_test",
+      "1360d751f30091b830065bc72eda812e": "integer_literal_replace",
+      "7e5af2097fb9705e66d2e5671ef1df0b": "guard_type_test",
+      "eb8900e88b5308032fd25c1bb57ada85": "integer_literal_replace",
+      "b8131bb577d5766b7849db765890036c": "guard_type_test",
+      "c32c7305b8288615f9c79fa781a07afd": "guard_comparison_negation",
+      "cc0be5e06ae4c703bee0f92e23841fb3": "guard_type_test",
+      "aeebda250921ffbed8adadc32b1973c0": "integer_literal_replace",
+      "268327b5d0475b6833182dcf18e60270": "guard_type_test",
+      "55261fb0cf661bded7e162cdaa191aaf": "integer_literal_replace",
+      "a1779da38b942527fbc82059727d9104": "attribute_int_replace",
+      "290aec500216e46180841bd0eab3333b": "comparison_negation",
+      "6c4dec116ac7e6a6b0337373e7ece652": "boolean_literal_flip",
+      "c26b511de9ee6bd613c93a59944e65fa": "arithmetic_op",
+      "4f1b623323df6c0028e2210959100216": "arithmetic_op",
+      "992e8d3228ca2ac82afd68b93f74813d": "guard_type_test",
+      "6eae7c60cdf225d83f533c9729aab278": "guard_comparison_boundary",
+      "11cbce8a9c5a77584d65184d54e399f6": "integer_literal_replace",
+      "a1c283b3932e4d08cfa921c017a83c37": "integer_literal_replace",
+      "1f4713614a50fd28713b1259d99322c6": "guard_type_test",
+      "ed1ded3093bc0b87ac98d3c4801cc18a": "comparison_negation",
+      "320623ef37a1aa89c241068e3e778b46": "comparison_negation",
+      "82b8f0a48ca47d50ce47a1171ae82bb8": "integer_literal_replace",
+      "a6a75841bf3bc69c4d7e88a4864d0eb8": "boolean_op",
+      "d90d5cb3b4649efde1bfdc9f836711af": "unary_not_removal",
+      "eab60343ebdd703bef08097ee2523ecb": "arithmetic_op",
+      "e156c949962d0aba8fb749e42186643d": "guard_type_test",
+      "cb455fd273de6b29b04faf6d15a77a84": "integer_literal_replace",
+      "9a5ce6dffe3248a4ce8a6aef82791271": "guard_type_test",
+      "97945a919ec7ba25968a69b386134a2a": "arithmetic_op",
+      "bc967d1873e23926feb1951e4109c270": "arithmetic_op",
+      "4e5f8845fceb6af841549521a8bb0583": "guard_type_test",
+      "0446c4affb4b80d8e459f1897d53c350": "boolean_literal_flip",
+      "028140767d66376ef79cd91e4b6e58e1": "unary_not_removal",
+      "e2f46bf1c1a6fcca3988c5be07a8efe0": "guard_type_test",
+      "da4d06faee12f73c7b5c701b0e52436c": "guard_type_test",
+      "cf53e63f854b2db908e8958ca8dcced7": "integer_literal_replace",
+      "bb2b60be0022f26594e3fbaaec18bb29": "guard_comparison_negation",
+      "d3954c9c82add592f7ac86a43fb69267": "boolean_op",
+      "ad7284d7bc1afba8484969e0d0a6b08b": "guard_type_test",
+      "f5d34ebe5bbf5b814ed2a59d6f618b97": "attribute_int_replace",
+      "d41639a74d48ae07454bdcccf0b25b1c": "guard_type_test",
+      "c8d2a9fbbc096d0c9db39b1a43177fd8": "guard_comparison_boundary",
+      "46ea55007958d0e880d0a1e14c7b23e6": "guard_type_test",
+      "adbdcf5b3c696f27c6c87c8500245558": "guard_comparison_negation"
+    },
+    "persistent": null,
+    "phase_timings": {
+      "baseline_tests_ms": 1058,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 15544,
+      "oracle_build_ms": 3524,
+      "plan_generation_ms": 12,
+      "report_writing_ms": 8,
+      "schema_build_ms": 3625,
+      "schema_workers_ms": 3181,
+      "total_ms": 27439
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 52,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 52
+      },
+      "mode": "static",
+      "selected_tests_avg": 2.0,
+      "selected_tests_median": 2
+    },
+    "stable_id_to_integer": {
+      "495fca562da8c896a8d6f2d15bc364d3": 12,
+      "e5a006e5aa26cff4a8353808556c8161": 47,
+      "c234b6c05d85dbf482fa4510b9e89841": 34,
+      "ba7149b1f4a576b7802756c48914fe54": 31,
+      "3f8721021c575dcd6fbd7da33a639feb": 10,
+      "ad72dd8113716102a4c94cd15269b4e7": 27,
+      "15083cc3497dac0faf7bdf7c8f8ba9d9": 5,
+      "ea6d36dd69ca69882f4a98355533da35": 48,
+      "1360d751f30091b830065bc72eda812e": 4,
+      "7e5af2097fb9705e66d2e5671ef1df0b": 18,
+      "eb8900e88b5308032fd25c1bb57ada85": 50,
+      "b8131bb577d5766b7849db765890036c": 30,
+      "c32c7305b8288615f9c79fa781a07afd": 36,
+      "cc0be5e06ae4c703bee0f92e23841fb3": 39,
+      "aeebda250921ffbed8adadc32b1973c0": 29,
+      "268327b5d0475b6833182dcf18e60270": 7,
+      "55261fb0cf661bded7e162cdaa191aaf": 15,
+      "a1779da38b942527fbc82059727d9104": 23,
+      "290aec500216e46180841bd0eab3333b": 8,
+      "6c4dec116ac7e6a6b0337373e7ece652": 16,
+      "c26b511de9ee6bd613c93a59944e65fa": 35,
+      "4f1b623323df6c0028e2210959100216": 14,
+      "992e8d3228ca2ac82afd68b93f74813d": 21,
+      "6eae7c60cdf225d83f533c9729aab278": 17,
+      "11cbce8a9c5a77584d65184d54e399f6": 3,
+      "a1c283b3932e4d08cfa921c017a83c37": 24,
+      "1f4713614a50fd28713b1259d99322c6": 6,
+      "ed1ded3093bc0b87ac98d3c4801cc18a": 51,
+      "320623ef37a1aa89c241068e3e778b46": 9,
+      "82b8f0a48ca47d50ce47a1171ae82bb8": 19,
+      "a6a75841bf3bc69c4d7e88a4864d0eb8": 25,
+      "d90d5cb3b4649efde1bfdc9f836711af": 43,
+      "eab60343ebdd703bef08097ee2523ecb": 49,
+      "e156c949962d0aba8fb749e42186643d": 45,
+      "cb455fd273de6b29b04faf6d15a77a84": 38,
+      "9a5ce6dffe3248a4ce8a6aef82791271": 22,
+      "97945a919ec7ba25968a69b386134a2a": 20,
+      "bc967d1873e23926feb1951e4109c270": 33,
+      "4e5f8845fceb6af841549521a8bb0583": 13,
+      "0446c4affb4b80d8e459f1897d53c350": 2,
+      "028140767d66376ef79cd91e4b6e58e1": 1,
+      "e2f46bf1c1a6fcca3988c5be07a8efe0": 46,
+      "da4d06faee12f73c7b5c701b0e52436c": 44,
+      "cf53e63f854b2db908e8958ca8dcced7": 40,
+      "bb2b60be0022f26594e3fbaaec18bb29": 32,
+      "d3954c9c82add592f7ac86a43fb69267": 41,
+      "ad7284d7bc1afba8484969e0d0a6b08b": 26,
+      "f5d34ebe5bbf5b814ed2a59d6f618b97": 52,
+      "d41639a74d48ae07454bdcccf0b25b1c": 42,
+      "c8d2a9fbbc096d0c9db39b1a43177fd8": 37,
+      "46ea55007958d0e880d0a1e14c7b23e6": 11,
+      "adbdcf5b3c696f27c6c87c8500245558": 28
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}
