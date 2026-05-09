@@ -1,0 +1,53 @@
+target=jason repo=https://github.com/michalmuskala/jason.git ref=v1.4.5 sha=4ede42858eb19f80ec9e863aab52df466eab8608 selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.017s
+New:
+  jason 1.4.5
+Unchanged:
+  decimal 2.3.0
+  dialyxir 1.4.7
+  earmark_parser 1.4.44
+  erlex 0.2.8
+  ex_doc 0.40.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.3
+  nimble_parsec 1.4.2
+  stream_data 1.3.0
+* Getting decimal (Hex package)
+* Getting dialyxir (Hex package)
+* Getting ex_doc (Hex package)
+* Getting stream_data (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+* Getting erlex (Hex package)
+You have added/upgraded packages you could sponsor, run `mix hex.sponsor` to learn more
+mix mut starting
+==> stream_data
+Compiling 3 files (.ex)
+Generated stream_data app
+==> erlex
+Compiling 1 file (.xrl)
+Compiling 1 file (.yrl)
+src/erlex_parser.yrl: Warning: conflicts: 27 shift/reduce, 0 reduce/reduce
+Compiling 2 files (.erl)
+Compiling 1 file (.ex)
+Generated erlex app
+==> decimal
+Compiling 4 files (.ex)
+Generated decimal app
+    warning: redefining module Jason.Mixfile (current version defined in memory)
+    │
+  1 │ defmodule Jason.Mixfile do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ /Users/lukaszsamson/claude_fun/mutalisk/_build/bench_deps/jason/mix.exs:1: Jason.Mixfile (module)
+
+==> jason
+Error while loading project :jason at /Users/lukaszsamson/claude_fun/mutalisk/_build/bench_deps/jason
+** (Mix) Trying to load Jason.Mixfile from "/Users/lukaszsamson/claude_fun/mutalisk/_build/bench_deps/jason/mix.exs" but another project with the same name was already defined at "/Users/lukaszsamson/claude_fun/mutalisk/tmp/bench/jason/mix.exs"
