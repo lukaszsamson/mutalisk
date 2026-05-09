@@ -9,10 +9,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 158,
+          "duration": 160,
           "id": "0070f6db97a940dd7998a3aceb2c1c94",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with compound subtypes"
           ],
           "location": {
             "end": {
@@ -34,7 +34,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 161,
+          "duration": 171,
           "id": "019f9b61e291ef92938c79847900bde2",
           "killedBy": [
             "NimbleOptionsTest:type validation valid timeout"
@@ -59,10 +59,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 160,
+          "duration": 157,
           "id": "029e70252c5bc7f99df4a6e862f98f35",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:list, subtype}"
+            "NimbleOptionsTest:type validation valid nil"
           ],
           "location": {
             "end": {
@@ -84,9 +84,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 18,
+          "duration": 1142,
           "id": "073c2ad39f77bb2fc161458d0cde2ab8",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid mfa"
+          ],
           "location": {
             "end": {
               "column": 25,
@@ -99,8 +101,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_nil(mod)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in String.trim_trailing/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -108,7 +109,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 54,
+          "duration": 62,
           "id": "0f9305ff26912183e6ffb20e5c856de9",
           "killedBy": [
             "NimbleOptionsTest:nested options with custom keys validate empty keys for :non_empty_keyword_list"
@@ -156,10 +157,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 158,
+          "duration": 152,
           "id": "1a73dbd10b25073c5b9f5efdb9e26e1d",
           "killedBy": [
-            "NimbleOptionsTest:wrapper struct can be built from a valid schema"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -181,10 +182,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 163,
+          "duration": 165,
           "id": "20a652dd07c3d2ce388fad3d0df58913",
           "killedBy": [
-            "NimbleOptionsTest:default value is not treated as values of received options when showing validation error"
+            "NimbleOptionsTest:type validation invalid non negative integer"
           ],
           "location": {
             "end": {
@@ -206,10 +207,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 155,
+          "duration": 157,
           "id": "2a3020e3b996b628c8067ea4971eb66f",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:list, subtype} with custom subtype"
+            "NimbleOptionsTest:type validation valid {:map, key_type, value_type}"
           ],
           "location": {
             "end": {
@@ -231,10 +232,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace boolean literal true with false",
-          "duration": 152,
+          "duration": 162,
           "id": "396df1eed505f60365ed01ff7e3bfa78",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys required options missing for map"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -256,10 +257,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 152,
+          "duration": 160,
           "id": "3b85b137b0814d54998bd884f9dd6bdc",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid timeout"
+            "NimbleOptionsTest:type validation invalid timeout"
           ],
           "location": {
             "end": {
@@ -281,7 +282,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 156,
+          "duration": 164,
           "id": "3bf0fe184509d1b46f32725063b3ae82",
           "killedBy": [],
           "location": {
@@ -304,10 +305,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 150,
+          "duration": 154,
           "id": "455b7285d89610bf26514db91051d218",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:list, subtype} with a :non_empty_keyword_list subtype"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
           ],
           "location": {
             "end": {
@@ -329,7 +330,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 18,
+          "duration": 11,
           "id": "4bd65e23ab93262ec765b13a89da6e4e",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -354,7 +355,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 154,
+          "duration": 161,
           "id": "4e7d40724753ce4c7d3ff614a41dd266",
           "killedBy": [],
           "location": {
@@ -377,10 +378,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 153,
+          "duration": 175,
           "id": "536ad5204ff6e52cb274c98cbbeee961",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:map, key_type, value_type}"
+            "NimbleOptionsTest:type validation invalid integer"
           ],
           "location": {
             "end": {
@@ -402,7 +403,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 153,
+          "duration": 167,
           "id": "5569009fc6c2db81272a93f4f5af4cf7",
           "killedBy": [
             "NimbleOptionsTest:type validation valid non negative integer"
@@ -427,10 +428,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 151,
+          "duration": 159,
           "id": "597d964bdb543da3a0dc607dace41c84",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} can also cast the value of an option"
           ],
           "location": {
             "end": {
@@ -452,7 +453,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 155,
+          "duration": 162,
           "id": "5a549de0ab03723a5fc8d656ef7bbd35",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -477,10 +478,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 166,
+          "duration": 155,
           "id": "5adde818ee3640268cc76f514b485e79",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:fun, arity}"
+            "NimbleOptionsTest:type validation invalid {:fun, arity}"
           ],
           "location": {
             "end": {
@@ -502,7 +503,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 15,
+          "duration": 10,
           "id": "5e1edeac6873e335255713804d9480ef",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -527,7 +528,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 158,
+          "duration": 166,
           "id": "60b83f98c968f821f2564ad443c941f5",
           "killedBy": [],
           "location": {
@@ -550,7 +551,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 152,
+          "duration": 163,
           "id": "628fefcdd99d20ebf9030701bea7f443",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -575,7 +576,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 153,
+          "duration": 162,
           "id": "62e707e8bf97dd25c844f131a8e71173",
           "killedBy": [
             "NimbleOptionsTest:default value is not treated as values of received options when showing validation error"
@@ -600,9 +601,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 14,
+          "duration": 160,
           "id": "6c5ac97cea62365fe8b3aa4f5fe04e3c",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid float"
+          ],
           "location": {
             "end": {
               "column": 66,
@@ -615,8 +618,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_number(value)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -624,10 +626,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 152,
+          "duration": 156,
           "id": "774c69a920f6711b70703a3317b2287f",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys required options missing for map"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
           ],
           "location": {
             "end": {
@@ -674,11 +676,9 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 153,
+          "duration": 234,
           "id": "7d2b0d7426e028c69563e47992e3dd6e",
-          "killedBy": [
-            "NimbleOptionsTest:type validation invalid mfa"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 62,
@@ -691,7 +691,8 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_atom(value)",
-          "status": "Killed"
+          "status": "CompileError",
+          "statusReason": "\n== Compilation error in file lib/nimble_options.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:742:63:\n     error: unexpected token: )\n     │\n   1 │ defmodule NimbleOptions do\n     │                         └ unclosed delimiter\n ...\n 742 │   defp validate_type(:mfa, key, value) when not is_atom(value)) do\n     │                                                               └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/nimble_options.ex:742:63\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options.ex\", {1, 25}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:742:63:\\n     error: unexpected token: )\\n     │\\n   1 │ defmodule NimbleOptions do\\n     │                         └ unclosed delimiter\\n ...\\n 742 │   defp validate_type(:mfa, key, value) when not is_atom(value)) do\\n     │                                                               └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/nimble_options.ex:742:63\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -699,9 +700,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 15,
+          "duration": 162,
           "id": "7f630fc8ef95dcbb4cc9d1b39f77f31f",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid timeout"
+          ],
           "location": {
             "end": {
               "column": 73,
@@ -714,8 +717,7 @@
           },
           "mutatorName": "GuardComparisonBoundary",
           "replacement": "value > 0",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -723,7 +725,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 9,
+          "duration": 8,
           "id": "81a48defcaa303cefecc6eb070f84f1d",
           "killedBy": [
             "NimbleOptionsTest:doctest module NimbleOptions (1)"
@@ -748,7 +750,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 14,
+          "duration": 159,
           "id": "831860a6dadb1b8b698ba1d3ea13a2b0",
           "killedBy": [],
           "location": {
@@ -763,8 +765,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_number(value)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -772,9 +773,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 15,
+          "duration": 156,
           "id": "87b48056a448cf20e7856a8d3c6b2dde",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with simple subtypes"
+          ],
           "location": {
             "end": {
               "column": 68,
@@ -787,8 +790,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(subtypes)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -796,7 +798,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 150,
+          "duration": 162,
           "id": "8bfd260806d4a7d72531e1b1fcda3723",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -846,7 +848,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 154,
+          "duration": 235,
           "id": "9346bc9d0755b820b11462045d7c7d6b",
           "killedBy": [],
           "location": {
@@ -861,7 +863,8 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_atom(nested_schema)",
-          "status": "Survived"
+          "status": "CompileError",
+          "statusReason": "\n== Compilation error in file lib/nimble_options.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:835:55:\n     error: unexpected token: )\n     │\n 834 │         case validate_type(subtype, key, value) do\n     │                                                 └ unclosed delimiter\n 835 │           {:ok, value} when not is_atom(nested_schema)) ->\n     │                                                       └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/nimble_options.ex:835:55\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options.ex\", {834, 49}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:835:55:\\n     error: unexpected token: )\\n     │\\n 834 │         case validate_type(subtype, key, value) do\\n     │                                                 └ unclosed delimiter\\n 835 │           {:ok, value} when not is_atom(nested_schema)) ->\\n     │                                                       └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/nimble_options.ex:835:55\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -869,10 +872,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 150,
+          "duration": 157,
           "id": "954166fad2ec8ec51c53b3415eb3c5a7",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys required options missing for map"
+            "NimbleOptionsTest:type validation invalid :map"
           ],
           "location": {
             "end": {
@@ -894,7 +897,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 153,
+          "duration": 166,
           "id": "9ca41075ada7276b4970e28af50bf012",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid integer"
@@ -919,10 +922,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 149,
+          "duration": 154,
           "id": "a59b17a825122265cf24848f2dc74b50",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys required options missing for map"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -944,7 +947,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 149,
+          "duration": 169,
           "id": "a5a08c636728d70e217594217ecba098",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -969,10 +972,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 145,
+          "duration": 164,
           "id": "a6a15f55ccab797dd8a91d3bf4e266a2",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
+            "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
           ],
           "location": {
             "end": {
@@ -994,7 +997,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 153,
+          "duration": 160,
           "id": "b311175ec61c6854d123d61005dec458",
           "killedBy": [],
           "location": {
@@ -1017,7 +1020,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 151,
+          "duration": 156,
           "id": "b5c5e246bd7687a3783f31df86e7989a",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
@@ -1042,7 +1045,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 158,
+          "duration": 172,
           "id": "bb3cccf9c6e6be4d30a5803051062cb3",
           "killedBy": [],
           "location": {
@@ -1065,10 +1068,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 150,
+          "duration": 154,
           "id": "bb8845235b5d8aa8fe3db9c90ad1414f",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:list, subtype} with a :non_empty_keyword_list subtype"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
           ],
           "location": {
             "end": {
@@ -1090,10 +1093,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 146,
+          "duration": 153,
           "id": "bde079a777a57718db045ba0843a0bcf",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} can also cast the value of an option"
           ],
           "location": {
             "end": {
@@ -1115,7 +1118,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 195,
+          "duration": 162,
           "id": "c04a8c12415a48613525b31da5d2a5d1",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -1140,10 +1143,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 205,
+          "duration": 158,
           "id": "c8676a0887a60354a9abfd8d5e93ad80",
           "killedBy": [
-            "NimbleOptionsTest:type validation non-matching {:struct, struct_name}"
+            "NimbleOptionsTest:type validation valid {:struct, struct_name}"
           ],
           "location": {
             "end": {
@@ -1165,7 +1168,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 152,
+          "duration": 157,
           "id": "cd0b0b12e7df29652c4ac68813b4f31c",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mod_arg"
@@ -1190,10 +1193,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 150,
+          "duration": 158,
           "id": "d02129c107cb8dffd37d527e94d9a9e7",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested keyword lists"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested :or"
           ],
           "location": {
             "end": {
@@ -1215,10 +1218,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 149,
+          "duration": 151,
           "id": "d1eeb58dd18e9a1fddea33633ca23b70",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys required options missing for map"
+            "NimbleOptionsTest:type validation valid nil"
           ],
           "location": {
             "end": {
@@ -1240,7 +1243,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 6,
+          "duration": 16,
           "id": "e2215fb855a35b33caaae4a528149b08",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested keyword lists"
@@ -1265,9 +1268,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 14,
+          "duration": 164,
           "id": "e68f994996b6fc5cb43785aecf5f39d4",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:list, subtype} with a :non_empty_keyword_list subtype"
+          ],
           "location": {
             "end": {
               "column": 84,
@@ -1280,8 +1285,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(keys)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -1289,7 +1293,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 14,
+          "duration": 249,
           "id": "e69dace77d472110db789826b6ad5eac",
           "killedBy": [],
           "location": {
@@ -1305,7 +1309,7 @@
           "mutatorName": "GuardComparisonNegation",
           "replacement": "value < 0",
           "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "statusReason": "\n== Compilation error in file lib/nimble_options.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:1095:1:\n      error: unexpected reserved word: end\n      │\n  634 │        when not (value == :infinity or (is_integer(value) and value < 0) do\n      │                 └ unclosed delimiter\n ...\n 1095 │ end\n      │ └ mismatched closing delimiter (expected \")\")\n      │\n      └─ lib/nimble_options.ex:1095:1\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options.ex\", {634, 17}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:1095:1:\\n      error: unexpected reserved word: end\\n      │\\n  634 │        when not (value == :infinity or (is_integer(value) and value < 0) do\\n      │                 └ unclosed delimiter\\n ...\\n 1095 │ end\\n      │ └ mismatched closing delimiter (expected \\\")\\\")\\n      │\\n      └─ lib/nimble_options.ex:1095:1\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -1313,11 +1317,9 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 152,
+          "duration": 253,
           "id": "e96cadb63de6f8600ea18ac2747287c4",
-          "killedBy": [
-            "NimbleOptionsTest:type validation invalid float"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 66,
@@ -1330,7 +1332,8 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_integer(value)",
-          "status": "Killed"
+          "status": "CompileError",
+          "statusReason": "\n== Compilation error in file lib/nimble_options.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:617:69:\n     error: unexpected token: )\n     │\n   1 │ defmodule NimbleOptions do\n     │                         └ unclosed delimiter\n ...\n 617 │   defp validate_type(:float, key, value) when not is_integer(value)e) do\n     │                                                                     └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/nimble_options.ex:617:69\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/4/lib/nimble_options.ex\", {1, 25}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:617:69:\\n     error: unexpected token: )\\n     │\\n   1 │ defmodule NimbleOptions do\\n     │                         └ unclosed delimiter\\n ...\\n 617 │   defp validate_type(:float, key, value) when not is_integer(value)e) do\\n     │                                                                     └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/nimble_options.ex:617:69\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -1338,9 +1341,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 15,
+          "duration": 160,
           "id": "ecd9d6c91de0565d137699acba63d887",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid positive integer"
+          ],
           "location": {
             "end": {
               "column": 74,
@@ -1353,8 +1358,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_float(value)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -1362,10 +1366,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 151,
+          "duration": 153,
           "id": "f1b33c0ca7d7e3311ae76bcd43791ef6",
           "killedBy": [
-            "NimbleOptionsTest:nested options with custom keys nested options types for map"
+            "NimbleOptionsTest:type validation invalid :map"
           ],
           "location": {
             "end": {
@@ -1387,7 +1391,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 150,
+          "duration": 164,
           "id": "f4972e130686a9686b6986617815cd89",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -1412,11 +1416,9 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 148,
+          "duration": 258,
           "id": "f629228fd9347b4ba0125671fa4b0df0",
-          "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 49,
@@ -1429,7 +1431,8 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(schema)",
-          "status": "Killed"
+          "status": "CompileError",
+          "statusReason": "\n== Compilation error in file lib/nimble_options.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:419:50:\n     error: unexpected token: )\n     │\n   1 │ defmodule NimbleOptions do\n     │                         └ unclosed delimiter\n ...\n 419 │   def docs(schema, options) when is_tuple(schema)) and is_list(options) do\n     │                                                  └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/nimble_options.ex:419:50\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options.ex\", {1, 25}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:419:50:\\n     error: unexpected token: )\\n     │\\n   1 │ defmodule NimbleOptions do\\n     │                         └ unclosed delimiter\\n ...\\n 419 │   def docs(schema, options) when is_tuple(schema)) and is_list(options) do\\n     │                                                  └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/nimble_options.ex:419:50\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -1437,9 +1440,11 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 15,
+          "duration": 171,
           "id": "f6a99aa3ef59fa66f96dc0f013012375",
-          "killedBy": [],
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+          ],
           "location": {
             "end": {
               "column": 70,
@@ -1452,8 +1457,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(options)",
-          "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -1461,7 +1465,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 15,
+          "duration": 275,
           "id": "fb7d901609fc3a114ca49c5755811004",
           "killedBy": [],
           "location": {
@@ -1477,7 +1481,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(options)",
           "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "statusReason": "\n== Compilation error in file lib/nimble_options.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:423:75:\n     error: unexpected token: )\n     │\n   1 │ defmodule NimbleOptions do\n     │                         └ unclosed delimiter\n ...\n 423 │   def docs(%NimbleOptions{schema: schema}, options) when is_tuple(options)) do\n     │                                                                           └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/nimble_options.ex:423:75\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/4/lib/nimble_options.ex\", {1, 25}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options.ex:423:75:\\n     error: unexpected token: )\\n     │\\n   1 │ defmodule NimbleOptions do\\n     │                         └ unclosed delimiter\\n ...\\n 423 │   def docs(%NimbleOptions{schema: schema}, options) when is_tuple(options)) do\\n     │                                                                           └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/nimble_options.ex:423:75\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -1485,7 +1489,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 151,
+          "duration": 164,
           "id": "fc8d6bffba6906549bb365ebc8b02d26",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:fun, arity}"
@@ -1516,7 +1520,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 187,
+          "duration": 191,
           "id": "0cbc4007fad2ed2326c0ea7d9d037763",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
@@ -1541,10 +1545,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 31,
+          "duration": 39,
           "id": "153c25b36be8d18bba98b4ef50c5ebe7",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1566,7 +1570,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 50,
+          "duration": 53,
           "id": "2e332aaccee32562dc3a1b7e51fa0640",
           "killedBy": [],
           "location": {
@@ -1589,7 +1593,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 10 with 11",
-          "duration": 184,
+          "duration": 192,
           "id": "380a2042e5ab1a3d60005c79f844cc75",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
@@ -1614,10 +1618,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 30,
+          "duration": 35,
           "id": "3f1ea37e39498b6467672b166a9c69c9",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1639,7 +1643,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 183,
+          "duration": 196,
           "id": "43c1430de432353a42e76376126d5e8d",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
@@ -1664,10 +1668,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 185,
+          "duration": 192,
           "id": "53493520e49382ea41e31f7eff9154eb",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1689,7 +1693,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 51,
+          "duration": 254,
           "id": "64010f6a6993a544f03c789e55ae9ef5",
           "killedBy": [],
           "location": {
@@ -1705,7 +1709,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(options)",
           "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "statusReason": "\n== Compilation error in file lib/nimble_options/docs.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options/docs.ex:4:75:\n    error: unexpected token: )\n    │\n  1 │ defmodule NimbleOptions.Docs do\n    │                              └ unclosed delimiter\n  2 │   @moduledoc false\n  3 │ \n  4 │   def generate(schema, options) when is_list(schema) and is_tuple(options)) do\n    │                                                                           └ mismatched closing delimiter (expected \"end\")\n    │\n    └─ lib/nimble_options/docs.ex:4:75\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options/docs.ex\", {1, 30}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options/docs.ex:4:75:\\n    error: unexpected token: )\\n    │\\n  1 │ defmodule NimbleOptions.Docs do\\n    │                              └ unclosed delimiter\\n  2 │   @moduledoc false\\n  3 │ \\n  4 │   def generate(schema, options) when is_list(schema) and is_tuple(options)) do\\n    │                                                                           └ mismatched closing delimiter (expected \\\"end\\\")\\n    │\\n    └─ lib/nimble_options/docs.ex:4:75\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -1713,10 +1717,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 8,
+          "duration": 10,
           "id": "7267f5b99d043f81e3b56ede9be6ec02",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
           ],
           "location": {
             "end": {
@@ -1738,10 +1742,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 7,
+          "duration": 5,
           "id": "745a0d9ab7ba2728ba49c172c5f81b11",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1766,7 +1770,7 @@
           "duration": 6,
           "id": "74f25423b43da7100e59b6a74c19d656",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1788,10 +1792,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 5,
+          "duration": 6,
           "id": "7fdb129dc40c0616b73670a9261816c5",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
           ],
           "location": {
             "end": {
@@ -1813,7 +1817,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 13,
+          "duration": 22,
           "id": "82d309d246a48373579703fd94acf85e",
           "killedBy": [],
           "location": {
@@ -1836,7 +1840,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 10 with 0",
-          "duration": 185,
+          "duration": 191,
           "id": "94f430ba32b64854060b36a32fdcd966",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
@@ -1861,7 +1865,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 191,
+          "duration": 192,
           "id": "9bf1c2970ca9058f6f1e637314508c05",
           "killedBy": [
             "NimbleOptionsTest:option_typespec/1 all possible types"
@@ -1886,10 +1890,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 189,
+          "duration": 196,
           "id": "a1a42c70c2283d0bfba0dd88afa3b21f",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
           ],
           "location": {
             "end": {
@@ -1911,7 +1915,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 2,
+          "duration": 1,
           "id": "a510d58025ec970bb9996db9b6703e69",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
@@ -1936,7 +1940,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 191,
+          "duration": 204,
           "id": "b7514836a3074e041f85885a292fde96",
           "killedBy": [],
           "location": {
@@ -1984,7 +1988,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 232,
+          "duration": 200,
           "id": "c22aa142fbdadf7af891ec4c1f232578",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
@@ -2009,7 +2013,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace boolean literal true with false",
-          "duration": 104,
+          "duration": 311,
           "id": "c57017ce599513d2c71961096e589ef1",
           "killedBy": [],
           "location": {
@@ -2025,7 +2029,7 @@
           "mutatorName": "BooleanLiteral",
           "replacement": "false",
           "status": "CompileError",
-          "statusReason": "no cond clause evaluated to a truthy value"
+          "statusReason": "    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)\n    │\n  1 │ defmodule NimbleOptions do\n    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~\n    │\n    └─ lib/nimble_options.ex:1: NimbleOptions (module)\n\n    warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)\n    │\n  1 │ defmodule NimbleOptions.Docs do\n    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    │\n    └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)\n\n    error: undefined variable \"falsee\"\n    │\n 67 │       falsee ->\n    │       ^^^^^^\n    │\n    └─ lib/nimble_options/docs.ex:67:7: NimbleOptions.Docs.option_doc/2\n\n\n== Compilation error in file lib/nimble_options/docs.ex ==\n** (CompileError) lib/nimble_options/docs.ex: cannot compile module NimbleOptions.Docs (errors have been logged)\n\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options/docs.ex\", {67, 7}, \"undefined variable \\\"falsee\\\"\"}, {\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options/docs.ex\", 0, \"** (CompileError) lib/nimble_options/docs.ex: cannot compile module NimbleOptions.Docs (errors have been logged)\\n\\n\"}]\nmut.recompile warnings: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options.ex\", 1, \"redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)\"}, {\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/1/lib/nimble_options/docs.ex\", 1, \"redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)\"}]\n"
         },
         {
           "coveredBy": [
@@ -2033,7 +2037,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 53,
+          "duration": 252,
           "id": "cbdb53a0bb2ebecb707673ddcb776084",
           "killedBy": [],
           "location": {
@@ -2049,7 +2053,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(schema)",
           "status": "CompileError",
-          "statusReason": "no function clause matching in NimbleOptions.Docs.generate/2"
+          "statusReason": "\n== Compilation error in file lib/nimble_options/docs.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options/docs.ex:4:54:\n    error: unexpected token: )\n    │\n  1 │ defmodule NimbleOptions.Docs do\n    │                              └ unclosed delimiter\n  2 │   @moduledoc false\n  3 │ \n  4 │   def generate(schema, options) when is_tuple(schema)) and is_list(options) do\n    │                                                      └ mismatched closing delimiter (expected \"end\")\n    │\n    └─ lib/nimble_options/docs.ex:4:54\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:327: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:382: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.20.0-rc.4) src/elixir.erl:365: :elixir.erl_eval/3\n  (elixir 1.20.0-rc.4) src/elixir.erl:329: :elixir.eval_forms/4\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321370-n_1Axw/4/lib/nimble_options/docs.ex\", {1, 30}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/nimble_options/docs.ex:4:54:\\n    error: unexpected token: )\\n    │\\n  1 │ defmodule NimbleOptions.Docs do\\n    │                              └ unclosed delimiter\\n  2 │   @moduledoc false\\n  3 │ \\n  4 │   def generate(schema, options) when is_tuple(schema)) and is_list(options) do\\n    │                                                      └ mismatched closing delimiter (expected \\\"end\\\")\\n    │\\n    └─ lib/nimble_options/docs.ex:4:54\\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:548: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -2060,7 +2064,7 @@
           "duration": 5,
           "id": "e9c82ea4d6716c5f04bb200317b20147",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -2082,7 +2086,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 7,
           "id": "f80390c710140571755a758bbf35890d",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
@@ -2107,7 +2111,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 184,
+          "duration": 190,
           "id": "fd33ef2ff24070683d3a8955983230fa",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
@@ -2226,7 +2230,7 @@
     },
     "metrics": {
       "fallback_count": 69,
-      "fallback_time_ms": 9414,
+      "fallback_time_ms": 13271,
       "fanout": {
         "e9c82ea4d6716c5f04bb200317b20147": 2,
         "f629228fd9347b4ba0125671fa4b0df0": 2,
@@ -2413,56 +2417,56 @@
     },
     "persistent": {
       "app_startup_ms": {
-        "median": 24.3,
+        "median": 23.5,
         "total_apps": 52
       },
       "boot_ms": {
-        "max": 556,
-        "median": 551.0,
-        "p95": 556
+        "max": 577,
+        "median": 559.0,
+        "p95": 577
       },
       "crash_count": 0,
       "filter_lookup_ms": 0.0,
       "filter_miss_count": 0,
       "memory": {
-        "peak_processes_mb": 15.9,
-        "peak_total_mb": 62.6
+        "peak_processes_mb": 16.2,
+        "peak_total_mb": 62.9
       },
-      "mix_fallback_count": 0,
+      "mix_fallback_count": 10,
       "mutant_run_ms": {
         "count": 17,
-        "median": 7.5,
-        "p95": 50.7
+        "median": 9.0,
+        "p95": 59.6
       },
       "reset_ms": {
         "application_env": 0.0,
-        "ets": 0.1,
+        "ets": 0.2,
         "on_exit": 0.0,
         "persistent_term": 0.0,
         "processes": 0.0
       },
       "restart_count": 0,
       "test_load_ms": {
-        "median": 322.4,
+        "median": 331.4,
         "total_files": 12
       },
       "worker_count": 4
     },
     "phase_timings": {
-      "baseline_tests_ms": 571,
+      "baseline_tests_ms": 612,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 5100,
-      "oracle_build_ms": 3858,
-      "plan_generation_ms": 20,
-      "report_writing_ms": 11,
-      "schema_build_ms": 3392,
-      "schema_workers_ms": 108,
-      "total_ms": 15683
+      "fallback_workers_ms": 6334,
+      "oracle_build_ms": 3538,
+      "plan_generation_ms": 21,
+      "report_writing_ms": 13,
+      "schema_build_ms": 3563,
+      "schema_workers_ms": 118,
+      "total_ms": 16877
     },
     "recompile_categories": {
-      "compile_error": 0,
+      "compile_error": 9,
       "dep_path_error": 0,
-      "unknown": 13
+      "unknown": 0
     },
     "selection": {
       "coverage_collection_wall_ms": 0,
