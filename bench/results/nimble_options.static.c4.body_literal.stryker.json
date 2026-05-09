@@ -1,0 +1,2547 @@
+{
+  "files": {
+    "lib/nimble_options.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1259,
+          "id": "0070f6db97a940dd7998a3aceb2c1c94",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with empty args"
+          ],
+          "location": {
+            "end": {
+              "column": 59,
+              "line": 1010
+            },
+            "start": {
+              "column": 46,
+              "line": 1010
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(args)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1288,
+          "id": "019f9b61e291ef92938c79847900bde2",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid timeout"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 634
+            },
+            "start": {
+              "column": 41,
+              "line": 634
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1490,
+          "id": "029e70252c5bc7f99df4a6e862f98f35",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
+          ],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 345
+            },
+            "start": {
+              "column": 59,
+              "line": 345
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(schema)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1262,
+          "id": "073c2ad39f77bb2fc161458d0cde2ab8",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid mfa"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 738
+            },
+            "start": {
+              "column": 13,
+              "line": 738
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mod)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 837,
+          "id": "0f9305ff26912183e6ffb20e5c856de9",
+          "killedBy": [
+            "NimbleOptionsTest:nested options with custom keys validate empty keys for :non_empty_keyword_list"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 671
+            },
+            "start": {
+              "column": 29,
+              "line": 671
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "keyword_list?(value) or value != []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1208,
+          "id": "10a9b79094d504a154658867526b7d59",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 66,
+              "line": 1000
+            },
+            "start": {
+              "column": 49,
+              "line": 1000
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(arity)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 1103,
+          "id": "1a73dbd10b25073c5b9f5efdb9e26e1d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 83,
+              "line": 495
+            },
+            "start": {
+              "column": 71,
+              "line": 495
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(opts)",
+          "status": "RuntimeError",
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":2610}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_finished\",\"duration_us\":3383}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_finished\",\"duration_us\":33}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 generate inline indented docs for nested options (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:20\\n     ** (BadMapError) expected a map, got:\\n\\n         [\\n           producer: [\\n             type: :non_empty_keyword_list,\\n             doc: \\\"The producer. Supported options:\\\",\\n             keys: [\\n               module: [type: :mod_arg, doc: \\\"The module.\\\"],\\n               rate_limiting: [\\n                 type: :non_empty_keyword_list,\\n                 doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\",\\n                 keys: [\\n                   allowed_messages: [\\n                     type: :pos_integer,\\n                     doc: \\\"Number of messages per interval.\\\"\\n                   ],\\n                   interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]\\n                 ]\\n               ]\\n             ]\\n           ],\\n           other_key: [type: :string]\\n         ]\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (stdlib 7.2) maps.erl:1303: :maps.to_list([producer: [type: :non_empty_keyword_list, doc: \\\"The producer. Supported options:\\\", keys: [module: [type: :mod_arg, doc: \\\"The module.\\\"], rate_limiting: [type: :non_empty_keyword_list, doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\", keys: [allowed_messages: [type: :pos_integer, doc: \\\"Number of messages per interval.\\\"], interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]]]]], other_key: [type: :string]])\\n       test/nimble_options/docs_test.exs:58: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_finished\",\"duration_us\":4641}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (BadMapError) expected a map, got:\n\n    [an_option: []]\n\n    (stdlib 7.2) maps.erl:1303: :maps.to_list([an_option: []])\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard < with >=",
+          "duration": 1196,
+          "id": "20a652dd07c3d2ce388fad3d0df58913",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid non negative integer"
+          ],
+          "location": {
+            "end": {
+              "column": 91,
+              "line": 601
+            },
+            "start": {
+              "column": 82,
+              "line": 601
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "value >= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1233,
+          "id": "2a3020e3b996b628c8067ea4971eb66f",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:list, subtype} with custom subtype"
+          ],
+          "location": {
+            "end": {
+              "column": 71,
+              "line": 863
+            },
+            "start": {
+              "column": 57,
+              "line": 863
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace boolean literal true with false",
+          "duration": 1110,
+          "id": "396df1eed505f60365ed01ff7e3bfa78",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 588
+            },
+            "start": {
+              "column": 7,
+              "line": 588
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "false",
+          "status": "RuntimeError",
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 generate inline indented docs for nested options (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:20\\n     ** (CondClauseError) no cond clause evaluated to a truthy value\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:588: NimbleOptions.validate_value/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:561: NimbleOptions.validate_option/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\\n       (elixir 1.20.0-rc.4) lib/enum.ex:5119: Enumerable.List.reduce/3\\n       (elixir 1.20.0-rc.4) lib/enum.ex:2676: Enum.reduce_while/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\\n       (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\\n       (elixir 1.20.0-rc.4) lib/enum.ex:5119: Enumerable.List.reduce/3\\n       (elixir 1.20.0-rc.4) lib/enum.ex:2676: Enum.reduce_while/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\\n       (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:58: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_finished\",\"duration_us\":10961}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (CondClauseError) no cond clause evaluated to a truthy value\n    (nimble_options 1.1.1) lib/nimble_options.ex:588: NimbleOptions.validate_value/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:561: NimbleOptions.validate_option/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\n    (elixir 1.20.0-rc.4) lib/enum.ex:5119: Enumerable.List.reduce/3\n    (elixir 1.20.0-rc.4) lib/enum.ex:2676: Enum.reduce_while/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\n    (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\n    (elixir 1.20.0-rc.4) lib/enum.ex:5119: Enumerable.List.reduce/3\n    (elixir 1.20.0-rc.4) lib/enum.ex:2676: Enum.reduce_while/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\n    (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 1232,
+          "id": "3b85b137b0814d54998bd884f9dd6bdc",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid timeout"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 634
+            },
+            "start": {
+              "column": 18,
+              "line": 634
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "value != :infinity",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_nil with is_atom",
+          "duration": 1181,
+          "id": "3bf0fe184509d1b46f32725063b3ae82",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 876
+            },
+            "start": {
+              "column": 33,
+              "line": 876
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_atom(nested_schema)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace boolean literal false with true",
+          "duration": 1117,
+          "id": "455b7285d89610bf26514db91051d218",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 580
+            },
+            "start": {
+              "column": 38,
+              "line": 580
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "true",
+          "status": "RuntimeError",
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_finished\",\"duration_us\":3147}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 stop generating docs recursively if type has no :keys (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:290\\n     ** (ArgumentError) invalid NimbleOptions schema. Reason: required :required option not found, received options: [:type, :doc, :keys] (in options [:custom_keys])\\n     code: assert {:ok, ^opts} = NimbleOptions.validate(opts, schema)\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:375: NimbleOptions.new!/1\\n       (nimble_options 1.1.1) lib/nimble_options.ex:346: NimbleOptions.validate/2\\n       test/nimble_options/docs_test.exs:301: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_finished\",\"duration_us\":5489}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (ArgumentError) invalid NimbleOptions schema. Reason: required :type option not found, received options: [] (in options [:an_option])\n    (nimble_options 1.1.1) lib/nimble_options.ex:375: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 716,
+          "id": "4bd65e23ab93262ec765b13a89da6e4e",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
+          ],
+          "location": {
+            "end": {
+              "column": 81,
+              "line": 805
+            },
+            "start": {
+              "column": 81,
+              "line": 805
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "length(args) - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1207,
+          "id": "4e7d40724753ce4c7d3ff614a41dd266",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 81,
+              "line": 1000
+            },
+            "start": {
+              "column": 71,
+              "line": 1000
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "arity > 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1180,
+          "id": "536ad5204ff6e52cb274c98cbbeee961",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid integer"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 593
+            },
+            "start": {
+              "column": 53,
+              "line": 593
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard < with <=",
+          "duration": 1172,
+          "id": "5569009fc6c2db81272a93f4f5af4cf7",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid non negative integer"
+          ],
+          "location": {
+            "end": {
+              "column": 91,
+              "line": 601
+            },
+            "start": {
+              "column": 82,
+              "line": 601
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "value <= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1237,
+          "id": "597d964bdb543da3a0dc607dace41c84",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested :or"
+          ],
+          "location": {
+            "end": {
+              "column": 24,
+              "line": 1010
+            },
+            "start": {
+              "column": 12,
+              "line": 1010
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mod)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard < with <=",
+          "duration": 1228,
+          "id": "5a549de0ab03723a5fc8d656ef7bbd35",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid positive integer"
+          ],
+          "location": {
+            "end": {
+              "column": 87,
+              "line": 609
+            },
+            "start": {
+              "column": 78,
+              "line": 609
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "value <= 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard >= with <",
+          "duration": 1267,
+          "id": "5adde818ee3640268cc76f514b485e79",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid {:fun, arity}"
+          ],
+          "location": {
+            "end": {
+              "column": 81,
+              "line": 1000
+            },
+            "start": {
+              "column": 71,
+              "line": 1000
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "arity < 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 701,
+          "id": "5e1edeac6873e335255713804d9480ef",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
+          ],
+          "location": {
+            "end": {
+              "column": 81,
+              "line": 805
+            },
+            "start": {
+              "column": 81,
+              "line": 805
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "length(args) * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1269,
+          "id": "60b83f98c968f821f2564ad443c941f5",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 78,
+              "line": 601
+            },
+            "start": {
+              "column": 61,
+              "line": 601
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(value)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1302,
+          "id": "628fefcdd99d20ebf9030701bea7f443",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
+          ],
+          "location": {
+            "end": {
+              "column": 84,
+              "line": 805
+            },
+            "start": {
+              "column": 83,
+              "line": 805
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1238,
+          "id": "62e707e8bf97dd25c844f131a8e71173",
+          "killedBy": [
+            "NimbleOptionsTest:default value is not treated as values of received options when showing validation error"
+          ],
+          "location": {
+            "end": {
+              "column": 78,
+              "line": 601
+            },
+            "start": {
+              "column": 61,
+              "line": 601
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_float with is_number",
+          "duration": 1302,
+          "id": "6c5ac97cea62365fe8b3aa4f5fe04e3c",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid float"
+          ],
+          "location": {
+            "end": {
+              "column": 66,
+              "line": 617
+            },
+            "start": {
+              "column": 51,
+              "line": 617
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1284,
+          "id": "774c69a920f6711b70703a3317b2287f",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
+          ],
+          "location": {
+            "end": {
+              "column": 64,
+              "line": 625
+            },
+            "start": {
+              "column": 50,
+              "line": 625
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1189,
+          "id": "78bcb6c9ee29833cc7c9a2692d0816b8",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid mfa"
+          ],
+          "location": {
+            "end": {
+              "column": 42,
+              "line": 738
+            },
+            "start": {
+              "column": 30,
+              "line": 738
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(fun)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_nil with is_atom",
+          "duration": 1158,
+          "id": "7d2b0d7426e028c69563e47992e3dd6e",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid mfa"
+          ],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 742
+            },
+            "start": {
+              "column": 49,
+              "line": 742
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_atom(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1188,
+          "id": "7f630fc8ef95dcbb4cc9d1b39f77f31f",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid timeout"
+          ],
+          "location": {
+            "end": {
+              "column": 73,
+              "line": 634
+            },
+            "start": {
+              "column": 63,
+              "line": 634
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "value > 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 739,
+          "id": "81a48defcaa303cefecc6eb070f84f1d",
+          "killedBy": [
+            "NimbleOptionsTest:doctest module NimbleOptions (2)"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 671
+            },
+            "start": {
+              "column": 39,
+              "line": 671
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "value == []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1185,
+          "id": "831860a6dadb1b8b698ba1d3ea13a2b0",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 609
+            },
+            "start": {
+              "column": 57,
+              "line": 609
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(value)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1353,
+          "id": "87b48056a448cf20e7856a8d3c6b2dde",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with compound subtypes"
+          ],
+          "location": {
+            "end": {
+              "column": 68,
+              "line": 1014
+            },
+            "start": {
+              "column": 51,
+              "line": 1014
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(subtypes)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1362,
+          "id": "8bfd260806d4a7d72531e1b1fcda3723",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid mfa"
+          ],
+          "location": {
+            "end": {
+              "column": 60,
+              "line": 738
+            },
+            "start": {
+              "column": 47,
+              "line": 738
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(args)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1373,
+          "id": "903f4de5ca1ae41567e483d930b37431",
+          "killedBy": [
+            "NimbleOptionsTest:option_typespec/1 joins typespec correctly"
+          ],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 474
+            },
+            "start": {
+              "column": 36,
+              "line": 474
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(schema)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_nil with is_atom",
+          "duration": 1372,
+          "id": "9346bc9d0755b820b11462045d7c7d6b",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 835
+            },
+            "start": {
+              "column": 33,
+              "line": 835
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_atom(nested_schema)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1194,
+          "id": "954166fad2ec8ec51c53b3415eb3c5a7",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:map, key_type, value_type}"
+          ],
+          "location": {
+            "end": {
+              "column": 32,
+              "line": 697
+            },
+            "start": {
+              "column": 18,
+              "line": 697
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(pairs)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1220,
+          "id": "9ca41075ada7276b4970e28af50bf012",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid integer"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 593
+            },
+            "start": {
+              "column": 53,
+              "line": 593
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1142,
+          "id": "a59b17a825122265cf24848f2dc74b50",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 369
+            },
+            "start": {
+              "column": 25,
+              "line": 369
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(schema)",
+          "status": "RuntimeError",
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":1008}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":1264}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 stop generating docs recursively if type has no :keys (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:290\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1\\n\\n     The following arguments were given to NimbleOptions.new!/1:\\n\\n         # 1\\n         [custom_keys: [type: :keyword_list, doc: \\\"Custom keys\\\", keys: [*: [type: :atom, doc: \\\"Won't be there!\\\"]]]]\\n\\n     Attempted function clauses (showing 1 out of 1):\\n\\n         def new!(schema) when is_tuple(schema)\\n\\n     code: assert {:ok, ^opts} = NimbleOptions.validate(opts, schema)\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:301: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_finished\",\"duration_us\":4209}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1    \n    \n    The following arguments were given to NimbleOptions.new!/1:\n    \n        # 1\n        [an_option: []]\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def new!(+schema+) when -is_tuple(schema)-\n    \n    (nimble_options 1.1.1) NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1295,
+          "id": "a5a08c636728d70e217594217ecba098",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
+          ],
+          "location": {
+            "end": {
+              "column": 65,
+              "line": 1042
+            },
+            "start": {
+              "column": 47,
+              "line": 1042
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(tuple_def)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_tuple with is_list",
+          "duration": 1211,
+          "id": "a6a15f55ccab797dd8a91d3bf4e266a2",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 912
+            },
+            "start": {
+              "column": 13,
+              "line": 912
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1265,
+          "id": "b311175ec61c6854d123d61005dec458",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 634
+            },
+            "start": {
+              "column": 41,
+              "line": 634
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(value)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 1245,
+          "id": "b5c5e246bd7687a3783f31df86e7989a",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
+          ],
+          "location": {
+            "end": {
+              "column": 71,
+              "line": 912
+            },
+            "start": {
+              "column": 33,
+              "line": 912
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "length(tuple_def) != tuple_size(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_tuple with is_list",
+          "duration": 1224,
+          "id": "bb3cccf9c6e6be4d30a5803051062cb3",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 75,
+              "line": 932
+            },
+            "start": {
+              "column": 60,
+              "line": 932
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(value)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1103,
+          "id": "bb8845235b5d8aa8fe3db9c90ad1414f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 84,
+              "line": 504
+            },
+            "start": {
+              "column": 71,
+              "line": 504
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(opts)",
+          "status": "RuntimeError",
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_finished\",\"duration_us\":4079}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_finished\",\"duration_us\":1334}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_finished\",\"duration_us\":30}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":7}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":0}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:61\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3\\n\\n     The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\\n\\n         # 1\\n         [producer: [type: :non_empty_keyword_list, doc: \\\"The producer.\\\\n\\\\nWhich is very cool.\\\\n\\\", keys: [nested: [type: :integer, doc: \\\"The nestedness.\\\\n\\\\nIt should be quite nested.\\\\n\\\"]]]]\\n\\n         # 2\\n         [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \\\"The type of the option item.\\\"], required: [type: :boolean, default: false, doc: \\\"Defines if the option item is required.\\\"], default: [type: :any, doc: \\\"The default value for the option item if that option is not specified. This value\\\\nis *validated* according to the given `:type`. This means that you cannot\\\\nhave, for example, `type: :integer` and use `default: \\\\\\\"a string\\\\\\\"`.\\\\n\\\"], keys: [type: :keyword_list, doc: \\\"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\\\nit defines which set of keys are accepted for the option item. The value of the\\\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\\\n`keys: [*: [type: :integer]]`.\\\\n\\\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \\\"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\\\n\\\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The documentation for the option item.\\\"], subsection: [type: :string, doc: \\\"The title of separate subsection of the options' documentation\\\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The type doc to use *in the documentation* for the option item. If `false`,\\\\nno type documentation is added to the item. If it's a string, it can be\\\\nanything. For example, you can use `\\\\\\\"a list of PIDs\\\\\\\"`, or you can use\\\\na typespec reference that ExDoc can link to the type definition, such as\\\\n`` \\\\\\\"`t:binary/0`\\\\\\\" ``. You can use Markdown in this documentation. If the\\\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\\\ndocumentation automatically if it can do it unambiguously. For example,\\\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\\\nauto-generated type doc.\\\\n\\\"], type_spec: [type: :any, type_doc: \\\"`t:Macro.t/0`\\\", doc: \\\"The quoted spec to use *in the typespec* for the option item. You should use this\\\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\\\nterm. For example, if you have an `:exception` option that is validated with a\\\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\\\n\\\"]]]]\\n\\n         # 3\\n         []\\n\\n     Attempted function clauses (showing 3 out of 3):\\n\\n         defp validate_options_with_schema_and_path(opts, fun, path) when is_function(fun)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_tuple(opts)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:95: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778317795-ynZTfQ/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_finished\",\"duration_us\":5382}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3    \n    \n    The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\n    \n        # 1\n        [an_option: []]\n    \n        # 2\n        [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \"The type of the option item.\"], required: [type: :boolean, default: false, doc: \"Defines if the option item is required.\"], default: [type: :any, doc: \"The default value for the option item if that option is not specified. This value\\nis *validated* according to the given `:type`. This means that you cannot\\nhave, for example, `type: :integer` and use `default: \\\"a string\\\"`.\\n\"], keys: [type: :keyword_list, doc: \"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\nit defines which set of keys are accepted for the option item. The value of the\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\n`keys: [*: [type: :integer]]`.\\n\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\n\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The documentation for the option item.\"], subsection: [type: :string, doc: \"The title of separate subsection of the options' documentation\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The type doc to use *in the documentation* for the option item. If `false`,\\nno type documentation is added to the item. If it's a string, it can be\\nanything. For example, you can use `\\\"a list of PIDs\\\"`, or you can use\\na typespec reference that ExDoc can link to the type definition, such as\\n`` \\\"`t:binary/0`\\\" ``. You can use Markdown in this documentation. If the\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\ndocumentation automatically if it can do it unambiguously. For example,\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\nauto-generated type doc.\\n\"], type_spec: [type: :any, type_doc: \"`t:Macro.t/0`\", doc: \"The quoted spec to use *in the typespec* for the option item. You should use this\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\nterm. For example, if you have an `:exception` option that is validated with a\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\n\"]]]]\n    \n        # 3\n        []\n    \n    Attempted function clauses (showing 3 out of 3):\n    \n        defp validate_options_with_schema_and_path(+opts+, +fun+, +path+) when -is_function(fun)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_map(opts)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_tuple(opts)-\n    \n    (nimble_options 1.1.1) NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1222,
+          "id": "bde079a777a57718db045ba0843a0bcf",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with empty args"
+          ],
+          "location": {
+            "end": {
+              "column": 41,
+              "line": 1010
+            },
+            "start": {
+              "column": 29,
+              "line": 1010
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(fun)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1217,
+          "id": "c04a8c12415a48613525b31da5d2a5d1",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 924
+            },
+            "start": {
+              "column": 16,
+              "line": 924
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(acc)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1232,
+          "id": "c8676a0887a60354a9abfd8d5e93ad80",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:struct, struct_name}"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 1074
+            },
+            "start": {
+              "column": 50,
+              "line": 1074
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(struct_name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1245,
+          "id": "cd0b0b12e7df29652c4ac68813b4f31c",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid mod_arg"
+          ],
+          "location": {
+            "end": {
+              "column": 76,
+              "line": 750
+            },
+            "start": {
+              "column": 64,
+              "line": 750
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(mod)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1214,
+          "id": "d02129c107cb8dffd37d527e94d9a9e7",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested keyword lists"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 853
+            },
+            "start": {
+              "column": 19,
+              "line": 853
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(errors)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1367,
+          "id": "d1eeb58dd18e9a1fddea33633ca23b70",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
+          ],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 345
+            },
+            "start": {
+              "column": 38,
+              "line": 345
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(options)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 704,
+          "id": "e2215fb855a35b33caaae4a528149b08",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested keyword lists"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 965
+            },
+            "start": {
+              "column": 20,
+              "line": 965
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "is_list(value) or Enum.all?(value, &match?({key, _value} when is_atom(key), &1))",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1217,
+          "id": "e68f994996b6fc5cb43785aecf5f39d4",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:list, subtype} with a :map subtype"
+          ],
+          "location": {
+            "end": {
+              "column": 84,
+              "line": 1031
+            },
+            "start": {
+              "column": 71,
+              "line": 1031
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(keys)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard >= with <",
+          "duration": 1201,
+          "id": "e69dace77d472110db789826b6ad5eac",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid timeout"
+          ],
+          "location": {
+            "end": {
+              "column": 73,
+              "line": 634
+            },
+            "start": {
+              "column": 63,
+              "line": 634
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "value < 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_float with is_integer",
+          "duration": 1196,
+          "id": "e96cadb63de6f8600ea18ac2747287c4",
+          "killedBy": [
+            "NimbleOptionsTest:type validation invalid float"
+          ],
+          "location": {
+            "end": {
+              "column": 66,
+              "line": 617
+            },
+            "start": {
+              "column": 51,
+              "line": 617
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_integer(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1222,
+          "id": "ecd9d6c91de0565d137699acba63d887",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid positive integer"
+          ],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 609
+            },
+            "start": {
+              "column": 57,
+              "line": 609
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 1217,
+          "id": "f1b33c0ca7d7e3311ae76bcd43791ef6",
+          "killedBy": [
+            "NimbleOptionsTest:type validation {:list, subtype} with a :map subtype"
+          ],
+          "location": {
+            "end": {
+              "column": 78,
+              "line": 686
+            },
+            "start": {
+              "column": 67,
+              "line": 686
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(map)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard < with >=",
+          "duration": 1205,
+          "id": "f4972e130686a9686b6986617815cd89",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid positive integer"
+          ],
+          "location": {
+            "end": {
+              "column": 87,
+              "line": 609
+            },
+            "start": {
+              "column": 78,
+              "line": 609
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "value >= 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1277,
+          "id": "f629228fd9347b4ba0125671fa4b0df0",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+          ],
+          "location": {
+            "end": {
+              "column": 49,
+              "line": 419
+            },
+            "start": {
+              "column": 34,
+              "line": 419
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(schema)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1251,
+          "id": "f6a99aa3ef59fa66f96dc0f013012375",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
+          ],
+          "location": {
+            "end": {
+              "column": 70,
+              "line": 419
+            },
+            "start": {
+              "column": 54,
+              "line": 419
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(options)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1213,
+          "id": "fb7d901609fc3a114ca49c5755811004",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 423
+            },
+            "start": {
+              "column": 58,
+              "line": 423
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(options)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options_test.exs",
+            "test/nimble_options/docs_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1240,
+          "id": "fc8d6bffba6906549bb365ebc8b02d26",
+          "killedBy": [
+            "NimbleOptionsTest:type validation valid {:fun, arity}"
+          ],
+          "location": {
+            "end": {
+              "column": 66,
+              "line": 1000
+            },
+            "start": {
+              "column": 49,
+              "line": 1000
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(arity)",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule NimbleOptions do\n  @options_schema [\n    *: [\n      type: :keyword_list,\n      keys: [\n        type: [\n          type: {:custom, __MODULE__, :validate_type, []},\n          default: :any,\n          doc: \"The type of the option item.\"\n        ],\n        required: [\n          type: :boolean,\n          default: false,\n          doc: \"Defines if the option item is required.\"\n        ],\n        default: [\n          type: :any,\n          doc: \"\"\"\n          The default value for the option item if that option is not specified. This value\n          is *validated* according to the given `:type`. This means that you cannot\n          have, for example, `type: :integer` and use `default: \"a string\"`.\n          \"\"\"\n        ],\n        keys: [\n          type: :keyword_list,\n          doc: \"\"\"\n          Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\n          it defines which set of keys are accepted for the option item. The value of the\n          `:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\n          Use `:*` as the key to allow multiple arbitrary keys and specify their schema:\n          `keys: [*: [type: :integer]]`.\n          \"\"\",\n          keys: &__MODULE__.options_schema/0\n        ],\n        deprecated: [\n          type: :string,\n          doc: \"\"\"\n          Defines a message to indicate that the option item is deprecated. \\\n          The message will be displayed as a warning when passing the item.\n          \"\"\"\n        ],\n        doc: [\n          type: {:or, [:string, {:in, [false]}]},\n          type_doc: \"`t:String.t/0` or `false`\",\n          doc: \"The documentation for the option item.\"\n        ],\n        subsection: [\n          type: :string,\n          doc: \"The title of separate subsection of the options' documentation\"\n        ],\n        type_doc: [\n          type: {:or, [:string, {:in, [false]}]},\n          type_doc: \"`t:String.t/0` or `false`\",\n          doc: \"\"\"\n          The type doc to use *in the documentation* for the option item. If `false`,\n          no type documentation is added to the item. If it's a string, it can be\n          anything. For example, you can use `\"a list of PIDs\"`, or you can use\n          a typespec reference that ExDoc can link to the type definition, such as\n          `` \"`t:binary/0`\" ``. You can use Markdown in this documentation. If the\n          `:type_doc` option is not present, NimbleOptions tries to produce a type\n          documentation automatically if it can do it unambiguously. For example,\n          if `type: :integer`, NimbleOptions will use `t:integer/0` as the\n          auto-generated type doc.\n          \"\"\"\n        ],\n        type_spec: [\n          type: :any,\n          type_doc: \"`t:Macro.t/0`\",\n          doc: \"\"\"\n          The quoted spec to use *in the typespec* for the option item. You should use this\n          when the auto-generated spec is not specific enough. For example, if you are performing\n          custom validation on an option (with the `{:custom, ...}` type), then the\n          generated type spec for that option will always be `t:term/0`, but you can use\n          this option to customize that. The value for this option **must** be a quoted Elixir\n          term. For example, if you have an `:exception` option that is validated with a\n          `{:custom, ...}` type (based on `is_exception/1`), you can override the type\n          spec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\n          \"\"\"\n        ]\n      ]\n    ]\n  ]\n\n  @moduledoc \"\"\"\n  Provides a standard API to handle keyword-list-based options.\n\n  `NimbleOptions` allows developers to create schemas using a\n  pre-defined set of options and types. The main benefits are:\n\n    * A single unified way to define simple static options\n    * Config validation against schemas\n    * Automatic doc generation\n\n  ## Schema Options\n\n  These are the options supported in a *schema*. They are what\n  defines the validation for the items in the given schema.\n\n  #{NimbleOptions.Docs.generate(@options_schema, nest_level: 0)}\n\n  ## Types\n\n    * `:any` - Any type.\n\n    * `:keyword_list` - A keyword list.\n\n    * `:non_empty_keyword_list` - A non-empty keyword list.\n\n    * `:map` - A map consisting of `:atom` keys. Shorthand for `{:map, :atom, :any}`.\n      Keys can be specified using the `keys` option.\n\n    * `{:map, key_type, value_type}` - A map consisting of `key_type` keys and\n      `value_type` values.\n\n    * `:atom` - An atom.\n\n    * `:string` - A string.\n\n    * `:boolean` - A boolean.\n\n    * `:integer` - An integer.\n\n    * `:non_neg_integer` - A non-negative integer.\n\n    * `:pos_integer` - A positive integer.\n\n    * `:float` - A float.\n\n    * `:timeout` - A non-negative integer or the atom `:infinity`.\n\n    * `:pid` - A PID (process identifier).\n\n    * `:reference` - A reference (see `t:reference/0`).\n\n    * `nil` - The value `nil` itself. Available since v1.0.0.\n\n    * `:mfa` - A named function in the format `{module, function, arity}` where\n      `arity` is a list of arguments. For example, `{MyModule, :my_fun, [arg1, arg2]}`.\n\n    * `:mod_arg` - A module along with arguments, such as `{MyModule, arguments}`.\n      Usually used for process initialization using `start_link` and similar. The\n      second element of the tuple can be any term.\n\n    * `{:fun, arity}` - Any function with the specified arity.\n\n    * `{:in, choices}` - A value that is a member of one of the `choices`. `choices`\n      should be a list of terms or a `Range`. The value is an element in said\n      list of terms, that is, `value in choices` is `true`. This was previously\n      called `:one_of` and the `:in` name is available since version 0.3.3 (`:one_of`\n      has been removed in v0.4.0).\n\n    * `{:custom, mod, fun, args}` - A custom type. The related value must be validated\n      by `mod.fun(values, ...args)`. The function should return `{:ok, value}` or\n      `{:error, message}`.\n\n    * `{:or, subtypes}` - A value that matches one of the given `subtypes`. The value is\n      matched against the subtypes in the order specified in the list of `subtypes`. If\n      one of the subtypes matches and **updates** (casts) the given value, the updated\n      value is used. For example: `{:or, [:string, :boolean, {:fun, 2}]}`. If one of the\n      subtypes is a keyword list or map, you won't be able to pass `:keys` directly. For this reason,\n      `:keyword_list`, `:non_empty_keyword_list`, and `:map` are special cased and can\n      be used as subtypes with `{:keyword_list, keys}`, `{:non_empty_keyword_list, keys}` or `{:map, keys}`.\n      For example, a type such as `{:or, [:boolean, keyword_list: [enabled: [type: :boolean]]]}`\n      would match either a boolean or a keyword list with the `:enabled` boolean option in it.\n\n    * `{:list, subtype}` - A list where all elements match `subtype`. `subtype` can be any\n      of the accepted types listed here. Empty lists are allowed. The resulting validated list\n      contains the validated (and possibly updated) elements, each as returned after validation\n      through `subtype`. For example, if `subtype` is a custom validator function that returns\n      an updated value, then that updated value is used in the resulting list. Validation\n      fails at the *first* element that is invalid according to `subtype`. If `subtype` is\n      a keyword list or map, you won't be able to pass `:keys` directly. For this reason,\n      `:keyword_list`, `:non_empty_keyword_list`, and `:map` are special cased and can\n      be used as the subtype by using `{:keyword_list, keys}`, `{:non_empty_keyword_list, keys}`\n      or `{:keyword_list, keys}`. For example, a type such as\n      `{:list, {:keyword_list, enabled: [type: :boolean]}}` would a *list of keyword lists*,\n      where each keyword list in the list could have the `:enabled` boolean option in it.\n\n    * `{:tuple, list_of_subtypes}` - A tuple as described by `tuple_of_subtypes`.\n      `list_of_subtypes` must be a list with the same length as the expected tuple.\n      Each of the list's elements must be a subtype that should match the given element in that\n      same position. For example, to describe 3-element tuples with an atom, a string, and\n      a list of integers you would use the type `{:tuple, [:atom, :string, {:list, :integer}]}`.\n      *Available since v0.4.1*.\n\n    * `{:struct, struct_name}` - An instance of the struct type given.\n\n  ## Example\n\n      iex> schema = [\n      ...>   producer: [\n      ...>     type: :non_empty_keyword_list,\n      ...>     required: true,\n      ...>     keys: [\n      ...>       module: [required: true, type: :mod_arg],\n      ...>       concurrency: [\n      ...>         type: :pos_integer,\n      ...>       ]\n      ...>     ]\n      ...>   ]\n      ...> ]\n      ...>\n      ...> config = [\n      ...>   producer: [\n      ...>     concurrency: 1,\n      ...>   ]\n      ...> ]\n      ...>\n      ...> {:error, %NimbleOptions.ValidationError{} = error} = NimbleOptions.validate(config, schema)\n      ...> Exception.message(error)\n      \"required :module option not found, received options: [:concurrency] (in options [:producer])\"\n\n  ## Nested Option Items\n\n  `NimbleOptions` allows option items to be nested so you can recursively validate\n  any item down the options tree.\n\n  ### Example\n\n      iex> schema = [\n      ...>   producer: [\n      ...>     required: true,\n      ...>     type: :non_empty_keyword_list,\n      ...>     keys: [\n      ...>       rate_limiting: [\n      ...>         type: :non_empty_keyword_list,\n      ...>         keys: [\n      ...>           interval: [required: true, type: :pos_integer]\n      ...>         ]\n      ...>       ]\n      ...>     ]\n      ...>   ]\n      ...> ]\n      ...>\n      ...> config = [\n      ...>   producer: [\n      ...>     rate_limiting: [\n      ...>       interval: :oops!\n      ...>     ]\n      ...>   ]\n      ...> ]\n      ...>\n      ...> {:error, %NimbleOptions.ValidationError{} = error} = NimbleOptions.validate(config, schema)\n      ...> Exception.message(error)\n      \"invalid value for :interval option: expected positive integer, got: :oops! (in options [:producer, :rate_limiting])\"\n\n  ## Validating Schemas\n\n  Each time `validate/2` is called, the given schema itself will be validated before validating\n  the options.\n\n  In most applications the schema will never change but validating options will be done\n  repeatedly.\n\n  To avoid the extra cost of validating the schema, it is possible to validate the schema once,\n  and then use that valid schema directly. This is done by using the `new!/1` function first, and\n  then passing the returned schema to `validate/2`.\n\n  > #### Create the Schema at Compile Time {: .tip}\n  >\n  > If your option schema doesn't include any runtime-only terms in it (such as anonymous\n  > functions), you can call `new!/1` to validate the schema and returned a *compiled* schema\n  > **at compile time**. This is an efficient way to avoid doing any unnecessary work at\n  > runtime. See the example below for more information.\n\n  ### Example\n\n      iex> raw_schema = [\n      ...>   hostname: [\n      ...>     required: true,\n      ...>     type: :string\n      ...>   ]\n      ...> ]\n      ...>\n      ...> schema = NimbleOptions.new!(raw_schema)\n      ...> NimbleOptions.validate([hostname: \"elixir-lang.org\"], schema)\n      {:ok, hostname: \"elixir-lang.org\"}\n\n  Calling `new!/1` from a function that receives options will still validate the schema each time\n  that function is called. Declaring the schema as a module attribute is supported:\n\n      @options_schema NimbleOptions.new!([...])\n\n  This schema will be validated at compile time. Calling `docs/1` on that schema is also\n  supported.\n  \"\"\"\n\n  alias NimbleOptions.ValidationError\n\n  defstruct schema: []\n\n  @basic_types [\n    :any,\n    :keyword_list,\n    :non_empty_keyword_list,\n    :map,\n    :atom,\n    :integer,\n    :non_neg_integer,\n    :pos_integer,\n    :float,\n    :mfa,\n    :mod_arg,\n    :string,\n    :boolean,\n    :timeout,\n    :pid,\n    :reference,\n    nil\n  ]\n\n  @typedoc \"\"\"\n  A schema.\n\n  See the module documentation for more information.\n  \"\"\"\n  @type schema() :: keyword()\n\n  @typedoc \"\"\"\n  The `NimbleOptions` struct embedding a validated schema.\n\n  See the [*Validating Schemas* section](#module-validating-schemas) in\n  the module documentation.\n  \"\"\"\n  @type t() :: %__MODULE__{schema: schema()}\n\n  @doc \"\"\"\n  Validates the given `options` with the given `schema`.\n\n  See the module documentation for what a `schema` is.\n\n  If the validation is successful, this function returns `{:ok, validated_options}`\n  where `validated_options` is a keyword list. If the validation fails, this\n  function returns `{:error, validation_error}` where `validation_error` is a\n  `NimbleOptions.ValidationError` struct explaining what's wrong with the options.\n  You can use `raise/1` with that struct or `Exception.message/1` to turn it into a string.\n  \"\"\"\n  @spec validate(keyword() | map(), schema() | t()) ::\n          {:ok, validated_options :: keyword() | map()} | {:error, ValidationError.t()}\n\n  def validate(options, %NimbleOptions{schema: schema}) do\n    validate_options_with_schema(options, schema)\n  end\n\n  def validate(options, schema) when is_list(options) and is_list(schema) do\n    validate(options, new!(schema))\n  end\n\n  @doc \"\"\"\n  Validates the given `options` with the given `schema` and raises if they're not valid.\n\n  This function behaves exactly like `validate/2`, but returns the options directly\n  if they're valid or raises a `NimbleOptions.ValidationError` exception otherwise.\n  \"\"\"\n  @spec validate!(keyword() | map(), schema() | t()) :: validated_options :: keyword() | map()\n  def validate!(options, schema) do\n    case validate(options, schema) do\n      {:ok, options} -> options\n      {:error, %ValidationError{} = error} -> raise error\n    end\n  end\n\n  @doc \"\"\"\n  Validates the given `schema` and returns a wrapped schema to be used with `validate/2`.\n\n  If the given schema is not valid, raises a `NimbleOptions.ValidationError`.\n  \"\"\"\n  @spec new!(schema()) :: t()\n  def new!(schema) when is_list(schema) do\n    case validate_options_with_schema(schema, options_schema()) do\n      {:ok, validated_schema} ->\n        %NimbleOptions{schema: validated_schema}\n\n      {:error, %ValidationError{} = error} ->\n        raise ArgumentError,\n              \"invalid NimbleOptions schema. Reason: #{Exception.message(error)}\"\n    end\n  end\n\n  @doc ~S\"\"\"\n  Returns documentation for the given schema.\n\n  You can use this to inject documentation in your docstrings. For example,\n  say you have your schema in a module attribute:\n\n      @options_schema [...]\n\n  With this, you can use `docs/1` to inject documentation:\n\n      @doc \"Supported options:\\n#{NimbleOptions.docs(@options_schema)}\"\n\n  ## Options\n\n    * `:nest_level` - an integer deciding the \"nest level\" of the generated\n      docs. This is useful when, for example, you use `docs/2` inside the `:doc`\n      option of another schema. For example, if you have the following nested schema:\n\n          nested_schema = [\n            allowed_messages: [type: :pos_integer, doc: \"Allowed messages.\"],\n            interval: [type: :pos_integer, doc: \"Interval.\"]\n          ]\n\n      then you can document it inside another schema with its nesting level increased:\n\n          schema = [\n            producer: [\n              type: {:or, [:string, keyword_list: nested_schema]},\n              doc:\n                \"Either a string or a keyword list with the following keys:\\n\\n\" <>\n                  NimbleOptions.docs(nested_schema, nest_level: 1)\n            ],\n            other_key: [type: :string]\n          ]\n\n  \"\"\"\n  @spec docs(schema() | t(), keyword()) :: String.t()\n  def docs(schema, options \\\\ [])\n\n  def docs(schema, options) when is_list(schema) and is_list(options) do\n    NimbleOptions.Docs.generate(schema, options)\n  end\n\n  def docs(%NimbleOptions{schema: schema}, options) when is_list(options) do\n    NimbleOptions.Docs.generate(schema, options)\n  end\n\n  @doc \"\"\"\n  Returns the quoted typespec for any option described by the given schema.\n\n  The returned quoted code represents the **type union** for all possible\n  keys in the schema, alongside their type. Nested keyword lists are\n  spec'ed as `t:keyword/0`.\n\n  ## Usage\n\n  Because of how typespecs are treated by the Elixir compiler, you have\n  to use `unquote/1` on the return value of this function to use it\n  in a typespec:\n\n      @type option() :: unquote(NimbleOptions.option_typespec(my_schema))\n\n  This function returns the type union for a single option: to give you\n  flexibility to combine it and use it in your own typespecs. For example,\n  if you only validate part of the options through NimbleOptions, you could\n  write a spec like this:\n\n      @type my_option() ::\n              {:my_opt1, integer()}\n              | {:my_opt2, boolean()}\n              | unquote(NimbleOptions.option_typespec(my_schema))\n\n  If you want to spec a whole schema, you could write something like this:\n\n      @type options() :: [unquote(NimbleOptions.option_typespec(my_schema))]\n\n  ## Example\n\n      schema = [\n        int: [type: :integer],\n        number: [type: {:or, [:integer, :float]}]\n      ]\n\n      @type option() :: unquote(NimbleOptions.option_typespec(schema))\n\n  The code above would essentially compile to:\n\n      @type option() :: {:int, integer()} | {:number, integer() | float()}\n\n  \"\"\"\n  @doc since: \"0.5.0\"\n  @spec option_typespec(schema() | t()) :: Macro.t()\n  def option_typespec(schema)\n\n  def option_typespec(schema) when is_list(schema) do\n    NimbleOptions.Docs.schema_to_spec(schema)\n  end\n\n  def option_typespec(%NimbleOptions{schema: schema}) do\n    NimbleOptions.Docs.schema_to_spec(schema)\n  end\n\n  @doc false\n  def options_schema() do\n    @options_schema\n  end\n\n  defp validate_options_with_schema(opts, schema) do\n    validate_options_with_schema_and_path(opts, schema, _path = [])\n  end\n\n  defp validate_options_with_schema_and_path(opts, fun, path) when is_function(fun) do\n    validate_options_with_schema_and_path(opts, fun.(), path)\n  end\n\n  defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts) do\n    list_opts = Map.to_list(opts)\n\n    case validate_options_with_schema_and_path(list_opts, schema, path) do\n      {:ok, validated_list_opts} -> {:ok, Map.new(validated_list_opts)}\n      error -> error\n    end\n  end\n\n  defp validate_options_with_schema_and_path(opts, schema, path) when is_list(opts) do\n    schema = expand_star_to_option_keys(schema, opts)\n\n    with :ok <- validate_unknown_options(opts, schema),\n         {:ok, options} <- validate_options(opts, schema) do\n      {:ok, options}\n    else\n      {:error, %ValidationError{} = error} ->\n        {:error, %ValidationError{error | keys_path: path ++ error.keys_path}}\n    end\n  end\n\n  defp validate_unknown_options(opts, schema) do\n    valid_opts = Keyword.keys(schema)\n\n    case Keyword.keys(opts) -- valid_opts do\n      [] ->\n        :ok\n\n      keys ->\n        error_tuple(\n          keys,\n          nil,\n          \"unknown options #{inspect(keys)}, valid options are: #{inspect(valid_opts)}\"\n        )\n    end\n  end\n\n  defp validate_options(opts, schema) do\n    orig_opts = opts\n\n    case Enum.reduce_while(schema, {opts, orig_opts}, &reduce_options/2) do\n      {:error, %ValidationError{}} = result -> result\n      {opts, _orig_opts} -> {:ok, opts}\n    end\n  end\n\n  defp reduce_options({key, schema_opts}, {opts, orig_opts}) do\n    case validate_option({opts, orig_opts}, key, schema_opts) do\n      {:error, %ValidationError{}} = result ->\n        {:halt, result}\n\n      {:ok, value} ->\n        opts = Keyword.update(opts, key, value, fn _ -> value end)\n        {:cont, {opts, orig_opts}}\n\n      :no_value ->\n        if Keyword.has_key?(schema_opts, :default) do\n          opts_with_default = Keyword.put(opts, key, schema_opts[:default])\n          reduce_options({key, schema_opts}, {opts_with_default, orig_opts})\n        else\n          {:cont, {opts, orig_opts}}\n        end\n    end\n  end\n\n  defp validate_option({opts, orig_opts}, key, schema) do\n    with {:ok, value} <- validate_value({opts, orig_opts}, key, schema),\n         {:ok, value} <- validate_type(schema[:type], key, value) do\n      if nested_schema = schema[:keys] do\n        validate_options_with_schema_and_path(value, nested_schema, _path = [key])\n      else\n        {:ok, value}\n      end\n    end\n  end\n\n  defp validate_value({opts, orig_opts}, key, schema) do\n    cond do\n      Keyword.has_key?(opts, key) ->\n        if message = Keyword.get(schema, :deprecated) do\n          IO.warn(\"#{render_key(key)} is deprecated. \" <> message)\n        end\n\n        {:ok, opts[key]}\n\n      Keyword.get(schema, :required, false) ->\n        error_tuple(\n          key,\n          nil,\n          \"required #{render_key(key)} not found, received options: \" <>\n            inspect(Keyword.keys(orig_opts))\n        )\n\n      true ->\n        :no_value\n    end\n  end\n\n  defp validate_type(:integer, key, value) when not is_integer(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected integer, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:non_neg_integer, key, value) when not is_integer(value) or value < 0 do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected non negative integer, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:pos_integer, key, value) when not is_integer(value) or value < 1 do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected positive integer, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:float, key, value) when not is_float(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected float, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:atom, key, value) when not is_atom(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected atom, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:timeout, key, value)\n       when not (value == :infinity or (is_integer(value) and value >= 0)) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected non-negative integer or :infinity, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:string, key, value) when not is_binary(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected string, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:boolean, key, value) when not is_boolean(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected boolean, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:keyword_list, key, value) do\n    if keyword_list?(value) do\n      {:ok, value}\n    else\n      error_tuple(\n        key,\n        value,\n        \"invalid value for #{render_key(key)}: expected keyword list, got: #{inspect(value)}\"\n      )\n    end\n  end\n\n  defp validate_type(:non_empty_keyword_list, key, value) do\n    if keyword_list?(value) and value != [] do\n      {:ok, value}\n    else\n      error_tuple(\n        key,\n        value,\n        \"invalid value for #{render_key(key)}: expected non-empty keyword list, got: #{inspect(value)}\"\n      )\n    end\n  end\n\n  defp validate_type(:map, key, value) do\n    validate_type({:map, :atom, :any}, key, value)\n  end\n\n  defp validate_type({:map, key_type, value_type}, key, map) when is_map(map) do\n    map\n    |> Enum.reduce_while([], fn {key, value}, acc ->\n      with {:ok, updated_key} <- validate_type(key_type, {__MODULE__, :key}, key),\n           {:ok, updated_value} <- validate_type(value_type, {__MODULE__, :value, key}, value) do\n        {:cont, [{updated_key, updated_value} | acc]}\n      else\n        {:error, %ValidationError{} = error} -> {:halt, error}\n      end\n    end)\n    |> case do\n      pairs when is_list(pairs) ->\n        {:ok, Map.new(pairs)}\n\n      %ValidationError{} = error ->\n        error_tuple(key, map, \"invalid map in #{render_key(key)}: #{error.message}\")\n    end\n  end\n\n  defp validate_type({:map, _, _}, key, value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected map, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:pid, _key, value) when is_pid(value) do\n    {:ok, value}\n  end\n\n  defp validate_type(:pid, key, value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected pid, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:reference, _key, value) when is_reference(value) do\n    {:ok, value}\n  end\n\n  defp validate_type(:reference, key, value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected reference, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:mfa, _key, {mod, fun, args} = value)\n       when is_atom(mod) and is_atom(fun) and is_list(args) do\n    {:ok, value}\n  end\n\n  defp validate_type(:mfa, key, value) when not is_nil(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected tuple {mod, fun, args}, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type(:mod_arg, _key, {mod, _arg} = value) when is_atom(mod) do\n    {:ok, value}\n  end\n\n  defp validate_type(:mod_arg, key, value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected tuple {mod, arg}, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type({:fun, arity}, key, value) do\n    if is_function(value) do\n      case :erlang.fun_info(value, :arity) do\n        {:arity, ^arity} ->\n          {:ok, value}\n\n        {:arity, fun_arity} ->\n          error_tuple(\n            key,\n            value,\n            \"invalid value for #{render_key(key)}: expected function of arity #{arity}, got: function of arity #{inspect(fun_arity)}\"\n          )\n      end\n    else\n      error_tuple(\n        key,\n        value,\n        \"invalid value for #{render_key(key)}: expected function of arity #{arity}, got: #{inspect(value)}\"\n      )\n    end\n  end\n\n  defp validate_type(nil, key, value) do\n    if is_nil(value) do\n      {:ok, value}\n    else\n      error_tuple(\n        key,\n        value,\n        \"invalid value for #{render_key(key)}: expected nil, got: #{inspect(value)}\"\n      )\n    end\n  end\n\n  defp validate_type({:custom, mod, fun, args}, key, value) do\n    case apply(mod, fun, [value | args]) do\n      {:ok, value} ->\n        {:ok, value}\n\n      {:error, message} when is_binary(message) ->\n        error_tuple(key, value, \"invalid value for #{render_key(key)}: \" <> message)\n\n      other ->\n        raise \"custom validation function #{inspect(mod)}.#{fun}/#{length(args) + 1} \" <>\n                \"must return {:ok, value} or {:error, message}, got: #{inspect(other)}\"\n    end\n  end\n\n  defp validate_type({:in, choices}, key, value) do\n    if value in choices do\n      {:ok, value}\n    else\n      error_tuple(\n        key,\n        value,\n        \"invalid value for #{render_key(key)}: expected one of #{inspect(choices)}, got: #{inspect(value)}\"\n      )\n    end\n  end\n\n  defp validate_type({:or, subtypes}, key, value) do\n    result =\n      Enum.reduce_while(subtypes, _errors = [], fn subtype, errors_acc ->\n        {subtype, nested_schema} =\n          case subtype do\n            {type, keys} when type in [:keyword_list, :non_empty_keyword_list, :map] ->\n              {type, keys}\n\n            other ->\n              {other, _nested_schema = nil}\n          end\n\n        case validate_type(subtype, key, value) do\n          {:ok, value} when not is_nil(nested_schema) ->\n            case validate_options_with_schema_and_path(value, nested_schema, _path = [key]) do\n              {:ok, value} -> {:halt, {:ok, value}}\n              {:error, %ValidationError{} = error} -> {:cont, [error | errors_acc]}\n            end\n\n          {:ok, value} ->\n            {:halt, {:ok, value}}\n\n          {:error, %ValidationError{} = reason} ->\n            {:cont, [reason | errors_acc]}\n        end\n      end)\n\n    case result do\n      {:ok, value} ->\n        {:ok, value}\n\n      errors when is_list(errors) ->\n        message =\n          \"expected #{render_key(key)} to match at least one given type, but didn't match \" <>\n            \"any. Here are the reasons why it didn't match each of the allowed types:\\n\\n\" <>\n            Enum.map_join(errors, \"\\n\", &(\"  * \" <> Exception.message(&1)))\n\n        error_tuple(key, value, message)\n    end\n  end\n\n  defp validate_type({:list, subtype}, key, value) when is_list(value) do\n    {subtype, nested_schema} =\n      case subtype do\n        {type, keys} when type in [:keyword_list, :non_empty_keyword_list, :map] ->\n          {type, keys}\n\n        other ->\n          {other, _nested_schema = nil}\n      end\n\n    updated_elements =\n      for {elem, index} <- Stream.with_index(value) do\n        case validate_type(subtype, {__MODULE__, :list, index}, elem) do\n          {:ok, value} when not is_nil(nested_schema) ->\n            case validate_options_with_schema_and_path(value, nested_schema, _path = [key]) do\n              {:ok, updated_value} -> updated_value\n              {:error, %ValidationError{} = error} -> throw({:error, index, error})\n            end\n\n          {:ok, updated_elem} ->\n            updated_elem\n\n          {:error, %ValidationError{} = error} ->\n            throw({:error, error})\n        end\n      end\n\n    {:ok, updated_elements}\n  catch\n    {:error, %ValidationError{} = error} ->\n      error_tuple(key, value, \"invalid list in #{render_key(key)}: #{error.message}\")\n\n    {:error, index, %ValidationError{} = error} ->\n      error_tuple(\n        key,\n        value,\n        \"invalid list element at position #{index} in #{render_key(key)}: #{error.message}\"\n      )\n  end\n\n  defp validate_type({:list, _subtype}, key, value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected list, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type({:tuple, tuple_def}, key, value)\n       when is_tuple(value) and length(tuple_def) == tuple_size(value) do\n    tuple_def\n    |> Stream.with_index()\n    |> Enum.reduce_while([], fn {subtype, index}, acc ->\n      elem = elem(value, index)\n\n      case validate_type(subtype, {__MODULE__, :tuple, index}, elem) do\n        {:ok, updated_elem} -> {:cont, [updated_elem | acc]}\n        {:error, %ValidationError{} = error} -> {:halt, error}\n      end\n    end)\n    |> case do\n      acc when is_list(acc) ->\n        {:ok, acc |> Enum.reverse() |> List.to_tuple()}\n\n      %ValidationError{} = error ->\n        error_tuple(key, value, \"invalid tuple in #{render_key(key)}: #{error.message}\")\n    end\n  end\n\n  defp validate_type({:tuple, tuple_def}, key, value) when is_tuple(value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected tuple with #{length(tuple_def)} elements, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type({:tuple, _tuple_def}, key, value) do\n    error_tuple(\n      key,\n      value,\n      \"invalid value for #{render_key(key)}: expected tuple, got: #{inspect(value)}\"\n    )\n  end\n\n  defp validate_type({:struct, struct_name}, key, value) do\n    if match?(%^struct_name{}, value) do\n      {:ok, value}\n    else\n      error_tuple(\n        key,\n        value,\n        \"invalid value for #{render_key(key)}: expected #{inspect(struct_name)}, got: #{inspect(value)}\"\n      )\n    end\n  end\n\n  defp validate_type(_type, _key, value) do\n    {:ok, value}\n  end\n\n  defp keyword_list?(value) do\n    is_list(value) and Enum.all?(value, &match?({key, _value} when is_atom(key), &1))\n  end\n\n  defp expand_star_to_option_keys(keys, opts) do\n    case keys[:*] do\n      nil ->\n        keys\n\n      schema_opts ->\n        Enum.map(opts, fn {k, _} -> {k, schema_opts} end)\n    end\n  end\n\n  defp available_types() do\n    types =\n      Enum.map(@basic_types, &inspect/1) ++\n        [\n          \"{:fun, arity}\",\n          \"{:in, choices}\",\n          \"{:or, subtypes}\",\n          \"{:custom, mod, fun, args}\",\n          \"{:list, subtype}\",\n          \"{:tuple, list_of_subtypes}\",\n          \"{:map, key_type, value_type}\",\n          \"{:struct, struct_name}\"\n        ]\n\n    Enum.join(types, \", \")\n  end\n\n  @doc false\n  def validate_type(value) when value in @basic_types do\n    {:ok, value}\n  end\n\n  def validate_type({:fun, arity} = value) when is_integer(arity) and arity >= 0 do\n    {:ok, value}\n  end\n\n  # \"choices\" here can be any enumerable so there's no easy and fast way to validate it.\n  def validate_type({:in, _choices} = value) do\n    {:ok, value}\n  end\n\n  def validate_type({:custom, mod, fun, args} = value)\n      when is_atom(mod) and is_atom(fun) and is_list(args) do\n    {:ok, value}\n  end\n\n  def validate_type({:or, subtypes} = value) when is_list(subtypes) do\n    Enum.reduce_while(subtypes, {:ok, value}, fn\n      {type, _keys}, acc\n      when type in [:keyword_list, :non_empty_keyword_list, :map] ->\n        {:cont, acc}\n\n      subtype, acc ->\n        case validate_type(subtype) do\n          {:ok, _value} -> {:cont, acc}\n          {:error, reason} -> {:halt, {:error, \"invalid type given to :or type: #{reason}\"}}\n        end\n    end)\n  end\n\n  # This is to support the special-cased \"{:list, {:keyword_list, my_key: [type: ...]}}\",\n  # like we do in the :or type.\n  def validate_type({:list, {type, keys}})\n      when type in [:keyword_list, :non_empty_keyword_list, :map] and is_list(keys) do\n    {:ok, {:list, {type, keys}}}\n  end\n\n  def validate_type({:list, subtype}) do\n    case validate_type(subtype) do\n      {:ok, validated_subtype} -> {:ok, {:list, validated_subtype}}\n      {:error, reason} -> {:error, \"invalid subtype given to :list type: #{reason}\"}\n    end\n  end\n\n  def validate_type({:tuple, tuple_def}) when is_list(tuple_def) do\n    validated_def =\n      Enum.map(tuple_def, fn subtype ->\n        case validate_type(subtype) do\n          {:ok, validated_subtype} -> validated_subtype\n          {:error, reason} -> throw({:error, \"invalid subtype given to :tuple type: #{reason}\"})\n        end\n      end)\n\n    {:ok, {:tuple, validated_def}}\n  catch\n    {:error, reason} -> {:error, reason}\n  end\n\n  def validate_type({:map, key_type, value_type}) do\n    valid_key_type =\n      case validate_type(key_type) do\n        {:ok, validated_key_type} -> validated_key_type\n        {:error, reason} -> throw({:error, \"invalid key_type for :map type: #{reason}\"})\n      end\n\n    valid_values_type =\n      case validate_type(value_type) do\n        {:ok, validated_values_type} -> validated_values_type\n        {:error, reason} -> throw({:error, \"invalid value_type for :map type: #{reason}\"})\n      end\n\n    {:ok, {:map, valid_key_type, valid_values_type}}\n  catch\n    {:error, reason} -> {:error, reason}\n  end\n\n  def validate_type({:struct, struct_name}) when is_atom(struct_name) do\n    {:ok, {:struct, struct_name}}\n  end\n\n  def validate_type({:struct, struct_name}) do\n    {:error, \"invalid struct_name for :struct, expected atom, got #{inspect(struct_name)}\"}\n  end\n\n  def validate_type(value) do\n    {:error, \"unknown type #{inspect(value)}.\\n\\nAvailable types: #{available_types()}\"}\n  end\n\n  defp error_tuple(key, value, message) do\n    {:error, %ValidationError{key: key, message: message, value: value}}\n  end\n\n  defp render_key({__MODULE__, :key}), do: \"map key\"\n  defp render_key({__MODULE__, :value, key}), do: \"map key #{inspect(key)}\"\n  defp render_key({__MODULE__, :tuple, index}), do: \"tuple element at position #{index}\"\n  defp render_key({__MODULE__, :list, index}), do: \"list element at position #{index}\"\n  defp render_key(key), do: inspect(key) <> \" option\"\nend\n"
+    },
+    "lib/nimble_options/docs.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1174,
+          "id": "0cbc4007fad2ed2326c0ea7d9d037763",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
+          ],
+          "location": {
+            "end": {
+              "column": 72,
+              "line": 28
+            },
+            "start": {
+              "column": 71,
+              "line": 28
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 824,
+          "id": "153c25b36be8d18bba98b4ef50c5ebe7",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 44
+            },
+            "start": {
+              "column": 48,
+              "line": 44
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "level - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 844,
+          "id": "2e332aaccee32562dc3a1b7e51fa0640",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 14
+            },
+            "start": {
+              "column": 28,
+              "line": 14
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "level * 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 10 with 11",
+          "duration": 1182,
+          "id": "380a2042e5ab1a3d60005c79f844cc75",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 173
+            },
+            "start": {
+              "column": 17,
+              "line": 173
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "11",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 851,
+          "id": "3f1ea37e39498b6467672b166a9c69c9",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 44
+            },
+            "start": {
+              "column": 48,
+              "line": 44
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "level * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1143,
+          "id": "43c1430de432353a42e76376126d5e8d",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 88,
+              "line": 64
+            },
+            "start": {
+              "column": 87,
+              "line": 64
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 0 with 1",
+          "duration": 1125,
+          "id": "53493520e49382ea41e31f7eff9154eb",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 5
+            },
+            "start": {
+              "column": 52,
+              "line": 5
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1270,
+          "id": "64010f6a6993a544f03c789e55ae9ef5",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
+          ],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 4
+            },
+            "start": {
+              "column": 58,
+              "line": 4
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(options)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 720,
+          "id": "7267f5b99d043f81e3b56ede9be6ec02",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 35
+            },
+            "start": {
+              "column": 21,
+              "line": 35
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "schema[:doc] != false",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace && with ||",
+          "duration": 710,
+          "id": "745a0d9ab7ba2728ba49c172c5f81b11",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 27,
+              "line": 83
+            },
+            "start": {
+              "column": 27,
+              "line": 83
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "schema[:deprecated] || \"*This option is deprecated. #{String.trim(schema[:deprecated])}*\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 725,
+          "id": "74f25423b43da7100e59b6a74c19d656",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 21
+            },
+            "start": {
+              "column": 26,
+              "line": 21
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "schema && []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace && with ||",
+          "duration": 744,
+          "id": "7fdb129dc40c0616b73670a9261816c5",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 autogenerated type docs"
+          ],
+          "location": {
+            "end": {
+              "column": 41,
+              "line": 88
+            },
+            "start": {
+              "column": 41,
+              "line": 88
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "schema[:doc] || String.trim(schema[:doc])",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 727,
+          "id": "82d309d246a48373579703fd94acf85e",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 14
+            },
+            "start": {
+              "column": 28,
+              "line": 14
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "level + 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 10 with 0",
+          "duration": 1120,
+          "id": "94f430ba32b64854060b36a32fdcd966",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 173
+            },
+            "start": {
+              "column": 17,
+              "line": 173
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1161,
+          "id": "9bf1c2970ca9058f6f1e637314508c05",
+          "killedBy": [
+            "NimbleOptionsTest:option_typespec/1 all possible types"
+          ],
+          "location": {
+            "end": {
+              "column": 44,
+              "line": 259
+            },
+            "start": {
+              "column": 43,
+              "line": 259
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace boolean literal false with true",
+          "duration": 1246,
+          "id": "a1a42c70c2283d0bfba0dd88afa3b21f",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 35
+            },
+            "start": {
+              "column": 24,
+              "line": 35
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "true",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 713,
+          "id": "a510d58025ec970bb9996db9b6703e69",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 85,
+              "line": 64
+            },
+            "start": {
+              "column": 85,
+              "line": 64
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "level * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1189,
+          "id": "b7514836a3074e041f85885a292fde96",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 31,
+              "line": 14
+            },
+            "start": {
+              "column": 30,
+              "line": 14
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace && with ||",
+          "duration": 700,
+          "id": "bebad99e4effb3d9e76c965a861c2133",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
+          ],
+          "location": {
+            "end": {
+              "column": 19,
+              "line": 97
+            },
+            "start": {
+              "column": 19,
+              "line": 97
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "prev_str || String.contains?(prev_str, [\"\\r\\n\", \"\\n\\n\"])",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace boolean literal false with true",
+          "duration": 1206,
+          "id": "c22aa142fbdadf7af891ec4c1f232578",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 110
+            },
+            "start": {
+              "column": 15,
+              "line": 110
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "true",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace boolean literal true with false",
+          "duration": 1185,
+          "id": "c57017ce599513d2c71961096e589ef1",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 67
+            },
+            "start": {
+              "column": 7,
+              "line": 67
+            }
+          },
+          "mutatorName": "BooleanLiteral",
+          "replacement": "false",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1187,
+          "id": "cbdb53a0bb2ebecb707673ddcb776084",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 autogenerated type docs"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 4
+            },
+            "start": {
+              "column": 38,
+              "line": 4
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(schema)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace && with ||",
+          "duration": 686,
+          "id": "e9c82ea4d6716c5f04bb200317b20147",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 60
+            },
+            "start": {
+              "column": 21,
+              "line": 60
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "schema[:keys] || schema[:subsection]",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 561,
+          "id": "f80390c710140571755a758bbf35890d",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
+          ],
+          "location": {
+            "end": {
+              "column": 85,
+              "line": 64
+            },
+            "start": {
+              "column": 85,
+              "line": 64
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "level - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_options/docs_test.exs",
+            "test/nimble_options_test.exs"
+          ],
+          "description": "replace integer literal 1 with 0",
+          "duration": 1106,
+          "id": "fd33ef2ff24070683d3a8955983230fa",
+          "killedBy": [
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+          ],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 44
+            },
+            "start": {
+              "column": 50,
+              "line": 44
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule NimbleOptions.Docs do\n  @moduledoc false\n\n  def generate(schema, options) when is_list(schema) and is_list(options) do\n    nest_level = Keyword.get(options, :nest_level, 0)\n    {docs, sections, _level} = build_docs(schema, {[], [], nest_level})\n    to_string([Enum.reverse(docs), Enum.reverse(sections)])\n  end\n\n  # If the schema is a function, we want to not show anything (it's a recursive\n  # function) and \"back up\" one level since when we got here we already\n  # increased the level by one.\n  defp build_docs(fun, {docs, sections, level}) when is_function(fun) do\n    {docs, sections, level - 1}\n  end\n\n  defp build_docs(schema, {docs, sections, level} = acc) do\n    if schema[:*] do\n      build_docs(schema[:*][:keys], acc)\n    else\n      Enum.reduce(schema || [], {docs, sections, level}, &maybe_option_doc/2)\n    end\n  end\n\n  defp build_docs_with_subsection(subsection, schema, {docs, sections, level}) do\n    subsection = String.trim_trailing(subsection, \"\\n\") <> \"\\n\\n\"\n\n    {item_docs, sections, _level} = build_docs(schema, {[], sections, 0})\n    item_section = [subsection | Enum.reverse(item_docs)]\n\n    {docs, [item_section | sections], level}\n  end\n\n  defp maybe_option_doc({key, schema}, acc) do\n    if schema[:doc] == false do\n      acc\n    else\n      option_doc({key, schema}, acc)\n    end\n  end\n\n  defp option_doc({key, schema}, {docs, sections, level}) do\n    type_str = if type_str = get_type_str(schema), do: \" #{type_str}\"\n    desc_indent = String.duplicate(\"  \", level + 1)\n\n    description =\n      get_required_str(schema)\n      |> get_deprecated_str(schema)\n      |> get_doc_str(schema)\n      |> get_default_str(schema)\n      |> case do\n        nil -> \"\"\n        parts -> indent_doc(\" - \" <> parts, desc_indent)\n      end\n\n    doc = [String.duplicate(\"  \", level), \"* `#{inspect(key)}`#{type_str}\", description, \"\\n\\n\"]\n    docs = [IO.iodata_to_binary(doc) | docs]\n\n    cond do\n      schema[:keys] && schema[:subsection] ->\n        build_docs_with_subsection(schema[:subsection], schema[:keys], {docs, sections, level})\n\n      schema[:keys] ->\n        {docs, sections, _level} = build_docs(schema[:keys], {docs, sections, level + 1})\n        {docs, sections, level}\n\n      true ->\n        {docs, sections, level}\n    end\n  end\n\n  defp space_concat(left, nil), do: left\n  defp space_concat(nil, right), do: right\n  defp space_concat(left, right), do: left <> \" \" <> right\n\n  defp get_required_str(schema) do\n    if schema[:required], do: \"Required.\"\n  end\n\n  defp get_deprecated_str(prev_str, schema) do\n    space_concat(\n      prev_str,\n      schema[:deprecated] && \"*This option is deprecated. #{String.trim(schema[:deprecated])}*\"\n    )\n  end\n\n  defp get_doc_str(prev_str, schema) do\n    space_concat(prev_str, schema[:doc] && String.trim(schema[:doc]))\n  end\n\n  defp get_default_str(prev_str, schema) do\n    if Keyword.has_key?(schema, :default) do\n      default_str = \"The default value is `#{inspect(schema[:default])}`.\"\n\n      # If the documentation contains multiple lines,\n      # the default must be in a trailing line.\n      if prev_str && String.contains?(prev_str, [\"\\r\\n\", \"\\n\\n\"]) do\n        prev_str <> \"\\n\\n\" <> default_str\n      else\n        space_concat(prev_str, default_str)\n      end\n    else\n      prev_str\n    end\n  end\n\n  defp get_type_str(schema) do\n    str =\n      case Keyword.fetch(schema, :type_doc) do\n        {:ok, false} -> nil\n        {:ok, type_doc} when is_binary(type_doc) -> type_doc\n        :error -> get_raw_type_str(schema[:type])\n      end\n\n    if str do\n      \"(#{str})\"\n    end\n  end\n\n  # Only shows types when they are concise.\n  defp get_raw_type_str(nil), do: nil\n  defp get_raw_type_str({:custom, _mod, _fun, _args}), do: nil\n  defp get_raw_type_str(:mfa), do: nil\n  defp get_raw_type_str(:mod_arg), do: nil\n  defp get_raw_type_str({:or, _values}), do: nil\n  defp get_raw_type_str({:in, _}), do: nil\n  defp get_raw_type_str({:fun, arity}), do: \"function of arity #{arity}\"\n  defp get_raw_type_str(:any), do: \"`t:term/0`\"\n  defp get_raw_type_str(:reference), do: \"`t:reference/0`\"\n  defp get_raw_type_str(:pid), do: \"`t:pid/0`\"\n  defp get_raw_type_str(:timeout), do: \"`t:timeout/0`\"\n  defp get_raw_type_str(:boolean), do: \"`t:boolean/0`\"\n  defp get_raw_type_str(:atom), do: \"`t:atom/0`\"\n  defp get_raw_type_str(:integer), do: \"`t:integer/0`\"\n  defp get_raw_type_str(:non_neg_integer), do: \"`t:non_neg_integer/0`\"\n  defp get_raw_type_str(:pos_integer), do: \"`t:pos_integer/0`\"\n  defp get_raw_type_str(:float), do: \"`t:float/0`\"\n  defp get_raw_type_str(:string), do: \"`t:String.t/0`\"\n  defp get_raw_type_str(:keyword_list), do: \"`t:keyword/0`\"\n  defp get_raw_type_str(:non_empty_keyword_list), do: \"non-empty `t:keyword/0`\"\n  defp get_raw_type_str({:map, _keys}), do: \"`t:map/0`\"\n  defp get_raw_type_str({:keyword_list, _keys}), do: \"`t:keyword/0`\"\n  defp get_raw_type_str({:non_empty_keyword_list, _keys}), do: \"non-empty `t:keyword/0`\"\n  defp get_raw_type_str(:map), do: \"`t:map/0`\"\n  defp get_raw_type_str({:struct, struct_type}), do: \"struct of type `#{inspect(struct_type)}`\"\n\n  defp get_raw_type_str({:list, subtype}) do\n    if subtype_str = get_raw_type_str(subtype), do: \"list of #{subtype_str}\"\n  end\n\n  defp get_raw_type_str({:map, key_type, value_type}) do\n    with key_type_str when is_binary(key_type_str) <- get_raw_type_str(key_type),\n         value_type_str when is_binary(value_type_str) <- get_raw_type_str(value_type) do\n      \"map of #{key_type_str} keys and #{value_type_str} values\"\n    end\n  end\n\n  defp get_raw_type_str({:tuple, value_types}) do\n    value_types =\n      value_types\n      |> Enum.map(&get_raw_type_str/1)\n      |> Enum.join(\", \")\n\n    \"tuple of #{value_types} values\"\n  end\n\n  defp indent_doc(text, indent) do\n    [head | tail] = String.split(text, [\"\\r\\n\", \"\\n\"])\n\n    tail =\n      Enum.map(tail, fn\n        \"\" -> \"\\n\"\n        str -> [?\\n, indent, str]\n      end)\n\n    [head | tail]\n  end\n\n  def schema_to_spec(schema) do\n    schema\n    |> Enum.map(fn {key, opt_schema} ->\n      typespec =\n        Keyword.get_lazy(opt_schema, :type_spec, fn -> type_to_spec(opt_schema[:type]) end)\n\n      quote do: {unquote(key), unquote(typespec)}\n    end)\n    |> unionize_quoted()\n  end\n\n  defp type_to_spec(type) do\n    case type do\n      :any ->\n        quote(do: term())\n\n      :integer ->\n        quote(do: integer())\n\n      :non_neg_integer ->\n        quote(do: non_neg_integer())\n\n      :pos_integer ->\n        quote(do: pos_integer())\n\n      :atom ->\n        quote(do: atom())\n\n      :float ->\n        quote(do: float())\n\n      :boolean ->\n        quote(do: boolean())\n\n      :pid ->\n        quote(do: pid())\n\n      :reference ->\n        quote(do: reference())\n\n      :timeout ->\n        quote(do: timeout())\n\n      :string ->\n        quote(do: binary())\n\n      :mfa ->\n        quote(do: {module(), atom(), [term()]})\n\n      :mod_arg ->\n        quote(do: {module(), [term()]})\n\n      :keyword_list ->\n        quote(do: keyword())\n\n      {:keyword_list, _keys} ->\n        quote(do: keyword())\n\n      :non_empty_keyword_list ->\n        quote(do: keyword())\n\n      {:non_empty_keyword_list, _keys} ->\n        quote(do: keyword())\n\n      nil ->\n        quote(do: nil)\n\n      :map ->\n        quote(do: map())\n\n      {:map, key_type, value_type} ->\n        quote(\n          do: %{optional(unquote(type_to_spec(key_type))) => unquote(type_to_spec(value_type))}\n        )\n\n      {:fun, arity} ->\n        function_spec(arity)\n\n      {:in, %Range{first: first, last: last} = range} ->\n        # TODO: match on first..last//1 when we depend on Elixir 1.12+\n        if Map.get(range, :step) in [nil, 1] do\n          quote(do: unquote(first)..unquote(last))\n        else\n          quote(do: term())\n        end\n\n      {:in, _choices} ->\n        quote(do: term())\n\n      {:custom, _mod, _fun, _args} ->\n        quote(do: term())\n\n      {:list, subtype} ->\n        quote(do: [unquote(type_to_spec(subtype))])\n\n      {:or, subtypes} ->\n        subtypes |> Enum.map(&type_to_spec/1) |> unionize_quoted()\n\n      {:struct, _struct_name} ->\n        quote(do: struct())\n\n      {:tuple, tuple_types} ->\n        case Enum.map(tuple_types, &type_to_spec/1) do\n          [type1, type2] -> quote(do: {unquote(type1), unquote(type2)})\n          types -> quote do: {unquote_splicing(types)}\n        end\n    end\n  end\n\n  defp function_spec(arity) do\n    args = List.duplicate(quote(do: term()), arity)\n\n    quote do\n      unquote_splicing(args) -> term()\n    end\n  end\n\n  defp unionize_quoted(specs) do\n    specs\n    |> Enum.reverse()\n    |> Enum.reduce(&quote(do: unquote(&1) | unquote(&2)))\n  end\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "e9c82ea4d6716c5f04bb200317b20147": "schema",
+      "f629228fd9347b4ba0125671fa4b0df0": "fallback",
+      "3b85b137b0814d54998bd884f9dd6bdc": "fallback",
+      "82d309d246a48373579703fd94acf85e": "schema",
+      "2e332aaccee32562dc3a1b7e51fa0640": "schema",
+      "774c69a920f6711b70703a3317b2287f": "fallback",
+      "f6a99aa3ef59fa66f96dc0f013012375": "fallback",
+      "7d2b0d7426e028c69563e47992e3dd6e": "fallback",
+      "78bcb6c9ee29833cc7c9a2692d0816b8": "fallback",
+      "87b48056a448cf20e7856a8d3c6b2dde": "fallback",
+      "94f430ba32b64854060b36a32fdcd966": "fallback",
+      "ecd9d6c91de0565d137699acba63d887": "fallback",
+      "c04a8c12415a48613525b31da5d2a5d1": "fallback",
+      "5adde818ee3640268cc76f514b485e79": "fallback",
+      "9346bc9d0755b820b11462045d7c7d6b": "fallback",
+      "4bd65e23ab93262ec765b13a89da6e4e": "schema",
+      "e68f994996b6fc5cb43785aecf5f39d4": "fallback",
+      "f80390c710140571755a758bbf35890d": "schema",
+      "bb3cccf9c6e6be4d30a5803051062cb3": "fallback",
+      "d1eeb58dd18e9a1fddea33633ca23b70": "fallback",
+      "b7514836a3074e041f85885a292fde96": "fallback",
+      "e2215fb855a35b33caaae4a528149b08": "schema",
+      "954166fad2ec8ec51c53b3415eb3c5a7": "fallback",
+      "536ad5204ff6e52cb274c98cbbeee961": "fallback",
+      "c8676a0887a60354a9abfd8d5e93ad80": "fallback",
+      "a5a08c636728d70e217594217ecba098": "fallback",
+      "628fefcdd99d20ebf9030701bea7f443": "fallback",
+      "bebad99e4effb3d9e76c965a861c2133": "schema",
+      "380a2042e5ab1a3d60005c79f844cc75": "fallback",
+      "fd33ef2ff24070683d3a8955983230fa": "fallback",
+      "20a652dd07c3d2ce388fad3d0df58913": "fallback",
+      "62e707e8bf97dd25c844f131a8e71173": "fallback",
+      "396df1eed505f60365ed01ff7e3bfa78": "fallback",
+      "9bf1c2970ca9058f6f1e637314508c05": "fallback",
+      "cbdb53a0bb2ebecb707673ddcb776084": "fallback",
+      "f1b33c0ca7d7e3311ae76bcd43791ef6": "fallback",
+      "3bf0fe184509d1b46f32725063b3ae82": "fallback",
+      "019f9b61e291ef92938c79847900bde2": "fallback",
+      "e69dace77d472110db789826b6ad5eac": "fallback",
+      "5e1edeac6873e335255713804d9480ef": "schema",
+      "831860a6dadb1b8b698ba1d3ea13a2b0": "fallback",
+      "53493520e49382ea41e31f7eff9154eb": "fallback",
+      "6c5ac97cea62365fe8b3aa4f5fe04e3c": "fallback",
+      "903f4de5ca1ae41567e483d930b37431": "fallback",
+      "7f630fc8ef95dcbb4cc9d1b39f77f31f": "fallback",
+      "a510d58025ec970bb9996db9b6703e69": "schema",
+      "153c25b36be8d18bba98b4ef50c5ebe7": "schema",
+      "0cbc4007fad2ed2326c0ea7d9d037763": "fallback",
+      "9ca41075ada7276b4970e28af50bf012": "fallback",
+      "f4972e130686a9686b6986617815cd89": "fallback",
+      "c57017ce599513d2c71961096e589ef1": "fallback",
+      "8bfd260806d4a7d72531e1b1fcda3723": "fallback",
+      "4e7d40724753ce4c7d3ff614a41dd266": "fallback",
+      "10a9b79094d504a154658867526b7d59": "fallback",
+      "a6a15f55ccab797dd8a91d3bf4e266a2": "fallback",
+      "a1a42c70c2283d0bfba0dd88afa3b21f": "fallback",
+      "745a0d9ab7ba2728ba49c172c5f81b11": "schema",
+      "e96cadb63de6f8600ea18ac2747287c4": "fallback",
+      "60b83f98c968f821f2564ad443c941f5": "fallback",
+      "597d964bdb543da3a0dc607dace41c84": "fallback",
+      "5569009fc6c2db81272a93f4f5af4cf7": "fallback",
+      "d02129c107cb8dffd37d527e94d9a9e7": "fallback",
+      "c22aa142fbdadf7af891ec4c1f232578": "fallback",
+      "43c1430de432353a42e76376126d5e8d": "fallback",
+      "cd0b0b12e7df29652c4ac68813b4f31c": "fallback",
+      "0f9305ff26912183e6ffb20e5c856de9": "schema",
+      "7fdb129dc40c0616b73670a9261816c5": "schema",
+      "a59b17a825122265cf24848f2dc74b50": "fallback",
+      "073c2ad39f77bb2fc161458d0cde2ab8": "fallback",
+      "2a3020e3b996b628c8067ea4971eb66f": "fallback",
+      "5a549de0ab03723a5fc8d656ef7bbd35": "fallback",
+      "64010f6a6993a544f03c789e55ae9ef5": "fallback",
+      "7267f5b99d043f81e3b56ede9be6ec02": "schema",
+      "1a73dbd10b25073c5b9f5efdb9e26e1d": "fallback",
+      "029e70252c5bc7f99df4a6e862f98f35": "fallback",
+      "b311175ec61c6854d123d61005dec458": "fallback",
+      "fb7d901609fc3a114ca49c5755811004": "fallback",
+      "bde079a777a57718db045ba0843a0bcf": "fallback",
+      "fc8d6bffba6906549bb365ebc8b02d26": "fallback",
+      "3f1ea37e39498b6467672b166a9c69c9": "schema",
+      "81a48defcaa303cefecc6eb070f84f1d": "schema",
+      "0070f6db97a940dd7998a3aceb2c1c94": "fallback",
+      "bb8845235b5d8aa8fe3db9c90ad1414f": "fallback",
+      "74f25423b43da7100e59b6a74c19d656": "schema",
+      "b5c5e246bd7687a3783f31df86e7989a": "fallback",
+      "455b7285d89610bf26514db91051d218": "fallback"
+    },
+    "metrics": {
+      "fallback_count": 69,
+      "fallback_time_ms": 84474,
+      "fanout": {
+        "e9c82ea4d6716c5f04bb200317b20147": 2,
+        "f629228fd9347b4ba0125671fa4b0df0": 2,
+        "3b85b137b0814d54998bd884f9dd6bdc": 2,
+        "82d309d246a48373579703fd94acf85e": 2,
+        "2e332aaccee32562dc3a1b7e51fa0640": 2,
+        "774c69a920f6711b70703a3317b2287f": 2,
+        "f6a99aa3ef59fa66f96dc0f013012375": 2,
+        "7d2b0d7426e028c69563e47992e3dd6e": 2,
+        "78bcb6c9ee29833cc7c9a2692d0816b8": 2,
+        "87b48056a448cf20e7856a8d3c6b2dde": 2,
+        "94f430ba32b64854060b36a32fdcd966": 2,
+        "ecd9d6c91de0565d137699acba63d887": 2,
+        "c04a8c12415a48613525b31da5d2a5d1": 2,
+        "5adde818ee3640268cc76f514b485e79": 2,
+        "9346bc9d0755b820b11462045d7c7d6b": 2,
+        "4bd65e23ab93262ec765b13a89da6e4e": 2,
+        "e68f994996b6fc5cb43785aecf5f39d4": 2,
+        "f80390c710140571755a758bbf35890d": 2,
+        "bb3cccf9c6e6be4d30a5803051062cb3": 2,
+        "d1eeb58dd18e9a1fddea33633ca23b70": 2,
+        "b7514836a3074e041f85885a292fde96": 2,
+        "e2215fb855a35b33caaae4a528149b08": 2,
+        "954166fad2ec8ec51c53b3415eb3c5a7": 2,
+        "536ad5204ff6e52cb274c98cbbeee961": 2,
+        "c8676a0887a60354a9abfd8d5e93ad80": 2,
+        "a5a08c636728d70e217594217ecba098": 2,
+        "628fefcdd99d20ebf9030701bea7f443": 2,
+        "bebad99e4effb3d9e76c965a861c2133": 2,
+        "380a2042e5ab1a3d60005c79f844cc75": 2,
+        "fd33ef2ff24070683d3a8955983230fa": 2,
+        "20a652dd07c3d2ce388fad3d0df58913": 2,
+        "62e707e8bf97dd25c844f131a8e71173": 2,
+        "396df1eed505f60365ed01ff7e3bfa78": 2,
+        "9bf1c2970ca9058f6f1e637314508c05": 2,
+        "cbdb53a0bb2ebecb707673ddcb776084": 2,
+        "f1b33c0ca7d7e3311ae76bcd43791ef6": 2,
+        "3bf0fe184509d1b46f32725063b3ae82": 2,
+        "019f9b61e291ef92938c79847900bde2": 2,
+        "e69dace77d472110db789826b6ad5eac": 2,
+        "5e1edeac6873e335255713804d9480ef": 2,
+        "831860a6dadb1b8b698ba1d3ea13a2b0": 2,
+        "53493520e49382ea41e31f7eff9154eb": 2,
+        "6c5ac97cea62365fe8b3aa4f5fe04e3c": 2,
+        "903f4de5ca1ae41567e483d930b37431": 2,
+        "7f630fc8ef95dcbb4cc9d1b39f77f31f": 2,
+        "a510d58025ec970bb9996db9b6703e69": 2,
+        "153c25b36be8d18bba98b4ef50c5ebe7": 2,
+        "0cbc4007fad2ed2326c0ea7d9d037763": 2,
+        "9ca41075ada7276b4970e28af50bf012": 2,
+        "f4972e130686a9686b6986617815cd89": 2,
+        "c57017ce599513d2c71961096e589ef1": 2,
+        "8bfd260806d4a7d72531e1b1fcda3723": 2,
+        "4e7d40724753ce4c7d3ff614a41dd266": 2,
+        "10a9b79094d504a154658867526b7d59": 2,
+        "a6a15f55ccab797dd8a91d3bf4e266a2": 2,
+        "a1a42c70c2283d0bfba0dd88afa3b21f": 2,
+        "745a0d9ab7ba2728ba49c172c5f81b11": 2,
+        "e96cadb63de6f8600ea18ac2747287c4": 2,
+        "60b83f98c968f821f2564ad443c941f5": 2,
+        "597d964bdb543da3a0dc607dace41c84": 2,
+        "5569009fc6c2db81272a93f4f5af4cf7": 2,
+        "d02129c107cb8dffd37d527e94d9a9e7": 2,
+        "c22aa142fbdadf7af891ec4c1f232578": 2,
+        "43c1430de432353a42e76376126d5e8d": 2,
+        "cd0b0b12e7df29652c4ac68813b4f31c": 2,
+        "0f9305ff26912183e6ffb20e5c856de9": 2,
+        "7fdb129dc40c0616b73670a9261816c5": 2,
+        "a59b17a825122265cf24848f2dc74b50": 2,
+        "073c2ad39f77bb2fc161458d0cde2ab8": 2,
+        "2a3020e3b996b628c8067ea4971eb66f": 2,
+        "5a549de0ab03723a5fc8d656ef7bbd35": 2,
+        "64010f6a6993a544f03c789e55ae9ef5": 2,
+        "7267f5b99d043f81e3b56ede9be6ec02": 2,
+        "1a73dbd10b25073c5b9f5efdb9e26e1d": 2,
+        "029e70252c5bc7f99df4a6e862f98f35": 2,
+        "b311175ec61c6854d123d61005dec458": 2,
+        "fb7d901609fc3a114ca49c5755811004": 2,
+        "bde079a777a57718db045ba0843a0bcf": 2,
+        "fc8d6bffba6906549bb365ebc8b02d26": 2,
+        "3f1ea37e39498b6467672b166a9c69c9": 2,
+        "81a48defcaa303cefecc6eb070f84f1d": 2,
+        "0070f6db97a940dd7998a3aceb2c1c94": 2,
+        "bb8845235b5d8aa8fe3db9c90ad1414f": 2,
+        "74f25423b43da7100e59b6a74c19d656": 2,
+        "b5c5e246bd7687a3783f31df86e7989a": 2,
+        "455b7285d89610bf26514db91051d218": 2
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "missing_oracle_site": 41,
+        "no_applicable_mutator": 9,
+        "unsupported_dispatch": 629
+      }
+    },
+    "mutation_kind": {
+      "e9c82ea4d6716c5f04bb200317b20147": "boolean_op",
+      "f629228fd9347b4ba0125671fa4b0df0": "guard_type_test",
+      "3b85b137b0814d54998bd884f9dd6bdc": "guard_comparison_negation",
+      "82d309d246a48373579703fd94acf85e": "arithmetic_op",
+      "2e332aaccee32562dc3a1b7e51fa0640": "arithmetic_op",
+      "774c69a920f6711b70703a3317b2287f": "guard_type_test",
+      "f6a99aa3ef59fa66f96dc0f013012375": "guard_type_test",
+      "7d2b0d7426e028c69563e47992e3dd6e": "guard_type_test",
+      "78bcb6c9ee29833cc7c9a2692d0816b8": "guard_type_test",
+      "87b48056a448cf20e7856a8d3c6b2dde": "guard_type_test",
+      "94f430ba32b64854060b36a32fdcd966": "integer_literal_replace",
+      "ecd9d6c91de0565d137699acba63d887": "guard_type_test",
+      "c04a8c12415a48613525b31da5d2a5d1": "guard_type_test",
+      "5adde818ee3640268cc76f514b485e79": "guard_comparison_negation",
+      "9346bc9d0755b820b11462045d7c7d6b": "guard_type_test",
+      "4bd65e23ab93262ec765b13a89da6e4e": "arithmetic_op",
+      "e68f994996b6fc5cb43785aecf5f39d4": "guard_type_test",
+      "f80390c710140571755a758bbf35890d": "arithmetic_op",
+      "bb3cccf9c6e6be4d30a5803051062cb3": "guard_type_test",
+      "d1eeb58dd18e9a1fddea33633ca23b70": "guard_type_test",
+      "b7514836a3074e041f85885a292fde96": "integer_literal_replace",
+      "e2215fb855a35b33caaae4a528149b08": "boolean_op",
+      "954166fad2ec8ec51c53b3415eb3c5a7": "guard_type_test",
+      "536ad5204ff6e52cb274c98cbbeee961": "guard_type_test",
+      "c8676a0887a60354a9abfd8d5e93ad80": "guard_type_test",
+      "a5a08c636728d70e217594217ecba098": "guard_type_test",
+      "628fefcdd99d20ebf9030701bea7f443": "integer_literal_replace",
+      "bebad99e4effb3d9e76c965a861c2133": "boolean_op",
+      "380a2042e5ab1a3d60005c79f844cc75": "integer_literal_replace",
+      "fd33ef2ff24070683d3a8955983230fa": "integer_literal_replace",
+      "20a652dd07c3d2ce388fad3d0df58913": "guard_comparison_negation",
+      "62e707e8bf97dd25c844f131a8e71173": "guard_type_test",
+      "396df1eed505f60365ed01ff7e3bfa78": "boolean_literal_flip",
+      "9bf1c2970ca9058f6f1e637314508c05": "integer_literal_replace",
+      "cbdb53a0bb2ebecb707673ddcb776084": "guard_type_test",
+      "f1b33c0ca7d7e3311ae76bcd43791ef6": "guard_type_test",
+      "3bf0fe184509d1b46f32725063b3ae82": "guard_type_test",
+      "019f9b61e291ef92938c79847900bde2": "guard_type_test",
+      "e69dace77d472110db789826b6ad5eac": "guard_comparison_negation",
+      "5e1edeac6873e335255713804d9480ef": "arithmetic_op",
+      "831860a6dadb1b8b698ba1d3ea13a2b0": "guard_type_test",
+      "53493520e49382ea41e31f7eff9154eb": "integer_literal_replace",
+      "6c5ac97cea62365fe8b3aa4f5fe04e3c": "guard_type_test",
+      "903f4de5ca1ae41567e483d930b37431": "guard_type_test",
+      "7f630fc8ef95dcbb4cc9d1b39f77f31f": "guard_comparison_boundary",
+      "a510d58025ec970bb9996db9b6703e69": "arithmetic_op",
+      "153c25b36be8d18bba98b4ef50c5ebe7": "arithmetic_op",
+      "0cbc4007fad2ed2326c0ea7d9d037763": "integer_literal_replace",
+      "9ca41075ada7276b4970e28af50bf012": "guard_type_test",
+      "f4972e130686a9686b6986617815cd89": "guard_comparison_negation",
+      "c57017ce599513d2c71961096e589ef1": "boolean_literal_flip",
+      "8bfd260806d4a7d72531e1b1fcda3723": "guard_type_test",
+      "4e7d40724753ce4c7d3ff614a41dd266": "guard_comparison_boundary",
+      "10a9b79094d504a154658867526b7d59": "guard_type_test",
+      "a6a15f55ccab797dd8a91d3bf4e266a2": "guard_type_test",
+      "a1a42c70c2283d0bfba0dd88afa3b21f": "boolean_literal_flip",
+      "745a0d9ab7ba2728ba49c172c5f81b11": "boolean_op",
+      "e96cadb63de6f8600ea18ac2747287c4": "guard_type_test",
+      "60b83f98c968f821f2564ad443c941f5": "guard_type_test",
+      "597d964bdb543da3a0dc607dace41c84": "guard_type_test",
+      "5569009fc6c2db81272a93f4f5af4cf7": "guard_comparison_boundary",
+      "d02129c107cb8dffd37d527e94d9a9e7": "guard_type_test",
+      "c22aa142fbdadf7af891ec4c1f232578": "boolean_literal_flip",
+      "43c1430de432353a42e76376126d5e8d": "integer_literal_replace",
+      "cd0b0b12e7df29652c4ac68813b4f31c": "guard_type_test",
+      "0f9305ff26912183e6ffb20e5c856de9": "boolean_op",
+      "7fdb129dc40c0616b73670a9261816c5": "boolean_op",
+      "a59b17a825122265cf24848f2dc74b50": "guard_type_test",
+      "073c2ad39f77bb2fc161458d0cde2ab8": "guard_type_test",
+      "2a3020e3b996b628c8067ea4971eb66f": "guard_type_test",
+      "5a549de0ab03723a5fc8d656ef7bbd35": "guard_comparison_boundary",
+      "64010f6a6993a544f03c789e55ae9ef5": "guard_type_test",
+      "7267f5b99d043f81e3b56ede9be6ec02": "comparison_negation",
+      "1a73dbd10b25073c5b9f5efdb9e26e1d": "guard_type_test",
+      "029e70252c5bc7f99df4a6e862f98f35": "guard_type_test",
+      "b311175ec61c6854d123d61005dec458": "guard_type_test",
+      "fb7d901609fc3a114ca49c5755811004": "guard_type_test",
+      "bde079a777a57718db045ba0843a0bcf": "guard_type_test",
+      "fc8d6bffba6906549bb365ebc8b02d26": "guard_type_test",
+      "3f1ea37e39498b6467672b166a9c69c9": "arithmetic_op",
+      "81a48defcaa303cefecc6eb070f84f1d": "comparison_negation",
+      "0070f6db97a940dd7998a3aceb2c1c94": "guard_type_test",
+      "bb8845235b5d8aa8fe3db9c90ad1414f": "guard_type_test",
+      "74f25423b43da7100e59b6a74c19d656": "boolean_op",
+      "b5c5e246bd7687a3783f31df86e7989a": "guard_comparison_negation",
+      "455b7285d89610bf26514db91051d218": "boolean_literal_flip"
+    },
+    "persistent": null,
+    "phase_timings": {
+      "baseline_tests_ms": 590,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 23793,
+      "oracle_build_ms": 3505,
+      "plan_generation_ms": 19,
+      "report_writing_ms": 14,
+      "schema_build_ms": 3430,
+      "schema_workers_ms": 3580,
+      "total_ms": 35353
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 86,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 86
+      },
+      "mode": "static",
+      "selected_tests_avg": 2.0,
+      "selected_tests_median": 2
+    },
+    "stable_id_to_integer": {
+      "e9c82ea4d6716c5f04bb200317b20147": 77,
+      "f629228fd9347b4ba0125671fa4b0df0": 81,
+      "3b85b137b0814d54998bd884f9dd6bdc": 15,
+      "82d309d246a48373579703fd94acf85e": 43,
+      "2e332aaccee32562dc3a1b7e51fa0640": 12,
+      "774c69a920f6711b70703a3317b2287f": 37,
+      "f6a99aa3ef59fa66f96dc0f013012375": 82,
+      "7d2b0d7426e028c69563e47992e3dd6e": 39,
+      "78bcb6c9ee29833cc7c9a2692d0816b8": 38,
+      "87b48056a448cf20e7856a8d3c6b2dde": 45,
+      "94f430ba32b64854060b36a32fdcd966": 49,
+      "ecd9d6c91de0565d137699acba63d887": 78,
+      "c04a8c12415a48613525b31da5d2a5d1": 65,
+      "5adde818ee3640268cc76f514b485e79": 27,
+      "9346bc9d0755b820b11462045d7c7d6b": 48,
+      "4bd65e23ab93262ec765b13a89da6e4e": 20,
+      "e68f994996b6fc5cb43785aecf5f39d4": 74,
+      "f80390c710140571755a758bbf35890d": 83,
+      "bb3cccf9c6e6be4d30a5803051062cb3": 61,
+      "d1eeb58dd18e9a1fddea33633ca23b70": 72,
+      "b7514836a3074e041f85885a292fde96": 60,
+      "e2215fb855a35b33caaae4a528149b08": 73,
+      "954166fad2ec8ec51c53b3415eb3c5a7": 50,
+      "536ad5204ff6e52cb274c98cbbeee961": 23,
+      "c8676a0887a60354a9abfd8d5e93ad80": 68,
+      "a5a08c636728d70e217594217ecba098": 56,
+      "628fefcdd99d20ebf9030701bea7f443": 30,
+      "bebad99e4effb3d9e76c965a861c2133": 64,
+      "380a2042e5ab1a3d60005c79f844cc75": 13,
+      "fd33ef2ff24070683d3a8955983230fa": 86,
+      "20a652dd07c3d2ce388fad3d0df58913": 10,
+      "62e707e8bf97dd25c844f131a8e71173": 31,
+      "396df1eed505f60365ed01ff7e3bfa78": 14,
+      "9bf1c2970ca9058f6f1e637314508c05": 51,
+      "cbdb53a0bb2ebecb707673ddcb776084": 69,
+      "f1b33c0ca7d7e3311ae76bcd43791ef6": 79,
+      "3bf0fe184509d1b46f32725063b3ae82": 16,
+      "019f9b61e291ef92938c79847900bde2": 2,
+      "e69dace77d472110db789826b6ad5eac": 75,
+      "5e1edeac6873e335255713804d9480ef": 28,
+      "831860a6dadb1b8b698ba1d3ea13a2b0": 44,
+      "53493520e49382ea41e31f7eff9154eb": 22,
+      "6c5ac97cea62365fe8b3aa4f5fe04e3c": 33,
+      "903f4de5ca1ae41567e483d930b37431": 47,
+      "7f630fc8ef95dcbb4cc9d1b39f77f31f": 40,
+      "a510d58025ec970bb9996db9b6703e69": 54,
+      "153c25b36be8d18bba98b4ef50c5ebe7": 8,
+      "0cbc4007fad2ed2326c0ea7d9d037763": 5,
+      "9ca41075ada7276b4970e28af50bf012": 52,
+      "f4972e130686a9686b6986617815cd89": 80,
+      "c57017ce599513d2c71961096e589ef1": 67,
+      "8bfd260806d4a7d72531e1b1fcda3723": 46,
+      "4e7d40724753ce4c7d3ff614a41dd266": 21,
+      "10a9b79094d504a154658867526b7d59": 7,
+      "a6a15f55ccab797dd8a91d3bf4e266a2": 57,
+      "a1a42c70c2283d0bfba0dd88afa3b21f": 53,
+      "745a0d9ab7ba2728ba49c172c5f81b11": 35,
+      "e96cadb63de6f8600ea18ac2747287c4": 76,
+      "60b83f98c968f821f2564ad443c941f5": 29,
+      "597d964bdb543da3a0dc607dace41c84": 25,
+      "5569009fc6c2db81272a93f4f5af4cf7": 24,
+      "d02129c107cb8dffd37d527e94d9a9e7": 71,
+      "c22aa142fbdadf7af891ec4c1f232578": 66,
+      "43c1430de432353a42e76376126d5e8d": 18,
+      "cd0b0b12e7df29652c4ac68813b4f31c": 70,
+      "0f9305ff26912183e6ffb20e5c856de9": 6,
+      "7fdb129dc40c0616b73670a9261816c5": 41,
+      "a59b17a825122265cf24848f2dc74b50": 55,
+      "073c2ad39f77bb2fc161458d0cde2ab8": 4,
+      "2a3020e3b996b628c8067ea4971eb66f": 11,
+      "5a549de0ab03723a5fc8d656ef7bbd35": 26,
+      "64010f6a6993a544f03c789e55ae9ef5": 32,
+      "7267f5b99d043f81e3b56ede9be6ec02": 34,
+      "1a73dbd10b25073c5b9f5efdb9e26e1d": 9,
+      "029e70252c5bc7f99df4a6e862f98f35": 3,
+      "b311175ec61c6854d123d61005dec458": 58,
+      "fb7d901609fc3a114ca49c5755811004": 84,
+      "bde079a777a57718db045ba0843a0bcf": 63,
+      "fc8d6bffba6906549bb365ebc8b02d26": 85,
+      "3f1ea37e39498b6467672b166a9c69c9": 17,
+      "81a48defcaa303cefecc6eb070f84f1d": 42,
+      "0070f6db97a940dd7998a3aceb2c1c94": 1,
+      "bb8845235b5d8aa8fe3db9c90ad1414f": 62,
+      "74f25423b43da7100e59b6a74c19d656": 36,
+      "b5c5e246bd7687a3783f31df86e7989a": 59,
+      "455b7285d89610bf26514db91051d218": 19
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}
