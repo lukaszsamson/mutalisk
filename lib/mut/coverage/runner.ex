@@ -169,7 +169,7 @@ defmodule Mut.Coverage.Runner do
     root
     |> Path.join("#{@build_path}/lib/*/ebin")
     |> Path.wildcard()
-    |> Enum.reject(&(Path.basename(Path.dirname(&1)) in ["mutalisk", "jason"]))
+    |> Enum.reject(&(Path.basename(Path.dirname(&1)) == "mutalisk"))
     |> Enum.each(&(&1 |> String.to_charlist() |> Code.prepend_path()))
   end
 
@@ -181,7 +181,7 @@ defmodule Mut.Coverage.Runner do
     :cover.start()
     Code.prepend_paths(Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"))
     for ebin <- Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"),
-        Path.basename(Path.dirname(ebin)) not in ["mutalisk", "jason"] do
+        Path.basename(Path.dirname(ebin)) != "mutalisk" do
       for beam <- Path.wildcard(Path.join(ebin, "*.beam")) do
         {:ok, _module} = :cover.compile_beam(String.to_charlist(beam))
       end

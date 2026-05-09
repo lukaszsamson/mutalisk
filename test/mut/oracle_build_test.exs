@@ -34,9 +34,9 @@ defmodule Mut.OracleBuildTest do
 
   defp comparable_oracle(json) do
     json
-    |> Jason.decode!()
+    |> Mut.JSON.decode!()
     |> Enum.reject(&compile_time_module_dispatch?/1)
-    |> Jason.encode!(pretty: true)
+    |> Mut.JSON.encode!(pretty: true)
   end
 
   defp compile_time_module_dispatch?(%{"column" => nil, "resolved_module" => module})

@@ -20,10 +20,10 @@ defmodule Mut.PlanTest do
 
   test "round-trip decoded values are stable" do
     json = Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], invalid: [], skipped: []})
-    decoded = Jason.decode!(json)
+    decoded = Mut.JSON.decode!(json)
 
     second =
-      Jason.decode!(
+      Mut.JSON.decode!(
         Plan.dump_json(%Plan{schema: [mutant("a", 1)], fallback: [], invalid: [], skipped: []})
       )
 

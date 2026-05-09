@@ -31,11 +31,11 @@ defmodule Mut.SourceSpanTest do
     assert span.end_byte == 4
   end
 
-  test "Jason round-trip has expected keys" do
+  test "JSON round-trip has expected keys" do
     keys =
       source_span()
-      |> Jason.encode!()
-      |> Jason.decode!()
+      |> Mut.JSON.encode!()
+      |> Mut.JSON.decode!()
       |> Map.keys()
       |> Enum.sort()
 

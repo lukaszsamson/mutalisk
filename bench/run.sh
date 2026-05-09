@@ -193,8 +193,7 @@ mkdir -p "$WORK_DIR/bench/results"
 cp "$WORK_DIR/$REL_REPORT_PATH" "$REPORT_PATH"
 
 ROOT="$ROOT" REPORT_PATH="$REPORT_PATH" TARGET="$TARGET" SELECTION="$SELECTION" elixir --eval '
-Mix.install([{:jason, "~> 1.4"}])
-report = System.fetch_env!("REPORT_PATH") |> File.read!() |> Jason.decode!()
+report = System.fetch_env!("REPORT_PATH") |> File.read!() |> JSON.decode!()
 engine = report["mutalisk"]["engine"]
 mutants = report["files"] |> Map.values() |> Enum.flat_map(& &1["mutants"])
 

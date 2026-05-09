@@ -42,7 +42,7 @@ defmodule Mut.Trace.Writer do
 
   @impl true
   def handle_cast({:put, %Mut.Oracle.DispatchSite{} = site}, state) do
-    IO.write(state.file, [Jason.encode!(site), ?\n])
+    IO.write(state.file, [Mut.JSON.encode!(site), ?\n])
     {:noreply, %{state | count: state.count + 1}}
   end
 

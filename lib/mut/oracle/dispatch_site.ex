@@ -52,13 +52,13 @@ defmodule Mut.Oracle.DispatchSite do
         }
 end
 
-defimpl Jason.Encoder, for: Mut.Oracle.DispatchSite do
-  def encode(site, opts) do
+defimpl JSON.Encoder, for: Mut.Oracle.DispatchSite do
+  def encode(site, encoder) do
     site
     |> Map.from_struct()
     |> Map.update!(:function, &encode_function/1)
     |> Map.update!(:meta, &encode_meta/1)
-    |> Jason.Encode.map(opts)
+    |> JSON.protocol_encode(encoder)
   end
 
   defp encode_function(nil), do: nil

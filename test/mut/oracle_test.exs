@@ -10,7 +10,7 @@ defmodule Mut.OracleTest do
 
   test "loads JSONL and validates sentinel" do
     path = tmp_file("ok.jsonl")
-    File.write!(path, Jason.encode!(site()) <> "\n" <> ~s({"event":"end","count":1}\n))
+    File.write!(path, Mut.JSON.encode!(site()) <> "\n" <> ~s({"event":"end","count":1}\n))
 
     assert {:ok, 1} = Mut.Oracle.load_jsonl(path)
     assert [_site] = Mut.Oracle.lookup_by_file_line("lib/example.ex", 1)
@@ -18,14 +18,14 @@ defmodule Mut.OracleTest do
 
   test "missing sentinel returns error" do
     path = tmp_file("missing.jsonl")
-    File.write!(path, Jason.encode!(site()) <> "\n")
+    File.write!(path, Mut.JSON.encode!(site()) <> "\n")
 
     assert {:error, :missing_sentinel} = Mut.Oracle.load_jsonl(path)
   end
 
   test "count mismatch returns error" do
     path = tmp_file("mismatch.jsonl")
-    File.write!(path, Jason.encode!(site()) <> "\n" <> ~s({"event":"end","count":2}\n))
+    File.write!(path, Mut.JSON.encode!(site()) <> "\n" <> ~s({"event":"end","count":2}\n))
 
     assert {:error, :count_mismatch} = Mut.Oracle.load_jsonl(path)
   end

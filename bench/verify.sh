@@ -49,7 +49,7 @@ if [ ! -f "$REPORT_PATH" ]; then
 fi
 
 REPORT_PATH="$REPORT_PATH" EXPECTED_SCHEMA="$EXPECTED_SCHEMA" EXPECTED_FALLBACK="$EXPECTED_FALLBACK" EXPECTED_COMBINED="$EXPECTED_COMBINED" mix run --no-start -e '
-report = System.fetch_env!("REPORT_PATH") |> File.read!() |> Jason.decode!()
+report = System.fetch_env!("REPORT_PATH") |> File.read!() |> JSON.decode!()
 
 case Mut.Reporter.StrykerJson.validate(report) do
   :ok -> :ok

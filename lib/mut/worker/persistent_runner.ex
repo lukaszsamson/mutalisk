@@ -346,14 +346,35 @@ defmodule Mut.Worker.PersistentRunner do
     error in CompileError ->
       {:error, :compile_error, Exception.message(error)}
 
-    error in [SyntaxError, TokenMissingError] ->
-      {:error, :compile_error, Exception.message(error)}
-
-    error in UndefinedFunctionError ->
-      {:error, :dep_path_error, Exception.message(error)}
-
     error ->
-      {:error, :unknown, Exception.message(error)}
+      cond do
+        # Parse-class errors. M25 nimble_options diagnosis: 18 guard mutants
+        # produced `MismatchedDelimiterError` / `SyntaxError` from
+        # `Code.compile_file/1` in the persistent BEAM despite the patched
+        # bytes parsing cleanly via `Kernel.ParallelCompiler` in mix-spawn.
+        # The hypothesis is in-process recompile state interacting with the
+        # patched module's compile-time evaluation. We classify these as
+        # `:parse_error` so the host can route to mix-spawn for an
+        # authoritative verdict — mirroring the `:unknown` recovery contract
+        # introduced in ee436e5. If mix-spawn ALSO fails to parse, the
+        # invalid result it produces is the truthful one.
+        parse_error?(error) ->
+          {:error, :parse_error, Exception.message(error)}
+
+        match?(%UndefinedFunctionError{}, error) ->
+          {:error, :dep_path_error, Exception.message(error)}
+
+        true ->
+          {:error, :unknown, Exception.message(error)}
+      end
+  end
+
+  # `MismatchedDelimiterError` was added in Elixir 1.17 and does not inherit
+  # from `SyntaxError`, so we match by struct module name to stay
+  # version-tolerant.
+  defp parse_error?(%mod{}) do
+    mod in [SyntaxError, TokenMissingError] or
+      mod == :"Elixir.MismatchedDelimiterError"
   end
 
   defp restore_modules(modules) do
@@ -475,7 +496,7 @@ defmodule Mut.Worker.PersistentRunner do
   # mutant run will simply fail consistently with mix.
   @system_apps_for_start ~w(kernel stdlib elixir compiler asn1 crypto ssl public_key
                             sasl runtime_tools mix iex hex logger inets ex_unit
-                            syntax_tools tools jason)a
+                            syntax_tools tools)a
 
   defp start_project_apps do
     discover_project_apps()

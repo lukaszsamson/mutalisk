@@ -40,11 +40,11 @@ defmodule Mut.Oracle.DispatchSiteTest do
     assert site.meta == [line: 1, column: 3]
   end
 
-  test "Jason round-trip has expected keys" do
+  test "JSON round-trip has expected keys" do
     decoded =
       dispatch_site()
-      |> Jason.encode!()
-      |> Jason.decode!()
+      |> Mut.JSON.encode!()
+      |> Mut.JSON.decode!()
 
     assert decoded |> Map.keys() |> Enum.sort() ==
              ~w(column dispatch_kind end_column end_line env_context event_file file function line meta module resolved_arity resolved_module resolved_name)

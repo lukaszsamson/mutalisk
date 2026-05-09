@@ -39,7 +39,7 @@ defmodule Mut.Reporter.StrykerJson do
 
   @spec write(rendered :: map(), path :: Path.t()) :: :ok
   def write(rendered, path) when is_map(rendered) and is_binary(path) do
-    File.write!(path, Jason.encode!(rendered, pretty: true) <> "\n")
+    File.write!(path, Mut.JSON.encode!(rendered, pretty: true) <> "\n")
     :ok
   end
 

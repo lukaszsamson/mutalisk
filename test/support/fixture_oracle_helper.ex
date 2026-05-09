@@ -8,7 +8,7 @@ defmodule Mut.FixtureOracleHelper do
   def golden_oracle(path \\ Path.expand("test/golden/oracle/demo_app.json")) do
     path
     |> File.read!()
-    |> Jason.decode!()
+    |> Mut.JSON.decode!()
     |> Enum.map(&decode_site/1)
     |> oracle()
   end

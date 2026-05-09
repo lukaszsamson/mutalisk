@@ -131,7 +131,11 @@ defmodule Mut.Worker.PersistentRunner.Reset do
 
   ## --- :persistent_term ---------------------------------------------------
 
-  @spec capture_persistent_terms() :: MapSet.t()
+  # `MapSet.t/0` is opaque; under Elixir 1.19+ dialyzer the success typing
+  # reveals the internal struct shape, so an explicit `@spec` would trigger
+  # `contract_with_opaque`. We omit the spec here and rely on the public
+  # contract being preserved by callers using `MapSet` operations only.
+  @dialyzer {:no_opaque, capture_persistent_terms: 0}
   def capture_persistent_terms do
     :persistent_term.get() |> Enum.map(fn {k, _v} -> k end) |> MapSet.new()
   rescue

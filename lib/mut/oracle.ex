@@ -1,6 +1,7 @@
 defmodule Mut.Oracle do
   @moduledoc "Stores oracle dispatch sites."
 
+  alias Mut.JSON.OrderedObject
   alias Mut.Oracle.DispatchSite
 
   defstruct sites: [], by_key: %{}, by_file_line: %{}
@@ -112,7 +113,7 @@ defmodule Mut.Oracle do
   end
 
   defp parse_jsonl(lines) do
-    decoded = Enum.map(lines, &Jason.decode!/1)
+    decoded = Enum.map(lines, &Mut.JSON.decode!/1)
 
     case List.last(decoded) do
       %{"event" => "end", "count" => expected_count} ->
@@ -174,7 +175,7 @@ defmodule Mut.Oracle do
     |> Agent.get(& &1.sites)
     |> Enum.sort_by(&sort_key/1)
     |> Enum.map(&canonical_site/1)
-    |> Jason.encode!(pretty: true)
+    |> Mut.JSON.encode!(pretty: true)
     |> Kernel.<>("\n")
   end
 
@@ -185,7 +186,7 @@ defmodule Mut.Oracle do
   end
 
   defp canonical_site(site) do
-    Jason.OrderedObject.new(
+    OrderedObject.new(
       file: site.file,
       line: site.line,
       column: site.column,

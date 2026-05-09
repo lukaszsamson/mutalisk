@@ -83,14 +83,14 @@ defmodule Mut.Mutant do
         }
 end
 
-defimpl Jason.Encoder, for: Mut.Mutant do
-  def encode(mutant, opts) do
+defimpl JSON.Encoder, for: Mut.Mutant do
+  def encode(mutant, encoder) do
     mutant
     |> Map.from_struct()
     |> Map.drop([:original_ast, :mutated_ast])
     |> Map.update!(:span, &encode_span/1)
     |> Map.update!(:function, &encode_function/1)
-    |> Jason.Encode.map(opts)
+    |> JSON.protocol_encode(encoder)
   end
 
   defp encode_span(nil), do: nil

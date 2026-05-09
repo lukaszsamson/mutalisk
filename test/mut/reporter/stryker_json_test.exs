@@ -8,11 +8,11 @@ defmodule Mut.Reporter.StrykerJsonTest do
   alias Mut.Plan
   alias Mut.Reporter.StrykerJson
 
-  test "render produces schema v2 shape and round-trips through Jason" do
+  test "render produces schema v2 shape and round-trips through JSON" do
     {snapshot, plan} = fixture_snapshot_and_plan([:killed])
 
     rendered = StrykerJson.render(snapshot, plan, source_loader(), [])
-    decoded = rendered |> Jason.encode!() |> Jason.decode!()
+    decoded = rendered |> Mut.JSON.encode!() |> Mut.JSON.decode!()
 
     assert Map.keys(decoded) |> Enum.sort() == [
              "files",

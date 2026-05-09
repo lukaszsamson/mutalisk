@@ -17,7 +17,7 @@ defmodule Mut.Reporter.StrykerJsonGoldenTest do
 
     assert :ok = StrykerJson.validate(rendered)
 
-    actual = Jason.encode!(rendered, pretty: true) <> "\n"
+    actual = Mut.JSON.encode!(rendered, pretty: true) <> "\n"
 
     if System.get_env("MUT_REGOLD") == "1" do
       File.mkdir_p!(Path.dirname(@golden))

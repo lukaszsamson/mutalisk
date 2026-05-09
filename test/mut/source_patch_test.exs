@@ -35,11 +35,11 @@ defmodule Mut.SourcePatchTest do
     assert patch.replacement == "-"
   end
 
-  test "Jason round-trip has expected keys" do
+  test "JSON round-trip has expected keys" do
     keys =
       source_patch()
-      |> Jason.encode!()
-      |> Jason.decode!()
+      |> Mut.JSON.encode!()
+      |> Mut.JSON.decode!()
       |> Map.keys()
       |> Enum.sort()
 

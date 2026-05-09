@@ -59,10 +59,10 @@ defmodule Mut.MutantTest do
     end
   end
 
-  test "Jason round-trip has expected keys and excludes AST fields" do
-    json = Jason.encode!(mutant(:survived))
-    decoded = Jason.decode!(json)
-    encoded_again = Jason.encode!(decoded)
+  test "JSON round-trip has expected keys and excludes AST fields" do
+    json = Mut.JSON.encode!(mutant(:survived))
+    decoded = Mut.JSON.decode!(json)
+    encoded_again = Mut.JSON.encode!(decoded)
 
     assert decoded |> Map.keys() |> Enum.sort() ==
              ~w(ast_path_hash column compile_error covering_tests description duration_ms end_byte engine file function id killing_test line module mutated_source mutation_kind mutator mutator_name original_dispatch original_source skip_reason source_patch span stable_id stable_id_kind start_byte status)

@@ -128,7 +128,7 @@ defmodule Mut.Worker.PersistentRunner.Diag do
   def parse_line(_), do: :error
 
   defp decode(rest, kind) do
-    case Jason.decode(String.trim(rest)) do
+    case Mut.JSON.decode(String.trim(rest)) do
       {:ok, map} when is_map(map) ->
         {:ok, kind, atomize_keys(map, kind)}
 
@@ -158,7 +158,7 @@ defmodule Mut.Worker.PersistentRunner.Diag do
   end
 
   defp emit_line(marker, metrics) do
-    case Jason.encode(metrics) do
+    case Mut.JSON.encode(metrics) do
       {:ok, payload} -> IO.puts(marker <> " " <> payload)
       _ -> :ok
     end

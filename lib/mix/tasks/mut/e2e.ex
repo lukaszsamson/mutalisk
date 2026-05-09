@@ -88,7 +88,7 @@ defmodule Mix.Tasks.Mut.E2e do
       raise "mix mut #{label} did not write #{report_path}\n#{output}"
     end
 
-    report = Jason.decode!(File.read!(report_file))
+    report = Mut.JSON.decode!(File.read!(report_file))
     :ok = StrykerJson.validate(report)
 
     File.rm!(report_file)
@@ -178,7 +178,7 @@ defmodule Mix.Tasks.Mut.E2e do
   end
 
   defp assert_golden_ids!(run) do
-    expected = @golden_stable_ids |> File.read!() |> Jason.decode!() |> Enum.sort()
+    expected = @golden_stable_ids |> File.read!() |> Mut.JSON.decode!() |> Enum.sort()
     actual = stable_ids(run.report)
 
     if actual != expected do

@@ -1,7 +1,7 @@
 defmodule Mut.SourcePatch do
   @moduledoc "Fallback byte-range source patch."
 
-  @derive Jason.Encoder
+  @derive JSON.Encoder
   @enforce_keys [
     :file,
     :start_byte,

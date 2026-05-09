@@ -18,7 +18,7 @@ defmodule Mut.Trace.WriterTest do
 
     lines = path |> File.read!() |> String.split("\n", trim: true)
     assert length(lines) == 3
-    assert Jason.decode!(List.last(lines)) == %{"event" => "end", "count" => 2}
+    assert Mut.JSON.decode!(List.last(lines)) == %{"event" => "end", "count" => 2}
   end
 
   defp site(line) do

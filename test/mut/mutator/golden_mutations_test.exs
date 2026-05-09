@@ -29,10 +29,10 @@ defmodule Mut.Mutator.GoldenMutationsTest do
 
       if System.get_env("MUT_REGOLD") == "1" do
         File.mkdir_p!(@mutation_golden_root)
-        File.write!(golden, Jason.encode!(actual, pretty: true) <> "\n")
+        File.write!(golden, Mut.JSON.encode!(actual, pretty: true) <> "\n")
       end
 
-      assert actual == Jason.decode!(File.read!(golden))
+      assert actual == Mut.JSON.decode!(File.read!(golden))
     end)
   end
 
@@ -206,7 +206,7 @@ defmodule Mut.Mutator.GoldenMutationsTest do
   defp golden_oracle do
     @oracle_golden
     |> File.read!()
-    |> Jason.decode!()
+    |> Mut.JSON.decode!()
     |> Enum.map(&decode_site/1)
     |> oracle()
   end

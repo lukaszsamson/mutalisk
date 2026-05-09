@@ -1,9 +1,10 @@
 defmodule Mut.Plan do
   @moduledoc "Mutation plan consumed by later execution phases."
 
+  alias Mut.JSON.OrderedObject
   alias Mut.Mutant
 
-  @derive {Jason.Encoder, except: [:matched_pairs]}
+  @derive {JSON.Encoder, except: [:matched_pairs]}
   @enforce_keys [:schema, :fallback, :skipped]
   defstruct schema: [], fallback: [], skipped: [], invalid: [], matched_pairs: []
 
@@ -84,12 +85,12 @@ defmodule Mut.Plan do
   defp json_dump(plan) do
     plan
     |> canonical()
-    |> Jason.encode!(pretty: true)
+    |> Mut.JSON.encode!(pretty: true)
     |> Kernel.<>("\n")
   end
 
   defp canonical(%__MODULE__{} = plan) do
-    Jason.OrderedObject.new(
+    OrderedObject.new(
       schema: Enum.sort_by(plan.schema, & &1.stable_id),
       fallback: Enum.sort_by(plan.fallback, & &1.stable_id),
       invalid: Enum.sort_by(plan.invalid, & &1.stable_id),

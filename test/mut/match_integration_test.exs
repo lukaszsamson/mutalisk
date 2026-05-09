@@ -88,7 +88,7 @@ defmodule Mut.MatchIntegrationTest do
   defp golden_oracle do
     @golden
     |> File.read!()
-    |> Jason.decode!()
+    |> Mut.JSON.decode!()
     |> Enum.map(&decode_site/1)
     |> oracle()
   end

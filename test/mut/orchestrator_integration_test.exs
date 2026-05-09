@@ -43,9 +43,9 @@ defmodule Mut.OrchestratorIntegrationTest do
 
     if System.get_env("MUT_REGOLD") == "1" do
       File.mkdir_p!(Path.dirname(@golden))
-      File.write!(@golden, Jason.encode!(stable_ids, pretty: true) <> "\n")
+      File.write!(@golden, Mut.JSON.encode!(stable_ids, pretty: true) <> "\n")
     end
 
-    assert stable_ids == Jason.decode!(File.read!(@golden))
+    assert stable_ids == Mut.JSON.decode!(File.read!(@golden))
   end
 end

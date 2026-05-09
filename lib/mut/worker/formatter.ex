@@ -101,12 +101,12 @@ defmodule Mut.Worker.Formatter do
 
   defp emit(event) do
     event
-    |> Jason.encode!()
+    |> Mut.JSON.encode!()
     |> IO.puts()
   end
 
   defp decode_line(line) do
-    case Jason.decode(line) do
+    case Mut.JSON.decode(line) do
       {:ok, %{"event" => _event} = event} -> [event]
       _not_json -> []
     end

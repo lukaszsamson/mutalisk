@@ -1,7 +1,7 @@
 defmodule Mut.SourceSpan do
   @moduledoc "Source byte and line span."
 
-  @derive Jason.Encoder
+  @derive JSON.Encoder
   @enforce_keys [:file, :start_line, :start_byte, :end_byte]
   defstruct [
     :file,

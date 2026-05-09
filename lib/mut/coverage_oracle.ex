@@ -1,7 +1,7 @@
 defmodule Mut.CoverageOracle do
   @moduledoc "Per-test-file coverage map for v1.5 selection."
 
-  @derive {Jason.Encoder, except: []}
+  @derive {JSON.Encoder, except: []}
   defstruct by_line: %{},
             by_function: %{},
             test_runtime_ms: %{},

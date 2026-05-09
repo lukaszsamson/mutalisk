@@ -6,7 +6,7 @@ defmodule Mutalisk.MixProject do
     [
       app: :mutalisk,
       version: "0.1.0",
-      elixir: ">= 1.18.0",
+      elixir: ">= 1.19.0",
       start_permanent: Mix.env() == :prod,
       test_load_filters: [
         fn file ->
@@ -19,7 +19,7 @@ defmodule Mutalisk.MixProject do
       aliases: aliases(),
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
-        plt_add_apps: [:mix, :ex_unit, :jason]
+        plt_add_apps: [:mix, :ex_unit]
       ]
     ]
   end
@@ -37,15 +37,12 @@ defmodule Mutalisk.MixProject do
     [
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      # runtime: false keeps :jason out of mutalisk.app's `applications` list.
-      # Without this, when a target project's app name is also a name that
-      # `:jason` lists in its `optional_applications` (e.g. `:decimal`),
-      # Erlang's app start graph forms a cycle target -> mutalisk -> jason
-      # -> target and `mix test` deadlocks at :application_controller.call/2.
-      # Mutalisk only uses Jason as plain function calls (no GenServer), so
-      # it does not need :jason to be a started OTP application.
-      {:jason, "~> 1.4", runtime: false}
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
+      # JSON: Mutalisk uses the built-in Elixir `JSON` module (Elixir 1.19+)
+      # via the thin `Mut.JSON` wrapper in `lib/mut/json.ex`. No JSON
+      # dependency is required at runtime, which avoids the previous
+      # mutalisk -> jason -> target start-graph cycle observed when target
+      # apps shared names with `:jason`'s `optional_applications`.
     ]
   end
 
