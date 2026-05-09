@@ -92,7 +92,8 @@ defmodule Mut.SchemaBuild do
 
   defp build_in_work_copy(work_copy, plan, opts) do
     with :ok <- Mut.WorkCopy.install_overlay(work_copy, :schema),
-         {:ok, placement_maps, original_sources} <- instrument_files(work_copy, plan),
+         {:ok, placement_maps, original_sources, refusals} <- instrument_files(work_copy, plan),
+         plan <- reroute_refused(plan, refusals),
          :ok <- run_child_mix(work_copy, @deps_args),
          {:compile, output, exit_code} <- compile(work_copy),
          {:ok, final} <-
@@ -116,21 +117,45 @@ defmodule Mut.SchemaBuild do
   defp instrument_files(work_copy, %Plan{} = plan) do
     plan.schema
     |> Enum.group_by(& &1.file)
-    |> Enum.reduce_while({:ok, %{}, %{}}, fn {file, mutants}, {:ok, maps, originals} ->
+    |> Enum.reduce_while({:ok, %{}, %{}, []}, fn {file, mutants},
+                                                 {:ok, maps, originals, refusals_acc} ->
       work_file = Path.join(work_copy, file)
       original_source = File.read!(work_file)
 
       case Mut.SchemaPlacer.instrument_file(work_file, mutants) do
-        {:ok, source, placement_map} ->
+        {:ok, source, placement_map, refusals} ->
           File.write!(work_file, source)
 
           {:cont,
-           {:ok, Map.put(maps, file, placement_map), Map.put(originals, file, original_source)}}
+           {:ok, Map.put(maps, file, placement_map), Map.put(originals, file, original_source),
+            refusals ++ refusals_acc}}
 
         {:error, reason} ->
           {:halt, {:error, reason}}
       end
     end)
+  end
+
+  # Move schema mutants whose AST landed in a refused context (e.g. inside a
+  # `defmacro` body) over to the fallback engine. Schema instrumentation can
+  # only wrap expressions in a runtime `case`; macro expansion happens before
+  # runtime, so a schema-wrapped expression inside a macro body never sees the
+  # active id. Source-patch (fallback) substitution still works for those
+  # sites because it replaces the bytes before compilation.
+  defp reroute_refused(%Plan{} = plan, []), do: plan
+
+  defp reroute_refused(%Plan{} = plan, refusals) do
+    refused_ids = MapSet.new(refusals, & &1.mutant.id)
+
+    {refused, kept_schema} =
+      Enum.split_with(plan.schema, &MapSet.member?(refused_ids, &1.id))
+
+    rerouted =
+      Enum.map(refused, fn mutant ->
+        %{mutant | engine: :fallback}
+      end)
+
+    %{plan | schema: kept_schema, fallback: plan.fallback ++ rerouted}
   end
 
   defp restore_original_sources(work_copy, original_sources) do

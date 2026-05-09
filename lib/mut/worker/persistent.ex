@@ -252,11 +252,14 @@ defmodule Mut.Worker.Persistent do
         # almost always Code.compile_file/1 raising a non-CompileError
         # exception (e.g., FunctionClauseError) during compile-time
         # eval of the patched file in the polluted persistent BEAM.
-        # ParallelCompiler in a fresh subprocess accepts the same
-        # patch. Bump mix_fallback_count for :unknown so the
-        # diagnostics block reflects the retry rate.
+        # M25 follow-up: `:parse_error` is the same kind of "in-process
+        # path disagrees with mix-spawn" signal but caused by the parser
+        # reporting MismatchedDelimiter/Syntax on bytes mix-spawn parses
+        # cleanly. Both are routed to mix-spawn by the host; bump
+        # mix_fallback_count so the diagnostics block reflects the
+        # retry rate.
         state =
-          if category == :unknown,
+          if category in [:unknown, :parse_error],
             do: Map.update!(state, :mix_fallback_count, &(&1 + 1)),
             else: state
 
@@ -593,6 +596,7 @@ defmodule Mut.Worker.Persistent do
 
   defp parse_category("compile_error"), do: :compile_error
   defp parse_category("dep_path_error"), do: :dep_path_error
+  defp parse_category("parse_error"), do: :parse_error
   defp parse_category(_), do: :unknown
 
   defp killing_test(output) do

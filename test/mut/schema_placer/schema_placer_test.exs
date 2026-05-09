@@ -129,7 +129,7 @@ defmodule Mut.SchemaPlacerTest do
         {:-, [line: 2, column: 14], [{:a, [line: 2, column: 13], nil}, 1]}
       )
 
-    assert {:ok, rendered, %SchemaPlacer.PlacementMap{} = placement_map} =
+    assert {:ok, rendered, %SchemaPlacer.PlacementMap{} = placement_map, []} =
              SchemaPlacer.instrument_file(path, [%{mutant | file: "tmp/schema_placer_sample.ex"}])
 
     assert String.contains?(rendered, "case :persistent_term.get")
@@ -193,6 +193,54 @@ defmodule Mut.SchemaPlacerTest do
     assert_raise SchemaPlacer.RefusedContext, ~r/inside a defmacro\/defmacrop body/, fn ->
       SchemaPlacer.place(ast, [mutant])
     end
+  end
+
+  test "place_with_refusals returns refused mutant instead of raising" do
+    source = "defmodule Sample do\n  defmacro f(a), do: a + 1\nend"
+    ast = parsed!(source)
+
+    mutant =
+      mutant(
+        ast,
+        source,
+        :+,
+        11,
+        7,
+        {:-, [line: 2, column: 25], [{:a, [line: 2, column: 24], nil}, 1]}
+      )
+
+    assert {placed, [%{mutant: refused_mutant, reason: reason}]} =
+             SchemaPlacer.place_with_refusals(ast, [mutant])
+
+    # AST is returned unchanged (no schema case wrapping the refused site)
+    assert schema_cases(placed) == []
+    assert refused_mutant.id == 11
+    assert reason =~ "defmacro/defmacrop body"
+  end
+
+  test "place_with_refusals partitions accepted from refused mutants by candidate hash" do
+    source = """
+    defmodule Sample do
+      def ok(a), do: a + 1
+      defmacro bad(a), do: a * 1
+    end
+    """
+
+    ast = parsed!(source)
+
+    accepted =
+      mutant(ast, source, :+, 21, 2, {:-, [line: 2, column: 18], [{:a, [], nil}, 1]})
+
+    refused =
+      mutant(ast, source, :*, 22, 3, {:/, [line: 3, column: 27], [{:a, [], nil}, 1]})
+
+    {placed, refusals} =
+      SchemaPlacer.place_with_refusals(ast, [accepted, refused])
+
+    # Exactly one schema case rendered (for the accepted mutant in def body).
+    assert length(schema_cases(placed)) == 1
+    assert [%{mutant: %{id: 22}, reason: reason}] = refusals
+    assert reason =~ "defmacro/defmacrop body"
   end
 
   defp parsed!(source) do

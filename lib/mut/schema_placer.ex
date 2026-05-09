@@ -43,14 +43,48 @@ defmodule Mut.SchemaPlacer do
     end
   end
 
+  @typedoc "Refused-context refusal returned by `place_with_refusals/2`."
+  @type refusal :: %{mutant: Mutant.t(), reason: String.t()}
+
+  @doc """
+  Place schema instrumentation around the given mutants.
+
+  Raises `RefusedContext` if any mutant lands in a refused AST context (macro
+  body, when guard, function head pattern, etc.). For a non-raising variant,
+  use `place_with_refusals/2`.
+  """
   @spec place(Macro.t(), [Mutant.t()]) :: Macro.t()
   def place(ast, []), do: ast
 
   def place(ast, mutants) when is_list(mutants) do
+    case place_with_refusals(ast, mutants) do
+      {instrumented, []} ->
+        instrumented
+
+      {_instrumented, [%{mutant: mutant, reason: reason} | _rest]} ->
+        raise RefusedContext,
+          mutant_id: mutant.id,
+          file: mutant.file,
+          line: mutant.line,
+          description: reason
+    end
+  end
+
+  @doc """
+  Like `place/2`, but instead of raising on refused contexts, returns the
+  partially-instrumented AST and a list of refusals. Refused mutants are not
+  wrapped in schema cases; the caller is expected to reroute them to the
+  fallback engine (or mark them invalid).
+  """
+  @spec place_with_refusals(Macro.t(), [Mutant.t()]) :: {Macro.t(), [refusal()]}
+  def place_with_refusals(ast, []), do: {ast, []}
+
+  def place_with_refusals(ast, mutants) when is_list(mutants) do
     groups = mutant_groups(mutants)
     hoist_plan = hoist_plan(ast, groups)
-    {instrumented, _acc} = Macro.traverse(ast, acc(groups, hoist_plan), &pre/2, &post/2)
-    instrumented
+    initial_acc = acc(groups, hoist_plan)
+    {instrumented, %{refusals: refusals}} = Macro.traverse(ast, initial_acc, &pre/2, &post/2)
+    {instrumented, Enum.reverse(refusals)}
   end
 
   @spec render(Macro.t()) :: String.t()
@@ -63,12 +97,14 @@ defmodule Mut.SchemaPlacer do
   end
 
   @spec instrument_file(file :: Path.t(), [Mutant.t()]) ::
-          {:ok, instrumented_source :: String.t(), PlacementMap.t()} | {:error, term}
+          {:ok, instrumented_source :: String.t(), PlacementMap.t(), [refusal()]}
+          | {:error, term}
   def instrument_file(file, mutants) do
     with {:ok, {ast, _source}} <- Mut.SourceParse.parse(file) do
       file_mutants = Enum.filter(mutants, &same_file?(&1.file, file))
-      rendered = render(place(ast, file_mutants))
-      {:ok, rendered, placement_map(file, rendered)}
+      {placed_ast, refusals} = place_with_refusals(ast, file_mutants)
+      rendered = render(placed_ast)
+      {:ok, rendered, placement_map(file, rendered), refusals}
     end
   end
 
@@ -93,7 +129,14 @@ defmodule Mut.SchemaPlacer do
   end
 
   defp acc(groups, hoist_plan) do
-    %{frames: [], groups: groups, hoist_plan: hoist_plan, def_stack: [], skip_depth: 0}
+    %{
+      frames: [],
+      groups: groups,
+      hoist_plan: hoist_plan,
+      def_stack: [],
+      skip_depth: 0,
+      refusals: []
+    }
   end
 
   defp pre(node, acc) do
@@ -107,22 +150,19 @@ defmodule Mut.SchemaPlacer do
     path = hd(acc.frames).path
     group = Map.get(acc.groups, path_hash(path))
 
-    node =
+    {node, acc} =
       cond do
         group && acc.skip_depth > 0 ->
-          raise_refused(group, "inside quote/unquote/unquote_splicing")
+          {node, record_refused(acc, group, "inside quote/unquote/unquote_splicing")}
 
         group ->
-          refused = refused_context(path)
-
-          if refused do
-            raise_refused(group, refused)
-          else
-            schema_case(node, group, scrutinee(acc))
+          case refused_context(path) do
+            nil -> {schema_case(node, group, scrutinee(acc)), acc}
+            description -> {node, record_refused(acc, group, description)}
           end
 
         true ->
-          node
+          {node, acc}
       end
 
     node = maybe_hoist_body(node, path, acc)
@@ -233,12 +273,9 @@ defmodule Mut.SchemaPlacer do
     end
   end
 
-  defp raise_refused([mutant | _rest], description) do
-    raise RefusedContext,
-      mutant_id: mutant.id,
-      file: mutant.file,
-      line: mutant.line,
-      description: description
+  defp record_refused(acc, group, description) do
+    refusals = Enum.map(group, &%{mutant: &1, reason: description})
+    %{acc | refusals: refusals ++ acc.refusals}
   end
 
   defp function_head_path?(path) do

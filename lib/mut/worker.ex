@@ -157,26 +157,35 @@ defmodule Mut.Worker do
           %Result{} = result ->
             %{result | duration_ms: elapsed(started)}
 
-          {:compile_error, :unknown, message} ->
-            # M25 diagnosis (nimble_options): `:unknown`-category
-            # in-process compile failures often indicate the patched
-            # file's compile-time code raised a non-CompileError
-            # exception (e.g., FunctionClauseError) inside
-            # `Code.compile_file/1`. Mix-spawn's
-            # `Kernel.ParallelCompiler.compile_to_path/2` typically
-            # accepts the same patch in a clean BEAM, so the in-process
-            # signal is a false positive 90%+ of the time on real
-            # targets. Route to mix-spawn fallback (same recovery
-            # contract as `:filter_miss | :timeout | :crashed`); the
-            # patch is still applied to the sandbox. If mix-spawn ALSO
-            # fails to compile, the resulting `%Result{status: :invalid,
-            # recompile_category: ...}` is the truthful verdict.
+          {:compile_error, category, message} when category in [:unknown, :parse_error] ->
+            # M25 diagnosis (nimble_options): in-process recompile
+            # failures in two categories disagree systematically with
+            # mix-spawn:
+            #
+            #   `:unknown` — patched file's compile-time code raised a
+            #     non-CompileError exception (e.g., FunctionClauseError)
+            #     inside `Code.compile_file/1`. Persistent BEAM state is
+            #     the cause; a fresh `Kernel.ParallelCompiler` subprocess
+            #     accepts the same patch.
+            #
+            #   `:parse_error` — `MismatchedDelimiterError` / `SyntaxError`
+            #     / `TokenMissingError` on patched bytes that mix-spawn
+            #     parses cleanly. Same source bytes, different parser
+            #     verdict; observed on nimble_options' guard mutants.
+            #
+            # Both route to mix-spawn for an authoritative verdict (same
+            # recovery contract as `:filter_miss | :timeout | :crashed`).
+            # The patch is still applied to the sandbox. If mix-spawn
+            # ALSO fails, the resulting `%Result{status: :invalid,
+            # recompile_category: ...}` is the truthful verdict and
+            # matches the mix-only baseline.
             #
             # We DO NOT fall back for `:compile_error` and
             # `:dep_path_error` — those are taxonomies the in-process
             # path agrees with mix-spawn on, and falling back would
             # double-cost every truly broken patch.
             _persistent_message = message
+            _persistent_category = category
             run_fallback(sandbox, mutant, test_files, opts)
 
           {:compile_error, category, message} ->

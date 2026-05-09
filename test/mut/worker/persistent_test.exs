@@ -252,7 +252,48 @@ defmodule Mut.Worker.PersistentTest do
           ["test/calc_test.exs"]
         )
 
-      assert {:compile_error, _category, _message} = reply
+      assert {:compile_error, category, message} = reply
+      # `def add(a, b) :: a + b` is parseable but rejected by the
+      # compiler ("patterns are not allowed in function head"), so it
+      # surfaces as a CompileError, not a parse-class error.
+      # `:parse_error` is reserved for SyntaxError / TokenMissingError /
+      # MismatchedDelimiterError; see the dedicated regression below.
+      assert category == :compile_error
+      assert is_binary(message)
+      assert Process.alive?(server)
+    after
+      stop(server)
+    end
+  end
+
+  @tag timeout: 30_000
+  test "run_fallback returns :parse_error category for MismatchedDelimiterError-class corruption" do
+    sandbox_path = fake_fallback_project("inprocess_mismatched_delim")
+    sandbox = %Sandbox{id: 1, path: sandbox_path}
+
+    {:ok, server} = Persistent.start_link(sandbox, test_files: ["test/calc_test.exs"])
+
+    try do
+      # Mismatched closing parenthesis — the same shape of corruption
+      # observed on nimble_options' guard mutants in the M25 Phase B
+      # bench. This produces MismatchedDelimiterError on Elixir 1.18+
+      # and a SyntaxError on older versions; both must be classified
+      # as `:parse_error` so the host can route to mix-spawn.
+      File.write!(
+        Path.join(sandbox_path, "lib/calc.ex"),
+        "defmodule Calc do\n  def add(a, b) when is_integer(a)) do\n    a + b\n  end\nend\n"
+      )
+
+      reply =
+        Persistent.run_fallback(
+          server,
+          1,
+          ["lib/calc.ex"],
+          ["test/calc_test.exs"]
+        )
+
+      assert {:compile_error, :parse_error, message} = reply
+      assert is_binary(message)
       assert Process.alive?(server)
     after
       stop(server)

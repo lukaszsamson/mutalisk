@@ -295,7 +295,12 @@ defmodule Mut.CompileRollback do
     mutants = Enum.filter(plan.schema, &(&1.file == file))
 
     case Mut.SchemaPlacer.instrument_file(path, mutants) do
-      {:ok, source, placement_map} ->
+      {:ok, source, placement_map, _refusals} ->
+        # During rollback we operate on a subset of mutants that already
+        # passed initial schema placement; refusals here would indicate a
+        # logic regression. We ignore them rather than crashing the rollback,
+        # but the residual mutants stay in `plan.schema` and will be invalid
+        # on the next compile pass if they truly cannot be placed.
         File.write!(path, source)
         {:cont, {:ok, Map.put(maps, file, placement_map)}}
 

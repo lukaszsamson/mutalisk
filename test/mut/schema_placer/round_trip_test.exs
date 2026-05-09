@@ -15,7 +15,7 @@ defmodule Mut.SchemaPlacer.RoundTripTest do
     module = unique_module()
     mutants = arith_mutants()
 
-    assert {:ok, rendered, _placement_map} =
+    assert {:ok, rendered, _placement_map, []} =
              Mut.SchemaPlacer.instrument_file(@arith_file, mutants)
 
     rendered =
