@@ -165,9 +165,9 @@ case "$TARGET" in
     ;;
   ecto)
     # Exclude DB-backed integration tests when no Postgres/MySQL is up.
-    cat > "$WORK_DIR/test/test_helper.exs" <<'EOF'
-ExUnit.start(exclude: [:integration, :postgres, :mysql], seed: 42)
-EOF
+    # Inject into the existing test_helper.exs (which loads Ecto.TestRepo
+    # support file) rather than overwriting; preserves project setup.
+    perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(exclude: [:integration, :postgres, :mysql], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
   jason)
     # Pin StreamData seed for reproducibility across mix/persistent diffs.
