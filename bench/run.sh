@@ -9,7 +9,7 @@ WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -60,34 +60,40 @@ case "$TARGET" in
     REF="v2.1.1"
     SHA="70af9d89e6bcb6fa7c47d42ef608e5c76a50d7ff"
     ;;
-  # M24 OSS targets. SHAs left blank — pin and verify before running
-  # against the byte-identity gates. The harness will refuse to run
-  # without a SHA so a bench operator can't accidentally drift
-  # against a moving HEAD.
+  # M25 v1.10 validation targets. SHAs pinned to latest stable tags
+  # (queried 2026-05-09). BENCH_SHA / BENCH_REF env vars override for
+  # one-off runs against newer upstream state, but the default is the
+  # frozen v1.10 matrix anchor — do not bump without re-running the
+  # M25 byte-identity gates.
   nimble_options)
     REPO="https://github.com/dashbitco/nimble_options.git"
-    REF="${BENCH_REF:-main}"
-    SHA="${BENCH_SHA:-}"
+    REF="${BENCH_REF:-v1.1.1}"
+    SHA="${BENCH_SHA:-cc80e7e6fdb9bbbe6a4614b2e2e81ca4012fc264}"
     ;;
   gettext)
     REPO="https://github.com/elixir-gettext/gettext.git"
-    REF="${BENCH_REF:-main}"
-    SHA="${BENCH_SHA:-}"
+    REF="${BENCH_REF:-v1.0.2}"
+    SHA="${BENCH_SHA:-e3180f138bda49c7607b709ec74133c47c24c81d}"
     ;;
   ecto)
     REPO="https://github.com/elixir-ecto/ecto.git"
-    REF="${BENCH_REF:-master}"
-    SHA="${BENCH_SHA:-}"
+    REF="${BENCH_REF:-v3.13.6}"
+    SHA="${BENCH_SHA:-285329f63d34b610d754fd16d07f6c95ae52bfc7}"
     ;;
   mox)
     REPO="https://github.com/dashbitco/mox.git"
-    REF="${BENCH_REF:-main}"
-    SHA="${BENCH_SHA:-}"
+    REF="${BENCH_REF:-v1.2.0}"
+    SHA="${BENCH_SHA:-5dd54291520f64e73186606befcaf5729307b237}"
     ;;
   jason)
     REPO="https://github.com/michalmuskala/jason.git"
-    REF="${BENCH_REF:-master}"
-    SHA="${BENCH_SHA:-}"
+    REF="${BENCH_REF:-v1.4.5}"
+    SHA="${BENCH_SHA:-4ede42858eb19f80ec9e863aab52df466eab8608}"
+    ;;
+  plug)
+    REPO="https://github.com/elixir-plug/plug.git"
+    REF="${BENCH_REF:-v1.19.1}"
+    SHA="${BENCH_SHA:-8723880aa55ec9aae26ec33bc2c107903ec16840}"
     ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
