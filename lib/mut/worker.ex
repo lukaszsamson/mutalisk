@@ -157,6 +157,28 @@ defmodule Mut.Worker do
           %Result{} = result ->
             %{result | duration_ms: elapsed(started)}
 
+          {:compile_error, :unknown, message} ->
+            # M25 diagnosis (nimble_options): `:unknown`-category
+            # in-process compile failures often indicate the patched
+            # file's compile-time code raised a non-CompileError
+            # exception (e.g., FunctionClauseError) inside
+            # `Code.compile_file/1`. Mix-spawn's
+            # `Kernel.ParallelCompiler.compile_to_path/2` typically
+            # accepts the same patch in a clean BEAM, so the in-process
+            # signal is a false positive 90%+ of the time on real
+            # targets. Route to mix-spawn fallback (same recovery
+            # contract as `:filter_miss | :timeout | :crashed`); the
+            # patch is still applied to the sandbox. If mix-spawn ALSO
+            # fails to compile, the resulting `%Result{status: :invalid,
+            # recompile_category: ...}` is the truthful verdict.
+            #
+            # We DO NOT fall back for `:compile_error` and
+            # `:dep_path_error` — those are taxonomies the in-process
+            # path agrees with mix-spawn on, and falling back would
+            # double-cost every truly broken patch.
+            _persistent_message = message
+            run_fallback(sandbox, mutant, test_files, opts)
+
           {:compile_error, category, message} ->
             %Result{
               status: :invalid,

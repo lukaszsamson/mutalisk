@@ -245,9 +245,21 @@ defmodule Mut.Worker.Persistent do
         # M21 in-process fallback: patch did not compile. The
         # persistent BEAM is still healthy (we reset modules in the
         # `after` clause regardless). Reply with the category +
-        # message so the host materialises Result{status: :invalid,
-        # recompile_category: category}. Mix-retry would just fail
-        # with the same compile error, so don't bother.
+        # message so the host can materialise Result{status: :invalid,
+        # recompile_category: category} or route to mix-spawn for the
+        # `:unknown` category — see `Mut.Worker.run_fallback_in_process`.
+        # M25 nimble_options diagnosis: `:unknown`-category errors are
+        # almost always Code.compile_file/1 raising a non-CompileError
+        # exception (e.g., FunctionClauseError) during compile-time
+        # eval of the patched file in the polluted persistent BEAM.
+        # ParallelCompiler in a fresh subprocess accepts the same
+        # patch. Bump mix_fallback_count for :unknown so the
+        # diagnostics block reflects the retry rate.
+        state =
+          if category == :unknown,
+            do: Map.update!(state, :mix_fallback_count, &(&1 + 1)),
+            else: state
+
         {:reply, {:compile_error, category, message}, %{state | leftover: ""}}
 
       {:error, kind, _leftover} when kind in [:timeout, :crashed] ->
