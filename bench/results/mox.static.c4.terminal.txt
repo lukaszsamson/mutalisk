@@ -27,56 +27,6 @@ Unchanged:
 mix mut starting
 ==> jason
 Compiling 10 files (.ex)
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 164 │     ']'
-     │     ~
-     │
-     └─ lib/encode.ex:164:5
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 193 │     '}'
-     │     ~
-     │
-     └─ lib/encode.ex:193:5
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 211 │     '}'
-     │     ~
-     │
-     └─ lib/encode.ex:211:5
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
-     │                            ~
-     │
-     └─ lib/encode.ex:284:28
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
-     │                                              ~
-     │
-     └─ lib/encode.ex:284:46
-
     warning: using single-quoted strings to represent charlists is deprecated.
     Use ~c"" if you indeed want a charlist or use "" instead.
     You may run "mix format --migrate" to change all single-quoted
@@ -112,20 +62,60 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 104 │       _ in '\s\n\t\r', rest ->
-     │            ~
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
      │
-     └─ lib/decoder.ex:104:12
+     └─ lib/formatter.ex:170:69
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
      │                                                                     ~
      │
-     └─ lib/formatter.ex:170:69
+     └─ lib/formatter.ex:201:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 104 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:104:12
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -152,30 +142,10 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:183:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
  110 │       _ in '-', rest ->
      │            ~
      │
      └─ lib/decoder.ex:110:12
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:189:77
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -192,30 +162,10 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
-     │                                                                      ~
-     │
-     └─ lib/formatter.ex:195:70
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
  114 │       _ in '[', rest ->
      │            ~
      │
      └─ lib/decoder.ex:114:12
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:201:69
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -757,6 +707,56 @@ Compiling 10 files (.ex)
      │
      └─ lib/decoder.ex:695:21
 
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 164 │     ']'
+     │     ~
+     │
+     └─ lib/encode.ex:164:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 193 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:193:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 211 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:211:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                            ~
+     │
+     └─ lib/encode.ex:284:28
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                                              ~
+     │
+     └─ lib/encode.ex:284:46
+
      warning: you are implementing a protocol for Decimal but said module is not available. Make sure the module name is correct. If Decimal is an optional dependency, please wrap the protocol implementation in a Code.ensure_loaded?(Decimal) check
      │
  224 │ defimpl Jason.Encoder, for: Decimal do
@@ -764,19 +764,19 @@ Compiling 10 files (.ex)
      │
      └─ lib/encoder.ex:224: (file)
 
-     warning: Decimal.to_string/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
-     │
- 228 │     [?", decimal.to_string(value), ?"]
-     │                  ~
-     │
-     └─ lib/encoder.ex:228:18: Jason.Encoder.Decimal.encode/2
-
      warning: Decimal.to_string/2 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
      │
  242 │     [?", decimal.to_string(value, :normal), ?"]
      │                  ~
      │
      └─ lib/encode.ex:242:18: Jason.Encode.struct/4
+
+     warning: Decimal.to_string/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
+     │
+ 228 │     [?", decimal.to_string(value), ?"]
+     │                  ~
+     │
+     └─ lib/encoder.ex:228:18: Jason.Encoder.Decimal.encode/2
 
 warning: struct Decimal.Error is undefined (module Decimal.Error is not available or is yet to be defined)
 └─ lib/decoder.ex: Jason.Decoder.float_decode_function/1
@@ -794,64 +794,12 @@ Compiling 1 file (.ex)
 Generated castore app
 ==> excoveralls
 Compiling 29 files (.ex)
-    warning: unused require EEx
-    │
-  5 │   require EEx
-    │   ~
-    │
-    └─ lib/excoveralls/html/view.ex:5:3
-
-    warning: unused require ExCoveralls.Html.Safe
-    │
-  6 │   require ExCoveralls.Html.Safe
-    │   ~
-    │
-    └─ lib/excoveralls/html/view.ex:6:3
-
     warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
     │
  17 │            |> List.zip
     │                    ~
     │
     └─ lib/excoveralls/stop_words.ex:17:20: ExCoveralls.StopWords.do_filter/2
-
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--pretty=format:%s"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 49 │       _ -> "[no commit message]"
-    │         ~
-    │
-    └─ lib/excoveralls/semaphore.ex:49:9: ExCoveralls.Semaphore.get_message!/0
-
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--format=%an"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 55 │       _ -> "[no committer name]"
-    │         ~
-    │
-    └─ lib/excoveralls/gitlab.ex:55:9: ExCoveralls.Gitlab.get_committer/0
 
     warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
     │
@@ -860,28 +808,9 @@ Compiling 29 files (.ex)
     │
     └─ lib/excoveralls/ignore.ex:18:20: ExCoveralls.Ignore.do_filter/1
 
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--pretty=format:%s"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 50 │       _ -> "[no commit message]"
-    │         ~
-    │
-    └─ lib/excoveralls/circle.ex:50:9: ExCoveralls.Circle.get_message!/0
-
 Generated excoveralls app
 ==> mutalisk
-Compiling 74 files (.ex)
+Compiling 75 files (.ex)
 Generated mutalisk app
 ==> nimble_ownership
 Compiling 2 files (.ex)
@@ -891,17 +820,27 @@ Compiling 2 files (.ex)
 
      but got type:
 
-         dynamic(%{..., monitored_pids: term()})
+         dynamic()
 
      where "state" was given the type:
 
-         # type: dynamic(%{..., monitored_pids: term()})
+         # type: dynamic()
          # from: lib/nimble_ownership.ex:545:11
          state = maybe_monitor_pid(state, shared_owner_pid)
 
-     when defining the variable "state", you must also pattern match on "%NimbleOwnership{}"
+     when defining the variable "state", you must also pattern match on "%NimbleOwnership{}".
 
-     type warning found at:
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
      │
  546 │     state = %__MODULE__{state | mode: {:shared, shared_owner_pid}}
      │             ~
@@ -914,36 +853,33 @@ Compiling 2 files (.ex)
 
      but got type:
 
-         dynamic(%{..., allowances: term()})
+         dynamic()
 
-     where "state" was given the types:
+     where "state" was given the type:
 
-         # type: dynamic(map())
+         # type: dynamic()
          # from: lib/nimble_ownership.ex:594:16
          {_, state} =
            Map.get_and_update!(state, :owner_cleanup, fn x ->
              case x do
-               ...
+               nil -> {nil, nil}
+               h -> Access.pop(h, target_pid)
              end
            end)
 
-         # type: dynamic(%{..., allowances: term()})
-         # from: lib/nimble_ownership.ex:597:12
-         Enum.reduce(state.allowances, state.allowances, fn {pid, allowances}, acc ->
-           new_allowances =
-             for {key, owner_pid} <- allowances,
-                 owner_pid != target_pid do
-               {key, owner_pid}
-             into
-               %{}
-             end
-         
-           Map.put(acc, pid, new_allowances)
-         end)
+     when defining the variable "state", you must also pattern match on "%NimbleOwnership{}".
 
-     when defining the variable "state", you must also pattern match on "%NimbleOwnership{}"
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
 
-     type warning found at:
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
      │
  607 │     %__MODULE__{state | allowances: allowances}
      │     ~
@@ -964,9 +900,19 @@ Compiling 2 files (.ex)
          # from: lib/nimble_ownership.ex:658:61
          state
 
-     when defining the variable "state", you must also pattern match on "%NimbleOwnership{}"
+     when defining the variable "state", you must also pattern match on "%NimbleOwnership{}".
 
-     type warning found at:
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
      │
  664 │     %__MODULE__{state | allowances: allowances, lazy_calls: lazy_calls}
      │     ~
@@ -979,31 +925,31 @@ Compiling 4 files (.ex)
 Generated mox app
 Schema build starting
 Schema build complete
-[1/38] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
-[2/38] killed    lib/mox.ex:857  Arithmetic  replace - with *
-[3/38] killed    lib/mox.ex:443  UnaryNot  remove unary not
+[1/38] killed    lib/mox.ex:443  UnaryNot  remove unary not
+[2/38] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
+[3/38] killed    lib/mox.ex:857  Arithmetic  replace - with *
 [4/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
-[5/38] killed    lib/mox.ex:1018  Arithmetic  replace + with *
-[6/38] killed    lib/mox.ex:911  Arithmetic  replace + with *
-[7/38] killed    lib/mox.ex:1017  Boolean  replace || with &&
+[5/38] killed    lib/mox.ex:911  Arithmetic  replace + with *
+[6/38] killed    lib/mox.ex:1017  Boolean  replace || with &&
+[7/38] killed    lib/mox.ex:1018  Arithmetic  replace + with *
 [8/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
 [9/38] killed    lib/mox.ex:850  Boolean  replace or with and
 [10/38] killed    lib/mox.ex:1018  Arithmetic  replace + with -
-[11/38] killed    lib/mox.ex:911  Arithmetic  replace + with -
-[12/38] killed    lib/mox.ex:469  UnaryNot  remove unary not
-[13/38] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
-[14/38] killed    lib/mox.ex:857  Arithmetic  replace - with +
-[15/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_float
-[16/38] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
-[17/38] killed    lib/mox.ex:758  GuardTypeTest  replace guard is_atom with is_nil
-[18/38] killed    lib/mox.ex:468  GuardTypeTest  replace guard is_list with is_tuple
-[19/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_list with is_tuple
-[20/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
-[21/38] killed    lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
-[22/38] survived  lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
+[11/38] killed    lib/mox.ex:469  UnaryNot  remove unary not
+[12/38] killed    lib/mox.ex:911  Arithmetic  replace + with -
+[13/38] killed    lib/mox.ex:857  Arithmetic  replace - with +
+[14/38] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
+[15/38] killed    lib/mox.ex:468  GuardTypeTest  replace guard is_list with is_tuple
+[16/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_float
+[17/38] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
+[18/38] killed    lib/mox.ex:758  GuardTypeTest  replace guard is_atom with is_nil
+[19/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
+[20/38] killed    lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
+[21/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_list with is_tuple
+[22/38] survived  lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
 [23/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
-[24/38] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
-[25/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
+[24/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
+[25/38] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
 [26/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
 [27/38] killed    lib/mox.ex:571  GuardComparisonNegation  replace guard >= with <
 [28/38] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
@@ -1020,33 +966,33 @@ Schema build complete
 Mutation score: 35/38 = 92.1%
 
 Surviving mutants:
-  lib/mox.ex:1015 GuardTypeTest            replace guard is_nil with is_atom
+  lib/mox.ex:571 GuardComparisonBoundary  replace guard >= with >
   lib/mox.ex:571 GuardTypeTest            replace guard is_integer with is_number
   lib/mox.ex:546 GuardTypeTest            replace guard is_integer with is_number
 
-Schema:    14/14 killed (100.0%)   wall: 12.6s
-Fallback:  21/24 killed (87.5%)   wall: 32.5s
-  guard_comparison_boundary:    2/2 killed
+Schema:    14/14 killed (100.0%)   wall: 12.3s
+Fallback:  21/24 killed (87.5%)   wall: 33.4s
+  guard_comparison_boundary:    1/2 killed
   guard_comparison_negation:    3/3 killed
-  guard_type_test:              16/19 killed
+  guard_type_test:              17/19 killed
 Skipped:   366 (attribute_engine_disabled: 1, body_literal_engine_disabled: 12, missing_oracle_site: 38, no_applicable_mutator: 1, unsupported_dispatch: 314)
 Invalid:   0
 Errors:    0
 Timeouts:  0
 
-Run time: 45.1s
-Fallback wall-clock: 72.0% of total
+Run time: 45.7s
+Fallback wall-clock: 73.1% of total
 Fallback mutants: 63.2% of executed
 
 Phases:
-  oracle build:         4029 ms
-  baseline tests:       1290 ms
+  oracle build:         3328 ms
+  baseline tests:       1146 ms
   plan generation:        13 ms
-  schema build:         4514 ms
-  schema workers:       3500 ms
-  fallback workers:     9786 ms
-  report writing:          6 ms
-  total:               23669 ms
+  schema build:         3305 ms
+  schema workers:       3434 ms
+  fallback workers:    10138 ms
+  report writing:          2 ms
+  total:               21871 ms
 
 Selection:
   mode: static
@@ -1062,5 +1008,5 @@ Selection:
 Concurrency: 4 workers
 Test timeout: 10000 ms
 
-Mutalisk run complete in 24023ms
-bench.wall_ms=26000
+Mutalisk run complete in 22230ms
+bench.wall_ms=25000

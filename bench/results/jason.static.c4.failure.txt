@@ -2,9 +2,7 @@ target=jason repo=https://github.com/michalmuskala/jason.git ref=v1.4.5 sha=4ede
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.017s
-New:
-  jason 1.4.5
+Resolution completed in 0.015s
 Unchanged:
   decimal 2.3.0
   dialyxir 1.4.7
@@ -41,13 +39,41 @@ Generated erlex app
 ==> decimal
 Compiling 4 files (.ex)
 Generated decimal app
-    warning: redefining module Jason.Mixfile (current version defined in memory)
-    │
-  1 │ defmodule Jason.Mixfile do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ /Users/lukaszsamson/claude_fun/mutalisk/_build/bench_deps/jason/mix.exs:1: Jason.Mixfile (module)
-
+==> dialyxir
+Compiling 67 files (.ex)
+Generated dialyxir app
+==> mutalisk
+Compiling 75 files (.ex)
+Generated mutalisk app
 ==> jason
-Error while loading project :jason at /Users/lukaszsamson/claude_fun/mutalisk/_build/bench_deps/jason
-** (Mix) Trying to load Jason.Mixfile from "/Users/lukaszsamson/claude_fun/mutalisk/_build/bench_deps/jason/mix.exs" but another project with the same name was already defined at "/Users/lukaszsamson/claude_fun/mutalisk/tmp/bench/jason/mix.exs"
+Compiling 10 files (.ex)
+Generated jason app
+Schema build starting
+** (Protocol.UndefinedError) protocol Enumerable not implemented for Tuple
+
+Got value:
+
+    {:unquote,
+     [
+       end_of_expression: [newlines: 1, line: 30, column: 61],
+       closing: [line: 30, column: 60],
+       line: 30,
+       column: 9
+     ],
+     [
+       {:jump_table_to_clauses,
+        [closing: [line: 30, column: 59], line: 30, column: 17],
+        [
+          {:jump_table, [line: 30, column: 39], nil},
+          {:literals, [line: 30, column: 51], nil}
+        ]}
+     ]}
+
+    (elixir 1.19.5) lib/enum.ex:5: Enumerable.impl_for!/1
+    (elixir 1.19.5) lib/enum.ex:170: Enumerable.reduce/3
+    (elixir 1.19.5) lib/enum.ex:4570: Enum.flat_map/2
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:388: Mut.SchemaPlacer.schema_arm_ids/1
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:372: anonymous fn/2 in Mut.SchemaPlacer.schema_entries/1
+    (elixir 1.19.5) lib/enum.ex:4570: anonymous fn/3 in Enum.reduce/3
+    (elixir 1.19.5) lib/macro.ex:1070: Macro.prewalker/3
+    (elixir 1.19.5) lib/enum.ex:4570: Enum.reduce/3

@@ -9,10 +9,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1483,
+          "duration": 1352,
           "id": "0070f6db97a940dd7998a3aceb2c1c94",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with empty args"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested :or"
           ],
           "location": {
             "end": {
@@ -34,7 +34,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1483,
+          "duration": 1353,
           "id": "019f9b61e291ef92938c79847900bde2",
           "killedBy": [
             "NimbleOptionsTest:type validation valid timeout"
@@ -59,7 +59,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1678,
+          "duration": 1337,
           "id": "029e70252c5bc7f99df4a6e862f98f35",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
@@ -84,7 +84,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1460,
+          "duration": 1351,
           "id": "073c2ad39f77bb2fc161458d0cde2ab8",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -109,7 +109,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 726,
+          "duration": 807,
           "id": "0f9305ff26912183e6ffb20e5c856de9",
           "killedBy": [
             "NimbleOptionsTest:nested options with custom keys validate empty keys for :non_empty_keyword_list"
@@ -134,7 +134,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1212,
+          "duration": 1341,
           "id": "10a9b79094d504a154658867526b7d59",
           "killedBy": [],
           "location": {
@@ -157,7 +157,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 1130,
+          "duration": 1195,
           "id": "1a73dbd10b25073c5b9f5efdb9e26e1d",
           "killedBy": [],
           "location": {
@@ -173,7 +173,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_list(opts)",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 generate inline indented docs for nested options (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:20\\n     ** (BadMapError) expected a map, got:\\n\\n         [\\n           producer: [\\n             type: :non_empty_keyword_list,\\n             doc: \\\"The producer. Supported options:\\\",\\n             keys: [\\n               module: [type: :mod_arg, doc: \\\"The module.\\\"],\\n               rate_limiting: [\\n                 type: :non_empty_keyword_list,\\n                 doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\",\\n                 keys: [\\n                   allowed_messages: [\\n                     type: :pos_integer,\\n                     doc: \\\"Number of messages per interval.\\\"\\n                   ],\\n                   interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]\\n                 ]\\n               ]\\n             ]\\n           ],\\n           other_key: [type: :string]\\n         ]\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (stdlib 7.2) maps.erl:1303: :maps.to_list([producer: [type: :non_empty_keyword_list, doc: \\\"The producer. Supported options:\\\", keys: [module: [type: :mod_arg, doc: \\\"The module.\\\"], rate_limiting: [type: :non_empty_keyword_list, doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\", keys: [allowed_messages: [type: :pos_integer, doc: \\\"Number of messages per interval.\\\"], interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]]]]], other_key: [type: :string]])\\n       test/nimble_options/docs_test.exs:58: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321224-hNCSyQ/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_finished\",\"duration_us\":6880}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (BadMapError) expected a map, got:\n\n    [an_option: []]\n\n    (stdlib 7.2) maps.erl:1303: :maps.to_list([an_option: []])\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_finished\",\"duration_us\":6891}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":4}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 stop generating docs recursively if type has no :keys (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:290\\n     ** (BadMapError) expected a map, got:\\n\\n         [\\n           custom_keys: [\\n             type: :keyword_list,\\n             doc: \\\"Custom keys\\\",\\n             keys: [*: [type: :atom, doc: \\\"Won't be there!\\\"]]\\n           ]\\n         ]\\n\\n     code: assert {:ok, ^opts} = NimbleOptions.validate(opts, schema)\\n     stacktrace:\\n       (stdlib 7.2) maps.erl:1303: :maps.to_list([custom_keys: [type: :keyword_list, doc: \\\"Custom keys\\\", keys: [*: [type: :atom, doc: \\\"Won't be there!\\\"]]]])\\n       test/nimble_options/docs_test.exs:301: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_finished\",\"duration_us\":5860}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (BadMapError) expected a map, got:\n\n    [an_option: []]\n\n    (stdlib 7.2) maps.erl:1303: :maps.to_list([an_option: []])\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
         },
         {
           "coveredBy": [
@@ -181,10 +181,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1210,
+          "duration": 1317,
           "id": "20a652dd07c3d2ce388fad3d0df58913",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid non negative integer"
+            "NimbleOptionsTest:type validation invalid non negative integer"
           ],
           "location": {
             "end": {
@@ -206,10 +206,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1184,
+          "duration": 1294,
           "id": "2a3020e3b996b628c8067ea4971eb66f",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:list, subtype} with custom subtype"
+            "NimbleOptionsTest:type validation valid {:map, key_type, value_type}"
           ],
           "location": {
             "end": {
@@ -231,10 +231,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1374,
+          "duration": 1244,
           "id": "3b85b137b0814d54998bd884f9dd6bdc",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid timeout"
+            "NimbleOptionsTest:type validation invalid timeout"
           ],
           "location": {
             "end": {
@@ -256,7 +256,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1450,
+          "duration": 1365,
           "id": "3bf0fe184509d1b46f32725063b3ae82",
           "killedBy": [],
           "location": {
@@ -279,7 +279,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 706,
+          "duration": 813,
           "id": "4bd65e23ab93262ec765b13a89da6e4e",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -304,7 +304,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1399,
+          "duration": 1325,
           "id": "4e7d40724753ce4c7d3ff614a41dd266",
           "killedBy": [],
           "location": {
@@ -327,10 +327,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1415,
+          "duration": 1309,
           "id": "536ad5204ff6e52cb274c98cbbeee961",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid integer"
+            "NimbleOptionsTest:type validation valid {:map, key_type, value_type}"
           ],
           "location": {
             "end": {
@@ -352,7 +352,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1517,
+          "duration": 1280,
           "id": "5569009fc6c2db81272a93f4f5af4cf7",
           "killedBy": [
             "NimbleOptionsTest:type validation valid non negative integer"
@@ -377,10 +377,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1523,
+          "duration": 1295,
           "id": "597d964bdb543da3a0dc607dace41c84",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
           ],
           "location": {
             "end": {
@@ -402,7 +402,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1535,
+          "duration": 1284,
           "id": "5a549de0ab03723a5fc8d656ef7bbd35",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -427,10 +427,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1572,
+          "duration": 1283,
           "id": "5adde818ee3640268cc76f514b485e79",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:fun, arity}"
+            "NimbleOptionsTest:type validation valid {:fun, arity}"
           ],
           "location": {
             "end": {
@@ -452,7 +452,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 694,
+          "duration": 852,
           "id": "5e1edeac6873e335255713804d9480ef",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -477,7 +477,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1348,
+          "duration": 1277,
           "id": "60b83f98c968f821f2564ad443c941f5",
           "killedBy": [],
           "location": {
@@ -500,7 +500,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1360,
+          "duration": 1304,
           "id": "62e707e8bf97dd25c844f131a8e71173",
           "killedBy": [
             "NimbleOptionsTest:type validation valid non negative integer"
@@ -525,7 +525,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 1393,
+          "duration": 1273,
           "id": "6c5ac97cea62365fe8b3aa4f5fe04e3c",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid float"
@@ -550,7 +550,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1176,
+          "duration": 1336,
           "id": "774c69a920f6711b70703a3317b2287f",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
@@ -575,7 +575,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1346,
+          "duration": 1283,
           "id": "78bcb6c9ee29833cc7c9a2692d0816b8",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -600,7 +600,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1330,
+          "duration": 1318,
           "id": "7d2b0d7426e028c69563e47992e3dd6e",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid mfa"
@@ -625,7 +625,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1329,
+          "duration": 1342,
           "id": "7f630fc8ef95dcbb4cc9d1b39f77f31f",
           "killedBy": [
             "NimbleOptionsTest:type validation valid timeout"
@@ -650,10 +650,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 654,
+          "duration": 808,
           "id": "81a48defcaa303cefecc6eb070f84f1d",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:list, subtype} with a :non_empty_keyword_list subtype"
+            "NimbleOptionsTest:nested options with custom keys validate empty keys for :non_empty_keyword_list"
           ],
           "location": {
             "end": {
@@ -675,7 +675,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1318,
+          "duration": 1362,
           "id": "831860a6dadb1b8b698ba1d3ea13a2b0",
           "killedBy": [],
           "location": {
@@ -698,10 +698,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1246,
+          "duration": 1437,
           "id": "87b48056a448cf20e7856a8d3c6b2dde",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with compound subtypes"
           ],
           "location": {
             "end": {
@@ -723,7 +723,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1223,
+          "duration": 1429,
           "id": "8bfd260806d4a7d72531e1b1fcda3723",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -748,10 +748,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1290,
+          "duration": 1426,
           "id": "903f4de5ca1ae41567e483d930b37431",
           "killedBy": [
-            "NimbleOptionsTest:option_typespec/1 joins typespec correctly"
+            "NimbleOptionsTest:option_typespec/1 all possible types"
           ],
           "location": {
             "end": {
@@ -773,7 +773,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1202,
+          "duration": 1354,
           "id": "9346bc9d0755b820b11462045d7c7d6b",
           "killedBy": [],
           "location": {
@@ -796,10 +796,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1219,
+          "duration": 1314,
           "id": "954166fad2ec8ec51c53b3415eb3c5a7",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys empty default option with default values for map"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested map"
           ],
           "location": {
             "end": {
@@ -821,7 +821,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1254,
+          "duration": 1343,
           "id": "9ca41075ada7276b4970e28af50bf012",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid integer"
@@ -846,7 +846,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1131,
+          "duration": 1218,
           "id": "a59b17a825122265cf24848f2dc74b50",
           "killedBy": [],
           "location": {
@@ -862,7 +862,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(schema)",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321224-hNCSyQ/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_finished\",\"duration_us\":3369}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321224-hNCSyQ/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_finished\",\"duration_us\":27}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 generate inline indented docs for nested options (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:20\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1\\n\\n     The following arguments were given to NimbleOptions.new!/1:\\n\\n         # 1\\n         [producer: [type: :non_empty_keyword_list, doc: \\\"The producer. Supported options:\\\", keys: [module: [type: :mod_arg, doc: \\\"The module.\\\"], rate_limiting: [type: :non_empty_keyword_list, doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\", keys: [allowed_messages: [type: :pos_integer, doc: \\\"Number of messages per interval.\\\"], interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]]]]], other_key: [type: :string]]\\n\\n     Attempted function clauses (showing 1 out of 1):\\n\\n         def new!(schema) when is_tuple(schema)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:58: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321224-hNCSyQ/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_finished\",\"duration_us\":5419}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1    \n    \n    The following arguments were given to NimbleOptions.new!/1:\n    \n        # 1\n        [an_option: []]\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def new!(+schema+) when -is_tuple(schema)-\n    \n    (nimble_options 1.1.1) NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_started\"}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1    \n    \n    The following arguments were given to NimbleOptions.new!/1:\n    \n        # 1\n        [an_option: []]\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def new!(+schema+) when -is_tuple(schema)-\n    \n    (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n{\"error\":\"  1) test NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:61\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1\\n\\n     The following arguments were given to NimbleOptions.new!/1:\\n\\n         # 1\\n         [producer: [type: :non_empty_keyword_list, doc: \\\"The producer.\\\\n\\\\nWhich is very cool.\\\\n\\\", keys: [nested: [type: :integer, doc: \\\"The nestedness.\\\\n\\\\nIt should be quite nested.\\\\n\\\"]]]]\\n\\n     Attempted function clauses (showing 1 out of 1):\\n\\n         def new!(schema) when is_tuple(schema)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:95: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_finished\",\"duration_us\":13545}\n"
         },
         {
           "coveredBy": [
@@ -870,7 +870,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1214,
+          "duration": 1292,
           "id": "a5a08c636728d70e217594217ecba098",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -895,7 +895,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 1269,
+          "duration": 1305,
           "id": "a6a15f55ccab797dd8a91d3bf4e266a2",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -920,7 +920,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1290,
+          "duration": 1361,
           "id": "b311175ec61c6854d123d61005dec458",
           "killedBy": [],
           "location": {
@@ -943,7 +943,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1270,
+          "duration": 1362,
           "id": "b5c5e246bd7687a3783f31df86e7989a",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
@@ -968,7 +968,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 1270,
+          "duration": 1446,
           "id": "bb3cccf9c6e6be4d30a5803051062cb3",
           "killedBy": [],
           "location": {
@@ -991,7 +991,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1137,
+          "duration": 1235,
           "id": "bb8845235b5d8aa8fe3db9c90ad1414f",
           "killedBy": [],
           "location": {
@@ -1007,7 +1007,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(opts)",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321224-hNCSyQ/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":3491}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 stop generating docs recursively if type has no :keys (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:290\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3\\n\\n     The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\\n\\n         # 1\\n         [custom_keys: [type: :keyword_list, doc: \\\"Custom keys\\\", keys: [*: [type: :atom, doc: \\\"Won't be there!\\\"]]]]\\n\\n         # 2\\n         [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \\\"The type of the option item.\\\"], required: [type: :boolean, default: false, doc: \\\"Defines if the option item is required.\\\"], default: [type: :any, doc: \\\"The default value for the option item if that option is not specified. This value\\\\nis *validated* according to the given `:type`. This means that you cannot\\\\nhave, for example, `type: :integer` and use `default: \\\\\\\"a string\\\\\\\"`.\\\\n\\\"], keys: [type: :keyword_list, doc: \\\"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\\\nit defines which set of keys are accepted for the option item. The value of the\\\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\\\n`keys: [*: [type: :integer]]`.\\\\n\\\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \\\"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\\\n\\\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The documentation for the option item.\\\"], subsection: [type: :string, doc: \\\"The title of separate subsection of the options' documentation\\\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The type doc to use *in the documentation* for the option item. If `false`,\\\\nno type documentation is added to the item. If it's a string, it can be\\\\nanything. For example, you can use `\\\\\\\"a list of PIDs\\\\\\\"`, or you can use\\\\na typespec reference that ExDoc can link to the type definition, such as\\\\n`` \\\\\\\"`t:binary/0`\\\\\\\" ``. You can use Markdown in this documentation. If the\\\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\\\ndocumentation automatically if it can do it unambiguously. For example,\\\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\\\nauto-generated type doc.\\\\n\\\"], type_spec: [type: :any, type_doc: \\\"`t:Macro.t/0`\\\", doc: \\\"The quoted spec to use *in the typespec* for the option item. You should use this\\\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\\\nterm. For example, if you have an `:exception` option that is validated with a\\\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\\\n\\\"]]]]\\n\\n         # 3\\n         []\\n\\n     Attempted function clauses (showing 3 out of 3):\\n\\n         defp validate_options_with_schema_and_path(opts, fun, path) when is_function(fun)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_tuple(opts)\\n\\n     code: assert {:ok, ^opts} = NimbleOptions.validate(opts, schema)\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       (nimble_options 1.1.1) lib/nimble_options.ex:346: NimbleOptions.validate/2\\n       test/nimble_options/docs_test.exs:301: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778321224-hNCSyQ/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_finished\",\"duration_us\":4147}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3    \n    \n    The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\n    \n        # 1\n        [an_option: []]\n    \n        # 2\n        [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \"The type of the option item.\"], required: [type: :boolean, default: false, doc: \"Defines if the option item is required.\"], default: [type: :any, doc: \"The default value for the option item if that option is not specified. This value\\nis *validated* according to the given `:type`. This means that you cannot\\nhave, for example, `type: :integer` and use `default: \\\"a string\\\"`.\\n\"], keys: [type: :keyword_list, doc: \"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\nit defines which set of keys are accepted for the option item. The value of the\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\n`keys: [*: [type: :integer]]`.\\n\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\n\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The documentation for the option item.\"], subsection: [type: :string, doc: \"The title of separate subsection of the options' documentation\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The type doc to use *in the documentation* for the option item. If `false`,\\nno type documentation is added to the item. If it's a string, it can be\\nanything. For example, you can use `\\\"a list of PIDs\\\"`, or you can use\\na typespec reference that ExDoc can link to the type definition, such as\\n`` \\\"`t:binary/0`\\\" ``. You can use Markdown in this documentation. If the\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\ndocumentation automatically if it can do it unambiguously. For example,\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\nauto-generated type doc.\\n\"], type_spec: [type: :any, type_doc: \"`t:Macro.t/0`\", doc: \"The quoted spec to use *in the typespec* for the option item. You should use this\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\nterm. For example, if you have an `:exception` option that is validated with a\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\n\"]]]]\n    \n        # 3\n        []\n    \n    Attempted function clauses (showing 3 out of 3):\n    \n        defp validate_options_with_schema_and_path(+opts+, +fun+, +path+) when -is_function(fun)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_map(opts)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_tuple(opts)-\n    \n    (nimble_options 1.1.1) NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.20.0-rc.4) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_finished\",\"duration_us\":3463}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 passing specific indentation\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 passing specific indentation\",\"event\":\"test_finished\",\"duration_us\":28}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":3}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":7}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_finished\",\"duration_us\":28}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 stop generating docs recursively if type has no :keys (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:290\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3\\n\\n     The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\\n\\n         # 1\\n         [custom_keys: [type: :keyword_list, doc: \\\"Custom keys\\\", keys: [*: [type: :atom, doc: \\\"Won't be there!\\\"]]]]\\n\\n         # 2\\n         [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \\\"The type of the option item.\\\"], required: [type: :boolean, default: false, doc: \\\"Defines if the option item is required.\\\"], default: [type: :any, doc: \\\"The default value for the option item if that option is not specified. This value\\\\nis *validated* according to the given `:type`. This means that you cannot\\\\nhave, for example, `type: :integer` and use `default: \\\\\\\"a string\\\\\\\"`.\\\\n\\\"], keys: [type: :keyword_list, doc: \\\"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\\\nit defines which set of keys are accepted for the option item. The value of the\\\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\\\n`keys: [*: [type: :integer]]`.\\\\n\\\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \\\"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\\\n\\\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The documentation for the option item.\\\"], subsection: [type: :string, doc: \\\"The title of separate subsection of the options' documentation\\\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The type doc to use *in the documentation* for the option item. If `false`,\\\\nno type documentation is added to the item. If it's a string, it can be\\\\nanything. For example, you can use `\\\\\\\"a list of PIDs\\\\\\\"`, or you can use\\\\na typespec reference that ExDoc can link to the type definition, such as\\\\n`` \\\\\\\"`t:binary/0`\\\\\\\" ``. You can use Markdown in this documentation. If the\\\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\\\ndocumentation automatically if it can do it unambiguously. For example,\\\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\\\nauto-generated type doc.\\\\n\\\"], type_spec: [type: :any, type_doc: \\\"`t:Macro.t/0`\\\", doc: \\\"The quoted spec to use *in the typespec* for the option item. You should use this\\\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\\\nterm. For example, if you have an `:exception` option that is validated with a\\\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\\\n\\\"]]]]\\n\\n         # 3\\n         []\\n\\n     Attempted function clauses (showing 3 out of 3):\\n\\n         defp validate_options_with_schema_and_path(opts, fun, path) when is_function(fun)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_tuple(opts)\\n\\n     code: assert {:ok, ^opts} = NimbleOptions.validate(opts, schema)\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       (nimble_options 1.1.1) lib/nimble_options.ex:346: NimbleOptions.validate/2\\n       test/nimble_options/docs_test.exs:301: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331460-URRP1A/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_finished\",\"duration_us\":3849}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3    \n    \n    The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\n    \n        # 1\n        [an_option: []]\n    \n        # 2\n        [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \"The type of the option item.\"], required: [type: :boolean, default: false, doc: \"Defines if the option item is required.\"], default: [type: :any, doc: \"The default value for the option item if that option is not specified. This value\\nis *validated* according to the given `:type`. This means that you cannot\\nhave, for example, `type: :integer` and use `default: \\\"a string\\\"`.\\n\"], keys: [type: :keyword_list, doc: \"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\nit defines which set of keys are accepted for the option item. The value of the\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\n`keys: [*: [type: :integer]]`.\\n\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\n\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The documentation for the option item.\"], subsection: [type: :string, doc: \"The title of separate subsection of the options' documentation\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The type doc to use *in the documentation* for the option item. If `false`,\\nno type documentation is added to the item. If it's a string, it can be\\nanything. For example, you can use `\\\"a list of PIDs\\\"`, or you can use\\na typespec reference that ExDoc can link to the type definition, such as\\n`` \\\"`t:binary/0`\\\" ``. You can use Markdown in this documentation. If the\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\ndocumentation automatically if it can do it unambiguously. For example,\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\nauto-generated type doc.\\n\"], type_spec: [type: :any, type_doc: \"`t:Macro.t/0`\", doc: \"The quoted spec to use *in the typespec* for the option item. You should use this\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\nterm. For example, if you have an `:exception` option that is validated with a\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\n\"]]]]\n    \n        # 3\n        []\n    \n    Attempted function clauses (showing 3 out of 3):\n    \n        defp validate_options_with_schema_and_path(+opts+, +fun+, +path+) when -is_function(fun)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_map(opts)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_tuple(opts)-\n    \n    (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
         },
         {
           "coveredBy": [
@@ -1015,10 +1015,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1270,
+          "duration": 1293,
           "id": "bde079a777a57718db045ba0843a0bcf",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with empty args"
+            "NimbleOptionsTest:type validation {:list, subtype} with custom subtype"
           ],
           "location": {
             "end": {
@@ -1040,7 +1040,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1263,
+          "duration": 1327,
           "id": "c04a8c12415a48613525b31da5d2a5d1",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -1065,10 +1065,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1233,
+          "duration": 1310,
           "id": "c8676a0887a60354a9abfd8d5e93ad80",
           "killedBy": [
-            "NimbleOptionsTest:type validation non-matching {:struct, struct_name}"
+            "NimbleOptionsTest:type validation valid {:struct, struct_name}"
           ],
           "location": {
             "end": {
@@ -1090,7 +1090,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1250,
+          "duration": 1266,
           "id": "cd0b0b12e7df29652c4ac68813b4f31c",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mod_arg"
@@ -1115,10 +1115,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1244,
+          "duration": 1266,
           "id": "d02129c107cb8dffd37d527e94d9a9e7",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested :or"
           ],
           "location": {
             "end": {
@@ -1140,7 +1140,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1526,
+          "duration": 1217,
           "id": "d1eeb58dd18e9a1fddea33633ca23b70",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
@@ -1165,7 +1165,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 672,
+          "duration": 856,
           "id": "e2215fb855a35b33caaae4a528149b08",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested keyword lists"
@@ -1190,7 +1190,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1265,
+          "duration": 1273,
           "id": "e68f994996b6fc5cb43785aecf5f39d4",
           "killedBy": [
             "NimbleOptionsTest:type validation {:list, subtype} with a :map subtype"
@@ -1215,10 +1215,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1319,
+          "duration": 1307,
           "id": "e69dace77d472110db789826b6ad5eac",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid timeout"
+            "NimbleOptionsTest:type validation invalid timeout"
           ],
           "location": {
             "end": {
@@ -1240,10 +1240,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 1304,
+          "duration": 1305,
           "id": "e96cadb63de6f8600ea18ac2747287c4",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid float"
+            "NimbleOptionsTest:type validation invalid float"
           ],
           "location": {
             "end": {
@@ -1265,7 +1265,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1237,
+          "duration": 1218,
           "id": "ecd9d6c91de0565d137699acba63d887",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -1290,10 +1290,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 1254,
+          "duration": 1244,
           "id": "f1b33c0ca7d7e3311ae76bcd43791ef6",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested map"
+            "NimbleOptionsTest:nested options show up in error messages for options that we validate for map"
           ],
           "location": {
             "end": {
@@ -1315,10 +1315,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1236,
+          "duration": 1232,
           "id": "f4972e130686a9686b6986617815cd89",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid positive integer"
+            "NimbleOptionsTest:type validation valid positive integer"
           ],
           "location": {
             "end": {
@@ -1340,10 +1340,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1271,
+          "duration": 1223,
           "id": "f629228fd9347b4ba0125671fa4b0df0",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1365,10 +1365,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1178,
+          "duration": 1168,
           "id": "f6a99aa3ef59fa66f96dc0f013012375",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1390,10 +1390,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1195,
+          "duration": 1121,
           "id": "fb7d901609fc3a114ca49c5755811004",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1415,7 +1415,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1116,
+          "duration": 1092,
           "id": "fc8d6bffba6906549bb365ebc8b02d26",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:fun, arity}"
@@ -1446,10 +1446,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 738,
+          "duration": 809,
           "id": "153c25b36be8d18bba98b4ef50c5ebe7",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 autogenerated type docs"
           ],
           "location": {
             "end": {
@@ -1471,7 +1471,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 735,
+          "duration": 805,
           "id": "2e332aaccee32562dc3a1b7e51fa0640",
           "killedBy": [],
           "location": {
@@ -1494,7 +1494,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 707,
+          "duration": 766,
           "id": "3f1ea37e39498b6467672b166a9c69c9",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
@@ -1519,7 +1519,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1328,
+          "duration": 1222,
           "id": "64010f6a6993a544f03c789e55ae9ef5",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
@@ -1544,10 +1544,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 694,
+          "duration": 835,
           "id": "7267f5b99d043f81e3b56ede9be6ec02",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1569,10 +1569,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 699,
+          "duration": 847,
           "id": "745a0d9ab7ba2728ba49c172c5f81b11",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
           ],
           "location": {
             "end": {
@@ -1594,10 +1594,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 648,
+          "duration": 803,
           "id": "74f25423b43da7100e59b6a74c19d656",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
           ],
           "location": {
             "end": {
@@ -1619,10 +1619,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 653,
+          "duration": 842,
           "id": "7fdb129dc40c0616b73670a9261816c5",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false"
           ],
           "location": {
             "end": {
@@ -1644,7 +1644,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 656,
+          "duration": 815,
           "id": "82d309d246a48373579703fd94acf85e",
           "killedBy": [],
           "location": {
@@ -1667,10 +1667,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 663,
+          "duration": 837,
           "id": "a510d58025ec970bb9996db9b6703e69",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1692,7 +1692,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 668,
+          "duration": 861,
           "id": "bebad99e4effb3d9e76c965a861c2133",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
@@ -1717,10 +1717,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1180,
+          "duration": 1209,
           "id": "cbdb53a0bb2ebecb707673ddcb776084",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1742,7 +1742,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 680,
+          "duration": 826,
           "id": "e9c82ea4d6716c5f04bb200317b20147",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
@@ -1767,10 +1767,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 581,
+          "duration": 619,
           "id": "f80390c710140571755a758bbf35890d",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
           ],
           "location": {
             "end": {
@@ -1797,155 +1797,155 @@
       "schedulers_online": 12
     },
     "engine": {
-      "e9c82ea4d6716c5f04bb200317b20147": "schema",
-      "f629228fd9347b4ba0125671fa4b0df0": "fallback",
-      "3b85b137b0814d54998bd884f9dd6bdc": "fallback",
-      "82d309d246a48373579703fd94acf85e": "schema",
+      "0070f6db97a940dd7998a3aceb2c1c94": "fallback",
+      "019f9b61e291ef92938c79847900bde2": "fallback",
+      "029e70252c5bc7f99df4a6e862f98f35": "fallback",
+      "073c2ad39f77bb2fc161458d0cde2ab8": "fallback",
+      "0f9305ff26912183e6ffb20e5c856de9": "schema",
+      "10a9b79094d504a154658867526b7d59": "fallback",
+      "153c25b36be8d18bba98b4ef50c5ebe7": "schema",
+      "1a73dbd10b25073c5b9f5efdb9e26e1d": "fallback",
+      "20a652dd07c3d2ce388fad3d0df58913": "fallback",
+      "2a3020e3b996b628c8067ea4971eb66f": "fallback",
       "2e332aaccee32562dc3a1b7e51fa0640": "schema",
-      "774c69a920f6711b70703a3317b2287f": "fallback",
-      "f6a99aa3ef59fa66f96dc0f013012375": "fallback",
-      "7d2b0d7426e028c69563e47992e3dd6e": "fallback",
-      "78bcb6c9ee29833cc7c9a2692d0816b8": "fallback",
-      "87b48056a448cf20e7856a8d3c6b2dde": "fallback",
-      "ecd9d6c91de0565d137699acba63d887": "fallback",
-      "c04a8c12415a48613525b31da5d2a5d1": "fallback",
-      "5adde818ee3640268cc76f514b485e79": "fallback",
-      "9346bc9d0755b820b11462045d7c7d6b": "fallback",
+      "3b85b137b0814d54998bd884f9dd6bdc": "fallback",
+      "3bf0fe184509d1b46f32725063b3ae82": "fallback",
+      "3f1ea37e39498b6467672b166a9c69c9": "schema",
       "4bd65e23ab93262ec765b13a89da6e4e": "schema",
-      "e68f994996b6fc5cb43785aecf5f39d4": "fallback",
-      "f80390c710140571755a758bbf35890d": "schema",
+      "4e7d40724753ce4c7d3ff614a41dd266": "fallback",
+      "536ad5204ff6e52cb274c98cbbeee961": "fallback",
+      "5569009fc6c2db81272a93f4f5af4cf7": "fallback",
+      "597d964bdb543da3a0dc607dace41c84": "fallback",
+      "5a549de0ab03723a5fc8d656ef7bbd35": "fallback",
+      "5adde818ee3640268cc76f514b485e79": "fallback",
+      "5e1edeac6873e335255713804d9480ef": "schema",
+      "60b83f98c968f821f2564ad443c941f5": "fallback",
+      "62e707e8bf97dd25c844f131a8e71173": "fallback",
+      "64010f6a6993a544f03c789e55ae9ef5": "fallback",
+      "6c5ac97cea62365fe8b3aa4f5fe04e3c": "fallback",
+      "7267f5b99d043f81e3b56ede9be6ec02": "schema",
+      "745a0d9ab7ba2728ba49c172c5f81b11": "schema",
+      "74f25423b43da7100e59b6a74c19d656": "schema",
+      "774c69a920f6711b70703a3317b2287f": "fallback",
+      "78bcb6c9ee29833cc7c9a2692d0816b8": "fallback",
+      "7d2b0d7426e028c69563e47992e3dd6e": "fallback",
+      "7f630fc8ef95dcbb4cc9d1b39f77f31f": "fallback",
+      "7fdb129dc40c0616b73670a9261816c5": "schema",
+      "81a48defcaa303cefecc6eb070f84f1d": "schema",
+      "82d309d246a48373579703fd94acf85e": "schema",
+      "831860a6dadb1b8b698ba1d3ea13a2b0": "fallback",
+      "87b48056a448cf20e7856a8d3c6b2dde": "fallback",
+      "8bfd260806d4a7d72531e1b1fcda3723": "fallback",
+      "903f4de5ca1ae41567e483d930b37431": "fallback",
+      "9346bc9d0755b820b11462045d7c7d6b": "fallback",
+      "954166fad2ec8ec51c53b3415eb3c5a7": "fallback",
+      "9ca41075ada7276b4970e28af50bf012": "fallback",
+      "a510d58025ec970bb9996db9b6703e69": "schema",
+      "a59b17a825122265cf24848f2dc74b50": "fallback",
+      "a5a08c636728d70e217594217ecba098": "fallback",
+      "a6a15f55ccab797dd8a91d3bf4e266a2": "fallback",
+      "b311175ec61c6854d123d61005dec458": "fallback",
+      "b5c5e246bd7687a3783f31df86e7989a": "fallback",
       "bb3cccf9c6e6be4d30a5803051062cb3": "fallback",
+      "bb8845235b5d8aa8fe3db9c90ad1414f": "fallback",
+      "bde079a777a57718db045ba0843a0bcf": "fallback",
+      "bebad99e4effb3d9e76c965a861c2133": "schema",
+      "c04a8c12415a48613525b31da5d2a5d1": "fallback",
+      "c8676a0887a60354a9abfd8d5e93ad80": "fallback",
+      "cbdb53a0bb2ebecb707673ddcb776084": "fallback",
+      "cd0b0b12e7df29652c4ac68813b4f31c": "fallback",
+      "d02129c107cb8dffd37d527e94d9a9e7": "fallback",
       "d1eeb58dd18e9a1fddea33633ca23b70": "fallback",
       "e2215fb855a35b33caaae4a528149b08": "schema",
-      "954166fad2ec8ec51c53b3415eb3c5a7": "fallback",
-      "536ad5204ff6e52cb274c98cbbeee961": "fallback",
-      "c8676a0887a60354a9abfd8d5e93ad80": "fallback",
-      "a5a08c636728d70e217594217ecba098": "fallback",
-      "bebad99e4effb3d9e76c965a861c2133": "schema",
-      "20a652dd07c3d2ce388fad3d0df58913": "fallback",
-      "62e707e8bf97dd25c844f131a8e71173": "fallback",
-      "cbdb53a0bb2ebecb707673ddcb776084": "fallback",
-      "f1b33c0ca7d7e3311ae76bcd43791ef6": "fallback",
-      "3bf0fe184509d1b46f32725063b3ae82": "fallback",
-      "019f9b61e291ef92938c79847900bde2": "fallback",
+      "e68f994996b6fc5cb43785aecf5f39d4": "fallback",
       "e69dace77d472110db789826b6ad5eac": "fallback",
-      "5e1edeac6873e335255713804d9480ef": "schema",
-      "831860a6dadb1b8b698ba1d3ea13a2b0": "fallback",
-      "6c5ac97cea62365fe8b3aa4f5fe04e3c": "fallback",
-      "903f4de5ca1ae41567e483d930b37431": "fallback",
-      "7f630fc8ef95dcbb4cc9d1b39f77f31f": "fallback",
-      "a510d58025ec970bb9996db9b6703e69": "schema",
-      "153c25b36be8d18bba98b4ef50c5ebe7": "schema",
-      "9ca41075ada7276b4970e28af50bf012": "fallback",
-      "f4972e130686a9686b6986617815cd89": "fallback",
-      "8bfd260806d4a7d72531e1b1fcda3723": "fallback",
-      "4e7d40724753ce4c7d3ff614a41dd266": "fallback",
-      "10a9b79094d504a154658867526b7d59": "fallback",
-      "a6a15f55ccab797dd8a91d3bf4e266a2": "fallback",
-      "745a0d9ab7ba2728ba49c172c5f81b11": "schema",
       "e96cadb63de6f8600ea18ac2747287c4": "fallback",
-      "60b83f98c968f821f2564ad443c941f5": "fallback",
-      "597d964bdb543da3a0dc607dace41c84": "fallback",
-      "5569009fc6c2db81272a93f4f5af4cf7": "fallback",
-      "d02129c107cb8dffd37d527e94d9a9e7": "fallback",
-      "cd0b0b12e7df29652c4ac68813b4f31c": "fallback",
-      "0f9305ff26912183e6ffb20e5c856de9": "schema",
-      "7fdb129dc40c0616b73670a9261816c5": "schema",
-      "a59b17a825122265cf24848f2dc74b50": "fallback",
-      "073c2ad39f77bb2fc161458d0cde2ab8": "fallback",
-      "2a3020e3b996b628c8067ea4971eb66f": "fallback",
-      "5a549de0ab03723a5fc8d656ef7bbd35": "fallback",
-      "64010f6a6993a544f03c789e55ae9ef5": "fallback",
-      "7267f5b99d043f81e3b56ede9be6ec02": "schema",
-      "1a73dbd10b25073c5b9f5efdb9e26e1d": "fallback",
-      "029e70252c5bc7f99df4a6e862f98f35": "fallback",
-      "b311175ec61c6854d123d61005dec458": "fallback",
+      "e9c82ea4d6716c5f04bb200317b20147": "schema",
+      "ecd9d6c91de0565d137699acba63d887": "fallback",
+      "f1b33c0ca7d7e3311ae76bcd43791ef6": "fallback",
+      "f4972e130686a9686b6986617815cd89": "fallback",
+      "f629228fd9347b4ba0125671fa4b0df0": "fallback",
+      "f6a99aa3ef59fa66f96dc0f013012375": "fallback",
+      "f80390c710140571755a758bbf35890d": "schema",
       "fb7d901609fc3a114ca49c5755811004": "fallback",
-      "bde079a777a57718db045ba0843a0bcf": "fallback",
-      "fc8d6bffba6906549bb365ebc8b02d26": "fallback",
-      "3f1ea37e39498b6467672b166a9c69c9": "schema",
-      "81a48defcaa303cefecc6eb070f84f1d": "schema",
-      "0070f6db97a940dd7998a3aceb2c1c94": "fallback",
-      "bb8845235b5d8aa8fe3db9c90ad1414f": "fallback",
-      "74f25423b43da7100e59b6a74c19d656": "schema",
-      "b5c5e246bd7687a3783f31df86e7989a": "fallback"
+      "fc8d6bffba6906549bb365ebc8b02d26": "fallback"
     },
     "metrics": {
       "fallback_count": 55,
-      "fallback_time_ms": 71909,
+      "fallback_time_ms": 71235,
       "fanout": {
-        "e9c82ea4d6716c5f04bb200317b20147": 2,
-        "f629228fd9347b4ba0125671fa4b0df0": 2,
-        "3b85b137b0814d54998bd884f9dd6bdc": 2,
-        "82d309d246a48373579703fd94acf85e": 2,
+        "0070f6db97a940dd7998a3aceb2c1c94": 2,
+        "019f9b61e291ef92938c79847900bde2": 2,
+        "029e70252c5bc7f99df4a6e862f98f35": 2,
+        "073c2ad39f77bb2fc161458d0cde2ab8": 2,
+        "0f9305ff26912183e6ffb20e5c856de9": 2,
+        "10a9b79094d504a154658867526b7d59": 2,
+        "153c25b36be8d18bba98b4ef50c5ebe7": 2,
+        "1a73dbd10b25073c5b9f5efdb9e26e1d": 2,
+        "20a652dd07c3d2ce388fad3d0df58913": 2,
+        "2a3020e3b996b628c8067ea4971eb66f": 2,
         "2e332aaccee32562dc3a1b7e51fa0640": 2,
-        "774c69a920f6711b70703a3317b2287f": 2,
-        "f6a99aa3ef59fa66f96dc0f013012375": 2,
-        "7d2b0d7426e028c69563e47992e3dd6e": 2,
-        "78bcb6c9ee29833cc7c9a2692d0816b8": 2,
-        "87b48056a448cf20e7856a8d3c6b2dde": 2,
-        "ecd9d6c91de0565d137699acba63d887": 2,
-        "c04a8c12415a48613525b31da5d2a5d1": 2,
-        "5adde818ee3640268cc76f514b485e79": 2,
-        "9346bc9d0755b820b11462045d7c7d6b": 2,
+        "3b85b137b0814d54998bd884f9dd6bdc": 2,
+        "3bf0fe184509d1b46f32725063b3ae82": 2,
+        "3f1ea37e39498b6467672b166a9c69c9": 2,
         "4bd65e23ab93262ec765b13a89da6e4e": 2,
-        "e68f994996b6fc5cb43785aecf5f39d4": 2,
-        "f80390c710140571755a758bbf35890d": 2,
+        "4e7d40724753ce4c7d3ff614a41dd266": 2,
+        "536ad5204ff6e52cb274c98cbbeee961": 2,
+        "5569009fc6c2db81272a93f4f5af4cf7": 2,
+        "597d964bdb543da3a0dc607dace41c84": 2,
+        "5a549de0ab03723a5fc8d656ef7bbd35": 2,
+        "5adde818ee3640268cc76f514b485e79": 2,
+        "5e1edeac6873e335255713804d9480ef": 2,
+        "60b83f98c968f821f2564ad443c941f5": 2,
+        "62e707e8bf97dd25c844f131a8e71173": 2,
+        "64010f6a6993a544f03c789e55ae9ef5": 2,
+        "6c5ac97cea62365fe8b3aa4f5fe04e3c": 2,
+        "7267f5b99d043f81e3b56ede9be6ec02": 2,
+        "745a0d9ab7ba2728ba49c172c5f81b11": 2,
+        "74f25423b43da7100e59b6a74c19d656": 2,
+        "774c69a920f6711b70703a3317b2287f": 2,
+        "78bcb6c9ee29833cc7c9a2692d0816b8": 2,
+        "7d2b0d7426e028c69563e47992e3dd6e": 2,
+        "7f630fc8ef95dcbb4cc9d1b39f77f31f": 2,
+        "7fdb129dc40c0616b73670a9261816c5": 2,
+        "81a48defcaa303cefecc6eb070f84f1d": 2,
+        "82d309d246a48373579703fd94acf85e": 2,
+        "831860a6dadb1b8b698ba1d3ea13a2b0": 2,
+        "87b48056a448cf20e7856a8d3c6b2dde": 2,
+        "8bfd260806d4a7d72531e1b1fcda3723": 2,
+        "903f4de5ca1ae41567e483d930b37431": 2,
+        "9346bc9d0755b820b11462045d7c7d6b": 2,
+        "954166fad2ec8ec51c53b3415eb3c5a7": 2,
+        "9ca41075ada7276b4970e28af50bf012": 2,
+        "a510d58025ec970bb9996db9b6703e69": 2,
+        "a59b17a825122265cf24848f2dc74b50": 2,
+        "a5a08c636728d70e217594217ecba098": 2,
+        "a6a15f55ccab797dd8a91d3bf4e266a2": 2,
+        "b311175ec61c6854d123d61005dec458": 2,
+        "b5c5e246bd7687a3783f31df86e7989a": 2,
         "bb3cccf9c6e6be4d30a5803051062cb3": 2,
+        "bb8845235b5d8aa8fe3db9c90ad1414f": 2,
+        "bde079a777a57718db045ba0843a0bcf": 2,
+        "bebad99e4effb3d9e76c965a861c2133": 2,
+        "c04a8c12415a48613525b31da5d2a5d1": 2,
+        "c8676a0887a60354a9abfd8d5e93ad80": 2,
+        "cbdb53a0bb2ebecb707673ddcb776084": 2,
+        "cd0b0b12e7df29652c4ac68813b4f31c": 2,
+        "d02129c107cb8dffd37d527e94d9a9e7": 2,
         "d1eeb58dd18e9a1fddea33633ca23b70": 2,
         "e2215fb855a35b33caaae4a528149b08": 2,
-        "954166fad2ec8ec51c53b3415eb3c5a7": 2,
-        "536ad5204ff6e52cb274c98cbbeee961": 2,
-        "c8676a0887a60354a9abfd8d5e93ad80": 2,
-        "a5a08c636728d70e217594217ecba098": 2,
-        "bebad99e4effb3d9e76c965a861c2133": 2,
-        "20a652dd07c3d2ce388fad3d0df58913": 2,
-        "62e707e8bf97dd25c844f131a8e71173": 2,
-        "cbdb53a0bb2ebecb707673ddcb776084": 2,
-        "f1b33c0ca7d7e3311ae76bcd43791ef6": 2,
-        "3bf0fe184509d1b46f32725063b3ae82": 2,
-        "019f9b61e291ef92938c79847900bde2": 2,
+        "e68f994996b6fc5cb43785aecf5f39d4": 2,
         "e69dace77d472110db789826b6ad5eac": 2,
-        "5e1edeac6873e335255713804d9480ef": 2,
-        "831860a6dadb1b8b698ba1d3ea13a2b0": 2,
-        "6c5ac97cea62365fe8b3aa4f5fe04e3c": 2,
-        "903f4de5ca1ae41567e483d930b37431": 2,
-        "7f630fc8ef95dcbb4cc9d1b39f77f31f": 2,
-        "a510d58025ec970bb9996db9b6703e69": 2,
-        "153c25b36be8d18bba98b4ef50c5ebe7": 2,
-        "9ca41075ada7276b4970e28af50bf012": 2,
-        "f4972e130686a9686b6986617815cd89": 2,
-        "8bfd260806d4a7d72531e1b1fcda3723": 2,
-        "4e7d40724753ce4c7d3ff614a41dd266": 2,
-        "10a9b79094d504a154658867526b7d59": 2,
-        "a6a15f55ccab797dd8a91d3bf4e266a2": 2,
-        "745a0d9ab7ba2728ba49c172c5f81b11": 2,
         "e96cadb63de6f8600ea18ac2747287c4": 2,
-        "60b83f98c968f821f2564ad443c941f5": 2,
-        "597d964bdb543da3a0dc607dace41c84": 2,
-        "5569009fc6c2db81272a93f4f5af4cf7": 2,
-        "d02129c107cb8dffd37d527e94d9a9e7": 2,
-        "cd0b0b12e7df29652c4ac68813b4f31c": 2,
-        "0f9305ff26912183e6ffb20e5c856de9": 2,
-        "7fdb129dc40c0616b73670a9261816c5": 2,
-        "a59b17a825122265cf24848f2dc74b50": 2,
-        "073c2ad39f77bb2fc161458d0cde2ab8": 2,
-        "2a3020e3b996b628c8067ea4971eb66f": 2,
-        "5a549de0ab03723a5fc8d656ef7bbd35": 2,
-        "64010f6a6993a544f03c789e55ae9ef5": 2,
-        "7267f5b99d043f81e3b56ede9be6ec02": 2,
-        "1a73dbd10b25073c5b9f5efdb9e26e1d": 2,
-        "029e70252c5bc7f99df4a6e862f98f35": 2,
-        "b311175ec61c6854d123d61005dec458": 2,
+        "e9c82ea4d6716c5f04bb200317b20147": 2,
+        "ecd9d6c91de0565d137699acba63d887": 2,
+        "f1b33c0ca7d7e3311ae76bcd43791ef6": 2,
+        "f4972e130686a9686b6986617815cd89": 2,
+        "f629228fd9347b4ba0125671fa4b0df0": 2,
+        "f6a99aa3ef59fa66f96dc0f013012375": 2,
+        "f80390c710140571755a758bbf35890d": 2,
         "fb7d901609fc3a114ca49c5755811004": 2,
-        "bde079a777a57718db045ba0843a0bcf": 2,
-        "fc8d6bffba6906549bb365ebc8b02d26": 2,
-        "3f1ea37e39498b6467672b166a9c69c9": 2,
-        "81a48defcaa303cefecc6eb070f84f1d": 2,
-        "0070f6db97a940dd7998a3aceb2c1c94": 2,
-        "bb8845235b5d8aa8fe3db9c90ad1414f": 2,
-        "74f25423b43da7100e59b6a74c19d656": 2,
-        "b5c5e246bd7687a3783f31df86e7989a": 2
+        "fc8d6bffba6906549bb365ebc8b02d26": 2
       },
       "invalid_mutants": {},
       "rollback_count": 0,
@@ -1958,90 +1958,90 @@
       }
     },
     "mutation_kind": {
-      "e9c82ea4d6716c5f04bb200317b20147": "boolean_op",
-      "f629228fd9347b4ba0125671fa4b0df0": "guard_type_test",
-      "3b85b137b0814d54998bd884f9dd6bdc": "guard_comparison_negation",
-      "82d309d246a48373579703fd94acf85e": "arithmetic_op",
+      "0070f6db97a940dd7998a3aceb2c1c94": "guard_type_test",
+      "019f9b61e291ef92938c79847900bde2": "guard_type_test",
+      "029e70252c5bc7f99df4a6e862f98f35": "guard_type_test",
+      "073c2ad39f77bb2fc161458d0cde2ab8": "guard_type_test",
+      "0f9305ff26912183e6ffb20e5c856de9": "boolean_op",
+      "10a9b79094d504a154658867526b7d59": "guard_type_test",
+      "153c25b36be8d18bba98b4ef50c5ebe7": "arithmetic_op",
+      "1a73dbd10b25073c5b9f5efdb9e26e1d": "guard_type_test",
+      "20a652dd07c3d2ce388fad3d0df58913": "guard_comparison_negation",
+      "2a3020e3b996b628c8067ea4971eb66f": "guard_type_test",
       "2e332aaccee32562dc3a1b7e51fa0640": "arithmetic_op",
-      "774c69a920f6711b70703a3317b2287f": "guard_type_test",
-      "f6a99aa3ef59fa66f96dc0f013012375": "guard_type_test",
-      "7d2b0d7426e028c69563e47992e3dd6e": "guard_type_test",
-      "78bcb6c9ee29833cc7c9a2692d0816b8": "guard_type_test",
-      "87b48056a448cf20e7856a8d3c6b2dde": "guard_type_test",
-      "ecd9d6c91de0565d137699acba63d887": "guard_type_test",
-      "c04a8c12415a48613525b31da5d2a5d1": "guard_type_test",
-      "5adde818ee3640268cc76f514b485e79": "guard_comparison_negation",
-      "9346bc9d0755b820b11462045d7c7d6b": "guard_type_test",
+      "3b85b137b0814d54998bd884f9dd6bdc": "guard_comparison_negation",
+      "3bf0fe184509d1b46f32725063b3ae82": "guard_type_test",
+      "3f1ea37e39498b6467672b166a9c69c9": "arithmetic_op",
       "4bd65e23ab93262ec765b13a89da6e4e": "arithmetic_op",
-      "e68f994996b6fc5cb43785aecf5f39d4": "guard_type_test",
-      "f80390c710140571755a758bbf35890d": "arithmetic_op",
+      "4e7d40724753ce4c7d3ff614a41dd266": "guard_comparison_boundary",
+      "536ad5204ff6e52cb274c98cbbeee961": "guard_type_test",
+      "5569009fc6c2db81272a93f4f5af4cf7": "guard_comparison_boundary",
+      "597d964bdb543da3a0dc607dace41c84": "guard_type_test",
+      "5a549de0ab03723a5fc8d656ef7bbd35": "guard_comparison_boundary",
+      "5adde818ee3640268cc76f514b485e79": "guard_comparison_negation",
+      "5e1edeac6873e335255713804d9480ef": "arithmetic_op",
+      "60b83f98c968f821f2564ad443c941f5": "guard_type_test",
+      "62e707e8bf97dd25c844f131a8e71173": "guard_type_test",
+      "64010f6a6993a544f03c789e55ae9ef5": "guard_type_test",
+      "6c5ac97cea62365fe8b3aa4f5fe04e3c": "guard_type_test",
+      "7267f5b99d043f81e3b56ede9be6ec02": "comparison_negation",
+      "745a0d9ab7ba2728ba49c172c5f81b11": "boolean_op",
+      "74f25423b43da7100e59b6a74c19d656": "boolean_op",
+      "774c69a920f6711b70703a3317b2287f": "guard_type_test",
+      "78bcb6c9ee29833cc7c9a2692d0816b8": "guard_type_test",
+      "7d2b0d7426e028c69563e47992e3dd6e": "guard_type_test",
+      "7f630fc8ef95dcbb4cc9d1b39f77f31f": "guard_comparison_boundary",
+      "7fdb129dc40c0616b73670a9261816c5": "boolean_op",
+      "81a48defcaa303cefecc6eb070f84f1d": "comparison_negation",
+      "82d309d246a48373579703fd94acf85e": "arithmetic_op",
+      "831860a6dadb1b8b698ba1d3ea13a2b0": "guard_type_test",
+      "87b48056a448cf20e7856a8d3c6b2dde": "guard_type_test",
+      "8bfd260806d4a7d72531e1b1fcda3723": "guard_type_test",
+      "903f4de5ca1ae41567e483d930b37431": "guard_type_test",
+      "9346bc9d0755b820b11462045d7c7d6b": "guard_type_test",
+      "954166fad2ec8ec51c53b3415eb3c5a7": "guard_type_test",
+      "9ca41075ada7276b4970e28af50bf012": "guard_type_test",
+      "a510d58025ec970bb9996db9b6703e69": "arithmetic_op",
+      "a59b17a825122265cf24848f2dc74b50": "guard_type_test",
+      "a5a08c636728d70e217594217ecba098": "guard_type_test",
+      "a6a15f55ccab797dd8a91d3bf4e266a2": "guard_type_test",
+      "b311175ec61c6854d123d61005dec458": "guard_type_test",
+      "b5c5e246bd7687a3783f31df86e7989a": "guard_comparison_negation",
       "bb3cccf9c6e6be4d30a5803051062cb3": "guard_type_test",
+      "bb8845235b5d8aa8fe3db9c90ad1414f": "guard_type_test",
+      "bde079a777a57718db045ba0843a0bcf": "guard_type_test",
+      "bebad99e4effb3d9e76c965a861c2133": "boolean_op",
+      "c04a8c12415a48613525b31da5d2a5d1": "guard_type_test",
+      "c8676a0887a60354a9abfd8d5e93ad80": "guard_type_test",
+      "cbdb53a0bb2ebecb707673ddcb776084": "guard_type_test",
+      "cd0b0b12e7df29652c4ac68813b4f31c": "guard_type_test",
+      "d02129c107cb8dffd37d527e94d9a9e7": "guard_type_test",
       "d1eeb58dd18e9a1fddea33633ca23b70": "guard_type_test",
       "e2215fb855a35b33caaae4a528149b08": "boolean_op",
-      "954166fad2ec8ec51c53b3415eb3c5a7": "guard_type_test",
-      "536ad5204ff6e52cb274c98cbbeee961": "guard_type_test",
-      "c8676a0887a60354a9abfd8d5e93ad80": "guard_type_test",
-      "a5a08c636728d70e217594217ecba098": "guard_type_test",
-      "bebad99e4effb3d9e76c965a861c2133": "boolean_op",
-      "20a652dd07c3d2ce388fad3d0df58913": "guard_comparison_negation",
-      "62e707e8bf97dd25c844f131a8e71173": "guard_type_test",
-      "cbdb53a0bb2ebecb707673ddcb776084": "guard_type_test",
-      "f1b33c0ca7d7e3311ae76bcd43791ef6": "guard_type_test",
-      "3bf0fe184509d1b46f32725063b3ae82": "guard_type_test",
-      "019f9b61e291ef92938c79847900bde2": "guard_type_test",
+      "e68f994996b6fc5cb43785aecf5f39d4": "guard_type_test",
       "e69dace77d472110db789826b6ad5eac": "guard_comparison_negation",
-      "5e1edeac6873e335255713804d9480ef": "arithmetic_op",
-      "831860a6dadb1b8b698ba1d3ea13a2b0": "guard_type_test",
-      "6c5ac97cea62365fe8b3aa4f5fe04e3c": "guard_type_test",
-      "903f4de5ca1ae41567e483d930b37431": "guard_type_test",
-      "7f630fc8ef95dcbb4cc9d1b39f77f31f": "guard_comparison_boundary",
-      "a510d58025ec970bb9996db9b6703e69": "arithmetic_op",
-      "153c25b36be8d18bba98b4ef50c5ebe7": "arithmetic_op",
-      "9ca41075ada7276b4970e28af50bf012": "guard_type_test",
-      "f4972e130686a9686b6986617815cd89": "guard_comparison_negation",
-      "8bfd260806d4a7d72531e1b1fcda3723": "guard_type_test",
-      "4e7d40724753ce4c7d3ff614a41dd266": "guard_comparison_boundary",
-      "10a9b79094d504a154658867526b7d59": "guard_type_test",
-      "a6a15f55ccab797dd8a91d3bf4e266a2": "guard_type_test",
-      "745a0d9ab7ba2728ba49c172c5f81b11": "boolean_op",
       "e96cadb63de6f8600ea18ac2747287c4": "guard_type_test",
-      "60b83f98c968f821f2564ad443c941f5": "guard_type_test",
-      "597d964bdb543da3a0dc607dace41c84": "guard_type_test",
-      "5569009fc6c2db81272a93f4f5af4cf7": "guard_comparison_boundary",
-      "d02129c107cb8dffd37d527e94d9a9e7": "guard_type_test",
-      "cd0b0b12e7df29652c4ac68813b4f31c": "guard_type_test",
-      "0f9305ff26912183e6ffb20e5c856de9": "boolean_op",
-      "7fdb129dc40c0616b73670a9261816c5": "boolean_op",
-      "a59b17a825122265cf24848f2dc74b50": "guard_type_test",
-      "073c2ad39f77bb2fc161458d0cde2ab8": "guard_type_test",
-      "2a3020e3b996b628c8067ea4971eb66f": "guard_type_test",
-      "5a549de0ab03723a5fc8d656ef7bbd35": "guard_comparison_boundary",
-      "64010f6a6993a544f03c789e55ae9ef5": "guard_type_test",
-      "7267f5b99d043f81e3b56ede9be6ec02": "comparison_negation",
-      "1a73dbd10b25073c5b9f5efdb9e26e1d": "guard_type_test",
-      "029e70252c5bc7f99df4a6e862f98f35": "guard_type_test",
-      "b311175ec61c6854d123d61005dec458": "guard_type_test",
+      "e9c82ea4d6716c5f04bb200317b20147": "boolean_op",
+      "ecd9d6c91de0565d137699acba63d887": "guard_type_test",
+      "f1b33c0ca7d7e3311ae76bcd43791ef6": "guard_type_test",
+      "f4972e130686a9686b6986617815cd89": "guard_comparison_negation",
+      "f629228fd9347b4ba0125671fa4b0df0": "guard_type_test",
+      "f6a99aa3ef59fa66f96dc0f013012375": "guard_type_test",
+      "f80390c710140571755a758bbf35890d": "arithmetic_op",
       "fb7d901609fc3a114ca49c5755811004": "guard_type_test",
-      "bde079a777a57718db045ba0843a0bcf": "guard_type_test",
-      "fc8d6bffba6906549bb365ebc8b02d26": "guard_type_test",
-      "3f1ea37e39498b6467672b166a9c69c9": "arithmetic_op",
-      "81a48defcaa303cefecc6eb070f84f1d": "comparison_negation",
-      "0070f6db97a940dd7998a3aceb2c1c94": "guard_type_test",
-      "bb8845235b5d8aa8fe3db9c90ad1414f": "guard_type_test",
-      "74f25423b43da7100e59b6a74c19d656": "boolean_op",
-      "b5c5e246bd7687a3783f31df86e7989a": "guard_comparison_negation"
+      "fc8d6bffba6906549bb365ebc8b02d26": "guard_type_test"
     },
     "persistent": null,
     "phase_timings": {
-      "baseline_tests_ms": 555,
+      "baseline_tests_ms": 618,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 20472,
-      "oracle_build_ms": 3419,
-      "plan_generation_ms": 18,
-      "report_writing_ms": 11,
-      "schema_build_ms": 3298,
-      "schema_workers_ms": 3349,
-      "total_ms": 31546
+      "fallback_workers_ms": 20367,
+      "oracle_build_ms": 3509,
+      "plan_generation_ms": 20,
+      "report_writing_ms": 4,
+      "schema_build_ms": 3640,
+      "schema_workers_ms": 3893,
+      "total_ms": 32495
     },
     "recompile_categories": {
       "compile_error": 0,
@@ -2064,78 +2064,78 @@
       "selected_tests_median": 2
     },
     "stable_id_to_integer": {
-      "e9c82ea4d6716c5f04bb200317b20147": 64,
-      "f629228fd9347b4ba0125671fa4b0df0": 68,
-      "3b85b137b0814d54998bd884f9dd6bdc": 12,
-      "82d309d246a48373579703fd94acf85e": 36,
+      "0070f6db97a940dd7998a3aceb2c1c94": 1,
+      "019f9b61e291ef92938c79847900bde2": 2,
+      "029e70252c5bc7f99df4a6e862f98f35": 3,
+      "073c2ad39f77bb2fc161458d0cde2ab8": 4,
+      "0f9305ff26912183e6ffb20e5c856de9": 5,
+      "10a9b79094d504a154658867526b7d59": 6,
+      "153c25b36be8d18bba98b4ef50c5ebe7": 7,
+      "1a73dbd10b25073c5b9f5efdb9e26e1d": 8,
+      "20a652dd07c3d2ce388fad3d0df58913": 9,
+      "2a3020e3b996b628c8067ea4971eb66f": 10,
       "2e332aaccee32562dc3a1b7e51fa0640": 11,
-      "774c69a920f6711b70703a3317b2287f": 30,
-      "f6a99aa3ef59fa66f96dc0f013012375": 69,
-      "7d2b0d7426e028c69563e47992e3dd6e": 32,
-      "78bcb6c9ee29833cc7c9a2692d0816b8": 31,
-      "87b48056a448cf20e7856a8d3c6b2dde": 38,
-      "ecd9d6c91de0565d137699acba63d887": 65,
-      "c04a8c12415a48613525b31da5d2a5d1": 54,
-      "5adde818ee3640268cc76f514b485e79": 21,
-      "9346bc9d0755b820b11462045d7c7d6b": 41,
+      "3b85b137b0814d54998bd884f9dd6bdc": 12,
+      "3bf0fe184509d1b46f32725063b3ae82": 13,
+      "3f1ea37e39498b6467672b166a9c69c9": 14,
       "4bd65e23ab93262ec765b13a89da6e4e": 15,
-      "e68f994996b6fc5cb43785aecf5f39d4": 61,
-      "f80390c710140571755a758bbf35890d": 70,
+      "4e7d40724753ce4c7d3ff614a41dd266": 16,
+      "536ad5204ff6e52cb274c98cbbeee961": 17,
+      "5569009fc6c2db81272a93f4f5af4cf7": 18,
+      "597d964bdb543da3a0dc607dace41c84": 19,
+      "5a549de0ab03723a5fc8d656ef7bbd35": 20,
+      "5adde818ee3640268cc76f514b485e79": 21,
+      "5e1edeac6873e335255713804d9480ef": 22,
+      "60b83f98c968f821f2564ad443c941f5": 23,
+      "62e707e8bf97dd25c844f131a8e71173": 24,
+      "64010f6a6993a544f03c789e55ae9ef5": 25,
+      "6c5ac97cea62365fe8b3aa4f5fe04e3c": 26,
+      "7267f5b99d043f81e3b56ede9be6ec02": 27,
+      "745a0d9ab7ba2728ba49c172c5f81b11": 28,
+      "74f25423b43da7100e59b6a74c19d656": 29,
+      "774c69a920f6711b70703a3317b2287f": 30,
+      "78bcb6c9ee29833cc7c9a2692d0816b8": 31,
+      "7d2b0d7426e028c69563e47992e3dd6e": 32,
+      "7f630fc8ef95dcbb4cc9d1b39f77f31f": 33,
+      "7fdb129dc40c0616b73670a9261816c5": 34,
+      "81a48defcaa303cefecc6eb070f84f1d": 35,
+      "82d309d246a48373579703fd94acf85e": 36,
+      "831860a6dadb1b8b698ba1d3ea13a2b0": 37,
+      "87b48056a448cf20e7856a8d3c6b2dde": 38,
+      "8bfd260806d4a7d72531e1b1fcda3723": 39,
+      "903f4de5ca1ae41567e483d930b37431": 40,
+      "9346bc9d0755b820b11462045d7c7d6b": 41,
+      "954166fad2ec8ec51c53b3415eb3c5a7": 42,
+      "9ca41075ada7276b4970e28af50bf012": 43,
+      "a510d58025ec970bb9996db9b6703e69": 44,
+      "a59b17a825122265cf24848f2dc74b50": 45,
+      "a5a08c636728d70e217594217ecba098": 46,
+      "a6a15f55ccab797dd8a91d3bf4e266a2": 47,
+      "b311175ec61c6854d123d61005dec458": 48,
+      "b5c5e246bd7687a3783f31df86e7989a": 49,
       "bb3cccf9c6e6be4d30a5803051062cb3": 50,
+      "bb8845235b5d8aa8fe3db9c90ad1414f": 51,
+      "bde079a777a57718db045ba0843a0bcf": 52,
+      "bebad99e4effb3d9e76c965a861c2133": 53,
+      "c04a8c12415a48613525b31da5d2a5d1": 54,
+      "c8676a0887a60354a9abfd8d5e93ad80": 55,
+      "cbdb53a0bb2ebecb707673ddcb776084": 56,
+      "cd0b0b12e7df29652c4ac68813b4f31c": 57,
+      "d02129c107cb8dffd37d527e94d9a9e7": 58,
       "d1eeb58dd18e9a1fddea33633ca23b70": 59,
       "e2215fb855a35b33caaae4a528149b08": 60,
-      "954166fad2ec8ec51c53b3415eb3c5a7": 42,
-      "536ad5204ff6e52cb274c98cbbeee961": 17,
-      "c8676a0887a60354a9abfd8d5e93ad80": 55,
-      "a5a08c636728d70e217594217ecba098": 46,
-      "bebad99e4effb3d9e76c965a861c2133": 53,
-      "20a652dd07c3d2ce388fad3d0df58913": 9,
-      "62e707e8bf97dd25c844f131a8e71173": 24,
-      "cbdb53a0bb2ebecb707673ddcb776084": 56,
-      "f1b33c0ca7d7e3311ae76bcd43791ef6": 66,
-      "3bf0fe184509d1b46f32725063b3ae82": 13,
-      "019f9b61e291ef92938c79847900bde2": 2,
+      "e68f994996b6fc5cb43785aecf5f39d4": 61,
       "e69dace77d472110db789826b6ad5eac": 62,
-      "5e1edeac6873e335255713804d9480ef": 22,
-      "831860a6dadb1b8b698ba1d3ea13a2b0": 37,
-      "6c5ac97cea62365fe8b3aa4f5fe04e3c": 26,
-      "903f4de5ca1ae41567e483d930b37431": 40,
-      "7f630fc8ef95dcbb4cc9d1b39f77f31f": 33,
-      "a510d58025ec970bb9996db9b6703e69": 44,
-      "153c25b36be8d18bba98b4ef50c5ebe7": 7,
-      "9ca41075ada7276b4970e28af50bf012": 43,
-      "f4972e130686a9686b6986617815cd89": 67,
-      "8bfd260806d4a7d72531e1b1fcda3723": 39,
-      "4e7d40724753ce4c7d3ff614a41dd266": 16,
-      "10a9b79094d504a154658867526b7d59": 6,
-      "a6a15f55ccab797dd8a91d3bf4e266a2": 47,
-      "745a0d9ab7ba2728ba49c172c5f81b11": 28,
       "e96cadb63de6f8600ea18ac2747287c4": 63,
-      "60b83f98c968f821f2564ad443c941f5": 23,
-      "597d964bdb543da3a0dc607dace41c84": 19,
-      "5569009fc6c2db81272a93f4f5af4cf7": 18,
-      "d02129c107cb8dffd37d527e94d9a9e7": 58,
-      "cd0b0b12e7df29652c4ac68813b4f31c": 57,
-      "0f9305ff26912183e6ffb20e5c856de9": 5,
-      "7fdb129dc40c0616b73670a9261816c5": 34,
-      "a59b17a825122265cf24848f2dc74b50": 45,
-      "073c2ad39f77bb2fc161458d0cde2ab8": 4,
-      "2a3020e3b996b628c8067ea4971eb66f": 10,
-      "5a549de0ab03723a5fc8d656ef7bbd35": 20,
-      "64010f6a6993a544f03c789e55ae9ef5": 25,
-      "7267f5b99d043f81e3b56ede9be6ec02": 27,
-      "1a73dbd10b25073c5b9f5efdb9e26e1d": 8,
-      "029e70252c5bc7f99df4a6e862f98f35": 3,
-      "b311175ec61c6854d123d61005dec458": 48,
+      "e9c82ea4d6716c5f04bb200317b20147": 64,
+      "ecd9d6c91de0565d137699acba63d887": 65,
+      "f1b33c0ca7d7e3311ae76bcd43791ef6": 66,
+      "f4972e130686a9686b6986617815cd89": 67,
+      "f629228fd9347b4ba0125671fa4b0df0": 68,
+      "f6a99aa3ef59fa66f96dc0f013012375": 69,
+      "f80390c710140571755a758bbf35890d": 70,
       "fb7d901609fc3a114ca49c5755811004": 71,
-      "bde079a777a57718db045ba0843a0bcf": 52,
-      "fc8d6bffba6906549bb365ebc8b02d26": 72,
-      "3f1ea37e39498b6467672b166a9c69c9": 14,
-      "81a48defcaa303cefecc6eb070f84f1d": 35,
-      "0070f6db97a940dd7998a3aceb2c1c94": 1,
-      "bb8845235b5d8aa8fe3db9c90ad1414f": 51,
-      "74f25423b43da7100e59b6a74c19d656": 29,
-      "b5c5e246bd7687a3783f31df86e7989a": 49
+      "fc8d6bffba6906549bb365ebc8b02d26": 72
     },
     "test_timeout_ms": 10000
   },

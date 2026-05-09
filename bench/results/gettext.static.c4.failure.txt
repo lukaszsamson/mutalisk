@@ -2,7 +2,7 @@ target=gettext repo=https://github.com/elixir-gettext/gettext.git ref=v1.0.2 sha
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.017s
+Resolution completed in 0.016s
 Unchanged:
   castore 1.0.10
   earmark_parser 1.4.44
@@ -33,20 +33,6 @@ Compiling 1 file (.ex)
 Generated castore app
 ==> excoveralls
 Compiling 29 files (.ex)
-    warning: unused require EEx
-    │
-  5 │   require EEx
-    │   ~
-    │
-    └─ lib/excoveralls/html/view.ex:5:3
-
-    warning: unused require ExCoveralls.Html.Safe
-    │
-  6 │   require ExCoveralls.Html.Safe
-    │   ~
-    │
-    └─ lib/excoveralls/html/view.ex:6:3
-
     warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
     │
  17 │            |> List.zip
@@ -54,67 +40,43 @@ Compiling 29 files (.ex)
     │
     └─ lib/excoveralls/stop_words.ex:17:20: ExCoveralls.StopWords.do_filter/2
 
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--pretty=format:%s"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 50 │       _ -> "[no commit message]"
-    │         ~
-    │
-    └─ lib/excoveralls/semaphore.ex:50:9: ExCoveralls.Semaphore.get_message!/0
-
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--format=%an"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 56 │       _ -> "[no committer name]"
-    │         ~
-    │
-    └─ lib/excoveralls/gitlab.ex:56:9: ExCoveralls.Gitlab.get_committer/0
-
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--pretty=format:%s"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 51 │       _ -> "[no commit message]"
-    │         ~
-    │
-    └─ lib/excoveralls/circle.ex:51:9: ExCoveralls.Circle.get_message!/0
-
 Generated excoveralls app
 ==> expo
 Compiling 2 files (.erl)
 Compiling 22 files (.ex)
+     warning: a struct for Expo.Messages is expected on struct update:
+
+         %Expo.Messages{po | file: path}
+
+     but got type:
+
+         dynamic()
+
+     where "po" was given the type:
+
+         # type: dynamic()
+         # from: lib/expo/mo.ex:132:20
+         {:ok, po} <- Expo.MO.Parser.parse(contents, Keyword.put_new(options, :file, path))
+
+     when defining the variable "po", you must also pattern match on "%Expo.Messages{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 133 │       {:ok, %Messages{po | file: path}}
+     │             ~
+     │
+     └─ lib/expo/mo.ex:133:13: Expo.MO.parse_file/2
+
     warning: a struct for Expo.Messages is expected on struct update:
 
         %Expo.Messages{po | file: Keyword.get(opts, :file)}
@@ -129,9 +91,19 @@ Compiling 22 files (.ex)
         # from: lib/expo/po/parser.ex:17:20
         {:ok, po} <- check_for_duplicates(po)
 
-    when defining the variable "po", you must also pattern match on "%Expo.Messages{}"
+    when defining the variable "po", you must also pattern match on "%Expo.Messages{}".
 
-    type warning found at:
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
     │
  18 │       {:ok, %Messages{po | file: Keyword.get(opts, :file)}}
     │             ~
@@ -140,69 +112,36 @@ Compiling 22 files (.ex)
 
 Generated expo app
 ==> mutalisk
-Compiling 74 files (.ex)
+Compiling 75 files (.ex)
 Generated mutalisk app
 ==> gettext
 Compiling 19 files (.ex)
-     warning: this clause in cond will never match:
-
-         not is_binary(locale)
-
-     since it has type:
-
-         dynamic(false)
-
-     where "locale" was given the types:
-
-         # type: binary()
-         # from: lib/gettext.ex:806:28
-         locale
-
-         # type: binary()
-         # from: lib/gettext.ex:806:41
-         is_binary(locale)
-
-     type warning found at:
-     │
- 808 │       not is_binary(locale) ->
-     │                             ~
-     │
-     └─ lib/gettext.ex:808:29: Gettext.put_locale!/2
-
-     warning: the following clause is redundant:
-
-         defp ensure_empty_msgstr!(%Expo.Message.Plural{} = message)
-
-     it has type:
-
-         dynamic(%Expo.Message.Plural{})
-
-     previous clauses have already matched on the following types:
-
-         %Expo.Message.Singular{}
-         %Expo.Message.Plural{}
-
-     │
- 391 │   defp ensure_empty_msgstr!(%Message.Plural{} = message) do
-     │        ~
-     │
-     └─ lib/gettext/extractor.ex:391:8: Gettext.Extractor.ensure_empty_msgstr!/1
-
-     warning: Kernel.ParallelCompiler.async/1 is deprecated. Use `pmap/2` instead
-     │
- 426 │               Kernel.ParallelCompiler.async(fn ->
-     │                                       ~
-     │
-     └─ lib/gettext/compiler.ex:426:39: Gettext.Compiler.compile_po_files/3
-
 Generated gettext app
 Schema build starting
-** (Mut.SchemaPlacer.RefusedContext) refused schema mutant 12 at lib/gettext.ex:619: inside a defmacro/defmacrop body
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:237: Mut.SchemaPlacer.raise_refused/2
-    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3
-    (elixir 1.20.0-rc.4) lib/macro.ex:626: Macro.do_traverse/4
-    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3
-    (stdlib 7.2) lists.erl:2674: :lists.mapfoldl_1/3
-    (elixir 1.20.0-rc.4) lib/macro.ex:626: Macro.do_traverse/4
-    (elixir 1.20.0-rc.4) lib/macro.ex:641: Macro.do_traverse/4
-    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3
+** (Protocol.UndefinedError) protocol Enumerable not implemented for Tuple. This protocol is implemented for: Date.Range, File.Stream, Function, GenEvent.Stream, HashDict, HashSet, IO.Stream, Jason.OrderedObject, List, Map, MapSet, Range, Stream
+
+Got value:
+
+    {:unquote,
+     [
+       end_of_expression: [newlines: 1, line: 745, column: 47],
+       closing: [line: 745, column: 46],
+       line: 745,
+       column: 15
+     ],
+     [
+       {:++, [line: 745, column: 31],
+        [
+          {:clauses, [line: 745, column: 23], nil},
+          {:error_clause, [line: 745, column: 34], nil}
+        ]}
+     ]}
+
+    (elixir 1.19.5) lib/enum.ex:5: Enumerable.impl_for!/1
+    (elixir 1.19.5) lib/enum.ex:170: Enumerable.reduce/3
+    (elixir 1.19.5) lib/enum.ex:4570: Enum.flat_map/2
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:388: Mut.SchemaPlacer.schema_arm_ids/1
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:372: anonymous fn/2 in Mut.SchemaPlacer.schema_entries/1
+    (elixir 1.19.5) lib/enum.ex:4570: anonymous fn/3 in Enum.reduce/3
+    (elixir 1.19.5) lib/macro.ex:1070: Macro.prewalker/3
+    (elixir 1.19.5) lib/enum.ex:4570: Enum.reduce/3

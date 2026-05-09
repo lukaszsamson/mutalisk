@@ -14,6 +14,7 @@ Unchanged:
   nimble_parsec 1.4.2
   telemetry 1.2.1
 * Getting telemetry (Hex package)
+* creating /Users/lukaszsamson/elixir/.mix/elixir/1-19-otp-28/rebar3
 * Getting decimal (Hex package)
 * Getting jason (Hex package)
 * Getting ex_doc (Hex package)
@@ -28,66 +29,6 @@ Compiling 4 files (.ex)
 Generated decimal app
 ==> jason
 Compiling 10 files (.ex)
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:166:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:170:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:183:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:189:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
-     │                                                                      ~
-     │
-     └─ lib/formatter.ex:195:70
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:201:69
-
     warning: using single-quoted strings to represent charlists is deprecated.
     Use ~c"" if you indeed want a charlist or use "" instead.
     You may run "mix format --migrate" to change all single-quoted
@@ -107,6 +48,26 @@ Compiling 10 files (.ex)
      │                                                ~
      │
      └─ lib/codegen.ex:118:48
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:166:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:170:69
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -253,6 +214,16 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
  187 │        when byte in '0123456789' do
      │                     ~
      │
@@ -263,10 +234,40 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
  195 │        when byte in '0123456789' do
      │                     ~
      │
      └─ lib/decoder.ex:195:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:201:69
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -763,97 +764,90 @@ Generated jason app
 ===> Analyzing applications...
 ===> Compiling telemetry
 ==> mutalisk
-Compiling 74 files (.ex)
+Compiling 75 files (.ex)
 Generated mutalisk app
 ==> ecto
 Compiling 56 files (.ex)
-     warning: this clause of defp field_source!/2 is never used (or it will always fail/warn when invoked)
-     │
- 968 │   defp field_source!(nil, field) do
-     │        ~
-     │
-     └─ lib/ecto/repo/schema.ex:968:8: Ecto.Repo.Schema.field_source!/2
-
 Generated ecto app
 ** (Mix) baseline tests failed; aborting mutation run (full log: /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_baseline.log)
 
-           hints: empty_list()
-         }) == empty_list()
+.....
 
-     where "left" (context ExUnit.Assertions) was given the type:
+  8) test unique_constraint/3 (Ecto.ChangesetTest)
+     test/ecto/changeset_test.exs:2716
+     Assertion with == failed
+     code:  assert constraints(changeset) == [
+              %{
+                type: :unique,
+                field: :title,
+                constraint: ~r/whatever\d+/,
+                match: :exact,
+                error_message: "is taken",
+                error_type: :unique
+              }
+            ]
+     left:  [
+              %{
+                match: :exact,
+                type: :unique,
+                constraint: ~r/whatever\d+/,
+                error_type: :unique,
+                field: :title,
+                error_message: "is taken"
+              }
+            ]
+     right: [
+              %{
+                match: :exact,
+                type: :unique,
+                constraint: ~r/whatever\d+/,
+                error_type: :unique,
+                field: :title,
+                error_message: "is taken"
+              }
+            ]
+     stacktrace:
+       test/ecto/changeset_test.exs:2782: (test)
 
-         # type: non_empty_list(%Ecto.Query.JoinExpr{
-           qual: :inner,
-           source: {binary(), nil},
-           on: %Ecto.Query.QueryExpr{expr: true, file: binary(), line: integer(), params: empty_list()},
-           file: binary(),
-           line: integer(),
-           assoc: nil,
-           as: nil,
-           ix: nil,
-           prefix: nil,
-           params: empty_list(),
-           hints: empty_list()
-         })
-         # from: test/ecto/query_test.exs:829
-         left = inner_query.joins
+........
 
-     where "right" (context ExUnit.Assertions) was given the type:
+  9) test exclusion_constraint/3 (Ecto.ChangesetTest)
+     test/ecto/changeset_test.exs:3340
+     Assertion with == failed
+     code:  assert constraints(changeset) == [
+              %{
+                type: :exclusion,
+                field: :title,
+                constraint: ~r/whatever\d+/,
+                match: :exact,
+                error_message: "is invalid",
+                error_type: :exclusion
+              }
+            ]
+     left:  [
+              %{
+                match: :exact,
+                type: :exclusion,
+                constraint: ~r/whatever\d+/,
+                error_type: :exclusion,
+                field: :title,
+                error_message: "is invalid"
+              }
+            ]
+     right: [
+              %{
+                match: :exact,
+                type: :exclusion,
+                constraint: ~r/whatever\d+/,
+                error_type: :exclusion,
+                field: :title,
+                error_message: "is invalid"
+              }
+            ]
+     stacktrace:
+       test/ecto/changeset_test.exs:3422: (test)
 
-         # type: empty_list()
-         # from: test/ecto/query_test.exs:829
-         right = base.joins
-
-     While Elixir can compare across all types, you are comparing across types which are always disjoint, and the result is either always true or always false
-
-     type warning found at:
-     │
- 829 │       refute inner_query.joins == base.joins
-     │                                ~
-     │
-     └─ test/ecto/query_test.exs:829:32: Ecto.QueryTest."test exclude/2 removes join qualifiers"/1
-
-      warning: incompatible types given to Ecto.Query.Builder.identifier!/1:
-
-          Ecto.Query.Builder.identifier!(123)
-
-      given types:
-
-          -integer()-
-
-      but expected one of:
-
-          binary()
-
-      type warning found at:
-      │
- 1104 │         from p in "posts", select: fragment("? COLLATE ?", p.name, identifier(^123))
-      │         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/ecto/query_test.exs:1104: Ecto.QueryTest."test fragment/1 supports identifiers"/1
-
-      warning: incompatible types given to Ecto.Query.Builder.splice!/1:
-
-          Ecto.Query.Builder.splice!(234)
-
-      given types:
-
-          -integer()-
-
-      but expected one of:
-
-          empty_list() or non_empty_list(term(), term())
-
-      type warning found at:
-      │
- 1146 │         from p in "posts", where: p.id in fragment("(?)", splice(^234))
-      │         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/ecto/query_test.exs:1146: Ecto.QueryTest."test fragment/1 supports list splicing"/1
-
-.......
-Finished in 4.1 seconds (4.1s async, 0.06s sync)
-
-Result: 1502/1511 passed (97/97 doctests, 1405/1414 tests)
-Failed: 9 tests
+..........................................................................................................................
+Finished in 4.2 seconds (4.1s async, 0.1s sync)
+97 doctests, 1414 tests, 9 failures
 

@@ -200,66 +200,6 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:166:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:170:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:183:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:189:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
-     │                                                                      ~
-     │
-     └─ lib/formatter.ex:195:70
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:201:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
  195 │        when byte in '0123456789' do
      │                     ~
      │
@@ -710,6 +650,66 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
+ 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:166:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:170:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:201:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
  164 │     ']'
      │     ~
      │
@@ -792,45 +792,12 @@ Compiling 1 file (.ex)
 Generated castore app
 ==> excoveralls
 Compiling 29 files (.ex)
-    warning: unused require EEx
-    │
-  5 │   require EEx
-    │   ~
-    │
-    └─ lib/excoveralls/html/view.ex:5:3
-
-    warning: unused require ExCoveralls.Html.Safe
-    │
-  6 │   require ExCoveralls.Html.Safe
-    │   ~
-    │
-    └─ lib/excoveralls/html/view.ex:6:3
-
     warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
     │
  17 │            |> List.zip
     │                    ~
     │
     └─ lib/excoveralls/stop_words.ex:17:20: ExCoveralls.StopWords.do_filter/2
-
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--pretty=format:%s"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 49 │       _ -> "[no commit message]"
-    │         ~
-    │
-    └─ lib/excoveralls/semaphore.ex:49:9: ExCoveralls.Semaphore.get_message!/0
 
     warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
     │
@@ -839,81 +806,43 @@ Compiling 29 files (.ex)
     │
     └─ lib/excoveralls/ignore.ex:18:20: ExCoveralls.Ignore.do_filter/1
 
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--pretty=format:%s"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 50 │       _ -> "[no commit message]"
-    │         ~
-    │
-    └─ lib/excoveralls/circle.ex:50:9: ExCoveralls.Circle.get_message!/0
-
-    warning: the following clause cannot match because the previous clauses already matched all possible values:
-
-        _ ->
-
-    it attempts to match on the result of:
-
-        System.cmd("git", ["log", "-1", "--format=%an"])
-
-    which has the already matched type:
-
-        dynamic({term(), term()})
-
-    type warning found at:
-    │
- 55 │       _ -> "[no committer name]"
-    │         ~
-    │
-    └─ lib/excoveralls/gitlab.ex:55:9: ExCoveralls.Gitlab.get_committer/0
-
 Generated excoveralls app
 ==> mutalisk
-Compiling 74 files (.ex)
+Compiling 75 files (.ex)
 Generated mutalisk app
 ==> nimble_options
 Compiling 3 files (.ex)
 Generated nimble_options app
 Schema build starting
 Schema build complete
-[1/86] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with -
-[2/86] killed    lib/nimble_options.ex:671  Boolean  replace and with or
-[3/86] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with *
-[4/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with *
+[1/86] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with *
+[2/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with *
+[3/86] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with -
+[4/86] killed    lib/nimble_options.ex:671  Boolean  replace and with or
 [5/86] killed    lib/nimble_options.ex:805  Arithmetic  replace + with *
 [6/86] killed    lib/nimble_options.ex:805  Arithmetic  replace + with -
 [7/86] killed    lib/nimble_options/docs.ex:35  ComparisonNegation  replace == with !=
 [8/86] killed    lib/nimble_options/docs.ex:83  Boolean  replace && with ||
-[9/86] killed    lib/nimble_options.ex:671  ComparisonNegation  replace != with ==
-[10/86] killed    lib/nimble_options/docs.ex:88  Boolean  replace && with ||
-[11/86] killed    lib/nimble_options/docs.ex:21  Boolean  replace || with &&
+[9/86] killed    lib/nimble_options/docs.ex:88  Boolean  replace && with ||
+[10/86] killed    lib/nimble_options/docs.ex:21  Boolean  replace || with &&
+[11/86] killed    lib/nimble_options.ex:671  ComparisonNegation  replace != with ==
 [12/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with +
 [13/86] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with *
-[14/86] killed    lib/nimble_options.ex:965  Boolean  replace and with or
-[15/86] killed    lib/nimble_options/docs.ex:97  Boolean  replace && with ||
+[14/86] killed    lib/nimble_options/docs.ex:97  Boolean  replace && with ||
+[15/86] killed    lib/nimble_options.ex:965  Boolean  replace and with or
 [16/86] killed    lib/nimble_options/docs.ex:60  Boolean  replace && with ||
 [17/86] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with -
-[18/86] killed    lib/nimble_options.ex:634  GuardTypeTest  replace guard is_integer with is_float
-[19/86] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_atom with is_nil
-[20/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_list with is_tuple
-[21/86] killed    lib/nimble_options.ex:345  GuardTypeTest  replace guard is_list with is_tuple
+[18/86] killed    lib/nimble_options.ex:345  GuardTypeTest  replace guard is_list with is_tuple
+[19/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_list with is_tuple
+[20/86] killed    lib/nimble_options.ex:634  GuardTypeTest  replace guard is_integer with is_float
+[21/86] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_atom with is_nil
 [22/86] error     lib/nimble_options.ex:495  GuardTypeTest  replace guard is_map with is_list
 [23/86] killed    lib/nimble_options/docs.ex:28  IntegerLiteral  replace integer literal 0 with 1
 [24/86] survived  lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_number
 [25/86] killed    lib/nimble_options.ex:601  GuardComparisonNegation  replace guard < with >=
 [26/86] killed    lib/nimble_options.ex:863  GuardTypeTest  replace guard is_list with is_tuple
-[27/86] error     lib/nimble_options.ex:588  BooleanLiteral  replace boolean literal true with false
-[28/86] killed    lib/nimble_options/docs.ex:173  IntegerLiteral  replace integer literal 10 with 11
+[27/86] killed    lib/nimble_options/docs.ex:173  IntegerLiteral  replace integer literal 10 with 11
+[28/86] error     lib/nimble_options.ex:588  BooleanLiteral  replace boolean literal true with false
 [29/86] killed    lib/nimble_options.ex:634  GuardComparisonNegation  replace guard == with !=
 [30/86] error     lib/nimble_options.ex:580  BooleanLiteral  replace boolean literal false with true
 [31/86] survived  lib/nimble_options.ex:876  GuardTypeTest  replace guard is_nil with is_atom
@@ -953,8 +882,8 @@ Schema build complete
 [65/86] survived  lib/nimble_options.ex:932  GuardTypeTest  replace guard is_tuple with is_list
 [66/86] error     lib/nimble_options.ex:504  GuardTypeTest  replace guard is_list with is_tuple
 [67/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_atom with is_nil
-[68/86] killed    lib/nimble_options.ex:924  GuardTypeTest  replace guard is_list with is_tuple
-[69/86] killed    lib/nimble_options/docs.ex:110  BooleanLiteral  replace boolean literal false with true
+[68/86] killed    lib/nimble_options/docs.ex:110  BooleanLiteral  replace boolean literal false with true
+[69/86] killed    lib/nimble_options.ex:924  GuardTypeTest  replace guard is_list with is_tuple
 [70/86] killed    lib/nimble_options/docs.ex:67  BooleanLiteral  replace boolean literal true with false
 [71/86] killed    lib/nimble_options.ex:1074  GuardTypeTest  replace guard is_atom with is_nil
 [72/86] killed    lib/nimble_options/docs.ex:4  GuardTypeTest  replace guard is_list with is_tuple
@@ -964,8 +893,8 @@ Schema build complete
 [76/86] killed    lib/nimble_options.ex:1031  GuardTypeTest  replace guard is_list with is_tuple
 [77/86] killed    lib/nimble_options.ex:634  GuardComparisonNegation  replace guard >= with <
 [78/86] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_integer
-[79/86] killed    lib/nimble_options.ex:686  GuardTypeTest  replace guard is_map with is_list
-[80/86] killed    lib/nimble_options.ex:609  GuardTypeTest  replace guard is_integer with is_float
+[79/86] killed    lib/nimble_options.ex:609  GuardTypeTest  replace guard is_integer with is_float
+[80/86] killed    lib/nimble_options.ex:686  GuardTypeTest  replace guard is_map with is_list
 [81/86] killed    lib/nimble_options.ex:609  GuardComparisonNegation  replace guard < with >=
 [82/86] killed    lib/nimble_options.ex:419  GuardTypeTest  replace guard is_list with is_tuple
 [83/86] killed    lib/nimble_options.ex:419  GuardTypeTest  replace guard is_list with is_tuple
@@ -987,8 +916,8 @@ Surviving mutants:
   lib/nimble_options/docs.ex:14 IntegerLiteral           replace integer literal 1 with 0
   lib/nimble_options.ex:932 GuardTypeTest            replace guard is_tuple with is_list
 
-Schema:    15/17 killed (88.2%)   wall: 14.3s
-Fallback:  55/69 killed (79.7%)   wall: 94.1s
+Schema:    15/17 killed (88.2%)   wall: 13.2s
+Fallback:  55/69 killed (79.7%)   wall: 86.6s
   boolean_literal_flip:         3/5 killed
   guard_comparison_boundary:    3/4 killed
   guard_comparison_negation:    6/6 killed
@@ -999,19 +928,19 @@ Invalid:   0
 Errors:    5
 Timeouts:  0
 
-Run time: 108.4s
-Fallback wall-clock: 86.8% of total
+Run time: 99.9s
+Fallback wall-clock: 86.7% of total
 Fallback mutants: 80.2% of executed
 
 Phases:
-  oracle build:         3816 ms
-  baseline tests:        617 ms
-  plan generation:        20 ms
-  schema build:         3670 ms
-  schema workers:       4032 ms
-  fallback workers:    26551 ms
-  report writing:         11 ms
-  total:               39204 ms
+  oracle build:         3223 ms
+  baseline tests:        607 ms
+  plan generation:        22 ms
+  schema build:         3308 ms
+  schema workers:       3766 ms
+  fallback workers:    24560 ms
+  report writing:          5 ms
+  total:               35936 ms
 
 Selection:
   mode: static
@@ -1027,5 +956,5 @@ Selection:
 Concurrency: 4 workers
 Test timeout: 10000 ms
 
-Mutalisk run complete in 39540ms
-bench.wall_ms=42000
+Mutalisk run complete in 36274ms
+bench.wall_ms=38000

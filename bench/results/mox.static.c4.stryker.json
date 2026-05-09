@@ -9,10 +9,10 @@
             "test/cluster_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 1087,
+          "duration": 969,
           "id": "028140767d66376ef79cd91e4b6e58e1",
           "killedBy": [
-            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
+            "MoxTest:defmock/2 defines a mock function for all callbacks by default"
           ],
           "location": {
             "end": {
@@ -34,10 +34,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 1086,
+          "duration": 994,
           "id": "15083cc3497dac0faf7bdf7c8f8ba9d9",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -59,7 +59,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1362,
+          "duration": 1424,
           "id": "1f4713614a50fd28713b1259d99322c6",
           "killedBy": [
             "MoxTest:allow/3 allowances support lazy calls for processes registered through a Registry"
@@ -84,10 +84,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1358,
+          "duration": 1388,
           "id": "268327b5d0475b6833182dcf18e60270",
           "killedBy": [
-            "MoxTest:stub_with/2 stubs functions which are optional callbacks"
+            "MoxTest:stub_with/2 stubs all functions with functions from a module"
           ],
           "location": {
             "end": {
@@ -109,7 +109,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 1131,
+          "duration": 996,
           "id": "290aec500216e46180841bd0eab3333b",
           "killedBy": [
             "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
@@ -134,10 +134,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 1076,
+          "duration": 969,
           "id": "320623ef37a1aa89c241068e3e778b46",
           "killedBy": [
-            "MoxTest:allow/3 allowances support processes registered through a Registry"
+            "MoxTest:allow/3 allowances support lazy calls for processes registered through a Registry"
           ],
           "location": {
             "end": {
@@ -159,10 +159,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1353,
+          "duration": 1377,
           "id": "3f8721021c575dcd6fbd7da33a639feb",
           "killedBy": [
-            "MoxTest:deny/3 raises even when a stub is defined"
+            "MoxTest:deny/3 raises if function is not in behaviour"
           ],
           "location": {
             "end": {
@@ -184,7 +184,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1383,
+          "duration": 1364,
           "id": "46ea55007958d0e880d0a1e14c7b23e6",
           "killedBy": [
             "MoxTest:defmock/2 defines a mock function for all callbacks by default"
@@ -209,10 +209,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1398,
+          "duration": 1326,
           "id": "495fca562da8c896a8d6f2d15bc364d3",
           "killedBy": [
-            "MoxTest:expect/4 works with multiple behaviours"
+            "MoxTest:allow/3 allowances support locally registered processes"
           ],
           "location": {
             "end": {
@@ -234,9 +234,11 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1811,
+          "duration": 1373,
           "id": "4e5f8845fceb6af841549521a8bb0583",
-          "killedBy": [],
+          "killedBy": [
+            "MoxTest:expect/4 allows asserting that function is not called"
+          ],
           "location": {
             "end": {
               "column": 57,
@@ -249,7 +251,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_atom(current_exps)",
-          "status": "Survived"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -257,10 +259,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 895,
+          "duration": 860,
           "id": "4f1b623323df6c0028e2210959100216",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
           ],
           "location": {
             "end": {
@@ -282,11 +284,9 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1387,
+          "duration": 1809,
           "id": "6eae7c60cdf225d83f533c9729aab278",
-          "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 80,
@@ -299,7 +299,7 @@
           },
           "mutatorName": "GuardComparisonBoundary",
           "replacement": "arity > 0",
-          "status": "Killed"
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -307,10 +307,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1350,
+          "duration": 1343,
           "id": "7e5af2097fb9705e66d2e5671ef1df0b",
           "killedBy": [
-            "MoxTest:defmock/2 accepts a list of behaviours"
+            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
           ],
           "location": {
             "end": {
@@ -332,7 +332,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 894,
+          "duration": 854,
           "id": "97945a919ec7ba25968a69b386134a2a",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -357,10 +357,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1211,
+          "duration": 1296,
           "id": "992e8d3228ca2ac82afd68b93f74813d",
           "killedBy": [
-            "MoxTest:deny/3 raises if a non-mock is given"
+            "MoxTest:deny/3 raises even when a stub is defined"
           ],
           "location": {
             "end": {
@@ -382,10 +382,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1251,
+          "duration": 1278,
           "id": "9a5ce6dffe3248a4ce8a6aef82791271",
           "killedBy": [
-            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks is not an optional callback"
+            "MoxTest:defmock/2 raises for non behaviour"
           ],
           "location": {
             "end": {
@@ -407,10 +407,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 903,
+          "duration": 836,
           "id": "a6a75841bf3bc69c4d7e88a4864d0eb8",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+            "MoxTest:stub_with/2 can override stubs"
           ],
           "location": {
             "end": {
@@ -432,10 +432,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1250,
+          "duration": 1316,
           "id": "ad7284d7bc1afba8484969e0d0a6b08b",
           "killedBy": [
-            "MoxTest:stub/3 overwrites earlier stubs"
+            "MoxTest:stub/3 raises if function is not in behaviour"
           ],
           "location": {
             "end": {
@@ -457,10 +457,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1231,
+          "duration": 1242,
           "id": "ad72dd8113716102a4c94cd15269b4e7",
           "killedBy": [
-            "MoxTest:allow/3 allowances support lazy calls for processes registered through a Registry"
+            "MoxTest:verify_on_exit!/0 verifies all mocks for current process on exit in global mode"
           ],
           "location": {
             "end": {
@@ -482,7 +482,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1204,
+          "duration": 1316,
           "id": "adbdcf5b3c696f27c6c87c8500245558",
           "killedBy": [
             "MoxTest:deny/3 raises even when a stub is defined"
@@ -507,10 +507,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1290,
+          "duration": 1341,
           "id": "b8131bb577d5766b7849db765890036c",
           "killedBy": [
-            "MoxTest:stub_with/2 can override stubs"
+            "MoxTest:stub_with/2 stubs all functions with functions from a module"
           ],
           "location": {
             "end": {
@@ -532,7 +532,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 969,
+          "duration": 882,
           "id": "ba7149b1f4a576b7802756c48914fe54",
           "killedBy": [
             "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
@@ -557,10 +557,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1836,
+          "duration": 1890,
           "id": "bb2b60be0022f26594e3fbaaec18bb29",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
           ],
           "location": {
             "end": {
@@ -582,10 +582,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 823,
+          "duration": 904,
           "id": "bc967d1873e23926feb1951e4109c270",
           "killedBy": [
-            "MoxTest:expect/4 allows asserting that function is not called"
+            "MoxTest:deny/3 allows asserting that function is not called"
           ],
           "location": {
             "end": {
@@ -607,10 +607,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 813,
+          "duration": 882,
           "id": "c26b511de9ee6bd613c93a59944e65fa",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
           ],
           "location": {
             "end": {
@@ -632,10 +632,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1267,
+          "duration": 1300,
           "id": "c32c7305b8288615f9c79fa781a07afd",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+            "MoxTest:verify_on_exit!/0 verifies all mocks for current process on exit in global mode"
           ],
           "location": {
             "end": {
@@ -657,7 +657,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1184,
+          "duration": 1227,
           "id": "c8d2a9fbbc096d0c9db39b1a43177fd8",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -682,10 +682,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1214,
+          "duration": 1210,
           "id": "cc0be5e06ae4c703bee0f92e23841fb3",
           "killedBy": [
-            "MoxTest:stub/3 raises if function is not in behaviour"
+            "MoxTest:allow/3 allows different processes to share mocks from child process"
           ],
           "location": {
             "end": {
@@ -707,10 +707,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 790,
+          "duration": 864,
           "id": "d3954c9c82add592f7ac86a43fb69267",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -732,10 +732,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 1264,
+          "duration": 1247,
           "id": "d41639a74d48ae07454bdcccf0b25b1c",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by the same process in private mode"
+            "MoxTest:stub/3 does not fail verification if not called"
           ],
           "location": {
             "end": {
@@ -757,7 +757,7 @@
             "test/cluster_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 787,
+          "duration": 851,
           "id": "d90d5cb3b4649efde1bfdc9f836711af",
           "killedBy": [
             "MoxTest:defmock/2 accepts a list of callbacks to skip"
@@ -782,7 +782,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1725,
+          "duration": 1855,
           "id": "da4d06faee12f73c7b5c701b0e52436c",
           "killedBy": [],
           "location": {
@@ -805,10 +805,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1234,
+          "duration": 1269,
           "id": "e156c949962d0aba8fb749e42186643d",
           "killedBy": [
-            "MoxTest:expect/4 raises if a non-mock is given"
+            "MoxTest:stub_with/2 can override stubs"
           ],
           "location": {
             "end": {
@@ -830,7 +830,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1696,
+          "duration": 1766,
           "id": "e2f46bf1c1a6fcca3988c5be07a8efe0",
           "killedBy": [],
           "location": {
@@ -853,10 +853,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1138,
+          "duration": 1271,
           "id": "e5a006e5aa26cff4a8353808556c8161",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in global mode"
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
           ],
           "location": {
             "end": {
@@ -878,10 +878,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1056,
+          "duration": 1185,
           "id": "ea6d36dd69ca69882f4a98355533da35",
           "killedBy": [
-            "MoxTest:deny/3 raises if you try to add expectations from non global process"
+            "MoxTest:deny/3 raises even when a stub is defined"
           ],
           "location": {
             "end": {
@@ -903,10 +903,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 694,
+          "duration": 708,
           "id": "eab60343ebdd703bef08097ee2523ecb",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -928,10 +928,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 673,
+          "duration": 697,
           "id": "ed1ded3093bc0b87ac98d3c4801cc18a",
           "killedBy": [
-            "MoxTest:allow/3 allowances support processes registered through a Registry"
+            "MoxTest:allow/3 allows different processes to share mocks from parent process"
           ],
           "location": {
             "end": {
@@ -958,87 +958,87 @@
       "schedulers_online": 12
     },
     "engine": {
-      "495fca562da8c896a8d6f2d15bc364d3": "fallback",
-      "e5a006e5aa26cff4a8353808556c8161": "fallback",
-      "ba7149b1f4a576b7802756c48914fe54": "schema",
-      "3f8721021c575dcd6fbd7da33a639feb": "fallback",
-      "ad72dd8113716102a4c94cd15269b4e7": "fallback",
+      "028140767d66376ef79cd91e4b6e58e1": "schema",
       "15083cc3497dac0faf7bdf7c8f8ba9d9": "schema",
-      "ea6d36dd69ca69882f4a98355533da35": "fallback",
-      "7e5af2097fb9705e66d2e5671ef1df0b": "fallback",
-      "b8131bb577d5766b7849db765890036c": "fallback",
-      "c32c7305b8288615f9c79fa781a07afd": "fallback",
-      "cc0be5e06ae4c703bee0f92e23841fb3": "fallback",
+      "1f4713614a50fd28713b1259d99322c6": "fallback",
       "268327b5d0475b6833182dcf18e60270": "fallback",
       "290aec500216e46180841bd0eab3333b": "schema",
-      "c26b511de9ee6bd613c93a59944e65fa": "schema",
-      "4f1b623323df6c0028e2210959100216": "schema",
-      "992e8d3228ca2ac82afd68b93f74813d": "fallback",
-      "6eae7c60cdf225d83f533c9729aab278": "fallback",
-      "1f4713614a50fd28713b1259d99322c6": "fallback",
-      "ed1ded3093bc0b87ac98d3c4801cc18a": "schema",
       "320623ef37a1aa89c241068e3e778b46": "schema",
-      "a6a75841bf3bc69c4d7e88a4864d0eb8": "schema",
-      "d90d5cb3b4649efde1bfdc9f836711af": "schema",
-      "eab60343ebdd703bef08097ee2523ecb": "schema",
-      "e156c949962d0aba8fb749e42186643d": "fallback",
-      "9a5ce6dffe3248a4ce8a6aef82791271": "fallback",
-      "97945a919ec7ba25968a69b386134a2a": "schema",
-      "bc967d1873e23926feb1951e4109c270": "schema",
-      "4e5f8845fceb6af841549521a8bb0583": "fallback",
-      "028140767d66376ef79cd91e4b6e58e1": "schema",
-      "e2f46bf1c1a6fcca3988c5be07a8efe0": "fallback",
-      "da4d06faee12f73c7b5c701b0e52436c": "fallback",
-      "bb2b60be0022f26594e3fbaaec18bb29": "fallback",
-      "d3954c9c82add592f7ac86a43fb69267": "schema",
-      "ad7284d7bc1afba8484969e0d0a6b08b": "fallback",
-      "d41639a74d48ae07454bdcccf0b25b1c": "fallback",
-      "c8d2a9fbbc096d0c9db39b1a43177fd8": "fallback",
+      "3f8721021c575dcd6fbd7da33a639feb": "fallback",
       "46ea55007958d0e880d0a1e14c7b23e6": "fallback",
-      "adbdcf5b3c696f27c6c87c8500245558": "fallback"
+      "495fca562da8c896a8d6f2d15bc364d3": "fallback",
+      "4e5f8845fceb6af841549521a8bb0583": "fallback",
+      "4f1b623323df6c0028e2210959100216": "schema",
+      "6eae7c60cdf225d83f533c9729aab278": "fallback",
+      "7e5af2097fb9705e66d2e5671ef1df0b": "fallback",
+      "97945a919ec7ba25968a69b386134a2a": "schema",
+      "992e8d3228ca2ac82afd68b93f74813d": "fallback",
+      "9a5ce6dffe3248a4ce8a6aef82791271": "fallback",
+      "a6a75841bf3bc69c4d7e88a4864d0eb8": "schema",
+      "ad7284d7bc1afba8484969e0d0a6b08b": "fallback",
+      "ad72dd8113716102a4c94cd15269b4e7": "fallback",
+      "adbdcf5b3c696f27c6c87c8500245558": "fallback",
+      "b8131bb577d5766b7849db765890036c": "fallback",
+      "ba7149b1f4a576b7802756c48914fe54": "schema",
+      "bb2b60be0022f26594e3fbaaec18bb29": "fallback",
+      "bc967d1873e23926feb1951e4109c270": "schema",
+      "c26b511de9ee6bd613c93a59944e65fa": "schema",
+      "c32c7305b8288615f9c79fa781a07afd": "fallback",
+      "c8d2a9fbbc096d0c9db39b1a43177fd8": "fallback",
+      "cc0be5e06ae4c703bee0f92e23841fb3": "fallback",
+      "d3954c9c82add592f7ac86a43fb69267": "schema",
+      "d41639a74d48ae07454bdcccf0b25b1c": "fallback",
+      "d90d5cb3b4649efde1bfdc9f836711af": "schema",
+      "da4d06faee12f73c7b5c701b0e52436c": "fallback",
+      "e156c949962d0aba8fb749e42186643d": "fallback",
+      "e2f46bf1c1a6fcca3988c5be07a8efe0": "fallback",
+      "e5a006e5aa26cff4a8353808556c8161": "fallback",
+      "ea6d36dd69ca69882f4a98355533da35": "fallback",
+      "eab60343ebdd703bef08097ee2523ecb": "schema",
+      "ed1ded3093bc0b87ac98d3c4801cc18a": "schema"
     },
     "metrics": {
       "fallback_count": 24,
-      "fallback_time_ms": 32453,
+      "fallback_time_ms": 33413,
       "fanout": {
-        "495fca562da8c896a8d6f2d15bc364d3": 2,
-        "e5a006e5aa26cff4a8353808556c8161": 2,
-        "ba7149b1f4a576b7802756c48914fe54": 2,
-        "3f8721021c575dcd6fbd7da33a639feb": 2,
-        "ad72dd8113716102a4c94cd15269b4e7": 2,
+        "028140767d66376ef79cd91e4b6e58e1": 2,
         "15083cc3497dac0faf7bdf7c8f8ba9d9": 2,
-        "ea6d36dd69ca69882f4a98355533da35": 2,
-        "7e5af2097fb9705e66d2e5671ef1df0b": 2,
-        "b8131bb577d5766b7849db765890036c": 2,
-        "c32c7305b8288615f9c79fa781a07afd": 2,
-        "cc0be5e06ae4c703bee0f92e23841fb3": 2,
+        "1f4713614a50fd28713b1259d99322c6": 2,
         "268327b5d0475b6833182dcf18e60270": 2,
         "290aec500216e46180841bd0eab3333b": 2,
-        "c26b511de9ee6bd613c93a59944e65fa": 2,
-        "4f1b623323df6c0028e2210959100216": 2,
-        "992e8d3228ca2ac82afd68b93f74813d": 2,
-        "6eae7c60cdf225d83f533c9729aab278": 2,
-        "1f4713614a50fd28713b1259d99322c6": 2,
-        "ed1ded3093bc0b87ac98d3c4801cc18a": 2,
         "320623ef37a1aa89c241068e3e778b46": 2,
-        "a6a75841bf3bc69c4d7e88a4864d0eb8": 2,
-        "d90d5cb3b4649efde1bfdc9f836711af": 2,
-        "eab60343ebdd703bef08097ee2523ecb": 2,
-        "e156c949962d0aba8fb749e42186643d": 2,
-        "9a5ce6dffe3248a4ce8a6aef82791271": 2,
-        "97945a919ec7ba25968a69b386134a2a": 2,
-        "bc967d1873e23926feb1951e4109c270": 2,
-        "4e5f8845fceb6af841549521a8bb0583": 2,
-        "028140767d66376ef79cd91e4b6e58e1": 2,
-        "e2f46bf1c1a6fcca3988c5be07a8efe0": 2,
-        "da4d06faee12f73c7b5c701b0e52436c": 2,
-        "bb2b60be0022f26594e3fbaaec18bb29": 2,
-        "d3954c9c82add592f7ac86a43fb69267": 2,
-        "ad7284d7bc1afba8484969e0d0a6b08b": 2,
-        "d41639a74d48ae07454bdcccf0b25b1c": 2,
-        "c8d2a9fbbc096d0c9db39b1a43177fd8": 2,
+        "3f8721021c575dcd6fbd7da33a639feb": 2,
         "46ea55007958d0e880d0a1e14c7b23e6": 2,
-        "adbdcf5b3c696f27c6c87c8500245558": 2
+        "495fca562da8c896a8d6f2d15bc364d3": 2,
+        "4e5f8845fceb6af841549521a8bb0583": 2,
+        "4f1b623323df6c0028e2210959100216": 2,
+        "6eae7c60cdf225d83f533c9729aab278": 2,
+        "7e5af2097fb9705e66d2e5671ef1df0b": 2,
+        "97945a919ec7ba25968a69b386134a2a": 2,
+        "992e8d3228ca2ac82afd68b93f74813d": 2,
+        "9a5ce6dffe3248a4ce8a6aef82791271": 2,
+        "a6a75841bf3bc69c4d7e88a4864d0eb8": 2,
+        "ad7284d7bc1afba8484969e0d0a6b08b": 2,
+        "ad72dd8113716102a4c94cd15269b4e7": 2,
+        "adbdcf5b3c696f27c6c87c8500245558": 2,
+        "b8131bb577d5766b7849db765890036c": 2,
+        "ba7149b1f4a576b7802756c48914fe54": 2,
+        "bb2b60be0022f26594e3fbaaec18bb29": 2,
+        "bc967d1873e23926feb1951e4109c270": 2,
+        "c26b511de9ee6bd613c93a59944e65fa": 2,
+        "c32c7305b8288615f9c79fa781a07afd": 2,
+        "c8d2a9fbbc096d0c9db39b1a43177fd8": 2,
+        "cc0be5e06ae4c703bee0f92e23841fb3": 2,
+        "d3954c9c82add592f7ac86a43fb69267": 2,
+        "d41639a74d48ae07454bdcccf0b25b1c": 2,
+        "d90d5cb3b4649efde1bfdc9f836711af": 2,
+        "da4d06faee12f73c7b5c701b0e52436c": 2,
+        "e156c949962d0aba8fb749e42186643d": 2,
+        "e2f46bf1c1a6fcca3988c5be07a8efe0": 2,
+        "e5a006e5aa26cff4a8353808556c8161": 2,
+        "ea6d36dd69ca69882f4a98355533da35": 2,
+        "eab60343ebdd703bef08097ee2523ecb": 2,
+        "ed1ded3093bc0b87ac98d3c4801cc18a": 2
       },
       "invalid_mutants": {},
       "rollback_count": 0,
@@ -1051,56 +1051,56 @@
       }
     },
     "mutation_kind": {
-      "495fca562da8c896a8d6f2d15bc364d3": "guard_type_test",
-      "e5a006e5aa26cff4a8353808556c8161": "guard_type_test",
-      "ba7149b1f4a576b7802756c48914fe54": "comparison_negation",
-      "3f8721021c575dcd6fbd7da33a639feb": "guard_type_test",
-      "ad72dd8113716102a4c94cd15269b4e7": "guard_type_test",
+      "028140767d66376ef79cd91e4b6e58e1": "unary_not_removal",
       "15083cc3497dac0faf7bdf7c8f8ba9d9": "arithmetic_op",
-      "ea6d36dd69ca69882f4a98355533da35": "guard_type_test",
-      "7e5af2097fb9705e66d2e5671ef1df0b": "guard_type_test",
-      "b8131bb577d5766b7849db765890036c": "guard_type_test",
-      "c32c7305b8288615f9c79fa781a07afd": "guard_comparison_negation",
-      "cc0be5e06ae4c703bee0f92e23841fb3": "guard_type_test",
+      "1f4713614a50fd28713b1259d99322c6": "guard_type_test",
       "268327b5d0475b6833182dcf18e60270": "guard_type_test",
       "290aec500216e46180841bd0eab3333b": "comparison_negation",
-      "c26b511de9ee6bd613c93a59944e65fa": "arithmetic_op",
-      "4f1b623323df6c0028e2210959100216": "arithmetic_op",
-      "992e8d3228ca2ac82afd68b93f74813d": "guard_type_test",
-      "6eae7c60cdf225d83f533c9729aab278": "guard_comparison_boundary",
-      "1f4713614a50fd28713b1259d99322c6": "guard_type_test",
-      "ed1ded3093bc0b87ac98d3c4801cc18a": "comparison_negation",
       "320623ef37a1aa89c241068e3e778b46": "comparison_negation",
-      "a6a75841bf3bc69c4d7e88a4864d0eb8": "boolean_op",
-      "d90d5cb3b4649efde1bfdc9f836711af": "unary_not_removal",
-      "eab60343ebdd703bef08097ee2523ecb": "arithmetic_op",
-      "e156c949962d0aba8fb749e42186643d": "guard_type_test",
-      "9a5ce6dffe3248a4ce8a6aef82791271": "guard_type_test",
-      "97945a919ec7ba25968a69b386134a2a": "arithmetic_op",
-      "bc967d1873e23926feb1951e4109c270": "arithmetic_op",
-      "4e5f8845fceb6af841549521a8bb0583": "guard_type_test",
-      "028140767d66376ef79cd91e4b6e58e1": "unary_not_removal",
-      "e2f46bf1c1a6fcca3988c5be07a8efe0": "guard_type_test",
-      "da4d06faee12f73c7b5c701b0e52436c": "guard_type_test",
-      "bb2b60be0022f26594e3fbaaec18bb29": "guard_comparison_negation",
-      "d3954c9c82add592f7ac86a43fb69267": "boolean_op",
-      "ad7284d7bc1afba8484969e0d0a6b08b": "guard_type_test",
-      "d41639a74d48ae07454bdcccf0b25b1c": "guard_type_test",
-      "c8d2a9fbbc096d0c9db39b1a43177fd8": "guard_comparison_boundary",
+      "3f8721021c575dcd6fbd7da33a639feb": "guard_type_test",
       "46ea55007958d0e880d0a1e14c7b23e6": "guard_type_test",
-      "adbdcf5b3c696f27c6c87c8500245558": "guard_comparison_negation"
+      "495fca562da8c896a8d6f2d15bc364d3": "guard_type_test",
+      "4e5f8845fceb6af841549521a8bb0583": "guard_type_test",
+      "4f1b623323df6c0028e2210959100216": "arithmetic_op",
+      "6eae7c60cdf225d83f533c9729aab278": "guard_comparison_boundary",
+      "7e5af2097fb9705e66d2e5671ef1df0b": "guard_type_test",
+      "97945a919ec7ba25968a69b386134a2a": "arithmetic_op",
+      "992e8d3228ca2ac82afd68b93f74813d": "guard_type_test",
+      "9a5ce6dffe3248a4ce8a6aef82791271": "guard_type_test",
+      "a6a75841bf3bc69c4d7e88a4864d0eb8": "boolean_op",
+      "ad7284d7bc1afba8484969e0d0a6b08b": "guard_type_test",
+      "ad72dd8113716102a4c94cd15269b4e7": "guard_type_test",
+      "adbdcf5b3c696f27c6c87c8500245558": "guard_comparison_negation",
+      "b8131bb577d5766b7849db765890036c": "guard_type_test",
+      "ba7149b1f4a576b7802756c48914fe54": "comparison_negation",
+      "bb2b60be0022f26594e3fbaaec18bb29": "guard_comparison_negation",
+      "bc967d1873e23926feb1951e4109c270": "arithmetic_op",
+      "c26b511de9ee6bd613c93a59944e65fa": "arithmetic_op",
+      "c32c7305b8288615f9c79fa781a07afd": "guard_comparison_negation",
+      "c8d2a9fbbc096d0c9db39b1a43177fd8": "guard_comparison_boundary",
+      "cc0be5e06ae4c703bee0f92e23841fb3": "guard_type_test",
+      "d3954c9c82add592f7ac86a43fb69267": "boolean_op",
+      "d41639a74d48ae07454bdcccf0b25b1c": "guard_type_test",
+      "d90d5cb3b4649efde1bfdc9f836711af": "unary_not_removal",
+      "da4d06faee12f73c7b5c701b0e52436c": "guard_type_test",
+      "e156c949962d0aba8fb749e42186643d": "guard_type_test",
+      "e2f46bf1c1a6fcca3988c5be07a8efe0": "guard_type_test",
+      "e5a006e5aa26cff4a8353808556c8161": "guard_type_test",
+      "ea6d36dd69ca69882f4a98355533da35": "guard_type_test",
+      "eab60343ebdd703bef08097ee2523ecb": "arithmetic_op",
+      "ed1ded3093bc0b87ac98d3c4801cc18a": "comparison_negation"
     },
     "persistent": null,
     "phase_timings": {
-      "baseline_tests_ms": 1290,
+      "baseline_tests_ms": 1146,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 9786,
-      "oracle_build_ms": 4029,
+      "fallback_workers_ms": 10138,
+      "oracle_build_ms": 3328,
       "plan_generation_ms": 13,
-      "report_writing_ms": 6,
-      "schema_build_ms": 4514,
-      "schema_workers_ms": 3500,
-      "total_ms": 23669
+      "report_writing_ms": 2,
+      "schema_build_ms": 3305,
+      "schema_workers_ms": 3434,
+      "total_ms": 21871
     },
     "recompile_categories": {
       "compile_error": 0,
@@ -1123,44 +1123,44 @@
       "selected_tests_median": 2
     },
     "stable_id_to_integer": {
-      "495fca562da8c896a8d6f2d15bc364d3": 9,
-      "e5a006e5aa26cff4a8353808556c8161": 35,
-      "ba7149b1f4a576b7802756c48914fe54": 22,
-      "3f8721021c575dcd6fbd7da33a639feb": 7,
-      "ad72dd8113716102a4c94cd15269b4e7": 19,
+      "028140767d66376ef79cd91e4b6e58e1": 1,
       "15083cc3497dac0faf7bdf7c8f8ba9d9": 2,
-      "ea6d36dd69ca69882f4a98355533da35": 36,
-      "7e5af2097fb9705e66d2e5671ef1df0b": 13,
-      "b8131bb577d5766b7849db765890036c": 21,
-      "c32c7305b8288615f9c79fa781a07afd": 26,
-      "cc0be5e06ae4c703bee0f92e23841fb3": 28,
+      "1f4713614a50fd28713b1259d99322c6": 3,
       "268327b5d0475b6833182dcf18e60270": 4,
       "290aec500216e46180841bd0eab3333b": 5,
-      "c26b511de9ee6bd613c93a59944e65fa": 25,
-      "4f1b623323df6c0028e2210959100216": 11,
-      "992e8d3228ca2ac82afd68b93f74813d": 15,
-      "6eae7c60cdf225d83f533c9729aab278": 12,
-      "1f4713614a50fd28713b1259d99322c6": 3,
-      "ed1ded3093bc0b87ac98d3c4801cc18a": 38,
       "320623ef37a1aa89c241068e3e778b46": 6,
-      "a6a75841bf3bc69c4d7e88a4864d0eb8": 17,
-      "d90d5cb3b4649efde1bfdc9f836711af": 31,
-      "eab60343ebdd703bef08097ee2523ecb": 37,
-      "e156c949962d0aba8fb749e42186643d": 33,
-      "9a5ce6dffe3248a4ce8a6aef82791271": 16,
-      "97945a919ec7ba25968a69b386134a2a": 14,
-      "bc967d1873e23926feb1951e4109c270": 24,
-      "4e5f8845fceb6af841549521a8bb0583": 10,
-      "028140767d66376ef79cd91e4b6e58e1": 1,
-      "e2f46bf1c1a6fcca3988c5be07a8efe0": 34,
-      "da4d06faee12f73c7b5c701b0e52436c": 32,
-      "bb2b60be0022f26594e3fbaaec18bb29": 23,
-      "d3954c9c82add592f7ac86a43fb69267": 29,
-      "ad7284d7bc1afba8484969e0d0a6b08b": 18,
-      "d41639a74d48ae07454bdcccf0b25b1c": 30,
-      "c8d2a9fbbc096d0c9db39b1a43177fd8": 27,
+      "3f8721021c575dcd6fbd7da33a639feb": 7,
       "46ea55007958d0e880d0a1e14c7b23e6": 8,
-      "adbdcf5b3c696f27c6c87c8500245558": 20
+      "495fca562da8c896a8d6f2d15bc364d3": 9,
+      "4e5f8845fceb6af841549521a8bb0583": 10,
+      "4f1b623323df6c0028e2210959100216": 11,
+      "6eae7c60cdf225d83f533c9729aab278": 12,
+      "7e5af2097fb9705e66d2e5671ef1df0b": 13,
+      "97945a919ec7ba25968a69b386134a2a": 14,
+      "992e8d3228ca2ac82afd68b93f74813d": 15,
+      "9a5ce6dffe3248a4ce8a6aef82791271": 16,
+      "a6a75841bf3bc69c4d7e88a4864d0eb8": 17,
+      "ad7284d7bc1afba8484969e0d0a6b08b": 18,
+      "ad72dd8113716102a4c94cd15269b4e7": 19,
+      "adbdcf5b3c696f27c6c87c8500245558": 20,
+      "b8131bb577d5766b7849db765890036c": 21,
+      "ba7149b1f4a576b7802756c48914fe54": 22,
+      "bb2b60be0022f26594e3fbaaec18bb29": 23,
+      "bc967d1873e23926feb1951e4109c270": 24,
+      "c26b511de9ee6bd613c93a59944e65fa": 25,
+      "c32c7305b8288615f9c79fa781a07afd": 26,
+      "c8d2a9fbbc096d0c9db39b1a43177fd8": 27,
+      "cc0be5e06ae4c703bee0f92e23841fb3": 28,
+      "d3954c9c82add592f7ac86a43fb69267": 29,
+      "d41639a74d48ae07454bdcccf0b25b1c": 30,
+      "d90d5cb3b4649efde1bfdc9f836711af": 31,
+      "da4d06faee12f73c7b5c701b0e52436c": 32,
+      "e156c949962d0aba8fb749e42186643d": 33,
+      "e2f46bf1c1a6fcca3988c5be07a8efe0": 34,
+      "e5a006e5aa26cff4a8353808556c8161": 35,
+      "ea6d36dd69ca69882f4a98355533da35": 36,
+      "eab60343ebdd703bef08097ee2523ecb": 37,
+      "ed1ded3093bc0b87ac98d3c4801cc18a": 38
     },
     "test_timeout_ms": 10000
   },
