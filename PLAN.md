@@ -1174,3 +1174,424 @@ If either condition fails, M21 defers to v1.9 or later. v1.8 ships with M20 alon
 - Disabling `Application.ensure_all_started/1` for project apps.
 
 `--worker-type mix` remains permanent regardless of v1.8 perf outcomes.
+
+---
+
+# v1.9 Milestones
+
+v1.9's theme: **mature persistent worker, expand mutation surface, validate against the Elixir ecosystem.**
+
+v1.8 delivered persistent worker speedups (2.04× plug_crypto, 1.99× Decimal at c=4 with `--test-timeout-ms 10000`). v1.7 + v1.8 only validated 3 projects. v1.9 matures persistent-worker operations and lands a narrow new literal mutator surface without changing defaults.
+
+**Default `--worker-type` does NOT flip in v1.9.** That's v1.10 territory, gated on expanded validation results.
+
+**Default `--selection` does NOT flip in v1.9.** Coverage remains opt-in until expanded real-project validation proves the interaction with persistent workers and the expanded mutation surface.
+
+v1.9 lands two milestones. M22 adds reliability, observability, and configuration. M23 introduces opt-in body-context literal mutators. Real-world validation and default flips move to v1.10+.
+
+## M22 — Persistent reliability + observability + config + guide
+
+**Goal:** make persistent worker operationally boring, expose the diagnostics M20 already collects, document the user contract.
+
+**Deliverables:**
+
+- **`--test-timeout-ms N` flag + `config :mut, test_timeout_ms: N`.** Default 10_000 (v1.8's value). Plumbs to both mix-spawn `--timeout` and persistent runner ExUnit config. Reported in terminal and `mutalisk.test_timeout_ms` JSON key. Users with legitimately slow tests have a one-flag opt-out.
+- **Persistent metrics surfaced in summary always when persistent is active.** M20 collects restart count, in-process fallback compile-error count, filter-miss count. M22 promotes these to terminal display in the existing "Persistent worker:" section.
+- **Single explicit warning threshold.** At run end, if `--worker-type persistent` AND any of: filter-miss rate > 25%, crash rate > 10%, in-process fallback compile-error rate > 5% — emit a one-line warning suggesting `--worker-type mix`. No auto-fallback, no auto-mode-switching. Just a hint.
+- **Coverage + persistent interaction validation.** Add an integration test asserting `--selection coverage_with_static_fallback --worker-type persistent` produces byte-identical outcomes vs `--selection static --worker-type mix` on demo_app and plug_crypto. Currently UNTESTED; this closes a real silent-drift risk before v1.10 considers default flips.
+- **Regression fixture for Application.start/2 + named ETS.** Add `test/fixtures/overlay_cases/app_start_callback/` mirroring the plug_crypto F2 root cause. Lock in the v1.7 fix; future code changes can't regress it silently.
+- **`docs/PERSISTENT_WORKER_GUIDE.md`** (new). User-facing doc covering: when to use persistent, what project shapes work, what doesn't (NIF projects, tests with global GenServer state, etc.), how to interpret persistent metrics, when to fall back to `--worker-type mix`. Replaces scattered CHANGELOG warnings with a single canonical reference.
+
+**Acceptance gates:**
+- All 9 v1.9 verify layers green at default.
+- `--test-timeout-ms` flag works on both worker types.
+- Persistent metrics shown in terminal output when `--worker-type persistent` is active.
+- Warning threshold triggers correctly on synthetic test fixtures.
+- Coverage + persistent interaction byte-identical on demo_app and plug_crypto.
+- PERSISTENT_WORKER_GUIDE.md committed.
+
+**Out of scope for M22:**
+- Default flip of `--worker-type` (v1.10).
+- Default flip of `--selection` (v1.10+).
+- New mutators (M23).
+- Real-world validation expansion (M24).
+
+**Recommended commit pacing:** 4-5 commits.
+
+---
+
+## M23 — Body-context literal mutators
+
+**Goal:** introduce mutation targets in function-body literals. v1's mutator set covers operators and dispatches but leaves literals untouched in body positions. Adds two focused mutators with low equivalent-mutant rate.
+
+**Scope:** narrow. Only integer and boolean literals in body positions. Float, string, atom, list, map, tuple deferred to v2 alongside the lean env walker.
+
+**Deliverables:**
+
+- **`Mut.AstWalk.body_literal_candidates/2`**: walker that emits `%AstCandidate{}` for integer and boolean literals in function-body context. Uses existing `env_context` field; populates with `nil` (body) and skips when `:guard` or `:match`.
+- **Body-context detection**: walker tracks whether current AST position is inside a `def`/`defp`/`defmacro`/`defmacrop` body, NOT inside `when` (guard), NOT inside pattern positions (LHS of `=`, function head args, `case`/`with`/`fn` clause heads), NOT inside `quote`/`unquote`/`unquote_splicing`. The existing `Mut.AstWalk` infrastructure tracks `ast_path`; reuse for context detection.
+- **`Mut.Mutator.IntegerLiteral`**:
+  - Targets: `:dispatch`-equivalent for body context; specifically `targets/0` returns `[:body_literal]` (new target type).
+  - Replacement table:
+    - `0 → 1`
+    - `1 → 0`
+    - `n → 0` (for n > 1 or n < 0)
+    - `n → n + 1` (avoiding overflow concerns; document limit)
+  - `applicable?/2`: requires `ctx.env_context == nil` AND `ctx.engine == :fallback`.
+  - `compatible?/2`: matches body literal candidates with integer values.
+- **`Mut.Mutator.BooleanLiteral`**:
+  - Targets: `[:body_literal]`.
+  - Replacement table: `true → false`, `false → true`.
+  - Same applicable/compatible discipline as IntegerLiteral.
+- **`Mut.Plan` extension**: `:body_literal` added to `target` enum. Orchestrator routes body-literal candidates through the fallback engine, gated by `--enable body_literal`.
+- **Stable ID input extension**: body-literal mutations need to be stably-identified. Existing `(file, span, mutator, kind, original_dispatch)` tuple works if `original_dispatch` for body literals is `"<literal_value>"`. Verify and pin format.
+- **Schema routing deferred**: schema placement requires the literal walker and placer to agree on AST shape. The v1.9 walker uses parser `literal_encoder` metadata; the existing placer uses bare-literal AST, so fallback routing avoids global stable-id churn.
+- **Demo_app fixture extension**: add a small integer-literal mutation site (e.g., a function returning `0` as a default) and a boolean-literal site to `arith.ex` or a new `literals.ex`. Update fixture tests to actually catch the mutation.
+- **Golden mutation list update**: regenerate `test/golden/mutations/*.json` for fixture files now containing body literal mutants.
+
+**Acceptance gates:**
+- All 9 v1.9 verify layers green at default.
+- demo_app fixture mutant count grows by the expected number (literals in fixture × replacements per literal).
+- byte-identity preserved between mix and persistent for body-literal mutants.
+- Plug_crypto produces additional body-literal mutants; stable_ids deterministic across runs.
+- Equivalent-mutant rate documented (expected: high for `n → n+1` on truly arbitrary integers; lower for `0 → 1`).
+
+**Out of scope for M23:**
+- Float, string, atom, list, map, tuple literal mutators (v2 with env walker).
+- Pattern-position literal mutations (different semantic surface).
+- Function-call deletion (deferred indefinitely).
+- Return-value replacement (deferred indefinitely).
+- Variable mutations (v2).
+
+**Recommended commit pacing:** 4-6 commits.
+
+1. Walker extension for body-literal context detection.
+2. `Mut.Mutator.IntegerLiteral` + tests.
+3. `Mut.Mutator.BooleanLiteral` + tests.
+4. Orchestrator routing + Plan target enum.
+5. Fallback routing integration + demo_app fixture extension.
+6. Golden mutation lists regenerated.
+
+---
+
+## M24 — Body-literal real-world validation (v1.10 candidate)
+
+**Goal:** validate opt-in body literal mutation on real projects before adding more literal types or changing defaults.
+
+**Deliverables:**
+
+- **Body-literal validation matrix**: run demo_app, plug_crypto, and Decimal with and without `--enable body_literal`; capture additional mutants, killed/survived/timeout/invalid deltas, fallback wall-clock delta, and noisy/equivalent survivor samples.
+- **Real-world target expansion**: validate on additional OSS targets beyond demo_app/plug_crypto/Decimal. Suggested set:
+  - `nimble_options` — small, simple validation. Baseline.
+  - `gettext` — compile-time macros. Tests schema build robustness on macro-heavy code.
+  - `ecto` — Ecto.Query macro, schema generation. Tests both schema build AND persistent's reset hooks (Ecto.Repo state).
+  - `mox` — module-replacement mocking. The kind of test pattern that could expose persistent's reset hooks. CRITICAL TEST.
+  - **`jason` (StreamData target)** — property-based tests via StreamData. Mutation testing on StreamData is intrinsically non-deterministic (different generator inputs each run). Document this as a known limitation; don't gate on byte-identity for StreamData targets. Treat as "informational" benchmark.
+- **Validation matrix per target**: run `--worker-type mix --selection static`, `--worker-type persistent --selection static`, and the same persistent run with `--enable body_literal` at c=4. Capture wall-clock, kill rate, byte-identity status, invalid rate, and fallback cost.
+- **`docs/PERSISTENT_WORKER_GUIDE.md` extension**: per-target findings, unsupported pattern catalog (if any surface).
+- **BENCHMARKS.md "v1.10 body-literal validation" section**: full matrix of targets × worker × body-literal enablement. Compare to v1.9 baseline.
+- **v1.10 default-flip gate documented**: PLAN.md gains a forward-looking section pinning the criteria for flipping `--worker-type` default in v1.10. Specifically: ≥4 of 5 new OSS targets clean (byte-identical, persistent faster or comparable); zero new unsupported-pattern categories affecting common project shapes; persistent ≥1.5× faster than mix at default concurrency on at least plug_crypto, Decimal, AND 2 of M24's new targets.
+
+**Acceptance gates:**
+- All 9 v1.9 verify layers green at default.
+- Existing non-body-literal stable IDs unchanged when `--enable body_literal` is not used.
+- `--enable body_literal` produces zero invalid body-literal mutants on reference targets.
+- Additional killed/survived/timeout deltas and fallback cost are documented.
+- Clear recommendation documented: keep opt-in, enable by default, or trim replacement table.
+- ≥5 OSS targets validated; matrix documented.
+- PERSISTENT_WORKER_GUIDE.md gains target-specific notes.
+- Any unsupported patterns documented.
+
+**Out of scope for M24:**
+- Default `--worker-type` flip.
+- Default `--selection` flip.
+- New literal types beyond integer/boolean.
+- Reliability work already covered by M22.
+
+**Subagent brief:**
+
+The riskiest target is `mox`. Module-replacement mocking writes new bytecode for mocked modules at runtime, then restores. Persistent worker's reset hooks may not catch `:code` server state for mocked-and-restored modules. If mox testing diverges between worker types, that's a real find — document and add to PERSISTENT_WORKER_GUIDE's unsupported patterns.
+
+The least risky is `nimble_options`. Run that first to validate the harness; if it works, scale to others.
+
+**StreamData targets (jason)** are intrinsically non-deterministic. Mutation outcomes vary across runs because generator inputs vary. Two approaches:
+1. Pin a StreamData seed via `ExUnit.start(seed: N)` and `:rand.seed/2` configuration, then accept that one fixed seed defines "byte-identical."
+2. Document the variance and report the run as "informational."
+
+Pick approach 1 if pinnable; fall back to approach 2 otherwise. Either way, StreamData target results don't gate v1.9 acceptance.
+
+**Recommended commit pacing:** 5-7 commits.
+
+1. Validation matrix harness extension.
+2. Body-literal benches: demo_app, plug_crypto, Decimal.
+3. Per-target benches: nimble_options, gettext (and PERSISTENT_WORKER_GUIDE entries).
+4. Per-target benches: ecto, mox (and any unsupported patterns documented).
+5. StreamData target (jason) with documented variance.
+6. BENCHMARKS.md v1.10 body-literal validation section.
+7. Body-literal default/opt-in recommendation.
+
+---
+
+# v1.10 default `--worker-type` flip gate (forward-looking)
+
+`--worker-type` default flips from `mix` → `persistent` in v1.10 IF AND ONLY IF:
+
+- v1.10 validation covers ≥4 of ≥5 new OSS targets cleanly (byte-identical, persistent faster or comparable).
+- Zero new unsupported-pattern categories surface during validation that affect common Elixir project shapes (Phoenix-style, Ecto-style, GenServer-heavy).
+- `--worker-type mix` remains the documented and tested escape hatch.
+- Persistent is faster than mix at default `--concurrency` on at least plug_crypto, Decimal, AND 2 of M24's new targets.
+
+If validation surfaces unsupported patterns affecting common project shapes, default stays `mix` and v1.10's scope shifts to addressing those patterns.
+
+# Out of scope for v1.9 (do not let it sneak in)
+
+- Default `--worker-type` flip (v1.10).
+- Float, string, atom, list, map, tuple body-literal mutators (v2 with env walker).
+- Pattern-position literal mutators (v2).
+- Variable mutators (v2).
+- Function-call deletion / return-value replacement (deferred indefinitely).
+- New CLI flags beyond `--test-timeout-ms`.
+- Cross-run state persistence (v2).
+- Wrapper guard schemata (v2).
+- Mutation semantics changes.
+- Skipping reset vectors via dirty flags.
+- Disabling `Application.ensure_all_started/1`.
+- Auto-fallback / auto-mode-switching for persistent worker (just warning thresholds).
+
+---
+
+# v1.10 Milestones
+
+v1.10's theme: **validate everything against the Elixir ecosystem, then decide on defaults.**
+
+v1.9 deferred the OSS validation matrix because external-repo probing was sandbox-blocked. v1.10's job is to actually run that matrix and use the data to make two decisions: body-literal default policy + persistent worker default-flip.
+
+**One bench cycle answers both questions.** Running 5+ OSS targets × `{mix, persistent}` × `{baseline, body_literal}` produces:
+- Body-literal kill rate per target.
+- Equivalent-mutant rate signal.
+- Fallback wall-clock impact for body literals.
+- Persistent vs mix wall-clock per target.
+- Coverage default-flip field validation (v1.9's flip; how does it perform on OSS?).
+- Coverage + body_literal interaction validation.
+- M22 warning threshold field-tuning data.
+
+v1.10 is **two milestones** (not four). M25 runs the matrix and decides body-literal scope. M26 uses the same matrix data to decide persistent default-flip.
+
+## M25 — Validation matrix + body-literal decisions
+
+**Goal:** run the OSS validation matrix that v1.9 M24 deferred; use the data to decide body-literal default policy and routing.
+
+**Inputs:** `bench/run.sh` harness (M24 ready); pinned target SHAs (M25's first task to capture); v1.9 PLAN/HLD/CHANGELOG; v1.9's `mutalisk.persistent` JSON metrics block.
+
+### Phase A — Pin target SHAs
+
+Each OSS target needs a pinned commit SHA for reproducibility:
+
+- `nimble_options` — small validation library, baseline correctness.
+- `gettext` — compile-time macros, schema-build robustness.
+- `ecto` — Ecto.Query macros, schema generation, persistent reset hooks tested against Ecto.Repo state.
+- `mox` — module-replacement mocking. Highest-risk target for persistent's `:code` server reset.
+- `jason` — StreamData property tests. Non-deterministic; treat as informational.
+- (Optional) `plug` — if budget allows, real-world Phoenix-shape testing.
+
+For each: `git ls-remote <repo> | grep <stable-tag-or-main>` → pin SHA in `bench/run.sh`'s target table. SHAs committed; runs reproducible.
+
+### Phase B — Run the matrix
+
+For each target, execute (sequentially or batched):
+
+1. `bench/run.sh --target <t> --concurrency 4 --worker-type mix` (baseline)
+2. `bench/run.sh --target <t> --concurrency 4 --worker-type persistent` (persistent baseline)
+3. `bench/run.sh --target <t> --concurrency 4 --worker-type mix --enable-body-literal` (mix + body literals)
+4. `bench/run.sh --target <t> --concurrency 4 --worker-type persistent --enable-body-literal` (persistent + body literals)
+
+Estimated bench time: 6 targets × 4 modes × 30-90 min/target = ~12-18 hours. Run overnight or distributed.
+
+For each run, capture in `bench/results/`: Stryker JSON, terminal output, wall-clock per phase, `mutalisk.persistent` block.
+
+### Phase C — Analyze + decide
+
+For each target, compare:
+
+**Byte-identity check (mix vs persistent at same body_literal mode)**:
+- Same total mutant count?
+- Same Survived stable_id set (MapSet.equal?)?
+- Same Killed stable_id set (modulo V17 timeout-flap acceptance)?
+
+If any deterministic target shows drift > V17 acceptance: PERSISTENT_WORKER_GUIDE.md gains an "unsupported pattern" entry; investigate the drift source.
+
+**Body-literal impact (baseline vs body_literal at same worker)**:
+- Mutant count delta (number of new body-literal mutants).
+- Kill rate of new mutants (killed / generated).
+- Equivalent-mutant rate (estimate: surviving mutants whose math is trivially indistinguishable).
+- Fallback wall-clock contribution (body literals route through fallback engine in v1.9 M23).
+
+**Coverage default-flip validation (v1.9 flipped to `coverage_with_static_fallback`)**:
+- Coverage selection adds time on small projects with auto-fallback; should reduce time on larger projects.
+- Document any project where coverage selection produces false survivors or false kills (a real silent-drift bug if surfaced).
+
+**Coverage + body_literal interaction**:
+- Verify the M22 e2e_persistent assertion generalizes to OSS targets.
+- Body-literal mutants under coverage selection should map to tests that hit the literal's line.
+
+**M22 warning threshold tuning**:
+- Did any target trip the warning hint (filter-miss > 25%, crash > 10%, fallback compile-error > 5%)?
+- If a hint fired but the run was actually fine: threshold too tight, raise it.
+- If no hint fired but the run had real issues (high fallback count, frequent restarts): threshold too loose, lower it.
+
+### Phase D — Decisions output
+
+Two decisions encoded in M25's final commit:
+
+**Decision 1: body-literal default policy**
+
+Three possible outcomes:
+- **Default-on** if: average kill rate ≥60% across deterministic targets AND equivalent-mutant rate <20% AND zero invalid body-literal mutants. Update `Mut.Cli` default `:enable` to include `:body_literal`.
+- **Trim table** if: equivalent-mutant rate is dominant noise (specifically: `n → n+1` produces survivor rate >50% across multiple targets). Drop `n → n+1` from `Mut.Mutator.IntegerLiteral` replacement table; keep `0 → 1`, `1 → 0`, `n → 0`. Re-run matrix on subset of targets to validate.
+- **Keep opt-in** if: any target shows >5% invalid body-literal mutants OR `mox`/`ecto` shows persistent-specific drift. CHANGELOG documents the limitation.
+
+**Decision 2: body-literal routing decision**
+
+Two possible outcomes:
+- **Stay fallback** if: body-literal contribution to total wall-clock <15% on the largest target. v1.10 doesn't change routing.
+- **Migrate to schema (deferred to v1.11+)** if: fallback cost ≥15% AND Decision 1 = default-on. v1.10 documents the migration as a v1.11 milestone scope; doesn't ship the migration code (stable_id migration is too big to fold into M25).
+
+### Acceptance gates (whole milestone)
+
+- All 9 v1.9 verify layers green at default after M25's changes (default may flip per Decision 1).
+- BENCHMARKS.md gains "v1.10 validation matrix" section with per-target × per-mode table.
+- PERSISTENT_WORKER_GUIDE.md updated with target-specific findings + any unsupported patterns.
+- CHANGELOG documents Decision 1 outcome.
+- If Decision 2 = migrate-to-schema: PLAN.md gains a v1.11 milestone scoping the stable_id migration.
+- bench/results/ has all 24+ matrix runs committed (small JSON files; valuable historical record).
+
+### Out of scope for M25
+
+- Schema-routing migration code (deferred to v1.11+ if Decision 2 demands it).
+- Persistent default-flip (M26's job, same matrix data).
+- New mutators beyond M23's body literals.
+- New CLI flags.
+- Mutation semantics changes.
+- Coverage caching (still v2).
+
+### Subagent brief
+
+**Highest-risk targets and what to look for**:
+
+- **`mox`**: module-replacement mocking writes new bytecode at runtime, then restores. Persistent's reset hooks may not catch all `:code` server state. Run mix vs persistent first; any drift = unsupported pattern documented immediately.
+- **`ecto`**: schema-generation macros + Ecto.Repo state. Persistent's reset hooks need to handle Ecto.Repo's process-tree (DBConnection pool, etc.). Run small Ecto first if budget allows.
+- **`jason` (StreamData)**: pin StreamData seed via `ExUnit.start(seed: N)` before running; otherwise mutation outcomes are non-deterministic. Document the pinned seed in BENCHMARKS as the reproducibility input. If StreamData seed-pinning doesn't fully stabilize outcomes, fall back to "informational target" framing.
+
+**Bench discipline**:
+- Run each target's `mix` baseline FIRST (gold standard for byte-identity comparison).
+- THEN run persistent baseline; compare to mix.
+- THEN run mix + body_literal; compare to mix baseline (mutant count delta + new survivors).
+- THEN run persistent + body_literal; compare to mix + body_literal (byte-identity check across worker types).
+
+This four-step-per-target sequence isolates regressions: any drift between steps 1-2 is persistent-related; any drift between steps 1-3 is body-literal-related; any drift between steps 3-4 is persistent + body_literal interaction.
+
+**Don't pre-commit decisions before the data**. The decision criteria above are predicates evaluated against the matrix data. Empirics decide.
+
+### Recommended commit pacing
+
+5-7 commits.
+
+1. Pin target SHAs in `bench/run.sh`.
+2. Run matrix; commit per-target raw results.
+3. BENCHMARKS.md "v1.10 validation matrix" section + analysis tables.
+4. Decision 1 implementation: keep opt-in / trim table / default-on (whichever applies).
+5. Decision 2 documentation: stay fallback OR v1.11 migration scope written into PLAN.
+6. PERSISTENT_WORKER_GUIDE.md updates + CHANGELOG v1.10 entry.
+
+If matrix surfaces unsupported patterns: additional commits documenting them (one per pattern), no code changes (those are v1.11+).
+
+---
+
+## M26 — Persistent worker default-flip decision
+
+**Goal:** apply the v1.10 default-flip gate (already documented in PLAN.md after M24) using the M25 matrix data.
+
+**Inputs:** M25's matrix results; v1.10 default-flip gate criteria.
+
+### Phase A — Apply gate criteria
+
+The v1.10 default-flip gate:
+
+- ≥4 of 5 new OSS targets clean (byte-identical, persistent ≥ comparable).
+- Zero new unsupported-pattern categories surface during M25 that affect common Elixir project shapes.
+- `--worker-type mix` remains the documented and tested escape hatch.
+- Persistent ≥1.5× faster than mix at default `--concurrency 4` on plug_crypto, Decimal, AND 2 of M25's new targets.
+
+Evaluate each criterion against M25's data. Don't run new bench cycles; reuse M25's results.
+
+### Phase B — Three possible outcomes
+
+**Outcome 1: Flip default to persistent.** All gate criteria met.
+- Change `Mut.Cli` default for `--worker-type` from `:mix` to `:persistent`.
+- Update CHANGELOG with rationale and explicit "use `--worker-type mix` for sequential or for projects that need it."
+- Update PERSISTENT_WORKER_GUIDE: persistent is now the default; sections about "when to opt in" become sections about "when to opt out."
+- Update README.
+- v1.10 ships as "default-faster mutation testing."
+
+**Outcome 2: Keep mix default but document persistent as production-ready.** Gate criteria mostly met; one or two targets have caveats but overall picture is healthy.
+- No code change.
+- CHANGELOG: explicit "persistent is now production-ready opt-in."
+- PERSISTENT_WORKER_GUIDE: tightened language on supported project shapes.
+- v1.10 ships as "extended docs + opt-in confidence."
+
+**Outcome 3: Defer flip; document patterns persistent doesn't yet handle.** Gate criteria not met.
+- No default change.
+- PERSISTENT_WORKER_GUIDE: detailed documentation of unsupported patterns.
+- PLAN.md gains v1.11 milestones scoped to address the unsupported patterns.
+- v1.10 ships as "validation honest, fixes scoped for v1.11."
+
+### Acceptance gates
+
+- M25's matrix data exists and is committed.
+- Gate criteria evaluated against the data; outcome chosen with documented rationale.
+- CHANGELOG records the outcome.
+- All 9 verify layers still green at the chosen default.
+- If Outcome 1: e2e_persistent layer renamed or supplemented to validate the new default.
+
+### Out of scope for M26
+
+- New bench runs (use M25's data).
+- Schema-routing migration (M25's Decision 2).
+- New mutators.
+- v1.11 work.
+
+### Recommended commit pacing
+
+2-3 commits.
+
+1. Outcome decision: code change (Outcome 1) OR doc update (Outcomes 2, 3).
+2. CHANGELOG + PERSISTENT_WORKER_GUIDE updates.
+3. (Outcome 3 only) PLAN.md v1.11 milestone scoping.
+
+---
+
+# v1.11 horizon (forward-looking, not v1.10 scope)
+
+If v1.10 lands cleanly:
+
+- **v1.11 scope = body-literal schema migration** (if M25 Decision 2 demanded it). The stable_id migration is the load-bearing change; expect a SPEC amendment for the input format.
+- **v1.11+ = env walker** (the long-deferred v2 architecture work). Unblocks float/string/atom/list/map/tuple body literals AND pattern-position literals AND variable mutators AND better attribute classification.
+
+If M25/M26 surface unsupported persistent patterns:
+
+- **v1.11 scope = persistent fixes for surfaced patterns** (e.g., Mox-class module-replacement reset, Ecto.Repo process-tree reset).
+- Default flip deferred to v1.12+ until fixes validate on the relevant targets.
+
+# Out of scope for v1.10 (do not let it sneak in)
+
+- New mutators (body-literal table TUNING is in scope; new mutator types are not).
+- Schema-routing migration code (decision in M25; code is v1.11+).
+- New CLI flags (M22's `--test-timeout-ms` is the last one for the v1.X line).
+- Cross-run state persistence (v2).
+- Wrapper guard schemata (v2 if metrics ever justify; v1.8 confirmed they don't).
+- Pattern-position mutators (v2 with env walker).
+- Variable mutators (v2 with env walker).
+- Coverage caching (v2).
+- Mutation semantics changes.
+- Stable_id input changes (a future schema-routing migration would be a separate, explicit migration milestone).
+- Per-test-case coverage attribution (v2).

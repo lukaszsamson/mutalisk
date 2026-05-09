@@ -351,7 +351,8 @@ v1 fallback attribute support becomes more precise:
 
 v2 still routes by context:
 
-- Trusted function body literals: schema engine.
+- Trusted function body literals: fallback in v1.9; schema routing is
+  deferred until literal encoding can be reconciled without stable-id churn.
 - Trusted dispatch body nodes: schema engine from v1.
 - Guards: fallback unless wrapper-schemata threshold from v1 metrics is crossed.
 - Patterns: fallback initially, because pattern schemata are not expression-position safe.
@@ -455,7 +456,8 @@ v2 must report:
 - v2 preserves all v1/v1.5 behavior for dispatch-shaped mutants.
 - Env walker never expands user macros.
 - Opaque macro descendants are skipped by default.
-- Literal body mutants can run through schema engine.
+- Literal body mutants run through fallback in v1.9; schema routing is
+  allowed later only with an explicit stable-id migration decision.
 - Pattern and attribute mutants route through fallback unless explicitly safe.
 - Reports clearly distinguish unsupported, opaque, generated, and no-coverage skips.
 - Invalid rate for new mutators is tracked and can be gated in CI.
@@ -612,14 +614,100 @@ If v1.8 lands the speed bar, default flip is v1.9 work. If v1.8 documents a fund
 - Skipping reset vectors via dirty flags. Re-introduces the v1.7 F2 failure mode.
 - Disabling `Application.ensure_all_started/1` for project apps. v1.7 F2 proved this is required for correctness on plug_crypto-class projects.
 
+### v1.9 (two milestones — maturation + expanded mutation surface)
+
+v1.7 + v1.8 only validated 3 projects (demo_app, plug_crypto, Decimal). v1.9 matures persistent-worker operations and adds a narrow opt-in literal surface without changing defaults.
+
+**Default `--worker-type` does NOT flip in v1.9.** That's v1.10 territory, gated on expanded validation.
+
+**Default `--selection` does NOT flip in v1.9.** Coverage remains opt-in until the expanded validation milestone proves the interaction with persistent workers on more real projects.
+
+**M22 — Persistent reliability + observability + config + guide**
+
+- `--test-timeout-ms N` flag and `config :mut, test_timeout_ms: N`. Default 10_000 (v1.8's value). Plumbs to mix-spawn `--timeout` and persistent runner ExUnit config. One-flag opt-out for users with legitimately slow tests.
+- Persistent metrics surfaced in summary always when persistent is active (M20 already collects them; M22 promotes to terminal display).
+- Single explicit warning threshold: filter-miss > 25% OR crash > 10% OR fallback-compile-error > 5% triggers a one-line "consider --worker-type mix" hint at run end. No auto-mode-switching.
+- Coverage + persistent interaction validation in the existing e2e_persistent layer. Currently UNTESTED; closes a real silent-drift risk.
+- Regression fixture for `Application.start/2` + named ETS tables, mirroring the v1.7 F2 root cause.
+- New `docs/PERSISTENT_WORKER_GUIDE.md` covering when to use persistent, supported/unsupported project shapes, metric interpretation, fallback advice.
+
+**M23 — Body-context literal mutators**
+
+Two new mutators, narrowly scoped:
+- `Mut.Mutator.IntegerLiteral`: integer literals in body context only. Replacements: `0 → 1`, `1 → 0`, `n → 0`, `n → n + 1`.
+- `Mut.Mutator.BooleanLiteral`: boolean literals in body context only. Replacements: `true ↔ false`.
+
+Walker extension `Mut.AstWalk.body_literal_candidates/1` discovers literals in function-body positions (not guards, not patterns, not quote/unquote). v1.9 routes body literals through the fallback engine because the literal walker uses parser `literal_encoder` metadata while the schema placer uses bare-literal AST. Schema routing is deferred unless benchmarks justify a literal-encoding stable-id migration.
+
+Float, string, atom, list, map, tuple literals deferred to v2 alongside the lean env walker, where their pattern-position vs body-position discrimination needs richer context tracking than v1.9's syntactic walker provides.
+
+Function-call deletion and return-value replacement remain deferred indefinitely (high false-positive risk).
+
+**M24 — Body-literal real-world validation (v1.10 candidate)**
+
+- Validate `--enable body_literal` on real OSS targets before expanding the literal surface or changing defaults.
+- Coverage default flip remains deferred; `--selection static` stays the default in v1.9.
+- Validate persistent worker behavior on additional OSS targets:
+  - `nimble_options` — small validation library, baseline.
+  - `gettext` — compile-time macros, tests schema build robustness.
+  - `ecto` — Ecto.Query macros + schema generation. Tests both schema build AND persistent's reset hooks (Ecto.Repo state).
+  - `mox` — module-replacement mocking. CRITICAL test for persistent's :code-server state handling.
+  - `jason` — StreamData property-based tests. Mutation testing on StreamData is intrinsically non-deterministic; documented as informational target with caveat.
+- BENCHMARKS.md gains a v1.10 body-literal validation section per target × worker × body-literal enablement.
+- `PERSISTENT_WORKER_GUIDE.md` gains target-specific notes including any unsupported patterns surfaced.
+- v1.10 default-flip gate remains documented in PLAN.md.
+
+**v1.10 default `--worker-type` flip gate** (carried forward):
+- ≥4 of 5 new OSS targets clean (byte-identical, persistent faster or comparable).
+- Zero new unsupported-pattern categories affecting common project shapes.
+- `--worker-type mix` permanent escape hatch.
+- Persistent ≥1.5× faster than mix on plug_crypto, Decimal, AND 2 of M24's new targets.
+
+If validation surfaces unsupported patterns affecting common project shapes (Phoenix, Ecto, mox-based tests), v1.10 scope shifts to addressing them and worker default stays `mix`.
+
+**Explicit StreamData treatment**: property-based tests with random generators violate byte-identity expectations. Two acceptable approaches per M24's subagent brief: (1) pin StreamData seed for reproducibility, or (2) document target as informational. StreamData target results do NOT gate v1.9 acceptance.
+
+### v1.10 (two milestones — validation + decisions)
+
+v1.9 deferred the OSS validation matrix because external-repo probing was sandbox-blocked. v1.10's job is to actually run that matrix and use the data to make two decisions: body-literal default policy + persistent worker default-flip.
+
+**One bench cycle answers both questions.** Running 5+ OSS targets × `{mix, persistent}` × `{baseline, body_literal}` produces all the data needed for both decisions plus side-validations (coverage default-flip field validation, M22 warning threshold tuning, coverage + body_literal interaction).
+
+v1.10 is **two milestones**, not four. M25 runs the matrix and decides body-literal scope. M26 uses the same data to decide persistent default-flip.
+
+**M25 — Validation matrix + body-literal decisions**
+
+Pin SHAs for nimble_options, gettext, ecto, mox, jason (and optionally plug). Run the four-step-per-target matrix (mix baseline, persistent baseline, mix + body_literal, persistent + body_literal). Capture per-target Stryker JSON, terminal output, phase timings, persistent metrics.
+
+Two decisions output:
+
+1. **Body-literal default policy**: default-on (if average kill rate ≥60% and equivalent rate <20%), trim table (drop `n → n+1` if survivor rate >50%), or keep opt-in (if any target shows invalid body-literal mutants or persistent-specific drift).
+2. **Body-literal routing**: stay fallback (if contribution <15% of largest target's wall-clock), or migrate to schema (deferred to v1.11+ as a stable_id migration milestone).
+
+Side validations: coverage default-flip on real OSS, coverage + body_literal interaction, M22 warning threshold tuning.
+
+**M26 — Persistent worker default-flip decision**
+
+Reuses M25's matrix data (no new bench cycles). Apply the v1.10 default-flip gate: ≥4 of 5 OSS targets clean, zero new unsupported patterns, persistent ≥1.5× faster on plug_crypto + Decimal + 2 of M25's new targets.
+
+Three possible outcomes: flip default to persistent, keep mix default with extended docs, or defer flip and scope v1.11 fixes for unsupported patterns.
+
+**v1.11 horizon** (not v1.10 scope):
+- Body-literal schema migration if M25 Decision 2 demands it (stable_id migration).
+- Persistent worker fixes for unsupported patterns surfaced in M25/M26.
+- Or env walker (the long-deferred v2 architecture work) if v1.10 closes cleanly.
+
 ### v2
 
 - Lean env walker.
 - Env oracle merge with tracer oracle.
-- Literal mutators in trusted function bodies.
+- Float, string, atom, list, map, tuple literal mutators in trusted function bodies (M23 handled integer + boolean only).
+- Pattern-position literal mutators.
 - Conservative pattern mutator framework.
+- Variable mutators.
 - Better attribute classification.
 - Optional incremental history.
+- Wrapper guard schemata (if v1's fallback metrics ever justify it; v1.8 measurements suggest fallback is not dominant overhead).
 
 ## Open Questions
 
