@@ -2,7 +2,7 @@ target=phoenix_pubsub repo=https://github.com/phoenixframework/phoenix_pubsub.gi
 mutalisk_path=mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.012s
+Resolution completed in 0.014s
 Unchanged:
   earmark_parser 1.4.44
   ex_doc 0.38.4
@@ -31,17 +31,163 @@ Compiling 14 files (.ex)
 
 Generated phoenix_pubsub app
 Schema build starting
-** (SyntaxError) invalid syntax found on nofile:43:21:
-    error: unexpected token: "\" (column 21, code point U+005C)
-    │
- 43 │             IO.puts \"presence leave: key \\"#{key}\\" with meta #{inspect meta}\"
-    │                     ^
-    │
-    └─ nofile:43:21
-    (elixir 1.19.5) lib/code.ex:1103: Code.format_string!/2
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:95: Mut.SchemaPlacer.render/1
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:141: Mut.SchemaPlacer.instrument_file/2
-    (mutalisk 0.1.0) lib/mut/schema_build.ex:125: anonymous fn/3 in Mut.SchemaBuild.instrument_files/2
-    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
-    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3
-    (mutalisk 0.1.0) lib/mut/schema_build.ex:95: Mut.SchemaBuild.build_in_work_copy/3
+Schema build complete
+[1/113] error     lib/phoenix/pubsub/pg2.ex:66  ComparisonBoundary  replace < with <=
+[2/113] error     lib/phoenix/tracker/shard.ex:164  Arithmetic  replace * with /
+[3/113] error     lib/phoenix/tracker/shard.ex:164  Arithmetic  replace * with +
+[4/113] error     lib/phoenix/tracker/delta_generation.ex:36  ComparisonBoundary  replace <= with <
+[5/113] error     lib/phoenix/tracker/state.ex:474  UnaryNot  remove unary not
+[6/113] error     lib/phoenix/tracker/shard.ex:112  Arithmetic  replace * with +
+[7/113] error     lib/phoenix/tracker/state.ex:474  UnaryNot  remove unary not
+[8/113] error     lib/phoenix/tracker/state.ex:460  Boolean  replace or with and
+[9/113] error     lib/phoenix/tracker/shard.ex:112  Boolean  replace || with &&
+[10/113] killed    lib/phoenix/pubsub/pg2.ex:25  ComparisonNegation  replace != with ==
+[11/113] error     lib/phoenix/tracker/clock.ex:52  ComparisonNegation  replace >= with <
+[12/113] error     lib/phoenix/tracker/clock.ex:52  ComparisonBoundary  replace >= with >
+[13/113] error     lib/phoenix/tracker/state.ex:461  Boolean  replace and with or
+[14/113] error     lib/phoenix/pubsub/pg2.ex:66  ComparisonNegation  replace < with >=
+[15/113] error     lib/phoenix/tracker/shard.ex:164  Arithmetic  replace * with -
+[16/113] error     lib/phoenix/tracker/state.ex:381  UnaryNot  remove unary not
+[17/113] killed    lib/phoenix/tracker/shard.ex:112  Arithmetic  replace * with /
+[18/113] error     lib/phoenix/tracker/delta_generation.ex:66  UnaryNot  remove unary not
+[19/113] error     lib/phoenix/tracker/shard.ex:374  Arithmetic  replace - with +
+[20/113] error     lib/phoenix/tracker.ex:353  Arithmetic  replace * with -
+[21/113] error     lib/phoenix/tracker/shard.ex:112  Arithmetic  replace * with -
+[22/113] error     lib/phoenix/tracker/replica.ex:57  ComparisonBoundary  replace > with >=
+[23/113] error     lib/phoenix/tracker/replica.ex:54  ComparisonNegation  replace > with <=
+[24/113] error     lib/phoenix/tracker.ex:366  Arithmetic  replace - with +
+[25/113] error     lib/phoenix/tracker/replica.ex:89  Arithmetic  replace + with -
+[26/113] killed    lib/phoenix/tracker/shard.ex:114  Boolean  replace || with &&
+[27/113] error     lib/phoenix/pubsub/supervisor.ex:21  Boolean  replace || with &&
+[28/113] error     lib/phoenix/tracker/state.ex:381  Boolean  replace or with and
+[29/113] error     lib/phoenix/tracker/delta_generation.ex:65  Boolean  replace and with or
+[30/113] error     lib/phoenix/tracker/replica.ex:51  Arithmetic  replace - with +
+[31/113] error     lib/phoenix/tracker/shard.ex:112  Arithmetic  replace * with -
+[32/113] error     lib/phoenix/tracker/state.ex:230  ComparisonNegation  replace != with ==
+[33/113] error     lib/phoenix/pubsub/supervisor.ex:25  Boolean  replace || with &&
+[34/113] error     lib/phoenix/tracker/state.ex:407  UnaryNot  remove unary not
+[35/113] killed    lib/phoenix/tracker/replica.ex:51  Arithmetic  replace - with *
+[36/113] error     lib/phoenix/tracker/state.ex:469  UnaryNot  remove unary not
+[37/113] error     lib/phoenix/tracker/clock.ex:90  Boolean  replace || with &&
+[38/113] error     lib/phoenix/tracker/shard.ex:116  Boolean  replace || with &&
+[39/113] error     lib/phoenix/tracker/shard.ex:374  Arithmetic  replace - with *
+[40/113] error     lib/phoenix/tracker/state.ex:627  ComparisonBoundary  replace >= with >
+[41/113] error     lib/phoenix/tracker/state.ex:649  Arithmetic  replace + with -
+[42/113] error     lib/phoenix/tracker/replica.ex:89  Arithmetic  replace + with *
+[43/113] error     lib/phoenix/tracker/delta_generation.ex:64  Boolean  replace and with or
+[44/113] error     lib/phoenix/tracker/clock.ex:37  ComparisonBoundary  replace >= with >
+[45/113] error     lib/phoenix/pubsub.ex:374  ComparisonNegation  replace != with ==
+[46/113] error     lib/phoenix/tracker/clock.ex:37  ComparisonNegation  replace >= with <
+[47/113] error     lib/phoenix/tracker/state.ex:649  Arithmetic  replace + with *
+[48/113] error     lib/phoenix/tracker.ex:353  Arithmetic  replace * with +
+[49/113] error     lib/phoenix/tracker/delta_generation.ex:15  Arithmetic  replace + with -
+[50/113] error     lib/phoenix/tracker/delta_generation.ex:15  Arithmetic  replace + with *
+[51/113] error     lib/phoenix/tracker/replica.ex:54  ComparisonBoundary  replace > with >=
+[52/113] error     lib/phoenix/tracker/shard.ex:109  Boolean  replace || with &&
+[53/113] error     lib/phoenix/tracker/shard.ex:486  ComparisonBoundary  replace >= with >
+[54/113] error     lib/phoenix/tracker/state.ex:474  Boolean  replace and with or
+[55/113] error     lib/phoenix/tracker/state.ex:459  Boolean  replace and with or
+[56/113] error     lib/phoenix/tracker/state.ex:469  Boolean  replace or with and
+[57/113] error     lib/phoenix/tracker.ex:327  Arithmetic  replace - with +
+[58/113] error     lib/phoenix/tracker/delta_generation.ex:36  ComparisonNegation  replace <= with >
+[59/113] error     lib/phoenix/pubsub/supervisor.ex:11  Boolean  replace || with &&
+[60/113] error     lib/phoenix/tracker.ex:353  Arithmetic  replace * with /
+[61/113] error     lib/phoenix/pubsub/supervisor.ex:25  Boolean  replace || with &&
+[62/113] error     lib/phoenix/tracker/shard.ex:113  Boolean  replace || with &&
+[63/113] error     lib/phoenix/tracker/shard.ex:112  Arithmetic  replace * with +
+[64/113] error     lib/phoenix/tracker/state.ex:627  ComparisonNegation  replace >= with <
+[65/113] error     lib/phoenix/tracker/state.ex:622  Boolean  replace or with and
+[66/113] error     lib/phoenix/tracker/state.ex:550  Arithmetic  replace + with -
+[67/113] error     lib/phoenix/tracker/state.ex:407  Boolean  replace and with or
+[68/113] error     lib/phoenix/tracker/shard.ex:486  ComparisonNegation  replace >= with <
+[69/113] error     lib/phoenix/tracker/state.ex:550  Arithmetic  replace + with *
+[70/113] error     lib/phoenix/tracker/clock.ex:90  UnaryNot  remove unary !
+[71/113] error     lib/phoenix/tracker/shard.ex:110  Boolean  replace || with &&
+[72/113] error     lib/phoenix/tracker/delta_generation.ex:64  UnaryNot  remove unary not
+[73/113] error     lib/phoenix/tracker/replica.ex:57  ComparisonNegation  replace > with <=
+[74/113] error     lib/phoenix/tracker.ex:366  Arithmetic  replace - with *
+[75/113] error     lib/phoenix/tracker/shard.ex:416  ComparisonNegation  replace != with ==
+[76/113] error     lib/phoenix/tracker/shard.ex:112  Arithmetic  replace * with /
+[77/113] error     lib/phoenix/tracker/shard.ex:255  ComparisonNegation  replace == with !=
+[78/113] survived  lib/phoenix/tracker.ex:327  Arithmetic  replace - with *
+[78/113] invalid   lib/phoenix/tracker/shard.ex:152  GuardComparisonBoundary  replace guard < with <=
+[79/113] error     lib/phoenix/pubsub.ex:315  GuardTypeTest  replace guard is_atom with is_nil
+[80/113] error     lib/phoenix/pubsub.ex:295  GuardTypeTest  replace guard is_atom with is_nil
+[81/113] error     lib/phoenix/tracker/state.ex:607  GuardComparisonNegation  replace guard >= with <
+[82/113] error     lib/phoenix/pubsub.ex:231  GuardTypeTest  replace guard is_atom with is_nil
+[83/113] error     lib/phoenix/pubsub.ex:255  GuardTypeTest  replace guard is_atom with is_nil
+[84/113] error     lib/phoenix/tracker/state.ex:604  GuardComparisonNegation  replace guard == with !=
+[85/113] error     lib/phoenix/pubsub.ex:275  GuardTypeTest  replace guard is_atom with is_nil
+[86/113] error     lib/phoenix/tracker/clock.ex:48  GuardComparisonNegation  replace guard == with !=
+[87/113] error     lib/phoenix/tracker/shard.ex:53  GuardTypeTest  replace guard is_map with is_list
+[88/113] killed    lib/phoenix/tracker/clock.ex:34  GuardComparisonBoundary  replace guard < with <=
+[89/113] error     lib/phoenix/tracker/shard.ex:157  GuardComparisonNegation  replace guard <= with >
+[90/113] error     lib/phoenix/tracker/clock.ex:49  GuardComparisonNegation  replace guard == with !=
+[91/113] error     lib/phoenix/tracker/shard.ex:40  GuardTypeTest  replace guard is_number with is_integer
+[92/113] error     lib/phoenix/pubsub.ex:231  GuardTypeTest  replace guard is_atom with is_nil
+[93/113] error     lib/phoenix/tracker/shard.ex:40  GuardTypeTest  replace guard is_number with is_float
+[94/113] error     lib/phoenix/pubsub.ex:204  GuardTypeTest  replace guard is_list with is_tuple
+[95/113] error     lib/phoenix/tracker/clock.ex:48  GuardComparisonNegation  replace guard == with !=
+[96/113] error     lib/phoenix/tracker/shard.ex:157  GuardComparisonBoundary  replace guard <= with <
+[97/113] error     lib/phoenix/pubsub.ex:315  GuardTypeTest  replace guard is_atom with is_nil
+[98/113] error     lib/phoenix/tracker.ex:156  GuardTypeTest  replace guard is_map with is_list
+[99/113] error     lib/phoenix/pubsub.ex:295  GuardTypeTest  replace guard is_atom with is_nil
+[100/113] error     lib/phoenix/tracker.ex:214  GuardTypeTest  replace guard is_map with is_list
+[101/113] error     lib/phoenix/pubsub.ex:215  GuardTypeTest  replace guard is_atom with is_nil
+[102/113] error     lib/phoenix/tracker/shard.ex:66  GuardTypeTest  replace guard is_map with is_list
+[103/113] error     lib/phoenix/tracker/clock.ex:20  GuardComparisonNegation  replace guard == with !=
+[103/113] invalid   lib/phoenix/tracker/shard.ex:152  GuardComparisonNegation  replace guard < with >=
+[104/113] error     lib/phoenix/pubsub.ex:275  GuardTypeTest  replace guard is_atom with is_nil
+[105/113] error     lib/phoenix/tracker/shard.ex:359  GuardComparisonNegation  replace guard != with ==
+[106/113] error     lib/phoenix/pubsub.ex:255  GuardTypeTest  replace guard is_atom with is_nil
+[107/113] error     lib/phoenix/tracker/clock.ex:34  GuardComparisonNegation  replace guard < with >=
+[108/113] error     lib/phoenix/tracker/shard.ex:362  GuardComparisonNegation  replace guard != with ==
+[109/113] error     lib/phoenix/tracker/state.ex:607  GuardComparisonBoundary  replace guard >= with >
+[110/113] error     lib/phoenix/pubsub.ex:204  GuardTypeTest  replace guard is_atom with is_nil
+[111/113] survived  lib/phoenix/tracker/state.ex:610  GuardComparisonNegation  replace guard == with !=
+Mutation score: 5/7 = 71.4%
+
+Surviving mutants:
+  lib/phoenix/tracker.ex:327 Arithmetic               replace - with *
+  lib/phoenix/tracker/state.ex:610 GuardComparisonNegation  replace guard == with !=
+
+Schema:    4/78 killed (5.1%)   wall: 79.3s
+Fallback:  1/35 killed (2.9%)   wall: 59.8s
+  guard_comparison_boundary:    1/4 killed
+  guard_comparison_negation:    0/12 killed
+  guard_type_test:              0/19 killed
+Skipped:   1343 (attribute_engine_disabled: 1, body_literal_engine_disabled: 63, missing_oracle_site: 189, no_applicable_mutator: 17, unsupported_dispatch: 1073)
+Invalid:   2
+Errors:    104
+Timeouts:  0
+
+Run time: 139.1s
+Fallback wall-clock: 43.0% of total
+Fallback mutants: 31.0% of executed
+
+Phases:
+  oracle build:          2438 ms
+  baseline tests:       25706 ms
+  plan generation:         42 ms
+  schema build:          2683 ms
+  schema workers:       39533 ms
+  fallback workers:     29720 ms
+  report writing:          10 ms
+  total:               100479 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    113
+    all tests:          0
+  avg tests/mutant: 8.2
+  median tests/mutant: 8
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 100732ms
+bench.wall_ms=102000

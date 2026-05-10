@@ -206,6 +206,42 @@ defmodule Mut.SchemaPlacerTest do
     assert rendered =~ "Logger.warning("
   end
 
+  test "render/1 round-trips ~S sigil heredocs containing literal quote characters" do
+    # M34 regression: phoenix_html v4.3.0 lib/phoenix_html.ex has @doc
+    # blocks using `~S"""..."""` whose body contains `iex>` examples
+    # with literal `\"` escape sequences. Pre-M34, `strip_heredoc_delimiters`
+    # stripped the heredoc delimiter from sigil nodes too, forcing
+    # Macro.to_string into `~S"..."` form which fails to parse when the
+    # body contains literal `"` (the `"` would close the sigil prematurely).
+    # M34 narrows the strip to `:<<>>` interpolated-string nodes only,
+    # leaving sigil heredocs intact so they round-trip via Macro.to_string's
+    # native sigil-heredoc emission.
+    source = ~S'''
+    defmodule Sample do
+      @doc ~S"""
+      Examples
+
+          iex> attrs([title: "the title", id: "the id"])
+          " title=\"the title\" id=\"the id\""
+      """
+      def f, do: :ok
+    end
+    '''
+
+    path = Path.expand("tmp/schema_placer_sigil_heredoc.ex")
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, source)
+    on_exit(fn -> File.rm(path) end)
+
+    assert {:ok, rendered, %SchemaPlacer.PlacementMap{}, []} =
+             SchemaPlacer.instrument_file(path, [])
+
+    # Rendered output must be re-parseable.
+    assert {:ok, _ast} = Mut.SourceParse.parse_string(rendered, path)
+    # And the sigil heredoc form must survive the round-trip.
+    assert rendered =~ "~S\"\"\""
+  end
+
   test "rendered hoist variable does not collide with a user mut_active binding" do
     source =
       "defmodule Sample do\n  def f(a), do: (mut_active = a + 1; mut_active * (a - 1))\nend"

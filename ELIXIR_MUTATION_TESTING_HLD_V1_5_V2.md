@@ -721,6 +721,33 @@ M26 closed v1.10 with Outcome 3 (defer default-flip; scope persistent fixes for 
 
 **Default-flip gate (revised)**: `--worker-type` flips iff M28 closes mox-drift, M30 closes ecto-drift, AND gettext-class is either fixed (M31 path i) or formally documented as mix-only (M31 path ii). The flip is **not a v1.11 goal** — v1.11 ships even if the gate stays unmet. M29's spike output may rewrite this gate for v1.12.
 
+**v1.11 outcome (2026-05-10):** all 7 milestones closed across 13 commits. Default-flip gate **closed structurally**, not on engineering shortfall: M28's hook is correct but the residual mox-class drift is cluster/peer-state (not local Mox.Server state); M29's spike rejected helper-process isolation because the leak class is BEAM-global ETS, not process-local; M30 confirmed Ecto's RuntimeError-class drift is structural (mix-spawn re-runs `Application.start/2` per fallback mutant; persistent doesn't); M31 took Path (ii) and formally classified gettext as mix-only. M32 shelved on risk-surface analysis. M33 was already shipped in v1.5 (commit `06e8398`); v1.11 work was bench validation only. Final mix-only catalogue: Ecto/`:ecto_sql`, Gettext, clustered Mox, HTTP-clients with pooled state (mint/finch/nimble_pool — surfaced by M27, not yet in boot warning), and the M27 SchemaPlacer escaped-quote crash class (phoenix_html/plug/phoenix_pubsub — Mutalisk-owned regression, both worker types affected). Persistent worker remains opt-in. Default `--worker-type` stays `mix`.
+
+### v1.12 (4 committed milestones — stabilization)
+
+v1.11 closed with two M27 follow-throughs deferred (the SchemaPlacer escaped-quote crash and the pool-warm-state boot-warning gap) and the default-flip gate structurally closed. v1.12's theme: **stabilize the expanded harness; do not add broad new mutation surface until the env walker.**
+
+**Default `--worker-type` does NOT flip in v1.12.** The structural drift classes (Ecto, Gettext, clustered Mox) cannot be closed by reset hooks; v1.11 documented this. v1.12 may sharpen the mix-only catalogue but will not move the default.
+
+**Default `--selection` does NOT flip in v1.12.** Coverage stays opt-in until persistent stabilization completes.
+
+**M34 — `Mut.SchemaPlacer` escaped-quote fix.** Highest priority: Mutalisk-owned regression blocking `phoenix_html`, `plug`, and `phoenix_pubsub` under both worker types. Fix `render/1` round-trip for strings containing escaped quotes (`\"…\"`), escaped backslashes, and related escape sequences. Add fixture regression covering escaped-quote content in body and module-attribute positions. Re-bench the three previously-blocked targets in both worker modes; reclassify from `unrunnable`. Acceptance: schema build no longer crashes; both worker types reach mutant execution; existing `golden_instrument` layer remains green.
+
+**M35 — Pool-warm-state boot warning + drift bucketer hardening.** Bundled because both are M27 follow-throughs; neither alone justifies a milestone. Extend persistent boot-warning catalogue with HTTP-client / pool signatures: `:mint`, `:finch`, `:nimble_pool`. Drift bucketer gains per-bucket unit tests (especially `:pool_warm_state`), `--json` output for CI, report paths and sample stable_ids in output. Acceptance: bucketer remains <5% unclassified on M25+M27 corpus; pool boot warning fires correctly on mint/nimble_pool fixtures, silent on plug_crypto/Decimal/demo_app; `PERSISTENT_WORKER_GUIDE.md` documents pool signatures as persistent-risk (not hard mix-only — M36 decides that).
+
+**M36 — Pool-warm-state characterization spike.** Do not jump to reset hooks; characterize the leak class first (the answer may be "classify mix-only," mirroring M30). Three modes on `mint` and `nimble_pool` (and `finch` if toolchain permits): current persistent in-process, aggressive process-tree reset (kill+restart pool supervisors between mutants), restart-project-apps-per-mutant. Measure drift partition vs `mix`, wall-clock cost, memory. Identify dominant leak vector: process tree, ETS registry, sockets, or `Application` env. **Parse-class subsection**: re-examine the 4 residual parse-class mutants (2 nimble_options, 2 mox) in light of the spike's findings; fold the fix into the recommended path if applicable, otherwise document and accept as a known persistent limitation. Output: written decision doc at `docs/spikes/M36_pool_warm_state.md`. Three options: reset hook (if cheap and effective — promote to implementation in same milestone), mix-spawn reroute for affected mutants, or formal mix-only classification.
+
+**M37 — Mutator-surface decision.** Three releases without a new mutator weakens the value prop, but the env walker is still v2 work. Decide explicitly: ship one narrow schema-safe extension OR formally defer all catalog growth to v2. Candidate: `Mut.Mutator.ComparisonNegation` (`==` ↔ `!=`), schema-routed via existing dispatch oracle, structurally analogous to M33's ComparisonBoundary. Atoms/strings/maps/lists/list-construction stay v2. Decision criteria: schema-routed (no fallback-only), unambiguous in body context (no env-walker dependency), stable_id-safe (no migration). If shipped: validate on plug_crypto, Decimal, and ≥2 OSS targets; report kill rate as observation. Acceptance: either (a) one new schema-routed mutator landed and validated on ≥4 targets, OR (b) decision doc at `docs/spikes/M37_mutator_surface.md` formally deferring catalog growth to v2. Both outcomes ship v1.12.
+
+**Explicitly NOT in v1.12:**
+- Reopening helper-process recompile isolation (M29 rejected on root-cause grounds; reopen only if a real target shows drift it demonstrably closes).
+- Reopening affected-test selection (M32 shelved; reopening criteria documented there).
+- New CLI flags beyond M35's `--json`.
+- Persistent default flip (closed structurally).
+- Coverage default flip (deferred).
+- Stable_id input changes.
+- Reopening Ecto / Gettext / clustered-Mox persistent support on incremental hooks (mix-only is documented; reopen only on a fundamentally different approach).
+
 ### v2
 
 - Lean env walker.

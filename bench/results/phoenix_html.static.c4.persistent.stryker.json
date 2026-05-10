@@ -1,0 +1,2900 @@
+{
+  "files": {
+    "lib/phoenix_html.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 28,
+          "id": "02e6a958c47ec073a46bca2c98a32500",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 56,
+              "line": 397
+            },
+            "start": {
+              "column": 56,
+              "line": 397
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "hd(acc) != \"-\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 27,
+          "id": "0642ebb4c120529b0496349f2ab62b9e",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 415
+            },
+            "start": {
+              "column": 34,
+              "line": 415
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "index * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 89,
+          "id": "0b06ccd461e8dbfefbc7fb8065d4ee49",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle nested data"
+          ],
+          "location": {
+            "end": {
+              "column": 52,
+              "line": 225
+            },
+            "start": {
+              "column": 42,
+              "line": 225
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 75,
+          "id": "17a775df02c8fb7b319044ddc4f72099",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 57,
+              "line": 120
+            },
+            "start": {
+              "column": 43,
+              "line": 120
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(value)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 75,
+          "id": "17b77d5034c14214b162b16e5db8bc10",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle class value list with nested lists"
+          ],
+          "location": {
+            "end": {
+              "column": 32,
+              "line": 289
+            },
+            "start": {
+              "column": 18,
+              "line": 289
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(inner)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 76,
+          "id": "25cdf440e02ccc9bd27a686fa7d0250b",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle nested data"
+          ],
+          "location": {
+            "end": {
+              "column": 60,
+              "line": 254
+            },
+            "start": {
+              "column": 50,
+              "line": 254
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 4,
+          "id": "2dca40a0d7c9f6a79d5a2c9493ed350c",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape hyphens"
+          ],
+          "location": {
+            "end": {
+              "column": 24,
+              "line": 405
+            },
+            "start": {
+              "column": 24,
+              "line": 405
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "char >= 128 and char in ~c\"-_\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 72,
+          "id": "392af2e2f7a841a2fbe11a229b083e45",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape convert snake_case keys into kebab-case when key is atom"
+          ],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 295
+            },
+            "start": {
+              "column": 31,
+              "line": 295
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 73,
+          "id": "4a756244d55f76dba6a2651891239fe3",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle nested data"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 219
+            },
+            "start": {
+              "column": 43,
+              "line": 219
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 3,
+          "id": "58eed78318386240864c108103798a40",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 14,
+              "line": 386
+            },
+            "start": {
+              "column": 14,
+              "line": 386
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "char != 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 5,
+          "id": "64089611a319cb9ea2f1911d4740d08b",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape control characters"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 395
+            },
+            "start": {
+              "column": 50,
+              "line": 395
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(char in 1..31 or char == 127) and\n  (index == 0 and char in 48..57)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 3,
+          "id": "6f50ddd892cb86f22d5582779b46a85d",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 80,
+              "line": 405
+            },
+            "start": {
+              "column": 80,
+              "line": 405
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(char >= 128 or char in ~c\"-_\" or char in 48..57 or char in 65..90) and char in 97..122",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 79,
+          "id": "7e751ad111f5a94ff5ee4e6c5886b9f8",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle nested data"
+          ],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 237
+            },
+            "start": {
+              "column": 44,
+              "line": 237
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 8,
+          "id": "800adb9f035934d3d3d54f3946486274",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape control characters"
+          ],
+          "location": {
+            "end": {
+              "column": 32,
+              "line": 395
+            },
+            "start": {
+              "column": 32,
+              "line": 395
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "char in 1..31 and char == 127",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 91,
+          "id": "82877d4a3f9023c2d95c3a9e96ba8881",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle nested data"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 240
+            },
+            "start": {
+              "column": 43,
+              "line": 240
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 3,
+          "id": "857b2ec9a751417f449a3e3693c9c26c",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 395
+            },
+            "start": {
+              "column": 40,
+              "line": 395
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "char != 127",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 2,
+          "id": "8602adbb01ebdb38d6ab3ceb7927220d",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 396
+            },
+            "start": {
+              "column": 18,
+              "line": 396
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "index != 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 74,
+          "id": "96235fef423ece1c6e9be429bfaf4172",
+          "killedBy": [
+            "Phoenix.HTMLTest:doctest Phoenix.HTML.attributes_escape/1 (7)"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 222
+            },
+            "start": {
+              "column": 43,
+              "line": 222
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 3,
+          "id": "a1753d2a97dda1843373b55ec07551bc",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape hyphens"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 397
+            },
+            "start": {
+              "column": 25,
+              "line": 397
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "index == 1 or char in 48..57",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 3,
+          "id": "b93d53b8da16e3b946faae1e0708aede",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 44,
+              "line": 405
+            },
+            "start": {
+              "column": 44,
+              "line": 405
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(char >= 128 or char in ~c\"-_\") and char in 48..57",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 75,
+          "id": "c21b425f5188247a4467c96157695334",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 196
+            },
+            "start": {
+              "column": 37,
+              "line": 196
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(attrs)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 7,
+          "id": "c2988dec277483b6ea7f855376bc4497",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 44,
+              "line": 397
+            },
+            "start": {
+              "column": 44,
+              "line": 397
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(index == 1 and char in 48..57) or hd(acc) == \"-\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 4,
+          "id": "ca1ccc688a9755654d07a4780cf594da",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape leading hyphen and digit"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 396
+            },
+            "start": {
+              "column": 43,
+              "line": 396
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(char in 1..31 or char == 127 or\n   (index == 0 and char in 48..57)) and\n  (index == 1 and char in 48..57 and hd(acc) == \"-\")",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 74,
+          "id": "d3c1464cd6ac9cf9963ea7ad15cb2d48",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle nested data"
+          ],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 234
+            },
+            "start": {
+              "column": 44,
+              "line": 234
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(v)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_number with is_float",
+          "duration": 76,
+          "id": "e1ddd96209c15960370d69f5bfa45d13",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape raises on number id"
+          ],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 263
+            },
+            "start": {
+              "column": 29,
+              "line": 263
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 4,
+          "id": "e2a3ff334a27c7d005399545e1629de1",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape leading hyphen and digit"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 397
+            },
+            "start": {
+              "column": 20,
+              "line": 397
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "index != 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_number with is_integer",
+          "duration": 81,
+          "id": "e601271a5ea1c616f96a67ba7253e78a",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 263
+            },
+            "start": {
+              "column": 29,
+              "line": 263
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_integer(value)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 4,
+          "id": "e6a495823b8caedaf4059e3bed2d5321",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape leading hyphen and digit"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 415
+            },
+            "start": {
+              "column": 34,
+              "line": 415
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "index - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 4,
+          "id": "f34e8b8bbc1ee3fe0b018cda87c9468b",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 23,
+              "line": 396
+            },
+            "start": {
+              "column": 23,
+              "line": 396
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "index == 0 or char in 48..57",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 75,
+          "id": "f498a0e4b528d5950f8af56d03296b20",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle class value list with nested lists"
+          ],
+          "location": {
+            "end": {
+              "column": 46,
+              "line": 274
+            },
+            "start": {
+              "column": 32,
+              "line": 274
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(value)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 2,
+          "id": "fd8f933c0e3221da87dc91dd99ac489e",
+          "killedBy": [
+            "Phoenix.HTMLTest:css_escape non-leading digit"
+          ],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 405
+            },
+            "start": {
+              "column": 62,
+              "line": 405
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(char >= 128 or char in ~c\"-_\" or char in 48..57) and char in 65..90",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Phoenix.HTML do\n  @moduledoc \"\"\"\n  Building blocks for working with HTML in Phoenix.\n\n  This library provides three main functionalities:\n\n    * HTML safety\n    * Form abstractions\n    * A tiny JavaScript library to enhance applications\n\n  ## HTML safety\n\n  One of the main responsibilities of this package is to\n  provide convenience functions for escaping and marking\n  HTML code as safe.\n\n  By default, data output in templates is not considered\n  safe:\n\n  ```heex\n  <%= \"<hello>\" %>\n  ```\n\n  will be shown as:\n\n  ```html\n  &lt;hello&gt;\n  ```\n\n  User data or data coming from the database is almost never\n  considered safe. However, in some cases, you may want to tag\n  it as safe and show its \"raw\" contents:\n\n  ```heex\n  <%= raw \"<hello>\" %>\n  ```\n\n  ## Form handling\n\n  See `Phoenix.HTML.Form`.\n\n  ## JavaScript library\n\n  This project ships with a tiny bit of JavaScript that listens\n  to all click events to:\n\n    * Support `data-confirm=\"message\"` attributes, which shows\n      a confirmation modal with the given message\n\n    * Support `data-method=\"patch|post|put|delete\"` attributes,\n      which sends the current click as a PATCH/POST/PUT/DELETE\n      HTTP request. You will need to add `data-to` with the URL\n      and `data-csrf` with the CSRF token value\n\n    * Dispatch a \"phoenix.link.click\" event. You can listen to this\n      event to customize the behaviour above. Returning false from\n      this event will disable `data-method`. Stopping propagation\n      will disable `data-confirm`\n\n  To use the functionality above, you must load `priv/static/phoenix_html.js`\n  into your build tool.\n\n  ### Overriding the default confirmation behaviour\n\n  You can override the default implementation by hooking\n  into `phoenix.link.click`. Here is an example:\n\n  ```javascript\n  window.addEventListener('phoenix.link.click', function (e) {\n    // Introduce custom behaviour\n    var message = e.target.getAttribute(\"data-prompt\");\n    var answer = e.target.getAttribute(\"data-prompt-answer\");\n    if(message && answer && (answer != window.prompt(message))) {\n      e.preventDefault();\n    }\n  }, false);\n  ```\n\n  \"\"\"\n\n  @doc false\n  defmacro __using__(_) do\n    raise \"\"\"\n    use Phoenix.HTML is no longer supported in v4.0.\n\n    To keep compatibility with previous versions, \\\n    add {:phoenix_html_helpers, \"~> 1.0\"} to your mix.exs deps\n    and then, instead of \"use Phoenix.HTML\", you might:\n\n        import Phoenix.HTML\n        import Phoenix.HTML.Form\n        use PhoenixHTMLHelpers\n\n    \"\"\"\n  end\n\n  @typedoc \"Guaranteed to be safe\"\n  @type safe :: {:safe, iodata}\n\n  @typedoc \"May be safe or unsafe (i.e. it needs to be converted)\"\n  @type unsafe :: Phoenix.HTML.Safe.t()\n\n  @doc \"\"\"\n  Marks the given content as raw.\n\n  This means any HTML code inside the given\n  string won't be escaped.\n\n      iex> raw(\"<hello>\")\n      {:safe, \"<hello>\"}\n      iex> raw({:safe, \"<hello>\"})\n      {:safe, \"<hello>\"}\n      iex> raw(nil)\n      {:safe, \"\"}\n\n  \"\"\"\n  @spec raw(iodata | safe | nil) :: safe\n  def raw({:safe, value}), do: {:safe, value}\n  def raw(nil), do: {:safe, \"\"}\n  def raw(value) when is_binary(value) or is_list(value), do: {:safe, value}\n\n  @doc \"\"\"\n  Escapes the HTML entities in the given term, returning safe iodata.\n\n      iex> html_escape(\"<hello>\")\n      {:safe, [[[] | \"&lt;\"], \"hello\" | \"&gt;\"]}\n\n      iex> html_escape(~c\"<hello>\")\n      {:safe, [\"&lt;\", 104, 101, 108, 108, 111, \"&gt;\"]}\n\n      iex> html_escape(1)\n      {:safe, \"1\"}\n\n      iex> html_escape({:safe, \"<hello>\"})\n      {:safe, \"<hello>\"}\n\n  \"\"\"\n  @spec html_escape(unsafe) :: safe\n  def html_escape({:safe, _} = safe), do: safe\n  def html_escape(other), do: {:safe, Phoenix.HTML.Engine.encode_to_iodata!(other)}\n\n  @doc \"\"\"\n  Converts a safe result into a string.\n\n  Fails if the result is not safe. In such cases, you can\n  invoke `html_escape/1` or `raw/1` accordingly before.\n\n  You can combine `html_escape/1` and `safe_to_string/1`\n  to convert a data structure to a escaped string:\n\n      data |> html_escape() |> safe_to_string()\n  \"\"\"\n  @spec safe_to_string(safe) :: String.t()\n  def safe_to_string({:safe, iodata}) do\n    IO.iodata_to_binary(iodata)\n  end\n\n  @doc ~S\"\"\"\n  Escapes an enumerable of attributes, returning iodata.\n\n  The attributes are rendered in the given order. Note if\n  a map is given, the key ordering is not guaranteed.\n\n  The keys and values can be of any shape, as long as they\n  implement the `Phoenix.HTML.Safe` protocol. In addition,\n  if the key is an atom, it will be \"dasherized\". In other\n  words, `:phx_value_id` will be converted to `phx-value-id`.\n\n  Furthermore, the following attributes provide behaviour:\n\n    * `:aria`, `:data`, and `:phx` - they accept a keyword list as\n      value. `data: [confirm: \"are you sure?\"]` is converted to\n      `data-confirm=\"are you sure?\"`.\n\n    * `:class` - it accepts a list of classes as argument. Each\n      element in the list is separated by space. `nil` and `false`\n      elements are discarded. `class: [\"foo\", nil, \"bar\"]` then\n      becomes `class=\"foo bar\"`.\n\n    * `:id` - it is validated raise if a number is given as ID,\n      which is not allowed by the HTML spec and leads to unpredictable\n      behaviour.\n\n  ## Examples\n\n      iex> safe_to_string attributes_escape(title: \"the title\", id: \"the id\", selected: true)\n      \" title=\\\"the title\\\" id=\\\"the id\\\" selected\"\n\n      iex> safe_to_string attributes_escape(%{data: [confirm: \"Are you sure?\"]})\n      \" data-confirm=\\\"Are you sure?\\\"\"\n\n      iex> safe_to_string attributes_escape(%{phx: [value: [foo: \"bar\"]]})\n      \" phx-value-foo=\\\"bar\\\"\"\n\n  \"\"\"\n  def attributes_escape(attrs) when is_list(attrs) do\n    {:safe, build_attrs(attrs)}\n  end\n\n  def attributes_escape(attrs) do\n    {:safe, attrs |> Enum.to_list() |> build_attrs()}\n  end\n\n  defp build_attrs([{k, true} | t]),\n    do: [?\\s, key_escape(k) | build_attrs(t)]\n\n  defp build_attrs([{_, false} | t]),\n    do: build_attrs(t)\n\n  defp build_attrs([{_, nil} | t]),\n    do: build_attrs(t)\n\n  defp build_attrs([{:id, v} | t]),\n    do: [\" id=\\\"\", id_value(v), ?\" | build_attrs(t)]\n\n  defp build_attrs([{:class, v} | t]),\n    do: [\" class=\\\"\", class_value(v), ?\" | build_attrs(t)]\n\n  defp build_attrs([{:aria, v} | t]) when is_list(v),\n    do: nested_attrs(v, \" aria\", t)\n\n  defp build_attrs([{:data, v} | t]) when is_list(v),\n    do: nested_attrs(v, \" data\", t)\n\n  defp build_attrs([{:phx, v} | t]) when is_list(v),\n    do: nested_attrs(v, \" phx\", t)\n\n  defp build_attrs([{\"id\", v} | t]),\n    do: [\" id=\\\"\", id_value(v), ?\" | build_attrs(t)]\n\n  defp build_attrs([{\"class\", v} | t]),\n    do: [\" class=\\\"\", class_value(v), ?\" | build_attrs(t)]\n\n  defp build_attrs([{\"aria\", v} | t]) when is_list(v),\n    do: nested_attrs(v, \" aria\", t)\n\n  defp build_attrs([{\"data\", v} | t]) when is_list(v),\n    do: nested_attrs(v, \" data\", t)\n\n  defp build_attrs([{\"phx\", v} | t]) when is_list(v),\n    do: nested_attrs(v, \" phx\", t)\n\n  defp build_attrs([{k, v} | t]),\n    do: [?\\s, key_escape(k), ?=, ?\", attr_escape(v), ?\" | build_attrs(t)]\n\n  defp build_attrs([]), do: []\n\n  defp nested_attrs([{k, true} | kv], attr, t),\n    do: [attr, ?-, key_escape(k) | nested_attrs(kv, attr, t)]\n\n  defp nested_attrs([{_, falsy} | kv], attr, t) when falsy in [false, nil],\n    do: nested_attrs(kv, attr, t)\n\n  defp nested_attrs([{k, v} | kv], attr, t) when is_list(v),\n    do: [nested_attrs(v, \"#{attr}-#{key_escape(k)}\", []) | nested_attrs(kv, attr, t)]\n\n  defp nested_attrs([{k, v} | kv], attr, t),\n    do: [attr, ?-, key_escape(k), ?=, ?\", attr_escape(v), ?\" | nested_attrs(kv, attr, t)]\n\n  defp nested_attrs([], _attr, t),\n    do: build_attrs(t)\n\n  defp id_value(value) when is_number(value) do\n    raise ArgumentError,\n          \"attempting to set id attribute to #{value}, \" <>\n            \"but setting the DOM ID to a number can lead to unpredictable behaviour. \" <>\n            \"Instead consider prefixing the id with a string, such as \\\"user-#{value}\\\" or similar\"\n  end\n\n  defp id_value(value) do\n    attr_escape(value)\n  end\n\n  defp class_value(value) when is_list(value) do\n    value\n    |> list_class_value()\n    |> attr_escape()\n  end\n\n  defp class_value(value) do\n    attr_escape(value)\n  end\n\n  defp list_class_value(value) do\n    value\n    |> Enum.flat_map(fn\n      nil -> []\n      false -> []\n      inner when is_list(inner) -> [list_class_value(inner)]\n      other -> [other]\n    end)\n    |> Enum.join(\" \")\n  end\n\n  defp key_escape(value) when is_atom(value), do: String.replace(Atom.to_string(value), \"_\", \"-\")\n  defp key_escape(value), do: attr_escape(value)\n\n  defp attr_escape({:safe, data}), do: data\n  defp attr_escape(nil), do: []\n  defp attr_escape(other) when is_binary(other), do: Phoenix.HTML.Engine.html_escape(other)\n  defp attr_escape(other), do: Phoenix.HTML.Safe.to_iodata(other)\n\n  @doc \"\"\"\n  Escapes HTML content to be inserted into a JavaScript string.\n\n  This function is useful in JavaScript responses when there is a need\n  to escape HTML rendered from other templates, like in the following:\n\n      $(\"#container\").append(\"<%= javascript_escape(render(\"post.html\", post: @post)) %>\");\n\n  It escapes quotes (double and single), double backslashes and others.\n  \"\"\"\n  @spec javascript_escape(binary) :: binary\n  @spec javascript_escape(safe) :: safe\n  def javascript_escape({:safe, data}),\n    do: {:safe, data |> IO.iodata_to_binary() |> javascript_escape(\"\")}\n\n  def javascript_escape(data) when is_binary(data),\n    do: javascript_escape(data, \"\")\n\n  defp javascript_escape(<<0x2028::utf8, t::binary>>, acc),\n    do: javascript_escape(t, <<acc::binary, \"\\\\u2028\">>)\n\n  defp javascript_escape(<<0x2029::utf8, t::binary>>, acc),\n    do: javascript_escape(t, <<acc::binary, \"\\\\u2029\">>)\n\n  defp javascript_escape(<<0::utf8, t::binary>>, acc),\n    do: javascript_escape(t, <<acc::binary, \"\\\\u0000\">>)\n\n  defp javascript_escape(<<\"</\", t::binary>>, acc),\n    do: javascript_escape(t, <<acc::binary, ?<, ?\\\\, ?/>>)\n\n  defp javascript_escape(<<\"\\r\\n\", t::binary>>, acc),\n    do: javascript_escape(t, <<acc::binary, ?\\\\, ?n>>)\n\n  defp javascript_escape(<<h, t::binary>>, acc) when h in [?\", ?', ?\\\\, ?`],\n    do: javascript_escape(t, <<acc::binary, ?\\\\, h>>)\n\n  defp javascript_escape(<<h, t::binary>>, acc) when h in [?\\r, ?\\n],\n    do: javascript_escape(t, <<acc::binary, ?\\\\, ?n>>)\n\n  defp javascript_escape(<<h, t::binary>>, acc),\n    do: javascript_escape(t, <<acc::binary, h>>)\n\n  defp javascript_escape(<<>>, acc), do: acc\n\n  @doc \"\"\"\n  Escapes a string for use as a CSS identifier.\n\n  ## Examples\n\n      iex> css_escape(\"hello world\")\n      \"hello\\\\\\\\ world\"\n\n      iex> css_escape(\"-123\")\n      \"-\\\\\\\\31 23\"\n\n  \"\"\"\n  @spec css_escape(String.t()) :: String.t()\n  def css_escape(value) when is_binary(value) do\n    # This is a direct translation of\n    # https://github.com/mathiasbynens/CSS.escape/blob/master/css.escape.js\n    # into Elixir.\n    value\n    |> String.to_charlist()\n    |> escape_css_chars()\n    |> IO.iodata_to_binary()\n  end\n\n  defp escape_css_chars(chars) do\n    case chars do\n      # If the character is the first character and is a `-` (U+002D), and\n      # there is no second character, […]\n      [?- | []] -> [\"\\\\-\"]\n      _ -> escape_css_chars(chars, 0, [])\n    end\n  end\n\n  defp escape_css_chars([], _, acc), do: Enum.reverse(acc)\n\n  defp escape_css_chars([char | rest], index, acc) do\n    escaped =\n      cond do\n        # If the character is NULL (U+0000), then the REPLACEMENT CHARACTER\n        # (U+FFFD).\n        char == 0 ->\n          <<0xFFFD::utf8>>\n\n        # If the character is in the range [\\1-\\1F] (U+0001 to U+001F) or is\n        # U+007F,\n        # if the character is the first character and is in the range [0-9]\n        # (U+0030 to U+0039),\n        # if the character is the second character and is in the range [0-9]\n        # (U+0030 to U+0039) and the first character is a `-` (U+002D),\n        char in 0x0001..0x001F or char == 0x007F or\n          (index == 0 and char in ?0..?9) or\n            (index == 1 and char in ?0..?9 and hd(acc) == \"-\") ->\n          # https://drafts.csswg.org/cssom/#escape-a-character-as-code-point\n          [\"\\\\\", Integer.to_string(char, 16), \" \"]\n\n        # If the character is not handled by one of the above rules and is\n        # greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or\n        # is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to\n        # U+005A), or [a-z] (U+0061 to U+007A), […]\n        char >= 0x0080 or char in [?-, ?_] or char in ?0..?9 or char in ?A..?Z or char in ?a..?z ->\n          # the character itself\n          <<char::utf8>>\n\n        true ->\n          # Otherwise, the escaped character.\n          # https://drafts.csswg.org/cssom/#escape-a-character\n          [\"\\\\\", <<char::utf8>>]\n      end\n\n    escape_css_chars(rest, index + 1, [escaped | acc])\n  end\nend\n"
+    },
+    "lib/phoenix_html/engine.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 31,
+          "id": "02adc8f1c8e7756fbbbb08b64416dba2",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 88,
+              "line": 113
+            },
+            "start": {
+              "column": 88,
+              "line": 113
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "vars_count - 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 15,
+          "id": "1310785e0f8e56f54055429f59bb9685",
+          "killedBy": [
+            "Phoenix.HTML.EngineTest:escapes HTML from nested content"
+          ],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 54
+            },
+            "start": {
+              "column": 30,
+              "line": 54
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "skip - len",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 12,
+          "id": "22db11950d1daba50f82b205c465b91f",
+          "killedBy": [
+            "Phoenix.HTML.EngineTest:supports non-output expressions"
+          ],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 39
+            },
+            "start": {
+              "column": 30,
+              "line": 39
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "skip * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 36,
+          "id": "2dfb94c09d6bb1e2621d11cf9cd4d495",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 49,
+              "line": 21
+            },
+            "start": {
+              "column": 36,
+              "line": 21
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(list)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 6,
+          "id": "33f01af1b60cf48bc11caf8fa0575b60",
+          "killedBy": [
+            "Phoenix.HTMLTest:html_escape escapes entities"
+          ],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 54
+            },
+            "start": {
+              "column": 30,
+              "line": 54
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "skip * len",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_number with is_float",
+          "duration": 42,
+          "id": "45987c6f4e48339b8c8c15f608209186",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 73,
+              "line": 135
+            },
+            "start": {
+              "column": 55,
+              "line": 135
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(literal)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 4,
+          "id": "4a45df949c294ad0ada39ff4fd44bd8e",
+          "killedBy": [
+            "Phoenix.HTML.EngineTest:supports non-output expressions"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 59
+            },
+            "start": {
+              "column": 48,
+              "line": 59
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "len - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 38,
+          "id": "50ef5b18e91f5922e5bf43edc70e48e9",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 89,
+              "line": 170
+            },
+            "start": {
+              "column": 76,
+              "line": 170
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(atom)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 41,
+          "id": "63119f5a8e7f7365b16929c046c81b72",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 130
+            },
+            "start": {
+              "column": 42,
+              "line": 130
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(meta)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 2,
+          "id": "64ba60905b500999947cb231b9893ef6",
+          "killedBy": [
+            "Phoenix.HTML.EngineTest:supports non-output expressions"
+          ],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 39
+            },
+            "start": {
+              "column": 30,
+              "line": 39
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "skip - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_number with is_integer",
+          "duration": 38,
+          "id": "82b64f1231ecdafaca1847aa9a4d7d12",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 73,
+              "line": 135
+            },
+            "start": {
+              "column": 55,
+              "line": 135
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_integer(literal)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 5,
+          "id": "8c88211163ddde855d9b9e63f94f2cad",
+          "killedBy": [
+            "Phoenix.HTMLTest:html_escape escapes entities"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 54
+            },
+            "start": {
+              "column": 36,
+              "line": 54
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "(skip + len) * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 2,
+          "id": "a2b1b99f9d2a69df1d975d80d63ad844",
+          "killedBy": [
+            "Phoenix.HTML.EngineTest:supports non-output expressions"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 59
+            },
+            "start": {
+              "column": 48,
+              "line": 59
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "len * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 34,
+          "id": "b6da418528f7a1d28a18d390fcfe9c43",
+          "killedBy": [
+            "Phoenix.HTML.EngineTest:supports non-output expressions"
+          ],
+          "location": {
+            "end": {
+              "column": 71,
+              "line": 170
+            },
+            "start": {
+              "column": 58,
+              "line": 170
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 40,
+          "id": "c0948f9791d9d02bb64739536eb81ab7",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 52,
+              "line": 142
+            },
+            "start": {
+              "column": 36,
+              "line": 142
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(literal)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 8,
+          "id": "ed16fdc2436167c6c01e885b647bf94f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 88,
+              "line": 113
+            },
+            "start": {
+              "column": 88,
+              "line": 113
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "vars_count * 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 5,
+          "id": "f29e8da6d43dff317cbd90b2b061eeca",
+          "killedBy": [
+            "Phoenix.HTMLTest:attributes_escape handle class value list with nested lists"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 54
+            },
+            "start": {
+              "column": 36,
+              "line": 54
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "skip + len - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 39,
+          "id": "fe844b79898f2a70b5e376628440c3e3",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 135
+            },
+            "start": {
+              "column": 35,
+              "line": 135
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(literal)",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Phoenix.HTML.Engine do\n  @moduledoc \"\"\"\n  An EEx.Engine that guarantees templates are HTML Safe.\n  \"\"\"\n\n  @behaviour EEx.Engine\n\n  @anno (if :erlang.system_info(:otp_release) >= ~c\"19\" do\n           [generated: true]\n         else\n           [line: -1]\n         end)\n\n  @doc \"\"\"\n  Encodes the HTML templates to iodata.\n  \"\"\"\n  def encode_to_iodata!({:safe, body}), do: body\n  def encode_to_iodata!(nil), do: \"\"\n  def encode_to_iodata!(\"\"), do: \"\"\n  def encode_to_iodata!(bin) when is_binary(bin), do: html_escape(bin)\n  def encode_to_iodata!(list) when is_list(list), do: Phoenix.HTML.Safe.List.to_iodata(list)\n  def encode_to_iodata!(other), do: Phoenix.HTML.Safe.to_iodata(other)\n\n  @doc false\n  def html_escape(bin) when is_binary(bin) do\n    html_escape(bin, 0, bin, [])\n  end\n\n  escapes = [\n    {?<, \"&lt;\"},\n    {?>, \"&gt;\"},\n    {?&, \"&amp;\"},\n    {?\", \"&quot;\"},\n    {?', \"&#39;\"}\n  ]\n\n  for {match, insert} <- escapes do\n    defp html_escape(<<unquote(match), rest::bits>>, skip, original, acc) do\n      html_escape(rest, skip + 1, original, [acc | unquote(insert)])\n    end\n  end\n\n  defp html_escape(<<_char, rest::bits>>, skip, original, acc) do\n    html_escape(rest, skip, original, acc, 1)\n  end\n\n  defp html_escape(<<>>, _skip, _original, acc) do\n    acc\n  end\n\n  for {match, insert} <- escapes do\n    defp html_escape(<<unquote(match), rest::bits>>, skip, original, acc, len) do\n      part = binary_part(original, skip, len)\n      html_escape(rest, skip + len + 1, original, [acc, part | unquote(insert)])\n    end\n  end\n\n  defp html_escape(<<_char, rest::bits>>, skip, original, acc, len) do\n    html_escape(rest, skip, original, acc, len + 1)\n  end\n\n  defp html_escape(<<>>, 0, original, _acc, _len) do\n    original\n  end\n\n  defp html_escape(<<>>, skip, original, acc, len) do\n    [acc | binary_part(original, skip, len)]\n  end\n\n  @doc false\n  def init(_opts) do\n    %{\n      iodata: [],\n      dynamic: [],\n      vars_count: 0\n    }\n  end\n\n  @doc false\n  def handle_begin(state) do\n    %{state | iodata: [], dynamic: []}\n  end\n\n  @doc false\n  def handle_end(quoted) do\n    handle_body(quoted)\n  end\n\n  @doc false\n  def handle_body(state) do\n    %{iodata: iodata, dynamic: dynamic} = state\n    safe = {:safe, Enum.reverse(iodata)}\n    {:__block__, [], Enum.reverse([safe | dynamic])}\n  end\n\n  @doc false\n  def handle_text(state, text) do\n    handle_text(state, [], text)\n  end\n\n  @doc false\n  def handle_text(state, _meta, text) do\n    %{iodata: iodata} = state\n    %{state | iodata: [text | iodata]}\n  end\n\n  @doc false\n  def handle_expr(state, \"=\", ast) do\n    ast = traverse(ast)\n    %{iodata: iodata, dynamic: dynamic, vars_count: vars_count} = state\n    var = Macro.var(:\"arg#{vars_count}\", __MODULE__)\n    ast = quote do: unquote(var) = unquote(to_safe(ast))\n    %{state | dynamic: [ast | dynamic], iodata: [var | iodata], vars_count: vars_count + 1}\n  end\n\n  def handle_expr(state, \"\", ast) do\n    ast = traverse(ast)\n    %{dynamic: dynamic} = state\n    %{state | dynamic: [ast | dynamic]}\n  end\n\n  def handle_expr(state, marker, ast) do\n    EEx.Engine.handle_expr(state, marker, ast)\n  end\n\n  ## Safe conversion\n\n  defp to_safe(ast), do: to_safe(ast, line_from_expr(ast))\n\n  defp line_from_expr({_, meta, _}) when is_list(meta), do: Keyword.get(meta, :line, 0)\n  defp line_from_expr(_), do: 0\n\n  # We can do the work at compile time\n  defp to_safe(literal, _line)\n       when is_binary(literal) or is_atom(literal) or is_number(literal) do\n    literal\n    |> Phoenix.HTML.Safe.to_iodata()\n    |> IO.iodata_to_binary()\n  end\n\n  # We can do the work at runtime\n  defp to_safe(literal, line) when is_list(literal) do\n    quote line: line, do: Phoenix.HTML.Safe.List.to_iodata(unquote(literal))\n  end\n\n  # We need to check at runtime and we do so by optimizing common cases.\n  defp to_safe(expr, line) do\n    # Keep stacktraces for protocol dispatch and coverage\n    # bin_return uses generated: true to make Elixir's type system on v1.19 happy\n    safe_return = quote line: line, do: data\n    bin_return = quote line: line, generated: true, do: Phoenix.HTML.Engine.html_escape(bin)\n    other_return = quote line: line, do: Phoenix.HTML.Safe.to_iodata(other)\n\n    # However ignore them for the generated clauses to avoid warnings\n    quote @anno do\n      case unquote(expr) do\n        {:safe, data} -> unquote(safe_return)\n        bin when is_binary(bin) -> unquote(bin_return)\n        other -> unquote(other_return)\n      end\n    end\n  end\n\n  ## Traversal\n\n  defp traverse(expr) do\n    Macro.prewalk(expr, &handle_assign/1)\n  end\n\n  defp handle_assign({:@, meta, [{name, _, atom}]}) when is_atom(name) and is_atom(atom) do\n    quote line: meta[:line] || 0 do\n      Phoenix.HTML.Engine.fetch_assign!(var!(assigns), unquote(name))\n    end\n  end\n\n  defp handle_assign(arg), do: arg\n\n  @doc false\n  def fetch_assign!(assigns, key) do\n    case Access.fetch(assigns, key) do\n      {:ok, val} ->\n        val\n\n      :error ->\n        raise ArgumentError, \"\"\"\n        assign @#{key} not available in template.\n\n        Please make sure all proper assigns have been set. If this\n        is a child template, ensure assigns are given explicitly by\n        the parent template as they are not automatically forwarded.\n\n        Available assigns: #{inspect(Enum.map(assigns, &elem(&1, 0)))}\n        \"\"\"\n    end\n  end\nend\n"
+    },
+    "lib/phoenix_html/form.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 100,
+          "id": "041c84bcfa94f5e85d3879eea3368420",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 419
+            },
+            "start": {
+              "column": 13,
+              "line": 419
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(errors)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 15,
+          "id": "10960a97ed53882ccab8eb45a0940ba8",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 225
+            },
+            "start": {
+              "column": 48,
+              "line": 225
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "impl1.input_value(source1, form1, field) == impl2.input_value(source2, form2, field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 99,
+          "id": "18f05a1bf841e9ea571c279f272ff002",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_id/3 without form"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 158
+            },
+            "start": {
+              "column": 35,
+              "line": 158
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 17,
+          "id": "1f371132485d1d69d5b6cebe8ea0605c",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 223
+            },
+            "start": {
+              "column": 34,
+              "line": 223
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(impl1 != impl2 or id1 != id2) and name1 != name2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 95,
+          "id": "25b2bcb1d1bbae668244891d1d6afeac",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 94
+            },
+            "start": {
+              "column": 41,
+              "line": 94
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 105,
+          "id": "430bc0258921bf44567cf84b4384073a",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with changed action or method"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 222
+            },
+            "start": {
+              "column": 12,
+              "line": 222
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 6,
+          "id": "50674ea85ae9f23d120402f500dfe8bb",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 224
+            },
+            "start": {
+              "column": 36,
+              "line": 224
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "field_errors(errors1, field) == field_errors(errors2, field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 104,
+          "id": "604ca45f4a2d0f37227683f9f239c6d0",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:options_for_select/2 with groups"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 394
+            },
+            "start": {
+              "column": 13,
+              "line": 394
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(group_values)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 4,
+          "id": "61ccac76a71b5ebb087c1e5c6db7c1d7",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 27,
+              "line": 223
+            },
+            "start": {
+              "column": 27,
+              "line": 223
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "id1 == id2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 6,
+          "id": "62e3de424c65b5d82a19452420f9ead1",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 223
+            },
+            "start": {
+              "column": 11,
+              "line": 223
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "impl1 == impl2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 5,
+          "id": "661d9661e666fdf0cda9facfd13ffb8a",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 223
+            },
+            "start": {
+              "column": 43,
+              "line": 223
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "name1 == name2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 7,
+          "id": "6703abf9b3df82eba6cc844e6099bf87",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 223
+            },
+            "start": {
+              "column": 74,
+              "line": 223
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(impl1 != impl2 or id1 != id2 or name1 != name2 or action1 != action2) and\n  field_errors(errors1, field) != field_errors(errors2, field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 100,
+          "id": "6da45196828515fb842855383704a593",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 140
+            },
+            "start": {
+              "column": 12,
+              "line": 140
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 105,
+          "id": "6e880eb7c830ce3d76f8d6112e30b4d1",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:options_for_select/2 simple"
+          ],
+          "location": {
+            "end": {
+              "column": 86,
+              "line": 408
+            },
+            "start": {
+              "column": 72,
+              "line": 408
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(attrs)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 7,
+          "id": "7b2313cb6a99a269a028104419b71756",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 68,
+              "line": 224
+            },
+            "start": {
+              "column": 68,
+              "line": 224
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(impl1 != impl2 or id1 != id2 or name1 != name2 or action1 != action2 or\n   field_errors(errors1, field) != field_errors(errors2, field)) and\n  impl1.input_value(source1, form1, field) != impl2.input_value(source2, form2, field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 101,
+          "id": "7e7199f20169ca7e5e99e857906de8bb",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_id/2 with form"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 154
+            },
+            "start": {
+              "column": 39,
+              "line": 154
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 7,
+          "id": "9099b0483f1ed4f56867214286f40068",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 52,
+              "line": 223
+            },
+            "start": {
+              "column": 52,
+              "line": 223
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(impl1 != impl2 or id1 != id2 or name1 != name2) and action1 != action2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 100,
+          "id": "92e58ccf7ac2d2f02d46811f77e63b33",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 395
+            },
+            "start": {
+              "column": 16,
+              "line": 395
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(group_values)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 98,
+          "id": "9797eed856f0916c58649dab47d363e9",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_id/3 without form"
+          ],
+          "location": {
+            "end": {
+              "column": 67,
+              "line": 158
+            },
+            "start": {
+              "column": 53,
+              "line": 158
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 8,
+          "id": "a3c0fc828d6503efbd6d048329b60c47",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:normalize_value/2 for checkbox"
+          ],
+          "location": {
+            "end": {
+              "column": 24,
+              "line": 270
+            },
+            "start": {
+              "column": 24,
+              "line": 270
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "html_escape(value) != {:safe, \"true\"}",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 100,
+          "id": "aa7f7984711b360562926d1fae1a6ca8",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_value/2 without form"
+          ],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 144
+            },
+            "start": {
+              "column": 38,
+              "line": 144
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 96,
+          "id": "abde4192252980b41e3a07d44b0ada6f",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_name/2 without form"
+          ],
+          "location": {
+            "end": {
+              "column": 69,
+              "line": 192
+            },
+            "start": {
+              "column": 55,
+              "line": 192
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 2,
+          "id": "acb82ba524ab2eeb37037148e3476ba2",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:normalize_value/2 for textarea"
+          ],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 265
+            },
+            "start": {
+              "column": 40,
+              "line": 265
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "value && \"\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 98,
+          "id": "af91ab155a66eb11ce769fd8c9255054",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 234
+            },
+            "start": {
+              "column": 12,
+              "line": 234
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 98,
+          "id": "c119e4a7ffb4172453a66f33feb4b874",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_name/2 without form"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 192
+            },
+            "start": {
+              "column": 37,
+              "line": 192
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 4,
+          "id": "d7b3069b6abd98fdccf6af820f37626d",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 63,
+              "line": 223
+            },
+            "start": {
+              "column": 63,
+              "line": 223
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "action1 == action2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 96,
+          "id": "dcb41f51022521bea921ff4dbdd28e19",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 419
+            },
+            "start": {
+              "column": 34,
+              "line": 419
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 109,
+          "id": "ed14d9fe4229b22e943d97602967eb46",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_name/2 with form"
+          ],
+          "location": {
+            "end": {
+              "column": 59,
+              "line": 189
+            },
+            "start": {
+              "column": 45,
+              "line": 189
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 4,
+          "id": "f4c9751af8e92b8aac11930a775b9ded",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_changed? with string fields"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 223
+            },
+            "start": {
+              "column": 20,
+              "line": 223
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "impl1 != impl2 and id1 != id2",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Phoenix.HTML.Form do\n  @moduledoc ~S\"\"\"\n  Define a `Phoenix.HTML.Form` struct and functions to interact with it.\n\n  For building actual forms in your Phoenix application, see\n  [the `Phoenix.Component.form/1` component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html#form/1).\n\n  ## Access behaviour\n\n  The `Phoenix.HTML.Form` struct implements the `Access` behaviour.\n  When you do `form[field]`, it returns a `Phoenix.HTML.FormField`\n  struct with the `id`, `name`, `value`, and `errors` prefilled.\n\n  The field name can be either an atom or a string. If it is an atom,\n  it assumes the form keeps both data and errors as atoms. If it is a\n  string, it considers that data and errors are stored as strings for said\n  field. Forms backed by an `Ecto.Changeset` only support atom field names.\n\n  It is possible to \"access\" fields which do not exist in the source data\n  structure. A `Phoenix.HTML.FormField` struct will be dynamically created\n  with some attributes such as `name` and `id` populated.\n\n  ## Custom implementations\n\n  There is a protocol named `Phoenix.HTML.FormData` which can be implemented\n  by any data structure that wants to be cast to the `Phoenix.HTML.Form` struct.\n  \"\"\"\n\n  alias Phoenix.HTML.Form\n  import Phoenix.HTML\n\n  @doc \"\"\"\n  Defines the Phoenix.HTML.Form struct.\n\n  Its fields are:\n\n    * `:source` - the data structure that implements the form data protocol\n\n    * `:action` - The action that was taken against the form. This value can be\n      used to distinguish between different operations such as the user typing\n      into a form for validation, or submitting a form for a database insert.\n\n    * `:impl` - the module with the form data protocol implementation.\n      This is used to avoid multiple protocol dispatches.\n\n    * `:id` - the id to be used when generating input fields\n\n    * `:index` - the index of the struct in the form\n\n    * `:name` - the name to be used when generating input fields\n\n    * `:data` - the field used to store lookup data\n\n    * `:params` - the parameters associated with this form\n\n    * `:hidden` - a keyword list of fields that are required to\n      submit the form behind the scenes as hidden inputs\n\n    * `:options` - a copy of the options given when creating the\n      form without any form data specific key\n\n    * `:errors` - a keyword list of errors that are associated with\n      the form\n  \"\"\"\n  defstruct source: nil,\n            impl: nil,\n            id: nil,\n            name: nil,\n            data: nil,\n            action: nil,\n            hidden: [],\n            params: %{},\n            errors: [],\n            options: [],\n            index: nil\n\n  @type t :: %Form{\n          source: Phoenix.HTML.FormData.t(),\n          name: String.t(),\n          data: %{field => term},\n          action: atom(),\n          params: %{binary => term},\n          hidden: Keyword.t(),\n          options: Keyword.t(),\n          errors: [{field, term}],\n          impl: module,\n          id: String.t(),\n          index: nil | non_neg_integer\n        }\n\n  @type field :: atom | String.t()\n\n  @doc false\n  def fetch(%Form{} = form, field) when is_atom(field) do\n    fetch(form, field, Atom.to_string(field))\n  end\n\n  def fetch(%Form{} = form, field) when is_binary(field) do\n    fetch(form, field, field)\n  end\n\n  def fetch(%Form{}, field) do\n    raise ArgumentError,\n          \"accessing a form with form[field] requires the field to be an atom or a string, got: #{inspect(field)}\"\n  end\n\n  defp fetch(%{errors: errors} = form, field, field_as_string) do\n    {:ok,\n     %Phoenix.HTML.FormField{\n       errors: field_errors(errors, field),\n       field: field,\n       form: form,\n       id: input_id(form, field_as_string),\n       name: input_name(form, field_as_string),\n       value: input_value(form, field)\n     }}\n  end\n\n  @doc \"\"\"\n  Returns a value of a corresponding form field.\n\n  The `form` should either be a `Phoenix.HTML.Form` or an atom.\n  The field is either a string or an atom. If the field is given\n  as an atom, it will attempt to look data with atom keys. If\n  a string, it will look data with string keys.\n\n  When a form is given, it will look for changes, then\n  fallback to parameters, and finally fallback to the default\n  struct/map value.\n\n  Since the function looks up parameter values too, there is\n  no guarantee that the value will have a certain type. For\n  example, a boolean field will be sent as \"false\" as a\n  parameter, and this function will return it as is. If you\n  need to normalize the result of `input_value`, see\n  `normalize_value/2`.\n  \"\"\"\n  @spec input_value(t | atom, field) :: term\n  def input_value(%{source: source, impl: impl} = form, field)\n      when is_atom(field) or is_binary(field) do\n    impl.input_value(source, form, field)\n  end\n\n  def input_value(name, _field) when is_atom(name), do: nil\n\n  @doc \"\"\"\n  Returns an id of a corresponding form field.\n\n  The form should either be a `Phoenix.HTML.Form` or an atom.\n  \"\"\"\n  @spec input_id(t | atom, field) :: String.t()\n  def input_id(%{id: nil}, field), do: \"#{field}\"\n\n  def input_id(%{id: id}, field) when is_atom(field) or is_binary(field) do\n    \"#{id}_#{field}\"\n  end\n\n  def input_id(name, field) when (is_atom(name) and is_atom(field)) or is_binary(field) do\n    \"#{name}_#{field}\"\n  end\n\n  @doc \"\"\"\n  Returns an id of a corresponding form field and value attached to it.\n\n  Useful for radio buttons and inputs like multiselect checkboxes.\n  \"\"\"\n  @spec input_id(t | atom, field, Phoenix.HTML.Safe.t()) :: String.t()\n  def input_id(name, field, value) do\n    {:safe, value} = html_escape(value)\n    value_id = value |> IO.iodata_to_binary() |> String.replace(~r/\\W/u, \"_\")\n    input_id(name, field) <> \"_\" <> value_id\n  end\n\n  @doc \"\"\"\n  Returns a name of a corresponding form field.\n\n  The first argument should either be a `Phoenix.HTML.Form` or an atom.\n\n  ## Examples\n\n      iex> Phoenix.HTML.Form.input_name(:user, :first_name)\n      \"user[first_name]\"\n  \"\"\"\n  @spec input_name(t | atom, field) :: String.t()\n  def input_name(form_or_name, field)\n\n  def input_name(%{name: nil}, field), do: to_string(field)\n\n  def input_name(%{name: name}, field) when is_atom(field) or is_binary(field),\n    do: \"#{name}[#{field}]\"\n\n  def input_name(name, field) when (is_atom(name) and is_atom(field)) or is_binary(field),\n    do: \"#{name}[#{field}]\"\n\n  @doc \"\"\"\n  Receives two forms structs and checks if the given field changed.\n\n  The field will have changed if either its associated value, errors,\n  action, or implementation changed. This is mostly used for optimization\n  engines as an extension of the `Access` behaviour.\n  \"\"\"\n  @spec input_changed?(t, t, field()) :: boolean()\n  def input_changed?(\n        %Form{\n          impl: impl1,\n          id: id1,\n          name: name1,\n          errors: errors1,\n          source: source1,\n          action: action1\n        } = form1,\n        %Form{\n          impl: impl2,\n          id: id2,\n          name: name2,\n          errors: errors2,\n          source: source2,\n          action: action2\n        } = form2,\n        field\n      )\n      when is_atom(field) or is_binary(field) do\n    impl1 != impl2 or id1 != id2 or name1 != name2 or action1 != action2 or\n      field_errors(errors1, field) != field_errors(errors2, field) or\n      impl1.input_value(source1, form1, field) != impl2.input_value(source2, form2, field)\n  end\n\n  @doc \"\"\"\n  Returns the HTML validations that would apply to\n  the given field.\n  \"\"\"\n  @spec input_validations(t, field) :: Keyword.t()\n  def input_validations(%{source: source, impl: impl} = form, field)\n      when is_atom(field) or is_binary(field) do\n    impl.input_validations(source, form, field)\n  end\n\n  @doc \"\"\"\n  Normalizes an input `value` according to its input `type`.\n\n  Certain HTML input values must be cast, or they will have idiosyncracies\n  when they are rendered. The goal of this function is to encapsulate\n  this logic. In particular:\n\n    * For \"datetime-local\" types, it converts `DateTime` and\n      `NaiveDateTime` to strings without the second precision\n\n    * For \"checkbox\" types, it returns a boolean depending on\n      whether the input is \"true\" or not\n\n    * For \"textarea\", it prefixes a newline to ensure newlines\n      won't be ignored on submission. This requires however\n      that the textarea is rendered with no spaces after its\n      content\n  \"\"\"\n  def normalize_value(type, value)\n\n  def normalize_value(\"datetime-local\", %struct{} = value)\n      when struct in [NaiveDateTime, DateTime] do\n    <<date::10-binary, ?\\s, hour_minute::5-binary, _rest::binary>> = struct.to_string(value)\n    {:safe, [date, ?T, hour_minute]}\n  end\n\n  def normalize_value(\"textarea\", value) do\n    {:safe, value} = html_escape(value || \"\")\n    {:safe, [?\\n | value]}\n  end\n\n  def normalize_value(\"checkbox\", value) do\n    html_escape(value) == {:safe, \"true\"}\n  end\n\n  def normalize_value(_type, value) do\n    value\n  end\n\n  @doc \"\"\"\n  Returns options to be used inside a select element.\n\n  `options` is expected to be an enumerable which will be used to\n  generate each `option` element. The function supports different data\n  for the individual elements:\n\n    * keyword lists - each keyword list is expected to have the keys\n      `:key` and `:value`. Additional keys such as `:disabled` may\n      be given to customize the option.\n    * two-item tuples - where the first element is an atom, string or\n      integer to be used as the option label and the second element is\n      an atom, string or integer to be used as the option value\n    * simple atom, string or integer - which will be used as both label and value\n      for the generated select\n\n  ## Option groups\n\n  If `options` is map or keyword list where the first element is a string,\n  atom or integer and the second element is a list or a map, it is assumed\n  the key will be wrapped in an `<optgroup>` and the value will be used to\n  generate `<options>` nested under the group.\n\n  ## Examples\n\n      options_for_select([\"Admin\": \"admin\", \"User\": \"user\"], \"admin\")\n      #=> <option value=\"admin\" selected>Admin</option>\n      #=> <option value=\"user\">User</option>\n\n  Multiple selected values:\n\n      options_for_select([\"Admin\": \"admin\", \"User\": \"user\", \"Moderator\": \"moderator\"],\n        [\"admin\", \"moderator\"])\n      #=> <option value=\"admin\" selected>Admin</option>\n      #=> <option value=\"user\">User</option>\n      #=> <option value=\"moderator\" selected>Moderator</option>\n\n  Groups:\n\n      options_for_select([\"Europe\": [\"UK\", \"Sweden\", \"France\"], ...], nil)\n      #=> <optgroup label=\"Europe\">\n      #=>   <option>UK</option>\n      #=>   <option>Sweden</option>\n      #=>   <option>France</option>\n      #=> </optgroup>\n\n  Custom option tags:\n\n      options_for_select([\"Admin\": \"admin\", \"User\": \"user\"], nil, tag: \"opt\")\n      #=> <opt value=\"admin\">Admin</opt>\n      #=> <opt value=\"user\">User</opt>\n\n  Horizontal separators can be added:\n\n      options_for_select([\"Admin\", \"User\", :hr, \"New\"], nil)\n      #=> <option>Admin</option>\n      #=> <option>User</option>\n      #=> <hr/>\n      #=> <option>New</option>\n\n      options_for_select([\"Admin\": \"admin\", \"User\": \"user\", hr: nil, \"New\": \"new\"], nil)\n      #=> <option value=\"admin\" selected>Admin</option>\n      #=> <option value=\"user\">User</option>\n      #=> <hr/>\n      #=> <option value=\"new\">New</option>\n\n\n  \"\"\"\n  def options_for_select(options, selected_values, extra \\\\ []) do\n    {:safe,\n     escaped_options_for_select(\n       options,\n       selected_values |> List.wrap() |> Enum.map(&html_escape/1),\n       extra\n     )}\n  end\n\n  defp escaped_options_for_select(options, selected_values, extra) do\n    Enum.reduce(options, [], fn\n      {:hr, nil}, acc ->\n        [acc | hr_tag()]\n\n      {option_key, option_value}, acc ->\n        [acc | option(option_key, option_value, extra, selected_values)]\n\n      options, acc when is_list(options) ->\n        {option_key, options} =\n          case List.keytake(options, :key, 0) do\n            nil ->\n              raise ArgumentError,\n                    \"expected :key key when building <option> from keyword list: #{inspect(options)}\"\n\n            {{:key, key}, options} ->\n              {key, options}\n          end\n\n        {option_value, options} =\n          case List.keytake(options, :value, 0) do\n            nil ->\n              raise ArgumentError,\n                    \"expected :value key when building <option> from keyword list: #{inspect(options)}\"\n\n            {{:value, value}, options} ->\n              {value, options}\n          end\n\n        [acc | option(option_key, option_value, extra ++ options, selected_values)]\n\n      :hr, acc ->\n        [acc | hr_tag()]\n\n      option, acc ->\n        [acc | option(option, option, extra, selected_values)]\n    end)\n  end\n\n  defp option(group_label, group_values, extra, value)\n       when is_list(group_values) or\n              (is_map(group_values) and not is_map_key(group_values, :__struct__)) do\n    section_options = escaped_options_for_select(group_values, value, extra)\n    option_tag(\"optgroup\", [label: group_label], {:safe, section_options})\n  end\n\n  defp option(option_key, option_value, extra, value) do\n    option_key = html_escape(option_key)\n    option_value = html_escape(option_value)\n    attrs = extra ++ [selected: option_value in value, value: option_value]\n    {tag, attrs} = Keyword.pop(attrs, :tag, \"option\")\n    option_tag(tag, attrs, option_key)\n  end\n\n  defp option_tag(name, attrs, {:safe, body}) when is_binary(name) and is_list(attrs) do\n    {:safe, attrs} = Phoenix.HTML.attributes_escape(attrs)\n    [?<, name, attrs, ?>, body, ?<, ?/, name, ?>]\n  end\n\n  defp hr_tag() do\n    [?<, \"hr\", ?/, ?>]\n  end\n\n  # Helper for getting field errors, handling string fields\n  defp field_errors(errors, field)\n       when is_list(errors) and (is_atom(field) or is_binary(field)) do\n    for {^field, error} <- errors, do: error\n  end\nend\n"
+    },
+    "lib/phoenix_html/form_data.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace or with and",
+          "duration": 28,
+          "id": "06bfd62a9c7326ce177dbe72109b2839",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_id/2 with form"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 87
+            },
+            "start": {
+              "column": 26,
+              "line": 87
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "is_binary(id) and is_nil(id)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 60,
+          "id": "10bc1d90b7202a580161435441f638bb",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 179
+            },
+            "start": {
+              "column": 12,
+              "line": 179
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 4,
+          "id": "28547d396f68f9af4e77a8a5cf8ba10a",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 27,
+              "line": 128
+            },
+            "start": {
+              "column": 27,
+              "line": 128
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "name && form.name <> \"[#{field}]\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 2,
+          "id": "51fb7b3bd3c000aac1ee18bd46a7d105",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:input_id/2 with form"
+          ],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 85
+            },
+            "start": {
+              "column": 33,
+              "line": 85
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "Keyword.get(opts, :id) && name",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 59,
+          "id": "59a4b019094f682132721f35ae14b15e",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 118
+            },
+            "start": {
+              "column": 44,
+              "line": 118
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 5,
+          "id": "8673dc49340535098c52005c140129be",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 one: without default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 142
+            },
+            "start": {
+              "column": 28,
+              "line": 142
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "params && %{}",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 59,
+          "id": "9c649c5396b818518ccb26f0fcc59349",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 191
+            },
+            "start": {
+              "column": 36,
+              "line": 191
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(field)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 62,
+          "id": "bab7e77ee4333847787288a881fc5b01",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:warns on string keys"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 105
+            },
+            "start": {
+              "column": 27,
+              "line": 105
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(key)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 3,
+          "id": "d7a445000ba331d10e60b5ab1c367ce1",
+          "killedBy": [
+            "Phoenix.HTML.FormTest:to_form/4 many: with default and field is present"
+          ],
+          "location": {
+            "end": {
+              "column": 23,
+              "line": 127
+            },
+            "start": {
+              "column": 23,
+              "line": 127
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "id && form.id <> \"_#{field}\"",
+          "status": "Killed"
+        }
+      ],
+      "source": "defprotocol Phoenix.HTML.FormData do\n  @moduledoc \"\"\"\n  Converts a data structure into a `Phoenix.HTML.Form` struct.\n\n  ## Ecto integration\n\n  Phoenix provides integration of forms with Ecto changesets and data\n  structures via the [phoenix_ecto](https://hex.pm/packages/phoenix_ecto) package.\n  If a project was generated without Ecto support that dependency will need to be\n  manually added.\n  \"\"\"\n\n  @doc \"\"\"\n  Converts a data structure into a [`Phoenix.HTML.Form`](`t:Phoenix.HTML.Form.t/0`) struct.\n\n  The options have their meaning defined by the underlying\n  implementation but all shared options below are expected to\n  be implemented. All remaining options must be stored in the\n  returned struct.\n\n  ## Shared options\n\n    * `:as` - the value to be used as the form name\n\n    * `:id` - the ID of the form attribute. All form inputs will\n      be prefixed by the given ID\n\n  \"\"\"\n  @spec to_form(t, Keyword.t()) :: Phoenix.HTML.Form.t()\n  def to_form(data, options)\n\n  @doc \"\"\"\n  Converts the field in the given form based on the data structure\n  into a list of [`Phoenix.HTML.Form`](`t:Phoenix.HTML.Form.t/0`) structs.\n\n  The options have their meaning defined by the underlying\n  implementation but all shared options below are expected to\n  be implemented. All remaining options must be stored in the\n  returned struct.\n\n  ## Shared Options\n\n    * `:id` - the id to be used in the form, defaults to the\n      concatenation of the given `field` to the parent form id\n\n    * `:as` - the name to be used in the form, defaults to the\n      concatenation of the given `field` to the parent form name\n\n    * `:default` - the value to use if none is available\n\n    * `:prepend` - the values to prepend when rendering. This only\n      applies if the field value is a list and no parameters were\n      sent through the form.\n\n    * `:append` - the values to append when rendering. This only\n      applies if the field value is a list and no parameters were\n      sent through the form.\n\n    * `:action` - The user defined action being taken by the form, such\n      as `:validate`, `:save`, etc.\n  \"\"\"\n  @spec to_form(t, Phoenix.HTML.Form.t(), Phoenix.HTML.Form.field(), Keyword.t()) ::\n          [Phoenix.HTML.Form.t()]\n  def to_form(data, form, field, options)\n\n  @doc \"\"\"\n  Returns the value for the given field.\n  \"\"\"\n  @spec input_value(t, Phoenix.HTML.Form.t(), Phoenix.HTML.Form.field()) :: term\n  def input_value(data, form, field)\n\n  @doc \"\"\"\n  Returns the HTML5 validations that would apply to\n  the given field.\n  \"\"\"\n  @spec input_validations(t, Phoenix.HTML.Form.t(), Phoenix.HTML.Form.field()) :: Keyword.t()\n  def input_validations(data, form, field)\nend\n\ndefimpl Phoenix.HTML.FormData, for: Map do\n  def to_form(map, opts) do\n    {name, params, opts} = name_params_and_opts(map, opts)\n    {errors, opts} = Keyword.pop(opts, :errors, [])\n    {action, opts} = Keyword.pop(opts, :action, nil)\n    id = Keyword.get(opts, :id) || name\n\n    unless is_binary(id) or is_nil(id) do\n      raise ArgumentError, \":id option in form_for must be a binary/string, got: #{inspect(id)}\"\n    end\n\n    %Phoenix.HTML.Form{\n      source: map,\n      impl: __MODULE__,\n      id: id,\n      name: name,\n      params: params,\n      data: %{},\n      errors: errors,\n      action: action,\n      options: opts\n    }\n  end\n\n  defp name_params_and_opts(map, opts) do\n    with {key, _, _} when is_atom(key) <- :maps.next(:maps.iterator(map)) do\n      IO.warn(\n        \"a map with atom keys was given to a form. Maps are always considered \" <>\n          \"parameters and therefore must have string keys, got: #{inspect(map)}\"\n      )\n    end\n\n    case Keyword.pop(opts, :as) do\n      {nil, opts} -> {nil, map, opts}\n      {name, opts} -> {to_string(name), map, opts}\n    end\n  end\n\n  def to_form(map, form, field, opts) when is_atom(field) or is_binary(field) do\n    {default, opts} = Keyword.pop(opts, :default, %{})\n    {prepend, opts} = Keyword.pop(opts, :prepend, [])\n    {append, opts} = Keyword.pop(opts, :append, [])\n    {name, opts} = Keyword.pop(opts, :as)\n    {id, opts} = Keyword.pop(opts, :id)\n    {hidden, opts} = Keyword.pop(opts, :hidden, [])\n    {action, opts} = Keyword.pop(opts, :action, form.action)\n\n    id = to_string(id || form.id <> \"_#{field}\")\n    name = to_string(name || form.name <> \"[#{field}]\")\n    params = Map.get(form.params, field_to_string(field))\n\n    cond do\n      # cardinality: one\n      is_map(default) ->\n        [\n          %Phoenix.HTML.Form{\n            source: map,\n            impl: __MODULE__,\n            id: id,\n            name: name,\n            data: default,\n            action: action,\n            params: params || %{},\n            hidden: hidden,\n            options: opts\n          }\n        ]\n\n      # cardinality: many\n      is_list(default) ->\n        entries =\n          if params do\n            params\n            |> Enum.sort_by(&elem(&1, 0))\n            |> Enum.map(&{nil, elem(&1, 1)})\n          else\n            Enum.map(prepend ++ default ++ append, &{&1, %{}})\n          end\n\n        for {{data, params}, index} <- Enum.with_index(entries) do\n          index_string = Integer.to_string(index)\n\n          %Phoenix.HTML.Form{\n            source: map,\n            impl: __MODULE__,\n            index: index,\n            action: action,\n            id: id <> \"_\" <> index_string,\n            name: name <> \"[\" <> index_string <> \"]\",\n            data: data,\n            params: params,\n            hidden: hidden,\n            options: opts\n          }\n        end\n    end\n  end\n\n  def input_value(_map, %{data: data, params: params}, field)\n      when is_atom(field) or is_binary(field) do\n    key = field_to_string(field)\n\n    case params do\n      %{^key => value} -> value\n      %{} -> Map.get(data, field)\n    end\n  end\n\n  def input_validations(_map, _form, _field), do: []\n\n  # Normalize field name to string version\n  defp field_to_string(field) when is_atom(field), do: Atom.to_string(field)\n  defp field_to_string(field) when is_binary(field), do: field\nend\n"
+    },
+    "lib/phoenix_html/safe.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/safe_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 134,
+          "id": "11e3f70c0fe1a7072eb42f9c14d4172c",
+          "killedBy": [
+            "Phoenix.HTMLTest:doctest Phoenix.HTML.html_escape/1 (3)"
+          ],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 65
+            },
+            "start": {
+              "column": 22,
+              "line": 65
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(h)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/safe_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 131,
+          "id": "3a07a19fe3726b42ee7ac83eb7fb6ea4",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 69
+            },
+            "start": {
+              "column": 22,
+              "line": 69
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(h)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/safe_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 122,
+          "id": "3e34e5cbde8a8791af249c2f325ffd0c",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 65
+            },
+            "start": {
+              "column": 22,
+              "line": 65
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(h)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/safe_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 131,
+          "id": "4e81b8180cbca6180d0d91eb25b1a338",
+          "killedBy": [
+            "Phoenix.HTMLTest:html_escape only accepts valid iodata"
+          ],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 69
+            },
+            "start": {
+              "column": 22,
+              "line": 69
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(h)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/safe_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard <= with <",
+          "duration": 138,
+          "id": "5a950cfe46892f51f1bfc6659dfc6854",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 65
+            },
+            "start": {
+              "column": 40,
+              "line": 65
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "h < 255",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/phoenix_html/engine_test.exs",
+            "test/phoenix_html/form_test.exs",
+            "test/phoenix_html/safe_test.exs",
+            "test/phoenix_html_test.exs"
+          ],
+          "description": "replace guard <= with >",
+          "duration": 136,
+          "id": "fb9ad147cf7316f45cde700f8a0e824f",
+          "killedBy": [
+            "Phoenix.HTML.SafeTest:impl for io data"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 65
+            },
+            "start": {
+              "column": 40,
+              "line": 65
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "h > 255",
+          "status": "Killed"
+        }
+      ],
+      "source": "defprotocol Phoenix.HTML.Safe do\n  @moduledoc \"\"\"\n  Defines the HTML safe protocol.\n\n  In order to promote HTML safety, Phoenix templates\n  do not use `Kernel.to_string/1` to convert data types to\n  strings in templates. Instead, Phoenix uses this\n  protocol which must be implemented by data structures\n  and guarantee that a HTML safe representation is returned.\n\n  Furthermore, this protocol relies on iodata, which provides\n  better performance when sending or streaming data to the client.\n  \"\"\"\n\n  def to_iodata(data)\nend\n\ndefimpl Phoenix.HTML.Safe, for: Atom do\n  def to_iodata(nil), do: \"\"\n  def to_iodata(atom), do: Phoenix.HTML.Engine.html_escape(Atom.to_string(atom))\nend\n\ndefimpl Phoenix.HTML.Safe, for: BitString do\n  defdelegate to_iodata(data), to: Phoenix.HTML.Engine, as: :html_escape\nend\n\ndefimpl Phoenix.HTML.Safe, for: Time do\n  defdelegate to_iodata(data), to: Time, as: :to_iso8601\nend\n\ndefimpl Phoenix.HTML.Safe, for: Date do\n  defdelegate to_iodata(data), to: Date, as: :to_iso8601\nend\n\ndefimpl Phoenix.HTML.Safe, for: NaiveDateTime do\n  defdelegate to_iodata(data), to: NaiveDateTime, as: :to_iso8601\nend\n\ndefimpl Phoenix.HTML.Safe, for: DateTime do\n  def to_iodata(data) do\n    # Call escape in case someone can inject reserved\n    # characters in the timezone or its abbreviation\n    Phoenix.HTML.Engine.html_escape(DateTime.to_iso8601(data))\n  end\nend\n\nif Code.ensure_loaded?(Duration) do\n  defimpl Phoenix.HTML.Safe, for: Duration do\n    defdelegate to_iodata(data), to: Duration, as: :to_iso8601\n  end\nend\n\ndefimpl Phoenix.HTML.Safe, for: List do\n  def to_iodata(list), do: recur(list)\n\n  defp recur([h | t]), do: [recur(h) | recur(t)]\n  defp recur([]), do: []\n\n  defp recur(?<), do: \"&lt;\"\n  defp recur(?>), do: \"&gt;\"\n  defp recur(?&), do: \"&amp;\"\n  defp recur(?\"), do: \"&quot;\"\n  defp recur(?'), do: \"&#39;\"\n\n  defp recur(h) when is_integer(h) and h <= 255 do\n    h\n  end\n\n  defp recur(h) when is_integer(h) do\n    raise ArgumentError,\n          \"lists in Phoenix.HTML templates only support iodata, and not chardata. Integers may only represent bytes. \" <>\n            \"It's likely you meant to pass a string with double quotes instead of a char list with single quotes.\"\n  end\n\n  defp recur(h) when is_binary(h) do\n    Phoenix.HTML.Engine.html_escape(h)\n  end\n\n  defp recur({:safe, data}) do\n    data\n  end\n\n  defp recur(other) do\n    raise ArgumentError,\n          \"lists in Phoenix.HTML and templates may only contain integers representing bytes, binaries or other lists, \" <>\n            \"got invalid entry: #{inspect(other)}\"\n  end\nend\n\ndefimpl Phoenix.HTML.Safe, for: Integer do\n  defdelegate to_iodata(data), to: Integer, as: :to_string\nend\n\ndefimpl Phoenix.HTML.Safe, for: Float do\n  defdelegate to_iodata(data), to: Float, as: :to_string\nend\n\ndefimpl Phoenix.HTML.Safe, for: Tuple do\n  def to_iodata({:safe, data}), do: data\n  def to_iodata(value), do: raise(Protocol.UndefinedError, protocol: @protocol, value: value)\nend\n\ndefimpl Phoenix.HTML.Safe, for: URI do\n  def to_iodata(data), do: Phoenix.HTML.Engine.html_escape(URI.to_string(data))\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "02adc8f1c8e7756fbbbb08b64416dba2": "schema",
+      "02e6a958c47ec073a46bca2c98a32500": "schema",
+      "041c84bcfa94f5e85d3879eea3368420": "fallback",
+      "0642ebb4c120529b0496349f2ab62b9e": "schema",
+      "06bfd62a9c7326ce177dbe72109b2839": "schema",
+      "0b06ccd461e8dbfefbc7fb8065d4ee49": "fallback",
+      "10960a97ed53882ccab8eb45a0940ba8": "schema",
+      "10bc1d90b7202a580161435441f638bb": "fallback",
+      "11e3f70c0fe1a7072eb42f9c14d4172c": "fallback",
+      "1310785e0f8e56f54055429f59bb9685": "schema",
+      "17a775df02c8fb7b319044ddc4f72099": "fallback",
+      "17b77d5034c14214b162b16e5db8bc10": "fallback",
+      "18f05a1bf841e9ea571c279f272ff002": "fallback",
+      "1f371132485d1d69d5b6cebe8ea0605c": "schema",
+      "22db11950d1daba50f82b205c465b91f": "schema",
+      "25b2bcb1d1bbae668244891d1d6afeac": "fallback",
+      "25cdf440e02ccc9bd27a686fa7d0250b": "fallback",
+      "28547d396f68f9af4e77a8a5cf8ba10a": "schema",
+      "2dca40a0d7c9f6a79d5a2c9493ed350c": "schema",
+      "2dfb94c09d6bb1e2621d11cf9cd4d495": "fallback",
+      "33f01af1b60cf48bc11caf8fa0575b60": "schema",
+      "392af2e2f7a841a2fbe11a229b083e45": "fallback",
+      "3a07a19fe3726b42ee7ac83eb7fb6ea4": "fallback",
+      "3e34e5cbde8a8791af249c2f325ffd0c": "fallback",
+      "430bc0258921bf44567cf84b4384073a": "fallback",
+      "45987c6f4e48339b8c8c15f608209186": "fallback",
+      "4a45df949c294ad0ada39ff4fd44bd8e": "schema",
+      "4a756244d55f76dba6a2651891239fe3": "fallback",
+      "4e81b8180cbca6180d0d91eb25b1a338": "fallback",
+      "50674ea85ae9f23d120402f500dfe8bb": "schema",
+      "50ef5b18e91f5922e5bf43edc70e48e9": "fallback",
+      "51fb7b3bd3c000aac1ee18bd46a7d105": "schema",
+      "58eed78318386240864c108103798a40": "schema",
+      "59a4b019094f682132721f35ae14b15e": "fallback",
+      "5a950cfe46892f51f1bfc6659dfc6854": "fallback",
+      "604ca45f4a2d0f37227683f9f239c6d0": "fallback",
+      "61ccac76a71b5ebb087c1e5c6db7c1d7": "schema",
+      "62e3de424c65b5d82a19452420f9ead1": "schema",
+      "63119f5a8e7f7365b16929c046c81b72": "fallback",
+      "64089611a319cb9ea2f1911d4740d08b": "schema",
+      "64ba60905b500999947cb231b9893ef6": "schema",
+      "661d9661e666fdf0cda9facfd13ffb8a": "schema",
+      "6703abf9b3df82eba6cc844e6099bf87": "schema",
+      "6da45196828515fb842855383704a593": "fallback",
+      "6e880eb7c830ce3d76f8d6112e30b4d1": "fallback",
+      "6f50ddd892cb86f22d5582779b46a85d": "schema",
+      "7b2313cb6a99a269a028104419b71756": "schema",
+      "7e7199f20169ca7e5e99e857906de8bb": "fallback",
+      "7e751ad111f5a94ff5ee4e6c5886b9f8": "fallback",
+      "800adb9f035934d3d3d54f3946486274": "schema",
+      "82877d4a3f9023c2d95c3a9e96ba8881": "fallback",
+      "82b64f1231ecdafaca1847aa9a4d7d12": "fallback",
+      "857b2ec9a751417f449a3e3693c9c26c": "schema",
+      "8602adbb01ebdb38d6ab3ceb7927220d": "schema",
+      "8673dc49340535098c52005c140129be": "schema",
+      "8c88211163ddde855d9b9e63f94f2cad": "schema",
+      "9099b0483f1ed4f56867214286f40068": "schema",
+      "92e58ccf7ac2d2f02d46811f77e63b33": "fallback",
+      "96235fef423ece1c6e9be429bfaf4172": "fallback",
+      "9797eed856f0916c58649dab47d363e9": "fallback",
+      "9c649c5396b818518ccb26f0fcc59349": "fallback",
+      "a1753d2a97dda1843373b55ec07551bc": "schema",
+      "a2b1b99f9d2a69df1d975d80d63ad844": "schema",
+      "a3c0fc828d6503efbd6d048329b60c47": "schema",
+      "aa7f7984711b360562926d1fae1a6ca8": "fallback",
+      "abde4192252980b41e3a07d44b0ada6f": "fallback",
+      "acb82ba524ab2eeb37037148e3476ba2": "schema",
+      "af91ab155a66eb11ce769fd8c9255054": "fallback",
+      "b6da418528f7a1d28a18d390fcfe9c43": "fallback",
+      "b93d53b8da16e3b946faae1e0708aede": "schema",
+      "bab7e77ee4333847787288a881fc5b01": "fallback",
+      "c0948f9791d9d02bb64739536eb81ab7": "fallback",
+      "c119e4a7ffb4172453a66f33feb4b874": "fallback",
+      "c21b425f5188247a4467c96157695334": "fallback",
+      "c2988dec277483b6ea7f855376bc4497": "schema",
+      "ca1ccc688a9755654d07a4780cf594da": "schema",
+      "d3c1464cd6ac9cf9963ea7ad15cb2d48": "fallback",
+      "d7a445000ba331d10e60b5ab1c367ce1": "schema",
+      "d7b3069b6abd98fdccf6af820f37626d": "schema",
+      "dcb41f51022521bea921ff4dbdd28e19": "fallback",
+      "e1ddd96209c15960370d69f5bfa45d13": "fallback",
+      "e2a3ff334a27c7d005399545e1629de1": "schema",
+      "e601271a5ea1c616f96a67ba7253e78a": "fallback",
+      "e6a495823b8caedaf4059e3bed2d5321": "schema",
+      "ed14d9fe4229b22e943d97602967eb46": "fallback",
+      "ed16fdc2436167c6c01e885b647bf94f": "schema",
+      "f29e8da6d43dff317cbd90b2b061eeca": "schema",
+      "f34e8b8bbc1ee3fe0b018cda87c9468b": "schema",
+      "f498a0e4b528d5950f8af56d03296b20": "fallback",
+      "f4c9751af8e92b8aac11930a775b9ded": "schema",
+      "fb9ad147cf7316f45cde700f8a0e824f": "fallback",
+      "fd8f933c0e3221da87dc91dd99ac489e": "schema",
+      "fe844b79898f2a70b5e376628440c3e3": "fallback"
+    },
+    "metrics": {
+      "fallback_count": 48,
+      "fallback_time_ms": 4029,
+      "fanout": {
+        "02adc8f1c8e7756fbbbb08b64416dba2": 3,
+        "02e6a958c47ec073a46bca2c98a32500": 3,
+        "041c84bcfa94f5e85d3879eea3368420": 3,
+        "0642ebb4c120529b0496349f2ab62b9e": 3,
+        "06bfd62a9c7326ce177dbe72109b2839": 3,
+        "0b06ccd461e8dbfefbc7fb8065d4ee49": 3,
+        "10960a97ed53882ccab8eb45a0940ba8": 3,
+        "10bc1d90b7202a580161435441f638bb": 3,
+        "11e3f70c0fe1a7072eb42f9c14d4172c": 4,
+        "1310785e0f8e56f54055429f59bb9685": 3,
+        "17a775df02c8fb7b319044ddc4f72099": 3,
+        "17b77d5034c14214b162b16e5db8bc10": 3,
+        "18f05a1bf841e9ea571c279f272ff002": 3,
+        "1f371132485d1d69d5b6cebe8ea0605c": 3,
+        "22db11950d1daba50f82b205c465b91f": 3,
+        "25b2bcb1d1bbae668244891d1d6afeac": 3,
+        "25cdf440e02ccc9bd27a686fa7d0250b": 3,
+        "28547d396f68f9af4e77a8a5cf8ba10a": 3,
+        "2dca40a0d7c9f6a79d5a2c9493ed350c": 3,
+        "2dfb94c09d6bb1e2621d11cf9cd4d495": 3,
+        "33f01af1b60cf48bc11caf8fa0575b60": 3,
+        "392af2e2f7a841a2fbe11a229b083e45": 3,
+        "3a07a19fe3726b42ee7ac83eb7fb6ea4": 4,
+        "3e34e5cbde8a8791af249c2f325ffd0c": 4,
+        "430bc0258921bf44567cf84b4384073a": 3,
+        "45987c6f4e48339b8c8c15f608209186": 3,
+        "4a45df949c294ad0ada39ff4fd44bd8e": 3,
+        "4a756244d55f76dba6a2651891239fe3": 3,
+        "4e81b8180cbca6180d0d91eb25b1a338": 4,
+        "50674ea85ae9f23d120402f500dfe8bb": 3,
+        "50ef5b18e91f5922e5bf43edc70e48e9": 3,
+        "51fb7b3bd3c000aac1ee18bd46a7d105": 3,
+        "58eed78318386240864c108103798a40": 3,
+        "59a4b019094f682132721f35ae14b15e": 3,
+        "5a950cfe46892f51f1bfc6659dfc6854": 4,
+        "604ca45f4a2d0f37227683f9f239c6d0": 3,
+        "61ccac76a71b5ebb087c1e5c6db7c1d7": 3,
+        "62e3de424c65b5d82a19452420f9ead1": 3,
+        "63119f5a8e7f7365b16929c046c81b72": 3,
+        "64089611a319cb9ea2f1911d4740d08b": 3,
+        "64ba60905b500999947cb231b9893ef6": 3,
+        "661d9661e666fdf0cda9facfd13ffb8a": 3,
+        "6703abf9b3df82eba6cc844e6099bf87": 3,
+        "6da45196828515fb842855383704a593": 3,
+        "6e880eb7c830ce3d76f8d6112e30b4d1": 3,
+        "6f50ddd892cb86f22d5582779b46a85d": 3,
+        "7b2313cb6a99a269a028104419b71756": 3,
+        "7e7199f20169ca7e5e99e857906de8bb": 3,
+        "7e751ad111f5a94ff5ee4e6c5886b9f8": 3,
+        "800adb9f035934d3d3d54f3946486274": 3,
+        "82877d4a3f9023c2d95c3a9e96ba8881": 3,
+        "82b64f1231ecdafaca1847aa9a4d7d12": 3,
+        "857b2ec9a751417f449a3e3693c9c26c": 3,
+        "8602adbb01ebdb38d6ab3ceb7927220d": 3,
+        "8673dc49340535098c52005c140129be": 3,
+        "8c88211163ddde855d9b9e63f94f2cad": 3,
+        "9099b0483f1ed4f56867214286f40068": 3,
+        "92e58ccf7ac2d2f02d46811f77e63b33": 3,
+        "96235fef423ece1c6e9be429bfaf4172": 3,
+        "9797eed856f0916c58649dab47d363e9": 3,
+        "9c649c5396b818518ccb26f0fcc59349": 3,
+        "a1753d2a97dda1843373b55ec07551bc": 3,
+        "a2b1b99f9d2a69df1d975d80d63ad844": 3,
+        "a3c0fc828d6503efbd6d048329b60c47": 3,
+        "aa7f7984711b360562926d1fae1a6ca8": 3,
+        "abde4192252980b41e3a07d44b0ada6f": 3,
+        "acb82ba524ab2eeb37037148e3476ba2": 3,
+        "af91ab155a66eb11ce769fd8c9255054": 3,
+        "b6da418528f7a1d28a18d390fcfe9c43": 3,
+        "b93d53b8da16e3b946faae1e0708aede": 3,
+        "bab7e77ee4333847787288a881fc5b01": 3,
+        "c0948f9791d9d02bb64739536eb81ab7": 3,
+        "c119e4a7ffb4172453a66f33feb4b874": 3,
+        "c21b425f5188247a4467c96157695334": 3,
+        "c2988dec277483b6ea7f855376bc4497": 3,
+        "ca1ccc688a9755654d07a4780cf594da": 3,
+        "d3c1464cd6ac9cf9963ea7ad15cb2d48": 3,
+        "d7a445000ba331d10e60b5ab1c367ce1": 3,
+        "d7b3069b6abd98fdccf6af820f37626d": 3,
+        "dcb41f51022521bea921ff4dbdd28e19": 3,
+        "e1ddd96209c15960370d69f5bfa45d13": 3,
+        "e2a3ff334a27c7d005399545e1629de1": 3,
+        "e601271a5ea1c616f96a67ba7253e78a": 3,
+        "e6a495823b8caedaf4059e3bed2d5321": 3,
+        "ed14d9fe4229b22e943d97602967eb46": 3,
+        "ed16fdc2436167c6c01e885b647bf94f": 3,
+        "f29e8da6d43dff317cbd90b2b061eeca": 3,
+        "f34e8b8bbc1ee3fe0b018cda87c9468b": 3,
+        "f498a0e4b528d5950f8af56d03296b20": 3,
+        "f4c9751af8e92b8aac11930a775b9ded": 3,
+        "fb9ad147cf7316f45cde700f8a0e824f": 4,
+        "fd8f933c0e3221da87dc91dd99ac489e": 3,
+        "fe844b79898f2a70b5e376628440c3e3": 3
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "ambiguous_oracle_match": 1,
+        "body_literal_engine_disabled": 69,
+        "missing_oracle_site": 45,
+        "no_applicable_mutator": 21,
+        "unsupported_dispatch": 415
+      }
+    },
+    "mutation_kind": {
+      "02adc8f1c8e7756fbbbb08b64416dba2": "arithmetic_op",
+      "02e6a958c47ec073a46bca2c98a32500": "comparison_negation",
+      "041c84bcfa94f5e85d3879eea3368420": "guard_type_test",
+      "0642ebb4c120529b0496349f2ab62b9e": "arithmetic_op",
+      "06bfd62a9c7326ce177dbe72109b2839": "boolean_op",
+      "0b06ccd461e8dbfefbc7fb8065d4ee49": "guard_type_test",
+      "10960a97ed53882ccab8eb45a0940ba8": "comparison_negation",
+      "10bc1d90b7202a580161435441f638bb": "guard_type_test",
+      "11e3f70c0fe1a7072eb42f9c14d4172c": "guard_type_test",
+      "1310785e0f8e56f54055429f59bb9685": "arithmetic_op",
+      "17a775df02c8fb7b319044ddc4f72099": "guard_type_test",
+      "17b77d5034c14214b162b16e5db8bc10": "guard_type_test",
+      "18f05a1bf841e9ea571c279f272ff002": "guard_type_test",
+      "1f371132485d1d69d5b6cebe8ea0605c": "boolean_op",
+      "22db11950d1daba50f82b205c465b91f": "arithmetic_op",
+      "25b2bcb1d1bbae668244891d1d6afeac": "guard_type_test",
+      "25cdf440e02ccc9bd27a686fa7d0250b": "guard_type_test",
+      "28547d396f68f9af4e77a8a5cf8ba10a": "boolean_op",
+      "2dca40a0d7c9f6a79d5a2c9493ed350c": "boolean_op",
+      "2dfb94c09d6bb1e2621d11cf9cd4d495": "guard_type_test",
+      "33f01af1b60cf48bc11caf8fa0575b60": "arithmetic_op",
+      "392af2e2f7a841a2fbe11a229b083e45": "guard_type_test",
+      "3a07a19fe3726b42ee7ac83eb7fb6ea4": "guard_type_test",
+      "3e34e5cbde8a8791af249c2f325ffd0c": "guard_type_test",
+      "430bc0258921bf44567cf84b4384073a": "guard_type_test",
+      "45987c6f4e48339b8c8c15f608209186": "guard_type_test",
+      "4a45df949c294ad0ada39ff4fd44bd8e": "arithmetic_op",
+      "4a756244d55f76dba6a2651891239fe3": "guard_type_test",
+      "4e81b8180cbca6180d0d91eb25b1a338": "guard_type_test",
+      "50674ea85ae9f23d120402f500dfe8bb": "comparison_negation",
+      "50ef5b18e91f5922e5bf43edc70e48e9": "guard_type_test",
+      "51fb7b3bd3c000aac1ee18bd46a7d105": "boolean_op",
+      "58eed78318386240864c108103798a40": "comparison_negation",
+      "59a4b019094f682132721f35ae14b15e": "guard_type_test",
+      "5a950cfe46892f51f1bfc6659dfc6854": "guard_comparison_boundary",
+      "604ca45f4a2d0f37227683f9f239c6d0": "guard_type_test",
+      "61ccac76a71b5ebb087c1e5c6db7c1d7": "comparison_negation",
+      "62e3de424c65b5d82a19452420f9ead1": "comparison_negation",
+      "63119f5a8e7f7365b16929c046c81b72": "guard_type_test",
+      "64089611a319cb9ea2f1911d4740d08b": "boolean_op",
+      "64ba60905b500999947cb231b9893ef6": "arithmetic_op",
+      "661d9661e666fdf0cda9facfd13ffb8a": "comparison_negation",
+      "6703abf9b3df82eba6cc844e6099bf87": "boolean_op",
+      "6da45196828515fb842855383704a593": "guard_type_test",
+      "6e880eb7c830ce3d76f8d6112e30b4d1": "guard_type_test",
+      "6f50ddd892cb86f22d5582779b46a85d": "boolean_op",
+      "7b2313cb6a99a269a028104419b71756": "boolean_op",
+      "7e7199f20169ca7e5e99e857906de8bb": "guard_type_test",
+      "7e751ad111f5a94ff5ee4e6c5886b9f8": "guard_type_test",
+      "800adb9f035934d3d3d54f3946486274": "boolean_op",
+      "82877d4a3f9023c2d95c3a9e96ba8881": "guard_type_test",
+      "82b64f1231ecdafaca1847aa9a4d7d12": "guard_type_test",
+      "857b2ec9a751417f449a3e3693c9c26c": "comparison_negation",
+      "8602adbb01ebdb38d6ab3ceb7927220d": "comparison_negation",
+      "8673dc49340535098c52005c140129be": "boolean_op",
+      "8c88211163ddde855d9b9e63f94f2cad": "arithmetic_op",
+      "9099b0483f1ed4f56867214286f40068": "boolean_op",
+      "92e58ccf7ac2d2f02d46811f77e63b33": "guard_type_test",
+      "96235fef423ece1c6e9be429bfaf4172": "guard_type_test",
+      "9797eed856f0916c58649dab47d363e9": "guard_type_test",
+      "9c649c5396b818518ccb26f0fcc59349": "guard_type_test",
+      "a1753d2a97dda1843373b55ec07551bc": "boolean_op",
+      "a2b1b99f9d2a69df1d975d80d63ad844": "arithmetic_op",
+      "a3c0fc828d6503efbd6d048329b60c47": "comparison_negation",
+      "aa7f7984711b360562926d1fae1a6ca8": "guard_type_test",
+      "abde4192252980b41e3a07d44b0ada6f": "guard_type_test",
+      "acb82ba524ab2eeb37037148e3476ba2": "boolean_op",
+      "af91ab155a66eb11ce769fd8c9255054": "guard_type_test",
+      "b6da418528f7a1d28a18d390fcfe9c43": "guard_type_test",
+      "b93d53b8da16e3b946faae1e0708aede": "boolean_op",
+      "bab7e77ee4333847787288a881fc5b01": "guard_type_test",
+      "c0948f9791d9d02bb64739536eb81ab7": "guard_type_test",
+      "c119e4a7ffb4172453a66f33feb4b874": "guard_type_test",
+      "c21b425f5188247a4467c96157695334": "guard_type_test",
+      "c2988dec277483b6ea7f855376bc4497": "boolean_op",
+      "ca1ccc688a9755654d07a4780cf594da": "boolean_op",
+      "d3c1464cd6ac9cf9963ea7ad15cb2d48": "guard_type_test",
+      "d7a445000ba331d10e60b5ab1c367ce1": "boolean_op",
+      "d7b3069b6abd98fdccf6af820f37626d": "comparison_negation",
+      "dcb41f51022521bea921ff4dbdd28e19": "guard_type_test",
+      "e1ddd96209c15960370d69f5bfa45d13": "guard_type_test",
+      "e2a3ff334a27c7d005399545e1629de1": "comparison_negation",
+      "e601271a5ea1c616f96a67ba7253e78a": "guard_type_test",
+      "e6a495823b8caedaf4059e3bed2d5321": "arithmetic_op",
+      "ed14d9fe4229b22e943d97602967eb46": "guard_type_test",
+      "ed16fdc2436167c6c01e885b647bf94f": "arithmetic_op",
+      "f29e8da6d43dff317cbd90b2b061eeca": "arithmetic_op",
+      "f34e8b8bbc1ee3fe0b018cda87c9468b": "boolean_op",
+      "f498a0e4b528d5950f8af56d03296b20": "guard_type_test",
+      "f4c9751af8e92b8aac11930a775b9ded": "boolean_op",
+      "fb9ad147cf7316f45cde700f8a0e824f": "guard_comparison_negation",
+      "fd8f933c0e3221da87dc91dd99ac489e": "boolean_op",
+      "fe844b79898f2a70b5e376628440c3e3": "guard_type_test"
+    },
+    "persistent": {
+      "app_startup_ms": {
+        "median": 2.7,
+        "total_apps": 12
+      },
+      "boot_ms": {
+        "max": 521,
+        "median": 503.5,
+        "p95": 521
+      },
+      "crash_count": 0,
+      "filter_lookup_ms": 0.1,
+      "filter_miss_count": 0,
+      "memory": {
+        "peak_processes_mb": 14.6,
+        "peak_total_mb": 60.3
+      },
+      "mix_fallback_count": 0,
+      "mutant_run_ms": {
+        "count": 45,
+        "median": 3.5,
+        "p95": 25.4
+      },
+      "reset_ms": {
+        "application_env": 0.0,
+        "ecto": 0.1,
+        "ets": 0.1,
+        "mox": 0.2,
+        "on_exit": 0.0,
+        "persistent_term": 0.0,
+        "processes": 0.0
+      },
+      "restart_count": 0,
+      "test_load_ms": {
+        "median": 297.1,
+        "total_files": 20
+      },
+      "worker_count": 4
+    },
+    "phase_timings": {
+      "baseline_tests_ms": 529,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 2892,
+      "oracle_build_ms": 2505,
+      "plan_generation_ms": 18,
+      "report_writing_ms": 7,
+      "schema_build_ms": 2428,
+      "schema_workers_ms": 159,
+      "total_ms": 10937
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 6,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 87
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 93
+      },
+      "mode": "static",
+      "selected_tests_avg": 3.064516129032258,
+      "selected_tests_median": 3
+    },
+    "stable_id_to_integer": {
+      "02adc8f1c8e7756fbbbb08b64416dba2": 1,
+      "02e6a958c47ec073a46bca2c98a32500": 2,
+      "041c84bcfa94f5e85d3879eea3368420": 3,
+      "0642ebb4c120529b0496349f2ab62b9e": 4,
+      "06bfd62a9c7326ce177dbe72109b2839": 5,
+      "0b06ccd461e8dbfefbc7fb8065d4ee49": 6,
+      "10960a97ed53882ccab8eb45a0940ba8": 7,
+      "10bc1d90b7202a580161435441f638bb": 8,
+      "11e3f70c0fe1a7072eb42f9c14d4172c": 9,
+      "1310785e0f8e56f54055429f59bb9685": 10,
+      "17a775df02c8fb7b319044ddc4f72099": 11,
+      "17b77d5034c14214b162b16e5db8bc10": 12,
+      "18f05a1bf841e9ea571c279f272ff002": 13,
+      "1f371132485d1d69d5b6cebe8ea0605c": 14,
+      "22db11950d1daba50f82b205c465b91f": 15,
+      "25b2bcb1d1bbae668244891d1d6afeac": 16,
+      "25cdf440e02ccc9bd27a686fa7d0250b": 17,
+      "28547d396f68f9af4e77a8a5cf8ba10a": 18,
+      "2dca40a0d7c9f6a79d5a2c9493ed350c": 19,
+      "2dfb94c09d6bb1e2621d11cf9cd4d495": 20,
+      "33f01af1b60cf48bc11caf8fa0575b60": 21,
+      "392af2e2f7a841a2fbe11a229b083e45": 22,
+      "3a07a19fe3726b42ee7ac83eb7fb6ea4": 23,
+      "3e34e5cbde8a8791af249c2f325ffd0c": 24,
+      "430bc0258921bf44567cf84b4384073a": 25,
+      "45987c6f4e48339b8c8c15f608209186": 26,
+      "4a45df949c294ad0ada39ff4fd44bd8e": 27,
+      "4a756244d55f76dba6a2651891239fe3": 28,
+      "4e81b8180cbca6180d0d91eb25b1a338": 29,
+      "50674ea85ae9f23d120402f500dfe8bb": 30,
+      "50ef5b18e91f5922e5bf43edc70e48e9": 31,
+      "51fb7b3bd3c000aac1ee18bd46a7d105": 32,
+      "58eed78318386240864c108103798a40": 33,
+      "59a4b019094f682132721f35ae14b15e": 34,
+      "5a950cfe46892f51f1bfc6659dfc6854": 35,
+      "604ca45f4a2d0f37227683f9f239c6d0": 36,
+      "61ccac76a71b5ebb087c1e5c6db7c1d7": 37,
+      "62e3de424c65b5d82a19452420f9ead1": 38,
+      "63119f5a8e7f7365b16929c046c81b72": 39,
+      "64089611a319cb9ea2f1911d4740d08b": 40,
+      "64ba60905b500999947cb231b9893ef6": 41,
+      "661d9661e666fdf0cda9facfd13ffb8a": 42,
+      "6703abf9b3df82eba6cc844e6099bf87": 43,
+      "6da45196828515fb842855383704a593": 44,
+      "6e880eb7c830ce3d76f8d6112e30b4d1": 45,
+      "6f50ddd892cb86f22d5582779b46a85d": 46,
+      "7b2313cb6a99a269a028104419b71756": 47,
+      "7e7199f20169ca7e5e99e857906de8bb": 48,
+      "7e751ad111f5a94ff5ee4e6c5886b9f8": 49,
+      "800adb9f035934d3d3d54f3946486274": 50,
+      "82877d4a3f9023c2d95c3a9e96ba8881": 51,
+      "82b64f1231ecdafaca1847aa9a4d7d12": 52,
+      "857b2ec9a751417f449a3e3693c9c26c": 53,
+      "8602adbb01ebdb38d6ab3ceb7927220d": 54,
+      "8673dc49340535098c52005c140129be": 55,
+      "8c88211163ddde855d9b9e63f94f2cad": 56,
+      "9099b0483f1ed4f56867214286f40068": 57,
+      "92e58ccf7ac2d2f02d46811f77e63b33": 58,
+      "96235fef423ece1c6e9be429bfaf4172": 59,
+      "9797eed856f0916c58649dab47d363e9": 60,
+      "9c649c5396b818518ccb26f0fcc59349": 61,
+      "a1753d2a97dda1843373b55ec07551bc": 62,
+      "a2b1b99f9d2a69df1d975d80d63ad844": 63,
+      "a3c0fc828d6503efbd6d048329b60c47": 64,
+      "aa7f7984711b360562926d1fae1a6ca8": 65,
+      "abde4192252980b41e3a07d44b0ada6f": 66,
+      "acb82ba524ab2eeb37037148e3476ba2": 67,
+      "af91ab155a66eb11ce769fd8c9255054": 68,
+      "b6da418528f7a1d28a18d390fcfe9c43": 69,
+      "b93d53b8da16e3b946faae1e0708aede": 70,
+      "bab7e77ee4333847787288a881fc5b01": 71,
+      "c0948f9791d9d02bb64739536eb81ab7": 72,
+      "c119e4a7ffb4172453a66f33feb4b874": 73,
+      "c21b425f5188247a4467c96157695334": 74,
+      "c2988dec277483b6ea7f855376bc4497": 75,
+      "ca1ccc688a9755654d07a4780cf594da": 76,
+      "d3c1464cd6ac9cf9963ea7ad15cb2d48": 77,
+      "d7a445000ba331d10e60b5ab1c367ce1": 78,
+      "d7b3069b6abd98fdccf6af820f37626d": 79,
+      "dcb41f51022521bea921ff4dbdd28e19": 80,
+      "e1ddd96209c15960370d69f5bfa45d13": 81,
+      "e2a3ff334a27c7d005399545e1629de1": 82,
+      "e601271a5ea1c616f96a67ba7253e78a": 83,
+      "e6a495823b8caedaf4059e3bed2d5321": 84,
+      "ed14d9fe4229b22e943d97602967eb46": 85,
+      "ed16fdc2436167c6c01e885b647bf94f": 86,
+      "f29e8da6d43dff317cbd90b2b061eeca": 87,
+      "f34e8b8bbc1ee3fe0b018cda87c9468b": 88,
+      "f498a0e4b528d5950f8af56d03296b20": 89,
+      "f4c9751af8e92b8aac11930a775b9ded": 90,
+      "fb9ad147cf7316f45cde700f8a0e824f": 91,
+      "fd8f933c0e3221da87dc91dd99ac489e": 92,
+      "fe844b79898f2a70b5e376628440c3e3": 93
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

@@ -1,0 +1,1396 @@
+target=phoenix_html repo=https://github.com/phoenixframework/phoenix_html.git ref=v4.3.0 sha=8cfd3e37ff9ef0924812a78cf6c9d27cdbd4e726 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  castore 1.0.11
+  earmark_parser 1.4.44
+  ex_doc 0.38.4
+  makeup 1.2.1
+  makeup_eex 2.0.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  makeup_syntect 0.1.2
+  nimble_parsec 1.4.2
+  rustler_precompiled 0.8.2
+* Getting ex_doc (Hex package)
+* Getting makeup_eex (Hex package)
+* Getting makeup_syntect (Hex package)
+* Getting makeup (Hex package)
+* Getting rustler_precompiled (Hex package)
+* Getting castore (Hex package)
+* Getting nimble_parsec (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_erlang (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> phoenix_html
+Compiling 6 files (.ex)
+Generated phoenix_html app
+Schema build starting
+Schema build complete
+[1/93] killed    lib/phoenix_html.ex:397  ComparisonNegation  replace == with !=
+[2/93] killed    lib/phoenix_html.ex:415  Arithmetic  replace + with *
+[3/93] killed    lib/phoenix_html/form_data.ex:87  Boolean  replace or with and
+[4/93] survived  lib/phoenix_html/engine.ex:113  Arithmetic  replace + with -
+[5/93] killed    lib/phoenix_html/form.ex:225  ComparisonNegation  replace != with ==
+[7/93] killed    lib/phoenix_html/engine.ex:39  Arithmetic  replace + with *
+[7/93] killed    lib/phoenix_html/engine.ex:54  Arithmetic  replace + with -
+[8/93] killed    lib/phoenix_html/form.ex:223  Boolean  replace or with and
+[9/93] killed    lib/phoenix_html/form_data.ex:128  Boolean  replace || with &&
+[10/93] killed    lib/phoenix_html.ex:405  Boolean  replace or with and
+[11/93] killed    lib/phoenix_html/engine.ex:59  Arithmetic  replace + with -
+[12/93] killed    lib/phoenix_html/engine.ex:54  Arithmetic  replace + with *
+[13/93] killed    lib/phoenix_html/form_data.ex:85  Boolean  replace || with &&
+[14/93] killed    lib/phoenix_html.ex:386  ComparisonNegation  replace == with !=
+[15/93] killed    lib/phoenix_html/form.ex:224  ComparisonNegation  replace != with ==
+[16/93] killed    lib/phoenix_html/form.ex:223  ComparisonNegation  replace != with ==
+[17/93] killed    lib/phoenix_html/form.ex:223  ComparisonNegation  replace != with ==
+[18/93] killed    lib/phoenix_html/engine.ex:39  Arithmetic  replace + with -
+[19/93] killed    lib/phoenix_html.ex:395  Boolean  replace or with and
+[20/93] killed    lib/phoenix_html/form.ex:223  ComparisonNegation  replace != with ==
+[21/93] killed    lib/phoenix_html.ex:405  Boolean  replace or with and
+[22/93] killed    lib/phoenix_html/form.ex:223  Boolean  replace or with and
+[23/93] killed    lib/phoenix_html/form.ex:224  Boolean  replace or with and
+[24/93] killed    lib/phoenix_html.ex:395  ComparisonNegation  replace == with !=
+[25/93] killed    lib/phoenix_html.ex:395  Boolean  replace or with and
+[26/93] killed    lib/phoenix_html.ex:396  ComparisonNegation  replace == with !=
+[27/93] killed    lib/phoenix_html/form_data.ex:142  Boolean  replace || with &&
+[28/93] killed    lib/phoenix_html/engine.ex:54  Arithmetic  replace + with *
+[29/93] killed    lib/phoenix_html.ex:397  Boolean  replace and with or
+[30/93] killed    lib/phoenix_html/form.ex:223  Boolean  replace or with and
+[31/93] killed    lib/phoenix_html/engine.ex:59  Arithmetic  replace + with *
+[32/93] killed    lib/phoenix_html/form.ex:265  Boolean  replace || with &&
+[33/93] killed    lib/phoenix_html.ex:405  Boolean  replace or with and
+[34/93] killed    lib/phoenix_html/form.ex:270  ComparisonNegation  replace == with !=
+[35/93] killed    lib/phoenix_html.ex:397  Boolean  replace and with or
+[36/93] killed    lib/phoenix_html/form_data.ex:127  Boolean  replace || with &&
+[37/93] killed    lib/phoenix_html.ex:396  Boolean  replace or with and
+[38/93] killed    lib/phoenix_html/form.ex:223  ComparisonNegation  replace != with ==
+[39/93] killed    lib/phoenix_html.ex:397  ComparisonNegation  replace == with !=
+[40/93] killed    lib/phoenix_html.ex:415  Arithmetic  replace + with -
+[41/93] survived  lib/phoenix_html/engine.ex:113  Arithmetic  replace + with *
+[42/93] killed    lib/phoenix_html/engine.ex:54  Arithmetic  replace + with -
+[43/93] killed    lib/phoenix_html.ex:396  Boolean  replace and with or
+[44/93] killed    lib/phoenix_html/form.ex:223  Boolean  replace or with and
+[45/93] killed    lib/phoenix_html.ex:405  Boolean  replace or with and
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Safe (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.Safe do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:1: Phoenix.HTML.Safe (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Atom (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Atom.beam)
+    │
+ 18 │ defimpl Phoenix.HTML.Safe, for: Atom do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:18: Phoenix.HTML.Safe.Atom (module)
+
+    warning: redefining module Phoenix.HTML.Safe.BitString (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.BitString.beam)
+    │
+ 23 │ defimpl Phoenix.HTML.Safe, for: BitString do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:23: Phoenix.HTML.Safe.BitString (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Time (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Time.beam)
+    │
+ 27 │ defimpl Phoenix.HTML.Safe, for: Time do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:27: Phoenix.HTML.Safe.Time (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Date (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Date.beam)
+    │
+ 31 │ defimpl Phoenix.HTML.Safe, for: Date do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:31: Phoenix.HTML.Safe.Date (module)
+
+    warning: redefining module Phoenix.HTML.Safe.NaiveDateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.NaiveDateTime.beam)
+    │
+ 35 │ defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:35: Phoenix.HTML.Safe.NaiveDateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.DateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.DateTime.beam)
+    │
+ 39 │ defimpl Phoenix.HTML.Safe, for: DateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:39: Phoenix.HTML.Safe.DateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Duration (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Duration.beam)
+    │
+ 48 │   defimpl Phoenix.HTML.Safe, for: Duration do
+    │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:48: Phoenix.HTML.Safe.Duration (module)
+
+    warning: redefining module Phoenix.HTML.Safe.List (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.List.beam)
+    │
+ 53 │ defimpl Phoenix.HTML.Safe, for: List do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:53: Phoenix.HTML.Safe.List (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Integer (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Integer.beam)
+    │
+ 90 │ defimpl Phoenix.HTML.Safe, for: Integer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:90: Phoenix.HTML.Safe.Integer (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Float (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Float.beam)
+    │
+ 94 │ defimpl Phoenix.HTML.Safe, for: Float do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:94: Phoenix.HTML.Safe.Float (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Tuple (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Tuple.beam)
+    │
+ 98 │ defimpl Phoenix.HTML.Safe, for: Tuple do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:98: Phoenix.HTML.Safe.Tuple (module)
+
+     warning: redefining module Phoenix.HTML.Safe.URI (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.URI.beam)
+     │
+ 103 │ defimpl Phoenix.HTML.Safe, for: URI do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/phoenix_html/safe.ex:103: Phoenix.HTML.Safe.URI (module)
+
+[46/93] killed    lib/phoenix_html/form_data.ex:179  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[47/93] killed    lib/phoenix_html.ex:225  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+[48/93] killed    lib/phoenix_html/form.ex:419  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[49/93] killed    lib/phoenix_html/safe.ex:65  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[50/93] survived  lib/phoenix_html.ex:120  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[51/93] killed    lib/phoenix_html.ex:289  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+[52/93] killed    lib/phoenix_html/form.ex:158  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+[53/93] killed    lib/phoenix_html/form.ex:94  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Safe (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.Safe do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:1: Phoenix.HTML.Safe (module)
+
+[54/93] killed    lib/phoenix_html.ex:254  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Safe.Atom (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Atom.beam)
+    │
+ 18 │ defimpl Phoenix.HTML.Safe, for: Atom do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:18: Phoenix.HTML.Safe.Atom (module)
+
+    warning: redefining module Phoenix.HTML.Safe.BitString (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.BitString.beam)
+    │
+ 23 │ defimpl Phoenix.HTML.Safe, for: BitString do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:23: Phoenix.HTML.Safe.BitString (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Time (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Time.beam)
+    │
+ 27 │ defimpl Phoenix.HTML.Safe, for: Time do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:27: Phoenix.HTML.Safe.Time (module)
+
+[55/93] survived  lib/phoenix_html/engine.ex:21  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Safe.Date (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Date.beam)
+    │
+ 31 │ defimpl Phoenix.HTML.Safe, for: Date do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:31: Phoenix.HTML.Safe.Date (module)
+
+    warning: redefining module Phoenix.HTML.Safe.NaiveDateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.NaiveDateTime.beam)
+    │
+ 35 │ defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:35: Phoenix.HTML.Safe.NaiveDateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.Safe do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:1: Phoenix.HTML.Safe (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Safe.DateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.DateTime.beam)
+    │
+ 39 │ defimpl Phoenix.HTML.Safe, for: DateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:39: Phoenix.HTML.Safe.DateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Duration (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Duration.beam)
+    │
+ 48 │   defimpl Phoenix.HTML.Safe, for: Duration do
+    │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:48: Phoenix.HTML.Safe.Duration (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Atom (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Atom.beam)
+    │
+ 18 │ defimpl Phoenix.HTML.Safe, for: Atom do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:18: Phoenix.HTML.Safe.Atom (module)
+
+    warning: redefining module Phoenix.HTML.Safe.BitString (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.BitString.beam)
+    │
+ 23 │ defimpl Phoenix.HTML.Safe, for: BitString do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:23: Phoenix.HTML.Safe.BitString (module)
+
+    warning: redefining module Phoenix.HTML.Safe.List (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.List.beam)
+    │
+ 53 │ defimpl Phoenix.HTML.Safe, for: List do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:53: Phoenix.HTML.Safe.List (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Time (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Time.beam)
+    │
+ 27 │ defimpl Phoenix.HTML.Safe, for: Time do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:27: Phoenix.HTML.Safe.Time (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Integer (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Integer.beam)
+    │
+ 90 │ defimpl Phoenix.HTML.Safe, for: Integer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:90: Phoenix.HTML.Safe.Integer (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Date (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Date.beam)
+    │
+ 31 │ defimpl Phoenix.HTML.Safe, for: Date do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:31: Phoenix.HTML.Safe.Date (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Float (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Float.beam)
+    │
+ 94 │ defimpl Phoenix.HTML.Safe, for: Float do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:94: Phoenix.HTML.Safe.Float (module)
+
+    warning: redefining module Phoenix.HTML.Safe.NaiveDateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.NaiveDateTime.beam)
+    │
+ 35 │ defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:35: Phoenix.HTML.Safe.NaiveDateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Tuple (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Tuple.beam)
+    │
+ 98 │ defimpl Phoenix.HTML.Safe, for: Tuple do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:98: Phoenix.HTML.Safe.Tuple (module)
+
+    warning: redefining module Phoenix.HTML.Safe.DateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.DateTime.beam)
+    │
+ 39 │ defimpl Phoenix.HTML.Safe, for: DateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:39: Phoenix.HTML.Safe.DateTime (module)
+
+     warning: redefining module Phoenix.HTML.Safe.URI (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.URI.beam)
+     │
+ 103 │ defimpl Phoenix.HTML.Safe, for: URI do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/phoenix_html/safe.ex:103: Phoenix.HTML.Safe.URI (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Duration (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Duration.beam)
+    │
+ 48 │   defimpl Phoenix.HTML.Safe, for: Duration do
+    │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:48: Phoenix.HTML.Safe.Duration (module)
+
+[56/93] killed    lib/phoenix_html.ex:295  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Safe.List (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.List.beam)
+    │
+ 53 │ defimpl Phoenix.HTML.Safe, for: List do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:53: Phoenix.HTML.Safe.List (module)
+
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Integer (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Integer.beam)
+    │
+ 90 │ defimpl Phoenix.HTML.Safe, for: Integer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:90: Phoenix.HTML.Safe.Integer (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Float (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Float.beam)
+    │
+ 94 │ defimpl Phoenix.HTML.Safe, for: Float do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:94: Phoenix.HTML.Safe.Float (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Tuple (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Tuple.beam)
+    │
+ 98 │ defimpl Phoenix.HTML.Safe, for: Tuple do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:98: Phoenix.HTML.Safe.Tuple (module)
+
+     warning: redefining module Phoenix.HTML.Safe.URI (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.URI.beam)
+     │
+ 103 │ defimpl Phoenix.HTML.Safe, for: URI do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/phoenix_html/safe.ex:103: Phoenix.HTML.Safe.URI (module)
+
+[57/93] survived  lib/phoenix_html/safe.ex:69  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[58/93] survived  lib/phoenix_html/safe.ex:65  GuardTypeTest  replace guard is_integer with is_number
+[59/93] survived  lib/phoenix_html/engine.ex:135  GuardTypeTest  replace guard is_number with is_float
+[60/93] killed    lib/phoenix_html/form.ex:222  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.Safe (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.Safe do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:1: Phoenix.HTML.Safe (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Atom (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Atom.beam)
+    │
+ 18 │ defimpl Phoenix.HTML.Safe, for: Atom do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:18: Phoenix.HTML.Safe.Atom (module)
+
+    warning: redefining module Phoenix.HTML.Safe.BitString (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.BitString.beam)
+    │
+ 23 │ defimpl Phoenix.HTML.Safe, for: BitString do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:23: Phoenix.HTML.Safe.BitString (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Time (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Time.beam)
+    │
+ 27 │ defimpl Phoenix.HTML.Safe, for: Time do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:27: Phoenix.HTML.Safe.Time (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Date (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Date.beam)
+    │
+ 31 │ defimpl Phoenix.HTML.Safe, for: Date do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:31: Phoenix.HTML.Safe.Date (module)
+
+    warning: redefining module Phoenix.HTML.Safe.NaiveDateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.NaiveDateTime.beam)
+    │
+ 35 │ defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:35: Phoenix.HTML.Safe.NaiveDateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.DateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.DateTime.beam)
+    │
+ 39 │ defimpl Phoenix.HTML.Safe, for: DateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:39: Phoenix.HTML.Safe.DateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Duration (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Duration.beam)
+    │
+ 48 │   defimpl Phoenix.HTML.Safe, for: Duration do
+    │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:48: Phoenix.HTML.Safe.Duration (module)
+
+    warning: redefining module Phoenix.HTML.Safe.List (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.List.beam)
+    │
+ 53 │ defimpl Phoenix.HTML.Safe, for: List do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:53: Phoenix.HTML.Safe.List (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Integer (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Integer.beam)
+    │
+ 90 │ defimpl Phoenix.HTML.Safe, for: Integer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:90: Phoenix.HTML.Safe.Integer (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Float (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Float.beam)
+    │
+ 94 │ defimpl Phoenix.HTML.Safe, for: Float do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:94: Phoenix.HTML.Safe.Float (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Tuple (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Tuple.beam)
+    │
+ 98 │ defimpl Phoenix.HTML.Safe, for: Tuple do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:98: Phoenix.HTML.Safe.Tuple (module)
+
+[61/93] killed    lib/phoenix_html.ex:219  GuardTypeTest  replace guard is_list with is_tuple
+     warning: redefining module Phoenix.HTML.Safe.URI (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.URI.beam)
+     │
+ 103 │ defimpl Phoenix.HTML.Safe, for: URI do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/phoenix_html/safe.ex:103: Phoenix.HTML.Safe.URI (module)
+
+    warning: redefining module Phoenix.HTML.Safe (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.Safe do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:1: Phoenix.HTML.Safe (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Atom (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Atom.beam)
+    │
+ 18 │ defimpl Phoenix.HTML.Safe, for: Atom do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:18: Phoenix.HTML.Safe.Atom (module)
+
+    warning: redefining module Phoenix.HTML.Safe.BitString (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.BitString.beam)
+    │
+ 23 │ defimpl Phoenix.HTML.Safe, for: BitString do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:23: Phoenix.HTML.Safe.BitString (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Time (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Time.beam)
+    │
+ 27 │ defimpl Phoenix.HTML.Safe, for: Time do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:27: Phoenix.HTML.Safe.Time (module)
+
+[62/93] survived  lib/phoenix_html/engine.ex:170  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Safe.Date (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Date.beam)
+    │
+ 31 │ defimpl Phoenix.HTML.Safe, for: Date do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:31: Phoenix.HTML.Safe.Date (module)
+
+    warning: redefining module Phoenix.HTML.Safe.NaiveDateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.NaiveDateTime.beam)
+    │
+ 35 │ defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:35: Phoenix.HTML.Safe.NaiveDateTime (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Safe.DateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.DateTime.beam)
+    │
+ 39 │ defimpl Phoenix.HTML.Safe, for: DateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:39: Phoenix.HTML.Safe.DateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Duration (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Duration.beam)
+    │
+ 48 │   defimpl Phoenix.HTML.Safe, for: Duration do
+    │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:48: Phoenix.HTML.Safe.Duration (module)
+
+[63/93] killed    lib/phoenix_html/form_data.ex:118  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Safe.List (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.List.beam)
+    │
+ 53 │ defimpl Phoenix.HTML.Safe, for: List do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:53: Phoenix.HTML.Safe.List (module)
+
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Integer (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Integer.beam)
+    │
+ 90 │ defimpl Phoenix.HTML.Safe, for: Integer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:90: Phoenix.HTML.Safe.Integer (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Float (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Float.beam)
+    │
+ 94 │ defimpl Phoenix.HTML.Safe, for: Float do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:94: Phoenix.HTML.Safe.Float (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Tuple (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Tuple.beam)
+    │
+ 98 │ defimpl Phoenix.HTML.Safe, for: Tuple do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:98: Phoenix.HTML.Safe.Tuple (module)
+
+[64/93] killed    lib/phoenix_html/safe.ex:69  GuardTypeTest  replace guard is_integer with is_float
+     warning: redefining module Phoenix.HTML.Safe.URI (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.URI.beam)
+     │
+ 103 │ defimpl Phoenix.HTML.Safe, for: URI do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/phoenix_html/safe.ex:103: Phoenix.HTML.Safe.URI (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[65/93] survived  lib/phoenix_html/engine.ex:130  GuardTypeTest  replace guard is_list with is_tuple
+[66/93] survived  lib/phoenix_html/safe.ex:65  GuardComparisonBoundary  replace guard <= with <
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[67/93] killed    lib/phoenix_html/form.ex:394  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+[68/93] killed    lib/phoenix_html/form.ex:140  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[69/93] killed    lib/phoenix_html/form.ex:154  GuardTypeTest  replace guard is_atom with is_nil
+[70/93] killed    lib/phoenix_html/form.ex:408  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+[71/93] killed    lib/phoenix_html.ex:237  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+[72/93] killed    lib/phoenix_html.ex:240  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[73/93] survived  lib/phoenix_html/engine.ex:135  GuardTypeTest  replace guard is_number with is_integer
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[74/93] killed    lib/phoenix_html.ex:222  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[75/93] survived  lib/phoenix_html/form.ex:395  GuardTypeTest  replace guard is_map with is_list
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[76/93] killed    lib/phoenix_html/form.ex:158  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+[77/93] killed    lib/phoenix_html/form_data.ex:191  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[78/93] killed    lib/phoenix_html/engine.ex:170  GuardTypeTest  replace guard is_atom with is_nil
+[79/93] killed    lib/phoenix_html/form.ex:144  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+[80/93] killed    lib/phoenix_html/form.ex:192  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[81/93] survived  lib/phoenix_html/form.ex:234  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[82/93] survived  lib/phoenix_html/engine.ex:142  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[83/93] killed    lib/phoenix_html/form_data.ex:105  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[84/93] survived  lib/phoenix_html.ex:196  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+[85/93] killed    lib/phoenix_html/form.ex:192  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[86/93] killed    lib/phoenix_html.ex:234  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+    warning: redefining module Phoenix.HTML.FormData (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.FormData do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:1: Phoenix.HTML.FormData (module)
+
+    warning: redefining module Phoenix.HTML.FormData.Map (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.FormData.Map.beam)
+    │
+ 80 │ defimpl Phoenix.HTML.FormData, for: Map do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form_data.ex:80: Phoenix.HTML.FormData.Map (module)
+
+[87/93] killed    lib/phoenix_html/form.ex:419  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.beam)
+    │
+  1 │ defmodule Phoenix.HTML do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html.ex:1: Phoenix.HTML (module)
+
+[88/93] killed    lib/phoenix_html.ex:263  GuardTypeTest  replace guard is_number with is_float
+    warning: redefining module Phoenix.HTML.Form (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Form.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Form do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/form.ex:1: Phoenix.HTML.Form (module)
+
+[89/93] survived  lib/phoenix_html.ex:263  GuardTypeTest  replace guard is_number with is_integer
+    warning: redefining module Phoenix.HTML.Engine (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Engine.beam)
+    │
+  1 │ defmodule Phoenix.HTML.Engine do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/engine.ex:1: Phoenix.HTML.Engine (module)
+
+    warning: redefining module Phoenix.HTML.Safe (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.beam)
+    │
+  1 │ defprotocol Phoenix.HTML.Safe do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:1: Phoenix.HTML.Safe (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Atom (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Atom.beam)
+    │
+ 18 │ defimpl Phoenix.HTML.Safe, for: Atom do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:18: Phoenix.HTML.Safe.Atom (module)
+
+[90/93] killed    lib/phoenix_html/form.ex:189  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Phoenix.HTML.Safe.BitString (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.BitString.beam)
+    │
+ 23 │ defimpl Phoenix.HTML.Safe, for: BitString do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:23: Phoenix.HTML.Safe.BitString (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Time (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Time.beam)
+    │
+ 27 │ defimpl Phoenix.HTML.Safe, for: Time do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:27: Phoenix.HTML.Safe.Time (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Date (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Date.beam)
+    │
+ 31 │ defimpl Phoenix.HTML.Safe, for: Date do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:31: Phoenix.HTML.Safe.Date (module)
+
+    warning: redefining module Phoenix.HTML.Safe.NaiveDateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.NaiveDateTime.beam)
+    │
+ 35 │ defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:35: Phoenix.HTML.Safe.NaiveDateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.DateTime (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.DateTime.beam)
+    │
+ 39 │ defimpl Phoenix.HTML.Safe, for: DateTime do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:39: Phoenix.HTML.Safe.DateTime (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Duration (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Duration.beam)
+    │
+ 48 │   defimpl Phoenix.HTML.Safe, for: Duration do
+    │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:48: Phoenix.HTML.Safe.Duration (module)
+
+    warning: redefining module Phoenix.HTML.Safe.List (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.List.beam)
+    │
+ 53 │ defimpl Phoenix.HTML.Safe, for: List do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:53: Phoenix.HTML.Safe.List (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Integer (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Integer.beam)
+    │
+ 90 │ defimpl Phoenix.HTML.Safe, for: Integer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:90: Phoenix.HTML.Safe.Integer (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Float (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Float.beam)
+    │
+ 94 │ defimpl Phoenix.HTML.Safe, for: Float do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:94: Phoenix.HTML.Safe.Float (module)
+
+    warning: redefining module Phoenix.HTML.Safe.Tuple (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.Tuple.beam)
+    │
+ 98 │ defimpl Phoenix.HTML.Safe, for: Tuple do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/phoenix_html/safe.ex:98: Phoenix.HTML.Safe.Tuple (module)
+
+     warning: redefining module Phoenix.HTML.Safe.URI (current version loaded from _build/mut_schema/lib/phoenix_html/ebin/Elixir.Phoenix.HTML.Safe.URI.beam)
+     │
+ 103 │ defimpl Phoenix.HTML.Safe, for: URI do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/phoenix_html/safe.ex:103: Phoenix.HTML.Safe.URI (module)
+
+[91/93] killed    lib/phoenix_html.ex:274  GuardTypeTest  replace guard is_list with is_tuple
+[92/93] survived  lib/phoenix_html/engine.ex:135  GuardTypeTest  replace guard is_atom with is_nil
+[93/93] killed    lib/phoenix_html/safe.ex:65  GuardComparisonNegation  replace guard <= with >
+Mutation score: 76/93 = 81.7%
+
+Surviving mutants:
+  lib/phoenix_html/engine.ex:113 Arithmetic               replace + with -
+  lib/phoenix_html/engine.ex:113 Arithmetic               replace + with *
+  lib/phoenix_html.ex:120 GuardTypeTest            replace guard is_list with is_tuple
+  lib/phoenix_html/engine.ex:21 GuardTypeTest            replace guard is_list with is_tuple
+  lib/phoenix_html/safe.ex:69 GuardTypeTest            replace guard is_integer with is_number
+  lib/phoenix_html/safe.ex:65 GuardTypeTest            replace guard is_integer with is_number
+  lib/phoenix_html/engine.ex:135 GuardTypeTest            replace guard is_number with is_float
+  lib/phoenix_html/engine.ex:170 GuardTypeTest            replace guard is_atom with is_nil
+  lib/phoenix_html/engine.ex:130 GuardTypeTest            replace guard is_list with is_tuple
+  lib/phoenix_html/safe.ex:65 GuardComparisonBoundary  replace guard <= with <
+  lib/phoenix_html/engine.ex:135 GuardTypeTest            replace guard is_number with is_integer
+  lib/phoenix_html/form.ex:395 GuardTypeTest            replace guard is_map with is_list
+  lib/phoenix_html/form.ex:234 GuardTypeTest            replace guard is_atom with is_nil
+  lib/phoenix_html/engine.ex:142 GuardTypeTest            replace guard is_list with is_tuple
+  lib/phoenix_html.ex:196 GuardTypeTest            replace guard is_list with is_tuple
+  lib/phoenix_html.ex:263 GuardTypeTest            replace guard is_number with is_integer
+  lib/phoenix_html/engine.ex:135 GuardTypeTest            replace guard is_atom with is_nil
+
+Schema:    43/45 killed (95.6%)   wall: 0.3s
+Fallback:  33/48 killed (68.8%)   wall: 4.0s
+  guard_comparison_boundary:    0/1 killed
+  guard_comparison_negation:    1/1 killed
+  guard_type_test:              32/46 killed
+Skipped:   551 (ambiguous_oracle_match: 1, body_literal_engine_disabled: 69, missing_oracle_site: 45, no_applicable_mutator: 21, unsupported_dispatch: 415)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 4.4s
+Fallback wall-clock: 92.3% of total
+Fallback mutants: 51.6% of executed
+
+Phases:
+  oracle build:         2505 ms
+  baseline tests:        529 ms
+  plan generation:        18 ms
+  schema build:         2428 ms
+  schema workers:        159 ms
+  fallback workers:     2892 ms
+  report writing:          7 ms
+  total:               10937 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    87
+    all tests:          6
+  avg tests/mutant: 3.1
+  median tests/mutant: 3
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Persistent worker:
+  workers:     4
+  boot:        median 503.5 ms (max 521.0 ms)
+  app startup: median 2.7 ms (total apps: 12)
+  test load:   median 297.1 ms (total files: 20)
+  mutant run:  median 3.5 ms (p95 25.4 ms, n=45)
+  reset hooks:
+    application_env: 0.0 ms
+    ets:             0.1 ms
+    processes:       0.0 ms
+    persistent_term: 0.0 ms
+    on_exit:         0.0 ms
+    mox:             0.2 ms
+    ecto:            0.1 ms
+  filter lookup: 0.1 ms
+  memory: peak 60.3 MB total, 14.6 MB processes
+
+Mutalisk run complete in 11232ms
+bench.wall_ms=13000

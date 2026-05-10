@@ -1,5 +1,34 @@
 # Mutalisk Benchmarks
 
+## v1.12 SchemaPlacer escaped-quote fix (M34, 2026-05-10)
+
+M34 narrowed `Mut.SchemaPlacer.strip_heredoc_delimiters/1` to
+match only `:<<>>` interpolated-string AST nodes, leaving sigil
+heredocs (`:sigil_S` / `:sigil_s` / etc.) intact. Pre-M34, the
+strip applied to all 3-tuple nodes including sigils, which forced
+`Macro.to_string/1` into the regular `~S"..."` form for sigil
+heredocs — fatal when the body contained literal `"` characters
+(would close the sigil prematurely). Three M27-pinned targets
+crashed schema build on this; M34 unblocks them.
+
+Re-bench results (replacing the M27 unrunnable rows):
+
+| Target | Combined | Mix score | Persistent score | Drift | Class (post-M34) |
+|---|---:|---:|---:|---:|---|
+| `phoenix_html` v4.3.0 | 93 mutants | 81.7% | 81.7% | 0 | **clean** |
+| `plug` v1.19.1 | 352 mutants | 97.6% | 98.0% | 17 (4.8%) | drift (16 `RuntimeError → Killed` in `lib/plug/router/utils.ex` — supervisor-init class, same mechanism as Ecto/M30) |
+| `phoenix_pubsub` v2.2.0 | 113 mutants (mix) | 71.4% | — | — | unrunnable (different cause): persistent boot fails when `test/support/cluster.ex` calls `Mix.State.get/2` from a non-Mix-bootstrapped node. Mutalisk regression closed; test-infra issue out of scope. |
+
+The M27 BENCHMARKS table entries for these three targets are
+updated to reflect the post-M34 state.
+
+`bench/M27_RUNBOOK.md` adjusted to note that M34 closed the
+SchemaPlacer crash; phoenix_pubsub's residual cluster-test
+dependency on `Mix.State` is documented as an unrelated
+unrunnable. The persistent boot-warning catalogue is unchanged
+— phoenix_pubsub failure is not a project-class signature we
+can detect from compiled-dep tree.
+
 ## v1.11 OSS harness expansion (M27, 2026-05-10)
 
 M27 widens the permanent OSS validation matrix beyond the 5
@@ -21,9 +50,9 @@ persistent drift on new project shapes only).
 | `nimble_pool` | `v1.1.0` (`9829f27`) | 22 | 6 | 28 | 75.0% | 89.3% | 4 (14.3%) | pool_warm_state ×4 | drift |
 | `nimble_csv` | `v1.3.0` (`2fc3cbf`) | 0 | 0 | 0 | — | — | — | — | informational (defmacro-heavy, 0 mutants) |
 | `gen_stage` | `v1.3.2` (`d1532fa`) | 186 | 91 | 277 | mix-baseline-flake | 85.6% | — | — | informational (mix flaked one timing test) |
-| `phoenix_html` | `v4.3.0` (`8cfd3e3`) | — | — | — | — | — | — | — | unrunnable: SchemaPlacer crash on escaped-quote string content (NEW unsupported pattern) |
-| `plug` | `v1.19.1` (`8723880`) | — | — | — | — | — | — | — | unrunnable: same SchemaPlacer crash class |
-| `phoenix_pubsub` | `v2.2.0` (`086e0af`) | — | — | — | — | — | — | — | unrunnable: same SchemaPlacer crash class |
+| `phoenix_html` | `v4.3.0` (`8cfd3e3`) | 45 | 48 | 93 | 81.7% | 81.7% | 0 | — | clean (post-M34) |
+| `plug` | `v1.19.1` (`8723880`) | 225 | 127 | 352 | 97.6% | 98.0% | 17 (4.8%) | unclassified ×16 + parse_class ×1 | drift (post-M34); supervisor-init class on `lib/plug/router/utils.ex` |
+| `phoenix_pubsub` | `v2.2.0` (`086e0af`) | 78 | 35 | 113 | 71.4% | — | — | — | unrunnable (post-M34): persistent boot fails when test/support/cluster.ex calls `Mix.State.get/2` on a node where Mix isn't bootstrapped — test-infra issue, NOT a SchemaPlacer crash |
 | `finch` | `v0.9.1` (`0530e34`) | — | — | — | — | — | — | — | unrunnable: `:x509` transitive dep fails on Erlang/OTP 28 |
 | `ex_machina` | `v2.8.0` (`d1ec5e4`) | — | — | — | — | — | — | — | unrunnable: `:credo` dev dep fails on Elixir 1.19 (regex char-class) |
 | `tzdata` | `v1.1.3` (`61fb7ec`) | — | — | — | — | — | — | — | unrunnable: baseline test failures |

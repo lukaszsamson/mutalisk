@@ -2,7 +2,7 @@ target=plug repo=https://github.com/elixir-plug/plug.git ref=v1.19.1 sha=8723880
 mutalisk_path=mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.014s
+Resolution completed in 0.016s
 Unchanged:
   earmark_parser 1.4.44
   ex_doc 0.39.2
@@ -40,17 +40,411 @@ Compiling 1 file (.erl)
 Compiling 42 files (.ex)
 Generated plug app
 Schema build starting
-** (SyntaxError) invalid syntax found on nofile:239:32:
-     error: unexpected token: "\" (column 32, code point U+005C)
-     │
- 239 │     iex> token(~S[\"<f\oo>\\"<b\ar>\"])
-     │                                ^
-     │
-     └─ nofile:239:32
-    (elixir 1.19.5) lib/code.ex:1103: Code.format_string!/2
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:95: Mut.SchemaPlacer.render/1
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:141: Mut.SchemaPlacer.instrument_file/2
-    (mutalisk 0.1.0) lib/mut/schema_build.ex:125: anonymous fn/3 in Mut.SchemaBuild.instrument_files/2
-    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
-    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3
-    (mutalisk 0.1.0) lib/mut/schema_build.ex:95: Mut.SchemaBuild.build_in_work_copy/3
+Schema build complete
+[1/352] killed    lib/plug/debugger.ex:230  Boolean  replace || with &&
+[2/352] killed    lib/plug/router.ex:509  Boolean  replace || with &&
+[3/352] killed    lib/plug/static.ex:463  Boolean  replace or with and
+[4/352] killed    lib/plug/parsers/multipart.ex:231  Arithmetic  replace - with +
+[5/352] killed    lib/plug/static.ex:326  Arithmetic  replace - with +
+[6/352] killed    lib/plug/adapters/test/conn.ex:18  Boolean  replace || with &&
+[7/352] killed    lib/plug/telemetry.ex:82  Boolean  replace && with ||
+[8/352] killed    lib/plug/parsers/json.ex:47  ComparisonNegation  replace != with ==
+[9/352] killed    lib/plug/conn/query.ex:307  Boolean  replace and with or
+[10/352] killed    lib/plug/ssl.ex:412  ComparisonNegation  replace == with !=
+[11/352] killed    lib/plug/conn/query.ex:205  Arithmetic  replace + with *
+[12/352] killed    lib/plug/conn/adapter.ex:56  ComparisonNegation  replace != with ==
+[13/352] killed    lib/plug/csrf_protection.ex:398  Boolean  replace and with or
+[14/352] killed    lib/plug/static.ex:241  ComparisonNegation  replace != with ==
+[15/352] killed    lib/plug/logger.ex:41  Arithmetic  replace - with +
+[16/352] killed    lib/plug/upload.ex:161  Arithmetic  replace + with -
+[17/352] killed    lib/plug/conn/utils.ex:285  ComparisonNegation  replace != with ==
+[18/352] error     lib/plug/router/utils.ex:137  ComparisonNegation  replace != with ==
+[19/352] killed    lib/plug/session/ets.ex:91  Arithmetic  replace + with -
+[20/352] killed    lib/plug/router/utils.ex:152  Arithmetic  replace - with +
+[21/352] killed    lib/plug/logger.ex:41  Arithmetic  replace - with *
+[22/352] killed    lib/plug/conn.ex:1907  Boolean  replace || with &&
+[23/352] killed    lib/plug/csrf_protection.ex:194  ComparisonNegation  replace == with !=
+[24/352] killed    lib/plug/upload.ex:135  Arithmetic  replace * with -
+[25/352] killed    lib/plug/adapters/test/conn.ex:51  Boolean  replace || with &&
+[26/352] killed    lib/plug/csrf_protection.ex:398  UnaryNot  remove unary not
+[27/352] error     lib/plug/router/utils.ex:137  Boolean  replace and with or
+[28/352] killed    lib/plug/basic_auth.ex:105  Boolean  replace and with or
+[29/352] killed    lib/plug/debugger.ex:343  Boolean  replace || with &&
+[30/352] killed    lib/plug/adapters/test/conn.ex:51  Boolean  replace || with &&
+[31/352] killed    lib/plug/builder.ex:270  Boolean  replace || with &&
+[32/352] killed    lib/plug/debugger.ex:363  Arithmetic  replace + with *
+[33/352] killed    lib/plug/conn/cookies.ex:93  UnaryNot  remove unary !
+[34/352] killed    lib/plug/telemetry.ex:75  Arithmetic  replace - with *
+[35/352] killed    lib/plug/conn/cookies.ex:84  Boolean  replace || with &&
+[36/352] killed    lib/plug/csrf_protection.ex:311  ComparisonNegation  replace == with !=
+[37/352] killed    lib/plug/router/utils.ex:152  Arithmetic  replace - with *
+[38/352] killed    lib/plug/session/cookie.ex:229  Boolean  replace || with &&
+[39/352] killed    lib/plug/ssl.ex:194  UnaryNot  remove unary not
+[40/352] killed    lib/plug/conn/utils.ex:320  Arithmetic  replace - with *
+[41/352] killed    lib/plug/static.ex:412  UnaryNot  remove unary not
+[42/352] killed    lib/plug/conn/cookies.ex:38  Arithmetic  replace + with *
+[43/352] killed    lib/plug.ex:111  Boolean  replace && with ||
+[44/352] killed    lib/plug/csrf_protection.ex:329  Boolean  replace || with &&
+[45/352] killed    lib/plug/static.ex:312  Arithmetic  replace - with *
+[46/352] killed    lib/plug/csrf_protection.ex:398  Boolean  replace and with or
+[47/352] killed    lib/plug/upload.ex:161  Arithmetic  replace + with *
+[48/352] killed    lib/plug/upload.ex:135  Arithmetic  replace * with +
+[49/352] killed    lib/plug/conn/utils.ex:321  Arithmetic  replace - with +
+[50/352] killed    lib/plug/conn/cookies.ex:151  Arithmetic  replace + with *
+[51/352] killed    lib/plug/upload.ex:135  Arithmetic  replace * with /
+[52/352] killed    lib/plug/adapters/test/conn.ex:231  ComparisonNegation  replace != with ==
+[53/352] killed    lib/plug/adapters/test/conn.ex:54  Boolean  replace || with &&
+[54/352] killed    lib/plug/csrf_protection.ex:358  Boolean  replace or with and
+[55/352] error     lib/plug/router/utils.ex:161  Arithmetic  replace - with +
+[56/352] killed    lib/plug/conn/query.ex:206  Arithmetic  replace - with +
+[57/352] killed    lib/plug/conn.ex:1111  ComparisonNegation  replace > with <=
+[58/352] killed    lib/plug/csrf_protection.ex:385  ComparisonNegation  replace == with !=
+[59/352] killed    lib/plug/debugger.ex:494  Arithmetic  replace - with +
+[60/352] killed    lib/plug/adapters/test/conn.ex:59  Boolean  replace || with &&
+[61/352] killed    lib/plug/parsers/multipart.ex:112  Boolean  replace || with &&
+[62/352] killed    lib/plug/parsers/multipart.ex:153  ComparisonBoundary  replace > with >=
+[63/352] killed    lib/plug/static.ex:348  ComparisonNegation  replace != with ==
+[64/352] killed    lib/plug.ex:125  Boolean  replace && with ||
+[65/352] killed    lib/plug/router/utils.ex:152  Arithmetic  replace - with +
+[66/352] killed    lib/plug/conn.ex:576  Boolean  replace and with or
+[67/352] killed    lib/plug/html.ex:66  Arithmetic  replace + with *
+[68/352] killed    lib/plug/conn/utils.ex:253  ComparisonNegation  replace == with !=
+[69/352] killed    lib/plug/router/utils.ex:209  ComparisonNegation  replace == with !=
+[70/352] killed    lib/plug/debugger.ex:497  Arithmetic  replace - with *
+[71/352] killed    lib/plug/conn.ex:500  Boolean  replace && with ||
+[72/352] killed    lib/plug/debugger.ex:495  Arithmetic  replace + with -
+[73/352] killed    lib/plug/conn/query.ex:231  Arithmetic  replace - with +
+[74/352] killed    lib/plug/adapters/test/conn.ex:55  Boolean  replace || with &&
+[75/352] killed    lib/plug/mime.ex:32  ComparisonNegation  replace != with ==
+[76/352] killed    lib/plug/debugger.ex:495  Arithmetic  replace + with *
+[77/352] killed    lib/plug/debugger.ex:502  Arithmetic  replace + with *
+[78/352] killed    lib/plug/static.ex:406  Boolean  replace && with ||
+[79/352] killed    lib/plug/parsers/json.ex:45  Arithmetic  replace + with -
+[80/352] killed    lib/plug/csrf_protection.ex:398  UnaryNot  remove unary not
+[81/352] killed    lib/plug/debugger.ex:363  Arithmetic  replace + with -
+[82/352] killed    lib/plug/adapters/test/conn.ex:118  Arithmetic  replace - with +
+[83/352] killed    lib/plug/ssl.ex:189  Boolean  replace or with and
+[84/352] killed    lib/plug/html.ex:66  Arithmetic  replace + with *
+[85/352] killed    lib/plug/debugger.ex:510  Arithmetic  replace + with -
+[86/352] killed    lib/plug/adapters/test/conn.ex:62  Boolean  replace || with &&
+[87/352] killed    lib/plug/html.ex:71  Arithmetic  replace + with *
+[88/352] killed    lib/plug/conn/query.ex:433  ComparisonNegation  replace == with !=
+[89/352] killed    lib/plug/csrf_protection.ex:328  Boolean  replace || with &&
+[90/352] killed    lib/plug/parsers/multipart.ex:153  ComparisonNegation  replace > with <=
+[91/352] killed    lib/plug/conn/query.ex:309  Arithmetic  replace - with *
+[92/352] killed    lib/plug/debugger.ex:497  Arithmetic  replace - with +
+[93/352] killed    lib/plug/debugger.ex:346  Boolean  replace && with ||
+[94/352] killed    lib/plug/conn.ex:1966  Boolean  replace and with or
+[95/352] killed    lib/plug/conn/cookies.ex:55  Arithmetic  replace - with *
+[96/352] error     lib/plug/router/utils.ex:161  Arithmetic  replace - with +
+[97/352] killed    lib/plug/static.ex:326  Arithmetic  replace + with *
+[98/352] killed    lib/plug/conn/query.ex:307  ComparisonNegation  replace == with !=
+[99/352] killed    lib/plug/ssl.ex:231  ComparisonNegation  replace == with !=
+[100/352] killed    lib/plug/conn/utils.ex:320  ComparisonBoundary  replace > with >=
+[101/352] killed    lib/plug/ssl.ex:193  UnaryNot  remove unary not
+[102/352] killed    lib/plug/parsers/multipart.ex:211  Arithmetic  replace - with *
+[103/352] killed    lib/plug/adapters/test/conn.ex:61  Boolean  replace || with &&
+[104/352] killed    lib/plug/conn/utils.ex:321  Arithmetic  replace - with *
+[105/352] killed    lib/plug/parsers/multipart.ex:241  Arithmetic  replace - with *
+[106/352] killed    lib/plug/static.ex:312  Arithmetic  replace - with +
+[107/352] killed    lib/plug/csrf_protection.ex:194  Boolean  replace and with or
+[108/352] killed    lib/plug/conn/utils.ex:252  Boolean  replace and with or
+[109/352] killed    lib/plug/conn.ex:1967  UnaryNot  remove unary not
+[110/352] killed    lib/plug/debugger.ex:502  Arithmetic  replace + with -
+[111/352] killed    lib/plug/conn/query.ex:227  Arithmetic  replace + with -
+[112/352] error     lib/plug/router/utils.ex:161  Arithmetic  replace - with *
+[113/352] killed    lib/plug.ex:171  Arithmetic  replace - with +
+[114/352] killed    lib/plug/html.ex:51  Arithmetic  replace + with *
+[115/352] killed    lib/plug/parsers/multipart.ex:224  Arithmetic  replace - with +
+[116/352] killed    lib/plug/html.ex:51  Arithmetic  replace + with -
+[117/352] killed    lib/plug/debugger.ex:494  Arithmetic  replace - with +
+[118/352] killed    lib/plug/adapters/test/conn.ex:60  Boolean  replace || with &&
+[119/352] killed    lib/plug/conn/query.ex:218  Arithmetic  replace + with *
+[120/352] killed    lib/plug/ssl.ex:452  Boolean  replace && with ||
+[121/352] killed    lib/plug/conn/query.ex:206  Arithmetic  replace - with *
+[122/352] killed    lib/plug/conn/utils.ex:320  Arithmetic  replace - with +
+[123/352] killed    lib/plug/parsers/multipart.ex:235  Arithmetic  replace - with *
+[124/352] killed    lib/plug/parsers/multipart.ex:231  Arithmetic  replace - with *
+[125/352] killed    lib/plug/conn/query.ex:307  ComparisonNegation  replace != with ==
+[126/352] killed    lib/plug/static.ex:326  Arithmetic  replace - with *
+[127/352] killed    lib/plug/debugger.ex:497  Arithmetic  replace - with *
+[128/352] killed    lib/plug/conn.ex:1111  ComparisonBoundary  replace > with >=
+[129/352] killed    lib/plug/conn/utils.ex:247  Boolean  replace and with or
+[130/352] killed    lib/plug/router/utils.ex:152  Arithmetic  replace - with *
+[131/352] killed    lib/plug/static.ex:300  Arithmetic  replace - with *
+[132/352] error     lib/plug/router/utils.ex:137  ComparisonNegation  replace != with ==
+[133/352] killed    lib/plug/conn.ex:1909  ComparisonNegation  replace != with ==
+[134/352] error     lib/plug/builder.ex:309  Boolean  replace || with &&
+[135/352] killed    lib/plug/parsers/multipart.ex:215  Arithmetic  replace - with *
+[136/352] killed    lib/plug/debugger.ex:497  Arithmetic  replace - with +
+[137/352] killed    lib/plug/parsers/multipart.ex:245  Arithmetic  replace - with +
+[138/352] killed    lib/plug/static.ex:300  Arithmetic  replace - with +
+[139/352] killed    lib/plug/method_override.ex:61  Boolean  replace || with &&
+[140/352] killed    lib/plug/debugger.ex:362  Boolean  replace && with ||
+[141/352] killed    lib/plug/conn/query.ex:231  Arithmetic  replace - with *
+[142/352] killed    lib/plug/conn/cookies.ex:151  Arithmetic  replace + with -
+[143/352] killed    lib/plug/conn/utils.ex:334  UnaryNot  remove unary not
+[144/352] killed    lib/plug/parsers/json.ex:74  ComparisonNegation  replace == with !=
+[145/352] killed    lib/plug/ssl.ex:187  Boolean  replace or with and
+[146/352] killed    lib/plug/debugger.ex:345  Boolean  replace && with ||
+[147/352] killed    lib/plug/parsers.ex:367  Boolean  replace || with &&
+[148/352] killed    lib/plug/conn.ex:1704  Boolean  replace || with &&
+[149/352] killed    lib/plug/conn/status.ex:96  ComparisonNegation  replace != with ==
+[150/352] killed    lib/plug/static.ex:300  Arithmetic  replace - with *
+[151/352] killed    lib/plug/parsers/json.ex:45  Arithmetic  replace + with *
+[152/352] killed    lib/plug/conn/cookies.ex:55  Arithmetic  replace - with +
+[153/352] killed    lib/plug/static.ex:326  Arithmetic  replace + with -
+[154/352] killed    lib/plug/adapters/test/conn.ex:118  Arithmetic  replace - with *
+[155/352] killed    lib/plug/telemetry.ex:75  Arithmetic  replace - with +
+[156/352] killed    lib/plug/conn.ex:449  Boolean  replace && with ||
+[157/352] killed    lib/plug/conn/query.ex:218  Arithmetic  replace + with *
+[158/352] killed    lib/plug/debugger.ex:493  Boolean  replace and with or
+[159/352] killed    lib/plug/conn/cookies.ex:38  Arithmetic  replace + with -
+[160/352] error     lib/plug/router/utils.ex:161  Arithmetic  replace - with *
+[161/352] killed    lib/plug/router/utils.ex:58  ComparisonNegation  replace == with !=
+[162/352] killed    lib/plug/adapters/test/conn.ex:12  Boolean  replace and with or
+[163/352] killed    lib/plug/debugger.ex:498  Arithmetic  replace + with *
+[164/352] killed    lib/plug/parsers/json.ex:53  UnaryNot  remove unary not
+[165/352] killed    lib/plug/ssl.ex:193  Boolean  replace or with and
+[166/352] killed    lib/plug/debugger.ex:494  Arithmetic  replace - with *
+[167/352] killed    lib/plug/parsers/json.ex:74  Boolean  replace or with and
+[168/352] killed    lib/plug/csrf_protection.ex:330  Boolean  replace || with &&
+[169/352] killed    lib/plug/csrf_protection.ex:358  ComparisonNegation  replace == with !=
+[170/352] killed    lib/plug/conn/utils.ex:247  ComparisonNegation  replace == with !=
+[171/352] killed    lib/plug/static.ex:308  Arithmetic  replace - with +
+[172/352] killed    lib/plug/parsers/multipart.ex:245  Arithmetic  replace - with *
+[173/352] killed    lib/plug/static.ex:241  Boolean  replace and with or
+[174/352] killed    lib/plug/conn/query.ex:227  Arithmetic  replace + with *
+[175/352] killed    lib/plug/ssl.ex:272  Boolean  replace || with &&
+[176/352] killed    lib/plug/parsers/multipart.ex:220  Arithmetic  replace - with +
+[177/352] killed    lib/plug/parsers/multipart.ex:241  Arithmetic  replace - with +
+[178/352] killed    lib/plug/html.ex:66  Arithmetic  replace + with -
+[179/352] killed    lib/plug/html.ex:71  Arithmetic  replace + with -
+[180/352] killed    lib/plug/html.ex:66  Arithmetic  replace + with -
+[181/352] killed    lib/plug/conn/query.ex:309  Arithmetic  replace - with +
+[182/352] killed    lib/plug/session/ets.ex:91  Arithmetic  replace + with *
+[183/352] error     lib/plug/router/utils.ex:281  ComparisonNegation  replace != with ==
+[184/352] killed    lib/plug/parsers/multipart.ex:235  Arithmetic  replace - with +
+[185/352] killed    lib/plug/parsers/multipart.ex:220  Arithmetic  replace - with *
+[186/352] killed    lib/plug/conn/query.ex:218  Arithmetic  replace + with -
+[187/352] killed    lib/plug/debugger.ex:261  Boolean  replace || with &&
+[188/352] killed    lib/plug/parsers/multipart.ex:215  Arithmetic  replace - with +
+[189/352] killed    lib/plug/adapters/test/conn.ex:85  ComparisonNegation  replace == with !=
+[190/352] killed    lib/plug/parsers/multipart.ex:224  Arithmetic  replace - with *
+[191/352] killed    lib/plug/ssl.ex:188  Boolean  replace or with and
+[192/352] killed    lib/plug/parsers/multipart.ex:211  Arithmetic  replace - with +
+[193/352] killed    lib/plug/conn/utils.ex:320  ComparisonNegation  replace > with <=
+[194/352] killed    lib/plug/static.ex:308  Arithmetic  replace - with *
+[195/352] killed    lib/plug/static.ex:251  Boolean  replace || with &&
+[196/352] killed    lib/plug/static.ex:222  ComparisonNegation  replace == with !=
+[197/352] killed    lib/plug/adapters/test/conn.ex:12  UnaryNot  remove unary not
+[198/352] killed    lib/plug/conn/query.ex:205  Arithmetic  replace + with -
+[199/352] killed    lib/plug/conn/query.ex:218  Arithmetic  replace + with -
+[200/352] killed    lib/plug/static.ex:300  Arithmetic  replace - with +
+[201/352] killed    lib/plug/conn/adapter.ex:47  Boolean  replace || with &&
+[202/352] killed    lib/plug/conn/utils.ex:327  Arithmetic  replace + with -
+[203/352] killed    lib/plug/conn/utils.ex:253  Boolean  replace and with or
+[204/352] killed    lib/plug.ex:171  Arithmetic  replace - with *
+[205/352] killed    lib/plug/debugger.ex:474  Boolean  replace && with ||
+[206/352] error     lib/plug/router/utils.ex:214  ComparisonNegation  replace == with !=
+[207/352] killed    lib/plug/conn/cookies.ex:104  Arithmetic  replace + with -
+[208/352] killed    lib/plug/adapters/test/conn.ex:46  ComparisonNegation  replace != with ==
+[209/352] killed    lib/plug/csrf_protection.ex:314  ComparisonNegation  replace == with !=
+[210/352] killed    lib/plug/conn/utils.ex:320  Boolean  replace and with or
+[211/352] killed    lib/plug/ssl.ex:194  Boolean  replace or with and
+[212/352] killed    lib/plug/router/utils.ex:178  ComparisonNegation  replace != with ==
+[213/352] killed    lib/plug/debugger.ex:474  Boolean  replace && with ||
+[214/352] killed    lib/plug/debugger.ex:494  Arithmetic  replace - with *
+[215/352] killed    lib/plug/conn/utils.ex:252  ComparisonNegation  replace == with !=
+[216/352] killed    lib/plug/conn.ex:528  Boolean  replace && with ||
+[217/352] killed    lib/plug/upload.ex:178  ComparisonNegation  replace == with !=
+[218/352] killed    lib/plug/static.ex:241  Boolean  replace or with and
+[219/352] killed    lib/plug/conn/query.ex:217  Arithmetic  replace + with *
+[220/352] killed    lib/plug/conn/utils.ex:327  Arithmetic  replace + with *
+[221/352] killed    lib/plug/conn/cookies.ex:104  Arithmetic  replace + with *
+[222/352] killed    lib/plug/conn/query.ex:217  Arithmetic  replace + with -
+[223/352] killed    lib/plug/debugger.ex:498  Arithmetic  replace + with -
+[224/352] killed    lib/plug/debugger.ex:217  UnaryNot  remove unary not
+[225/352] killed    lib/plug/debugger.ex:510  Arithmetic  replace + with *
+[226/352] killed    lib/plug/router.ex:663  GuardTypeTest  replace guard is_atom with is_nil
+[227/352] killed    lib/plug/ssl.ex:372  GuardTypeTest  replace guard is_list with is_tuple
+[228/352] killed    lib/plug/upload.ex:152  GuardComparisonNegation  replace guard < with >=
+[229/352] killed    lib/plug/conn.ex:1395  GuardComparisonNegation  replace guard >= with <
+[230/352] killed    lib/plug/static.ex:445  GuardTypeTest  replace guard is_atom with is_nil
+[231/352] killed    lib/plug/parsers/multipart.ex:219  GuardComparisonNegation  replace guard >= with <
+[232/352] killed    lib/plug/parsers/multipart.ex:209  GuardComparisonBoundary  replace guard >= with >
+[232/352] invalid   lib/plug/router/utils.ex:248  GuardComparisonNegation  replace guard == with !=
+[233/352] error     lib/plug/router/utils.ex:172  GuardComparisonNegation  replace guard != with ==
+[234/352] survived  lib/plug/conn.ex:568  GuardTypeTest  replace guard is_list with is_tuple
+[235/352] killed    lib/plug/builder.ex:199  GuardTypeTest  replace guard is_tuple with is_list
+[236/352] killed    lib/plug/parsers.ex:270  GuardTypeTest  replace guard is_atom with is_nil
+[237/352] killed    lib/plug/conn/query.ex:335  GuardTypeTest  replace guard is_map with is_list
+[238/352] killed    lib/plug/conn/query.ex:203  GuardComparisonNegation  replace guard > with <=
+[239/352] killed    lib/plug/conn/utils.ex:255  GuardComparisonNegation  replace guard < with >=
+[240/352] survived  lib/plug/conn.ex:341  GuardTypeTest  replace guard is_atom with is_nil
+[241/352] killed    lib/plug/static.ex:310  GuardComparisonNegation  replace guard >= with <
+[242/352] killed    lib/plug/session/cookie.ex:241  GuardTypeTest  replace guard is_list with is_tuple
+[243/352] killed    lib/plug/static.ex:307  GuardComparisonNegation  replace guard >= with <
+[244/352] killed    lib/plug/basic_auth.ex:162  GuardTypeTest  replace guard is_list with is_tuple
+[245/352] error     lib/plug/router/utils.ex:168  GuardComparisonNegation  replace guard != with ==
+[246/352] killed    lib/plug/conn/query.ex:400  GuardTypeTest  replace guard is_list with is_tuple
+[246/352] invalid   lib/plug/router/utils.ex:258  GuardComparisonNegation  replace guard == with !=
+[247/352] killed    lib/plug/conn/utils.ex:65  GuardComparisonNegation  replace guard != with ==
+[248/352] killed    lib/plug/upload.ex:152  GuardComparisonBoundary  replace guard < with <=
+[249/352] killed    lib/plug/static.ex:300  GuardComparisonBoundary  replace guard <= with <
+[250/352] killed    lib/plug/static.ex:312  GuardComparisonBoundary  replace guard >= with >
+[251/352] killed    lib/plug/conn.ex:1766  GuardTypeTest  replace guard is_atom with is_nil
+[252/352] killed    lib/plug/conn.ex:1672  GuardTypeTest  replace guard is_list with is_tuple
+[253/352] killed    lib/plug/logger.ex:51  GuardComparisonNegation  replace guard > with <=
+[254/352] killed    lib/plug/conn.ex:732  GuardTypeTest  replace guard is_list with is_tuple
+[255/352] killed    lib/plug/adapters/test/conn.ex:199  GuardTypeTest  replace guard is_map with is_list
+[256/352] survived  lib/plug/conn.ex:347  GuardTypeTest  replace guard is_atom with is_nil
+[257/352] killed    lib/plug/debugger.ex:381  GuardTypeTest  replace guard is_list with is_tuple
+[258/352] killed    lib/plug/conn/query.ex:395  GuardTypeTest  replace guard is_list with is_tuple
+[259/352] killed    lib/plug/ssl.ex:384  GuardTypeTest  replace guard is_atom with is_nil
+[260/352] killed    lib/plug/parsers/multipart.ex:239  GuardComparisonNegation  replace guard >= with <
+[261/352] killed    lib/plug/parsers/multipart.ex:161  GuardComparisonBoundary  replace guard >= with >
+[262/352] killed    lib/plug/static.ex:445  GuardTypeTest  replace guard is_atom with is_nil
+[263/352] killed    lib/plug/static.ex:321  GuardComparisonNegation  replace guard == with !=
+[264/352] survived  lib/plug/conn.ex:1274  GuardComparisonBoundary  replace guard > with >=
+[265/352] killed    lib/plug/ssl.ex:381  GuardTypeTest  replace guard is_list with is_tuple
+[266/352] killed    lib/plug/conn/query.ex:395  GuardTypeTest  replace guard is_tuple with is_list
+[267/352] killed    lib/plug/parsers/multipart.ex:219  GuardComparisonBoundary  replace guard >= with >
+[268/352] killed    lib/plug/static.ex:307  GuardComparisonBoundary  replace guard >= with >
+[269/352] killed    lib/plug/conn/query.ex:402  GuardComparisonNegation  replace guard != with ==
+[270/352] killed    lib/plug/conn/cookies.ex:68  GuardTypeTest  replace guard is_map with is_list
+[270/352] invalid   lib/plug/builder.ex:240  Boolean  replace and with or
+[271/352] killed    lib/plug/session/ets.ex:85  GuardComparisonNegation  replace guard < with >=
+[272/352] survived  lib/plug/conn.ex:1927  GuardComparisonBoundary  replace guard > with >=
+[273/352] error     lib/plug/router.ex:631  GuardTypeTest  replace guard is_list with is_tuple
+[274/352] killed    lib/plug/static.ex:300  GuardComparisonBoundary  replace guard > with >=
+[275/352] killed    lib/plug/adapters/test/conn.ex:180  GuardTypeTest  replace guard is_list with is_tuple
+[276/352] killed    lib/plug/builder.ex:207  GuardTypeTest  replace guard is_list with is_tuple
+[277/352] killed    lib/plug/static.ex:312  GuardComparisonNegation  replace guard >= with <
+[278/352] killed    lib/plug/session/cookie.ex:183  GuardComparisonBoundary  replace guard < with <=
+[279/352] killed    lib/plug/debugger.ex:539  GuardComparisonNegation  replace guard != with ==
+[280/352] killed    lib/plug/parsers/json.ex:44  GuardTypeTest  replace guard is_list with is_tuple
+[281/352] error     lib/plug/session/cookie.ex:195  GuardTypeTest  replace guard is_atom with is_nil
+[282/352] killed    lib/plug/parsers/multipart.ex:161  GuardComparisonNegation  replace guard >= with <
+[283/352] killed    lib/plug/conn.ex:1927  GuardComparisonNegation  replace guard > with <=
+[284/352] killed    lib/plug/parsers/multipart.ex:209  GuardComparisonNegation  replace guard >= with <
+[285/352] killed    lib/plug/conn/utils.ex:186  GuardComparisonNegation  replace guard != with ==
+[286/352] killed    lib/plug/parsers/multipart.ex:239  GuardComparisonBoundary  replace guard >= with >
+[287/352] killed    lib/plug/conn/utils.ex:189  GuardComparisonNegation  replace guard < with >=
+[288/352] killed    lib/plug/router/utils.ex:115  GuardTypeTest  replace guard is_atom with is_nil
+[289/352] killed    lib/plug/static.ex:448  GuardTypeTest  replace guard is_atom with is_nil
+[290/352] killed    lib/plug/conn.ex:1752  GuardTypeTest  replace guard is_atom with is_nil
+[291/352] error     lib/plug/parsers.ex:273  GuardTypeTest  replace guard is_atom with is_nil
+[292/352] killed    lib/plug/logger.ex:51  GuardComparisonBoundary  replace guard > with >=
+[293/352] killed    lib/plug/conn/query.ex:203  GuardComparisonBoundary  replace guard > with >=
+[294/352] killed    lib/plug/conn.ex:988  GuardComparisonNegation  replace guard == with !=
+[295/352] killed    lib/plug/adapters/test/conn.ex:185  GuardTypeTest  replace guard is_map with is_list
+[296/352] killed    lib/plug/basic_auth.ex:98  GuardTypeTest  replace guard is_list with is_tuple
+[297/352] killed    lib/plug/ssl.ex:384  GuardTypeTest  replace guard is_list with is_tuple
+[298/352] killed    lib/plug/parsers/json.ex:97  GuardTypeTest  replace guard is_map with is_list
+[299/352] killed    lib/plug/conn.ex:1719  GuardTypeTest  replace guard is_list with is_tuple
+[300/352] killed    lib/plug/csrf_protection.ex:170  GuardTypeTest  replace guard is_nil with is_atom
+[301/352] killed    lib/plug/debugger.ex:415  GuardComparisonNegation  replace guard != with ==
+[301/352] invalid   lib/plug/builder.ex:240  UnaryNot  remove unary not
+[302/352] killed    lib/plug/parsers/multipart.ex:228  GuardComparisonBoundary  replace guard >= with >
+[303/352] killed    lib/plug/static.ex:300  GuardComparisonNegation  replace guard <= with >
+[303/352] invalid   lib/plug/builder.ex:169  ComparisonNegation  replace == with !=
+[304/352] killed    lib/plug/conn.ex:316  GuardTypeTest  replace guard is_atom with is_nil
+[305/352] killed    lib/plug/debugger.ex:188  GuardComparisonBoundary  replace guard < with <=
+[306/352] killed    lib/plug/conn/query.ex:385  GuardTypeTest  replace guard is_atom with is_nil
+[307/352] killed    lib/plug/ssl.ex:378  GuardTypeTest  replace guard is_list with is_tuple
+[308/352] killed    lib/plug/parsers/json.ex:44  GuardTypeTest  replace guard is_atom with is_nil
+[308/352] invalid   lib/plug/conn/utils.ex:70  GuardComparisonNegation  replace guard == with !=
+[309/352] killed    lib/plug/conn.ex:1944  GuardTypeTest  replace guard is_atom with is_nil
+[310/352] killed    lib/plug/conn.ex:1798  GuardTypeTest  replace guard is_atom with is_nil
+[311/352] survived  lib/plug/conn.ex:1395  GuardTypeTest  replace guard is_integer with is_number
+[312/352] killed    lib/plug/ssl.ex:417  GuardTypeTest  replace guard is_list with is_tuple
+[313/352] killed    lib/plug/conn/query.ex:335  GuardTypeTest  replace guard is_list with is_tuple
+[314/352] error     lib/plug/session/cookie.ex:183  GuardComparisonNegation  replace guard < with >=
+[315/352] killed    lib/plug/static.ex:310  GuardComparisonBoundary  replace guard >= with >
+[316/352] killed    lib/plug/conn/utils.ex:189  GuardComparisonNegation  replace guard === with !==
+[317/352] killed    lib/plug/conn.ex:1395  GuardComparisonNegation  replace guard <= with >
+[318/352] killed    lib/plug/debugger.ex:188  GuardComparisonNegation  replace guard < with >=
+[318/352] invalid   lib/plug/builder.ex:240  Boolean  replace and with or
+[319/352] killed    lib/plug/conn/utils.ex:255  GuardComparisonNegation  replace guard === with !==
+[320/352] killed    lib/plug/conn.ex:1395  GuardTypeTest  replace guard is_integer with is_float
+[321/352] killed    lib/plug/conn.ex:370  GuardTypeTest  replace guard is_atom with is_nil
+[322/352] killed    lib/plug/conn.ex:1274  GuardComparisonNegation  replace guard > with <=
+[323/352] killed    lib/plug/ssl.ex:384  GuardTypeTest  replace guard is_atom with is_nil
+[324/352] killed    lib/plug.ex:108  GuardTypeTest  replace guard is_atom with is_nil
+[325/352] killed    lib/plug/conn.ex:628  GuardTypeTest  replace guard is_list with is_tuple
+[326/352] killed    lib/plug/static.ex:445  GuardTypeTest  replace guard is_list with is_tuple
+[327/352] killed    lib/plug/conn.ex:957  GuardTypeTest  replace guard is_list with is_tuple
+[328/352] survived  lib/plug/conn.ex:1395  GuardComparisonBoundary  replace guard <= with <
+[329/352] killed    lib/plug/conn.ex:766  GuardComparisonNegation  replace guard == with !=
+[330/352] killed    lib/plug/builder.ex:203  GuardTypeTest  replace guard is_map with is_list
+[331/352] killed    lib/plug/parsers/multipart.ex:228  GuardComparisonNegation  replace guard >= with <
+[332/352] killed    lib/plug/parsers.ex:270  GuardTypeTest  replace guard is_list with is_tuple
+[333/352] killed    lib/plug/session/ets.ex:85  GuardComparisonBoundary  replace guard < with <=
+[334/352] killed    lib/plug/conn/query.ex:402  GuardTypeTest  replace guard is_map with is_list
+[335/352] killed    lib/plug/static.ex:300  GuardComparisonNegation  replace guard > with <=
+[336/352] killed    lib/plug/parsers/json.ex:62  GuardTypeTest  replace guard is_atom with is_nil
+[337/352] killed    lib/plug/parsers/json.ex:44  GuardTypeTest  replace guard is_atom with is_nil
+[337/352] invalid   lib/plug/csrf_protection.ex:243  GuardComparisonNegation  replace guard != with ==
+[338/352] killed    lib/plug/conn/utils.ex:189  GuardComparisonBoundary  replace guard < with <=
+[339/352] killed    lib/plug/conn/utils.ex:255  GuardComparisonBoundary  replace guard < with <=
+[340/352] killed    lib/plug/static.ex:162  GuardTypeTest  replace guard is_atom with is_nil
+[341/352] survived  lib/plug/conn.ex:1395  GuardComparisonBoundary  replace guard >= with >
+[342/352] error     lib/plug/router/utils.ex:151  GuardComparisonNegation  replace guard == with !=
+[343/352] killed    lib/plug/adapters/test/conn.ex:217  GuardTypeTest  replace guard is_atom with is_nil
+[344/352] killed    lib/plug/debugger.ex:463  GuardComparisonNegation  replace guard != with ==
+Mutation score: 319/327 = 97.6%
+
+Surviving mutants:
+  lib/plug/conn.ex:568 GuardTypeTest            replace guard is_list with is_tuple
+  lib/plug/conn.ex:341 GuardTypeTest            replace guard is_atom with is_nil
+  lib/plug/conn.ex:347 GuardTypeTest            replace guard is_atom with is_nil
+  lib/plug/conn.ex:1274 GuardComparisonBoundary  replace guard > with >=
+  lib/plug/conn.ex:1927 GuardComparisonBoundary  replace guard > with >=
+  lib/plug/conn.ex:1395 GuardTypeTest            replace guard is_integer with is_number
+  lib/plug/conn.ex:1395 GuardComparisonBoundary  replace guard <= with <
+  lib/plug/conn.ex:1395 GuardComparisonBoundary  replace guard >= with >
+
+Schema:    215/225 killed (95.6%)   wall: 490.7s
+Fallback:  104/127 killed (81.9%)   wall: 277.3s
+  boolean_op:                   0/2 killed
+  comparison_negation:          0/1 killed
+  guard_comparison_boundary:    18/22 killed
+  guard_comparison_negation:    32/40 killed
+  guard_type_test:              54/61 killed
+  unary_not_removal:            0/1 killed
+Skipped:   3778 (attribute_engine_disabled: 33, body_literal_engine_disabled: 281, missing_oracle_site: 322, no_applicable_mutator: 61, unsupported_dispatch: 3081)
+Invalid:   8
+Errors:    17
+Timeouts:  0
+
+Run time: 767.9s
+Fallback wall-clock: 36.1% of total
+Fallback mutants: 36.1% of executed
+
+Phases:
+  oracle build:          4798 ms
+  baseline tests:        1164 ms
+  plan generation:        111 ms
+  schema build:          6709 ms
+  schema workers:      132479 ms
+  fallback workers:     81977 ms
+  report writing:          61 ms
+  total:               227824 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    352
+    all tests:          0
+  avg tests/mutant: 21.7
+  median tests/mutant: 21
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 228234ms
+bench.wall_ms=231000

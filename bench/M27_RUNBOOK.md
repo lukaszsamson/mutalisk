@@ -31,14 +31,16 @@ This prints the per-bucket drift table consumed by BENCHMARKS.md.
 
 ## Round 1: primary candidates
 
-### `phoenix_html` (v4.3.0) — UNRUNNABLE
+### `phoenix_html` (v4.3.0) — CLEAN (post-M34)
 
-Crashes Mutalisk schema build with `Code.format_string!/2 →
-SyntaxError` on source files containing strings with embedded
-escaped double quotes (HTML header content). Same failure on both
-worker types — Mutalisk regression in `Mut.SchemaPlacer.render/1`,
-not a persistent-specific drift signal. Tracked as a v1.12
-follow-up (did not land in v1.11).
+The pre-M34 `Code.format_string!/2 → SyntaxError` was closed by
+narrowing `Mut.SchemaPlacer.strip_heredoc_delimiters/1` to match
+only `:<<>>` interpolated-string nodes, leaving sigil heredocs
+intact (the phoenix_html `@doc ~S"""...""" ` blocks contain
+literal escaped quotes that pre-M34 stripping converted to
+unparseable `~S"..."` form). 93 mutants, 81.7% combined score in
+both worker modes, zero drift. Joins the persistent-safe
+catalogue.
 
 ### `telemetry_metrics` (v1.1.0) — CLEAN
 
@@ -92,7 +94,18 @@ without forking; classified as unrunnable on Elixir 1.19+.
 
 ## Round 2: secondary expansion
 
-### `plug` (v1.19.1) — UNRUNNABLE (Mutalisk SchemaPlacer)
+### `plug` (v1.19.1) — DRIFT (post-M34)
+
+The pre-M34 SchemaPlacer crash class is closed (M34 reclassified
+phoenix_html / plug / phoenix_pubsub). 352 mutants, 17 drift
+(4.8%) — 16 `RuntimeError → Killed` flips on
+`lib/plug/router/utils.ex` plus 1 parse-class. Supervisor-init
+class, same mechanism as Ecto/M30: mix-spawn surfaces init
+errors persistent doesn't see. Per the M30 finding, this class
+is not addressable by reset hooks; documented as drift rather
+than mix-only because the absolute drift rate is small.
+
+### `plug` (v1.19.1) — pre-M34 SchemaPlacer note
 
 Same SchemaPlacer escaped-quote crash as `phoenix_html`. Per-target
 prep drops `test/plug/ssl_test.exs` (3 baseline failures from
@@ -111,10 +124,19 @@ Bench completes but produces no signal for drift comparison.
 Documented to discourage future re-pinning unless mutator catalogue
 grows to cover macro definitions.
 
-### `phoenix_pubsub` (v2.2.0) — UNRUNNABLE (Mutalisk SchemaPlacer)
+### `phoenix_pubsub` (v2.2.0) — UNRUNNABLE (test-infra; not SchemaPlacer)
 
-Per-target prep tag-skips 2 tests with OTP 28 ETS shape drift, but
-the schema build still crashes on the escaped-quote pattern.
+M34 closed the SchemaPlacer crash, but persistent boot now fails
+for a different reason: `test/support/cluster.ex:60` calls
+`Mix.State.get(Mix.State, :env)` on a spawned peer node, where
+the `Mix.State` ETS table doesn't exist (Mix isn't bootstrapped
+on peer nodes started outside `mix test`). Pre-M34's per-target
+prep tag-skips 2 OTP 28 ETS-shape drift tests; the cluster
+bootstrapping is independent of those.
+
+`mix`-mode bench succeeds (113 mutants, 71.4% score, 104 errors
+from cluster-test flake). Documented as test-infrastructure
+unrunnable for the persistent worker; out of v1.12 scope.
 
 ## Round 3: tertiary candidates (pure-logic libraries)
 

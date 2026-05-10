@@ -1761,6 +1761,158 @@ conditions fail (worker stays opt-in; default stays `mix`).
 - **Upstream Elixir heredoc fix revert**. Tracking note + TODO
   comment, not a milestone. Single PR when upstream lands.
 
+# v1.12 milestones (stabilize the expanded harness)
+
+v1.11 closed with two M27 follow-throughs deferred and the
+default-flip gate properly closed on structural grounds. v1.12's
+job is to fix the Mutalisk-owned correctness regression that
+blocks 3 pinned OSS targets, finish wiring M27's pool-warm-state
+class into the user-facing surface, characterize whether
+pool-warm-state drift can be closed, and decide whether catalog
+growth continues without the env walker.
+
+**Theme**: stabilize the expanded harness; do not add broad new
+mutation surface until the env walker.
+
+**Default `--worker-type` does NOT flip in v1.12.** The gate
+remains structurally closed (Ecto, Gettext, clustered Mox).
+v1.12 may sharpen the mix-only catalogue but will not move the
+default.
+
+**Default `--selection` does NOT flip in v1.12.** Coverage stays
+opt-in until persistent-worker stabilization completes.
+
+Four committed milestones, sequenced. Cheap correctness fix
+first; UX wins next; characterization spike before any structural
+work; mutator decision last.
+
+## v1.12 scope (committed)
+
+**M34 — `Mut.SchemaPlacer` escaped-quote fix.** Highest priority:
+Mutalisk-owned regression, blocks `phoenix_html`, `plug`, and
+`phoenix_pubsub` under both `mix` and `persistent` workers.
+- Fix `Mut.SchemaPlacer.render/1` round-trip for strings
+  containing escaped quotes (`\"…\"`, escaped backslashes, and
+  related escape sequences).
+- Add a fixture regression covering escaped-quote string content
+  in both body and module-attribute positions.
+- Re-bench `phoenix_html`, `plug`, `phoenix_pubsub` in both
+  worker modes; record results in BENCHMARKS.md and reclassify
+  from `unrunnable` to whatever the bench surfaces (clean / drift
+  / informational).
+- Acceptance: schema build no longer crashes on the three pinned
+  targets; both worker types reach mutant execution; new fixture
+  test added; existing `golden_instrument` layer remains green.
+
+**M35 — Pool-warm-state boot warning + drift bucketer
+hardening.** Bundled because both are M27 follow-throughs;
+neither alone justifies a milestone.
+- Extend persistent boot-warning catalogue with HTTP-client /
+  pool signatures: `:mint`, `:finch`, `:nimble_pool`. Do NOT
+  preemptively add `:poolboy`/`:hackney`/`:gun`/`:connection` —
+  add when a real target surfaces drift, not before.
+- Boot warning fires on mint/nimble_pool fixtures; silent on
+  plug_crypto/Decimal/demo_app.
+- Drift bucketer: per-bucket unit tests covering every heuristic
+  (especially `:pool_warm_state`); `--json` output for CI
+  consumption; include report paths and sample stable_ids in
+  output for faster triage.
+- Acceptance: bucketer remains <5% unclassified on M25+M27
+  corpus; pool boot warning fires correctly; PERSISTENT_WORKER_
+  GUIDE documents pool signatures as persistent-risk (NOT hard
+  mix-only — the spike below decides that).
+
+**M36 — Pool-warm-state characterization spike.** Do not jump
+to reset hooks. Characterize the leak class first; the answer
+may be "classify mix-only" (mirroring M30's Ecto outcome).
+- Three modes on `mint` and `nimble_pool` (and `finch` if
+  toolchain permits): current persistent in-process,
+  aggressive process-tree reset (kill+restart pool supervisors
+  between mutants), restart-project-apps-per-mutant.
+- Measure: drift partition vs `mix`, wall-clock cost, memory.
+- Identify the dominant leak vector: process-tree state, ETS
+  registry state, socket state, or `Application` env.
+- **Parse-class subsection**: re-examine the 4 residual
+  parse-class mutants (2 on `nimble_options`, 2 on `mox`) in
+  light of the spike's findings. Do any of the candidate
+  isolation modes also bear on parse-class? If yes, fold the
+  fix into the recommended path. If no, document and accept
+  parse-class as a known persistent limitation (it's 4 mutants
+  across the corpus; not worth a dedicated milestone).
+- Output: written decision doc at
+  `docs/spikes/M36_pool_warm_state.md`. Three options on the
+  table: reset hook (if cheap and effective), mix-spawn reroute
+  for affected mutants, or formal mix-only classification.
+- Acceptance: decision doc committed with three-mode comparison
+  table and explicit recommendation. Parse-class disposition
+  named in the same doc.
+- If the recommendation is "reset hook is cheap and effective,"
+  promote to implementation in the same milestone or a v1.12
+  follow-up commit; do NOT defer to v1.13.
+
+**M37 — Mutator-surface decision.** Three releases in a row
+without a new mutator weakens the value prop, but the env
+walker is still v2 work. Decide explicitly: ship one narrow
+schema-safe extension OR formally defer all catalog growth to
+the env walker.
+- Candidate: `Mut.Mutator.ComparisonNegation` (`==` ↔ `!=`).
+  Schema-routed via existing dispatch oracle, no env walker
+  required, structurally analogous to M33's ComparisonBoundary.
+  Atoms / strings / maps / lists / list-construction stay v2.
+- Decision criteria: the candidate must be schema-routed (no
+  fallback-only mutators in this milestone), unambiguous in
+  body context (no env-walker dependency), and stable_id-safe
+  (no migration). If the candidate fails any criterion, the
+  outcome is "defer all catalog growth to env walker (v2)."
+- If shipped: validate on plug_crypto, Decimal, and ≥2 OSS
+  targets from the M25/M27 corpus. Report kill rate as an
+  observation (per the M33 reframing — kill rate is a property
+  of the test suite, not the mutator).
+- Acceptance: either (a) one new schema-routed mutator landed,
+  unit-tested, golden layers green, validated on ≥4 targets, OR
+  (b) decision doc at `docs/spikes/M37_mutator_surface.md`
+  formally deferring all catalog growth to v2. Both outcomes
+  ship v1.12.
+
+## v1.12 default-flip gate (unchanged from v1.11 closure)
+
+Default `--worker-type` STAYS `mix`. The structural drift classes
+(Ecto, Gettext, clustered Mox) cannot be closed by reset hooks;
+M30 and M31 documented this. v1.12 does not relitigate. M36's
+spike may add or close pool-warm-state, but pool-warm-state alone
+does not gate the default.
+
+## v1.12 horizon (not v1.12 scope)
+
+- **Helper-process recompile isolation implementation** —
+  rejected by M29 on root-cause grounds. Reopen only if a real
+  target surfaces drift that helper-process isolation
+  demonstrably closes (M29's spike concluded the leak class is
+  BEAM-global ETS, not process-local).
+- **Affected-test selection** — M32 shelved on risk-surface
+  analysis; reopening criteria documented there. Not v1.12.
+- **Body-literal schema-routing migration** — gated on
+  body-literal becoming default-on, which has not happened.
+- **Env walker (v2 architecture)** — unblocks atoms / strings /
+  maps / lists / pattern-position literals / variable mutators
+  / better attribute classification. The long-deferred work.
+- **Upstream Elixir heredoc fix revert** — tracking note + TODO,
+  not a milestone.
+
+## Explicitly NOT v1.12
+
+- New CLI flags beyond what M35's bucketer needs (`--json`).
+- Cross-run state persistence (v2).
+- Wrapper guard schemata (v1.8 measurements showed fallback is
+  not dominant overhead).
+- Persistent default flip (closed on structural grounds).
+- Coverage default flip (deferred until persistent stabilizes).
+- Stable_id input changes (any future migration is its own
+  explicit milestone).
+- Reopening Ecto / Gettext / clustered-Mox persistent support
+  (mix-only is the documented disposition; reopen only on a
+  fundamentally different approach, not on incremental hooks).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

@@ -194,14 +194,17 @@ until the underlying drift is closed.
   drift direction. Reset hooks (`processes`) clear named process
   trees but not the longer-lived registry entries these libraries
   cache. Auto-classified as `:pool_warm_state` by `mix mut.drift`.
-- **SchemaPlacer escaped-quote crash.** Files containing strings
-  with embedded `\\"..\\"` sequences (HTML / header content /
-  fixture stubs) crash `Mut.SchemaPlacer.render/1` via
-  `Code.format_string!/2`. Mutalisk regression; both
-  `--worker-type mix` and `--worker-type persistent` fail
-  identically. Surfaced by M27 on `phoenix_html` v4.3.0,
-  `plug` v1.19.1, and `phoenix_pubsub` v2.2.0. Targets crash
-  before any mutant runs. v1.12 follow-up; tracked in BENCHMARKS.md.
+- **~~SchemaPlacer escaped-quote crash~~ — closed in v1.12 M34.**
+  Files with `~S"""..."""` sigil heredocs containing literal
+  escaped quotes are now handled correctly. The pre-M34 strip
+  walker had over-broad match scope; M34 narrows it to `:<<>>`
+  interpolated-string nodes, leaving sigil heredocs to render
+  via `Macro.to_string/1`'s native sigil-heredoc path. Re-bench:
+  `phoenix_html` v4.3.0 is now clean (0 drift); `plug` v1.19.1
+  shows small supervisor-init drift (4.8%); `phoenix_pubsub`
+  v2.2.0 remains unrunnable for an unrelated reason
+  (test-infrastructure cluster setup expects Mix bootstrapped
+  on peer nodes).
 - **Macro-bodies with literal interpolated heredocs.** Until
   Elixir's upstream `Macro.to_string/1` bug on heredoc
   `\`-continuation is fixed, mutants in files with that shape

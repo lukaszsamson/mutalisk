@@ -1,0 +1,47 @@
+target=phoenix_pubsub repo=https://github.com/phoenixframework/phoenix_pubsub.git ref=v2.2.0 sha=086e0af0af9306580ee59025c85931936a849ab5 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.011s
+Unchanged:
+  earmark_parser 1.4.44
+  ex_doc 0.38.4
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> phoenix_pubsub
+Compiling 14 files (.ex)
+    warning: :slave.start/3 is deprecated. It will be removed in OTP 29. Use the 'peer' module instead
+    │
+ 22 │     {:ok, node} = :slave.start(to_charlist("127.0.0.1"), node_name(node_host), inet_loader_args())
+    │                          ~
+    │
+    └─ test/support/cluster.ex:22:26: Phoenix.PubSub.Cluster.spawn_node/1
+
+Generated phoenix_pubsub app
+Schema build starting
+Schema build complete
+** (EXIT from #PID<0.94.0>) an exception was raised:
+    ** (ArgumentError) errors were found at the given arguments:
+
+  * 1st argument: the table identifier does not refer to an existing ETS table
+
+        (stdlib 7.2) :ets.lookup(Mix.State, :env)
+        lib/mix/state.ex:30: Mix.State.get/2
+        (phoenix_pubsub 2.2.0) test/support/cluster.ex:60: Phoenix.PubSub.Cluster.ensure_applications_started/1
+        (phoenix_pubsub 2.2.0) test/support/cluster.ex:25: Phoenix.PubSub.Cluster.spawn_node/1
+        (elixir 1.19.5) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2
+        (elixir 1.19.5) lib/task/supervised.ex:40: Task.Supervised.reply/4
+
+** (Mix) persistent worker start failed: {:worker_exited_during_boot, 1, "\n17:42:07.705 [error] Task #PID<0.133.0> started from #PID<0.94.0> terminating\n** (ArgumentError) errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n\n    (stdlib 7.2) :ets.lookup(Mix.State, :env)\n    lib/mix/state.ex:30: Mix.State.get/2\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:60: Phoenix.PubSub.Cluster.ensure_applications_started/1\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:25: Phoenix.PubSub.Cluster.spawn_node/1\n    (elixir 1.19.5) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2\n    (elixir 1.19.5) lib/task/supervised.ex:40: Task.Supervised.reply/4\nFunction: #Function<5.124944919/0 in Phoenix.PubSub.Cluster.spawn/1>\n    Args: []\n\n17:42:07.705 [error] Task #PID<0.132.0> started from #PID<0.94.0> terminating\n** (ArgumentError) errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n\n    (stdlib 7.2) :ets.lookup(Mix.State, :env)\n    lib/mix/state.ex:30: Mix.State.get/2\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:60: Phoenix.PubSub.Cluster.ensure_applications_started/1\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:25: Phoenix.PubSub.Cluster.spawn_node/1\n    (elixir 1.19.5) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2\n    (elixir 1.19.5) lib/task/supervised.ex:40: Task.Supervised.reply/4\nFunction: #Function<5.124944919/0 in Phoenix.PubSub.Cluster.spawn/1>\n    Args: []\n\n17:42:07.705 [error] Task #PID<0.130.0> started from #PID<0.94.0> terminating\n** (ArgumentError) errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n\n    (stdlib 7.2) :ets.lookup(Mix.State, :env)\n    lib/mix/state.ex:30: Mix.State.get/2\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:60: Phoenix.PubSub.Cluster.ensure_applications_started/1\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:25: Phoenix.PubSub.Cluster.spawn_node/1\n    (elixir 1.19.5) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2\n    (elixir 1.19.5) lib/task/supervised.ex:40: Task.Supervised.reply/4\nFunction: #Function<5.124944919/0 in Phoenix.PubSub.Cluster.spawn/1>\n    Args: []\n\n17:42:07.705 [error] Task #PID<0.131.0> started from #PID<0.94.0> terminating\n** (ArgumentError) errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n\n    (stdlib 7.2) :ets.lookup(Mix.State, :env)\n    lib/mix/state.ex:30: Mix.State.get/2\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:60: Phoenix.PubSub.Cluster.ensure_applications_started/1\n    (phoenix_pubsub 2.2.0) test/support/cluster.ex:25: Phoenix.PubSub.Cluster.spawn_node/1\n    (elixir 1.19.5) lib/task/supervised.ex:105: Task.Supervised.invoke_mfa/2\n    (elixir 1.19.5) lib/task/supervised.ex:40: Task.Supervised.reply/4\nFunction: #Function<5.124944919/0 in Phoenix.PubSub.Cluster.spawn/1>\n    Args: []\n"}

@@ -3,6 +3,72 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.12 unreleased
+
+### M34 — `Mut.SchemaPlacer` escaped-quote fix (2026-05-10)
+
+Mutalisk regression that blocked 3 OSS targets pinned in M27
+(`phoenix_html`, `plug`, `phoenix_pubsub`) is closed.
+
+#### Root cause
+
+`Mut.SchemaPlacer.strip_heredoc_delimiters/1` (added in M25 for a
+narrow gettext heredoc-with-`\`-continuation case) walked any AST
+3-tuple `{atom, meta, args}` and stripped `:delimiter` /
+`:indentation` metadata when the delimiter was `"\"\"\""` or
+`"'''"`. This forced `Macro.to_string/1` into regular form for
+both interpolated strings (`:<<>>` nodes) AND sigil nodes
+(`:sigil_S`, `:sigil_s`, ...).
+
+The intended target — interpolated-string heredocs with `\`
+continuation — round-trips cleanly via the regular `"..."` form.
+But sigil heredocs do NOT: a `~S"..."` regular sigil with literal
+`"` characters in the body fails to parse (the `"` closes the
+sigil prematurely). phoenix_html v4.3.0 `lib/phoenix_html.ex`
+contains `@doc ~S"""..."""` blocks with `iex>` examples
+containing literal escaped-quote sequences — pre-M34 schema
+build crashed there.
+
+#### Fix
+
+The strip walker now matches only `:<<>>` nodes. Sigil
+heredocs render via `Macro.to_string/1`'s native sigil-heredoc
+emission and round-trip without a workaround. The original
+gettext heredoc-with-`\`-continuation case continues to work
+(those are interpolated `:<<>>` nodes, which the strip still
+handles).
+
+Regression test added at
+`test/mut/schema_placer/schema_placer_test.exs` covering the
+phoenix_html shape (`@doc ~S"""...""" ` containing literal
+escaped quotes).
+
+#### Re-bench post-M34
+
+The three M27-pinned targets reclassified:
+
+- **phoenix_html v4.3.0**: clean. 93 mutants, 81.7% combined
+  score in both worker modes, zero drift. Joins the persistent-
+  safe catalogue.
+- **plug v1.19.1**: drift. 352 mutants, 17 drift (4.8%) all
+  `RuntimeError → Killed` in `lib/plug/router/utils.ex` —
+  supervisor-init class, same mechanism as Ecto/M30. Drift is
+  small but structural; classify as drift, not clean.
+- **phoenix_pubsub v2.2.0**: still unrunnable, BUT for a
+  different reason: persistent boot fails when
+  `test/support/cluster.ex` calls `Mix.State.get/2` from a
+  spawned peer node where Mix isn't bootstrapped. This is a
+  test-infrastructure dependency, not a Mutalisk regression. The
+  M27 SchemaPlacer crash is closed; phoenix_pubsub's residual
+  block is a different class (cluster-test bootstrapping) and
+  out of v1.12 scope.
+
+#### Module changes
+
+- `Mut.SchemaPlacer.strip_heredoc_delimiters/1` narrowed pattern
+  match.
+- New regression test for `~S` sigil heredoc round-trip.
+
 ## v1.11 unreleased
 
 ### M33 — Comparison-operator boundary mutator: pre-existing, validated (2026-05-10)
