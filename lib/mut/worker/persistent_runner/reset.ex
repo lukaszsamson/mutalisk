@@ -250,6 +250,92 @@ defmodule Mut.Worker.PersistentRunner.Reset do
     wait_for_mox_server(attempts - 1)
   end
 
+  ## --- Ecto compile/query state (M30) ------------------------------------
+
+  # Ecto's `Ecto.Query.Planner` keeps a per-repo ETS-backed query
+  # cache (`:ets.new(Repo.Module, [:set, :public, read_concurrency])`)
+  # populated lazily during test execution. `Ecto.Repo.Registry`
+  # tracks running repos in a named ETS table. Both are created at
+  # repo startup and live for the BEAM's lifetime — they survive
+  # mutant boundaries, so mutant N's plans are visible to mutant
+  # N+1's tests, producing both `Survived → Killed` flips
+  # (mutant's bad plan got cached, next mutant misses the cache and
+  # sees the previous fault) and `Killed → Survived` flips (mutant's
+  # mutation never re-evaluates because the cached plan still
+  # answers).
+  #
+  # Strategy: find ETS tables whose registered owner is an Ecto-named
+  # process and call `:ets.delete_all_objects/1` to wipe entries
+  # without destroying the table (destroying it would break the next
+  # mutant's queries; we only need fresh entries). Skip
+  # `Ecto.Repo.Registry` itself (clearing the registry would
+  # invalidate live repo references).
+  #
+  # No-op when `:ecto` is not loaded. Tolerates errors silently.
+  @spec reset_ecto() :: :ok
+  def reset_ecto do
+    if ecto_loaded?() do
+      do_reset_ecto()
+    else
+      :ok
+    end
+  rescue
+    _ -> :ok
+  catch
+    _, _ -> :ok
+  end
+
+  defp ecto_loaded? do
+    Code.ensure_loaded?(Ecto.Query.Planner) and
+      :ets.whereis(Ecto.Repo.Registry) != :undefined
+  end
+
+  @ecto_registry_table Ecto.Repo.Registry
+
+  defp do_reset_ecto do
+    :ets.all()
+    |> Enum.each(&maybe_clear_ecto_table/1)
+
+    :ok
+  end
+
+  defp maybe_clear_ecto_table(table) do
+    cond do
+      table == @ecto_registry_table -> :ok
+      ecto_owned_table?(table) -> safe_delete_all_objects(table)
+      true -> :ok
+    end
+  end
+
+  defp ecto_owned_table?(table) do
+    case :ets.info(table, :owner) do
+      :undefined ->
+        false
+
+      pid when is_pid(pid) ->
+        case Process.info(pid, :registered_name) do
+          {:registered_name, name} when is_atom(name) ->
+            name |> Atom.to_string() |> String.starts_with?("Elixir.Ecto.")
+
+          _ ->
+            false
+        end
+
+      _ ->
+        false
+    end
+  end
+
+  defp safe_delete_all_objects(table) do
+    try do
+      :ets.delete_all_objects(table)
+    catch
+      _, _ -> :ok
+    end
+
+    :ok
+  end
+
   ## --- ExUnit OnExitHandler ----------------------------------------------
 
   @spec clear_on_exit_handler() :: :ok

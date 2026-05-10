@@ -116,4 +116,11 @@ defmodule Mut.Worker.PersistentRunner.ResetTest do
       assert :ok = Reset.reset_mox()
     end
   end
+
+  describe "Ecto compile/query state (M30)" do
+    test "is a no-op when Ecto is not loaded" do
+      refute Code.ensure_loaded?(Ecto.Query.Planner)
+      assert :ok = Reset.reset_ecto()
+    end
+  end
 end

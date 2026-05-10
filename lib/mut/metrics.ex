@@ -515,7 +515,8 @@ defmodule Mut.Metrics do
       processes: us_to_ms(median(field(run_metrics, :reset_processes_us))),
       persistent_term: us_to_ms(median(field(run_metrics, :reset_persistent_term_us))),
       on_exit: us_to_ms(median(field(run_metrics, :reset_on_exit_us))),
-      mox: us_to_ms(median(field(run_metrics, :reset_mox_us)))
+      mox: us_to_ms(median(field(run_metrics, :reset_mox_us))),
+      ecto: us_to_ms(median(field(run_metrics, :reset_ecto_us)))
     }
   end
 

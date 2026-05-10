@@ -167,6 +167,7 @@ defmodule Mut.Reporter.Terminal do
       "    persistent_term: #{format_ms(Map.get(reset, :persistent_term, 0))}\n",
       "    on_exit:         #{format_ms(Map.get(reset, :on_exit, 0))}\n",
       "    mox:             #{format_ms(Map.get(reset, :mox, 0))}\n",
+      "    ecto:            #{format_ms(Map.get(reset, :ecto, 0))}\n",
       "  filter lookup: #{format_ms(Map.get(p, :filter_lookup_ms, 0))}\n",
       operational_counters_line(p, snapshot),
       "  memory: peak #{format_mb(Map.get(memory, :peak_total_mb, 0.0))} total, #{format_mb(Map.get(memory, :peak_processes_mb, 0.0))} processes\n"

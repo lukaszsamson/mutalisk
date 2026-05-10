@@ -35,9 +35,9 @@ defmodule Mut.Worker.Persistent.Detector do
     {:mox, :mox,
      "Mox-class projects: residual cluster/peer-state drift remains after M28's Mox.Server reset hook (3-mutant residual on mox v1.2.0 self-tests)."},
     {:ecto, :ecto,
-     "Ecto-class projects: warm BEAM contaminates Ecto.Query planner / schema metadata caches."},
+     "Ecto-class projects: supervisor-init structural drift cannot be closed by reset hooks (M30 finding); use --worker-type mix."},
     {:ecto_sql, :ecto,
-     "Ecto-class projects: warm BEAM contaminates Ecto.Query planner / schema metadata caches."},
+     "Ecto-class projects: supervisor-init structural drift cannot be closed by reset hooks (M30 finding); use --worker-type mix."},
     {:gettext, :gettext,
      "Gettext-class projects: persistent boot may fail in Gettext.Compiler.__before_compile__/1."}
   ]

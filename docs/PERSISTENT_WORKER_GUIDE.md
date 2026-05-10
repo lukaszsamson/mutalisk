@@ -127,15 +127,35 @@ until the underlying drift is closed.
   raising `ArgumentError: cannot spawn parallel compiler task`
   before any mutant runs. Use `--worker-type mix` for gettext
   projects unconditionally.
-- **Ecto-class warm-state contamination.** Projects with rich
-  module-attribute / ETS-backed compile-time caches (Ecto.Query
-  builder, planner cache, schema metadata). M25 ecto v3.13.6
-  measured **22.4% baseline drift**: persistent's warm BEAM masks
-  RuntimeErrors that mix-spawn surfaces (~140 `RuntimeError →
-  Killed` flips) and produces false-positive kills via leaked
-  Ecto.Query state (~55 `Survived → Killed` flips). The wall-clock
-  speedup is real (8.7× vs mix on ecto baseline) but the kill-rate
-  output is unsafe to consume.
+- **Ecto-class projects are mix-only (M30 closure).** v1.11 M30
+  shipped `Mut.Worker.PersistentRunner.Reset.reset_ecto/0`, which
+  walks ETS tables owned by `Elixir.Ecto.*`-named processes and
+  calls `:ets.delete_all_objects/1` between mutants. Re-bench on
+  ecto v3.13.6 (994 mutants): drift dropped from 226 to 231 — i.e.
+  the ETS reset has no measurable effect on the dominant warm-
+  state classes. Diagnosis from the M30 measurement:
+
+  - The 113 `RuntimeError → Killed` flips are NOT cache-state
+    leaks. They come from supervisor-init reordering: mix-spawn
+    re-runs `Application.start/2` on every fallback mutant, so any
+    mutation that breaks supervised initialization surfaces as a
+    test-framework RuntimeError. Persistent doesn't re-run
+    `Application.start/2` — it loads apps once at boot — so the
+    same mutation runs against an already-initialized supervisor
+    tree and the affected test simply fails (`Killed`).
+  - The 67 `Survived → Killed` flips are partly leaked Ecto.Query
+    planner cache and partly the same supervisor-init effect on
+    different test paths.
+  - The 22 `Killed → Survived` flips are the inverse: persistent's
+    cached planner state masks behavior change mix-spawn would see.
+
+  Reset hooks cannot close the supervisor-init path; that requires
+  re-running `Application.start/2` per mutant, which is
+  fundamentally what `--worker-type mix` already does and what
+  persistent is designed to avoid. **For Ecto-class projects, use
+  `--worker-type mix`.** The persistent worker's reset hook stays
+  in place as defense-in-depth (no-op when Ecto isn't loaded; very
+  cheap when it is) but does not change the recommendation.
 - **HTTP-client / process-pool warm state.** Projects with HTTP
   clients (`mint`, `finch`, `hackney`, `gun`) or generic process
   pools (`nimble_pool`, `poolboy`, `connection`). M27 mint v1.8.0
@@ -183,7 +203,7 @@ Triggers (v1.11 catalogue):
 | Detected dep | Signature | Suggested action |
 |---|---|---|
 | `:mox` | `:mox` | M28's reset hook closes local-node Mox state. Use `--worker-type mix` if your suite spans Erlang nodes (residual cluster-state drift). |
-| `:ecto`, `:ecto_sql` | `:ecto` | Use `--worker-type mix` until M30's warm-state closure lands. |
+| `:ecto`, `:ecto_sql` | `:ecto` | M30 confirmed Ecto-class drift is supervisor-init structural, not cache-state. Use `--worker-type mix` for Ecto-class projects. |
 | `:gettext` | `:gettext` | Use `--worker-type mix` (gettext-class projects boot-fail under persistent). |
 
 The warning is a *heads-up*, not a diagnosis. A clean Ecto setup

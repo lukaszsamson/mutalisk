@@ -5,6 +5,69 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.11 unreleased
 
+### M30 — Ecto warm-state closure: classified mix-only (2026-05-10)
+
+Ships `Mut.Worker.PersistentRunner.Reset.reset_ecto/0`, modeled on
+M28's `reset_mox/0`: walks the ETS catalogue, finds tables owned by
+`Elixir.Ecto.*`-named processes (skipping `Ecto.Repo.Registry`
+itself), and calls `:ets.delete_all_objects/1` between mutants. No-
+op when `:ecto` isn't loaded. `reset_ecto_us` joins
+`MUT_RUN_METRICS`; `ecto` row added to the `Persistent worker >
+reset hooks` terminal block (median ~0.1 ms with `:ecto` loaded).
+
+#### Acceptance findings
+
+Re-bench on ecto v3.13.6 (994 mutants):
+
+| | mix | persistent (pre-M30) | persistent (post-M30) |
+|---|---:|---:|---:|
+| Combined score | 78.0% | 76.0% | 76.5% |
+| Drift vs mix | — | 226 | 231 |
+
+The ETS reset has no measurable effect on the dominant warm-state
+classes. M30 measurement clarifies the M25 / M27 diagnosis:
+
+- The 113 `RuntimeError → Killed` flips are **not cache-state
+  leaks**. They come from supervisor-init reordering: mix-spawn
+  re-runs `Application.start/2` on every fallback mutant, so any
+  mutation that breaks supervised initialization surfaces as a
+  test-framework RuntimeError. Persistent doesn't re-run
+  `Application.start/2` — it loads apps once at boot — so the same
+  mutation runs against an already-initialized supervisor tree
+  and the affected test simply fails (`Killed`). This is
+  structurally what `--worker-type persistent` is designed to do;
+  it cannot be closed by reset hooks.
+- The 67 `Survived → Killed` and 22 `Killed → Survived` flips are
+  partly leaked `Ecto.Query` planner cache and partly the same
+  supervisor-init effect on other test paths. ETS-clearing reaches
+  the planner cache but not the supervisor-init class.
+
+**Decision: classify Ecto-class projects as mix-only.** The
+`reset_ecto/0` hook stays in place as defense-in-depth; the
+boot-warning catalogue's `:ecto` row is updated to reflect the
+finding rather than promising a future fix. v1.11+ will not
+attempt further Ecto-class closure unless the supervisor-init
+re-run can be made cheap enough to land per-mutant (open
+question for v1.12+).
+
+#### Module additions
+
+- `Mut.Worker.PersistentRunner.Reset.reset_ecto/0`
+- `reset_ecto_us` field in `MUT_RUN_METRICS` runner protocol.
+- `ecto` row in `Persistent worker > reset hooks` terminal block.
+
+#### Default-flip gate (closed)
+
+The v1.11 default-flip gate (PLAN.md) required Ecto-class drift
+to close to V17 timeout-flap acceptance. M30 confirms this is
+structurally impossible without re-running `Application.start/2`
+per mutant, which is what `--worker-type mix` already does.
+**The v1.11 default `--worker-type` STAYS `mix`.** Persistent
+remains opt-in and is the right choice for projects whose
+project-class signature does NOT match Ecto / Mox-cluster /
+HTTP-client / process-pool / Gettext / SchemaPlacer-crash
+patterns.
+
 ### M28 — `Mox.Server` reset hook for local-node mock state (2026-05-10)
 
 Adds a Mox-aware reset hook to the persistent worker. Between

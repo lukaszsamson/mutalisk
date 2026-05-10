@@ -35,6 +35,36 @@ targets are kept in the harness so future operators on different
 toolchains (older Elixir / OTP / patched x509 / patched credo)
 can rerun without re-pinning.
 
+### M30 — Ecto warm-state validation (2026-05-10)
+
+Re-bench of ecto v3.13.6 after `Mut.Worker.PersistentRunner.Reset.reset_ecto/0`
+landed:
+
+| | pre-M30 mix | pre-M30 persistent | post-M30 mix | post-M30 persistent |
+|---|---:|---:|---:|---:|
+| Combined score | 78.0% | 76.0% | 78.0% | 76.5% |
+| Drift mutants | — | 226 | — | 231 |
+
+ETS-clearing reset reaches the `Ecto.Query` planner cache but
+produces no measurable drift reduction. The dominant warm-state
+class is supervisor-init reordering (mix-spawn re-runs
+`Application.start/2`; persistent doesn't), which reset hooks
+cannot close.
+
+**Decision: classify Ecto-class projects as mix-only.** Reset
+hook stays as defense-in-depth. v1.11 default-flip gate STAYS
+gated; `--worker-type` default remains `mix`.
+
+| Drift bucket | Pre-M30 | Post-M30 |
+|---|---:|---:|
+| `RuntimeError → Killed` | 115 | 113 |
+| `Survived → Killed` | 62 | 67 |
+| `Killed → Survived` | 23 | 22 |
+| `RuntimeError → Survived` | 23 | 23 |
+| `RuntimeError → CompileError` | 2 | 4 |
+| `Killed → CompileError` | 0 | 1 |
+| `Timeout → Killed` | 1 | 1 |
+
 ### M28 — Mox.Server reset hook validation (2026-05-10)
 
 Re-bench of mox v1.2.0 after `Mut.Worker.PersistentRunner.Reset.reset_mox/0`
