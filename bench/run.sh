@@ -9,7 +9,7 @@ WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -94,6 +94,37 @@ case "$TARGET" in
     REPO="https://github.com/elixir-plug/plug.git"
     REF="${BENCH_REF:-v1.19.1}"
     SHA="${BENCH_SHA:-8723880aa55ec9aae26ec33bc2c107903ec16840}"
+    ;;
+  # M27 v1.11 OSS validation harness expansion. SHAs pinned to latest
+  # stable tags queried 2026-05-10. The expansion targets ecosystem
+  # shapes the M25 set did not cover: Phoenix-class compile macros
+  # (phoenix_html), telemetry/metrics primitives (telemetry_metrics),
+  # process-tree-heavy HTTP clients (mint, finch), and ExUnit factory
+  # macros (ex_machina). See bench/M27_RUNBOOK.md for per-target prep.
+  phoenix_html)
+    REPO="https://github.com/phoenixframework/phoenix_html.git"
+    REF="${BENCH_REF:-v4.3.0}"
+    SHA="${BENCH_SHA:-8cfd3e37ff9ef0924812a78cf6c9d27cdbd4e726}"
+    ;;
+  telemetry_metrics)
+    REPO="https://github.com/beam-telemetry/telemetry_metrics.git"
+    REF="${BENCH_REF:-v1.1.0}"
+    SHA="${BENCH_SHA:-138d5322aa004d1b207dee75860dc90ee9ad2601}"
+    ;;
+  mint)
+    REPO="https://github.com/elixir-mint/mint.git"
+    REF="${BENCH_REF:-v1.8.0}"
+    SHA="${BENCH_SHA:-f697f1c866ee1e5c802d19142487a85ea9eb0174}"
+    ;;
+  finch)
+    REPO="https://github.com/sneako/finch.git"
+    REF="${BENCH_REF:-v0.9.1}"
+    SHA="${BENCH_SHA:-0530e34d726b1efb1bae2518ea7c7751ea428f20}"
+    ;;
+  ex_machina)
+    REPO="https://github.com/beam-community/ex_machina.git"
+    REF="${BENCH_REF:-v2.8.0}"
+    SHA="${BENCH_SHA:-d1ec5e4b5af19276e2f5c184a05aa849323ad9a3}"
     ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
@@ -202,6 +233,18 @@ case "$TARGET" in
   jason)
     # Pin StreamData seed for reproducibility across mix/persistent diffs.
     perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  mint|finch)
+    # Network-dependent integration tests: real HTTPS to httpbin /
+    # localhost listeners. Exclude :requires_internet / :integration
+    # tags so the bench captures the deterministic test surface only.
+    # Mutation surface (lib/) is unchanged; the killing-test denominator
+    # shrinks but mix-vs-persistent comparison stays apples-to-apples.
+    perl -pi -e 's/ExUnit\.start\((.*)\)/ExUnit.start(exclude: [:requires_internet, :integration, :proxy], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  phoenix_html|telemetry_metrics|ex_machina)
+    # Pin seed for reproducibility; no network or DB required.
+    perl -pi -e 's/ExUnit\.start\((.*)\)/ExUnit.start(seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
 esac
 
