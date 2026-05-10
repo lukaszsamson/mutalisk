@@ -9,7 +9,7 @@ WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -126,6 +126,49 @@ case "$TARGET" in
     REF="${BENCH_REF:-v2.8.0}"
     SHA="${BENCH_SHA:-d1ec5e4b5af19276e2f5c184a05aa849323ad9a3}"
     ;;
+  # M27 secondary expansion: smaller candidates added once the first
+  # round (phoenix_html, plug, finch, ex_machina) hit unrunnable
+  # blockers. These cover process-tree primitives (nimble_pool,
+  # phoenix_pubsub) and a CSV parser (nimble_csv) — none require
+  # external infrastructure.
+  nimble_pool)
+    REPO="https://github.com/dashbitco/nimble_pool.git"
+    REF="${BENCH_REF:-v1.1.0}"
+    SHA="${BENCH_SHA:-9829f2753851694dd1b34682e0abede895966ca5}"
+    ;;
+  nimble_csv)
+    REPO="https://github.com/dashbitco/nimble_csv.git"
+    REF="${BENCH_REF:-v1.3.0}"
+    SHA="${BENCH_SHA:-2fc3cbf4b50ec504aa4f8d7ab9109c06ec9a7173}"
+    ;;
+  phoenix_pubsub)
+    REPO="https://github.com/phoenixframework/phoenix_pubsub.git"
+    REF="${BENCH_REF:-v2.2.0}"
+    SHA="${BENCH_SHA:-086e0af0af9306580ee59025c85931936a849ab5}"
+    ;;
+  # M27 tertiary expansion: pure-logic libraries selected to avoid
+  # the HTML/escaped-quote SchemaPlacer crash that knocks out
+  # phoenix_html / plug / phoenix_pubsub.
+  castore)
+    REPO="https://github.com/elixir-mint/castore.git"
+    REF="${BENCH_REF:-v1.0.9}"
+    SHA="${BENCH_SHA:-428328b630f7247a9eb2380792adda9d5e537673}"
+    ;;
+  mime)
+    REPO="https://github.com/elixir-plug/mime.git"
+    REF="${BENCH_REF:-v2.0.7}"
+    SHA="${BENCH_SHA:-4bb1ba13040a13b2f5d71bede10a7e3e45fc8e93}"
+    ;;
+  gen_stage)
+    REPO="https://github.com/elixir-lang/gen_stage.git"
+    REF="${BENCH_REF:-v1.3.2}"
+    SHA="${BENCH_SHA:-d1532fa56482bc92d90abc777439ff8be34b5b1a}"
+    ;;
+  tzdata)
+    REPO="https://github.com/lau/tzdata.git"
+    REF="${BENCH_REF:-v1.1.3}"
+    SHA="${BENCH_SHA:-61fb7ecf68fb9a3dbf7aeb7669adc3d0f7360b33}"
+    ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
     usage
@@ -178,7 +221,9 @@ fi
 git -C "$WORK_DIR" checkout --force "$SHA"
 
 MIX_FILE="$WORK_DIR/mix.exs"
-perl -0pi -e 's/(defp deps(?:\(\))? do\s*\[)/$1\n      {:mutalisk, path: System.fetch_env!("MUTALISK_PATH"), only: [:test], runtime: true},/s' "$MIX_FILE"
+# Some targets (e.g. plug v1.19.1) declare `def deps` rather than `defp
+# deps`; match either form.
+perl -0pi -e 's/((?:def|defp) deps(?:\(\))? do\s*\[)/$1\n      {:mutalisk, path: System.fetch_env!("MUTALISK_PATH"), only: [:test], runtime: true},/s' "$MIX_FILE"
 
 # Per-target test-tree prep. Required because some upstream test suites
 # fail against the current Elixir/Mix environment for reasons unrelated
@@ -234,17 +279,62 @@ case "$TARGET" in
     # Pin StreamData seed for reproducibility across mix/persistent diffs.
     perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
-  mint|finch)
-    # Network-dependent integration tests: real HTTPS to httpbin /
-    # localhost listeners. Exclude :requires_internet / :integration
-    # tags so the bench captures the deterministic test surface only.
-    # Mutation surface (lib/) is unchanged; the killing-test denominator
-    # shrinks but mix-vs-persistent comparison stays apples-to-apples.
+  mint)
+    # Mint's IntegrationTest modules expect a local httpbin / nghttp2.org
+    # / proxy listeners. The integration_test.exs files aren't tagged,
+    # so excluding by tag is insufficient — drop the files entirely so
+    # the deterministic test surface remains apples-to-apples for
+    # mix-vs-persistent comparison. Mutation surface (lib/) is
+    # unchanged; documented in BENCHMARKS.md.
+    rm -f "$WORK_DIR/test/mint/integration_test.exs"
+    rm -f "$WORK_DIR/test/mint/http1/integration_test.exs"
+    rm -f "$WORK_DIR/test/mint/http2/integration_test.exs"
     perl -pi -e 's/ExUnit\.start\((.*)\)/ExUnit.start(exclude: [:requires_internet, :integration, :proxy], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
-  phoenix_html|telemetry_metrics|ex_machina)
+  finch)
+    # finch transitively depends on :x509 which fails to compile under
+    # Erlang/OTP 28 (`no record AttributePKCS-10 found in PKCS-FRAME.hrl`).
+    # Document as unrunnable for M27; revisit when x509 ships a 28-
+    # compatible release. The harness still pins finch for future
+    # operators on older OTP.
+    printf 'finch is unrunnable on this OTP (x509 dep incompatibility); see BENCHMARKS.md\n' >&2
+    exit 65
+    ;;
+  plug)
+    # plug v1.19.1: ssl_test.exs creates fake keyfile paths
+    # ("abcdef", "ghijkl") relative to `_build/test/lib/plug/`; under
+    # Mutalisk's work-copy cwd these don't exist, producing 3
+    # baseline failures unrelated to mutation. Drop the file — TLS
+    # configuration isn't in plug's body-mutation surface (Plug.SSL
+    # is mostly module attributes + dispatch, mostly unmutable).
+    rm -f "$WORK_DIR/test/plug/ssl_test.exs"
+    perl -pi -e 's/ExUnit\.start\((.*)\)/ExUnit.start(seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  phoenix_html|telemetry_metrics|nimble_pool|nimble_csv|castore|mime|gen_stage|tzdata)
     # Pin seed for reproducibility; no network or DB required.
     perl -pi -e 's/ExUnit\.start\((.*)\)/ExUnit.start(seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  phoenix_pubsub)
+    # phoenix_pubsub v2.2.0 baseline shows 2 ETS-shape failures on
+    # OTP 28 (`:ets.lookup_element/3` returns `{{:duplicate, :pid}, n, nil}`
+    # rather than `{:duplicate, n, _}`). Tag-skip the two specific
+    # tests so baseline is green; mutation surface (lib/) unchanged.
+    perl -0pi -e '
+      s/^(\s+)(test "PubSub pool size can be configured separately from the Registry partitions",)/$1\@tag :otp_28_ets_shape_drift\n$1$2/m;
+      s/^(\s+)(test "Registry partitions are configured with the same pool size as PubSub if not specified",)/$1\@tag :otp_28_ets_shape_drift\n$1$2/m;
+    ' "$WORK_DIR/test/shared/pubsub_test.exs"
+    perl -pi -e 's/ExUnit\.start\((.*)\)/ExUnit.start(exclude: [:otp_28_ets_shape_drift], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  ex_machina)
+    # ex_machina's mix.exs lists :credo as a dev/test dep. Credo's
+    # ConfigCommentFinder regex (~r/[a-z_]+:[\\s,)]/) is rejected by
+    # Elixir 1.19's stricter character-class parser, blocking compile
+    # of any project that pulls credo in test env. ex_machina at
+    # v2.8.0 has no path to drop credo without forking; classify as
+    # unrunnable on Elixir 1.19+. Pin remains for future operators on
+    # 1.18 or with patched credo.
+    printf 'ex_machina is unrunnable on Elixir 1.19+ (credo dep); see BENCHMARKS.md\n' >&2
+    exit 65
     ;;
 esac
 
