@@ -2,7 +2,7 @@ target=mox repo=https://github.com/dashbitco/mox.git ref=v1.2.0 sha=5dd54291520f
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.015s
+Resolution completed in 0.027s
 Unchanged:
   castore 1.0.5
   earmark_parser 1.4.26
@@ -27,6 +27,86 @@ Unchanged:
 mix mut starting
 ==> jason
 Compiling 10 files (.ex)
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:166:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:170:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:201:69
+
+    warning: using single-quoted strings to represent charlists is deprecated.
+    Use ~c"" if you indeed want a charlist or use "" instead.
+    You may run "mix format --migrate" to change all single-quoted
+    strings to use the ~c sigil and fix this warning.
+    │
+ 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
+    │                                                     ~
+    │
+    └─ lib/codegen.ex:51:53
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
+     │                                                ~
+     │
+     └─ lib/codegen.ex:118:48
+
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
@@ -177,16 +257,6 @@ Compiling 10 files (.ex)
      │
      └─ lib/decoder.ex:187:21
 
-    warning: using single-quoted strings to represent charlists is deprecated.
-    Use ~c"" if you indeed want a charlist or use "" instead.
-    You may run "mix format --migrate" to change all single-quoted
-    strings to use the ~c sigil and fix this warning.
-    │
- 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
-    │                                                     ~
-    │
-    └─ lib/codegen.ex:51:53
-
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
@@ -196,16 +266,6 @@ Compiling 10 files (.ex)
      │                     ~
      │
      └─ lib/decoder.ex:195:21
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
-     │                                                ~
-     │
-     └─ lib/codegen.ex:118:48
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -697,66 +757,6 @@ Compiling 10 files (.ex)
      │
      └─ lib/encode.ex:284:46
 
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:166:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:170:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:183:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:189:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
-     │                                                                      ~
-     │
-     └─ lib/formatter.ex:195:70
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:201:69
-
      warning: you are implementing a protocol for Decimal but said module is not available. Make sure the module name is correct. If Decimal is an optional dependency, please wrap the protocol implementation in a Code.ensure_loaded?(Decimal) check
      │
  224 │ defimpl Jason.Encoder, for: Decimal do
@@ -925,39 +925,39 @@ Compiling 4 files (.ex)
 Generated mox app
 Schema build starting
 Schema build complete
-[1/52] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
-[2/52] killed    lib/mox.ex:443  UnaryNot  remove unary not
-[3/52] killed    lib/mox.ex:857  Arithmetic  replace - with *
-[4/52] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
+[1/52] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
+[2/52] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
+[3/52] killed    lib/mox.ex:443  UnaryNot  remove unary not
+[4/52] killed    lib/mox.ex:857  Arithmetic  replace - with *
 [5/52] killed    lib/mox.ex:1018  Arithmetic  replace + with *
 [6/52] killed    lib/mox.ex:1017  Boolean  replace || with &&
 [7/52] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
 [8/52] killed    lib/mox.ex:911  Arithmetic  replace + with *
-[9/52] killed    lib/mox.ex:1018  Arithmetic  replace + with -
-[10/52] killed    lib/mox.ex:911  Arithmetic  replace + with -
-[11/52] killed    lib/mox.ex:850  Boolean  replace or with and
+[9/52] killed    lib/mox.ex:850  Boolean  replace or with and
+[10/52] killed    lib/mox.ex:1018  Arithmetic  replace + with -
+[11/52] killed    lib/mox.ex:911  Arithmetic  replace + with -
 [12/52] killed    lib/mox.ex:469  UnaryNot  remove unary not
-[13/52] killed    lib/mox.ex:857  Arithmetic  replace - with +
-[14/52] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
+[13/52] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
+[14/52] killed    lib/mox.ex:857  Arithmetic  replace - with +
 [15/52] killed    lib/mox.ex:394  BooleanLiteral  replace boolean literal false with true
-[16/52] killed    lib/mox.ex:411  IntegerLiteral  replace integer literal 1 with 0
-[17/52] killed    lib/mox.ex:758  GuardTypeTest  replace guard is_atom with is_nil
+[16/52] killed    lib/mox.ex:758  GuardTypeTest  replace guard is_atom with is_nil
+[17/52] killed    lib/mox.ex:411  IntegerLiteral  replace integer literal 1 with 0
 [18/52] survived  lib/mox.ex:656  IntegerLiteral  replace integer literal 0 with 1
-[19/52] killed    lib/mox.ex:468  GuardTypeTest  replace guard is_list with is_tuple
-[20/52] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
+[19/52] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
+[20/52] killed    lib/mox.ex:468  GuardTypeTest  replace guard is_list with is_tuple
 [21/52] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_float
 [22/52] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
-[23/52] killed    lib/mox.ex:465  BooleanLiteral  replace boolean literal true with false
-[24/52] killed    lib/mox.ex:444  IntegerLiteral  replace integer literal 0 with 1
-[25/52] survived  lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
-[26/52] killed    lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
-[27/52] killed    lib/mox.ex:873  IntegerLiteral  replace integer literal 0 with 1
-[28/52] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_list with is_tuple
-[29/52] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
-[30/52] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
+[23/52] killed    lib/mox.ex:444  IntegerLiteral  replace integer literal 0 with 1
+[24/52] killed    lib/mox.ex:465  BooleanLiteral  replace boolean literal true with false
+[25/52] killed    lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
+[26/52] survived  lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
+[27/52] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_list with is_tuple
+[28/52] killed    lib/mox.ex:873  IntegerLiteral  replace integer literal 0 with 1
+[29/52] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
+[30/52] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
 [31/52] killed    lib/mox.ex:572  IntegerLiteral  replace integer literal 0 with 1
-[32/52] survived  lib/mox.ex:272  AttributeLiteral  replace attribute literal 30000 with 30001
-[33/52] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
+[32/52] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
+[33/52] survived  lib/mox.ex:272  AttributeLiteral  replace attribute literal 30000 with 30001
 [34/52] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
 [35/52] killed    lib/mox.ex:571  GuardComparisonNegation  replace guard >= with <
 [36/52] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
@@ -966,18 +966,18 @@ Schema build complete
 [39/52] killed    lib/mox.ex:462  BooleanLiteral  replace boolean literal false with true
 [40/52] killed    lib/mox.ex:546  GuardComparisonNegation  replace guard >= with <
 [41/52] killed    lib/mox.ex:546  GuardComparisonBoundary  replace guard >= with >
-[42/52] survived  lib/mox.ex:598  IntegerLiteral  replace integer literal 0 with 1
-[43/52] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
+[42/52] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
+[43/52] survived  lib/mox.ex:598  IntegerLiteral  replace integer literal 0 with 1
 [44/52] killed    lib/mox.ex:444  IntegerLiteral  replace integer literal 1 with 0
 [45/52] killed    lib/mox.ex:1015  GuardTypeTest  replace guard is_map with is_list
 [46/52] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_float
 [47/52] survived  lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_number
-[48/52] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_number
-[49/52] killed    lib/mox.ex:946  GuardTypeTest  replace guard is_list with is_tuple
+[48/52] killed    lib/mox.ex:946  GuardTypeTest  replace guard is_list with is_tuple
+[49/52] survived  lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_number
 [50/52] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
 [51/52] killed    lib/mox.ex:911  IntegerLiteral  replace integer literal 1 with 0
 [52/52] killed    lib/mox.ex:272  AttributeLiteral  replace attribute literal 30000 with 0
-Mutation score: 46/52 = 88.5%
+Mutation score: 45/52 = 86.5%
 
 Surviving mutants:
   lib/mox.ex:656 IntegerLiteral           replace integer literal 0 with 1
@@ -986,33 +986,34 @@ Surviving mutants:
   lib/mox.ex:883 IntegerLiteral           replace integer literal 1 with 0
   lib/mox.ex:598 IntegerLiteral           replace integer literal 0 with 1
   lib/mox.ex:571 GuardTypeTest            replace guard is_integer with is_number
+  lib/mox.ex:546 GuardTypeTest            replace guard is_integer with is_number
 
-Schema:    14/14 killed (100.0%)   wall: 17.7s
-Fallback:  32/38 killed (84.2%)   wall: 58.6s
+Schema:    14/14 killed (100.0%)   wall: 12.4s
+Fallback:  31/38 killed (81.6%)   wall: 49.7s
   attribute_int_replace:        1/2 killed
   boolean_literal_flip:         3/3 killed
   guard_comparison_boundary:    2/2 killed
   guard_comparison_negation:    3/3 killed
-  guard_type_test:              17/19 killed
+  guard_type_test:              16/19 killed
   integer_literal_replace:      6/9 killed
 Skipped:   353 (missing_oracle_site: 38, no_applicable_mutator: 1, unsupported_dispatch: 314)
 Invalid:   0
 Errors:    0
 Timeouts:  0
 
-Run time: 76.3s
-Fallback wall-clock: 76.8% of total
+Run time: 62.2s
+Fallback wall-clock: 80.0% of total
 Fallback mutants: 73.1% of executed
 
 Phases:
-  oracle build:         4469 ms
-  baseline tests:       1066 ms
+  oracle build:         3522 ms
+  baseline tests:       1051 ms
   plan generation:        12 ms
-  schema build:         3449 ms
-  schema workers:       4838 ms
-  fallback workers:    17522 ms
-  report writing:          3 ms
-  total:               31832 ms
+  schema build:         3292 ms
+  schema workers:       3452 ms
+  fallback workers:    14551 ms
+  report writing:          2 ms
+  total:               26367 ms
 
 Selection:
   mode: static
@@ -1028,5 +1029,5 @@ Selection:
 Concurrency: 4 workers
 Test timeout: 10000 ms
 
-Mutalisk run complete in 32182ms
-bench.wall_ms=35000
+Mutalisk run complete in 26713ms
+bench.wall_ms=29000

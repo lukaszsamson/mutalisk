@@ -1,0 +1,2065 @@
+target=ecto repo=https://github.com/elixir-ecto/ecto.git ref=v3.13.6 sha=285329f63d34b610d754fd16d07f6c95ae52bfc7 selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.015s
+Unchanged:
+  decimal 2.3.0
+  earmark_parser 1.4.44
+  ex_doc 0.40.1
+  jason 1.4.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.3
+  nimble_parsec 1.4.2
+  telemetry 1.2.1
+* Getting telemetry (Hex package)
+* Getting decimal (Hex package)
+* Getting jason (Hex package)
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> decimal
+Compiling 4 files (.ex)
+Generated decimal app
+==> jason
+Compiling 10 files (.ex)
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 104 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:104:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 106 │       _ in '0', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:106:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 108 │       _ in '123456789', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:108:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:166:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 110 │       _ in '-', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:110:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:170:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 112 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:112:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 114 │       _ in '[', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:114:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 116 │       _ in '{', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:116:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       _ in ']', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:118:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 120 │       _ in 't', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:120:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 127 │       _ in 'f', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:127:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 134 │       _ in 'n', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:134:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 152 │        when byte in '123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:152:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 167 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:167:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 173 │   defp number(<<e, rest::bits>>, original, skip, stack, decode, len) when e in 'eE' do
+     │                                                                                ~
+     │
+     └─ lib/decoder.ex:173:80
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 187 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:187:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:195:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 199 │        when e in 'eE' do
+     │                  ~
+     │
+     └─ lib/decoder.ex:199:18
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 210 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:210:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 214 │        when byte in '+-' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:214:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 222 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:222:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 230 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:230:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 241 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:241:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:201:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 245 │        when byte in '+-' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:245:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 253 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:253:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 261 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:261:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 279 │   defp number_zero(<<e, rest::bits>>, original, skip, stack, decode, len) when e in 'eE' do
+     │                                                                                     ~
+     │
+     └─ lib/decoder.ex:279:85
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 303 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:303:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 305 │       _ in ']', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:305:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 309 │       _ in ',', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:309:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 327 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:327:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 329 │       _ in '}', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:329:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 336 │       _ in ',', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:336:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 351 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:351:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 353 │       _ in '}', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:353:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 361 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:361:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 372 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:372:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 374 │       _ in ':', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:374:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 388 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:388:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 392 │       _ in '\\', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:392:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 412 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:412:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 416 │       _ in '\\', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:416:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 436 │       _ in 'b', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:436:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 437 │         string(rest, original, skip + 2, stack, decode, [acc | '\b'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:437:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 438 │       _ in 't', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:438:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 439 │         string(rest, original, skip + 2, stack, decode, [acc | '\t'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:439:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 440 │       _ in 'n', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:440:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 441 │         string(rest, original, skip + 2, stack, decode, [acc | '\n'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:441:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 442 │       _ in 'f', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:442:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 443 │         string(rest, original, skip + 2, stack, decode, [acc | '\f'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:443:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 444 │       _ in 'r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:444:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 445 │         string(rest, original, skip + 2, stack, decode, [acc | '\r'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:445:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 446 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:446:12
+
+    warning: using single-quoted strings to represent charlists is deprecated.
+    Use ~c"" if you indeed want a charlist or use "" instead.
+    You may run "mix format --migrate" to change all single-quoted
+    strings to use the ~c sigil and fix this warning.
+    │
+ 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
+    │                                                     ~
+    │
+    └─ lib/codegen.ex:51:53
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 447 │         string(rest, original, skip + 2, stack, decode, [acc | '\"'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:447:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
+     │                                                ~
+     │
+     └─ lib/codegen.ex:118:48
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 448 │       _ in '/', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:448:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 449 │         string(rest, original, skip + 2, stack, decode, [acc | '/'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:449:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 450 │       _ in '\\', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:450:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 451 │         string(rest, original, skip + 2, stack, decode, [acc | '\\'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:451:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 452 │       _ in 'u', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:452:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 609 │       digits1 = 'Dd'
+     │                 ~
+     │
+     └─ lib/decoder.ex:609:17
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 695 │        when byte in '\s\n\r\t' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:695:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 164 │     ']'
+     │     ~
+     │
+     └─ lib/encode.ex:164:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 193 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:193:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 211 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:211:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                            ~
+     │
+     └─ lib/encode.ex:284:28
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                                              ~
+     │
+     └─ lib/encode.ex:284:46
+
+Generated jason app
+==> ecto
+===> Analyzing applications...
+===> Compiling telemetry
+==> mutalisk
+Compiling 75 files (.ex)
+Generated mutalisk app
+==> ecto
+Compiling 56 files (.ex)
+Generated ecto app
+Schema build starting
+Schema build complete
+[1/994] error     lib/ecto/query/builder/from.ex:122  Boolean  replace || with &&
+[2/994] survived  lib/ecto/query/planner.ex:46  Arithmetic  replace + with -
+[3/994] killed    lib/ecto/query/builder/dynamic.ex:90  ComparisonNegation  replace > with <=
+[4/994] killed    lib/ecto/changeset.ex:4269  Boolean  replace and with or
+[5/994] killed    lib/ecto/query/planner.ex:1650  ComparisonNegation  replace == with !=
+[6/994] killed    lib/ecto/query/builder.ex:213  Arithmetic  replace - with *
+[7/994] killed    lib/ecto/repo/schema.ex:562  ComparisonNegation  replace != with ==
+[8/994] killed    lib/ecto/query/builder/join.ex:296  Boolean  replace || with &&
+[9/994] killed    lib/ecto/type.ex:1170  Arithmetic  replace * with +
+[10/994] survived  lib/ecto/type.ex:1426  Boolean  replace and with or
+[11/994] error     lib/ecto/query/builder.ex:320  Boolean  replace or with and
+[12/994] survived  lib/ecto/query/builder/select.ex:395  Boolean  replace and with or
+[13/994] killed    lib/ecto/repo/preloader.ex:261  Boolean  replace and with or
+[14/994] killed    lib/ecto/query/builder.ex:1483  Arithmetic  replace + with *
+[15/994] error     lib/ecto/query/builder/from.ex:118  Boolean  replace || with &&
+[16/994] survived  lib/mix/tasks/ecto.gen.repo.ex:58  Boolean  replace || with &&
+[17/994] killed    lib/ecto/changeset/relation.ex:350  Boolean  replace and with or
+[18/994] killed    lib/ecto/association.ex:216  ComparisonNegation  replace != with ==
+[19/994] survived  lib/ecto/repo/preloader.ex:470  Arithmetic  replace - with +
+[20/994] killed    lib/ecto.ex:686  ComparisonNegation  replace != with ==
+[21/994] killed    lib/ecto/association.ex:877  Boolean  replace || with &&
+[22/994] killed    lib/ecto/changeset.ex:3081  Boolean  replace && with ||
+[23/994] killed    lib/ecto/schema.ex:2042  Boolean  replace || with &&
+[24/994] killed    lib/ecto/query/inspect.ex:391  Boolean  replace || with &&
+[25/994] survived  lib/ecto/association.ex:413  Arithmetic  replace + with *
+[26/994] error     lib/ecto/query/builder.ex:1121  Boolean  replace || with &&
+[27/994] killed    lib/ecto/query/builder.ex:1483  Arithmetic  replace + with -
+[28/994] killed    lib/ecto/schema.ex:2021  Boolean  replace || with &&
+[29/994] killed    lib/ecto/changeset.ex:1443  Boolean  replace and with or
+[30/994] killed    lib/ecto/type.ex:1170  Arithmetic  replace * with -
+[31/994] killed    lib/mix/ecto.ex:107  Boolean  replace || with &&
+[32/994] error     lib/ecto/association.ex:1409  Boolean  replace || with &&
+[33/994] killed    lib/ecto/repo/schema.ex:326  Arithmetic  replace + with -
+[34/994] survived  lib/ecto/query/planner.ex:638  Arithmetic  replace + with *
+[35/994] killed    lib/ecto/changeset.ex:2735  Boolean  replace or with and
+[36/994] killed    lib/ecto/query/builder.ex:450  Boolean  replace || with &&
+[37/994] error     lib/ecto/schema.ex:2048  Boolean  replace && with ||
+[38/994] killed    lib/ecto/query/planner.ex:2313  UnaryNot  remove unary not
+[39/994] killed    lib/ecto/query/planner.ex:1043  ComparisonNegation  replace != with ==
+[40/994] killed    lib/ecto/repo/preloader.ex:132  ComparisonNegation  replace != with ==
+[41/994] killed    lib/ecto/changeset.ex:2859  ComparisonNegation  replace == with !=
+[42/994] killed    lib/ecto/query/builder.ex:213  Arithmetic  replace - with +
+[43/994] killed    lib/ecto/changeset/relation.ex:450  ComparisonNegation  replace == with !=
+[44/994] killed    lib/ecto/changeset/relation.ex:399  Boolean  replace and with or
+[45/994] survived  lib/ecto/query/builder.ex:1509  Arithmetic  replace + with -
+[46/994] killed    lib/ecto/changeset.ex:2689  Boolean  replace and with or
+[47/994] survived  lib/ecto/changeset/relation.ex:474  Arithmetic  replace + with *
+[48/994] killed    lib/ecto/query/builder.ex:1311  Boolean  replace or with and
+[49/994] killed    lib/ecto/query/builder/dynamic.ex:94  Arithmetic  replace + with *
+[50/994] killed    lib/ecto/query.ex:1012  UnaryNot  remove unary not
+[51/994] survived  lib/ecto/query/planner.ex:1931  ComparisonNegation  replace == with !=
+[52/994] survived  lib/ecto/query/builder/from.ex:230  Boolean  replace and with or
+[53/994] killed    lib/ecto/query/planner.ex:1539  ComparisonNegation  replace == with !=
+[54/994] killed    lib/ecto/query/builder/update.ex:179  Arithmetic  replace + with -
+[55/994] survived  lib/ecto/query/planner.ex:638  Arithmetic  replace + with -
+[56/994] survived  lib/ecto/association.ex:428  Arithmetic  replace + with -
+[57/994] killed    lib/ecto/type.ex:1223  Arithmetic  replace * with +
+[58/994] killed    lib/ecto/repo/schema.ex:45  Boolean  replace && with ||
+[59/994] killed    lib/ecto/changeset.ex:4011  Boolean  replace || with &&
+[60/994] killed    lib/ecto/schema.ex:2346  UnaryNot  remove unary not
+[61/994] killed    lib/ecto/association.ex:835  Boolean  replace || with &&
+[62/994] survived  lib/ecto/repo/assoc.ex:63  Boolean  replace && with ||
+[63/994] error     lib/ecto/schema.ex:2052  ComparisonNegation  replace != with ==
+[64/994] survived  lib/ecto/association.ex:1131  UnaryNot  remove unary not
+[65/994] killed    lib/ecto/query/planner.ex:637  Arithmetic  replace + with *
+[66/994] killed    lib/ecto/type.ex:1223  Arithmetic  replace * with -
+[67/994] killed    lib/ecto/type.ex:1352  ComparisonNegation  replace == with !=
+[68/994] killed    lib/ecto/changeset.ex:1932  Boolean  replace and with or
+[69/994] killed    lib/ecto/query/builder/update.ex:47  ComparisonNegation  replace == with !=
+[70/994] killed    lib/ecto/changeset/relation.ex:92  Boolean  replace && with ||
+[71/994] killed    lib/ecto/query/planner.ex:2245  Boolean  replace || with &&
+[72/994] killed    lib/ecto/changeset.ex:4161  ComparisonNegation  replace != with ==
+[73/994] survived  lib/ecto/query/planner.ex:42  Arithmetic  replace + with -
+[74/994] error     lib/ecto/association.ex:811  ComparisonNegation  replace == with !=
+[75/994] survived  lib/ecto/association.ex:409  Arithmetic  replace + with -
+[76/994] killed    lib/ecto/association.ex:593  UnaryNot  remove unary not
+[77/994] killed    lib/ecto/association.ex:607  UnaryNot  remove unary not
+[78/994] error     lib/ecto/repo/supervisor.ex:29  Boolean  replace || with &&
+[79/994] killed    lib/ecto/repo/schema.ex:1281  Boolean  replace and with or
+[80/994] killed    lib/ecto/changeset.ex:1953  UnaryNot  remove unary not
+[81/994] killed    lib/ecto/changeset.ex:607  Boolean  replace or with and
+[82/994] killed    lib/ecto/repo/schema.ex:562  Boolean  replace or with and
+[83/994] killed    lib/ecto/query/builder.ex:1603  ComparisonNegation  replace == with !=
+[84/994] survived  lib/ecto/changeset/relation.ex:474  Arithmetic  replace + with -
+[85/994] killed    lib/ecto/query/planner.ex:1753  Arithmetic  replace + with *
+[86/994] killed    lib/ecto/query/inspect.ex:175  Boolean  replace || with &&
+[87/994] killed    lib/ecto/query/planner.ex:1697  Boolean  replace and with or
+[88/994] survived  lib/ecto/query/planner.ex:1517  Arithmetic  replace * with /
+[89/994] error     lib/ecto/query/builder.ex:841  UnaryNot  remove unary not
+[90/994] killed    lib/ecto/query/planner.ex:719  Arithmetic  replace + with *
+[91/994] killed    lib/ecto/changeset.ex:929  UnaryNot  remove unary not
+[92/994] killed    lib/ecto/query/inspect.ex:175  Arithmetic  replace + with *
+[93/994] survived  lib/ecto/query/planner.ex:1944  Boolean  replace and with or
+[94/994] killed    lib/ecto/query/planner.ex:358  Boolean  replace || with &&
+[95/994] survived  lib/ecto/query/planner.ex:42  Arithmetic  replace + with *
+[96/994] killed    lib/ecto/repo/registry.ex:16  Boolean  replace || with &&
+[97/994] killed    lib/ecto/query/builder/filter.ex:165  Arithmetic  replace + with -
+[98/994] killed    lib/ecto/query/builder/select.ex:528  Arithmetic  replace + with *
+[99/994] survived  lib/ecto/type.ex:1426  UnaryNot  remove unary not
+[100/994] survived  lib/ecto/repo/preloader.ex:671  ComparisonNegation  replace == with !=
+[101/994] killed    lib/ecto/query/planner.ex:911  ComparisonNegation  replace != with ==
+[102/994] error     lib/ecto/repo/supervisor.ex:74  ComparisonNegation  replace != with ==
+[103/994] killed    lib/ecto/query.ex:1640  Boolean  replace || with &&
+[104/994] survived  lib/ecto/repo/queryable.ex:201  ComparisonNegation  replace == with !=
+[105/994] killed    lib/ecto/changeset/relation.ex:36  ComparisonNegation  replace == with !=
+[106/994] killed    lib/ecto/repo/schema.ex:320  Arithmetic  replace + with -
+[107/994] killed    lib/ecto/schema.ex:2346  Boolean  replace and with or
+[108/994] killed    lib/ecto/changeset/relation.ex:508  Boolean  replace || with &&
+[109/994] error     lib/ecto/schema.ex:2548  ComparisonNegation  replace == with !=
+[110/994] killed    lib/ecto/repo/supervisor.ex:110  Boolean  replace or with and
+[111/994] survived  lib/ecto/query/builder/select.ex:528  Arithmetic  replace + with -
+[112/994] survived  lib/ecto/repo/queryable.ex:117  Boolean  replace || with &&
+[113/994] killed    lib/ecto/changeset/relation.ex:379  Arithmetic  replace + with *
+[114/994] killed    lib/mix/ecto.ex:109  ComparisonNegation  replace != with ==
+[115/994] survived  lib/ecto/query/planner.ex:947  Boolean  replace and with or
+[116/994] killed    lib/ecto/query/builder/dynamic.ex:100  Arithmetic  replace + with -
+[117/994] killed    lib/ecto/changeset.ex:3451  Boolean  replace and with or
+[118/994] killed    lib/ecto/repo/schema.ex:590  Boolean  replace or with and
+[119/994] killed    lib/ecto/changeset.ex:3451  ComparisonNegation  replace == with !=
+[120/994] survived  lib/ecto/repo/preloader.ex:263  Boolean  replace and with or
+[121/994] killed    lib/ecto/query/builder/select.ex:411  ComparisonNegation  replace != with ==
+[122/994] killed    lib/ecto/query/builder/select.ex:249  ComparisonNegation  replace == with !=
+[123/994] survived  lib/ecto/association.ex:413  Arithmetic  replace + with -
+[124/994] error     lib/ecto/schema.ex:2623  UnaryNot  remove unary not
+[125/994] killed    lib/ecto/association.ex:933  ComparisonNegation  replace == with !=
+[126/994] error     lib/ecto/enum.ex:135  ComparisonNegation  replace != with ==
+[127/994] killed    lib/ecto/query/planner.ex:2505  Boolean  replace && with ||
+[128/994] killed    lib/ecto/query/builder/dynamic.ex:75  ComparisonNegation  replace != with ==
+[129/994] error     lib/ecto/query/builder/from.ex:114  Boolean  replace || with &&
+[130/994] killed    lib/ecto/changeset.ex:2735  Boolean  replace or with and
+[131/994] killed    lib/ecto/changeset.ex:3510  Boolean  replace and with or
+[132/994] killed    lib/ecto/schema.ex:2072  Boolean  replace || with &&
+[133/994] killed    lib/ecto/query/builder/filter.ex:108  ComparisonNegation  replace != with ==
+[134/994] error     lib/ecto/query/builder.ex:210  Arithmetic  replace + with *
+[135/994] survived  lib/ecto/association.ex:1341  UnaryNot  remove unary not
+[136/994] error     lib/ecto/association.ex:1421  Boolean  replace && with ||
+[137/994] survived  lib/ecto/association.ex:1137  UnaryNot  remove unary not
+[138/994] error     lib/ecto/query/builder/select.ex:217  Boolean  replace and with or
+[139/994] survived  lib/ecto/repo/preloader.ex:276  ComparisonNegation  replace == with !=
+[140/994] killed    lib/ecto/type.ex:1355  ComparisonNegation  replace == with !=
+[141/994] killed    lib/ecto/association.ex:1485  Boolean  replace || with &&
+[142/994] error     lib/ecto/enum.ex:81  Boolean  replace and with or
+[143/994] killed    lib/ecto/changeset.ex:3081  Boolean  replace || with &&
+[144/994] killed    lib/ecto/changeset.ex:4269  ComparisonNegation  replace == with !=
+[145/994] killed    lib/ecto/query/builder/select.ex:479  Boolean  replace and with or
+[146/994] error     lib/ecto/association.ex:822  Boolean  replace || with &&
+[147/994] killed    lib/ecto/changeset/relation.ex:443  ComparisonNegation  replace == with !=
+[148/994] killed    lib/ecto/repo/queryable.ex:62  Boolean  replace or with and
+[149/994] killed    lib/ecto/query/planner.ex:947  ComparisonNegation  replace != with ==
+[150/994] killed    lib/ecto/repo/schema.ex:1281  Boolean  replace or with and
+[151/994] survived  lib/mix/ecto.ex:111  Boolean  replace or with and
+[152/994] error     lib/ecto/repo/supervisor.ex:110  UnaryNot  remove unary not
+[153/994] error     lib/ecto/schema.ex:2108  Boolean  replace and with or
+[154/994] survived  lib/ecto/query/planner.ex:1754  Arithmetic  replace + with -
+[155/994] killed    lib/ecto/repo/preloader.ex:392  Arithmetic  replace + with -
+[156/994] survived  lib/ecto/schema.ex:2346  Boolean  replace and with or
+[157/994] survived  lib/ecto/query/planner.ex:1517  Arithmetic  replace * with +
+[158/994] killed    lib/ecto/repo/schema.ex:1183  Boolean  replace && with ||
+[159/994] survived  lib/ecto/repo/queryable.ex:447  Boolean  replace and with or
+[160/994] killed    lib/ecto/query/builder/select.ex:404  ComparisonNegation  replace == with !=
+[161/994] error     lib/ecto/repo/supervisor.ex:114  Boolean  replace && with ||
+[162/994] killed    lib/ecto/changeset.ex:3082  Boolean  replace && with ||
+[163/994] survived  lib/ecto/association.ex:428  Arithmetic  replace + with *
+[164/994] killed    lib/ecto/association.ex:1162  Boolean  replace || with &&
+[165/994] survived  lib/ecto/query/builder/dynamic.ex:90  ComparisonBoundary  replace > with >=
+[166/994] killed    lib/ecto/repo/schema.ex:46  Boolean  replace && with ||
+[167/994] killed    lib/ecto/changeset.ex:3089  Arithmetic  replace + with *
+[168/994] survived  lib/ecto/association.ex:243  Arithmetic  replace + with -
+[169/994] killed    lib/ecto/repo/preloader.ex:305  Boolean  replace || with &&
+[170/994] killed    lib/mix/tasks/ecto.drop.ex:69  Boolean  replace or with and
+[171/994] killed    lib/ecto/changeset.ex:1555  Boolean  replace || with &&
+[172/994] survived  lib/ecto/association.ex:1344  UnaryNot  remove unary not
+[173/994] killed    lib/ecto/repo/queryable.ex:62  ComparisonNegation  replace != with ==
+[174/994] error     lib/ecto/association.ex:821  Boolean  replace || with &&
+[175/994] killed    lib/ecto/changeset/relation.ex:409  ComparisonNegation  replace == with !=
+[176/994] killed    lib/ecto/query/planner.ex:1753  Arithmetic  replace + with -
+[177/994] survived  lib/ecto/repo/queryable.ex:447  ComparisonNegation  replace == with !=
+[178/994] killed    lib/ecto/repo/schema.ex:320  Arithmetic  replace + with *
+[179/994] killed    lib/ecto/association.ex:871  Boolean  replace || with &&
+[180/994] survived  lib/ecto/query/builder.ex:319  Boolean  replace or with and
+[181/994] survived  lib/ecto/association.ex:761  UnaryNot  remove unary not
+[182/994] killed    lib/ecto/changeset.ex:3641  Arithmetic  replace + with *
+[183/994] error     lib/ecto/query.ex:1218  ComparisonNegation  replace != with ==
+[184/994] killed    lib/ecto/association.ex:1605  UnaryNot  remove unary not
+[185/994] killed    lib/ecto/association.ex:691  Boolean  replace and with or
+[186/994] killed    lib/ecto/query/planner.ex:1082  ComparisonNegation  replace != with ==
+[187/994] killed    lib/ecto/changeset/relation.ex:334  ComparisonNegation  replace != with ==
+[188/994] error     lib/ecto/query/builder.ex:210  Arithmetic  replace + with -
+[189/994] survived  lib/ecto/repo/assoc.ex:46  ComparisonNegation  replace == with !=
+[190/994] killed    lib/ecto/changeset.ex:2974  UnaryNot  remove unary not
+[191/994] killed    lib/ecto/association.ex:1606  ComparisonNegation  replace == with !=
+[192/994] survived  lib/ecto/association.ex:1332  UnaryNot  remove unary not
+[193/994] killed    lib/ecto/enum.ex:200  ComparisonNegation  replace == with !=
+[194/994] killed    lib/ecto/query/planner.ex:637  Arithmetic  replace + with -
+[195/994] error     lib/ecto/schema.ex:2052  Boolean  replace && with ||
+[196/994] survived  lib/ecto/repo/preloader.ex:263  UnaryNot  remove unary not
+[197/994] error     lib/ecto/query/builder.ex:607  Arithmetic  replace - with +
+[198/994] error     lib/ecto/schema.ex:2511  UnaryNot  remove unary not
+[199/994] killed    lib/ecto/repo/schema.ex:185  UnaryNot  remove unary not
+[200/994] killed    lib/ecto/query/planner.ex:719  Arithmetic  replace + with -
+[201/994] killed    lib/ecto/repo/schema.ex:590  ComparisonNegation  replace != with ==
+[202/994] killed    lib/ecto/changeset/relation.ex:399  Boolean  replace and with or
+[203/994] error     lib/ecto/schema.ex:2638  UnaryNot  remove unary not
+[204/994] killed    lib/ecto/association.ex:820  Boolean  replace || with &&
+[205/994] killed    lib/ecto/repo/preloader.ex:276  Boolean  replace and with or
+[206/994] survived  lib/ecto/changeset/relation.ex:370  Arithmetic  replace + with *
+[207/994] killed    lib/ecto/query/planner.ex:929  Boolean  replace and with or
+[208/994] killed    lib/ecto/type.ex:1153  Boolean  replace || with &&
+[209/994] survived  lib/ecto/repo/schema.ex:698  ComparisonNegation  replace != with ==
+[210/994] survived  lib/ecto/query/planner.ex:1645  Arithmetic  replace + with -
+[211/994] killed    lib/ecto/association.ex:216  ComparisonNegation  replace != with ==
+[212/994] survived  lib/ecto/query/planner.ex:2218  Boolean  replace || with &&
+[213/994] error     lib/ecto/schema.ex:2024  UnaryNot  remove unary not
+[214/994] killed    lib/ecto/association.ex:1640  Boolean  replace || with &&
+[215/994] killed    lib/ecto/changeset.ex:1555  Boolean  replace && with ||
+[216/994] killed    lib/ecto/changeset.ex:1323  Boolean  replace or with and
+[217/994] error     lib/ecto/query/builder.ex:607  Arithmetic  replace - with *
+[218/994] error     lib/ecto/association.ex:1163  Boolean  replace || with &&
+[219/994] killed    lib/ecto/association.ex:262  Boolean  replace || with &&
+[220/994] killed    lib/ecto/association.ex:246  Arithmetic  replace - with *
+[221/994] killed    lib/ecto/query/planner.ex:2618  Boolean  replace || with &&
+[222/994] survived  lib/ecto/exceptions.ex:43  Boolean  replace && with ||
+[223/994] killed    lib/ecto/query/builder/dynamic.ex:94  Arithmetic  replace + with -
+[224/994] survived  lib/ecto/query/planner.ex:42  Arithmetic  replace - with *
+[225/994] error     lib/ecto/schema.ex:1987  UnaryNot  remove unary !
+[226/994] survived  lib/ecto/query/planner.ex:2550  ComparisonBoundary  replace >= with >
+[227/994] killed    lib/ecto/schema.ex:2346  ComparisonNegation  replace != with ==
+[228/994] survived  lib/ecto/query/planner.ex:1520  Arithmetic  replace + with -
+[229/994] killed    lib/ecto/type.ex:1438  Arithmetic  replace + with -
+[230/994] survived  lib/ecto/repo/preloader.ex:278  ComparisonNegation  replace == with !=
+[231/994] killed    lib/ecto/changeset/relation.ex:377  Boolean  replace && with ||
+[232/994] survived  lib/ecto/query/planner.ex:620  Arithmetic  replace - with +
+[233/994] survived  lib/ecto/query/planner.ex:1520  Arithmetic  replace + with *
+[234/994] killed    lib/ecto/query/planner.ex:2671  ComparisonNegation  replace == with !=
+[235/994] survived  lib/ecto/query/planner.ex:947  Boolean  replace and with or
+[236/994] killed    lib/ecto/schema.ex:2368  Boolean  replace || with &&
+[237/994] survived  lib/ecto/association.ex:243  Arithmetic  replace + with *
+[238/994] survived  lib/ecto/changeset.ex:3090  Arithmetic  replace + with *
+[239/994] killed    lib/ecto/type.ex:1296  ComparisonNegation  replace == with !=
+[240/994] killed    lib/ecto/changeset.ex:1309  Boolean  replace || with &&
+[241/994] killed    lib/ecto/query/builder/update.ex:45  ComparisonNegation  replace == with !=
+[242/994] killed    lib/ecto/query/planner.ex:335  Boolean  replace || with &&
+[243/994] killed    lib/ecto/query/planner.ex:2313  ComparisonNegation  replace < with >=
+[244/994] survived  lib/ecto/repo/assoc.ex:63  Boolean  replace && with ||
+[245/994] timeout   lib/ecto/changeset/relation.ex:387  ComparisonNegation  replace == with !=
+[246/994] killed    lib/ecto/repo/queryable.ex:62  ComparisonNegation  replace != with ==
+[247/994] survived  lib/ecto/query/planner.ex:38  Arithmetic  replace + with -
+[248/994] survived  lib/ecto/repo/queryable.ex:438  Boolean  replace && with ||
+[249/994] killed    lib/ecto/query/inspect.ex:175  Arithmetic  replace + with -
+[250/994] survived  lib/ecto/repo/schema.ex:303  Arithmetic  replace + with *
+[251/994] survived  lib/ecto/repo/preloader.ex:263  Boolean  replace and with or
+[252/994] killed    lib/ecto/query/planner.ex:781  Arithmetic  replace + with *
+[253/994] killed    lib/ecto/changeset/relation.ex:376  Boolean  replace and with or
+[254/994] error     lib/ecto/association.ex:1406  Boolean  replace || with &&
+[255/994] killed    lib/ecto/changeset/relation.ex:376  ComparisonNegation  replace != with ==
+[256/994] killed    lib/ecto/repo/schema.ex:919  ComparisonNegation  replace == with !=
+[257/994] killed    lib/ecto/query/planner.ex:2313  Boolean  replace and with or
+[258/994] survived  lib/ecto/repo/schema.ex:303  Arithmetic  replace + with -
+[259/994] survived  lib/ecto/repo/supervisor.ex:178  Boolean  replace || with &&
+[260/994] killed    lib/ecto/query/builder/filter.ex:165  Arithmetic  replace + with *
+[261/994] survived  lib/ecto/query/builder/select.ex:508  Boolean  replace || with &&
+[262/994] killed    lib/ecto/changeset.ex:4077  Boolean  replace || with &&
+[263/994] survived  lib/ecto/type.ex:1170  Arithmetic  replace * with /
+[264/994] survived  lib/ecto/association.ex:1335  UnaryNot  remove unary not
+[265/994] survived  lib/ecto/query/planner.ex:620  Arithmetic  replace + with *
+[266/994] survived  lib/ecto/query/planner.ex:683  Arithmetic  replace + with *
+[267/994] killed    lib/ecto/repo/schema.ex:983  ComparisonNegation  replace == with !=
+[268/994] killed    lib/ecto/query/builder/update.ex:112  ComparisonNegation  replace == with !=
+[269/994] survived  lib/ecto/association.ex:409  Arithmetic  replace + with *
+[270/994] killed    lib/ecto/repo/schema.ex:547  UnaryNot  remove unary !
+[271/994] killed    lib/ecto/query/builder/from.ex:230  ComparisonNegation  replace > with <=
+[272/994] killed    lib/ecto/association.ex:147  Boolean  replace || with &&
+[273/994] killed    lib/ecto/repo/schema.ex:1283  UnaryNot  remove unary not
+[274/994] survived  lib/ecto/association.ex:241  Arithmetic  replace + with *
+[275/994] survived  lib/ecto/association.ex:1134  UnaryNot  remove unary not
+[276/994] killed    lib/ecto/type.ex:1359  ComparisonNegation  replace == with !=
+[277/994] killed    lib/ecto/schema.ex:2008  UnaryNot  remove unary not
+[278/994] killed    lib/ecto/type.ex:1004  ComparisonNegation  replace == with !=
+[279/994] killed    lib/ecto/association.ex:1407  Boolean  replace || with &&
+[280/994] survived  lib/ecto/query/planner.ex:683  Arithmetic  replace + with -
+[281/994] killed    lib/ecto/repo/schema.ex:1276  Boolean  replace or with and
+[282/994] killed    lib/ecto/query/inspect.ex:169  ComparisonNegation  replace == with !=
+[283/994] killed    lib/ecto/query/builder/update.ex:125  ComparisonNegation  replace == with !=
+[284/994] survived  lib/ecto/query/planner.ex:108  Boolean  replace || with &&
+[285/994] killed    lib/ecto/changeset.ex:3897  Boolean  replace || with &&
+[286/994] survived  lib/ecto/type.ex:1432  Arithmetic  replace + with *
+[287/994] killed    lib/ecto/query/planner.ex:911  Boolean  replace and with or
+[288/994] killed    lib/ecto/changeset/relation.ex:210  Boolean  replace || with &&
+[289/994] survived  lib/ecto/query/builder.ex:841  Boolean  replace and with or
+[290/994] killed    lib/ecto/changeset/relation.ex:335  ComparisonNegation  replace == with !=
+[291/994] survived  lib/ecto/query/builder/join.ex:392  ComparisonNegation  replace != with ==
+[292/994] survived  lib/ecto/association.ex:764  UnaryNot  remove unary not
+[293/994] killed    lib/ecto/query/planner.ex:300  Boolean  replace || with &&
+[294/994] error     lib/ecto/query/builder/join.ex:150  Boolean  replace || with &&
+[295/994] survived  lib/ecto/query/planner.ex:46  Arithmetic  replace + with *
+[296/994] killed    lib/ecto/query/builder/select.ex:407  ComparisonNegation  replace == with !=
+[297/994] survived  lib/ecto/repo/supervisor.ex:32  Boolean  replace and with or
+[298/994] killed    lib/ecto/changeset/relation.ex:423  Boolean  replace and with or
+[299/994] killed    lib/ecto/type.ex:1438  Arithmetic  replace + with *
+[300/994] killed    lib/ecto/association.ex:1201  Boolean  replace || with &&
+[301/994] killed    lib/ecto/query/planner.ex:464  Boolean  replace || with &&
+[302/994] killed    lib/ecto/query/builder/windows.ex:106  ComparisonNegation  replace == with !=
+[303/994] killed    lib/ecto/changeset/relation.ex:387  Boolean  replace and with or
+[304/994] killed    lib/ecto/query/planner.ex:2313  ComparisonBoundary  replace < with <=
+[305/994] killed    lib/ecto/association.ex:226  Boolean  replace || with &&
+[306/994] error     lib/ecto/schema.ex:2635  UnaryNot  remove unary not
+[307/994] error     lib/ecto/schema.ex:2001  Boolean  replace || with &&
+[308/994] survived  lib/ecto/query/planner.ex:1754  Arithmetic  replace + with *
+[309/994] killed    lib/ecto/changeset/relation.ex:446  ComparisonNegation  replace == with !=
+[310/994] killed    lib/ecto/schema.ex:2373  Boolean  replace || with &&
+[311/994] survived  lib/ecto/changeset.ex:4114  Boolean  replace || with &&
+[312/994] killed    lib/ecto/changeset.ex:578  ComparisonNegation  replace != with ==
+[313/994] killed    lib/ecto/exceptions.ex:151  Boolean  replace || with &&
+[314/994] killed    lib/ecto/query/builder/update.ex:179  Arithmetic  replace + with *
+[315/994] survived  lib/ecto/association.ex:767  UnaryNot  remove unary not
+[316/994] killed    lib/ecto/changeset.ex:1555  Boolean  replace || with &&
+[317/994] error     lib/ecto/query/builder.ex:595  Arithmetic  replace - with *
+[318/994] killed    lib/ecto/multi.ex:861  Boolean  replace || with &&
+[319/994] survived  lib/ecto/query/planner.ex:1517  Arithmetic  replace * with -
+[320/994] killed    lib/ecto/association.ex:216  Boolean  replace or with and
+[321/994] survived  lib/ecto/repo/preloader.ex:470  Arithmetic  replace - with *
+[322/994] killed    lib/ecto/changeset/relation.ex:334  Boolean  replace or with and
+[323/994] killed    lib/ecto/query/planner.ex:311  Boolean  replace || with &&
+[324/994] killed    lib/ecto/changeset.ex:1323  Boolean  replace or with and
+[325/994] killed    lib/ecto/enum.ex:85  Boolean  replace and with or
+[326/994] killed    lib/ecto/repo/preloader.ex:278  Boolean  replace and with or
+[327/994] killed    lib/ecto/association.ex:691  ComparisonNegation  replace != with ==
+[328/994] killed    lib/mix/tasks/ecto.drop.ex:68  Boolean  replace or with and
+[329/994] survived  lib/ecto/type.ex:1432  Arithmetic  replace + with -
+[330/994] killed    lib/ecto/query/planner.ex:2313  ComparisonNegation  replace == with !=
+[331/994] survived  lib/ecto/query/builder/from.ex:230  ComparisonBoundary  replace > with >=
+[332/994] survived  lib/ecto/changeset.ex:607  ComparisonNegation  replace != with ==
+[333/994] survived  lib/ecto/query/builder/from.ex:230  ComparisonBoundary  replace > with >=
+[334/994] killed    lib/ecto/schema.ex:2000  Boolean  replace || with &&
+[335/994] killed    lib/ecto/query/planner.ex:1083  ComparisonNegation  replace != with ==
+[336/994] killed    lib/ecto/repo/schema.ex:927  ComparisonNegation  replace == with !=
+[337/994] killed    lib/ecto/changeset.ex:4199  Boolean  replace || with &&
+[338/994] killed    lib/ecto/association.ex:1262  ComparisonNegation  replace == with !=
+[339/994] error     lib/ecto/query/builder/join.ex:392  Boolean  replace and with or
+[340/994] survived  lib/ecto/query/builder.ex:1495  Arithmetic  replace + with -
+[341/994] killed    lib/ecto/changeset.ex:3082  Boolean  replace || with &&
+[342/994] survived  lib/ecto/association.ex:1338  UnaryNot  remove unary not
+[343/994] survived  lib/ecto/schema.ex:2262  Boolean  replace || with &&
+[344/994] killed    lib/ecto/query/planner.ex:997  ComparisonNegation  replace != with ==
+[345/994] survived  lib/ecto/query/planner.ex:620  Arithmetic  replace - with *
+[346/994] survived  lib/ecto/repo/queryable.ex:326  UnaryNot  remove unary not
+[347/994] survived  lib/ecto/query/planner.ex:16  ComparisonNegation  replace != with ==
+[348/994] killed    lib/ecto/changeset.ex:607  ComparisonNegation  replace != with ==
+[349/994] killed    lib/ecto/query/builder/join.ex:216  Arithmetic  replace + with *
+[350/994] killed    lib/mix/tasks/ecto.drop.ex:79  ComparisonNegation  replace != with ==
+[351/994] error     lib/ecto/schema.ex:2153  ComparisonNegation  replace == with !=
+[352/994] killed    lib/ecto/changeset.ex:2729  ComparisonNegation  replace == with !=
+[353/994] killed    lib/ecto/repo/supervisor.ex:32  ComparisonNegation  replace == with !=
+[354/994] killed    lib/ecto/query/planner.ex:2216  ComparisonNegation  replace == with !=
+[355/994] killed    lib/ecto/query/planner.ex:2550  ComparisonNegation  replace >= with <
+[356/994] killed    lib/ecto/query/planner.ex:335  Boolean  replace || with &&
+[357/994] killed    lib/ecto/changeset.ex:2623  Boolean  replace && with ||
+[358/994] killed    lib/ecto/query/planner.ex:1043  Boolean  replace and with or
+[359/994] killed    lib/ecto/changeset.ex:3060  Boolean  replace || with &&
+[360/994] error     lib/ecto/repo/supervisor.ex:129  UnaryNot  remove unary not
+[361/994] killed    lib/ecto/changeset.ex:1331  Boolean  replace and with or
+[362/994] killed    lib/ecto/changeset.ex:1555  Boolean  replace || with &&
+[363/994] error     lib/ecto/query/builder/from.ex:105  Boolean  replace || with &&
+[364/994] survived  lib/ecto/type.ex:1223  Arithmetic  replace * with /
+[365/994] killed    lib/ecto/changeset/relation.ex:376  Boolean  replace and with or
+[366/994] survived  lib/ecto/query/builder/select.ex:269  Arithmetic  replace + with -
+[367/994] survived  lib/ecto/changeset.ex:3090  Arithmetic  replace + with -
+[368/994] killed    lib/ecto/query/planner.ex:1307  ComparisonNegation  replace != with ==
+[369/994] killed    lib/ecto/repo/preloader.ex:693  Boolean  replace || with &&
+[370/994] killed    lib/ecto/association.ex:1408  Boolean  replace || with &&
+[371/994] error     lib/ecto/query/builder/lock.ex:21  ComparisonNegation  replace != with ==
+[372/994] survived  lib/ecto/association.ex:1347  UnaryNot  remove unary not
+[373/994] error     lib/ecto/query/builder.ex:976  ComparisonNegation  replace == with !=
+[374/994] killed    lib/ecto/query/builder/select.ex:392  ComparisonNegation  replace == with !=
+[375/994] killed    lib/ecto/association.ex:197  ComparisonNegation  replace != with ==
+[376/994] error     lib/ecto/schema.ex:2149  Boolean  replace || with &&
+[377/994] survived  lib/ecto/changeset.ex:3752  Boolean  replace || with &&
+[378/994] killed    lib/ecto/changeset/relation.ex:409  Boolean  replace or with and
+[379/994] killed    lib/ecto/changeset/relation.ex:334  ComparisonNegation  replace == with !=
+[380/994] killed    lib/ecto/query/planner.ex:1944  UnaryNot  remove unary not
+[381/994] survived  lib/ecto/repo/assoc.ex:63  UnaryNot  remove unary not
+[382/994] survived  lib/ecto/association.ex:241  Arithmetic  replace + with -
+[383/994] killed    lib/ecto/changeset/relation.ex:335  Boolean  replace and with or
+[384/994] killed    lib/ecto/changeset/relation.ex:375  Boolean  replace and with or
+[385/994] killed    lib/ecto/query/builder/select.ex:333  ComparisonNegation  replace == with !=
+[386/994] killed    lib/ecto/association.ex:221  ComparisonNegation  replace == with !=
+[387/994] error     lib/ecto/schema.ex:2542  UnaryNot  remove unary not
+[388/994] killed    lib/ecto/repo/preloader.ex:121  ComparisonNegation  replace != with ==
+[389/994] killed    lib/ecto/changeset/relation.ex:473  ComparisonNegation  replace == with !=
+[390/994] error     lib/ecto/association.ex:1405  Boolean  replace || with &&
+[391/994] killed    lib/ecto/repo/schema.ex:973  Boolean  replace || with &&
+[392/994] survived  lib/ecto/query/builder/select.ex:269  Arithmetic  replace + with *
+[393/994] killed    lib/ecto/repo/schema.ex:1281  ComparisonNegation  replace != with ==
+[394/994] error     lib/ecto/query/builder.ex:841  UnaryNot  remove unary not
+[395/994] killed    lib/ecto/repo/preloader.ex:138  Boolean  replace and with or
+[396/994] killed    lib/ecto/repo/preloader.ex:693  Boolean  replace || with &&
+[397/994] error     lib/ecto/query/builder/from.ex:109  Boolean  replace || with &&
+[398/994] error     lib/ecto/query/builder.ex:595  Arithmetic  replace - with *
+[399/994] survived  lib/ecto/query/planner.ex:42  Arithmetic  replace - with +
+[400/994] survived  lib/ecto/query/planner.ex:1645  Arithmetic  replace + with *
+[401/994] killed    lib/ecto/query/builder/from.ex:230  ComparisonNegation  replace > with <=
+[402/994] error     lib/ecto/schema.ex:2002  Boolean  replace || with &&
+[403/994] killed    lib/ecto/changeset.ex:2623  Boolean  replace && with ||
+[404/994] survived  lib/ecto/repo/queryable.ex:439  Boolean  replace && with ||
+[405/994] killed    lib/ecto/type.ex:1005  Boolean  replace and with or
+[406/994] killed    lib/ecto/query/builder.ex:1509  Arithmetic  replace + with *
+[407/994] error     lib/ecto/query/builder/select.ex:209  Boolean  replace and with or
+[408/994] killed    lib/ecto/changeset.ex:1560  Boolean  replace and with or
+[409/994] error     lib/ecto/schema.ex:1987  ComparisonNegation  replace == with !=
+[410/994] survived  lib/ecto/association.ex:1568  Boolean  replace and with or
+[411/994] killed    lib/ecto/changeset/relation.ex:334  Boolean  replace and with or
+[412/994] killed    lib/ecto/changeset/relation.ex:399  UnaryNot  remove unary not
+[413/994] killed    lib/ecto/query/builder/dynamic.ex:100  Arithmetic  replace + with *
+[414/994] killed    lib/ecto/query/planner.ex:781  Arithmetic  replace + with -
+[415/994] killed    lib/ecto/changeset.ex:3089  Arithmetic  replace + with -
+[416/994] killed    lib/ecto/changeset.ex:3962  Boolean  replace || with &&
+[417/994] killed    lib/ecto/query/inspect.ex:304  Boolean  replace || with &&
+[418/994] error     lib/ecto/schema.ex:2598  UnaryNot  remove unary not
+[419/994] error     lib/ecto/query/builder.ex:990  ComparisonNegation  replace != with ==
+[420/994] survived  lib/ecto/association.ex:1207  Boolean  replace || with &&
+[421/994] killed    lib/ecto/query/builder.ex:674  Boolean  replace and with or
+[422/994] error     lib/ecto/schema.ex:2120  Boolean  replace and with or
+[423/994] killed    lib/ecto/changeset.ex:929  Boolean  replace and with or
+[424/994] error     lib/ecto/query/builder.ex:595  Arithmetic  replace - with +
+[425/994] error     lib/ecto/query/builder.ex:210  ComparisonNegation  replace != with ==
+[426/994] killed    lib/ecto/repo/schema.ex:590  Boolean  replace and with or
+[427/994] killed    lib/ecto/query/builder.ex:1495  Arithmetic  replace + with *
+[428/994] survived  lib/ecto/query/planner.ex:38  Arithmetic  replace + with *
+[429/994] killed    lib/ecto/repo/supervisor.ex:56  Boolean  replace and with or
+[430/994] killed    lib/ecto/schema.ex:2029  ComparisonNegation  replace != with ==
+[431/994] survived  lib/ecto/changeset.ex:785  ComparisonNegation  replace != with ==
+[432/994] survived  lib/ecto/changeset/relation.ex:477  ComparisonNegation  replace != with ==
+[433/994] killed    lib/ecto/schema/metadata.ex:60  ComparisonNegation  replace != with ==
+[434/994] survived  lib/ecto/repo/preloader.ex:296  ComparisonBoundary  replace <= with <
+[435/994] survived  lib/ecto/repo/assoc.ex:46  Boolean  replace and with or
+[436/994] killed    lib/mix/tasks/ecto.gen.repo.ex:53  Boolean  replace || with &&
+[437/994] survived  lib/ecto/repo/preloader.ex:261  UnaryNot  remove unary not
+[438/994] survived  lib/ecto/query/planner.ex:620  Arithmetic  replace + with -
+[439/994] killed    lib/ecto/repo/queryable.ex:201  Boolean  replace and with or
+[440/994] killed    lib/ecto/type.ex:1365  Boolean  replace and with or
+[441/994] killed    lib/ecto/changeset/relation.ex:316  Boolean  replace && with ||
+[442/994] killed    lib/ecto/changeset.ex:3083  Boolean  replace && with ||
+[443/994] killed    lib/ecto/repo/preloader.ex:392  Arithmetic  replace + with *
+[444/994] killed    lib/ecto/association.ex:228  Arithmetic  replace - with +
+[445/994] error     lib/ecto/embedded.ex:49  ComparisonNegation  replace == with !=
+[446/994] killed    lib/ecto/changeset.ex:3510  ComparisonNegation  replace == with !=
+[447/994] killed    lib/ecto/association.ex:228  Arithmetic  replace - with *
+[448/994] killed    lib/ecto/association.ex:246  Arithmetic  replace - with +
+[449/994] killed    lib/ecto/type.ex:1005  ComparisonNegation  replace == with !=
+[450/994] killed    lib/ecto/query/builder/join.ex:216  Arithmetic  replace + with -
+[451/994] error     lib/ecto/schema.ex:2309  ComparisonNegation  replace == with !=
+[452/994] killed    lib/ecto/changeset/relation.ex:379  Arithmetic  replace + with -
+[453/994] killed    lib/ecto/query/builder.ex:361  Boolean  replace or with and
+[454/994] error     lib/ecto/schema.ex:1987  Boolean  replace && with ||
+[455/994] killed    lib/ecto/repo/schema.ex:1282  Boolean  replace and with or
+[456/994] survived  lib/ecto/changeset/relation.ex:370  Arithmetic  replace + with -
+[457/994] killed    lib/ecto/repo/schema.ex:590  ComparisonNegation  replace != with ==
+[458/994] killed    lib/ecto/query/planner.ex:976  ComparisonNegation  replace != with ==
+[459/994] killed    lib/ecto/query/builder.ex:504  ComparisonNegation  replace == with !=
+[460/994] error     lib/ecto/query/builder.ex:595  Arithmetic  replace - with +
+[461/994] killed    lib/ecto/query/planner.ex:1081  ComparisonNegation  replace != with ==
+[462/994] survived  lib/ecto/adapter/queryable.ex:109  ComparisonNegation  replace == with !=
+[463/994] killed    lib/ecto/query/planner.ex:1656  Arithmetic  replace + with *
+[464/994] killed    lib/ecto/repo/preloader.ex:138  UnaryNot  remove unary not
+[465/994] killed    lib/ecto/changeset.ex:3641  Arithmetic  replace + with -
+[466/994] survived  lib/ecto/query/planner.ex:947  Boolean  replace and with or
+[467/994] survived  lib/ecto/query/planner.ex:962  Boolean  replace and with or
+[468/994] survived  lib/ecto/repo/preloader.ex:296  ComparisonNegation  replace <= with >
+[469/994] killed    lib/ecto/query/planner.ex:1084  ComparisonNegation  replace != with ==
+[470/994] killed    lib/ecto/repo/schema.ex:326  Arithmetic  replace + with *
+[471/994] survived  lib/ecto/query/builder/preload.ex:308  Boolean  replace && with ||
+[472/994] killed    lib/ecto/repo/preloader.ex:138  Boolean  replace and with or
+[473/994] killed    lib/ecto/repo/schema.ex:338  ComparisonNegation  replace == with !=
+[474/994] killed    lib/ecto/changeset/relation.ex:165  Boolean  replace && with ||
+[475/994] survived  lib/ecto/type.ex:1386  Boolean  replace and with or
+[476/994] killed    lib/ecto/query/planner.ex:1656  Arithmetic  replace + with -
+[477/994] error     lib/ecto/query/builder.ex:1077  GuardTypeTest  replace guard is_atom with is_nil
+[478/994] error     lib/ecto/query/builder/join.ex:76  GuardTypeTest  replace guard is_atom with is_nil
+[479/994] killed    lib/ecto/repo/schema.ex:345  GuardTypeTest  replace guard is_atom with is_nil
+[480/994] survived  lib/ecto/query/builder/order_by.ex:100  GuardTypeTest  replace guard is_atom with is_nil
+[481/994] killed    lib/ecto/changeset.ex:915  GuardTypeTest  replace guard is_atom with is_nil
+[482/994] killed    lib/ecto/changeset.ex:1355  GuardTypeTest  replace guard is_list with is_tuple
+[483/994] killed    lib/ecto/query/planner.ex:2272  GuardTypeTest  replace guard is_nil with is_atom
+[484/994] killed    lib/ecto/query/builder.ex:673  GuardTypeTest  replace guard is_atom with is_nil
+[485/994] killed    lib/ecto/multi.ex:550  GuardTypeTest  replace guard is_list with is_tuple
+[486/994] killed    lib/ecto/query/builder/select.ex:466  GuardComparisonNegation  replace guard == with !=
+[487/994] killed    lib/ecto/changeset.ex:3380  GuardTypeTest  replace guard is_float with is_number
+[488/994] killed    lib/ecto/query/builder.ex:1370  GuardTypeTest  replace guard is_atom with is_nil
+[489/994] killed    lib/ecto/repo/queryable.ex:571  GuardTypeTest  replace guard is_atom with is_nil
+[490/994] killed    lib/ecto/type.ex:907  GuardTypeTest  replace guard is_float with is_integer
+[491/994] survived  lib/ecto/repo/queryable.ex:206  GuardComparisonNegation  replace guard != with ==
+[492/994] error     lib/ecto/query/builder.ex:1073  GuardTypeTest  replace guard is_atom with is_nil
+[493/994] killed    lib/ecto/query/planner.ex:2703  GuardComparisonNegation  replace guard == with !=
+[494/994] error     lib/ecto/query/builder.ex:875  GuardTypeTest  replace guard is_atom with is_nil
+[495/994] error     lib/ecto/query/builder/join.ex:48  GuardTypeTest  replace guard is_atom with is_nil
+[496/994] killed    lib/ecto/queryable.ex:148  GuardTypeTest  replace guard is_atom with is_nil
+[497/994] killed    lib/ecto/repo/queryable.ex:583  GuardTypeTest  replace guard is_list with is_tuple
+[498/994] killed    lib/ecto/query/builder.ex:1360  GuardTypeTest  replace guard is_atom with is_nil
+[499/994] error     lib/ecto/query/builder/update.ex:29  GuardTypeTest  replace guard is_list with is_tuple
+[500/994] survived  lib/ecto/type.ex:1085  GuardTypeTest  replace guard is_integer with is_number
+[501/994] killed    lib/ecto/query/planner.ex:2083  GuardTypeTest  replace guard is_atom with is_nil
+[502/994] error     lib/ecto/query/builder.ex:1623  GuardTypeTest  replace guard is_atom with is_nil
+[503/994] killed    lib/ecto/query.ex:524  GuardTypeTest  replace guard is_atom with is_nil
+[504/994] error     lib/ecto/query/builder/filter.ex:24  GuardTypeTest  replace guard is_list with is_tuple
+[505/994] killed    lib/ecto/query/planner.ex:1729  GuardTypeTest  replace guard is_list with is_tuple
+[506/994] killed    lib/ecto/query/planner.ex:2723  GuardComparisonNegation  replace guard != with ==
+[507/994] survived  lib/ecto/type.ex:687  GuardTypeTest  replace guard is_integer with is_number
+[508/994] survived  lib/ecto/changeset/relation.ex:302  GuardTypeTest  replace guard is_nil with is_atom
+[509/994] killed    lib/ecto/changeset/relation.ex:302  GuardTypeTest  replace guard is_map with is_list
+[510/994] survived  lib/ecto/query/builder/preload.ex:89  GuardTypeTest  replace guard is_atom with is_nil
+[511/994] killed    lib/ecto/query/planner.ex:432  GuardTypeTest  replace guard is_atom with is_nil
+[512/994] killed    lib/ecto/changeset.ex:520  GuardTypeTest  replace guard is_list with is_tuple
+[513/994] survived  lib/ecto/query/builder.ex:119  GuardTypeTest  replace guard is_atom with is_nil
+[514/994] killed    lib/ecto/query/builder.ex:1433  GuardTypeTest  replace guard is_integer with is_float
+[515/994] killed    lib/ecto/changeset/relation.ex:533  GuardComparisonNegation  replace guard == with !=
+[516/994] survived  lib/ecto/query/planner.ex:1655  GuardTypeTest  replace guard is_integer with is_number
+[517/994] survived  lib/ecto/query/inspect.ex:353  GuardTypeTest  replace guard is_integer with is_number
+[518/994] killed    lib/ecto/query/planner.ex:274  GuardComparisonNegation  replace guard != with ==
+[519/994] killed    lib/ecto/multi.ex:655  GuardTypeTest  replace guard is_list with is_tuple
+[520/994] error     lib/ecto/query/builder.ex:346  GuardTypeTest  replace guard is_atom with is_nil
+[521/994] survived  lib/ecto/query/planner.ex:778  GuardComparisonBoundary  replace guard > with >=
+[522/994] error     lib/ecto/association.ex:473  GuardTypeTest  replace guard is_atom with is_nil
+[523/994] killed    lib/ecto/query/builder.ex:1517  GuardTypeTest  replace guard is_atom with is_nil
+[524/994] survived  lib/ecto/query/planner.ex:1445  GuardTypeTest  replace guard is_integer with is_number
+[525/994] killed    lib/ecto/changeset.ex:571  GuardTypeTest  replace guard is_atom with is_nil
+[526/994] killed    lib/ecto/query/builder/update.ex:87  GuardTypeTest  replace guard is_atom with is_nil
+[527/994] survived  lib/ecto/query/builder/preload.ex:81  GuardTypeTest  replace guard is_atom with is_nil
+[528/994] killed    lib/ecto/association.ex:492  GuardTypeTest  replace guard is_list with is_tuple
+[529/994] killed    lib/ecto/query/builder.ex:1623  GuardTypeTest  replace guard is_atom with is_nil
+[530/994] error     lib/ecto/query/builder.ex:1134  GuardTypeTest  replace guard is_atom with is_nil
+[531/994] killed    lib/ecto/query/planner.ex:2615  GuardComparisonNegation  replace guard != with ==
+[532/994] killed    lib/ecto/query/builder/select.ex:227  GuardTypeTest  replace guard is_map with is_list
+[533/994] killed    lib/ecto/embedded.ex:95  GuardTypeTest  replace guard is_list with is_tuple
+[534/994] survived  lib/ecto/query/builder.ex:550  GuardTypeTest  replace guard is_atom with is_nil
+[535/994] killed    lib/ecto/repo/preloader.ex:391  GuardComparisonBoundary  replace guard >= with >
+[536/994] killed    lib/ecto/changeset.ex:1299  GuardComparisonNegation  replace guard == with !=
+[537/994] killed    lib/ecto/query/builder/update.ex:151  GuardTypeTest  replace guard is_list with is_tuple
+[538/994] survived  lib/ecto/type.ex:686  GuardTypeTest  replace guard is_float with is_integer
+[539/994] survived  lib/ecto/query/planner.ex:789  GuardTypeTest  replace guard is_integer with is_number
+[540/994] killed    lib/ecto/enum.ex:385  GuardTypeTest  replace guard is_map with is_list
+[541/994] killed    lib/ecto/query/planner.ex:1072  GuardComparisonNegation  replace guard != with ==
+[542/994] killed    lib/ecto/query/planner.ex:274  GuardComparisonNegation  replace guard != with ==
+[543/994] killed    lib/ecto/repo/schema.ex:1014  GuardTypeTest  replace guard is_atom with is_nil
+[544/994] killed    lib/ecto/query/planner.ex:293  GuardTypeTest  replace guard is_atom with is_nil
+[545/994] survived  lib/ecto/query/builder.ex:1246  GuardTypeTest  replace guard is_integer with is_number
+[546/994] survived  lib/ecto/query/planner.ex:795  GuardTypeTest  replace guard is_integer with is_number
+[547/994] survived  lib/ecto/query/builder/select.ex:194  GuardTypeTest  replace guard is_float with is_number
+[548/994] killed    lib/ecto/query/builder.ex:1073  GuardTypeTest  replace guard is_atom with is_nil
+[549/994] survived  lib/ecto/query/builder/join.ex:383  GuardTypeTest  replace guard is_atom with is_nil
+[550/994] killed    lib/ecto/query/builder.ex:1439  GuardTypeTest  replace guard is_atom with is_nil
+[551/994] error     lib/ecto/schema.ex:2670  GuardTypeTest  replace guard is_atom with is_nil
+[552/994] survived  lib/ecto/changeset.ex:1947  GuardTypeTest  replace guard is_atom with is_nil
+[553/994] killed    lib/ecto/query/planner.ex:2475  GuardTypeTest  replace guard is_integer with is_float
+[554/994] error     lib/ecto/query/builder.ex:195  GuardTypeTest  replace guard is_list with is_tuple
+[555/994] killed    lib/ecto/query/builder.ex:879  GuardTypeTest  replace guard is_atom with is_nil
+[556/994] survived  lib/ecto/query/builder.ex:1416  GuardTypeTest  replace guard is_integer with is_number
+[557/994] killed    lib/ecto/changeset.ex:3179  GuardComparisonNegation  replace guard <= with >
+[558/994] survived  lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_integer with is_number
+[559/994] killed    lib/ecto/changeset.ex:1852  GuardTypeTest  replace guard is_atom with is_nil
+[560/994] survived  lib/ecto/query/builder/join.ex:345  GuardTypeTest  replace guard is_atom with is_nil
+[561/994] error     lib/ecto/query/builder.ex:119  GuardTypeTest  replace guard is_atom with is_nil
+[562/994] survived  lib/ecto/repo/preloader.ex:633  GuardTypeTest  replace guard is_list with is_tuple
+[563/994] survived  lib/ecto/type.ex:687  GuardTypeTest  replace guard is_integer with is_float
+[564/994] killed    lib/ecto/changeset/relation.ex:311  GuardTypeTest  replace guard is_list with is_tuple
+[565/994] survived  lib/ecto/query/planner.ex:2088  GuardTypeTest  replace guard is_number with is_integer
+[566/994] error     lib/ecto/query/builder/update.ex:79  GuardTypeTest  replace guard is_atom with is_nil
+[567/994] killed    lib/ecto/query.ex:992  GuardTypeTest  replace guard is_list with is_tuple
+[568/994] killed    lib/ecto/query/builder/order_by.ex:68  GuardTypeTest  replace guard is_atom with is_nil
+[569/994] killed    lib/ecto/query/builder/order_by.ex:141  GuardTypeTest  replace guard is_atom with is_nil
+[570/994] error     lib/ecto/query/builder.ex:1077  GuardTypeTest  replace guard is_atom with is_nil
+[571/994] killed    lib/ecto/changeset.ex:2231  GuardTypeTest  replace guard is_atom with is_nil
+[572/994] killed    lib/ecto/query/builder/preload.ex:277  GuardTypeTest  replace guard is_list with is_tuple
+[573/994] error     lib/ecto/query/builder/from.ex:94  GuardTypeTest  replace guard is_atom with is_nil
+[574/994] survived  lib/ecto/association.ex:1367  GuardTypeTest  replace guard is_atom with is_nil
+[575/994] killed    lib/ecto/query/builder/select.ex:107  GuardTypeTest  replace guard is_atom with is_nil
+[576/994] killed    lib/ecto/changeset.ex:1809  GuardTypeTest  replace guard is_atom with is_nil
+[577/994] killed    lib/ecto/query/builder/join.ex:296  GuardComparisonNegation  replace guard != with ==
+[578/994] killed    lib/ecto/query/builder/select.ex:466  GuardComparisonNegation  replace guard == with !=
+[579/994] killed    lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_integer with is_float
+[580/994] killed    lib/ecto/multi.ex:281  GuardTypeTest  replace guard is_list with is_tuple
+[581/994] survived  lib/ecto/query/builder.ex:1433  GuardTypeTest  replace guard is_integer with is_number
+[582/994] killed    lib/ecto/changeset.ex:1359  GuardTypeTest  replace guard is_map with is_list
+[583/994] killed    lib/ecto/changeset.ex:4147  GuardTypeTest  replace guard is_atom with is_nil
+[584/994] survived  lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_integer with is_number
+[585/994] killed    lib/ecto/changeset.ex:2474  GuardTypeTest  replace guard is_atom with is_nil
+[586/994] survived  lib/ecto/type.ex:1142  GuardTypeTest  replace guard is_integer with is_number
+[587/994] error     lib/ecto/association.ex:1589  GuardTypeTest  replace guard is_atom with is_nil
+[588/994] killed    lib/ecto/changeset.ex:2250  GuardComparisonNegation  replace guard == with !=
+[589/994] survived  lib/ecto/embedded.ex:127  GuardTypeTest  replace guard is_list with is_tuple
+[590/994] error     lib/ecto/query/builder.ex:137  GuardTypeTest  replace guard is_list with is_tuple
+[591/994] killed    lib/ecto/changeset.ex:1000  GuardTypeTest  replace guard is_atom with is_nil
+[592/994] survived  lib/ecto/repo/preloader.ex:396  GuardTypeTest  replace guard is_list with is_tuple
+[593/994] killed    lib/ecto/schema/loader.ex:62  GuardTypeTest  replace guard is_atom with is_nil
+[594/994] survived  lib/ecto/query/planner.ex:2070  GuardTypeTest  replace guard is_float with is_number
+[595/994] error     lib/ecto/query/builder/join.ex:182  GuardTypeTest  replace guard is_atom with is_nil
+[596/994] killed    lib/ecto/query/builder/from.ex:198  GuardTypeTest  replace guard is_nil with is_atom
+[597/994] error     lib/ecto/query/builder/update.ex:41  GuardTypeTest  replace guard is_list with is_tuple
+[598/994] error     lib/ecto/query/builder/join.ex:85  GuardTypeTest  replace guard is_atom with is_nil
+[599/994] killed    lib/ecto/embedded.ex:79  GuardTypeTest  replace guard is_map with is_list
+[600/994] killed    lib/ecto/repo/queryable.ex:571  GuardTypeTest  replace guard is_integer with is_float
+[601/994] error     lib/ecto/query/builder.ex:1081  GuardTypeTest  replace guard is_atom with is_nil
+[602/994] killed    lib/ecto/query/planner.ex:778  GuardComparisonNegation  replace guard > with <=
+[603/994] killed    lib/ecto/multi.ex:737  GuardTypeTest  replace guard is_list with is_tuple
+[604/994] error     lib/ecto/query/builder/windows.ex:94  GuardTypeTest  replace guard is_list with is_tuple
+[605/994] killed    lib/ecto/query/builder/filter.ex:160  GuardTypeTest  replace guard is_atom with is_nil
+[606/994] killed    lib/ecto/query/builder/select.ex:548  GuardComparisonNegation  replace guard != with ==
+[607/994] killed    lib/ecto/changeset.ex:3636  GuardComparisonNegation  replace guard >= with <
+[608/994] killed    lib/ecto/type.ex:1537  GuardTypeTest  replace guard is_integer with is_float
+[609/994] killed    lib/ecto/query/builder/select.ex:461  GuardComparisonNegation  replace guard == with !=
+[610/994] killed    lib/ecto/changeset.ex:1299  GuardComparisonNegation  replace guard == with !=
+[611/994] killed    lib/ecto/query/builder.ex:875  GuardTypeTest  replace guard is_atom with is_nil
+[612/994] error     lib/ecto/query/builder.ex:531  GuardTypeTest  replace guard is_atom with is_nil
+[613/994] survived  lib/ecto/query/builder/select.ex:140  GuardTypeTest  replace guard is_atom with is_nil
+[614/994] killed    lib/ecto/changeset/relation.ex:559  GuardComparisonNegation  replace guard != with ==
+[615/994] killed    lib/ecto/query.ex:1011  GuardTypeTest  replace guard is_list with is_tuple
+[616/994] killed    lib/ecto/query/builder/select.ex:284  GuardTypeTest  replace guard is_tuple with is_list
+[617/994] survived  lib/ecto/changeset/relation.ex:118  GuardTypeTest  replace guard is_atom with is_nil
+[618/994] error     lib/ecto/association.ex:447  GuardTypeTest  replace guard is_atom with is_nil
+[619/994] killed    lib/ecto/query/builder/select.ex:453  GuardTypeTest  replace guard is_integer with is_float
+[620/994] killed    lib/ecto/query/planner.ex:2500  GuardTypeTest  replace guard is_atom with is_nil
+[621/994] killed    lib/ecto/changeset.ex:3427  GuardTypeTest  replace guard is_map with is_list
+[622/994] error     lib/ecto/query/builder.ex:871  GuardTypeTest  replace guard is_atom with is_nil
+[623/994] survived  lib/ecto/query/builder/select.ex:194  GuardTypeTest  replace guard is_float with is_integer
+[624/994] killed    lib/ecto/embedded.ex:155  GuardComparisonNegation  replace guard == with !=
+[625/994] killed    lib/ecto/query/planner.ex:553  GuardTypeTest  replace guard is_list with is_tuple
+[626/994] error     lib/ecto/query/builder.ex:395  GuardTypeTest  replace guard is_list with is_tuple
+[627/994] killed    lib/ecto/query/planner.ex:2461  GuardTypeTest  replace guard is_integer with is_float
+[628/994] error     lib/ecto/query/builder.ex:1151  GuardTypeTest  replace guard is_atom with is_nil
+[629/994] error     lib/ecto/query/builder/preload.ex:112  GuardTypeTest  replace guard is_atom with is_nil
+[630/994] error     lib/ecto/query/builder/preload.ex:53  GuardTypeTest  replace guard is_atom with is_nil
+[631/994] killed    lib/ecto/query/builder.ex:879  GuardTypeTest  replace guard is_atom with is_nil
+[632/994] survived  lib/ecto/query/builder/select.ex:461  GuardComparisonNegation  replace guard == with !=
+[633/994] survived  lib/ecto/association.ex:497  GuardTypeTest  replace guard is_atom with is_nil
+[634/994] killed    lib/ecto/repo/schema.ex:777  GuardTypeTest  replace guard is_nil with is_atom
+[635/994] survived  lib/ecto/repo/queryable.ex:571  GuardTypeTest  replace guard is_integer with is_number
+[636/994] survived  lib/ecto/query/builder.ex:1495  GuardTypeTest  replace guard is_integer with is_number
+[637/994] killed    lib/ecto/query.ex:1468  GuardTypeTest  replace guard is_list with is_tuple
+[638/994] killed    lib/ecto/query/planner.ex:556  GuardTypeTest  replace guard is_list with is_tuple
+[639/994] killed    lib/ecto/embedded.ex:64  GuardTypeTest  replace guard is_map with is_list
+[640/994] killed    lib/ecto/embedded.ex:198  GuardComparisonNegation  replace guard == with !=
+[641/994] killed    lib/ecto/repo/schema.ex:1186  GuardComparisonNegation  replace guard != with ==
+[642/994] killed    lib/ecto/schema/loader.ex:42  GuardTypeTest  replace guard is_map with is_list
+[643/994] killed    lib/ecto/multi.ex:659  GuardTypeTest  replace guard is_list with is_tuple
+[644/994] killed    lib/ecto/query.ex:2958  GuardTypeTest  replace guard is_integer with is_float
+[645/994] killed    lib/ecto/changeset.ex:4198  GuardTypeTest  replace guard is_atom with is_nil
+[646/994] killed    lib/ecto/repo/preloader.ex:624  GuardTypeTest  replace guard is_atom with is_nil
+[647/994] killed    lib/ecto/query/builder/preload.ex:127  GuardTypeTest  replace guard is_atom with is_nil
+[648/994] killed    lib/ecto/query/builder.ex:1351  GuardTypeTest  replace guard is_number with is_float
+[649/994] killed    lib/ecto/query/builder.ex:1429  GuardTypeTest  replace guard is_float with is_number
+[650/994] killed    lib/ecto/type.ex:907  GuardTypeTest  replace guard is_float with is_number
+[651/994] killed    lib/ecto/repo/schema.ex:347  GuardComparisonNegation  replace guard != with ==
+[652/994] killed    lib/ecto/repo/schema.ex:757  GuardTypeTest  replace guard is_list with is_tuple
+[653/994] killed    lib/ecto/repo/queryable.ex:93  GuardTypeTest  replace guard is_list with is_tuple
+[654/994] error     lib/ecto/query/builder/update.ex:41  GuardTypeTest  replace guard is_atom with is_nil
+[655/994] survived  lib/ecto/query/builder.ex:1417  GuardTypeTest  replace guard is_float with is_number
+[656/994] killed    lib/ecto/type.ex:989  GuardTypeTest  replace guard is_integer with is_number
+[657/994] error     lib/ecto/query/builder.ex:544  GuardTypeTest  replace guard is_atom with is_nil
+[658/994] survived  lib/ecto/repo/preloader.ex:45  GuardTypeTest  replace guard is_list with is_tuple
+[659/994] killed    lib/ecto/query/builder.ex:1384  GuardTypeTest  replace guard is_atom with is_nil
+[660/994] survived  lib/ecto/repo/schema.ex:31  GuardTypeTest  replace guard is_atom with is_nil
+[661/994] killed    lib/ecto/type.ex:897  GuardTypeTest  replace guard is_integer with is_number
+[662/994] killed    lib/ecto/query/builder/select.ex:414  GuardTypeTest  replace guard is_list with is_tuple
+[663/994] killed    lib/ecto/query/inspect.ex:10  GuardTypeTest  replace guard is_atom with is_nil
+[664/994] survived  lib/ecto/query/inspect.ex:357  GuardTypeTest  replace guard is_atom with is_nil
+[665/994] killed    lib/ecto/changeset.ex:520  GuardTypeTest  replace guard is_map with is_list
+[666/994] killed    lib/ecto/multi.ex:610  GuardTypeTest  replace guard is_atom with is_nil
+[667/994] error     lib/ecto/query/builder/join.ex:238  GuardTypeTest  replace guard is_list with is_tuple
+[668/994] killed    lib/ecto/query/planner.ex:361  GuardComparisonNegation  replace guard != with ==
+[669/994] killed    lib/ecto/enum.ex:374  GuardTypeTest  replace guard is_atom with is_nil
+[670/994] killed    lib/ecto/query/builder/join.ex:48  GuardTypeTest  replace guard is_atom with is_nil
+[671/994] error     lib/ecto/query/builder/select.ex:107  GuardTypeTest  replace guard is_atom with is_nil
+[672/994] survived  lib/ecto/query/builder/from.ex:113  GuardTypeTest  replace guard is_atom with is_nil
+[673/994] killed    lib/ecto/queryable.ex:148  GuardTypeTest  replace guard is_nil with is_atom
+[674/994] killed    lib/ecto/changeset.ex:3057  GuardTypeTest  replace guard is_list with is_tuple
+[675/994] survived  lib/ecto/query/builder.ex:1416  GuardTypeTest  replace guard is_integer with is_float
+[676/994] killed    lib/ecto/repo/schema.ex:757  GuardTypeTest  replace guard is_list with is_tuple
+[677/994] survived  lib/ecto/query/planner.ex:92  GuardTypeTest  replace guard is_integer with is_number
+[678/994] survived  lib/ecto/changeset/relation.ex:118  GuardTypeTest  replace guard is_list with is_tuple
+[679/994] killed    lib/ecto/query.ex:510  GuardTypeTest  replace guard is_map with is_list
+[680/994] killed    lib/ecto/type.ex:932  GuardTypeTest  replace guard is_map with is_list
+[681/994] killed    lib/ecto/query/builder/join.ex:123  GuardTypeTest  replace guard is_atom with is_nil
+[682/994] error     lib/ecto/schema.ex:2195  GuardTypeTest  replace guard is_atom with is_nil
+[683/994] survived  lib/ecto/repo/assoc.ex:88  GuardTypeTest  replace guard is_map with is_list
+[684/994] survived  lib/ecto/changeset.ex:3640  GuardTypeTest  replace guard is_integer with is_number
+[685/994] killed    lib/ecto/query/inspect.ex:23  GuardTypeTest  replace guard is_atom with is_nil
+[686/994] killed    lib/ecto/query/builder/select.ex:195  GuardTypeTest  replace guard is_atom with is_nil
+[687/994] killed    lib/ecto/query/builder.ex:1495  GuardTypeTest  replace guard is_integer with is_float
+[688/994] killed    lib/ecto/query/builder/join.ex:117  GuardTypeTest  replace guard is_atom with is_nil
+[689/994] killed    lib/ecto/query/builder/group_by.ex:30  GuardTypeTest  replace guard is_atom with is_nil
+[690/994] killed    lib/ecto/repo/preloader.ex:490  GuardComparisonNegation  replace guard == with !=
+[691/994] error     lib/ecto/association.ex:495  GuardTypeTest  replace guard is_list with is_tuple
+[692/994] survived  lib/ecto/type.ex:890  GuardComparisonBoundary  replace guard < with <=
+[693/994] survived  lib/ecto/query/planner.ex:754  GuardTypeTest  replace guard is_integer with is_number
+[694/994] killed    lib/ecto/query/builder.ex:1370  GuardTypeTest  replace guard is_atom with is_nil
+[695/994] error     lib/ecto/query.ex:1454  GuardTypeTest  replace guard is_list with is_tuple
+[696/994] killed    lib/ecto/repo/queryable.ex:575  GuardComparisonNegation  replace guard != with ==
+[697/994] survived  lib/ecto/query/builder/preload.ex:297  GuardTypeTest  replace guard is_integer with is_number
+[698/994] killed    lib/ecto/query/builder/filter.ex:164  GuardTypeTest  replace guard is_atom with is_nil
+[699/994] error     lib/ecto/query/builder.ex:1408  GuardTypeTest  replace guard is_list with is_tuple
+[700/994] survived  lib/ecto/query/planner.ex:2475  GuardTypeTest  replace guard is_integer with is_number
+[701/994] killed    lib/ecto/repo/schema.ex:1211  GuardComparisonNegation  replace guard != with ==
+[702/994] error     lib/ecto/query/builder/join.ex:290  GuardComparisonNegation  replace guard != with ==
+[703/994] killed    lib/ecto/query/planner.ex:2057  GuardTypeTest  replace guard is_list with is_tuple
+[704/994] survived  lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_nil with is_atom
+[705/994] killed    lib/ecto/repo/schema.ex:15  GuardTypeTest  replace guard is_atom with is_nil
+[706/994] killed    lib/ecto/embedded.ex:90  GuardTypeTest  replace guard is_map with is_list
+[707/994] survived  lib/ecto/query/builder/join.ex:345  GuardTypeTest  replace guard is_integer with is_float
+[708/994] killed    lib/ecto/query/planner.ex:2362  GuardTypeTest  replace guard is_list with is_tuple
+[709/994] killed    lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_integer with is_float
+[710/994] killed    lib/ecto/type.ex:989  GuardTypeTest  replace guard is_integer with is_float
+[711/994] killed    lib/ecto/repo/schema.ex:896  GuardComparisonNegation  replace guard == with !=
+[712/994] error     lib/ecto/query/builder.ex:957  GuardTypeTest  replace guard is_list with is_tuple
+[713/994] killed    lib/ecto/query/builder/select.ex:28  GuardTypeTest  replace guard is_atom with is_nil
+[714/994] killed    lib/ecto/multi.ex:741  GuardTypeTest  replace guard is_list with is_tuple
+[715/994] survived  lib/ecto/query/builder.ex:337  GuardTypeTest  replace guard is_number with is_integer
+[716/994] survived  lib/ecto/query/planner.ex:1774  GuardComparisonNegation  replace guard != with ==
+[717/994] killed    lib/ecto/query.ex:2988  GuardTypeTest  replace guard is_tuple with is_list
+[718/994] killed    lib/ecto/query/builder.ex:1070  GuardTypeTest  replace guard is_atom with is_nil
+[719/994] killed    lib/ecto/changeset/relation.ex:302  GuardTypeTest  replace guard is_list with is_tuple
+[720/994] killed    lib/ecto/type.ex:1085  GuardTypeTest  replace guard is_integer with is_float
+[721/994] killed    lib/ecto/changeset.ex:527  GuardTypeTest  replace guard is_list with is_tuple
+[722/994] killed    lib/ecto/type.ex:1151  GuardTypeTest  replace guard is_integer with is_float
+[723/994] killed    lib/ecto/changeset.ex:1246  GuardTypeTest  replace guard is_atom with is_nil
+[724/994] error     lib/ecto/query/builder.ex:700  GuardTypeTest  replace guard is_atom with is_nil
+[725/994] killed    lib/ecto/query/builder/preload.ex:236  GuardTypeTest  replace guard is_atom with is_nil
+[726/994] survived  lib/ecto/query/builder.ex:1246  GuardTypeTest  replace guard is_integer with is_float
+[727/994] survived  lib/ecto/repo/assoc.ex:84  GuardTypeTest  replace guard is_list with is_tuple
+[728/994] killed    lib/ecto/query/builder.ex:673  GuardTypeTest  replace guard is_list with is_tuple
+[729/994] killed    lib/ecto/association.ex:461  GuardTypeTest  replace guard is_list with is_tuple
+[730/994] killed    lib/ecto/query/builder/select.ex:390  GuardComparisonNegation  replace guard == with !=
+[731/994] killed    lib/ecto/multi.ex:281  GuardTypeTest  replace guard is_atom with is_nil
+[732/994] killed    lib/ecto/repo/preloader.ex:49  GuardTypeTest  replace guard is_map with is_list
+[733/994] killed    lib/ecto/type.ex:908  GuardTypeTest  replace guard is_integer with is_float
+[734/994] killed    lib/ecto/changeset.ex:1875  GuardTypeTest  replace guard is_atom with is_nil
+[735/994] killed    lib/ecto/changeset.ex:1609  GuardTypeTest  replace guard is_atom with is_nil
+[736/994] killed    lib/ecto/query/builder.ex:396  GuardTypeTest  replace guard is_tuple with is_list
+[737/994] killed    lib/ecto/query/builder.ex:396  GuardTypeTest  replace guard is_tuple with is_list
+[738/994] killed    lib/ecto/repo/schema.ex:763  GuardTypeTest  replace guard is_map with is_list
+[739/994] error     lib/ecto/query/builder.ex:648  GuardTypeTest  replace guard is_atom with is_nil
+[740/994] survived  lib/ecto/type.ex:1151  GuardTypeTest  replace guard is_integer with is_number
+[741/994] error     lib/ecto/query/builder.ex:1628  GuardTypeTest  replace guard is_atom with is_nil
+[742/994] survived  lib/ecto/query/planner.ex:96  GuardTypeTest  replace guard is_integer with is_float
+[743/994] error     lib/ecto/query/builder.ex:531  GuardTypeTest  replace guard is_list with is_tuple
+[744/994] killed    lib/ecto/query/builder/select.ex:279  GuardTypeTest  replace guard is_map with is_list
+[745/994] survived  lib/ecto/query/planner.ex:92  GuardTypeTest  replace guard is_integer with is_float
+[746/994] killed    lib/ecto/changeset.ex:1788  GuardTypeTest  replace guard is_list with is_tuple
+[747/994] error     lib/ecto/association.ex:449  GuardTypeTest  replace guard is_atom with is_nil
+[748/994] survived  lib/ecto/query/builder.ex:1222  GuardTypeTest  replace guard is_integer with is_number
+[749/994] killed    lib/ecto/type.ex:1369  GuardComparisonNegation  replace guard != with ==
+[750/994] killed    lib/ecto/query/planner.ex:784  GuardTypeTest  replace guard is_integer with is_float
+[751/994] killed    lib/ecto/repo/preloader.ex:588  GuardTypeTest  replace guard is_atom with is_nil
+[752/994] error     lib/ecto/query/builder.ex:119  GuardTypeTest  replace guard is_atom with is_nil
+[753/994] killed    lib/ecto/query/planner.ex:2343  GuardComparisonNegation  replace guard != with ==
+[754/994] killed    lib/ecto/changeset.ex:4134  GuardTypeTest  replace guard is_atom with is_nil
+[755/994] killed    lib/ecto/changeset.ex:3636  GuardComparisonBoundary  replace guard >= with >
+[756/994] killed    lib/ecto/changeset/relation.ex:209  GuardTypeTest  replace guard is_list with is_tuple
+[757/994] survived  lib/ecto/type.ex:908  GuardTypeTest  replace guard is_integer with is_number
+[758/994] killed    lib/ecto/query/builder.ex:879  GuardTypeTest  replace guard is_atom with is_nil
+[759/994] survived  lib/ecto.ex:576  GuardTypeTest  replace guard is_list with is_tuple
+[760/994] killed    lib/ecto/repo/schema.ex:828  GuardComparisonNegation  replace guard != with ==
+[761/994] error     lib/ecto/query/builder/order_by.ex:96  GuardTypeTest  replace guard is_list with is_tuple
+[762/994] error     lib/ecto/type.ex:974  GuardTypeTest  replace guard is_integer with is_float
+[763/994] killed    lib/ecto/query/builder/filter.ex:119  GuardTypeTest  replace guard is_list with is_tuple
+[764/994] error     lib/ecto/query/builder/select.ex:166  GuardTypeTest  replace guard is_list with is_tuple
+[765/994] killed    lib/ecto/query/builder/select.ex:284  GuardTypeTest  replace guard is_list with is_tuple
+[766/994] killed    lib/ecto/type.ex:1530  GuardComparisonNegation  replace guard < with >=
+[767/994] killed    lib/ecto/changeset.ex:3179  GuardComparisonBoundary  replace guard <= with <
+[768/994] killed    lib/ecto/query/builder/preload.ex:213  GuardTypeTest  replace guard is_atom with is_nil
+[769/994] survived  lib/ecto/repo/queryable.ex:108  GuardTypeTest  replace guard is_list with is_tuple
+[770/994] killed    lib/ecto/query/planner.ex:1774  GuardComparisonNegation  replace guard == with !=
+[771/994] error     lib/ecto/query/builder.ex:565  GuardTypeTest  replace guard is_atom with is_nil
+[772/994] killed    lib/ecto/query/planner.ex:1252  GuardComparisonNegation  replace guard != with ==
+[773/994] killed    lib/ecto/type.ex:1347  GuardTypeTest  replace guard is_atom with is_nil
+[774/994] killed    lib/ecto/query/planner.ex:307  GuardTypeTest  replace guard is_atom with is_nil
+[775/994] killed    lib/ecto/changeset.ex:527  GuardTypeTest  replace guard is_map with is_list
+[776/994] killed    lib/ecto/query/builder.ex:883  GuardTypeTest  replace guard is_atom with is_nil
+[777/994] error     lib/ecto/query/builder.ex:1623  GuardTypeTest  replace guard is_atom with is_nil
+[778/994] killed    lib/ecto/query/builder.ex:1360  GuardTypeTest  replace guard is_atom with is_nil
+[779/994] killed    lib/ecto/type.ex:1142  GuardTypeTest  replace guard is_integer with is_float
+[780/994] survived  lib/ecto/schema/loader.ex:86  GuardTypeTest  replace guard is_map with is_list
+[781/994] killed    lib/ecto/query.ex:2988  GuardTypeTest  replace guard is_atom with is_nil
+[782/994] survived  lib/ecto/changeset.ex:1418  GuardComparisonNegation  replace guard == with !=
+[783/994] killed    lib/ecto/query/planner.ex:2088  GuardTypeTest  replace guard is_number with is_float
+[784/994] killed    lib/ecto/changeset.ex:2477  GuardTypeTest  replace guard is_atom with is_nil
+[785/994] killed    lib/ecto/query/builder/preload.ex:297  GuardTypeTest  replace guard is_integer with is_float
+[786/994] survived  lib/ecto/query/builder/select.ex:146  GuardTypeTest  replace guard is_atom with is_nil
+[787/994] killed    lib/ecto/query/builder/select.ex:486  GuardTypeTest  replace guard is_list with is_tuple
+[788/994] killed    lib/ecto/changeset.ex:2685  GuardTypeTest  replace guard is_list with is_tuple
+[789/994] killed    lib/ecto/multi.ex:698  GuardTypeTest  replace guard is_list with is_tuple
+[790/994] survived  lib/ecto/association.ex:1368  GuardTypeTest  replace guard is_atom with is_nil
+[791/994] survived  lib/ecto/query/planner.ex:2439  GuardTypeTest  replace guard is_integer with is_number
+[792/994] killed    lib/ecto/query.ex:2958  GuardTypeTest  replace guard is_atom with is_nil
+[793/994] survived  lib/ecto/query/builder/select.ex:193  GuardTypeTest  replace guard is_integer with is_number
+[794/994] killed    lib/ecto/multi.ex:610  GuardTypeTest  replace guard is_list with is_tuple
+[795/994] killed    lib/ecto/query/builder/select.ex:28  GuardComparisonNegation  replace guard != with ==
+[796/994] killed    lib/ecto/repo/schema.ex:125  GuardTypeTest  replace guard is_list with is_tuple
+[797/994] survived  lib/ecto/type.ex:974  GuardTypeTest  replace guard is_integer with is_number
+[798/994] error     lib/ecto/query/builder/windows.ex:21  GuardTypeTest  replace guard is_list with is_tuple
+[799/994] killed    lib/ecto/query/planner.ex:1116  GuardTypeTest  replace guard is_atom with is_nil
+[800/994] killed    lib/ecto/changeset.ex:3640  GuardTypeTest  replace guard is_integer with is_float
+[801/994] killed    lib/ecto/query/builder.ex:1432  GuardTypeTest  replace guard is_nil with is_atom
+[802/994] killed    lib/ecto/query/inspect.ex:342  GuardComparisonNegation  replace guard == with !=
+[803/994] killed    lib/ecto/changeset.ex:3141  GuardComparisonBoundary  replace guard >= with >
+[804/994] killed    lib/ecto/changeset.ex:3469  GuardTypeTest  replace guard is_list with is_tuple
+[805/994] killed    lib/ecto/changeset/relation.ex:568  GuardComparisonNegation  replace guard != with ==
+[806/994] error     lib/ecto/query/builder.ex:1222  GuardTypeTest  replace guard is_integer with is_float
+[807/994] killed    lib/ecto/changeset/relation.ex:363  GuardTypeTest  replace guard is_map with is_list
+[808/994] error     lib/ecto/query/builder/select.ex:211  GuardTypeTest  replace guard is_atom with is_nil
+[809/994] survived  lib/ecto/association.ex:1368  GuardTypeTest  replace guard is_atom with is_nil
+[810/994] killed    lib/ecto/query.ex:2970  GuardComparisonNegation  replace guard != with ==
+[811/994] survived  lib/ecto/query/builder.ex:550  GuardTypeTest  replace guard is_list with is_tuple
+[812/994] survived  lib/ecto/query/builder.ex:334  GuardTypeTest  replace guard is_number with is_float
+[813/994] survived  lib/ecto/repo/preloader.ex:598  GuardTypeTest  replace guard is_atom with is_nil
+[814/994] killed    lib/ecto/changeset.ex:2289  GuardTypeTest  replace guard is_atom with is_nil
+[815/994] killed    lib/ecto/changeset.ex:3076  GuardTypeTest  replace guard is_map with is_list
+[816/994] killed    lib/ecto/query/builder.ex:544  GuardTypeTest  replace guard is_atom with is_nil
+[817/994] killed    lib/ecto/type.ex:1151  GuardTypeTest  replace guard is_integer with is_float
+[818/994] killed    lib/ecto/query/planner.ex:1792  GuardComparisonNegation  replace guard != with ==
+[819/994] killed    lib/ecto/query/builder.ex:1167  GuardTypeTest  replace guard is_atom with is_nil
+[820/994] killed    lib/ecto/query/builder.ex:1384  GuardTypeTest  replace guard is_atom with is_nil
+[821/994] error     lib/ecto/query/builder.ex:745  GuardTypeTest  replace guard is_atom with is_nil
+[822/994] killed    lib/ecto/changeset.ex:1330  GuardComparisonNegation  replace guard != with ==
+[823/994] survived  lib/ecto/query/builder.ex:1417  GuardTypeTest  replace guard is_float with is_integer
+[824/994] killed    lib/ecto/changeset.ex:1401  GuardComparisonNegation  replace guard < with >=
+[825/994] killed    lib/ecto/changeset.ex:3380  GuardTypeTest  replace guard is_float with is_integer
+[826/994] killed    lib/ecto/changeset/relation.ex:500  GuardTypeTest  replace guard is_list with is_tuple
+[827/994] killed    lib/ecto/query/planner.ex:560  GuardTypeTest  replace guard is_atom with is_nil
+[828/994] killed    lib/ecto/query/planner.ex:385  GuardComparisonNegation  replace guard == with !=
+[829/994] killed    lib/ecto/query/planner.ex:2439  GuardTypeTest  replace guard is_integer with is_float
+[830/994] killed    lib/ecto/query/planner.ex:1655  GuardTypeTest  replace guard is_integer with is_float
+[831/994] killed    lib/ecto/query/builder/select.ex:219  GuardTypeTest  replace guard is_atom with is_nil
+[832/994] killed    lib/ecto/changeset.ex:2622  GuardTypeTest  replace guard is_nil with is_atom
+[833/994] killed    lib/ecto/type.ex:914  GuardComparisonNegation  replace guard > with <=
+[834/994] killed    lib/ecto/repo/preloader.ex:391  GuardComparisonNegation  replace guard >= with <
+[835/994] error     lib/ecto/schema.ex:2216  GuardTypeTest  replace guard is_atom with is_nil
+[836/994] survived  lib/ecto/query/builder/join.ex:336  GuardTypeTest  replace guard is_integer with is_number
+[837/994] killed    lib/ecto/repo/schema.ex:754  GuardTypeTest  replace guard is_list with is_tuple
+[838/994] survived  lib/ecto/changeset.ex:1401  GuardComparisonBoundary  replace guard < with <=
+[839/994] killed    lib/ecto/association.ex:492  GuardTypeTest  replace guard is_atom with is_nil
+[840/994] survived  lib/ecto/type.ex:1085  GuardTypeTest  replace guard is_integer with is_number
+[841/994] killed    lib/ecto/type.ex:1511  GuardTypeTest  replace guard is_map with is_list
+[842/994] survived  lib/ecto/query/planner.ex:2461  GuardTypeTest  replace guard is_integer with is_number
+[843/994] killed    lib/ecto/changeset.ex:3141  GuardComparisonNegation  replace guard >= with <
+[844/994] killed    lib/ecto/query/builder/order_by.ex:72  GuardTypeTest  replace guard is_atom with is_nil
+[845/994] killed    lib/ecto/changeset/relation.ex:528  GuardTypeTest  replace guard is_nil with is_atom
+[846/994] killed    lib/ecto/query/planner.ex:1445  GuardTypeTest  replace guard is_integer with is_float
+[847/994] killed    lib/ecto/changeset.ex:1943  GuardTypeTest  replace guard is_atom with is_nil
+[848/994] survived  lib/ecto/type.ex:1151  GuardTypeTest  replace guard is_integer with is_number
+[849/994] killed    lib/ecto/multi.ex:702  GuardTypeTest  replace guard is_list with is_tuple
+[850/994] error     lib/ecto/query/builder.ex:88  GuardTypeTest  replace guard is_atom with is_nil
+[851/994] survived  lib/ecto/changeset/relation.ex:118  GuardTypeTest  replace guard is_atom with is_nil
+[852/994] killed    lib/ecto/query/builder/join.ex:85  GuardTypeTest  replace guard is_atom with is_nil
+[853/994] error     lib/ecto/association.ex:473  GuardTypeTest  replace guard is_list with is_tuple
+[854/994] killed    lib/ecto/multi.ex:610  GuardTypeTest  replace guard is_atom with is_nil
+[855/994] survived  lib/ecto/query/planner.ex:2066  GuardTypeTest  replace guard is_integer with is_number
+[856/994] error     lib/ecto/query/builder/update.ex:51  GuardTypeTest  replace guard is_atom with is_nil
+[857/994] survived  lib/ecto/type.ex:1580  GuardTypeTest  replace guard is_integer with is_number
+[858/994] survived  lib/ecto/query/planner.ex:784  GuardTypeTest  replace guard is_integer with is_number
+[859/994] survived  lib/ecto/type.ex:589  GuardTypeTest  replace guard is_float with is_number
+[860/994] killed    lib/ecto/type.ex:897  GuardTypeTest  replace guard is_integer with is_float
+[861/994] killed    lib/ecto/query/builder/select.ex:384  GuardComparisonNegation  replace guard == with !=
+[862/994] killed    lib/ecto/type.ex:587  GuardTypeTest  replace guard is_atom with is_nil
+[863/994] killed    lib/ecto/query/builder.ex:1517  GuardTypeTest  replace guard is_map with is_list
+[864/994] survived  lib/ecto/repo/queryable.ex:402  GuardTypeTest  replace guard is_atom with is_nil
+[865/994] killed    lib/ecto/repo/preloader.ex:603  GuardTypeTest  replace guard is_atom with is_nil
+[866/994] survived  lib/ecto/type.ex:1085  GuardTypeTest  replace guard is_integer with is_number
+[867/994] killed    lib/ecto/query/inspect.ex:353  GuardTypeTest  replace guard is_integer with is_float
+[868/994] killed    lib/ecto/changeset.ex:807  GuardTypeTest  replace guard is_list with is_tuple
+[869/994] killed    lib/ecto/association.ex:1616  GuardTypeTest  replace guard is_atom with is_nil
+[870/994] killed    lib/ecto/changeset/relation.ex:98  GuardTypeTest  replace guard is_list with is_tuple
+[871/994] killed    lib/ecto/embedded.ex:71  GuardTypeTest  replace guard is_list with is_tuple
+[872/994] survived  lib/ecto/type.ex:990  GuardTypeTest  replace guard is_float with is_number
+[873/994] killed    lib/ecto/changeset.ex:2465  GuardTypeTest  replace guard is_atom with is_nil
+[874/994] killed    lib/ecto/embedded.ex:191  GuardComparisonNegation  replace guard != with ==
+[875/994] killed    lib/ecto/changeset.ex:4283  GuardComparisonNegation  replace guard == with !=
+[876/994] error     lib/ecto/query/builder.ex:1070  GuardTypeTest  replace guard is_atom with is_nil
+[877/994] killed    lib/ecto/type.ex:890  GuardComparisonNegation  replace guard < with >=
+[878/994] error     lib/ecto/query/builder/join.ex:336  GuardTypeTest  replace guard is_integer with is_float
+[879/994] survived  lib/ecto/repo/queryable.ex:366  GuardComparisonNegation  replace guard != with ==
+[880/994] error     lib/ecto/query/builder.ex:875  GuardTypeTest  replace guard is_atom with is_nil
+[881/994] killed    lib/ecto/changeset.ex:1355  GuardTypeTest  replace guard is_list with is_tuple
+[882/994] survived  lib/ecto/repo/assoc.ex:76  GuardTypeTest  replace guard is_list with is_tuple
+[883/994] killed    lib/ecto/changeset.ex:3073  GuardTypeTest  replace guard is_list with is_tuple
+[884/994] killed    lib/ecto/association.ex:492  GuardTypeTest  replace guard is_atom with is_nil
+[885/994] error     lib/ecto/association.ex:476  GuardTypeTest  replace guard is_atom with is_nil
+[886/994] killed    lib/ecto/query/builder.ex:1374  GuardTypeTest  replace guard is_atom with is_nil
+[887/994] survived  lib/ecto/query/builder/select.ex:453  GuardTypeTest  replace guard is_integer with is_number
+[888/994] killed    lib/ecto/query/builder/preload.ex:217  GuardTypeTest  replace guard is_list with is_tuple
+[889/994] survived  lib/ecto/query/planner.ex:754  GuardTypeTest  replace guard is_integer with is_float
+[890/994] killed    lib/ecto/query/planner.ex:293  GuardComparisonNegation  replace guard != with ==
+[891/994] survived  lib/ecto/query/builder/from.ex:87  GuardTypeTest  replace guard is_nil with is_atom
+[892/994] error     lib/ecto/query/builder.ex:1199  GuardTypeTest  replace guard is_list with is_tuple
+[893/994] killed    lib/ecto/changeset.ex:938  GuardTypeTest  replace guard is_list with is_tuple
+[894/994] killed    lib/ecto/association.ex:500  GuardTypeTest  replace guard is_atom with is_nil
+[895/994] killed    lib/ecto/type.ex:881  GuardTypeTest  replace guard is_atom with is_nil
+[896/994] survived  lib/ecto/type.ex:589  GuardTypeTest  replace guard is_float with is_integer
+[897/994] killed    lib/ecto/changeset.ex:954  GuardTypeTest  replace guard is_list with is_tuple
+[898/994] killed    lib/ecto/repo/preloader.ex:594  GuardTypeTest  replace guard is_atom with is_nil
+[899/994] killed    lib/ecto/changeset.ex:2564  GuardTypeTest  replace guard is_nil with is_atom
+[900/994] survived  lib/ecto/query/builder.ex:1351  GuardTypeTest  replace guard is_number with is_integer
+[901/994] killed    lib/ecto/query/planner.ex:795  GuardTypeTest  replace guard is_integer with is_float
+[902/994] error     lib/ecto/query/builder.ex:738  GuardTypeTest  replace guard is_atom with is_nil
+[903/994] killed    lib/ecto/changeset.ex:1931  GuardComparisonNegation  replace guard != with ==
+[904/994] killed    lib/ecto/repo/registry.ex:20  GuardTypeTest  replace guard is_atom with is_nil
+[905/994] survived  lib/ecto/query/planner.ex:2070  GuardTypeTest  replace guard is_float with is_integer
+[906/994] survived  lib/ecto/query/builder.ex:1081  GuardTypeTest  replace guard is_atom with is_nil
+[907/994] survived  lib/ecto/repo/preloader.ex:403  GuardTypeTest  replace guard is_list with is_tuple
+[908/994] killed    lib/ecto/repo/schema.ex:909  GuardTypeTest  replace guard is_list with is_tuple
+[909/994] killed    lib/ecto/query/builder.ex:1360  GuardTypeTest  replace guard is_atom with is_nil
+[910/994] error     lib/ecto/query.ex:1454  GuardTypeTest  replace guard is_list with is_tuple
+[911/994] survived  lib/ecto/type.ex:914  GuardComparisonBoundary  replace guard > with >=
+[912/994] error     lib/ecto/association.ex:473  GuardTypeTest  replace guard is_atom with is_nil
+[913/994] survived  lib/ecto/repo/queryable.ex:402  GuardTypeTest  replace guard is_number with is_integer
+[914/994] killed    lib/ecto/query/builder.ex:883  GuardTypeTest  replace guard is_atom with is_nil
+[915/994] killed    lib/ecto/repo/schema.ex:248  GuardComparisonNegation  replace guard != with ==
+[916/994] error     lib/ecto/association.ex:479  GuardTypeTest  replace guard is_list with is_tuple
+[917/994] survived  lib/ecto/query/builder.ex:1077  GuardTypeTest  replace guard is_atom with is_nil
+[918/994] killed    lib/ecto/repo/schema.ex:760  GuardTypeTest  replace guard is_atom with is_nil
+[919/994] survived  lib/ecto/repo/schema.ex:883  GuardTypeTest  replace guard is_atom with is_nil
+[920/994] survived  lib/ecto/query/planner.ex:2347  GuardComparisonNegation  replace guard != with ==
+[921/994] killed    lib/ecto/type.ex:990  GuardTypeTest  replace guard is_float with is_integer
+[922/994] error     lib/ecto/query/builder/windows.ex:39  GuardComparisonNegation  replace guard == with !=
+[923/994] killed    lib/ecto/type.ex:1085  GuardTypeTest  replace guard is_integer with is_float
+[924/994] killed    lib/ecto/association.ex:1659  GuardTypeTest  replace guard is_atom with is_nil
+[925/994] survived  lib/ecto/query/builder/select.ex:218  GuardTypeTest  replace guard is_atom with is_nil
+[926/994] killed    lib/ecto/changeset.ex:773  GuardTypeTest  replace guard is_map with is_list
+[927/994] killed    lib/ecto/association.ex:500  GuardTypeTest  replace guard is_atom with is_nil
+[928/994] error     lib/ecto/query/builder/select.ex:101  GuardTypeTest  replace guard is_list with is_tuple
+[929/994] survived  lib/ecto/type.ex:686  GuardTypeTest  replace guard is_float with is_number
+[930/994] killed    lib/ecto/changeset.ex:1294  GuardTypeTest  replace guard is_atom with is_nil
+[931/994] killed    lib/ecto/query/builder/order_by.ex:212  GuardTypeTest  replace guard is_atom with is_nil
+[932/994] killed    lib/ecto/query/builder.ex:1429  GuardTypeTest  replace guard is_float with is_integer
+[933/994] error     lib/ecto/type.ex:460  GuardTypeTest  replace guard is_atom with is_nil
+[934/994] killed    lib/ecto/type.ex:1580  GuardTypeTest  replace guard is_integer with is_float
+[935/994] error     lib/ecto/query/builder.ex:337  GuardTypeTest  replace guard is_number with is_float
+[936/994] killed    lib/ecto/changeset.ex:3892  GuardTypeTest  replace guard is_atom with is_nil
+[937/994] killed    lib/ecto/repo/schema.ex:1146  GuardComparisonNegation  replace guard != with ==
+[938/994] killed    lib/ecto/query/builder/select.ex:140  GuardTypeTest  replace guard is_atom with is_nil
+[939/994] survived  lib/ecto/query/builder/join.ex:345  GuardTypeTest  replace guard is_integer with is_number
+[939/994] invalid   lib/ecto/query.ex:1625  UnaryNot  remove unary !
+[940/994] error     lib/ecto/query/builder/preload.ex:57  GuardTypeTest  replace guard is_list with is_tuple
+[941/994] killed    lib/ecto/query/planner.ex:789  GuardTypeTest  replace guard is_integer with is_float
+[942/994] survived  lib/ecto/query.ex:2958  GuardTypeTest  replace guard is_integer with is_number
+[943/994] survived  lib/ecto/query/planner.ex:1260  GuardTypeTest  replace guard is_list with is_tuple
+[944/994] survived  lib/ecto/query/planner.ex:96  GuardTypeTest  replace guard is_integer with is_number
+[945/994] killed    lib/ecto/changeset.ex:2701  GuardComparisonNegation  replace guard != with ==
+[946/994] survived  lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_integer with is_number
+[947/994] killed    lib/ecto/changeset.ex:515  GuardTypeTest  replace guard is_map with is_list
+[948/994] killed    lib/ecto/multi.ex:281  GuardTypeTest  replace guard is_atom with is_nil
+[949/994] survived  lib/ecto/type.ex:1537  GuardTypeTest  replace guard is_integer with is_number
+[950/994] survived  lib/ecto/type.ex:1530  GuardComparisonBoundary  replace guard < with <=
+[951/994] survived  lib/ecto/changeset.ex:1419  GuardComparisonNegation  replace guard == with !=
+[952/994] survived  lib/ecto/changeset.ex:1419  GuardComparisonNegation  replace guard == with !=
+[953/994] killed    lib/ecto/changeset/relation.ex:499  GuardTypeTest  replace guard is_map with is_list
+[954/994] survived  lib/ecto/repo/assoc.ex:80  GuardTypeTest  replace guard is_map with is_list
+[955/994] error     lib/ecto/query/builder.ex:295  GuardTypeTest  replace guard is_list with is_tuple
+[956/994] killed    lib/ecto/query/builder.ex:1439  GuardTypeTest  replace guard is_list with is_tuple
+[957/994] error     lib/ecto/query/builder/join.ex:100  GuardTypeTest  replace guard is_atom with is_nil
+[958/994] killed    lib/ecto/changeset.ex:847  GuardTypeTest  replace guard is_list with is_tuple
+[959/994] killed    lib/ecto/changeset.ex:2477  GuardTypeTest  replace guard is_list with is_tuple
+[960/994] killed    lib/ecto/query/builder/from.ex:101  GuardTypeTest  replace guard is_atom with is_nil
+[961/994] killed    lib/ecto/query/builder/group_by.ex:41  GuardTypeTest  replace guard is_atom with is_nil
+[962/994] survived  lib/ecto/query/planner.ex:1774  GuardComparisonNegation  replace guard != with ==
+[963/994] survived  lib/ecto/repo/preloader.ex:413  GuardTypeTest  replace guard is_atom with is_nil
+[964/994] killed    lib/ecto/type.ex:1085  GuardTypeTest  replace guard is_integer with is_float
+[965/994] killed    lib/ecto/type.ex:1152  GuardTypeTest  replace guard is_integer with is_float
+[966/994] killed    lib/ecto/repo/preloader.ex:622  GuardTypeTest  replace guard is_list with is_tuple
+[967/994] survived  lib/ecto/query/builder.ex:334  GuardTypeTest  replace guard is_number with is_integer
+[968/994] killed    lib/ecto/query/builder.ex:1176  GuardTypeTest  replace guard is_atom with is_nil
+[969/994] killed    lib/ecto/query/planner.ex:534  GuardTypeTest  replace guard is_atom with is_nil
+[970/994] killed    lib/ecto/changeset/relation.ex:209  GuardTypeTest  replace guard is_map with is_list
+[971/994] killed    lib/ecto/query/builder.ex:1370  GuardTypeTest  replace guard is_atom with is_nil
+[972/994] killed    lib/ecto/repo/queryable.ex:402  GuardTypeTest  replace guard is_number with is_float
+[973/994] survived  lib/ecto/repo/preloader.ex:422  GuardTypeTest  replace guard is_atom with is_nil
+[974/994] killed    lib/ecto/changeset.ex:813  GuardTypeTest  replace guard is_list with is_tuple
+[975/994] killed    lib/ecto/type.ex:1463  GuardTypeTest  replace guard is_map with is_list
+[976/994] survived  lib/ecto/query/builder/select.ex:193  GuardTypeTest  replace guard is_integer with is_float
+[977/994] killed    lib/ecto/changeset/relation.ex:363  GuardTypeTest  replace guard is_list with is_tuple
+[978/994] survived  lib/ecto/repo/queryable.ex:464  GuardTypeTest  replace guard is_list with is_tuple
+[979/994] killed    lib/ecto/changeset.ex:2849  GuardTypeTest  replace guard is_atom with is_nil
+[980/994] killed    lib/ecto/query/builder.ex:1255  GuardTypeTest  replace guard is_list with is_tuple
+[981/994] survived  lib/ecto/query/builder/preload.ex:232  GuardTypeTest  replace guard is_atom with is_nil
+[982/994] error     lib/ecto/query/builder/join.ex:419  GuardComparisonNegation  replace guard != with ==
+[983/994] killed    lib/ecto/repo/preloader.ex:594  GuardTypeTest  replace guard is_map with is_list
+[984/994] killed    lib/ecto/query/builder.ex:1432  GuardTypeTest  replace guard is_atom with is_nil
+[985/994] killed    lib/ecto/query/builder/select.ex:210  GuardTypeTest  replace guard is_atom with is_nil
+[986/994] survived  lib/ecto/association.ex:1367  GuardTypeTest  replace guard is_atom with is_nil
+[987/994] killed    lib/ecto/type.ex:986  GuardTypeTest  replace guard is_map with is_list
+[988/994] killed    lib/ecto/query/planner.ex:1792  GuardComparisonNegation  replace guard != with ==
+[989/994] killed    lib/ecto/repo/preloader.ex:588  GuardTypeTest  replace guard is_map with is_list
+[990/994] survived  lib/ecto/query/planner.ex:2066  GuardTypeTest  replace guard is_integer with is_float
+[991/994] killed    lib/ecto/repo/schema.ex:828  GuardComparisonNegation  replace guard != with ==
+[992/994] killed    lib/ecto/query/planner.ex:361  GuardComparisonNegation  replace guard != with ==
+[993/994] killed    lib/ecto/query/builder.ex:700  GuardTypeTest  replace guard is_atom with is_nil
+Mutation score: 598/852 = 70.2%
+
+Surviving mutants:
+  lib/ecto/query/planner.ex:46 Arithmetic               replace + with -
+  lib/ecto/type.ex:1426 Boolean                  replace and with or
+  lib/ecto/query/builder/select.ex:395 Boolean                  replace and with or
+  lib/mix/tasks/ecto.gen.repo.ex:58 Boolean                  replace || with &&
+  lib/ecto/repo/preloader.ex:470 Arithmetic               replace - with +
+  lib/ecto/association.ex:413 Arithmetic               replace + with *
+  lib/ecto/query/planner.ex:638 Arithmetic               replace + with *
+  lib/ecto/query/builder.ex:1509 Arithmetic               replace + with -
+  lib/ecto/changeset/relation.ex:474 Arithmetic               replace + with *
+  lib/ecto/query/planner.ex:1931 ComparisonNegation       replace == with !=
+  lib/ecto/query/builder/from.ex:230 Boolean                  replace and with or
+  lib/ecto/query/planner.ex:638 Arithmetic               replace + with -
+  lib/ecto/association.ex:428 Arithmetic               replace + with -
+  lib/ecto/repo/assoc.ex:63 Boolean                  replace && with ||
+  lib/ecto/association.ex:1131 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:42 Arithmetic               replace + with -
+  lib/ecto/association.ex:409 Arithmetic               replace + with -
+  lib/ecto/changeset/relation.ex:474 Arithmetic               replace + with -
+  lib/ecto/query/planner.ex:1517 Arithmetic               replace * with /
+  lib/ecto/query/planner.ex:1944 Boolean                  replace and with or
+  lib/ecto/query/planner.ex:42 Arithmetic               replace + with *
+  lib/ecto/type.ex:1426 UnaryNot                 remove unary not
+  lib/ecto/repo/preloader.ex:671 ComparisonNegation       replace == with !=
+  lib/ecto/repo/queryable.ex:201 ComparisonNegation       replace == with !=
+  lib/ecto/query/builder/select.ex:528 Arithmetic               replace + with -
+  lib/ecto/repo/queryable.ex:117 Boolean                  replace || with &&
+  lib/ecto/query/planner.ex:947 Boolean                  replace and with or
+  lib/ecto/repo/preloader.ex:263 Boolean                  replace and with or
+  lib/ecto/association.ex:413 Arithmetic               replace + with -
+  lib/ecto/association.ex:1341 UnaryNot                 remove unary not
+  lib/ecto/association.ex:1137 UnaryNot                 remove unary not
+  lib/ecto/repo/preloader.ex:276 ComparisonNegation       replace == with !=
+  lib/mix/ecto.ex:111 Boolean                  replace or with and
+  lib/ecto/query/planner.ex:1754 Arithmetic               replace + with -
+  lib/ecto/schema.ex:2346 Boolean                  replace and with or
+  lib/ecto/query/planner.ex:1517 Arithmetic               replace * with +
+  lib/ecto/repo/queryable.ex:447 Boolean                  replace and with or
+  lib/ecto/association.ex:428 Arithmetic               replace + with *
+  lib/ecto/query/builder/dynamic.ex:90 ComparisonBoundary       replace > with >=
+  lib/ecto/association.ex:243 Arithmetic               replace + with -
+  lib/ecto/association.ex:1344 UnaryNot                 remove unary not
+  lib/ecto/repo/queryable.ex:447 ComparisonNegation       replace == with !=
+  lib/ecto/query/builder.ex:319 Boolean                  replace or with and
+  lib/ecto/association.ex:761 UnaryNot                 remove unary not
+  lib/ecto/repo/assoc.ex:46 ComparisonNegation       replace == with !=
+  lib/ecto/association.ex:1332 UnaryNot                 remove unary not
+  lib/ecto/repo/preloader.ex:263 UnaryNot                 remove unary not
+  lib/ecto/changeset/relation.ex:370 Arithmetic               replace + with *
+  lib/ecto/repo/schema.ex:698 ComparisonNegation       replace != with ==
+  lib/ecto/query/planner.ex:1645 Arithmetic               replace + with -
+  lib/ecto/query/planner.ex:2218 Boolean                  replace || with &&
+  lib/ecto/exceptions.ex:43 Boolean                  replace && with ||
+  lib/ecto/query/planner.ex:42 Arithmetic               replace - with *
+  lib/ecto/query/planner.ex:2550 ComparisonBoundary       replace >= with >
+  lib/ecto/query/planner.ex:1520 Arithmetic               replace + with -
+  lib/ecto/repo/preloader.ex:278 ComparisonNegation       replace == with !=
+  lib/ecto/query/planner.ex:620 Arithmetic               replace - with +
+  lib/ecto/query/planner.ex:1520 Arithmetic               replace + with *
+  lib/ecto/query/planner.ex:947 Boolean                  replace and with or
+  lib/ecto/association.ex:243 Arithmetic               replace + with *
+  lib/ecto/changeset.ex:3090 Arithmetic               replace + with *
+  lib/ecto/repo/assoc.ex:63 Boolean                  replace && with ||
+  lib/ecto/query/planner.ex:38 Arithmetic               replace + with -
+  lib/ecto/repo/queryable.ex:438 Boolean                  replace && with ||
+  lib/ecto/repo/schema.ex:303 Arithmetic               replace + with *
+  lib/ecto/repo/preloader.ex:263 Boolean                  replace and with or
+  lib/ecto/repo/schema.ex:303 Arithmetic               replace + with -
+  lib/ecto/repo/supervisor.ex:178 Boolean                  replace || with &&
+  lib/ecto/query/builder/select.ex:508 Boolean                  replace || with &&
+  lib/ecto/type.ex:1170 Arithmetic               replace * with /
+  lib/ecto/association.ex:1335 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:620 Arithmetic               replace + with *
+  lib/ecto/query/planner.ex:683 Arithmetic               replace + with *
+  lib/ecto/association.ex:409 Arithmetic               replace + with *
+  lib/ecto/association.ex:241 Arithmetic               replace + with *
+  lib/ecto/association.ex:1134 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:683 Arithmetic               replace + with -
+  lib/ecto/query/planner.ex:108 Boolean                  replace || with &&
+  lib/ecto/type.ex:1432 Arithmetic               replace + with *
+  lib/ecto/query/builder.ex:841 Boolean                  replace and with or
+  lib/ecto/query/builder/join.ex:392 ComparisonNegation       replace != with ==
+  lib/ecto/association.ex:764 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:46 Arithmetic               replace + with *
+  lib/ecto/repo/supervisor.ex:32 Boolean                  replace and with or
+  lib/ecto/query/planner.ex:1754 Arithmetic               replace + with *
+  lib/ecto/changeset.ex:4114 Boolean                  replace || with &&
+  lib/ecto/association.ex:767 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:1517 Arithmetic               replace * with -
+  lib/ecto/repo/preloader.ex:470 Arithmetic               replace - with *
+  lib/ecto/type.ex:1432 Arithmetic               replace + with -
+  lib/ecto/query/builder/from.ex:230 ComparisonBoundary       replace > with >=
+  lib/ecto/changeset.ex:607 ComparisonNegation       replace != with ==
+  lib/ecto/query/builder/from.ex:230 ComparisonBoundary       replace > with >=
+  lib/ecto/query/builder.ex:1495 Arithmetic               replace + with -
+  lib/ecto/association.ex:1338 UnaryNot                 remove unary not
+  lib/ecto/schema.ex:2262 Boolean                  replace || with &&
+  lib/ecto/query/planner.ex:620 Arithmetic               replace - with *
+  lib/ecto/repo/queryable.ex:326 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:16 ComparisonNegation       replace != with ==
+  lib/ecto/type.ex:1223 Arithmetic               replace * with /
+  lib/ecto/query/builder/select.ex:269 Arithmetic               replace + with -
+  lib/ecto/changeset.ex:3090 Arithmetic               replace + with -
+  lib/ecto/association.ex:1347 UnaryNot                 remove unary not
+  lib/ecto/changeset.ex:3752 Boolean                  replace || with &&
+  lib/ecto/repo/assoc.ex:63 UnaryNot                 remove unary not
+  lib/ecto/association.ex:241 Arithmetic               replace + with -
+  lib/ecto/query/builder/select.ex:269 Arithmetic               replace + with *
+  lib/ecto/query/planner.ex:42 Arithmetic               replace - with +
+  lib/ecto/query/planner.ex:1645 Arithmetic               replace + with *
+  lib/ecto/repo/queryable.ex:439 Boolean                  replace && with ||
+  lib/ecto/association.ex:1568 Boolean                  replace and with or
+  lib/ecto/association.ex:1207 Boolean                  replace || with &&
+  lib/ecto/query/planner.ex:38 Arithmetic               replace + with *
+  lib/ecto/changeset.ex:785 ComparisonNegation       replace != with ==
+  lib/ecto/changeset/relation.ex:477 ComparisonNegation       replace != with ==
+  lib/ecto/repo/preloader.ex:296 ComparisonBoundary       replace <= with <
+  lib/ecto/repo/assoc.ex:46 Boolean                  replace and with or
+  lib/ecto/repo/preloader.ex:261 UnaryNot                 remove unary not
+  lib/ecto/query/planner.ex:620 Arithmetic               replace + with -
+  lib/ecto/changeset/relation.ex:370 Arithmetic               replace + with -
+  lib/ecto/adapter/queryable.ex:109 ComparisonNegation       replace == with !=
+  lib/ecto/query/planner.ex:947 Boolean                  replace and with or
+  lib/ecto/query/planner.ex:962 Boolean                  replace and with or
+  lib/ecto/repo/preloader.ex:296 ComparisonNegation       replace <= with >
+  lib/ecto/query/builder/preload.ex:308 Boolean                  replace && with ||
+  lib/ecto/type.ex:1386 Boolean                  replace and with or
+  lib/ecto/query/builder/order_by.ex:100 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/repo/queryable.ex:206 GuardComparisonNegation  replace guard != with ==
+  lib/ecto/type.ex:1085 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:687 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/changeset/relation.ex:302 GuardTypeTest            replace guard is_nil with is_atom
+  lib/ecto/query/builder/preload.ex:89 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:119 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/planner.ex:1655 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/inspect.ex:353 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:778 GuardComparisonBoundary  replace guard > with >=
+  lib/ecto/query/planner.ex:1445 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder/preload.ex:81 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:550 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/type.ex:686 GuardTypeTest            replace guard is_float with is_integer
+  lib/ecto/query/planner.ex:789 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder.ex:1246 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:795 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder/select.ex:194 GuardTypeTest            replace guard is_float with is_number
+  lib/ecto/query/builder/join.ex:383 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/changeset.ex:1947 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:1416 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1152 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder/join.ex:345 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/repo/preloader.ex:633 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/type.ex:687 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/query/planner.ex:2088 GuardTypeTest            replace guard is_number with is_integer
+  lib/ecto/association.ex:1367 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:1433 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1152 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1142 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/embedded.ex:127 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/repo/preloader.ex:396 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/query/planner.ex:2070 GuardTypeTest            replace guard is_float with is_number
+  lib/ecto/query/builder/select.ex:140 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/changeset/relation.ex:118 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder/select.ex:194 GuardTypeTest            replace guard is_float with is_integer
+  lib/ecto/query/builder/select.ex:461 GuardComparisonNegation  replace guard == with !=
+  lib/ecto/association.ex:497 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/repo/queryable.ex:571 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder.ex:1495 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder.ex:1417 GuardTypeTest            replace guard is_float with is_number
+  lib/ecto/repo/preloader.ex:45 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/repo/schema.ex:31 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/inspect.ex:357 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder/from.ex:113 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:1416 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/query/planner.ex:92 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/changeset/relation.ex:118 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/repo/assoc.ex:88 GuardTypeTest            replace guard is_map with is_list
+  lib/ecto/changeset.ex:3640 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:890 GuardComparisonBoundary  replace guard < with <=
+  lib/ecto/query/planner.ex:754 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder/preload.ex:297 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:2475 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1152 GuardTypeTest            replace guard is_nil with is_atom
+  lib/ecto/query/builder/join.ex:345 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/query/builder.ex:337 GuardTypeTest            replace guard is_number with is_integer
+  lib/ecto/query/planner.ex:1774 GuardComparisonNegation  replace guard != with ==
+  lib/ecto/query/builder.ex:1246 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/repo/assoc.ex:84 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/type.ex:1151 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:96 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/query/planner.ex:92 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/query/builder.ex:1222 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:908 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto.ex:576 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/repo/queryable.ex:108 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/schema/loader.ex:86 GuardTypeTest            replace guard is_map with is_list
+  lib/ecto/changeset.ex:1418 GuardComparisonNegation  replace guard == with !=
+  lib/ecto/query/builder/select.ex:146 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/association.ex:1368 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/planner.ex:2439 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/builder/select.ex:193 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:974 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/association.ex:1368 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:550 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/query/builder.ex:334 GuardTypeTest            replace guard is_number with is_float
+  lib/ecto/repo/preloader.ex:598 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:1417 GuardTypeTest            replace guard is_float with is_integer
+  lib/ecto/query/builder/join.ex:336 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/changeset.ex:1401 GuardComparisonBoundary  replace guard < with <=
+  lib/ecto/type.ex:1085 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:2461 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1151 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/changeset/relation.ex:118 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/planner.ex:2066 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1580 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:784 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:589 GuardTypeTest            replace guard is_float with is_number
+  lib/ecto/repo/queryable.ex:402 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/type.ex:1085 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:990 GuardTypeTest            replace guard is_float with is_number
+  lib/ecto/repo/queryable.ex:366 GuardComparisonNegation  replace guard != with ==
+  lib/ecto/repo/assoc.ex:76 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/query/builder/select.ex:453 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:754 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/query/builder/from.ex:87 GuardTypeTest            replace guard is_nil with is_atom
+  lib/ecto/type.ex:589 GuardTypeTest            replace guard is_float with is_integer
+  lib/ecto/query/builder.ex:1351 GuardTypeTest            replace guard is_number with is_integer
+  lib/ecto/query/planner.ex:2070 GuardTypeTest            replace guard is_float with is_integer
+  lib/ecto/query/builder.ex:1081 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/repo/preloader.ex:403 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/type.ex:914 GuardComparisonBoundary  replace guard > with >=
+  lib/ecto/repo/queryable.ex:402 GuardTypeTest            replace guard is_number with is_integer
+  lib/ecto/query/builder.ex:1077 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/repo/schema.ex:883 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/planner.ex:2347 GuardComparisonNegation  replace guard != with ==
+  lib/ecto/query/builder/select.ex:218 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/type.ex:686 GuardTypeTest            replace guard is_float with is_number
+  lib/ecto/query/builder/join.ex:345 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query.ex:2958 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/query/planner.ex:1260 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/query/planner.ex:96 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1152 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1537 GuardTypeTest            replace guard is_integer with is_number
+  lib/ecto/type.ex:1530 GuardComparisonBoundary  replace guard < with <=
+  lib/ecto/changeset.ex:1419 GuardComparisonNegation  replace guard == with !=
+  lib/ecto/changeset.ex:1419 GuardComparisonNegation  replace guard == with !=
+  lib/ecto/repo/assoc.ex:80 GuardTypeTest            replace guard is_map with is_list
+  lib/ecto/query/planner.ex:1774 GuardComparisonNegation  replace guard != with ==
+  lib/ecto/repo/preloader.ex:413 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder.ex:334 GuardTypeTest            replace guard is_number with is_integer
+  lib/ecto/repo/preloader.ex:422 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/builder/select.ex:193 GuardTypeTest            replace guard is_integer with is_float
+  lib/ecto/repo/queryable.ex:464 GuardTypeTest            replace guard is_list with is_tuple
+  lib/ecto/query/builder/preload.ex:232 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/association.ex:1367 GuardTypeTest            replace guard is_atom with is_nil
+  lib/ecto/query/planner.ex:2066 GuardTypeTest            replace guard is_integer with is_float
+
+Schema:    286/476 killed (60.1%)   wall: 4455.2s
+Fallback:  312/518 killed (60.2%)   wall: 5512.3s
+  guard_comparison_boundary:    4/9 killed
+  guard_comparison_negation:    58/70 killed
+  guard_type_test:              250/438 killed
+  unary_not_removal:            0/1 killed
+Skipped:   12133 (attribute_engine_disabled: 28, body_literal_engine_disabled: 562, missing_oracle_site: 1642, no_applicable_mutator: 88, unsupported_dispatch: 9813)
+Invalid:   1
+Errors:    140
+Timeouts:  1
+
+Run time: 9967.5s
+Fallback wall-clock: 55.3% of total
+Fallback mutants: 52.1% of executed
+
+Phases:
+  oracle build:           5715 ms
+  baseline tests:         4608 ms
+  plan generation:         509 ms
+  schema build:           6163 ms
+  schema workers:      1256431 ms
+  fallback workers:    1682549 ms
+  report writing:          495 ms
+  total:               2957144 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    994
+    all tests:          0
+  avg tests/mutant: 36.2
+  median tests/mutant: 36
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 2958454ms
+bench.wall_ms=2962000

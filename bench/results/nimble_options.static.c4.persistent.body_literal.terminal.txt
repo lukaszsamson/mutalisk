@@ -2,7 +2,7 @@ target=nimble_options repo=https://github.com/dashbitco/nimble_options.git ref=v
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.017s
+Resolution completed in 0.05s
 Unchanged:
   castore 1.0.5
   earmark_parser 1.4.39
@@ -25,6 +25,86 @@ Unchanged:
 mix mut starting
 ==> jason
 Compiling 10 files (.ex)
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:166:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:170:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:201:69
+
+    warning: using single-quoted strings to represent charlists is deprecated.
+    Use ~c"" if you indeed want a charlist or use "" instead.
+    You may run "mix format --migrate" to change all single-quoted
+    strings to use the ~c sigil and fix this warning.
+    │
+ 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
+    │                                                     ~
+    │
+    └─ lib/codegen.ex:51:53
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
+     │                                                ~
+     │
+     └─ lib/codegen.ex:118:48
+
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
@@ -625,26 +705,6 @@ Compiling 10 files (.ex)
      │
      └─ lib/decoder.ex:695:21
 
-    warning: using single-quoted strings to represent charlists is deprecated.
-    Use ~c"" if you indeed want a charlist or use "" instead.
-    You may run "mix format --migrate" to change all single-quoted
-    strings to use the ~c sigil and fix this warning.
-    │
- 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
-    │                                                     ~
-    │
-    └─ lib/codegen.ex:51:53
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
-     │                                                ~
-     │
-     └─ lib/codegen.ex:118:48
-
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
@@ -694,66 +754,6 @@ Compiling 10 files (.ex)
      │                                              ~
      │
      └─ lib/encode.ex:284:46
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:166:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:170:69
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:183:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:189:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
-     │                                                                      ~
-     │
-     └─ lib/formatter.ex:195:70
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:201:69
 
      warning: you are implementing a protocol for Decimal but said module is not available. Make sure the module name is correct. If Decimal is an optional dependency, please wrap the protocol implementation in a Code.ensure_loaded?(Decimal) check
      │
@@ -817,20 +817,20 @@ Schema build starting
 Schema build complete
 [1/86] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with *
 [2/86] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with -
-[3/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with *
+[3/86] killed    lib/nimble_options.ex:805  Arithmetic  replace + with -
 [4/86] killed    lib/nimble_options.ex:805  Arithmetic  replace + with *
 [5/86] killed    lib/nimble_options.ex:671  Boolean  replace and with or
-[6/86] killed    lib/nimble_options/docs.ex:21  Boolean  replace || with &&
-[7/86] killed    lib/nimble_options/docs.ex:83  Boolean  replace && with ||
-[8/86] killed    lib/nimble_options.ex:805  Arithmetic  replace + with -
-[9/86] killed    lib/nimble_options/docs.ex:35  ComparisonNegation  replace == with !=
+[6/86] killed    lib/nimble_options/docs.ex:35  ComparisonNegation  replace == with !=
+[7/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with *
+[8/86] killed    lib/nimble_options/docs.ex:21  Boolean  replace || with &&
+[9/86] killed    lib/nimble_options/docs.ex:83  Boolean  replace && with ||
 [10/86] killed    lib/nimble_options/docs.ex:88  Boolean  replace && with ||
-[11/86] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with *
-[12/86] killed    lib/nimble_options.ex:671  ComparisonNegation  replace != with ==
+[11/86] killed    lib/nimble_options.ex:671  ComparisonNegation  replace != with ==
+[12/86] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with *
 [13/86] killed    lib/nimble_options/docs.ex:97  Boolean  replace && with ||
-[14/86] killed    lib/nimble_options.ex:965  Boolean  replace and with or
-[15/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with +
-[16/86] killed    lib/nimble_options/docs.ex:60  Boolean  replace && with ||
+[14/86] killed    lib/nimble_options/docs.ex:60  Boolean  replace && with ||
+[15/86] killed    lib/nimble_options.ex:965  Boolean  replace and with or
+[16/86] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with +
 [17/86] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with -
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
@@ -900,6 +900,8 @@ Schema build complete
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
 [21/86] killed    lib/nimble_options.ex:495  GuardTypeTest  replace guard is_map with is_list
+[22/86] killed    lib/nimble_options/docs.ex:28  IntegerLiteral  replace integer literal 0 with 1
+[23/86] survived  lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_number
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -907,7 +909,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[22/86] survived  lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_number
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -915,7 +916,6 @@ Schema build complete
     │
     └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
 
-[23/86] killed    lib/nimble_options/docs.ex:28  IntegerLiteral  replace integer literal 0 with 1
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -945,7 +945,8 @@ Schema build complete
      │
      └─ (nimble_options 1.1.1) lib/nimble_options.ex:588:13: NimbleOptions.validate_value/3
 
-[24/86] killed    lib/nimble_options.ex:863  GuardTypeTest  replace guard is_list with is_tuple
+[24/86] killed    lib/nimble_options.ex:588  BooleanLiteral  replace boolean literal true with false
+[25/86] killed    lib/nimble_options.ex:863  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -953,15 +954,14 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[25/86] killed    lib/nimble_options.ex:588  BooleanLiteral  replace boolean literal true with false
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
 [26/86] killed    lib/nimble_options/docs.ex:173  IntegerLiteral  replace integer literal 10 with 11
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -984,7 +984,8 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[28/86] survived  lib/nimble_options.ex:876  GuardTypeTest  replace guard is_nil with is_atom
+[28/86] killed    lib/nimble_options/docs.ex:64  IntegerLiteral  replace integer literal 1 with 0
+[29/86] survived  lib/nimble_options.ex:876  GuardTypeTest  replace guard is_nil with is_atom
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -992,7 +993,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[29/86] killed    lib/nimble_options/docs.ex:64  IntegerLiteral  replace integer literal 1 with 0
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1008,6 +1008,7 @@ Schema build complete
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
 [30/86] killed    lib/nimble_options.ex:580  BooleanLiteral  replace boolean literal false with true
+[31/86] killed    lib/nimble_options.ex:601  GuardComparisonNegation  replace guard < with >=
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1015,7 +1016,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[31/86] survived  lib/nimble_options.ex:1000  GuardComparisonBoundary  replace guard >= with >
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1023,7 +1023,8 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[32/86] killed    lib/nimble_options/docs.ex:5  IntegerLiteral  replace integer literal 0 with 1
+[32/86] survived  lib/nimble_options.ex:1000  GuardComparisonBoundary  replace guard >= with >
+[33/86] killed    lib/nimble_options/docs.ex:5  IntegerLiteral  replace integer literal 0 with 1
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1031,7 +1032,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[33/86] killed    lib/nimble_options.ex:593  GuardTypeTest  replace guard is_integer with is_float
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1039,7 +1039,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[34/86] killed    lib/nimble_options.ex:601  GuardComparisonBoundary  replace guard < with <=
+[34/86] killed    lib/nimble_options.ex:593  GuardTypeTest  replace guard is_integer with is_float
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1047,7 +1047,8 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[35/86] killed    lib/nimble_options.ex:601  GuardComparisonNegation  replace guard < with >=
+[35/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_atom with is_nil
+[36/86] killed    lib/nimble_options.ex:609  GuardComparisonBoundary  replace guard < with <=
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1055,7 +1056,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[36/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1063,7 +1063,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[37/86] killed    lib/nimble_options.ex:609  GuardComparisonBoundary  replace guard < with <=
+[37/86] killed    lib/nimble_options.ex:1000  GuardComparisonNegation  replace guard >= with <
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1071,7 +1071,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[38/86] killed    lib/nimble_options.ex:1000  GuardComparisonNegation  replace guard >= with <
+[38/86] killed    lib/nimble_options.ex:805  IntegerLiteral  replace integer literal 1 with 0
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1079,6 +1079,7 @@ Schema build complete
     │
     └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
 
+[39/86] survived  lib/nimble_options.ex:601  GuardTypeTest  replace guard is_integer with is_number
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1086,7 +1087,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[39/86] killed    lib/nimble_options.ex:805  IntegerLiteral  replace integer literal 1 with 0
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1103,7 +1103,6 @@ Schema build complete
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
 [41/86] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_number
-[42/86] killed    lib/nimble_options.ex:625  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1111,6 +1110,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
+[42/86] killed    lib/nimble_options.ex:601  GuardComparisonBoundary  replace guard < with <=
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1118,7 +1118,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[42/86] invalid   lib/nimble_options/docs.ex:4  GuardTypeTest  replace guard is_list with is_tuple
+[43/86] killed    lib/nimble_options.ex:625  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1126,8 +1126,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[43/86] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_atom with is_nil
-[44/86] killed    lib/nimble_options.ex:742  GuardTypeTest  replace guard is_nil with is_atom
+[44/86] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1135,6 +1134,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
+[44/86] invalid   lib/nimble_options/docs.ex:4  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1142,7 +1142,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[44/86] invalid   lib/nimble_options.ex:634  GuardComparisonBoundary  replace guard >= with >
+[45/86] killed    lib/nimble_options.ex:634  GuardComparisonBoundary  replace guard >= with >
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1150,7 +1150,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[45/86] killed    lib/nimble_options.ex:1014  GuardTypeTest  replace guard is_list with is_tuple
 [46/86] survived  lib/nimble_options.ex:609  GuardTypeTest  replace guard is_integer with is_number
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
@@ -1159,6 +1158,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
+[46/86] invalid   lib/nimble_options.ex:742  GuardTypeTest  replace guard is_nil with is_atom
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1166,7 +1166,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[47/86] survived  lib/nimble_options.ex:601  GuardTypeTest  replace guard is_integer with is_number
+[47/86] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1181,7 +1181,6 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[47/86] invalid   lib/nimble_options.ex:738  GuardTypeTest  replace guard is_list with is_tuple
 [48/86] killed    lib/nimble_options.ex:474  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
@@ -1190,29 +1189,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-    warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
-    │
-  1 │ defmodule NimbleOptions.Docs do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
-
-[49/86] survived  lib/nimble_options.ex:835  GuardTypeTest  replace guard is_nil with is_atom
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[50/86] killed    lib/nimble_options/docs.ex:173  IntegerLiteral  replace integer literal 10 with 0
+[49/86] killed    lib/nimble_options/docs.ex:173  IntegerLiteral  replace integer literal 10 with 0
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1227,7 +1204,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[51/86] killed    lib/nimble_options.ex:593  GuardTypeTest  replace guard is_integer with is_number
+[49/86] invalid   lib/nimble_options.ex:1014  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1235,39 +1212,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[52/86] killed    lib/nimble_options/docs.ex:259  IntegerLiteral  replace integer literal 1 with 0
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[53/86] killed    lib/nimble_options/docs.ex:35  BooleanLiteral  replace boolean literal false with true
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[53/86] invalid   lib/nimble_options.ex:697  GuardTypeTest  replace guard is_list with is_tuple
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[54/86] killed    lib/nimble_options.ex:369  GuardTypeTest  replace guard is_list with is_tuple
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[55/86] killed    lib/nimble_options.ex:1042  GuardTypeTest  replace guard is_list with is_tuple
+[50/86] killed    lib/nimble_options.ex:697  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1275,13 +1220,60 @@ Schema build complete
     │
     └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
 
-[56/86] killed    lib/nimble_options.ex:912  GuardTypeTest  replace guard is_tuple with is_list
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[50/86] invalid   lib/nimble_options.ex:835  GuardTypeTest  replace guard is_nil with is_atom
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[51/86] killed    lib/nimble_options/docs.ex:259  IntegerLiteral  replace integer literal 1 with 0
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[52/86] killed    lib/nimble_options/docs.ex:35  BooleanLiteral  replace boolean literal false with true
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[53/86] killed    lib/nimble_options.ex:1042  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[54/86] killed    lib/nimble_options.ex:912  GuardTypeTest  replace guard is_tuple with is_list
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[54/86] invalid   lib/nimble_options.ex:369  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
+    │
+  1 │ defmodule NimbleOptions.Docs do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
 
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
@@ -1290,7 +1282,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[57/86] killed    lib/nimble_options.ex:912  GuardComparisonNegation  replace guard == with !=
+[55/86] survived  lib/nimble_options.ex:634  GuardTypeTest  replace guard is_integer with is_number
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1298,14 +1290,37 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[58/86] survived  lib/nimble_options.ex:932  GuardTypeTest  replace guard is_tuple with is_list
-[59/86] survived  lib/nimble_options/docs.ex:14  IntegerLiteral  replace integer literal 1 with 0
+[56/86] killed    lib/nimble_options.ex:912  GuardComparisonNegation  replace guard == with !=
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[57/86] survived  lib/nimble_options/docs.ex:14  IntegerLiteral  replace integer literal 1 with 0
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[58/86] killed    lib/nimble_options.ex:593  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[59/86] survived  lib/nimble_options.ex:932  GuardTypeTest  replace guard is_tuple with is_list
+    warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
+    │
+  1 │ defmodule NimbleOptions.Docs do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
 
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
@@ -1321,29 +1336,6 @@ Schema build complete
     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     │
     └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
-
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[61/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_atom with is_nil
-[62/86] killed    lib/nimble_options.ex:924  GuardTypeTest  replace guard is_list with is_tuple
-    warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
-    │
-  1 │ defmodule NimbleOptions.Docs do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options/docs.ex:1: NimbleOptions.Docs (module)
-
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
     warning: this clause in cond will never match:
 
@@ -1367,7 +1359,15 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[63/86] killed    lib/nimble_options/docs.ex:110  BooleanLiteral  replace boolean literal false with true
+[61/86] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[62/86] killed    lib/nimble_options/docs.ex:110  BooleanLiteral  replace boolean literal false with true
     warning: redefining module NimbleOptions.Docs (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.Docs.beam)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1382,7 +1382,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[64/86] killed    lib/nimble_options.ex:1074  GuardTypeTest  replace guard is_atom with is_nil
+[63/86] killed    lib/nimble_options.ex:1074  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1390,7 +1390,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[65/86] killed    lib/nimble_options.ex:750  GuardTypeTest  replace guard is_atom with is_nil
+[63/86] invalid   lib/nimble_options.ex:924  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1398,8 +1398,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[66/86] survived  lib/nimble_options.ex:634  GuardTypeTest  replace guard is_integer with is_number
-[66/86] invalid   lib/nimble_options/docs.ex:67  BooleanLiteral  replace boolean literal true with false
+[63/86] invalid   lib/nimble_options/docs.ex:67  BooleanLiteral  replace boolean literal true with false
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1407,39 +1406,8 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[66/86] invalid   lib/nimble_options/docs.ex:4  GuardTypeTest  replace guard is_list with is_tuple
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[67/86] killed    lib/nimble_options.ex:853  GuardTypeTest  replace guard is_list with is_tuple
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[68/86] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_integer
-    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
-    │
-  1 │ defmodule NimbleOptions do
-    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    │
-    └─ lib/nimble_options.ex:1: NimbleOptions (module)
-
-[68/86] invalid   lib/nimble_options.ex:1031  GuardTypeTest  replace guard is_list with is_tuple
-[68/86] invalid   lib/nimble_options.ex:345  GuardTypeTest  replace guard is_list with is_tuple
+[63/86] invalid   lib/nimble_options/docs.ex:4  GuardTypeTest  replace guard is_list with is_tuple
+[64/86] killed    lib/nimble_options.ex:750  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1454,7 +1422,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[68/86] invalid   lib/nimble_options.ex:634  GuardComparisonNegation  replace guard >= with <
+[65/86] killed    lib/nimble_options.ex:634  GuardComparisonNegation  replace guard >= with <
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1462,7 +1430,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[69/86] killed    lib/nimble_options.ex:609  GuardTypeTest  replace guard is_integer with is_float
+[65/86] invalid   lib/nimble_options.ex:853  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1470,7 +1438,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[70/86] killed    lib/nimble_options.ex:419  GuardTypeTest  replace guard is_list with is_tuple
+[66/86] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_integer
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1478,7 +1446,7 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[70/86] invalid   lib/nimble_options.ex:686  GuardTypeTest  replace guard is_map with is_list
+[66/86] invalid   lib/nimble_options.ex:345  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
     │
   1 │ defmodule NimbleOptions do
@@ -1486,7 +1454,39 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[70/86] invalid   lib/nimble_options.ex:419  GuardTypeTest  replace guard is_list with is_tuple
+[66/86] invalid   lib/nimble_options.ex:1031  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[67/86] killed    lib/nimble_options.ex:686  GuardTypeTest  replace guard is_map with is_list
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[67/86] invalid   lib/nimble_options.ex:609  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[68/86] killed    lib/nimble_options.ex:419  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module NimbleOptions (current version loaded from _build/mut_schema/lib/nimble_options/ebin/Elixir.NimbleOptions.beam)
+    │
+  1 │ defmodule NimbleOptions do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/nimble_options.ex:1: NimbleOptions (module)
+
+[68/86] invalid   lib/nimble_options.ex:419  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module NimbleOptions.Docs (current version defined in memory)
     │
   1 │ defmodule NimbleOptions.Docs do
@@ -1501,11 +1501,11 @@ Schema build complete
     │
     └─ lib/nimble_options.ex:1: NimbleOptions (module)
 
-[71/86] killed    lib/nimble_options.ex:423  GuardTypeTest  replace guard is_list with is_tuple
-[72/86] killed    lib/nimble_options/docs.ex:44  IntegerLiteral  replace integer literal 1 with 0
-[72/86] invalid   lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_float
-[73/86] killed    lib/nimble_options.ex:609  GuardComparisonNegation  replace guard < with >=
-Mutation score: 62/73 = 84.9%
+[69/86] killed    lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_float
+[69/86] invalid   lib/nimble_options.ex:423  GuardTypeTest  replace guard is_list with is_tuple
+[70/86] killed    lib/nimble_options/docs.ex:44  IntegerLiteral  replace integer literal 1 with 0
+[71/86] killed    lib/nimble_options.ex:609  GuardComparisonNegation  replace guard < with >=
+Mutation score: 61/71 = 85.9%
 
 Surviving mutants:
   lib/nimble_options/docs.ex:14 Arithmetic               replace - with *
@@ -1513,42 +1513,42 @@ Surviving mutants:
   lib/nimble_options.ex:1000 GuardTypeTest            replace guard is_integer with is_number
   lib/nimble_options.ex:876 GuardTypeTest            replace guard is_nil with is_atom
   lib/nimble_options.ex:1000 GuardComparisonBoundary  replace guard >= with >
-  lib/nimble_options.ex:609 GuardTypeTest            replace guard is_integer with is_number
   lib/nimble_options.ex:601 GuardTypeTest            replace guard is_integer with is_number
-  lib/nimble_options.ex:835 GuardTypeTest            replace guard is_nil with is_atom
-  lib/nimble_options.ex:932 GuardTypeTest            replace guard is_tuple with is_list
-  lib/nimble_options/docs.ex:14 IntegerLiteral           replace integer literal 1 with 0
+  lib/nimble_options.ex:609 GuardTypeTest            replace guard is_integer with is_number
   lib/nimble_options.ex:634 GuardTypeTest            replace guard is_integer with is_number
+  lib/nimble_options/docs.ex:14 IntegerLiteral           replace integer literal 1 with 0
+  lib/nimble_options.ex:932 GuardTypeTest            replace guard is_tuple with is_list
 
-Schema:    15/17 killed (88.2%)   wall: 0.4s
-Fallback:  47/69 killed (68.1%)   wall: 18.1s
+Schema:    15/17 killed (88.2%)   wall: 1.0s
+Fallback:  46/69 killed (66.7%)   wall: 51.8s
   boolean_literal_flip:         4/5 killed
-  guard_comparison_boundary:    2/4 killed
-  guard_comparison_negation:    5/6 killed
-  guard_type_test:              28/45 killed
+  guard_comparison_boundary:    3/4 killed
+  guard_comparison_negation:    6/6 killed
+  guard_type_test:              25/45 killed
   integer_literal_replace:      8/9 killed  recompile errors:
-    compile errors:    13
+    compile errors:    1
+    parse errors:      14
     dep path errors:   0
     unknown:           0
 
 Skipped:   679 (missing_oracle_site: 41, no_applicable_mutator: 9, unsupported_dispatch: 629)
-Invalid:   13
+Invalid:   15
 Errors:    0
 Timeouts:  0
 
-Run time: 18.5s
-Fallback wall-clock: 97.6% of total
+Run time: 52.8s
+Fallback wall-clock: 98.1% of total
 Fallback mutants: 80.2% of executed
 
 Phases:
-  oracle build:         3995 ms
-  baseline tests:        775 ms
-  plan generation:        34 ms
-  schema build:         3659 ms
-  schema workers:        162 ms
-  fallback workers:     8380 ms
-  report writing:          6 ms
-  total:               19996 ms
+  oracle build:        13757 ms
+  baseline tests:       1481 ms
+  plan generation:        35 ms
+  schema build:        11270 ms
+  schema workers:        332 ms
+  fallback workers:    53812 ms
+  report writing:          7 ms
+  total:               91256 ms
 
 Selection:
   mode: static
@@ -1566,21 +1566,21 @@ Test timeout: 10000 ms
 
 Persistent worker:
   workers:     4
-  boot:        median 633.5 ms (max 722.0 ms)
-  app startup: median 35.0 ms (total apps: 52)
-  test load:   median 344.7 ms (total files: 12)
-  mutant run:  median 11.6 ms (p95 74.9 ms, n=17)
+  boot:        median 1947.5 ms (max 5295.0 ms)
+  app startup: median 348.7 ms (total apps: 52)
+  test load:   median 863.3 ms (total files: 12)
+  mutant run:  median 37.0 ms (p95 184.7 ms, n=17)
   reset hooks:
     application_env: 0.0 ms
-    ets:             0.2 ms
+    ets:             0.5 ms
     processes:       0.0 ms
     persistent_term: 0.0 ms
     on_exit:         0.0 ms
   filter lookup: 0.0 ms
-  crashes: 0  restarts: 0  filter-miss: 0  in-process compile errors: 13  mix fallbacks: 17
-  memory: peak 60.9 MB total, 14.4 MB processes
+  crashes: 0  restarts: 0  filter-miss: 0  in-process compile errors: 1  parse errors: 14  mix fallbacks: 19
+  memory: peak 60.9 MB total, 14.5 MB processes
 
-Hint: persistent worker had high in-process fallback compile-error rate (18.8%). Consider --worker-type mix.
+Hint: persistent worker had high in-process fallback compile-error rate (21.7%). Consider --worker-type mix.
 
-Mutalisk run complete in 20326ms
-bench.wall_ms=23000
+Mutalisk run complete in 92034ms
+bench.wall_ms=98000

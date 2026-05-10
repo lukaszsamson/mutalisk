@@ -12,7 +12,7 @@
             "test/property_test.exs"
           ],
           "description": "replace < with <=",
-          "duration": 168,
+          "duration": 1101,
           "id": "02a827c07860385e094ce03318b77e41",
           "killedBy": [],
           "location": {
@@ -38,7 +38,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 260,
+          "duration": 1417,
           "id": "179cf2f0873e61d6688c0dcdb8a0918d",
           "killedBy": [],
           "location": {
@@ -54,7 +54,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_float(int)",
           "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/codegen.ex ==\n** (SyntaxError) invalid syntax found on lib/codegen.ex:100:24:\n     error: unexpected operator ->. If you want to define multiple clauses, the first expression must use ->. Syntax error before: '->'\n     │\n 100 │          {enum, value} ->\n     │                        ^\n     │\n     └─ lib/codegen.ex:100:24\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/codegen.ex\", {100, 24}, \"** (SyntaxError) invalid syntax found on lib/codegen.ex:100:24:\\n     error: unexpected operator ->. If you want to define multiple clauses, the first expression must use ->. Syntax error before: '->'\\n     │\\n 100 │          {enum, value} ->\\n     │                        ^\\n     │\\n     └─ lib/codegen.ex:100:24\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "statusReason": "\n== Compilation error in file lib/codegen.ex ==\n** (SyntaxError) invalid syntax found on lib/codegen.ex:100:24:\n     error: unexpected operator ->. If you want to define multiple clauses, the first expression must use ->. Syntax error before: '->'\n     │\n 100 │          {enum, value} ->\n     │                        ^\n     │\n     └─ lib/codegen.ex:100:24\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778400353-fEXRTw/1/lib/codegen.ex\", {100, 24}, \"** (SyntaxError) invalid syntax found on lib/codegen.ex:100:24:\\n     error: unexpected operator ->. If you want to define multiple clauses, the first expression must use ->. Syntax error before: '->'\\n     │\\n 100 │          {enum, value} ->\\n     │                        ^\\n     │\\n     └─ lib/codegen.ex:100:24\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -65,7 +65,7 @@
             "test/property_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 5,
+          "duration": 7,
           "id": "4d164291dfe568f3f72e1a238dc4487b",
           "killedBy": [
             "Jason.HelpersTest:json_map/2 rejects keys with invalid characters"
@@ -93,7 +93,7 @@
             "test/property_test.exs"
           ],
           "description": "replace < with >=",
-          "duration": 118,
+          "duration": 216,
           "id": "51273d4c5ce17444f6396e49f1cc28f3",
           "killedBy": [],
           "location": {
@@ -119,7 +119,7 @@
             "test/property_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 119,
+          "duration": 225,
           "id": "55b4072f81bcc041b5f34c81a90c0301",
           "killedBy": [],
           "location": {
@@ -145,7 +145,7 @@
             "test/property_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 110,
+          "duration": 193,
           "id": "a882353979b812e837f94d7a54443fc9",
           "killedBy": [],
           "location": {
@@ -171,7 +171,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1236,
+          "duration": 2288,
           "id": "d42eedc310849a65ab8dd12d0a73c62a",
           "killedBy": [],
           "location": {
@@ -197,7 +197,7 @@
             "test/property_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 109,
+          "duration": 404,
           "id": "eff0674c07b893e51e4d2957f61a128b",
           "killedBy": [],
           "location": {
@@ -229,10 +229,10 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 61,
+          "duration": 473,
           "id": "016e69e55ebcce6fd9ca89a92345c91f",
           "killedBy": [
-            "Jason.JsonTestSuite:number_real_underflow.json"
+            "Jason.DecodeTest:iodata"
           ],
           "location": {
             "end": {
@@ -257,7 +257,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 60,
+          "duration": 429,
           "id": "04559312c7631e3d840fb543cbacf27e",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -285,7 +285,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 15,
+          "duration": 45,
           "id": "0499a674cadccf8f41502b90ced4413d",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -313,7 +313,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 27,
+          "duration": 64,
           "id": "06481d16447e0ce644e4ad984621b98c",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -341,7 +341,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 17,
+          "duration": 86,
           "id": "06e95ed2c2def09fccb5670e4ce79120",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -369,7 +369,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 148,
+          "duration": 837,
           "id": "083a22b5c1933740c8d18ff6b77dfe5a",
           "killedBy": [],
           "location": {
@@ -395,7 +395,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 5,
+          "duration": 173,
           "id": "09a965f685a96da07f619c1d2c350e25",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -423,7 +423,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 137,
+          "duration": 829,
           "id": "0c25db624fbed5976d5bb87af816d97b",
           "killedBy": [
             "Jason.JsonTestSuite:object_escaped_null_in_key.json"
@@ -451,7 +451,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 25,
+          "duration": 250,
           "id": "0cafec69ee23714758de0cf2f81d5450",
           "killedBy": [
             "Jason.DecodeTest:whitespace"
@@ -479,7 +479,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 677,
+          "duration": 804,
           "id": "0cc4a184d864e8878a78fba15bd821ad",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -507,7 +507,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 11,
+          "duration": 78,
           "id": "0cc94ceec35264eac189bc82b1860746",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -535,7 +535,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 46,
           "id": "0cf2fecd1e8ae1552ffef5e99ca0c81b",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -563,7 +563,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 52,
           "id": "0d903a90ba434185152a4fe727d078b7",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -591,7 +591,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 25,
+          "duration": 165,
           "id": "0e4b48235f7788e6c4256b8361a300b7",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -619,7 +619,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 12,
+          "duration": 104,
           "id": "0e6be35bb5db374869f4414a0aba88f4",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -647,7 +647,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 47,
           "id": "10bbc7d19030454e3c1ea2bd52778b62",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -675,7 +675,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 40,
           "id": "111592db2f7d19edfd1d532fbed8f0d6",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -703,7 +703,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 22,
+          "duration": 87,
           "id": "12af8623e9dd1531bd3688fddd92b8b7",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -731,7 +731,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 22,
+          "duration": 160,
           "id": "16ff1780324065586cf696a87fb1905b",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -759,7 +759,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 75,
           "id": "182aaa4ffa65396cd722fb59b9025713",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -814,7 +814,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 69,
           "id": "190ada2bc658a5de6345d6fa47c309d1",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -842,7 +842,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 1046,
+          "duration": 1421,
           "id": "19d78fc4eaa1fa4e77b47d78544f7875",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -870,7 +870,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 30,
           "id": "1b15399029f2b152741bde7d21541590",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -898,7 +898,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 41,
+          "duration": 139,
           "id": "1b3f937682e97471703ac46a4c064f27",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -926,7 +926,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 111,
+          "duration": 525,
           "id": "1c56721985205a13e9c6ad942a9e8382",
           "killedBy": [],
           "location": {
@@ -952,7 +952,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 14,
           "id": "1c7697200cb4f79cda744f1c8cf61701",
           "killedBy": [
             "Jason.DecodeTest:whitespace"
@@ -980,7 +980,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 14,
           "id": "1c89f8ded5d50639190f68ba6cdc6861",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -1008,7 +1008,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 40,
           "id": "20fe05b11442a4bb590116956ce5a274",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1036,7 +1036,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 23,
           "id": "24a7f83aa848d73da6e5f0a26c53bd4a",
           "killedBy": [
             "Jason.DecodeTest:iodata"
@@ -1064,7 +1064,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 8,
+          "duration": 21,
           "id": "253213c64629f88d4a342c21c2c2d3b5",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1092,7 +1092,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 14,
+          "duration": 12,
           "id": "25f374319b208c4a6e4046adec65e247",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1147,7 +1147,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 117,
+          "duration": 443,
           "id": "29a907c65fdfb660160ca762e4dfb5f4",
           "killedBy": [],
           "location": {
@@ -1173,7 +1173,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 108,
+          "duration": 377,
           "id": "2e95e9afd8b2f3b87b01b42213b648b6",
           "killedBy": [],
           "location": {
@@ -1199,7 +1199,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 35,
           "id": "2f62b0ee104218d513ace3b016feef7d",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -1227,7 +1227,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 4,
+          "duration": 6,
           "id": "2f9e18bd017c6a0a81bd9068b2dc3476",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -1255,7 +1255,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 107,
+          "duration": 374,
           "id": "310f6ed167b1f76e585263033a5ef98b",
           "killedBy": [],
           "location": {
@@ -1281,7 +1281,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 29,
           "id": "331f23b18fc800f4c95d4bac075d277d",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -1309,7 +1309,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "34c4750a096e5e3ddce64f75a6856e2e",
           "killedBy": [],
           "location": {
@@ -1336,7 +1336,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 3,
+          "duration": 15,
           "id": "35fa7a30a8d6f2c5e0fa77319459f9f4",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -1364,7 +1364,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 23,
+          "duration": 12,
           "id": "38489b6ab3c36a14786803dc8da7ca55",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -1392,7 +1392,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 131,
+          "duration": 167,
           "id": "398e732c14575e2face284b65fd58be5",
           "killedBy": [],
           "location": {
@@ -1418,7 +1418,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 12,
           "id": "39e0f0fb603400091e8744d6ed48ba5e",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1446,7 +1446,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 10,
+          "duration": 17,
           "id": "39e7b209a970d2b95716b8a79f255dca",
           "killedBy": [
             "Jason.DecodeTest:whitespace"
@@ -1474,7 +1474,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 8,
+          "duration": 18,
           "id": "3a38ecbcaee396d6c005f52731715753",
           "killedBy": [
             "Jason.DecodeTest:iodata"
@@ -1502,7 +1502,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 99,
+          "duration": 409,
           "id": "3ac256be6ec11ef3bbbb27ab7c4c9fa6",
           "killedBy": [],
           "location": {
@@ -1528,7 +1528,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 17,
+          "duration": 29,
           "id": "3ba3a3b55fd7ba8705336ef2ec6dac8d",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -1556,7 +1556,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 12,
           "id": "3c4b89e9197053de0652f96cf92a4e62",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1584,7 +1584,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 129,
+          "duration": 294,
           "id": "3ccd7ec90b1f24b8c68177cbfec53827",
           "killedBy": [],
           "location": {
@@ -1610,7 +1610,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 126,
+          "duration": 432,
           "id": "3d307e8c60ac3f4ca165b5d67b600335",
           "killedBy": [],
           "location": {
@@ -1636,7 +1636,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 16,
           "id": "3d8c0bbac87a4c340b4d6cbd30abe228",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1664,7 +1664,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 24,
           "id": "419964ce345d0566aa3b6651e1edda5e",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -1692,7 +1692,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 124,
+          "duration": 296,
           "id": "4209ac27cd308eec209ab1df208d3b0f",
           "killedBy": [],
           "location": {
@@ -1718,7 +1718,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 17,
+          "duration": 11,
           "id": "4474cf85402627946ce2064f157dfbc5",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1746,7 +1746,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 102,
+          "duration": 197,
           "id": "45fccaa3694173974c585bfd20677ad6",
           "killedBy": [],
           "location": {
@@ -1772,7 +1772,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 21,
+          "duration": 30,
           "id": "490e34237cea6a1d8f7fd591d6866e39",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -1800,7 +1800,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "49feba456f1d3d2822b26b6bd2ac7268",
           "killedBy": [],
           "location": {
@@ -1827,7 +1827,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 5,
+          "duration": 6,
           "id": "4ae1fa5c9f235fd59db0bef5d4a2d432",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1855,7 +1855,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 7,
           "id": "4b513fc7ae0309d445b8c9740f92f1a5",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1883,7 +1883,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 5,
           "id": "4cab163f8067602e71dfd226796b1b9b",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1911,7 +1911,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 7,
           "id": "4e0cfe92b4c9e53871dec59288f024af",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -1939,7 +1939,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 39,
+          "duration": 18,
           "id": "50917fff688c9670fb1f3379054ad98e",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -1967,7 +1967,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 125,
+          "duration": 211,
           "id": "528d49d564c72caa97cb6f2060598315",
           "killedBy": [],
           "location": {
@@ -1993,7 +1993,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 8,
+          "duration": 40,
           "id": "528e99de429d721123fc606c61d2c727",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -2021,7 +2021,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 140,
+          "duration": 179,
           "id": "54c6a875cbe7df3cd025bfc0381bc421",
           "killedBy": [],
           "location": {
@@ -2047,7 +2047,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 129,
+          "duration": 222,
           "id": "556c7832a304e702247dcbc431c9c72b",
           "killedBy": [],
           "location": {
@@ -2073,7 +2073,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 10,
+          "duration": 9,
           "id": "5870425084bc03c08c5e38707e9eb559",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2101,7 +2101,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 103,
+          "duration": 179,
           "id": "59382cd6dcd9ce58a0290cecc28a95ba",
           "killedBy": [],
           "location": {
@@ -2127,7 +2127,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 8,
+          "duration": 12,
           "id": "59d9806c81b20cddf2f69a45a439a588",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2155,7 +2155,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 13,
           "id": "5b59eff8b0708b84b63300d735b65648",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2183,7 +2183,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 14,
+          "duration": 29,
           "id": "5bad7e4b476f6c8082d591d98003b225",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2211,7 +2211,7 @@
             "test/property_test.exs"
           ],
           "description": "replace > with >=",
-          "duration": 97,
+          "duration": 125,
           "id": "5c3a1335b70caadf8f9664c9113dff08",
           "killedBy": [],
           "location": {
@@ -2265,7 +2265,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 13,
+          "duration": 20,
           "id": "5cf85aba746a26516eceb72a51b3de50",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -2293,7 +2293,7 @@
             "test/property_test.exs"
           ],
           "description": "replace > with <=",
-          "duration": 6,
+          "duration": 4,
           "id": "5dbddd707b1afce1c2b155bf3f1e172f",
           "killedBy": [
             "Jason.DecodeTest:iodata"
@@ -2321,7 +2321,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 13,
+          "duration": 7,
           "id": "6056ecdd547838716a3274d4acda76a7",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -2349,7 +2349,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 7,
           "id": "607de2575a8878ddb6fdec27ac67d50f",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2377,7 +2377,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 5,
+          "duration": 14,
           "id": "631300a03487d43002fb29b561b12e21",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -2405,7 +2405,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 133,
+          "duration": 198,
           "id": "63272072a89bdedc1fa59847aeb1c994",
           "killedBy": [],
           "location": {
@@ -2431,7 +2431,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 126,
+          "duration": 192,
           "id": "647db55c75c0ce55a6b849fc61112fed",
           "killedBy": [],
           "location": {
@@ -2457,7 +2457,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 18,
           "id": "653b8fa2eb5ff4803d148912b54860b3",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2485,7 +2485,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 11,
+          "duration": 15,
           "id": "660321cb02d44924d1c0e0e0a925fbe7",
           "killedBy": [
             "Jason.DecodeTest:whitespace"
@@ -2513,7 +2513,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 10,
           "id": "666284a8898169400919f715f836de84",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -2541,7 +2541,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 101,
+          "duration": 174,
           "id": "666c018cd17d4a0898ff83641d04afda",
           "killedBy": [],
           "location": {
@@ -2567,7 +2567,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 5,
+          "duration": 7,
           "id": "66cc92c1719991ab01d414a81c497768",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2595,7 +2595,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 11,
+          "duration": 9,
           "id": "690f5626a7caf82b1c1a4f86322d4da5",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2623,7 +2623,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 14,
           "id": "6973ea19aecb8335b3d76b67e16c3175",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2651,7 +2651,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 12,
           "id": "6a9196a4e068018c4ac4205c71d4f4f5",
           "killedBy": [
             "Jason.DecodeTest:arrays"
@@ -2679,7 +2679,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 14,
           "id": "6af90b252b392f4423d897aaf9a21d43",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2707,7 +2707,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 101,
+          "duration": 386,
           "id": "73d4d806b9016960f92226b7c991a48c",
           "killedBy": [
             "Jason.JsonTestSuite:object_escaped_null_in_key.json"
@@ -2762,7 +2762,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 9,
           "id": "75419dec8916542789fb2ca4d38bb88b",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2790,7 +2790,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 9,
           "id": "755c663bc6078934c99246482afa9ccb",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2818,7 +2818,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 10,
+          "duration": 27,
           "id": "7648e3734f7b32d61f638e483a1b5e82",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -2846,7 +2846,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 110,
+          "duration": 372,
           "id": "76fdb42dfa9322699cb9e183f6ea60ca",
           "killedBy": [],
           "location": {
@@ -2899,7 +2899,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 26,
+          "duration": 71,
           "id": "7a963a08bc6f91ec26902dee983c20b5",
           "killedBy": [
             "Jason.JsonTestSuite:string_1_surrogate_then_escape_u1.json"
@@ -2927,7 +2927,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 18,
+          "duration": 120,
           "id": "7edab9d4f3c4a824e6ddd7fff817858d",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -2955,7 +2955,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 29,
           "id": "806e876faee9186b4aafd7e0f0cb4461",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -2983,7 +2983,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 17,
+          "duration": 21,
           "id": "80b65f10972980bd070bd95098e69744",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3011,7 +3011,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "841c5be7646fee5ce96a17bc167869e1",
           "killedBy": [],
           "location": {
@@ -3038,7 +3038,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 46,
           "id": "870e183a5aa70d4be5b5a1bb235af25a",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -3066,7 +3066,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 20,
           "id": "88185e782406b6a5684257ef72f623c9",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3094,7 +3094,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 114,
+          "duration": 182,
           "id": "89f03e3d4a24115783fb5800e83e4804",
           "killedBy": [],
           "location": {
@@ -3120,7 +3120,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 13,
           "id": "8bff95cdf1d44d63868af20b03e2ffe8",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -3148,7 +3148,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 116,
+          "duration": 220,
           "id": "8c422774eae22267bc78bd644f68b0c3",
           "killedBy": [],
           "location": {
@@ -3174,7 +3174,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 12,
           "id": "8f22975db770a47cea882720857bbafe",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -3202,7 +3202,7 @@
             "test/property_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 117,
+          "duration": 177,
           "id": "90b10d0a73b2b5f4bcbb0342b9e086ef",
           "killedBy": [],
           "location": {
@@ -3228,7 +3228,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 13,
+          "duration": 21,
           "id": "9196ebd1f32cb856aae78bdf1cfecf09",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -3256,7 +3256,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 62,
+          "duration": 130,
           "id": "91b018df95867648514d8a4639591842",
           "killedBy": [
             "Jason.JsonTestSuite:number_0.3e.json"
@@ -3284,7 +3284,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 9,
           "id": "9317875a1093b710df8b3560f551aa4d",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3312,7 +3312,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 11,
+          "duration": 10,
           "id": "936831a877672d31371b0fcc879e16c3",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -3340,7 +3340,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 109,
+          "duration": 266,
           "id": "95a296fe8ea883858c0287d52e35a1bc",
           "killedBy": [],
           "location": {
@@ -3366,7 +3366,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 16,
           "id": "971431bdded6e4692147e3081ebe1410",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3421,7 +3421,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 13,
+          "duration": 20,
           "id": "9900206f4f2619d350b9f8332e94ead0",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -3449,7 +3449,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 120,
+          "duration": 218,
           "id": "9a84b26d1b27f0a9890e8e81e3129671",
           "killedBy": [
             "Jason.JsonTestSuite:object_escaped_null_in_key.json"
@@ -3477,7 +3477,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 114,
+          "duration": 244,
           "id": "9b45b938c5c72ba522317fa03225436f",
           "killedBy": [],
           "location": {
@@ -3503,7 +3503,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 22,
+          "duration": 38,
           "id": "9cdeea8e65d63a2de88528efb66fe37e",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -3531,7 +3531,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 140,
+          "duration": 257,
           "id": "9de40736901884b5950922bb4c53d689",
           "killedBy": [],
           "location": {
@@ -3557,7 +3557,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 9,
           "id": "9fa0d5e7bd2deebf31254440bf4494f3",
           "killedBy": [
             "Jason.DecodeTest:iodata"
@@ -3585,7 +3585,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 24,
           "id": "9ffc257b1697f9b024de85d362e031df",
           "killedBy": [
             "Jason.DecodeTest:whitespace"
@@ -3613,7 +3613,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 108,
+          "duration": 163,
           "id": "a1f314d1485c76736d3dd0d7742fc2f2",
           "killedBy": [],
           "location": {
@@ -3639,7 +3639,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 18,
+          "duration": 7,
           "id": "a2d91dd6b2734865e46f119a7e29aae6",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3667,7 +3667,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 17,
+          "duration": 45,
           "id": "a4036d2a42e13a804e32220944c66133",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -3695,7 +3695,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 10,
           "id": "a58ef4c00b1bf17b1fe2091b532713d1",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3723,7 +3723,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 5,
+          "duration": 4,
           "id": "a6e6cca4396bf9d639285ba469be35dd",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3751,7 +3751,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 11,
+          "duration": 10,
           "id": "a8092ebb224ae1536a11c835f2d85de4",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3779,7 +3779,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 8,
           "id": "a8d19092ed1f11419fe6579b38ebb0fc",
           "killedBy": [],
           "location": {
@@ -3806,7 +3806,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 109,
+          "duration": 177,
           "id": "a9a9b06a95fad7bb7459b10c96ce3cda",
           "killedBy": [],
           "location": {
@@ -3832,7 +3832,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 10,
           "id": "abb7558e507c37e13b3946974e0919eb",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -3860,7 +3860,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 5,
+          "duration": 7,
           "id": "ad886e8f64703faadb7d9e788af7e2e5",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -3888,7 +3888,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 24,
+          "duration": 30,
           "id": "b2ecc8d5e2dea59c70cd27cf63bcf2e1",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -3916,7 +3916,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 112,
+          "duration": 274,
           "id": "b3492c48f111628a84092d23b4b9548f",
           "killedBy": [],
           "location": {
@@ -3942,7 +3942,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 144,
+          "duration": 339,
           "id": "b36048b641e09b0ddef26306b1a3d20f",
           "killedBy": [],
           "location": {
@@ -3968,7 +3968,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 24,
           "id": "b3697a5f32befc59f249dd1b6ddf0e81",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -3996,7 +3996,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 128,
+          "duration": 343,
           "id": "b4b9881e3bd2b47af413cd3d94aabac9",
           "killedBy": [],
           "location": {
@@ -4022,7 +4022,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 9,
+          "duration": 12,
           "id": "b4c0d8210cf6931d6bb1910726d52d5d",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4050,7 +4050,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 106,
+          "duration": 320,
           "id": "b639a02b5ef0fe5bfa7ce08e76b18dc4",
           "killedBy": [],
           "location": {
@@ -4076,7 +4076,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 14,
+          "duration": 36,
           "id": "b786459d2db4170dbb0e44e2f58e3ffb",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -4104,7 +4104,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 17,
           "id": "b7ba161d73794dc4f10da2b7c8f3c2ca",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4132,7 +4132,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 99,
+          "duration": 673,
           "id": "b7ffcfcbe16fc2889220303c2674b587",
           "killedBy": [],
           "location": {
@@ -4185,7 +4185,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 10,
+          "duration": 25,
           "id": "b8da7c04b6fcdf270297111151a83c15",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -4213,7 +4213,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 12,
+          "duration": 36,
           "id": "bc9c40075a7cd484ac7497176e18c9d0",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -4241,7 +4241,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 29,
           "id": "bf787c52df158c4564a6e0a8b885b13a",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -4269,7 +4269,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 144,
+          "duration": 883,
           "id": "c1567059f76bf3b1bd0f469d27b8b4d8",
           "killedBy": [],
           "location": {
@@ -4295,7 +4295,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 12,
+          "duration": 41,
           "id": "c1806c69384c6de1851f45b25164ab5c",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -4323,7 +4323,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 20,
+          "duration": 50,
           "id": "c1d7f62c404017c452a2865a29b09fab",
           "killedBy": [
             "Jason.DecodeTest:arrays"
@@ -4351,7 +4351,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 14,
+          "duration": 31,
           "id": "c224f822e887c57232bad7e8e2164496",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4379,7 +4379,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 11,
+          "duration": 42,
           "id": "c5dab4202028936fe7b9f3c1772a999e",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -4407,7 +4407,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 38,
           "id": "c7164aaa340627b1357b3b41b10cc9c9",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -4435,7 +4435,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 98,
+          "duration": 924,
           "id": "ca502c4119d842e790989951c7a6d01a",
           "killedBy": [
             "Jason.JsonTestSuite:object_escaped_null_in_key.json"
@@ -4463,7 +4463,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 39,
           "id": "cb2132083e0ba50c89608aadf895e160",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4491,7 +4491,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 20,
+          "duration": 153,
           "id": "cdb84c6c76f43aa7b7ebe4e9c393aa5a",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -4546,7 +4546,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 49,
           "id": "cf18e9510990e5a3bafbe86a36b66616",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -4574,7 +4574,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 14,
+          "duration": 76,
           "id": "cfdf6d2201e47bd023ba736eb02bee8a",
           "killedBy": [
             "Jason.DecodeTest:arrays"
@@ -4602,7 +4602,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 25,
+          "duration": 159,
           "id": "d13667a018b949c607f40a49357fe54f",
           "killedBy": [
             "Jason.JsonTestSuite:string_1_surrogate_then_escape.json"
@@ -4630,7 +4630,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 114,
+          "duration": 416,
           "id": "d252b40accf0a3dfa9bf8cf8e71e6052",
           "killedBy": [],
           "location": {
@@ -4656,7 +4656,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 25,
           "id": "d3a3b4458ffaf270c84e7a8fa66fc6af",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4684,7 +4684,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 3,
+          "duration": 18,
           "id": "d4889f91bedd556a8a194334c2d2c37e",
           "killedBy": [
             "Jason.DecodeTest:iodata"
@@ -4712,7 +4712,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 27,
           "id": "d4f32a22e0ea7ddc0ab92351201a52a1",
           "killedBy": [
             "Jason.DecodeTest:whitespace"
@@ -4740,7 +4740,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 9,
           "id": "d52089f6daa3ba77dfeeb69d50d15867",
           "killedBy": [
             "Jason.DecodeTest:iodata"
@@ -4768,7 +4768,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 706,
+          "duration": 917,
           "id": "d771468f485a5bcf8e749878d91a6385",
           "killedBy": [],
           "location": {
@@ -4794,7 +4794,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 22,
+          "duration": 37,
           "id": "d83cf8fcc5a46c3dc19bc90c654db74c",
           "killedBy": [
             "Jason.PropertyTest:property atom-keyed objects roundtrip"
@@ -4822,7 +4822,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 109,
+          "duration": 189,
           "id": "d88dba86ec7acd079e56da0b93e92fd4",
           "killedBy": [],
           "location": {
@@ -4848,7 +4848,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 98,
+          "duration": 208,
           "id": "dac91054828513c1774bcc7cc677314c",
           "killedBy": [],
           "location": {
@@ -4874,7 +4874,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 17,
           "id": "dbf87a14072418fc593774ced58b3ab6",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -4902,7 +4902,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 7,
           "id": "dc9951098cb039a6c8fdbea44ddc7fdf",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -4930,7 +4930,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 11,
           "id": "dcfbe615f3ac038b187c72439aff4582",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4958,7 +4958,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 6,
+          "duration": 10,
           "id": "ddee6e117df007ff2f114b1a5601f60f",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -4986,7 +4986,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 5,
+          "duration": 10,
           "id": "de68b23a025463051c8272f7ada7e5aa",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5042,7 +5042,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 10,
           "id": "e08b1fc554232ce47c61b1094f762c83",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5070,7 +5070,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 11,
           "id": "e1818f06b0730469aa2b15d45f0a0119",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -5098,7 +5098,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 2,
           "id": "e215a74de43b03da02b69d3dffdb0a98",
           "killedBy": [],
           "location": {
@@ -5125,7 +5125,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 10,
           "id": "e3b64252c2e5b8bbcf1fc07c4a845e1c",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5153,7 +5153,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 5,
+          "duration": 8,
           "id": "e5dc195b447cd11e1846e880c7b4740a",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5181,7 +5181,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 7,
+          "duration": 15,
           "id": "e621ca12a22a1f99bd0dda19a11461a5",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -5209,7 +5209,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 150,
+          "duration": 265,
           "id": "e78e47f0027d162cddede7038afe027a",
           "killedBy": [],
           "location": {
@@ -5235,7 +5235,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 5,
+          "duration": 20,
           "id": "e88769ab2c718987e4f1f062b6e15c93",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -5263,7 +5263,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 157,
+          "duration": 310,
           "id": "e8e5b746c936d83ad8b107a22965095c",
           "killedBy": [],
           "location": {
@@ -5289,7 +5289,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 141,
+          "duration": 248,
           "id": "ec8bfdba9035de2d77d78615fa99abe5",
           "killedBy": [
             "Jason.JsonTestSuite:object_escaped_null_in_key.json"
@@ -5317,7 +5317,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 7,
+          "duration": 15,
           "id": "ed6e8ee7dd04698a1cd9bf2e79458f98",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -5345,7 +5345,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 5,
+          "duration": 10,
           "id": "ee190b7664975cb2361dd487089795d0",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5373,7 +5373,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 10,
+          "duration": 16,
           "id": "eecffc13c881f73c3eb31dc373d00b06",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -5401,7 +5401,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 8,
+          "duration": 16,
           "id": "f3f1f9cedc1db9042b391b7d9f9fd6bc",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -5429,7 +5429,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 8,
+          "duration": 11,
           "id": "f64077de48073bb11a99c1d093629193",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5457,7 +5457,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 8,
+          "duration": 37,
           "id": "f75b5a74a1662affdd6050526b22831d",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5485,7 +5485,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 10,
+          "duration": 44,
           "id": "f7820e6dcbaf769980f39554b0980fec",
           "killedBy": [
             "Jason.DecodeTest:arrays"
@@ -5513,7 +5513,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 15,
+          "duration": 18,
           "id": "f8bcca33ea68efce630111437368b832",
           "killedBy": [
             "Jason.DecodeTest:numbers"
@@ -5541,7 +5541,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 94,
+          "duration": 489,
           "id": "fbccbf3d7239aad0d91a9ebdd0a9770c",
           "killedBy": [],
           "location": {
@@ -5567,7 +5567,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 9,
+          "duration": 46,
           "id": "fc3438e8a5a2534c24d875922f6b6fa8",
           "killedBy": [
             "Jason.DecodeTest:strings"
@@ -5595,7 +5595,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 102,
+          "duration": 448,
           "id": "ff466b9192cbdfa26629de0580b8f568",
           "killedBy": [],
           "location": {
@@ -5627,7 +5627,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 2,
+          "duration": 5,
           "id": "019a70f5627941164ec9d4e0432a3ca4",
           "killedBy": [],
           "location": {
@@ -5654,7 +5654,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 1,
+          "duration": 6,
           "id": "02562802344f5d954e6093866b863c11",
           "killedBy": [],
           "location": {
@@ -5681,7 +5681,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 1,
+          "duration": 5,
           "id": "03eae415ef6204b92b2312175bc1b4ed",
           "killedBy": [],
           "location": {
@@ -5708,7 +5708,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 168,
+          "duration": 1066,
           "id": "041b493c220b93ba09d146c578dc7b8f",
           "killedBy": [],
           "location": {
@@ -5734,7 +5734,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 1,
+          "duration": 5,
           "id": "0445f533cd81fba6c7a27900c0691158",
           "killedBy": [],
           "location": {
@@ -5761,7 +5761,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 133,
+          "duration": 1309,
           "id": "06bd34609819899984e946c190af02a7",
           "killedBy": [],
           "location": {
@@ -5787,7 +5787,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 28,
+          "duration": 114,
           "id": "07c3075cd459da2dbd881ef801707ee7",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -5815,7 +5815,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 613,
+          "duration": 746,
           "id": "08b9384ed537ae7e1474f63bb86a189a",
           "killedBy": [],
           "location": {
@@ -5841,7 +5841,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 147,
+          "duration": 1146,
           "id": "08dda24e607a317c695a83ab23506491",
           "killedBy": [],
           "location": {
@@ -5867,7 +5867,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 27,
+          "duration": 137,
           "id": "08e7c34c4a83a9a8f7428ca12b105edd",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -5895,7 +5895,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 129,
+          "duration": 749,
           "id": "09de2057485c44eea0ad216e29a52d36",
           "killedBy": [],
           "location": {
@@ -5921,7 +5921,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 104,
+          "duration": 749,
           "id": "0c6204d1aa4745e0b7276f5f53d3ed91",
           "killedBy": [],
           "location": {
@@ -5947,7 +5947,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 25,
+          "duration": 104,
           "id": "0e66ddafdec997f13474f42a812e23a3",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -5975,7 +5975,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 409,
+          "duration": 662,
           "id": "104025bc9947b8fe78ff372d558e21eb",
           "killedBy": [],
           "location": {
@@ -5991,7 +5991,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_float(char)",
           "status": "CompileError",
-          "statusReason": "    warning: redefining module Jason.EncodeError (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.EncodeError.beam)\n    │\n  1 │ defmodule Jason.EncodeError do\n    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    │\n    └─ lib/encode.ex:1: Jason.EncodeError (module)\n\n    warning: redefining module Jason.Encode (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.Encode.beam)\n    │\n 14 │ defmodule Jason.Encode do\n    │ ~~~~~~~~~~~~~~~~~~~~~~~~~\n    │\n    └─ lib/encode.ex:14: Jason.Encode (module)\n\n     error: undefined function when/2 (there is no such import)\n     │\n 294 │     {byte, char} when is_float(char)>\n     │                  ^\n     │\n     └─ lib/encode.ex:294:18: Jason.Encode (module)\n\n\n== Compilation error in file lib/encode.ex ==\n** (CompileError) lib/encode.ex: cannot compile module Jason.Encode (errors have been logged)\n    (elixir 1.19.5) src/elixir_fn.erl:21: anonymous fn/4 in :elixir_fn.expand/4\n    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3\n    (elixir 1.19.5) src/elixir_fn.erl:27: :elixir_fn.expand/4\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", {294, 18}, \"undefined function when/2 (there is no such import)\"}, {\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", 0, \"** (CompileError) lib/encode.ex: cannot compile module Jason.Encode (errors have been logged)\\n    (elixir 1.19.5) src/elixir_fn.erl:21: anonymous fn/4 in :elixir_fn.expand/4\\n    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3\\n    (elixir 1.19.5) src/elixir_fn.erl:27: :elixir_fn.expand/4\\n\"}]\nmut.recompile warnings: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", 1, \"redefining module Jason.EncodeError (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.EncodeError.beam)\"}, {\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", 14, \"redefining module Jason.Encode (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.Encode.beam)\"}]\n"
+          "statusReason": "    warning: redefining module Jason.EncodeError (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.EncodeError.beam)\n    │\n  1 │ defmodule Jason.EncodeError do\n    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    │\n    └─ lib/encode.ex:1: Jason.EncodeError (module)\n\n    warning: redefining module Jason.Encode (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.Encode.beam)\n    │\n 14 │ defmodule Jason.Encode do\n    │ ~~~~~~~~~~~~~~~~~~~~~~~~~\n    │\n    └─ lib/encode.ex:14: Jason.Encode (module)\n\n     error: undefined function when/2 (there is no such import)\n     │\n 294 │     {byte, char} when is_float(char)>\n     │                  ^\n     │\n     └─ lib/encode.ex:294:18: Jason.Encode (module)\n\n\n== Compilation error in file lib/encode.ex ==\n** (CompileError) lib/encode.ex: cannot compile module Jason.Encode (errors have been logged)\n    (elixir 1.19.5) src/elixir_fn.erl:21: anonymous fn/4 in :elixir_fn.expand/4\n    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3\n    (elixir 1.19.5) src/elixir_fn.erl:27: :elixir_fn.expand/4\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778400353-fEXRTw/3/lib/encode.ex\", {294, 18}, \"undefined function when/2 (there is no such import)\"}, {\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778400353-fEXRTw/3/lib/encode.ex\", 0, \"** (CompileError) lib/encode.ex: cannot compile module Jason.Encode (errors have been logged)\\n    (elixir 1.19.5) src/elixir_fn.erl:21: anonymous fn/4 in :elixir_fn.expand/4\\n    (stdlib 7.2) lists.erl:2673: :lists.mapfoldl_1/3\\n    (elixir 1.19.5) src/elixir_fn.erl:27: :elixir_fn.expand/4\\n\"}]\nmut.recompile warnings: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778400353-fEXRTw/3/lib/encode.ex\", 1, \"redefining module Jason.EncodeError (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.EncodeError.beam)\"}, {\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778400353-fEXRTw/3/lib/encode.ex\", 14, \"redefining module Jason.Encode (current version loaded from _build/mut_schema/lib/jason/ebin/Elixir.Jason.Encode.beam)\"}]\n"
         },
         {
           "coveredBy": [
@@ -6002,7 +6002,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 9,
+          "duration": 56,
           "id": "106fd0c74a74a37d05a59b647690c8f8",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -6030,7 +6030,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "1107aa416818dcbc2fcdc979aeedbbb8",
           "killedBy": [],
           "location": {
@@ -6057,7 +6057,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "120f304cab5f7f6790df2acbc030144e",
           "killedBy": [],
           "location": {
@@ -6084,7 +6084,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 583,
+          "duration": 1124,
           "id": "142d1ea263daac656e5b1b7e32393a47",
           "killedBy": [],
           "location": {
@@ -6110,7 +6110,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 111,
+          "duration": 624,
           "id": "1b42d24f4cfd2ced1ce889889ba6c183",
           "killedBy": [],
           "location": {
@@ -6136,10 +6136,10 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 514,
+          "duration": 710,
           "id": "1bbb07e24405d0194f22eda1182b46e5",
           "killedBy": [
-            "Jason.EncoderTest:pretty: true"
+            "Jason.PropertyTest:property atom-keyed objects roundtrip"
           ],
           "location": {
             "end": {
@@ -6164,7 +6164,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 110,
+          "duration": 382,
           "id": "1c586189370f08f8e62d5a46a7d206f1",
           "killedBy": [],
           "location": {
@@ -6190,7 +6190,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 573,
+          "duration": 1089,
           "id": "1d4c5eb7952261cbba4d9c35b8a05d9c",
           "killedBy": [],
           "location": {
@@ -6216,10 +6216,10 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 442,
+          "duration": 3385,
           "id": "1df0ed5c8e28538607d92d03983490fc",
           "killedBy": [
-            "Jason.EncoderTest:binaries"
+            "Jason.PropertyTest:property javascript escaping"
           ],
           "location": {
             "end": {
@@ -6244,7 +6244,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 97,
+          "duration": 613,
           "id": "1ed16a1a8f47a40c922b42243f9fe35f",
           "killedBy": [],
           "location": {
@@ -6270,7 +6270,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 555,
+          "duration": 688,
           "id": "2285e0754ec2ab87e15af2bdb45872b0",
           "killedBy": [],
           "location": {
@@ -6296,7 +6296,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 107,
+          "duration": 653,
           "id": "26dcb1e8aa7a34dfac9c2adf3288bcf8",
           "killedBy": [],
           "location": {
@@ -6322,7 +6322,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 17,
+          "duration": 75,
           "id": "275628c39a712da46c737f6c1a86fa7f",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -6350,7 +6350,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 25,
+          "duration": 148,
           "id": "2850c7dbfb1a635d7ed09693868d8db4",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -6405,7 +6405,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 125,
+          "duration": 379,
           "id": "3934456512bd3008dac66e3b1f15908e",
           "killedBy": [],
           "location": {
@@ -6431,7 +6431,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "3ac8f0953bd3d9406058f9d9223e316d",
           "killedBy": [],
           "location": {
@@ -6458,7 +6458,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 98,
+          "duration": 412,
           "id": "3b09e8300cec97234a113904b192b2c2",
           "killedBy": [],
           "location": {
@@ -6511,7 +6511,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 27,
+          "duration": 91,
           "id": "3bbc3991ee3ff324cbfe0f638658c944",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -6539,7 +6539,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 1551,
+          "duration": 720,
           "id": "3d89036efe03e3e27b5d741f9ed15c6b",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -6567,7 +6567,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "3e55b0a40efe36f84de8e2e9584c2673",
           "killedBy": [],
           "location": {
@@ -6594,7 +6594,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 124,
+          "duration": 416,
           "id": "3e63e372263f9e20622feeaa39d07bd0",
           "killedBy": [],
           "location": {
@@ -6620,7 +6620,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "3f7e5586a7eebe6e3e00af5814ff338b",
           "killedBy": [],
           "location": {
@@ -6647,7 +6647,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 74,
+          "duration": 247,
           "id": "401a517284dc2a28e0cd9c19af3f7722",
           "killedBy": [
             "Jason.PropertyTest:property javascript escaping"
@@ -6675,7 +6675,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 123,
+          "duration": 293,
           "id": "4295def21b5732fb6fe3403eb168f0dd",
           "killedBy": [],
           "location": {
@@ -6701,7 +6701,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 27,
+          "duration": 35,
           "id": "42a36a356c03332ca907146bde98710a",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -6729,7 +6729,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "43400d596615aba00a46d2982c7f8666",
           "killedBy": [],
           "location": {
@@ -6756,7 +6756,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 123,
+          "duration": 179,
           "id": "44b561144a09eb69ccafc364ec9e1fe2",
           "killedBy": [
             "Jason.PropertyTest:property html_safe escaping"
@@ -6784,7 +6784,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 104,
+          "duration": 211,
           "id": "45a0692131a5c6af328a2c69bab5524a",
           "killedBy": [],
           "location": {
@@ -6810,7 +6810,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 104,
+          "duration": 149,
           "id": "46075a7197b23a750fe24c5ae6c994b9",
           "killedBy": [],
           "location": {
@@ -6863,7 +6863,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 14,
+          "duration": 7,
           "id": "4ac3b9229d8be060f2a33d238be6e783",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -6891,7 +6891,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 2,
           "id": "50f0f2bdb8c354a23cde178b0c68cbc9",
           "killedBy": [],
           "location": {
@@ -6918,7 +6918,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "51df54dd8c2f6b38c46c8c997d75389d",
           "killedBy": [],
           "location": {
@@ -6945,7 +6945,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 93,
+          "duration": 168,
           "id": "522a8d0b61aca103e878c09c71038aa2",
           "killedBy": [
             "Jason.PropertyTest:property javascript escaping"
@@ -6973,7 +6973,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 12,
+          "duration": 20,
           "id": "52a3aa2919c5326eadf3e9a412e8c725",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -7001,10 +7001,10 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 478,
+          "duration": 2627,
           "id": "53664c95d02eaaa6cace2b20e385061e",
           "killedBy": [
-            "Jason.EncoderTest:binaries"
+            "Jason.PropertyTest:property html_safe escaping"
           ],
           "location": {
             "end": {
@@ -7029,7 +7029,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 115,
+          "duration": 237,
           "id": "55dd6347545661a5c8040c53d964d583",
           "killedBy": [],
           "location": {
@@ -7055,7 +7055,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 97,
+          "duration": 182,
           "id": "56ef84fb30ca33334e818ad92c090228",
           "killedBy": [],
           "location": {
@@ -7081,7 +7081,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 26,
+          "duration": 33,
           "id": "56f093f77285776686cb8d03e78c333b",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7109,7 +7109,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 25,
+          "duration": 28,
           "id": "570aed705b035d1526a03e84cbf75157",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7137,7 +7137,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 80,
+          "duration": 119,
           "id": "59c26c8fd16fb85fffc389997c4e5a14",
           "killedBy": [
             "Jason.PropertyTest:property javascript escaping"
@@ -7165,7 +7165,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 101,
+          "duration": 150,
           "id": "5bb73b95d127a243e44bfcb7e26542eb",
           "killedBy": [],
           "location": {
@@ -7299,7 +7299,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 467,
+          "duration": 767,
           "id": "622566546e5565a549f95c4a658ebc76",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -7327,7 +7327,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 11,
+          "duration": 10,
           "id": "63f46feac468b22b2067f280db756a9f",
           "killedBy": [
             "Jason.HelpersTest:json_map/2 produces same output as regular encoding"
@@ -7355,7 +7355,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 1,
+          "duration": 3,
           "id": "65555c44e5b8da47ee291dbcc0db03d5",
           "killedBy": [],
           "location": {
@@ -7382,7 +7382,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 110,
+          "duration": 184,
           "id": "658096329281befa4fe974a94dd0d70c",
           "killedBy": [],
           "location": {
@@ -7408,7 +7408,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 96,
+          "duration": 270,
           "id": "679cd610a1613ac4237173b38ef7b043",
           "killedBy": [],
           "location": {
@@ -7434,7 +7434,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 18,
+          "duration": 34,
           "id": "6815f7f702852b96230021b661136e80",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7462,7 +7462,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 4,
           "id": "6f156b58002d40459538446171509321",
           "killedBy": [],
           "location": {
@@ -7489,7 +7489,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 459,
+          "duration": 551,
           "id": "7272a0b32615982d90ccf63e8d9ef87e",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -7517,7 +7517,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 1477,
+          "duration": 568,
           "id": "75cb6c025ec13227f3e2996751a3f2a1",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7545,7 +7545,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 100,
+          "duration": 658,
           "id": "7ca487c3ad766594b571c3fe75a1e83d",
           "killedBy": [],
           "location": {
@@ -7571,7 +7571,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "7d1f12be966e511c41b93a9f73f8d12d",
           "killedBy": [],
           "location": {
@@ -7598,7 +7598,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 7,
           "id": "7d6db1625dcc200568d75175563f6c20",
           "killedBy": [],
           "location": {
@@ -7625,7 +7625,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 8,
           "id": "7db8d130c0a5992b48b8485f19b4ab17",
           "killedBy": [],
           "location": {
@@ -7652,7 +7652,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 15,
+          "duration": 31,
           "id": "7dc7c0d541c6a0a9a7b23f390374bfb2",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -7680,7 +7680,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 3,
           "id": "7df29e86d86f26d5071a61c650fe8eb7",
           "killedBy": [],
           "location": {
@@ -7707,7 +7707,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 26,
+          "duration": 62,
           "id": "7e05882457333ec47aab4461c3a1bb70",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7735,7 +7735,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 26,
+          "duration": 42,
           "id": "7e4a5c810444b553e8230a5327416bef",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7763,7 +7763,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 130,
+          "duration": 684,
           "id": "804c2332ec929576e4e8dc52121330e8",
           "killedBy": [],
           "location": {
@@ -7789,7 +7789,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 3,
           "id": "819f331edb9fa7d1e063f9fd9527db46",
           "killedBy": [],
           "location": {
@@ -7816,7 +7816,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 136,
+          "duration": 559,
           "id": "821a3ad7f056be22c01fb5e353a36137",
           "killedBy": [],
           "location": {
@@ -7842,7 +7842,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 52,
+          "duration": 153,
           "id": "82b7786cb1b766ed8b03391541daec14",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -7870,7 +7870,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 11,
+          "duration": 34,
           "id": "82f85091af619f14791b4591e92e1070",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -7898,7 +7898,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "83e073c2b3d1efe8687042a40e87d2b7",
           "killedBy": [],
           "location": {
@@ -7925,7 +7925,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 119,
+          "duration": 469,
           "id": "85437666e8d657603ede66f77000655b",
           "killedBy": [],
           "location": {
@@ -7978,7 +7978,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 26,
+          "duration": 89,
           "id": "8577a58f9627ff7c50039bab8ebcdab0",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8006,7 +8006,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 137,
+          "duration": 251,
           "id": "87df008005c5b45cf64e5aa401a96d2c",
           "killedBy": [],
           "location": {
@@ -8032,7 +8032,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 108,
+          "duration": 141,
           "id": "8a7d9f08938adc585961d485870b1c9f",
           "killedBy": [
             "Jason.PropertyTest:property html_safe escaping"
@@ -8060,7 +8060,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 29,
+          "duration": 25,
           "id": "8a7ecf1f185c326cf1c1bc12231231a7",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8088,7 +8088,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 493,
+          "duration": 631,
           "id": "8ab08b84554186df7935a89093300a5b",
           "killedBy": [
             "Jason.EncoderTest:EncodeError"
@@ -8116,7 +8116,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 29,
+          "duration": 35,
           "id": "8dc0803cfcb1e1e7905f91ce94a9dc2b",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8199,7 +8199,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 121,
+          "duration": 212,
           "id": "8e59a6f8a1690bb524f04c1e678594f8",
           "killedBy": [],
           "location": {
@@ -8225,7 +8225,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 96,
+          "duration": 225,
           "id": "91849a524fe360a9af3bfebafc47e04c",
           "killedBy": [],
           "location": {
@@ -8251,7 +8251,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 26,
+          "duration": 31,
           "id": "94159ef3fe476f6059073f555fcb0b55",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8279,7 +8279,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 470,
+          "duration": 885,
           "id": "943897bff3659cc1ee9ec426d1f0f42c",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -8307,7 +8307,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 477,
+          "duration": 2798,
           "id": "96231cb34b78ebfdba1a8f682ac5b599",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8335,7 +8335,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 29,
+          "duration": 35,
           "id": "97a0d3c8c7990b00a9b4681c0d886285",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8363,7 +8363,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 11,
+          "duration": 22,
           "id": "981378996737a68aae2d06c661f35cf5",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -8391,7 +8391,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 460,
+          "duration": 577,
           "id": "98f1de630291f3e4ee32577f7f503bf9",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8419,7 +8419,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 22,
+          "duration": 29,
           "id": "9ba24d2fb2d6eb4ad1abf85468472510",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -8447,7 +8447,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 117,
+          "duration": 205,
           "id": "9ca96091e8eebcf14ee53e806b2b5ceb",
           "killedBy": [],
           "location": {
@@ -8473,7 +8473,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 129,
+          "duration": 239,
           "id": "a0c621a15931cde0a87ec31b469786b0",
           "killedBy": [],
           "location": {
@@ -8499,7 +8499,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 218,
+          "duration": 834,
           "id": "a11715ce8db4d0f007fafd390201b142",
           "killedBy": [],
           "location": {
@@ -8514,8 +8514,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_list(value)",
-          "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/encode.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/encode.ex:101:59:\n     error: unexpected token: )\n     │\n  14 │ defmodule Jason.Encode do\n     │                        └ unclosed delimiter\n ...\n 101 │   def value(value, escape, encode_map) when is_list(value)) do\n     │                                                           └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/encode.ex:101:59\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", {14, 24}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/encode.ex:101:59:\\n     error: unexpected token: )\\n     │\\n  14 │ defmodule Jason.Encode do\\n     │                        └ unclosed delimiter\\n ...\\n 101 │   def value(value, escape, encode_map) when is_list(value)) do\\n     │                                                           └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/encode.ex:101:59\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -8526,7 +8525,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 456,
+          "duration": 639,
           "id": "a17773a00e5a410defd967c66f51c83f",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8554,7 +8553,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 114,
+          "duration": 194,
           "id": "a182ee18fcf1b5a9902c0e8b8f1962dc",
           "killedBy": [],
           "location": {
@@ -8580,7 +8579,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 26,
+          "duration": 39,
           "id": "a1c9bc1b0e2dc6907bb1a7573e68f1ce",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8608,7 +8607,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 10,
+          "duration": 15,
           "id": "a2052c1ab5c36cc52369ccdb6c473b7f",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -8636,7 +8635,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 131,
+          "duration": 196,
           "id": "a38e1ccdeefda7c2bfeb76cbeb91520c",
           "killedBy": [],
           "location": {
@@ -8662,7 +8661,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 104,
+          "duration": 185,
           "id": "a417a29ea7314dd64b8a7413001bf170",
           "killedBy": [],
           "location": {
@@ -8688,7 +8687,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 108,
+          "duration": 195,
           "id": "a4a0bb1ab73c88cf8761cff5ac1e9122",
           "killedBy": [],
           "location": {
@@ -8714,7 +8713,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 24,
+          "duration": 30,
           "id": "a56c253de765e3cc0a34c2cfe132cb20",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -8742,7 +8741,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 494,
+          "duration": 659,
           "id": "a631b4598262768a9c77bc34b4d8f7ae",
           "killedBy": [
             "Jason.EncoderTest:using keyword list encoding"
@@ -8770,7 +8769,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 118,
+          "duration": 197,
           "id": "a7b5b66be1940f2aad3f520085df6a29",
           "killedBy": [],
           "location": {
@@ -8796,7 +8795,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 28,
+          "duration": 46,
           "id": "a9d8b5af764450c631973376a71bce1d",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -8824,7 +8823,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 120,
+          "duration": 154,
           "id": "b1046f55401cc18a1ade55ec1340f9f3",
           "killedBy": [
             "Jason.PropertyTest:property html_safe escaping"
@@ -8852,7 +8851,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 137,
+          "duration": 142,
           "id": "b1196dc25b93aa4c8c4d8d37bba35efa",
           "killedBy": [
             "Jason.PropertyTest:property html_safe escaping"
@@ -8880,7 +8879,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 98,
+          "duration": 103,
           "id": "b31ad7bdc8adf024a7666568b1ef7592",
           "killedBy": [
             "Jason.PropertyTest:property javascript escaping"
@@ -8908,7 +8907,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 121,
+          "duration": 276,
           "id": "b50e636a72ffcfc74527946a0aa6de1a",
           "killedBy": [],
           "location": {
@@ -8934,7 +8933,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 98,
+          "duration": 455,
           "id": "b6ccb9d3fa3ce16e8f081dd3ce40ed18",
           "killedBy": [],
           "location": {
@@ -8960,7 +8959,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 1,
           "id": "b89949e28155f72bf16407f93afd4f20",
           "killedBy": [],
           "location": {
@@ -8987,7 +8986,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 25,
+          "duration": 73,
           "id": "b8e62f7f14808d28749dc7baed9bbe51",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -9015,7 +9014,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 6,
+          "duration": 17,
           "id": "baf8d38a0c1232c0ee386d7dfd38d3f1",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -9043,7 +9042,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "bce45378d1f936c54565dc8a8514b46c",
           "killedBy": [],
           "location": {
@@ -9070,7 +9069,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 10,
+          "duration": 34,
           "id": "be61ffcdaba907978440104436a4e667",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -9098,7 +9097,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "c13f3af184a791b53b56f0a6117a6940",
           "killedBy": [],
           "location": {
@@ -9125,7 +9124,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 133,
+          "duration": 868,
           "id": "c1941d35dee43552507d653b5691619f",
           "killedBy": [],
           "location": {
@@ -9151,10 +9150,10 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 476,
+          "duration": 602,
           "id": "c263dcebf344d6db650a7580f079660e",
           "killedBy": [
-            "Jason.EncoderTest:pretty: true"
+            "Jason.PropertyTest:property atom-keyed objects roundtrip"
           ],
           "location": {
             "end": {
@@ -9206,7 +9205,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "c663ac89cb4e60f27e5dbc0ffa8dfe65",
           "killedBy": [],
           "location": {
@@ -9233,7 +9232,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 76,
+          "duration": 310,
           "id": "c7aba66acaf5c3541bed4ad7988ff7fa",
           "killedBy": [
             "Jason.PropertyTest:property javascript escaping"
@@ -9261,7 +9260,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 108,
+          "duration": 461,
           "id": "c7b55a3ab70c4a064782d5ad71b0df7f",
           "killedBy": [
             "Jason.PropertyTest:property html_safe escaping"
@@ -9289,7 +9288,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 27,
+          "duration": 144,
           "id": "c9712bf73ebeff2a7f324cd4aa4b4b3b",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -9317,9 +9316,11 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 224,
+          "duration": 860,
           "id": "c9e5825070638d32a41ad7b1688d3db3",
-          "killedBy": [],
+          "killedBy": [
+            "Jason.EncoderTest:using keyword list encoding"
+          ],
           "location": {
             "end": {
               "column": 61,
@@ -9332,8 +9333,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(list)",
-          "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/encode.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/encode.ex:174:62:\n     error: unexpected token: )\n     │\n  14 │ defmodule Jason.Encode do\n     │                        └ unclosed delimiter\n ...\n 174 │   def keyword(list, {escape, encode_map}) when is_tuple(list)) do\n     │                                                              └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/encode.ex:174:62\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", {14, 24}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/encode.ex:174:62:\\n     error: unexpected token: )\\n     │\\n  14 │ defmodule Jason.Encode do\\n     │                        └ unclosed delimiter\\n ...\\n 174 │   def keyword(list, {escape, encode_map}) when is_tuple(list)) do\\n     │                                                              └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/encode.ex:174:62\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -9344,7 +9344,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 26,
+          "duration": 155,
           "id": "ca44dce0941b20c290fd4d289b678f26",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -9372,7 +9372,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 27,
+          "duration": 210,
           "id": "caed94067e7752de1fde4e2586609fe9",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -9400,7 +9400,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 584,
+          "duration": 874,
           "id": "cb5e9c6d559a160afae85ac0c5531cb6",
           "killedBy": [],
           "location": {
@@ -9426,7 +9426,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 99,
+          "duration": 772,
           "id": "cd042c50d8c40785541447ac7d01aef8",
           "killedBy": [],
           "location": {
@@ -9452,7 +9452,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 481,
+          "duration": 3332,
           "id": "d3ddbc7a72a5dc9377e659cff075a6ce",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -9480,7 +9480,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 125,
+          "duration": 197,
           "id": "d62dec136c49b8f33b0cf3acc269e94b",
           "killedBy": [
             "Jason.PropertyTest:property html_safe escaping"
@@ -9508,7 +9508,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 245,
+          "duration": 1331,
           "id": "d75ee26874fe82f07a760b81d7d9467f",
           "killedBy": [],
           "location": {
@@ -9523,8 +9523,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_number(value)",
-          "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/encode.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/encode.ex:89:63:\n    error: unexpected token: )\n    │\n 14 │ defmodule Jason.Encode do\n    │                        └ unclosed delimiter\n ...\n 89 │   def value(value, _escape, _encode_map) when is_number(value)) do\n    │                                                               └ mismatched closing delimiter (expected \"end\")\n    │\n    └─ lib/encode.ex:89:63\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394381-hiQwzQ/3/lib/encode.ex\", {14, 24}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/encode.ex:89:63:\\n    error: unexpected token: )\\n    │\\n 14 │ defmodule Jason.Encode do\\n    │                        └ unclosed delimiter\\n ...\\n 89 │   def value(value, _escape, _encode_map) when is_number(value)) do\\n    │                                                               └ mismatched closing delimiter (expected \\\"end\\\")\\n    │\\n    └─ lib/encode.ex:89:63\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -9535,7 +9534,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 133,
+          "duration": 260,
           "id": "d7908ba6fbedd5246764fedcea5b7272",
           "killedBy": [],
           "location": {
@@ -9588,10 +9587,10 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 1438,
+          "duration": 471,
           "id": "d8e2750345609f49673c13b76e6d64c7",
           "killedBy": [
-            "Jason.EncoderTest:binaries"
+            "Jason.PropertyTest:property unicode escaping"
           ],
           "location": {
             "end": {
@@ -9616,7 +9615,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 10,
+          "duration": 15,
           "id": "de5b112ea211ef774cca1d666beefce1",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -9644,7 +9643,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "e13ee8ec60762e5bd4ffe6a87eedb4d3",
           "killedBy": [],
           "location": {
@@ -9671,7 +9670,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 470,
+          "duration": 607,
           "id": "e251518117fd9cb3f1efedb241b978be",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -9699,7 +9698,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 447,
+          "duration": 604,
           "id": "e2ffb597cd27ffba0189624deb7d1634",
           "killedBy": [
             "Jason.HelpersTest:json_map/2 produces same output as regular encoding"
@@ -9727,7 +9726,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard === with !==",
-          "duration": 456,
+          "duration": 5425,
           "id": "e9416c3c02870a446d860ae850a8b920",
           "killedBy": [
             "Jason.HelpersTest:json_map/2 produces same output as regular encoding"
@@ -9755,7 +9754,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 1,
           "id": "e976dcb87a80f9d3bc76f57487a30379",
           "killedBy": [],
           "location": {
@@ -9782,7 +9781,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 154,
+          "duration": 298,
           "id": "e9e0dbefdf91a307bfd1ccf68b19bddd",
           "killedBy": [],
           "location": {
@@ -9808,7 +9807,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with <",
-          "duration": 0,
+          "duration": 4,
           "id": "ec9ff4b41ea08749b8d42c120a9e1b6a",
           "killedBy": [],
           "location": {
@@ -9835,7 +9834,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 110,
+          "duration": 385,
           "id": "f0ce7fb958c30b71e9b863726896488f",
           "killedBy": [],
           "location": {
@@ -9861,7 +9860,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 84,
+          "duration": 184,
           "id": "f14bcd7ae5972fb3cf13c9d6f2de945c",
           "killedBy": [
             "Jason.PropertyTest:property javascript escaping"
@@ -9889,7 +9888,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 27,
+          "duration": 85,
           "id": "f3bbd6cad67e938b0d8b1d5cc7e5eaa3",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -9917,7 +9916,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 6,
           "id": "f46e390e4abb93a0f3e491dafdfe471c",
           "killedBy": [],
           "location": {
@@ -9944,7 +9943,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 10,
+          "duration": 30,
           "id": "f5d70f2a7a6cb075eda582c2af344ab2",
           "killedBy": [
             "Jason.PropertyTest:property string roundtrip"
@@ -9972,7 +9971,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 121,
+          "duration": 625,
           "id": "f5e0033de0d50dd38270c90a95e62064",
           "killedBy": [],
           "location": {
@@ -9998,7 +9997,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 116,
+          "duration": 738,
           "id": "f67d3a0b890170761eb8ea0268c6eba6",
           "killedBy": [],
           "location": {
@@ -10052,7 +10051,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard <= with >",
-          "duration": 0,
+          "duration": 4,
           "id": "f8a180dcacedaa4eea30b9ab4114a756",
           "killedBy": [],
           "location": {
@@ -10079,7 +10078,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 113,
+          "duration": 623,
           "id": "f97c2e9e0c7eb604e8e27c5a00672c2f",
           "killedBy": [],
           "location": {
@@ -10105,7 +10104,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 14,
+          "duration": 89,
           "id": "fab1f8384810771b0e4132b7801b40ee",
           "killedBy": [
             "Jason.PropertyTest:property unicode escaping"
@@ -10133,7 +10132,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 26,
+          "duration": 30,
           "id": "fe0abe8d5b769c3f2b79eed77b5086c9",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -10161,7 +10160,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 11,
+          "duration": 59,
           "id": "fea8aa67d16fc3d314328aa1bb797f0b",
           "killedBy": [
             "Jason.EncoderTest:binaries"
@@ -10196,7 +10195,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 9,
+          "duration": 28,
           "id": "0b29e8971bb26969fcea6641c0d390cf",
           "killedBy": [
             "Jason.FormatterTest:simple-list |> minimize"
@@ -10225,7 +10224,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 19,
+          "duration": 57,
           "id": "1039a55282b25db6adc7b2be8aebef47",
           "killedBy": [
             "Jason.FormatterTest:nested-maps |> pretty_print |> pretty_print"
@@ -10254,7 +10253,7 @@
             "test/property_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 133,
+          "duration": 765,
           "id": "1396f5af37f5014e732b382e813b59e9",
           "killedBy": [],
           "location": {
@@ -10281,7 +10280,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 14,
+          "duration": 55,
           "id": "22b62cae91d99aa39f456aff9a5db973",
           "killedBy": [
             "Jason.FormatterTest:doctest Jason.Formatter.pretty_print/2 (1)"
@@ -10310,7 +10309,7 @@
             "test/property_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 13,
+          "duration": 14,
           "id": "314ef221e787062859615d99a6d8b3f9",
           "killedBy": [
             "Jason.FormatterTest:empty-list |> pretty_print |> minimize |> pretty_print"
@@ -10339,7 +10338,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 10,
+          "duration": 23,
           "id": "3f3c8f4bf0a7ecfa366f5c98d8ff74c6",
           "killedBy": [
             "Jason.FormatterTest:multiple-objects |> pretty_print |> pretty_print"
@@ -10368,7 +10367,7 @@
             "test/property_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 9,
+          "duration": 13,
           "id": "442e774d04639d54e29eb706abaa4fcc",
           "killedBy": [
             "Jason.FormatterTest:multiple-objects |> pretty_print |> pretty_print"
@@ -10397,7 +10396,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 6,
+          "duration": 11,
           "id": "4d4306130daae71165338b13881f8b33",
           "killedBy": [
             "Jason.FormatterTest:simple-list |> minimize"
@@ -10426,7 +10425,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 131,
+          "duration": 921,
           "id": "51782320c1301bd64d8e8eb73569a156",
           "killedBy": [],
           "location": {
@@ -10453,7 +10452,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 15,
+          "duration": 11,
           "id": "550cd72743943b530e438b2f92e387ed",
           "killedBy": [
             "Jason.FormatterTest:doctest Jason.Formatter.pretty_print/2 (1)"
@@ -10482,7 +10481,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 44,
+          "duration": 72,
           "id": "5e9da79e2c45f05a9dc5d490f834de44",
           "killedBy": [
             "Jason.FormatterTest:pretty_print iolist"
@@ -10511,7 +10510,7 @@
             "test/property_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 6,
+          "duration": 23,
           "id": "616b19cbc7af424a716e404cfa63d39b",
           "killedBy": [
             "Jason.FormatterTest:pretty_print iolist"
@@ -10540,7 +10539,7 @@
             "test/property_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 15,
+          "duration": 36,
           "id": "693605278d581c1e9bcb3b62beb4b840",
           "killedBy": [
             "Jason.FormatterTest:nested-maps |> pretty_print |> pretty_print"
@@ -10569,7 +10568,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 6,
+          "duration": 10,
           "id": "6aed20189844f1a1aa0c2ed7ec7a631b",
           "killedBy": [
             "Jason.FormatterTest:doctest Jason.Formatter.pretty_print/2 (1)"
@@ -10598,7 +10597,7 @@
             "test/property_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 19,
+          "duration": 31,
           "id": "9168e175093600949f5f8baa9e28f4dd",
           "killedBy": [
             "Jason.FormatterTest:doctest Jason.Formatter.pretty_print/2 (1)"
@@ -10627,7 +10626,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 5,
+          "duration": 11,
           "id": "a5bcfb624cf2ad7f8f5a6f270084445f",
           "killedBy": [
             "Jason.FormatterTest:doctest Jason.Formatter.pretty_print/2 (1)"
@@ -10656,7 +10655,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 41,
+          "duration": 98,
           "id": "b2aeb7cc7bc81213a5081cf734b4a1e8",
           "killedBy": [
             "Jason.FormatterTest:pretty_print iolist"
@@ -10685,7 +10684,7 @@
             "test/property_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 8,
+          "duration": 23,
           "id": "c10430a624aa34e74b18fc1c096369de",
           "killedBy": [
             "Jason.FormatterTest:simple-list |> minimize"
@@ -10714,7 +10713,7 @@
             "test/property_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 10,
+          "duration": 64,
           "id": "ca15437ec018abc992916941b316b6a6",
           "killedBy": [
             "Jason.FormatterTest:multiple-objects |> pretty_print |> pretty_print"
@@ -10743,7 +10742,7 @@
             "test/property_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 11,
+          "duration": 25,
           "id": "e6532ac3f55f37cf80c77c96ca9e3f8f",
           "killedBy": [
             "Jason.FormatterTest:pretty_print iolist"
@@ -10772,7 +10771,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 131,
+          "duration": 744,
           "id": "eec477041902040455e2de959195c757",
           "killedBy": [],
           "location": {
@@ -10804,7 +10803,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 93,
+          "duration": 659,
           "id": "a687be4fc09a3302054752d7a9f36389",
           "killedBy": [],
           "location": {
@@ -10837,7 +10836,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard !== with ===",
-          "duration": 40,
+          "duration": 79,
           "id": "c6d591563dd503a0688fb03e7d68ed1d",
           "killedBy": [
             "Jason.EncoderTest:pretty: false"
@@ -10872,7 +10871,7 @@
             "test/property_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 42,
+          "duration": 68,
           "id": "b1dc0cd3ec0bf0c013c493bc3ba211cb",
           "killedBy": [
             "Jason.DecodeTest:decoding objects preserving order"
@@ -11301,7 +11300,7 @@
     },
     "metrics": {
       "fallback_count": 92,
-      "fallback_time_ms": 20469,
+      "fallback_time_ms": 44353,
       "fanout": {
         "016e69e55ebcce6fd9ca89a92345c91f": 5,
         "019a70f5627941164ec9d4e0432a3ca4": 5,
@@ -12110,55 +12109,56 @@
     },
     "persistent": {
       "app_startup_ms": {
-        "median": 15.4,
+        "median": 65.3,
         "total_apps": 44
       },
       "boot_ms": {
-        "max": 891,
-        "median": 884.0,
-        "p95": 891
+        "max": 3723,
+        "median": 2800.5,
+        "p95": 3723
       },
       "crash_count": 0,
       "filter_lookup_ms": 0.2,
       "filter_miss_count": 0,
       "memory": {
-        "peak_processes_mb": 25.4,
-        "peak_total_mb": 74.5
+        "peak_processes_mb": 19.0,
+        "peak_total_mb": 67.7
       },
-      "mix_fallback_count": 8,
+      "mix_fallback_count": 7,
       "mutant_run_ms": {
         "count": 304,
-        "median": 17.7,
-        "p95": 131.3
+        "median": 39.9,
+        "p95": 658.1
       },
       "reset_ms": {
         "application_env": 0.0,
-        "ets": 0.2,
+        "ets": 0.5,
         "on_exit": 0.0,
         "persistent_term": 0.0,
         "processes": 0.0
       },
       "restart_count": 0,
       "test_load_ms": {
-        "median": 671.7,
+        "median": 1344.1,
         "total_files": 40
       },
       "worker_count": 4
     },
     "phase_timings": {
-      "baseline_tests_ms": 669,
+      "baseline_tests_ms": 993,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 11913,
-      "oracle_build_ms": 4501,
-      "plan_generation_ms": 37,
-      "report_writing_ms": 29,
-      "schema_build_ms": 4977,
-      "schema_workers_ms": 5135,
-      "total_ms": 31472
+      "fallback_workers_ms": 74020,
+      "oracle_build_ms": 16051,
+      "plan_generation_ms": 56,
+      "report_writing_ms": 35,
+      "schema_build_ms": 19103,
+      "schema_workers_ms": 15636,
+      "total_ms": 137953
     },
     "recompile_categories": {
-      "compile_error": 5,
+      "compile_error": 1,
       "dep_path_error": 0,
+      "parse_error": 1,
       "unknown": 0
     },
     "selection": {

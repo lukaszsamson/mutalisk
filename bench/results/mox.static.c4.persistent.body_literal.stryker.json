@@ -9,10 +9,10 @@
             "test/cluster_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 56,
+          "duration": 68,
           "id": "028140767d66376ef79cd91e4b6e58e1",
           "killedBy": [
-            "MoxTest:defmock/2 defines a mock function for all callbacks by default"
+            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
           ],
           "location": {
             "end": {
@@ -34,7 +34,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 296,
+          "duration": 267,
           "id": "0446c4affb4b80d8e459f1897d53c350",
           "killedBy": [],
           "location": {
@@ -50,7 +50,7 @@
           "mutatorName": "BooleanLiteral",
           "replacement": "true",
           "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/mox.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:404:3:\n     error: unexpected reserved word: end\n     │\n 394 │     moduledoc = Keyword.get(options, :moduledoc, true\n     │                            └ unclosed delimiter\n ...\n 404 │   end\n     │   └ mismatched closing delimiter (expected \")\")\n     │\n     └─ lib/mox.ex:404:3\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394199-ZGP90w/1/lib/mox.ex\", {394, 28}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:404:3:\\n     error: unexpected reserved word: end\\n     │\\n 394 │     moduledoc = Keyword.get(options, :moduledoc, true\\n     │                            └ unclosed delimiter\\n ...\\n 404 │   end\\n     │   └ mismatched closing delimiter (expected \\\")\\\")\\n     │\\n     └─ lib/mox.ex:404:3\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "statusReason": "\n== Compilation error in file lib/mox.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:404:3:\n     error: unexpected reserved word: end\n     │\n 394 │     moduledoc = Keyword.get(options, :moduledoc, true\n     │                            └ unclosed delimiter\n ...\n 404 │   end\n     │   └ mismatched closing delimiter (expected \")\")\n     │\n     └─ lib/mox.ex:404:3\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778401561-PICFMA/1/lib/mox.ex\", {394, 28}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:404:3:\\n     error: unexpected reserved word: end\\n     │\\n 394 │     moduledoc = Keyword.get(options, :moduledoc, true\\n     │                            └ unclosed delimiter\\n ...\\n 404 │   end\\n     │   └ mismatched closing delimiter (expected \\\")\\\")\\n     │\\n     └─ lib/mox.ex:404:3\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -58,10 +58,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 515,
+          "duration": 504,
           "id": "11cbce8a9c5a77584d65184d54e399f6",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
           ],
           "location": {
             "end": {
@@ -83,10 +83,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1223,
+          "duration": 1175,
           "id": "1360d751f30091b830065bc72eda812e",
           "killedBy": [
-            "MoxTest:defmock/2 accepts a list of behaviours"
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
           ],
           "location": {
             "end": {
@@ -108,10 +108,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 67,
+          "duration": 43,
           "id": "15083cc3497dac0faf7bdf7c8f8ba9d9",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -133,10 +133,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 128,
+          "duration": 131,
           "id": "1f4713614a50fd28713b1259d99322c6",
           "killedBy": [
-            "MoxTest:allow/3 raises if you try to allow already allowed process"
+            "MoxTest:allow/3 raises if you try to allow itself"
           ],
           "location": {
             "end": {
@@ -158,10 +158,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 148,
+          "duration": 142,
           "id": "268327b5d0475b6833182dcf18e60270",
           "killedBy": [
-            "MoxTest:stub_with/2 can stub multiple behaviours from a single module"
+            "MoxTest:stub_with/2 skips undefined functions which are optional callbacks"
           ],
           "location": {
             "end": {
@@ -183,10 +183,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 42,
+          "duration": 33,
           "id": "290aec500216e46180841bd0eab3333b",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -208,10 +208,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 30,
+          "duration": 46,
           "id": "320623ef37a1aa89c241068e3e778b46",
           "killedBy": [
-            "MoxTest:stub/3 a stub declared after an expect is invoked after all expectations are fulfilled"
+            "MoxTest:verify_on_exit!/0 verifies all mocks for the current process on exit with previous verification in private mode"
           ],
           "location": {
             "end": {
@@ -233,10 +233,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 136,
+          "duration": 128,
           "id": "3f8721021c575dcd6fbd7da33a639feb",
           "killedBy": [
-            "MoxTest:deny/3 raises if you try to add expectations from non global process"
+            "MoxTest:deny/3 raises if a non-mock is given"
           ],
           "location": {
             "end": {
@@ -258,7 +258,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 268,
+          "duration": 242,
           "id": "46ea55007958d0e880d0a1e14c7b23e6",
           "killedBy": [],
           "location": {
@@ -274,7 +274,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(skip_list)",
           "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/mox.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:468:41:\n     error: unexpected token: )\n     │\n 461 │     case skip_optional_callbacks do\n     │                                  └ unclosed delimiter\n ...\n 468 │       skip_list when is_tuple(skip_list)) ->\n     │                                         └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/mox.ex:468:41\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394199-ZGP90w/2/lib/mox.ex\", {461, 34}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:468:41:\\n     error: unexpected token: )\\n     │\\n 461 │     case skip_optional_callbacks do\\n     │                                  └ unclosed delimiter\\n ...\\n 468 │       skip_list when is_tuple(skip_list)) ->\\n     │                                         └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/mox.ex:468:41\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "statusReason": "\n== Compilation error in file lib/mox.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:468:41:\n     error: unexpected token: )\n     │\n 461 │     case skip_optional_callbacks do\n     │                                  └ unclosed delimiter\n ...\n 468 │       skip_list when is_tuple(skip_list)) ->\n     │                                         └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/mox.ex:468:41\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778401561-PICFMA/2/lib/mox.ex\", {461, 34}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:468:41:\\n     error: unexpected token: )\\n     │\\n 461 │     case skip_optional_callbacks do\\n     │                                  └ unclosed delimiter\\n ...\\n 468 │       skip_list when is_tuple(skip_list)) ->\\n     │                                         └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/mox.ex:468:41\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -282,10 +282,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 135,
+          "duration": 132,
           "id": "495fca562da8c896a8d6f2d15bc364d3",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in global mode"
+            "MoxTest:expect/4 works with multiple behaviours"
           ],
           "location": {
             "end": {
@@ -307,10 +307,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 208,
+          "duration": 192,
           "id": "4e5f8845fceb6af841549521a8bb0583",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
           ],
           "location": {
             "end": {
@@ -332,10 +332,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 12,
+          "duration": 10,
           "id": "4f1b623323df6c0028e2210959100216",
           "killedBy": [
-            "MoxTest:expect/4 raises if all expectations are consumed"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -357,10 +357,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 151,
+          "duration": 133,
           "id": "55261fb0cf661bded7e162cdaa191aaf",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in global mode"
+            "MoxTest:expect/4 works with multiple behaviours"
           ],
           "location": {
             "end": {
@@ -382,10 +382,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace boolean literal true with false",
-          "duration": 1295,
+          "duration": 1171,
           "id": "6c4dec116ac7e6a6b0337373e7ece652",
           "killedBy": [
-            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks is not an optional callback"
           ],
           "location": {
             "end": {
@@ -407,10 +407,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 197,
+          "duration": 185,
           "id": "6eae7c60cdf225d83f533c9729aab278",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
           ],
           "location": {
             "end": {
@@ -432,7 +432,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 308,
+          "duration": 235,
           "id": "7e5af2097fb9705e66d2e5671ef1df0b",
           "killedBy": [],
           "location": {
@@ -448,7 +448,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(options)",
           "status": "CompileError",
-          "statusReason": "\n== Compilation error in file lib/mox.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:386:70:\n     error: unexpected token: )\n     │\n   1 │ defmodule Mox do\n     │               └ unclosed delimiter\n ...\n 386 │   def defmock(name, options) when is_atom(name) and is_tuple(options)) do\n     │                                                                      └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/mox.ex:386:70\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778394199-ZGP90w/2/lib/mox.ex\", {1, 15}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:386:70:\\n     error: unexpected token: )\\n     │\\n   1 │ defmodule Mox do\\n     │               └ unclosed delimiter\\n ...\\n 386 │   def defmock(name, options) when is_atom(name) and is_tuple(options)) do\\n     │                                                                      └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/mox.ex:386:70\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
+          "statusReason": "\n== Compilation error in file lib/mox.ex ==\n** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:386:70:\n     error: unexpected token: )\n     │\n   1 │ defmodule Mox do\n     │               └ unclosed delimiter\n ...\n 386 │   def defmock(name, options) when is_atom(name) and is_tuple(options)) do\n     │                                                                      └ mismatched closing delimiter (expected \"end\")\n     │\n     └─ lib/mox.ex:386:70\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\nwarning: you must pass return_diagnostics: true when invoking Kernel.ParallelCompiler functions\n  (elixir 1.19.5) lib/kernel/parallel_compiler.ex:324: Kernel.ParallelCompiler.spawn_workers/3\n  (elixir 1.19.5) src/elixir.erl:371: :elixir.eval_external_handler/3\n  (stdlib 7.2) erl_eval.erl:924: :erl_eval.do_apply/7\n  (stdlib 7.2) erl_eval.erl:484: :erl_eval.expr/6\n  (elixir 1.19.5) src/elixir.erl:349: :elixir.eval_forms/4\n  (elixir 1.19.5) lib/module/parallel_checker.ex:155: Module.ParallelChecker.verify/1\n\nmut.recompile errors: [{\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778401561-PICFMA/2/lib/mox.ex\", {1, 15}, \"** (MismatchedDelimiterError) mismatched delimiter found on lib/mox.ex:386:70:\\n     error: unexpected token: )\\n     │\\n   1 │ defmodule Mox do\\n     │               └ unclosed delimiter\\n ...\\n 386 │   def defmock(name, options) when is_atom(name) and is_tuple(options)) do\\n     │                                                                      └ mismatched closing delimiter (expected \\\"end\\\")\\n     │\\n     └─ lib/mox.ex:386:70\\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:529: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\\n\"}]\nmut.recompile warnings: []\n"
         },
         {
           "coveredBy": [
@@ -456,10 +456,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 146,
+          "duration": 125,
           "id": "82b8f0a48ca47d50ce47a1171ae82bb8",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -481,7 +481,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 68,
+          "duration": 13,
           "id": "97945a919ec7ba25968a69b386134a2a",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -506,10 +506,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 133,
+          "duration": 151,
           "id": "992e8d3228ca2ac82afd68b93f74813d",
           "killedBy": [
-            "MoxTest:deny/3 allows asserting that function is not called"
+            "MoxTest:deny/3 raises if function is not in behaviour"
           ],
           "location": {
             "end": {
@@ -531,10 +531,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1213,
+          "duration": 1163,
           "id": "9a5ce6dffe3248a4ce8a6aef82791271",
           "killedBy": [
-            "MoxTest:defmock/2 raises for unknown module"
+            "MoxTest:defmock/2 raises if :skip_optional_callbacks is not a list or boolean"
           ],
           "location": {
             "end": {
@@ -556,10 +556,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace attribute literal 30000 with 30001",
-          "duration": 486,
+          "duration": 481,
           "id": "a1779da38b942527fbc82059727d9104",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
           ],
           "location": {
             "end": {
@@ -581,7 +581,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 220,
+          "duration": 137,
           "id": "a1c283b3932e4d08cfa921c017a83c37",
           "killedBy": [
             "MoxTest:deny/3 allows asserting that function is not called"
@@ -606,10 +606,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 18,
+          "duration": 14,
           "id": "a6a75841bf3bc69c4d7e88a4864d0eb8",
           "killedBy": [
-            "MoxTest:stub/3 a stub declared after an expect is invoked after all expectations are fulfilled"
+            "MoxTest:expect/4 raises if all expectations are consumed, even when a stub is defined"
           ],
           "location": {
             "end": {
@@ -631,10 +631,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 137,
+          "duration": 141,
           "id": "ad7284d7bc1afba8484969e0d0a6b08b",
           "killedBy": [
-            "MoxTest:allow/3 allowances are transitive"
+            "MoxTest:expect/4 expectations are reclaimed if the global process dies"
           ],
           "location": {
             "end": {
@@ -656,10 +656,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 138,
+          "duration": 127,
           "id": "ad72dd8113716102a4c94cd15269b4e7",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in global mode"
+            "MoxTest:expect/4 expectations are reclaimed if the global process dies"
           ],
           "location": {
             "end": {
@@ -681,7 +681,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 147,
+          "duration": 157,
           "id": "adbdcf5b3c696f27c6c87c8500245558",
           "killedBy": [
             "MoxTest:deny/3 raises if function is not in behaviour"
@@ -706,11 +706,9 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1329,
+          "duration": 1545,
           "id": "aeebda250921ffbed8adadc32b1973c0",
-          "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 53,
@@ -723,7 +721,7 @@
           },
           "mutatorName": "IntegerLiteral",
           "replacement": "0",
-          "status": "Killed"
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -731,10 +729,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1181,
+          "duration": 130,
           "id": "b8131bb577d5766b7849db765890036c",
           "killedBy": [
-            "MoxTest:stub_with/2 Leaves behaviours not implemented by the module un-stubbed"
+            "MoxTest:stub_with/2 skips undefined functions which are optional callbacks"
           ],
           "location": {
             "end": {
@@ -756,10 +754,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 9,
+          "duration": 29,
           "id": "ba7149b1f4a576b7802756c48914fe54",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
           ],
           "location": {
             "end": {
@@ -781,10 +779,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 432,
+          "duration": 380,
           "id": "bb2b60be0022f26594e3fbaaec18bb29",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
           ],
           "location": {
             "end": {
@@ -806,7 +804,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 31,
+          "duration": 13,
           "id": "bc967d1873e23926feb1951e4109c270",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -831,10 +829,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 183,
+          "duration": 143,
           "id": "c234b6c05d85dbf482fa4510b9e89841",
           "killedBy": [
-            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
+            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
           ],
           "location": {
             "end": {
@@ -856,10 +854,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 3,
+          "duration": 9,
           "id": "c26b511de9ee6bd613c93a59944e65fa",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -881,10 +879,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 142,
+          "duration": 121,
           "id": "c32c7305b8288615f9c79fa781a07afd",
           "killedBy": [
-            "MoxTest:stub/3 a stub declared after an expect is invoked after all expectations are fulfilled"
+            "MoxTest:expect/4 works with multiple behaviours"
           ],
           "location": {
             "end": {
@@ -906,7 +904,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 191,
+          "duration": 164,
           "id": "c8d2a9fbbc096d0c9db39b1a43177fd8",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -931,7 +929,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1580,
+          "duration": 1539,
           "id": "cb455fd273de6b29b04faf6d15a77a84",
           "killedBy": [],
           "location": {
@@ -954,10 +952,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 140,
+          "duration": 1113,
           "id": "cc0be5e06ae4c703bee0f92e23841fb3",
           "killedBy": [
-            "MoxTest:allow/3 allows different processes to share mocks from parent process"
+            "MoxTest:stub/3 a stub declared after an expect is invoked after all expectations are fulfilled"
           ],
           "location": {
             "end": {
@@ -979,10 +977,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 142,
+          "duration": 125,
           "id": "cf53e63f854b2db908e8958ca8dcced7",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -1004,10 +1002,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 11,
+          "duration": 6,
           "id": "d3954c9c82add592f7ac86a43fb69267",
           "killedBy": [
-            "MoxTest:verify_on_exit!/0 raises if the mocks are not called"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -1029,10 +1027,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 129,
+          "duration": 127,
           "id": "d41639a74d48ae07454bdcccf0b25b1c",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -1054,10 +1052,10 @@
             "test/cluster_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 13,
+          "duration": 35,
           "id": "d90d5cb3b4649efde1bfdc9f836711af",
           "killedBy": [
-            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks is not an optional callback"
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
           ],
           "location": {
             "end": {
@@ -1079,7 +1077,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 544,
+          "duration": 436,
           "id": "da4d06faee12f73c7b5c701b0e52436c",
           "killedBy": [
             "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
@@ -1104,10 +1102,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 134,
+          "duration": 135,
           "id": "e156c949962d0aba8fb749e42186643d",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -1129,11 +1127,9 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 561,
+          "duration": 1418,
           "id": "e2f46bf1c1a6fcca3988c5be07a8efe0",
-          "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
-          ],
+          "killedBy": [],
           "location": {
             "end": {
               "column": 61,
@@ -1146,7 +1142,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_number(n)",
-          "status": "Killed"
+          "status": "Survived"
         },
         {
           "coveredBy": [
@@ -1154,10 +1150,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 175,
+          "duration": 145,
           "id": "e5a006e5aa26cff4a8353808556c8161",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+            "MoxTest:allow/3 allowances support locally registered processes"
           ],
           "location": {
             "end": {
@@ -1179,7 +1175,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 140,
+          "duration": 165,
           "id": "ea6d36dd69ca69882f4a98355533da35",
           "killedBy": [
             "MoxTest:deny/3 raises if function is not in behaviour"
@@ -1204,10 +1200,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 36,
+          "duration": 3,
           "id": "eab60343ebdd703bef08097ee2523ecb",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -1229,7 +1225,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 189,
+          "duration": 135,
           "id": "eb8900e88b5308032fd25c1bb57ada85",
           "killedBy": [
             "MoxTest:deny/3 allows asserting that function is not called"
@@ -1254,7 +1250,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 7,
+          "duration": 14,
           "id": "ed1ded3093bc0b87ac98d3c4801cc18a",
           "killedBy": [
             "MoxTest:allow/3 raises if you try to define expectations on allowed process"
@@ -1279,10 +1275,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace attribute literal 30000 with 0",
-          "duration": 136,
+          "duration": 140,
           "id": "f5d34ebe5bbf5b814ed2a59d6f618b97",
           "killedBy": [
-            "MoxTest:expect/4 is invoked n times by any process in private mode on Elixir 1.8"
+            "MoxTest:stub_with/2 can stub multiple behaviours from a single module"
           ],
           "location": {
             "end": {
@@ -1364,7 +1360,7 @@
     },
     "metrics": {
       "fallback_count": 38,
-      "fallback_time_ms": 14956,
+      "fallback_time_ms": 15080,
       "fanout": {
         "028140767d66376ef79cd91e4b6e58e1": 2,
         "0446c4affb4b80d8e459f1897d53c350": 2,
@@ -1483,55 +1479,56 @@
     },
     "persistent": {
       "app_startup_ms": {
-        "median": 29.4,
+        "median": 31.1,
         "total_apps": 56
       },
       "boot_ms": {
-        "max": 610,
-        "median": 568.0,
-        "p95": 610
+        "max": 574,
+        "median": 544.5,
+        "p95": 574
       },
-      "crash_count": 3,
+      "crash_count": 4,
       "filter_lookup_ms": 0.0,
       "filter_miss_count": 0,
       "memory": {
         "peak_processes_mb": 14.5,
-        "peak_total_mb": 61.1
+        "peak_total_mb": 60.9
       },
-      "mix_fallback_count": 9,
+      "mix_fallback_count": 10,
       "mutant_run_ms": {
         "count": 14,
-        "median": 22.5,
-        "p95": 66.4
+        "median": 12.7,
+        "p95": 65.8
       },
       "reset_ms": {
         "application_env": 0.0,
-        "ets": 0.1,
+        "ets": 0.2,
         "on_exit": 0.0,
         "persistent_term": 0.0,
         "processes": 0.0
       },
-      "restart_count": 3,
+      "restart_count": 4,
       "test_load_ms": {
-        "median": 338.2,
+        "median": 325.1,
         "total_files": 12
       },
       "worker_count": 4
     },
     "phase_timings": {
-      "baseline_tests_ms": 1091,
+      "baseline_tests_ms": 1058,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 7405,
-      "oracle_build_ms": 3759,
+      "fallback_workers_ms": 8087,
+      "oracle_build_ms": 3388,
       "plan_generation_ms": 12,
-      "report_writing_ms": 3,
-      "schema_build_ms": 4784,
-      "schema_workers_ms": 144,
-      "total_ms": 19994
+      "report_writing_ms": 2,
+      "schema_build_ms": 3388,
+      "schema_workers_ms": 137,
+      "total_ms": 18741
     },
     "recompile_categories": {
-      "compile_error": 3,
+      "compile_error": 0,
       "dep_path_error": 0,
+      "parse_error": 3,
       "unknown": 0
     },
     "selection": {
