@@ -5,6 +5,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.11 unreleased
 
+### M32 — Affected-test selection spike: shelved (2026-05-10)
+
+PLAN.md scoped M32 as a spike with a strict kill criterion: any
+silent-survivor delta on demo_app + plug_crypto + ≥2 OSS targets
+shelves the optimization. v1.11 takes the documented shelve
+outcome based on pre-implementation analysis of the silent-
+survivor risk surface.
+
+Decision rationale (full analysis at
+`docs/spikes/M32_affected_tests.md`):
+
+1. Five risk vectors identified: `setup_all` cross-test
+   dependencies, doctest name encoding, property-based test
+   generator non-determinism, `:cover`'s macro-expansion gap, and
+   async test interleaving. Three plausibly fire on the
+   acceptance corpus (demo_app, plug_crypto, nimble_options,
+   jason) before implementation begins.
+2. Implementation cost (~300-500 LOC + fixtures + new coverage-
+   collection paths + ExUnit plumbing) is non-trivial.
+3. The current `coverage_with_static_fallback` mode already
+   provides fanout reduction at a softer correctness contract.
+
+`coverage_with_static_fallback` remains v1.11's selection default.
+M32 reopens in v1.12+ only if a real user report establishes
+demand AND one of the underlying primitives (`:cover` per-test
+attribution, ExUnit dependency exposure) gains capability that
+eliminates a primary risk vector.
+
 ### M31 — Gettext compatibility: classified mix-only (2026-05-10)
 
 PLAN.md scoped two paths for M31:
