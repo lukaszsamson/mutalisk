@@ -1,0 +1,48 @@
+target=phoenix_html repo=https://github.com/phoenixframework/phoenix_html.git ref=v4.3.0 sha=8cfd3e37ff9ef0924812a78cf6c9d27cdbd4e726 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  castore 1.0.11
+  earmark_parser 1.4.44
+  ex_doc 0.38.4
+  makeup 1.2.1
+  makeup_eex 2.0.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  makeup_syntect 0.1.2
+  nimble_parsec 1.4.2
+  rustler_precompiled 0.8.2
+* Getting ex_doc (Hex package)
+* Getting makeup_eex (Hex package)
+* Getting makeup_syntect (Hex package)
+* Getting makeup (Hex package)
+* Getting rustler_precompiled (Hex package)
+* Getting castore (Hex package)
+* Getting nimble_parsec (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_erlang (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> phoenix_html
+Compiling 6 files (.ex)
+Generated phoenix_html app
+Schema build starting
+** (SyntaxError) invalid syntax found on nofile:73:21:
+    error: syntax error before: title
+    │
+ 73 │     \" title=\\"the title\\" id=\\"the id\\" selected\"
+    │                     ^
+    │
+    └─ nofile:73:21
+    (elixir 1.19.5) lib/code.ex:1103: Code.format_string!/2
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:95: Mut.SchemaPlacer.render/1
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:141: Mut.SchemaPlacer.instrument_file/2
+    (mutalisk 0.1.0) lib/mut/schema_build.ex:125: anonymous fn/3 in Mut.SchemaBuild.instrument_files/2
+    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
+    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3
+    (mutalisk 0.1.0) lib/mut/schema_build.ex:95: Mut.SchemaBuild.build_in_work_copy/3

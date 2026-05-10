@@ -1,0 +1,110 @@
+target=castore repo=https://github.com/elixir-mint/castore.git ref=v1.0.9 sha=428328b630f7247a9eb2380792adda9d5e537673 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  earmark_parser 1.4.30
+  ex_doc 0.29.2
+  makeup 1.1.0
+  makeup_elixir 0.16.0
+  makeup_erlang 0.1.1
+  nimble_parsec 1.2.3
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> castore
+Compiling 2 files (.ex)
+Generated castore app
+Schema build starting
+Schema build complete
+[1/6] survived  lib/mix/tasks/certdata.ex:72  UnaryNot  remove unary not
+[2/6] survived  lib/mix/tasks/certdata.ex:162  ComparisonBoundary  replace < with <=
+[3/6] survived  lib/mix/tasks/certdata.ex:109  ComparisonNegation  replace != with ==
+[4/6] survived  lib/mix/tasks/certdata.ex:162  ComparisonNegation  replace < with >=
+    warning: redefining module Mix.Tasks.Certdata (current version loaded from _build/mut_schema/lib/castore/ebin/Elixir.Mix.Tasks.Certdata.beam)
+    │
+  1 │ defmodule Mix.Tasks.Certdata do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mix/tasks/certdata.ex:1: Mix.Tasks.Certdata (module)
+
+    warning: redefining module Mix.Tasks.Certdata (current version loaded from _build/mut_schema/lib/castore/ebin/Elixir.Mix.Tasks.Certdata.beam)
+    │
+  1 │ defmodule Mix.Tasks.Certdata do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mix/tasks/certdata.ex:1: Mix.Tasks.Certdata (module)
+
+[5/6] survived  lib/mix/tasks/certdata.ex:171  GuardComparisonNegation  replace guard == with !=
+[6/6] survived  lib/mix/tasks/certdata.ex:167  GuardComparisonNegation  replace guard == with !=
+Mutation score: 0/6 = 0.0%
+
+Surviving mutants:
+  lib/mix/tasks/certdata.ex:72 UnaryNot                 remove unary not
+  lib/mix/tasks/certdata.ex:162 ComparisonBoundary       replace < with <=
+  lib/mix/tasks/certdata.ex:109 ComparisonNegation       replace != with ==
+  lib/mix/tasks/certdata.ex:162 ComparisonNegation       replace < with >=
+  lib/mix/tasks/certdata.ex:171 GuardComparisonNegation  replace guard == with !=
+  lib/mix/tasks/certdata.ex:167 GuardComparisonNegation  replace guard == with !=
+
+Schema:    0/4 killed (0.0%)   wall: 0.1s
+Fallback:  0/2 killed (0.0%)   wall: 0.1s
+  guard_comparison_negation:    0/2 killed
+Skipped:   114 (attribute_engine_disabled: 5, body_literal_engine_disabled: 16, missing_oracle_site: 2, unsupported_dispatch: 91)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 0.2s
+Fallback wall-clock: 62.7% of total
+Fallback mutants: 33.3% of executed
+
+Phases:
+  oracle build:        2136 ms
+  baseline tests:       410 ms
+  plan generation:        4 ms
+  schema build:        2239 ms
+  schema workers:        18 ms
+  fallback workers:     150 ms
+  report writing:         1 ms
+  total:               6588 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          6
+  avg tests/mutant: 1.0
+  median tests/mutant: 1
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Persistent worker:
+  workers:     4
+  boot:        median 319.5 ms (max 355.0 ms)
+  app startup: median 2.8 ms (total apps: 20)
+  test load:   median 103.6 ms (total files: 8)
+  mutant run:  median 12.7 ms (p95 13.4 ms, n=4)
+  reset hooks:
+    application_env: 0.0 ms
+    ets:             1.1 ms
+    processes:       0.0 ms
+    persistent_term: 0.0 ms
+    on_exit:         0.0 ms
+  filter lookup: 0.0 ms
+  memory: peak 57.6 MB total, 14.0 MB processes
+
+Mutalisk run complete in 6884ms
+bench.wall_ms=8000

@@ -1,0 +1,81 @@
+target=castore repo=https://github.com/elixir-mint/castore.git ref=v1.0.9 sha=428328b630f7247a9eb2380792adda9d5e537673 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.016s
+Unchanged:
+  earmark_parser 1.4.30
+  ex_doc 0.29.2
+  makeup 1.1.0
+  makeup_elixir 0.16.0
+  makeup_erlang 0.1.1
+  nimble_parsec 1.2.3
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> castore
+Compiling 2 files (.ex)
+Generated castore app
+Schema build starting
+Schema build complete
+[1/6] survived  lib/mix/tasks/certdata.ex:162  ComparisonBoundary  replace < with <=
+[2/6] survived  lib/mix/tasks/certdata.ex:109  ComparisonNegation  replace != with ==
+[3/6] survived  lib/mix/tasks/certdata.ex:72  UnaryNot  remove unary not
+[4/6] survived  lib/mix/tasks/certdata.ex:162  ComparisonNegation  replace < with >=
+[5/6] survived  lib/mix/tasks/certdata.ex:171  GuardComparisonNegation  replace guard == with !=
+[6/6] survived  lib/mix/tasks/certdata.ex:167  GuardComparisonNegation  replace guard == with !=
+Mutation score: 0/6 = 0.0%
+
+Surviving mutants:
+  lib/mix/tasks/certdata.ex:162 ComparisonBoundary       replace < with <=
+  lib/mix/tasks/certdata.ex:109 ComparisonNegation       replace != with ==
+  lib/mix/tasks/certdata.ex:72 UnaryNot                 remove unary not
+  lib/mix/tasks/certdata.ex:162 ComparisonNegation       replace < with >=
+  lib/mix/tasks/certdata.ex:171 GuardComparisonNegation  replace guard == with !=
+  lib/mix/tasks/certdata.ex:167 GuardComparisonNegation  replace guard == with !=
+
+Schema:    0/4 killed (0.0%)   wall: 2.6s
+Fallback:  0/2 killed (0.0%)   wall: 1.6s
+  guard_comparison_negation:    0/2 killed
+Skipped:   114 (attribute_engine_disabled: 5, body_literal_engine_disabled: 16, missing_oracle_site: 2, unsupported_dispatch: 91)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 4.1s
+Fallback wall-clock: 37.4% of total
+Fallback mutants: 33.3% of executed
+
+Phases:
+  oracle build:        2135 ms
+  baseline tests:       415 ms
+  plan generation:        4 ms
+  schema build:        2096 ms
+  schema workers:       656 ms
+  fallback workers:     867 ms
+  report writing:         1 ms
+  total:               6504 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          6
+  avg tests/mutant: 1.0
+  median tests/mutant: 1
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 6752ms
+bench.wall_ms=8000

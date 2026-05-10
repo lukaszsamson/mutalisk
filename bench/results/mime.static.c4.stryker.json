@@ -1,0 +1,211 @@
+{
+  "files": {
+    "lib/mime.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/mime_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 641,
+          "id": "237c81617c335ec745ee8f72930ae607",
+          "killedBy": [
+            "MIMETest:doctest MIME.type/1 (5)"
+          ],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 241
+            },
+            "start": {
+              "column": 33,
+              "line": 241
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "ext_to_mime(file_extension) && @default_type",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mime_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 841,
+          "id": "43e1a59ae2b241d414094c3f6e4d2158",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 283
+            },
+            "start": {
+              "column": 38,
+              "line": 283
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "h * 32",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mime_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 845,
+          "id": "75506e919a0d70b06632e2891b636882",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 283
+            },
+            "start": {
+              "column": 38,
+              "line": 283
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "h - 32",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/mime_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 641,
+          "id": "7e7a42dc52c2f955abe968252b9198ca",
+          "killedBy": [
+            "MIMETest:doctest MIME.extensions/1 (1)"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 212
+            },
+            "start": {
+              "column": 39,
+              "line": 212
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "(mime_to_ext(mime) || suffix(mime)) && []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/mime_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 470,
+          "id": "b8840b0c0b84578907d857a43bdd1bed",
+          "killedBy": [
+            "MIMETest:doctest MIME.extensions/1 (1)"
+          ],
+          "location": {
+            "end": {
+              "column": 23,
+              "line": 212
+            },
+            "start": {
+              "column": 23,
+              "line": 212
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "mime_to_ext(mime) && suffix(mime)",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule MIME do\n  @moduledoc \"\"\"\n  Maps MIME types to its file extensions and vice versa.\n\n  MIME types can be extended in your application configuration\n  as follows:\n\n      config :mime, :types, %{\n        \"application/vnd.api+json\" => [\"json-api\"]\n      }\n\n  Note that defining a new type will completely override all\n  previous extensions. You can use `MIME.extensions/1` to get\n  the existing extension to keep when redefining.\n\n  You can also customize the extensions for suffixes. For example,\n  the mime type \"application/custom+gzip\" returns the extension\n  `\".gz\"` because the suffix \"gzip\" maps to `[\"gz\"]`:\n\n      config :mime, :suffixes, %{\n        \"gzip\" => [\"gz\"]\n      }\n\n  After adding the configuration, MIME needs to be recompiled\n  if you are using an Elixir version earlier than v1.15. In such\n  cases, it can be done with:\n\n      $ mix deps.clean mime --build\n\n  \"\"\"\n\n  types = %{\n    \"application/atom+xml\" => [\"atom\"],\n    \"application/epub+zip\" => [\"epub\"],\n    \"application/gzip\" => [\"gz\"],\n    \"application/java-archive\" => [\"jar\"],\n    \"application/javascript\" => [\"js\"],\n    \"application/json\" => [\"json\"],\n    \"application/json-patch+json\" => [\"json-patch\"],\n    \"application/ld+json\" => [\"jsonld\"],\n    \"application/manifest+json\" => [\"webmanifest\"],\n    \"application/msword\" => [\"doc\"],\n    \"application/octet-stream\" => [\"bin\"],\n    \"application/ogg\" => [\"ogx\"],\n    \"application/pdf\" => [\"pdf\"],\n    \"application/postscript\" => [\"ps\", \"eps\", \"ai\"],\n    \"application/rss+xml\" => [\"rss\"],\n    \"application/rtf\" => [\"rtf\"],\n    \"application/vnd.amazon.ebook\" => [\"azw\"],\n    \"application/vnd.api+json\" => [\"json-api\"],\n    \"application/vnd.apple.installer+xml\" => [\"mpkg\"],\n    \"application/vnd.etsi.asic-e+zip\" => [\"asice\", \"sce\"],\n    \"application/vnd.etsi.asic-s+zip\" => [\"asics\", \"scs\"],\n    \"application/vnd.mozilla.xul+xml\" => [\"xul\"],\n    \"application/vnd.ms-excel\" => [\"xls\"],\n    \"application/vnd.ms-fontobject\" => [\"eot\"],\n    \"application/vnd.ms-powerpoint\" => [\"ppt\"],\n    \"application/vnd.oasis.opendocument.presentation\" => [\"odp\"],\n    \"application/vnd.oasis.opendocument.spreadsheet\" => [\"ods\"],\n    \"application/vnd.oasis.opendocument.text\" => [\"odt\"],\n    \"application/vnd.openxmlformats-officedocument.presentationml.presentation\" => [\"pptx\"],\n    \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\" => [\"xlsx\"],\n    \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\" => [\"docx\"],\n    \"application/vnd.rar\" => [\"rar\"],\n    \"application/vnd.visio\" => [\"vsd\"],\n    \"application/wasm\" => [\"wasm\"],\n    \"application/x-7z-compressed\" => [\"7z\"],\n    \"application/x-abiword\" => [\"abw\"],\n    \"application/x-bzip\" => [\"bz\"],\n    \"application/x-bzip2\" => [\"bz2\"],\n    \"application/x-cdf\" => [\"cda\"],\n    \"application/x-csh\" => [\"csh\"],\n    \"application/x-freearc\" => [\"arc\"],\n    \"application/x-httpd-php\" => [\"php\"],\n    \"application/x-msaccess\" => [\"mdb\"],\n    \"application/x-sh\" => [\"sh\"],\n    \"application/x-shockwave-flash\" => [\"swf\"],\n    \"application/x-tar\" => [\"tar\"],\n    \"application/xhtml+xml\" => [\"xhtml\"],\n    \"application/xml\" => [\"xml\"],\n    \"application/zip\" => [\"zip\"],\n    \"application/zstd\" => [\"zst\"],\n    \"audio/3gpp\" => [\"3gp\"],\n    \"audio/3gpp2\" => [\"3g2\"],\n    \"audio/aac\" => [\"aac\"],\n    \"audio/midi\" => [\"mid\", \"midi\"],\n    \"audio/mpeg\" => [\"mp3\"],\n    \"audio/ogg\" => [\"oga\"],\n    \"audio/opus\" => [\"opus\"],\n    \"audio/wav\" => [\"wav\"],\n    \"audio/webm\" => [\"weba\"],\n    \"font/otf\" => [\"otf\"],\n    \"font/ttf\" => [\"ttf\"],\n    \"font/woff\" => [\"woff\"],\n    \"font/woff2\" => [\"woff2\"],\n    \"image/apng\" => [\"apng\"],\n    \"image/avif\" => [\"avif\"],\n    \"image/bmp\" => [\"bmp\"],\n    \"image/gif\" => [\"gif\"],\n    \"image/heic\" => [\"heic\"],\n    \"image/heif\" => [\"heif\"],\n    \"image/jp2\" => [\"jp2\"],\n    \"image/jpeg\" => [\"jpg\", \"jpeg\"],\n    \"image/jxl\" => [\"jxl\"],\n    \"image/png\" => [\"png\"],\n    \"image/svg+xml\" => [\"svg\", \"svgz\"],\n    \"image/tiff\" => [\"tiff\", \"tif\"],\n    \"image/vnd.adobe.photoshop\" => [\"psd\"],\n    \"image/vnd.microsoft.icon\" => [\"ico\"],\n    \"image/webp\" => [\"webp\"],\n    \"text/calendar\" => [\"ics\"],\n    \"text/css\" => [\"css\"],\n    \"text/csv\" => [\"csv\"],\n    \"text/html\" => [\"html\", \"htm\"],\n    \"text/javascript\" => [\"js\", \"mjs\"],\n    \"text/markdown\" => [\"md\", \"markdown\"],\n    \"text/plain\" => [\"txt\", \"text\"],\n    \"text/xml\" => [\"xml\"],\n    \"video/3gpp\" => [\"3gp\"],\n    \"video/3gpp2\" => [\"3g2\"],\n    \"video/mp2t\" => [\"ts\"],\n    \"video/mp4\" => [\"mp4\"],\n    \"video/mpeg\" => [\"mpeg\", \"mpg\"],\n    \"video/ogg\" => [\"ogv\"],\n    \"video/quicktime\" => [\"mov\"],\n    \"video/webm\" => [\"webm\"],\n    \"video/x-ms-wmv\" => [\"wmv\"],\n    \"video/x-msvideo\" => [\"avi\"]\n  }\n\n  require Application\n  custom_types = Application.compile_env(:mime, :types, %{})\n\n  to_exts = fn map ->\n    for {media, exts} <- map, ext <- exts, reduce: %{} do\n      acc -> Map.update(acc, ext, media, &[media | List.wrap(&1)])\n    end\n  end\n\n  all_types = Map.merge(types, custom_types)\n\n  default_exts = %{\n    \"3g2\" => \"video/3gpp2\",\n    \"3gp\" => \"video/3gpp\",\n    \"js\" => \"text/javascript\",\n    \"xml\" => \"text/xml\"\n  }\n\n  custom_exts = Application.compile_env(:mime, :extensions, %{})\n  all_exts = Map.merge(to_exts.(all_types), Map.merge(default_exts, custom_exts))\n\n  # https://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xhtml\n  default_suffixes = %{\n    \"gzip\" => [\"gz\"],\n    \"json\" => [\"json\"],\n    \"xml\" => [\"xml\"],\n    \"zip\" => [\"zip\"],\n    \"zstd\" => [\"zst\"]\n  }\n\n  custom_suffixes = Application.compile_env(:mime, :suffixes, %{})\n  suffixes = Map.merge(default_suffixes, custom_suffixes)\n\n  @doc \"\"\"\n  Returns the custom types compiled into the MIME module.\n  \"\"\"\n  def compiled_custom_types do\n    unquote(Macro.escape(custom_types))\n  end\n\n  @doc \"\"\"\n  Returns a mapping of all known types to their extensions,\n  including custom types compiled into the MIME module.\n\n  ## Examples\n\n      known_types()\n      #=> %{\"application/json\" => [\"json\"], ...}\n\n  \"\"\"\n  @doc since: \"2.1.0\"\n  @spec known_types() :: %{required(String.t()) => [String.t()]}\n  def known_types do\n    unquote(Macro.escape(all_types))\n  end\n\n  @doc \"\"\"\n  Returns the extensions associated with a given MIME type.\n\n  ## Examples\n\n      iex> MIME.extensions(\"text/html\")\n      [\"html\", \"htm\"]\n\n      iex> MIME.extensions(\"application/json\")\n      [\"json\"]\n\n      iex> MIME.extensions(\"application/vnd.custom+xml\")\n      [\"xml\"]\n\n      iex> MIME.extensions(\"foo/bar\")\n      []\n\n  \"\"\"\n  @spec extensions(String.t()) :: [String.t()]\n  def extensions(type) do\n    mime =\n      type\n      |> strip_params()\n      |> downcase(\"\")\n\n    mime_to_ext(mime) || suffix(mime) || []\n  end\n\n  defp suffix(type) do\n    case String.split(type, \"+\") do\n      [_type_subtype_without_suffix, suffix] -> suffix_to_ext(suffix)\n      _ -> nil\n    end\n  end\n\n  @default_type \"application/octet-stream\"\n\n  @doc \"\"\"\n  Returns the MIME type associated with a file extension.\n\n  If no MIME type is known for `file_extension`,\n  `#{inspect(@default_type)}` is returned.\n\n  ## Examples\n\n      iex> MIME.type(\"html\")\n      \"text/html\"\n\n      iex> MIME.type(\"foobarbaz\")\n      #{inspect(@default_type)}\n\n  \"\"\"\n  @spec type(String.t()) :: String.t()\n  def type(file_extension) do\n    ext_to_mime(file_extension) || @default_type\n  end\n\n  @doc \"\"\"\n  Returns whether an extension has a MIME type registered.\n\n  ## Examples\n\n      iex> MIME.has_type?(\"html\")\n      true\n\n      iex> MIME.has_type?(\"foobarbaz\")\n      false\n\n  \"\"\"\n  @spec has_type?(String.t()) :: boolean\n  def has_type?(file_extension) do\n    is_binary(ext_to_mime(file_extension))\n  end\n\n  @doc \"\"\"\n  Guesses the MIME type based on the path's extension. See `type/1`.\n\n  ## Examples\n\n      iex> MIME.from_path(\"index.html\")\n      \"text/html\"\n\n  \"\"\"\n  @spec from_path(Path.t()) :: String.t()\n  def from_path(path) do\n    case Path.extname(path) do\n      \".\" <> ext -> type(downcase(ext, \"\"))\n      _ -> @default_type\n    end\n  end\n\n  defp strip_params(string) do\n    string |> :binary.split(\";\") |> hd()\n  end\n\n  defp downcase(<<h, t::binary>>, acc) when h in ?A..?Z,\n    do: downcase(t, <<acc::binary, h + 32>>)\n\n  defp downcase(<<h, t::binary>>, acc), do: downcase(t, <<acc::binary, h>>)\n  defp downcase(<<>>, acc), do: acc\n\n  @spec ext_to_mime(String.t()) :: String.t() | nil\n  defp ext_to_mime(type)\n\n  for {ext, mimes} <- all_exts do\n    case mimes do\n      [first | _] ->\n        raise \"\"\"\n        extension .#{ext} currently maps to different mime-types: #{inspect(mimes)}\n\n        You must tell us which mime-type is preferred by defining the :extensions \\\n        configuration. For example:\n\n            config :mime, :extensions, %{\n              #{inspect(ext)} => #{inspect(first)}\n            }\n\n        \"\"\"\n\n      mime ->\n        defp ext_to_mime(unquote(ext)), do: unquote(mime)\n    end\n  end\n\n  defp ext_to_mime(_ext), do: nil\n\n  @spec mime_to_ext(String.t()) :: list(String.t()) | nil\n  defp mime_to_ext(type)\n\n  for {type, exts} <- all_types do\n    defp mime_to_ext(unquote(type)), do: unquote(List.wrap(exts))\n  end\n\n  defp mime_to_ext(_type), do: nil\n\n  @spec suffix_to_ext(String.t()) :: list(String.t()) | nil\n  defp suffix_to_ext(suffix)\n\n  for {suffix, exts} <- suffixes do\n    defp suffix_to_ext(unquote(suffix)), do: unquote(List.wrap(exts))\n  end\n\n  defp suffix_to_ext(_suffix), do: nil\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "237c81617c335ec745ee8f72930ae607": "schema",
+      "43e1a59ae2b241d414094c3f6e4d2158": "schema",
+      "75506e919a0d70b06632e2891b636882": "schema",
+      "7e7a42dc52c2f955abe968252b9198ca": "schema",
+      "b8840b0c0b84578907d857a43bdd1bed": "schema"
+    },
+    "metrics": {
+      "fallback_count": 0,
+      "fallback_time_ms": 0,
+      "fanout": {
+        "237c81617c335ec745ee8f72930ae607": 1,
+        "43e1a59ae2b241d414094c3f6e4d2158": 1,
+        "75506e919a0d70b06632e2891b636882": 1,
+        "7e7a42dc52c2f955abe968252b9198ca": 1,
+        "b8840b0c0b84578907d857a43bdd1bed": 1
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "attribute_engine_disabled": 1,
+        "body_literal_engine_disabled": 1,
+        "missing_oracle_site": 9,
+        "unsupported_dispatch": 53
+      }
+    },
+    "mutation_kind": {
+      "237c81617c335ec745ee8f72930ae607": "boolean_op",
+      "43e1a59ae2b241d414094c3f6e4d2158": "arithmetic_op",
+      "75506e919a0d70b06632e2891b636882": "arithmetic_op",
+      "7e7a42dc52c2f955abe968252b9198ca": "boolean_op",
+      "b8840b0c0b84578907d857a43bdd1bed": "boolean_op"
+    },
+    "persistent": null,
+    "phase_timings": {
+      "baseline_tests_ms": 643,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 0,
+      "oracle_build_ms": 2155,
+      "plan_generation_ms": 4,
+      "report_writing_ms": 1,
+      "schema_build_ms": 2117,
+      "schema_workers_ms": 1114,
+      "total_ms": 6341
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 5,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 5
+      },
+      "mode": "static",
+      "selected_tests_avg": 1.0,
+      "selected_tests_median": 1
+    },
+    "stable_id_to_integer": {
+      "237c81617c335ec745ee8f72930ae607": 1,
+      "43e1a59ae2b241d414094c3f6e4d2158": 2,
+      "75506e919a0d70b06632e2891b636882": 3,
+      "7e7a42dc52c2f955abe968252b9198ca": 4,
+      "b8840b0c0b84578907d857a43bdd1bed": 5
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

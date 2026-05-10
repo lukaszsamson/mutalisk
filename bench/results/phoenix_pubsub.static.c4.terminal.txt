@@ -1,0 +1,47 @@
+target=phoenix_pubsub repo=https://github.com/phoenixframework/phoenix_pubsub.git ref=v2.2.0 sha=086e0af0af9306580ee59025c85931936a849ab5 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.012s
+Unchanged:
+  earmark_parser 1.4.44
+  ex_doc 0.38.4
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> phoenix_pubsub
+Compiling 14 files (.ex)
+    warning: :slave.start/3 is deprecated. It will be removed in OTP 29. Use the 'peer' module instead
+    │
+ 22 │     {:ok, node} = :slave.start(to_charlist("127.0.0.1"), node_name(node_host), inet_loader_args())
+    │                          ~
+    │
+    └─ test/support/cluster.ex:22:26: Phoenix.PubSub.Cluster.spawn_node/1
+
+Generated phoenix_pubsub app
+Schema build starting
+** (SyntaxError) invalid syntax found on nofile:43:21:
+    error: unexpected token: "\" (column 21, code point U+005C)
+    │
+ 43 │             IO.puts \"presence leave: key \\"#{key}\\" with meta #{inspect meta}\"
+    │                     ^
+    │
+    └─ nofile:43:21
+    (elixir 1.19.5) lib/code.ex:1103: Code.format_string!/2
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:95: Mut.SchemaPlacer.render/1
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:141: Mut.SchemaPlacer.instrument_file/2
+    (mutalisk 0.1.0) lib/mut/schema_build.ex:125: anonymous fn/3 in Mut.SchemaBuild.instrument_files/2
+    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
+    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3
+    (mutalisk 0.1.0) lib/mut/schema_build.ex:95: Mut.SchemaBuild.build_in_work_copy/3

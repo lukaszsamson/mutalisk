@@ -1,0 +1,74 @@
+target=mime repo=https://github.com/elixir-plug/mime.git ref=v2.0.7 sha=4bb1ba13040a13b2f5d71bede10a7e3e45fc8e93 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+Unchanged:
+  earmark_parser 1.4.40
+  ex_doc 0.34.1
+  makeup 1.1.2
+  makeup_elixir 0.16.2
+  makeup_erlang 1.0.0
+  nimble_parsec 1.4.0
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> mime
+Compiling 1 file (.ex)
+Generated mime app
+Schema build starting
+Schema build complete
+[1/5] killed    lib/mime.ex:241  Boolean  replace || with &&
+[2/5] killed    lib/mime.ex:212  Boolean  replace || with &&
+[3/5] survived  lib/mime.ex:283  Arithmetic  replace + with *
+[4/5] survived  lib/mime.ex:283  Arithmetic  replace + with -
+[5/5] killed    lib/mime.ex:212  Boolean  replace || with &&
+Mutation score: 3/5 = 60.0%
+
+Surviving mutants:
+  lib/mime.ex:283 Arithmetic               replace + with *
+  lib/mime.ex:283 Arithmetic               replace + with -
+
+Schema:    3/5 killed (60.0%)   wall: 3.4s
+Fallback:  0/0 killed (100.0%)   wall: 0.0s
+Skipped:   64 (attribute_engine_disabled: 1, body_literal_engine_disabled: 1, missing_oracle_site: 9, unsupported_dispatch: 53)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 3.4s
+Fallback wall-clock: 0.0% of total
+Fallback mutants: 0.0% of executed
+
+Phases:
+  oracle build:        2155 ms
+  baseline tests:       643 ms
+  plan generation:        4 ms
+  schema build:        2117 ms
+  schema workers:      1114 ms
+  report writing:         1 ms
+  total:               6341 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          5
+  avg tests/mutant: 1.0
+  median tests/mutant: 1
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 6579ms
+bench.wall_ms=8000

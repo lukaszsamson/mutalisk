@@ -1,0 +1,57 @@
+target=gen_stage repo=https://github.com/elixir-lang/gen_stage.git ref=v1.3.2 sha=d1532fa56482bc92d90abc777439ff8be34b5b1a selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  earmark_parser 1.4.44
+  ex_doc 0.38.2
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> gen_stage
+Compiling 10 files (.ex)
+Generated gen_stage app
+** (Mix) baseline tests failed; aborting mutation run (full log: tmp/mut_baseline.log)
+
+Running ExUnit with seed: 42, max_cases: 24
+
+...........................................................................................
+
+  1) test producer callbacks handle_cancel/3 on consumer down (GenStageTest)
+     test/gen_stage_test.exs:1387
+     Assertion failed, no matching message after 100ms
+     The following variables were pinned:
+       consumer = #PID<0.601.0>
+       ref = #Reference<0.1575920748.702808067.57577>
+     Showing 2 of 2 messages in the mailbox
+     code: assert_receive {:producer_cancelled, {^consumer, ^ref}, {:down, :killed}}
+     mailbox:
+       pattern: {:producer_cancelled, {^consumer, ^ref}, {:down, :killed}}
+       value:   {:consumer_subscribed,
+                 {#PID<0.600.0>,
+                  #Reference<0.1575920748.702808067.57577>}}
+
+       pattern: {:producer_cancelled, {^consumer, ^ref}, {:down, :killed}}
+       value:   {:producer_cancelled,
+                 {#PID<0.601.0>,
+                  #Reference<0.1575920748.702808067.57577>},
+                 {:down, :noproc}}
+     stacktrace:
+       test/gen_stage_test.exs:1394: (test)
+
+........................................................................................................................
+Finished in 1.5 seconds (1.5s async, 0.00s sync)
+212 tests, 1 failure
+

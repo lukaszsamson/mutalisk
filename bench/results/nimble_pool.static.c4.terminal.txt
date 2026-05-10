@@ -1,0 +1,924 @@
+target=nimble_pool repo=https://github.com/dashbitco/nimble_pool.git ref=v1.1.0 sha=9829f2753851694dd1b34682e0abede895966ca5 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.021s
+Unchanged:
+  certifi 2.9.0
+  earmark_parser 1.4.39
+  ex_doc 0.31.2
+  excoveralls 0.16.1
+  hackney 1.18.1
+  idna 6.1.1
+  jason 1.4.0
+  makeup 1.1.1
+  makeup_elixir 0.16.2
+  makeup_erlang 0.1.5
+  metrics 1.0.1
+  mimerl 1.2.0
+  nimble_parsec 1.4.0
+  parse_trans 3.3.1
+  ssl_verify_fun 1.1.7
+  unicode_util_compat 0.7.0
+* Getting ex_doc (Hex package)
+* Getting excoveralls (Hex package)
+* Getting hackney (Hex package)
+* Getting jason (Hex package)
+* Getting certifi (Hex package)
+* Getting idna (Hex package)
+* Getting metrics (Hex package)
+* Getting mimerl (Hex package)
+* Getting parse_trans (Hex package)
+* Getting ssl_verify_fun (Hex package)
+* Getting unicode_util_compat (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> jason
+Compiling 10 files (.ex)
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 104 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:104:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 106 │       _ in '0', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:106:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 108 │       _ in '123456789', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:108:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 110 │       _ in '-', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:110:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 112 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:112:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 114 │       _ in '[', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:114:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 116 │       _ in '{', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:116:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       _ in ']', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:118:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 120 │       _ in 't', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:120:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 127 │       _ in 'f', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:127:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 134 │       _ in 'n', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:134:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 152 │        when byte in '123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:152:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 160 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:160:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 166 │   defp number(<<e, rest::bits>>, original, skip, stack, decode, len) when e in 'eE' do
+     │                                                                                ~
+     │
+     └─ lib/decoder.ex:166:80
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 176 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:176:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 184 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:184:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 188 │        when e in 'eE' do
+     │                  ~
+     │
+     └─ lib/decoder.ex:188:18
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 199 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:199:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 203 │        when byte in '+-' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:203:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 211 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:211:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 219 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:219:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 230 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:230:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 234 │        when byte in '+-' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:234:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 242 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:242:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 250 │        when byte in '0123456789' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:250:21
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 268 │   defp number_zero(<<e, rest::bits>>, original, skip, stack, decode, len) when e in 'eE' do
+     │                                                                                     ~
+     │
+     └─ lib/decoder.ex:268:85
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 292 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:292:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 294 │       _ in ']', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:294:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 298 │       _ in ',', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:298:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 316 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:316:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 318 │       _ in '}', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:318:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 325 │       _ in ',', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:325:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 340 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:340:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 342 │       _ in '}', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:342:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 350 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:350:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 361 │       _ in '\s\n\t\r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:361:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 363 │       _ in ':', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:363:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 377 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:377:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 381 │       _ in '\\', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:381:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 401 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:401:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 405 │       _ in '\\', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:405:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 425 │       _ in 'b', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:425:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 426 │         string(rest, original, skip + 2, stack, decode, [acc | '\b'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:426:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 427 │       _ in 't', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:427:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 428 │         string(rest, original, skip + 2, stack, decode, [acc | '\t'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:428:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 429 │       _ in 'n', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:429:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 430 │         string(rest, original, skip + 2, stack, decode, [acc | '\n'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:430:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 431 │       _ in 'f', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:431:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 432 │         string(rest, original, skip + 2, stack, decode, [acc | '\f'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:432:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 433 │       _ in 'r', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:433:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 434 │         string(rest, original, skip + 2, stack, decode, [acc | '\r'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:434:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 435 │       _ in '"', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:435:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 436 │         string(rest, original, skip + 2, stack, decode, [acc | '\"'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:436:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 437 │       _ in '/', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:437:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 438 │         string(rest, original, skip + 2, stack, decode, [acc | '/'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:438:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 439 │       _ in '\\', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:439:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 440 │         string(rest, original, skip + 2, stack, decode, [acc | '\\'], 0)
+     │                                                                ~
+     │
+     └─ lib/decoder.ex:440:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 441 │       _ in 'u', rest ->
+     │            ~
+     │
+     └─ lib/decoder.ex:441:12
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 598 │       digits1 = 'Dd'
+     │                 ~
+     │
+     └─ lib/decoder.ex:598:17
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 684 │        when byte in '\s\n\r\t' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:684:21
+
+    warning: using single-quoted strings to represent charlists is deprecated.
+    Use ~c"" if you indeed want a charlist or use "" instead.
+    You may run "mix format --migrate" to change all single-quoted
+    strings to use the ~c sigil and fix this warning.
+    │
+ 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
+    │                                                     ~
+    │
+    └─ lib/codegen.ex:51:53
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
+     │                                                ~
+     │
+     └─ lib/codegen.ex:118:48
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 166 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ' \n\r\t' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:166:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 170 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in '{[' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:170:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
+     │
+     └─ lib/formatter.ex:201:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 164 │     ']'
+     │     ~
+     │
+     └─ lib/encode.ex:164:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 193 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:193:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 211 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:211:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                            ~
+     │
+     └─ lib/encode.ex:284:28
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                                              ~
+     │
+     └─ lib/encode.ex:284:46
+
+     warning: you are implementing a protocol for Decimal but said module is not available. Make sure the module name is correct. If Decimal is an optional dependency, please wrap the protocol implementation in a Code.ensure_loaded?(Decimal) check
+     │
+ 224 │ defimpl Jason.Encoder, for: Decimal do
+     │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/encoder.ex:224: (file)
+
+     warning: Decimal.to_string/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
+     │
+ 228 │     [?", decimal.to_string(value), ?"]
+     │                  ~
+     │
+     └─ lib/encoder.ex:228:18: Jason.Encoder.Decimal.encode/2
+
+     warning: Decimal.to_string/2 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
+     │
+ 242 │     [?", decimal.to_string(value, :normal), ?"]
+     │                  ~
+     │
+     └─ lib/encode.ex:242:18: Jason.Encode.struct/4
+
+warning: struct Decimal.Error is undefined (module Decimal.Error is not available or is yet to be defined)
+└─ lib/decoder.ex: Jason.Decoder.float_decode_function/1
+
+    warning: Decimal.new/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
+    │
+ 94 │         decimal.new(string)
+    │                 ~
+    │
+    └─ lib/decoder.ex:94:17: Jason.Decoder.float_decode_function/1
+
+Generated jason app
+==> nimble_pool
+===> Analyzing applications...
+===> Compiling mimerl
+==> ssl_verify_fun
+Compiling 7 files (.erl)
+Generated ssl_verify_fun app
+==> nimble_pool
+===> Analyzing applications...
+===> Compiling unicode_util_compat
+===> Analyzing applications...
+===> Compiling idna
+===> Analyzing applications...
+===> Compiling certifi
+===> Analyzing applications...
+===> Compiling parse_trans
+===> Analyzing applications...
+===> Compiling metrics
+===> Analyzing applications...
+===> Compiling hackney
+==> excoveralls
+Compiling 29 files (.ex)
+    warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
+    │
+ 17 │            |> List.zip
+    │                    ~
+    │
+    └─ lib/excoveralls/stop_words.ex:17:20: ExCoveralls.StopWords.do_filter/2
+
+    warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
+    │
+ 18 │            |> List.zip
+    │                    ~
+    │
+    └─ lib/excoveralls/ignore.ex:18:20: ExCoveralls.Ignore.do_filter/1
+
+Generated excoveralls app
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> nimble_pool
+Compiling 2 files (.ex)
+Generated nimble_pool app
+Schema build starting
+Schema build complete
+[2/28] killed    lib/nimble_pool.ex:397  Boolean  replace and with or
+[2/28] killed    lib/nimble_pool.ex:943  Arithmetic  replace - with *
+[3/28] survived  lib/nimble_pool.ex:970  Arithmetic  replace - with +
+[4/28] survived  lib/nimble_pool.ex:970  Arithmetic  replace - with *
+[5/28] killed    lib/nimble_pool.ex:904  Arithmetic  replace - with *
+[6/28] killed    lib/nimble_pool.ex:904  Arithmetic  replace - with +
+[7/28] killed    lib/nimble_pool.ex:898  ComparisonBoundary  replace > with >=
+[8/28] survived  lib/nimble_pool.ex:920  Arithmetic  replace + with *
+[9/28] survived  lib/nimble_pool.ex:911  ComparisonBoundary  replace >= with >
+[10/28] killed    lib/nimble_pool.ex:945  ComparisonNegation  replace >= with <
+[11/28] killed    lib/nimble_pool.ex:397  ComparisonNegation  replace > with <=
+[12/28] killed    lib/nimble_pool.ex:397  ComparisonBoundary  replace > with >=
+[13/28] survived  lib/nimble_pool.ex:920  Arithmetic  replace + with -
+[14/28] survived  lib/nimble_pool.ex:945  ComparisonBoundary  replace >= with >
+[15/28] killed    lib/nimble_pool.ex:898  ComparisonNegation  replace > with <=
+[16/28] killed    lib/nimble_pool.ex:503  Arithmetic  replace + with *
+[17/28] killed    lib/nimble_pool.ex:959  Arithmetic  replace - with +
+[18/28] killed    lib/nimble_pool.ex:959  Arithmetic  replace - with *
+[19/28] killed    lib/nimble_pool.ex:898  Boolean  replace and with or
+[20/28] killed    lib/nimble_pool.ex:943  Arithmetic  replace - with +
+[21/28] killed    lib/nimble_pool.ex:911  ComparisonNegation  replace >= with <
+[22/28] killed    lib/nimble_pool.ex:503  Arithmetic  replace + with -
+[23/28] killed    lib/nimble_pool.ex:502  GuardTypeTest  replace guard is_integer with is_float
+[24/28] killed    lib/nimble_pool.ex:344  GuardTypeTest  replace guard is_list with is_tuple
+[25/28] killed    lib/nimble_pool.ex:502  GuardTypeTest  replace guard is_integer with is_number
+[26/28] survived  lib/nimble_pool.ex:910  GuardTypeTest  replace guard is_integer with is_number
+[27/28] killed    lib/nimble_pool.ex:382  GuardTypeTest  replace guard is_list with is_tuple
+[28/28] killed    lib/nimble_pool.ex:910  GuardTypeTest  replace guard is_integer with is_float
+Mutation score: 21/28 = 75.0%
+
+Surviving mutants:
+  lib/nimble_pool.ex:970 Arithmetic               replace - with +
+  lib/nimble_pool.ex:970 Arithmetic               replace - with *
+  lib/nimble_pool.ex:920 Arithmetic               replace + with *
+  lib/nimble_pool.ex:911 ComparisonBoundary       replace >= with >
+  lib/nimble_pool.ex:920 Arithmetic               replace + with -
+  lib/nimble_pool.ex:945 ComparisonBoundary       replace >= with >
+  lib/nimble_pool.ex:910 GuardTypeTest            replace guard is_integer with is_number
+
+Schema:    16/22 killed (72.7%)   wall: 41.0s
+Fallback:  5/6 killed (83.3%)   wall: 9.6s
+  guard_type_test:              5/6 killed
+Skipped:   409 (body_literal_engine_disabled: 23, missing_oracle_site: 95, no_applicable_mutator: 2, unsupported_dispatch: 289)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 50.6s
+Fallback wall-clock: 18.9% of total
+Fallback mutants: 21.4% of executed
+
+Phases:
+  oracle build:         9857 ms
+  baseline tests:       1153 ms
+  plan generation:        23 ms
+  schema build:         9709 ms
+  schema workers:      10961 ms
+  fallback workers:     3311 ms
+  report writing:          2 ms
+  total:               35681 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          28
+  avg tests/mutant: 1.0
+  median tests/mutant: 1
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 36127ms
+bench.wall_ms=44000

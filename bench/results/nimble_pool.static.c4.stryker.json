@@ -1,0 +1,845 @@
+{
+  "files": {
+    "lib/nimble_pool.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1382,
+          "id": "0cb9a55a32012883138e6b5d0ee23268",
+          "killedBy": [
+            "NimblePoolTest:start_link/1 validates the :pool_size option"
+          ],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 397
+            },
+            "start": {
+              "column": 34,
+              "line": 397
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "is_integer(pool_size) or pool_size > 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1584,
+          "id": "14a795cd267bf2730b18028c1bc6a795",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 502
+            },
+            "start": {
+              "column": 31,
+              "line": 502
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(timeout)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1382,
+          "id": "15a5200c9c1d4d21c26e0e277976cda1",
+          "killedBy": [
+            "NimblePoolTest:handle_ping ping only idle workers"
+          ],
+          "location": {
+            "end": {
+              "column": 31,
+              "line": 943
+            },
+            "start": {
+              "column": 31,
+              "line": 943
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "now_in_ms * worker_metadata",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1495,
+          "id": "15d693f01b4b62f9b448a163083601a8",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 970
+            },
+            "start": {
+              "column": 33,
+              "line": 970
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "remaining_pings + 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1498,
+          "id": "162f2dea7410303dbf0d1a61706eb554",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 970
+            },
+            "start": {
+              "column": 33,
+              "line": 970
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "remaining_pings * 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1589,
+          "id": "1ea4c5bbbbe4c43aab7d53b0651f21f9",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 42,
+              "line": 344
+            },
+            "start": {
+              "column": 29,
+              "line": 344
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(opts)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1771,
+          "id": "1eb01ff8a6f30bf6f244f742045998d6",
+          "killedBy": [
+            "NimblePoolTest:handle_cancelled should run when client raise after checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 502
+            },
+            "start": {
+              "column": 31,
+              "line": 502
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(timeout)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1215,
+          "id": "1fd7878d16104f7fefebcbc4fa77f546",
+          "killedBy": [
+            "NimblePoolTest:checkout! concurrent checkouts on lazy pool"
+          ],
+          "location": {
+            "end": {
+              "column": 83,
+              "line": 904
+            },
+            "start": {
+              "column": 83,
+              "line": 904
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "lazy + 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1208,
+          "id": "277c80d0210fe0a0b7814abb03e39abf",
+          "killedBy": [
+            "NimblePoolTest:checkout! concurrent checkouts on lazy pool"
+          ],
+          "location": {
+            "end": {
+              "column": 83,
+              "line": 904
+            },
+            "start": {
+              "column": 83,
+              "line": 904
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "lazy * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 6013,
+          "id": "2a8a10cfddfda6fbcf9e9951d29dcf7b",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 503
+            },
+            "start": {
+              "column": 29,
+              "line": 503
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "System.monotonic_time() * System.convert_time_unit(timeout, :millisecond, :native)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 1207,
+          "id": "2b6dbd6ddc86618b1d01323d44a20d9c",
+          "killedBy": [
+            "NimblePoolTest:checkout! concurrent checkouts on lazy pool"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 898
+            },
+            "start": {
+              "column": 13,
+              "line": 898
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "lazy >= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1834,
+          "id": "2c04296a41b295c28ca3597ea36ca30d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 910
+            },
+            "start": {
+              "column": 38,
+              "line": 910
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(deadline)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 1206,
+          "id": "2d1292c6f423a4182c6ccd43684ca91f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 920
+            },
+            "start": {
+              "column": 28,
+              "line": 920
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "lazy * 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace >= with >",
+          "duration": 1254,
+          "id": "334e48ec877d46448818067fe2e4c63f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 911
+            },
+            "start": {
+              "column": 29,
+              "line": 911
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "System.monotonic_time() > deadline",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 1225,
+          "id": "47e8257d7defda0704abac61a6e81b99",
+          "killedBy": [
+            "NimblePoolTest:handle_ping ping only idle workers"
+          ],
+          "location": {
+            "end": {
+              "column": 22,
+              "line": 945
+            },
+            "start": {
+              "column": 22,
+              "line": 945
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "time_diff < state.worker_idle_timeout",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace > with <=",
+          "duration": 967,
+          "id": "57599f3889b348a65ab70693f42fc655",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 397
+            },
+            "start": {
+              "column": 48,
+              "line": 397
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "pool_size <= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 1085,
+          "id": "620e05168bf8402d7009628d57e15505",
+          "killedBy": [
+            "NimblePoolTest:start_link/1 validates the :pool_size option"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 397
+            },
+            "start": {
+              "column": 48,
+              "line": 397
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "pool_size >= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 1219,
+          "id": "69bed026b7f807d56a9ff71ae470c817",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 920
+            },
+            "start": {
+              "column": 28,
+              "line": 920
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "lazy - 1",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 5992,
+          "id": "7f2ae420bae94fec9baf5dc04483a476",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 911
+            },
+            "start": {
+              "column": 29,
+              "line": 911
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "System.monotonic_time() < deadline",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 5983,
+          "id": "8ade2e503085f0d77a36f4623ed2a8d1",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 503
+            },
+            "start": {
+              "column": 29,
+              "line": 503
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "System.monotonic_time() - System.convert_time_unit(timeout, :millisecond, :native)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace >= with >",
+          "duration": 1203,
+          "id": "8fa35ef849342bed689f168f6dae6cfa",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 22,
+              "line": 945
+            },
+            "start": {
+              "column": 22,
+              "line": 945
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "time_diff > state.worker_idle_timeout",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace > with <=",
+          "duration": 1042,
+          "id": "91dc92a05b75ceeecdf1f82b654cdf87",
+          "killedBy": [
+            "NimblePoolTest:checkout! lazy concurrent checkouts"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 898
+            },
+            "start": {
+              "column": 13,
+              "line": 898
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "lazy <= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1065,
+          "id": "92038d7b62e0f4bef9d717ec80e82904",
+          "killedBy": [
+            "NimblePoolTest:handle_ping ping only idle workers"
+          ],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 959
+            },
+            "start": {
+              "column": 33,
+              "line": 959
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "remaining_pings + 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 1094,
+          "id": "9bd1a4a530dfbc002fb5034e7dfccfab",
+          "killedBy": [
+            "NimblePoolTest:handle_ping ping only max_idle_pings workers each verification cycle "
+          ],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 959
+            },
+            "start": {
+              "column": 33,
+              "line": 959
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "remaining_pings * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1394,
+          "id": "bc5880fd2b94745bebec558106828bcb",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 910
+            },
+            "start": {
+              "column": 38,
+              "line": 910
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(deadline)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1386,
+          "id": "d137f4625e3cfb340f5900f582bbb89a",
+          "killedBy": [
+            "NimblePoolTest:checkout! restarts worker on client throw/error/exit during checkout"
+          ],
+          "location": {
+            "end": {
+              "column": 42,
+              "line": 382
+            },
+            "start": {
+              "column": 29,
+              "line": 382
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(opts)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1127,
+          "id": "d4197130c3af3c5ae6d8102c1849237b",
+          "killedBy": [
+            "NimblePoolTest:checkout! concurrent checkouts on lazy pool"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 898
+            },
+            "start": {
+              "column": 17,
+              "line": 898
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "lazy > 0 or :queue.is_empty(resources)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/nimble_pool_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 1160,
+          "id": "e069df60970038cfc7b29f17727ec93b",
+          "killedBy": [
+            "NimblePoolTest:handle_ping ping only idle workers"
+          ],
+          "location": {
+            "end": {
+              "column": 31,
+              "line": 943
+            },
+            "start": {
+              "column": 31,
+              "line": 943
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "now_in_ms + worker_metadata",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule NimblePool do\n  @external_resource \"README.md\"\n  @moduledoc \"README.md\"\n             |> File.read!()\n             |> String.split(\"<!-- MDOC !-->\")\n             |> Enum.fetch!(1)\n\n  use GenServer\n  require Logger\n\n  @type from :: {pid, reference}\n  @type init_arg :: term\n  @type pool_state :: term\n  @type worker_state :: term\n  @type client_state :: term\n  @type user_reason :: term\n\n  @typedoc since: \"1.1.0\"\n  @type pool :: GenServer.server()\n\n  @doc \"\"\"\n  Initializes the worker.\n\n  It receives the worker argument passed to `start_link/1` if `c:init_pool/1` is\n  not implemented, otherwise the pool state returned by `c:init_pool/1`. It must\n  return `{:ok, worker_state, pool_state}` or `{:async, fun, pool_state}`, where the `fun`\n  is a zero-arity function that must return the worker state.\n\n  If this callback returns `{:async, fun, pool_state}`, `fun` is executed in a **separate\n  one-off process**. Because of this, if you start resources that the pool needs to \"own\",\n  you need to transfer ownership to the pool process. For example, if your async `fun`\n  opens a `:gen_tcp` socket, you'll have to use `:gen_tcp.controlling_process/2` to transfer\n  ownership back to the pool.\n\n  > #### Blocking the pool {: .warning}\n  >\n  > This callback is synchronous and therefore will block the pool, potentially\n  > for a significant amount of time since it's executed in the pool process once\n  > per worker. > If you need to perform long initialization, consider using the\n  > `{:async, fun, pool_state}` return type.\n  \"\"\"\n  @doc callback: :worker\n  @callback init_worker(pool_state) ::\n              {:ok, worker_state, pool_state} | {:async, (-> worker_state), pool_state}\n\n  @doc \"\"\"\n  Initializes the pool.\n\n  It receives the worker argument passed to `start_link/1` and must\n  return `{:ok, pool_state}` upon successful initialization,\n  `:ignore` to exit normally, or `{:stop, reason}` to exit with `reason`\n  and return `{:error, reason}`.\n\n  This is a good place to perform a registration, for example.\n\n  It must return the `pool_state`. The `pool_state` is given to\n  `init_worker`. By default, it simply returns the given arguments.\n\n  This callback is optional.\n\n  ## Examples\n\n      @impl NimblePool\n      def init_pool(options) do\n        Registry.register(options[:registry], :some_key, :some_value)\n      end\n\n  \"\"\"\n  @doc callback: :pool\n  @callback init_pool(init_arg) :: {:ok, pool_state} | :ignore | {:stop, reason :: any()}\n\n  @doc \"\"\"\n  Checks a worker out.\n\n  The `maybe_wrapped_command` is the `command` passed to `checkout!/4` if the worker\n  doesn't implement the `c:handle_enqueue/2` callback, otherwise it's the possibly-wrapped\n  command returned by `c:handle_enqueue/2`.\n\n  This callback must return one of:\n\n    * `{:ok, client_state, worker_state, pool_state}` — the client state is given to\n      the callback function passed to `checkout!/4`. `worker_state` and `pool_state`\n      can potentially update the state of the checked-out worker and the pool.\n\n    * `{:remove, reason, pool_state}` — `NimblePool` will remove the checked-out worker and\n      attempt to checkout another worker.\n\n    * `{:skip, Exception.t(), pool_state}` — `NimblePool` will skip the checkout, the client will\n      raise the returned exception, and the worker will be left ready for the next\n      checkout attempt.\n\n  > #### Blocking the pool {: .warning}\n  >\n  > This callback is synchronous and therefore will block the pool.\n  > Avoid performing long work in here. Instead, do as much work as\n  > possible on the client.\n\n  Once the worker is checked out, the worker won't handle any\n  messages targeted to `c:handle_info/2`.\n  \"\"\"\n  @doc callback: :worker\n  @callback handle_checkout(maybe_wrapped_command :: term, from, worker_state, pool_state) ::\n              {:ok, client_state, worker_state, pool_state}\n              | {:remove, user_reason, pool_state}\n              | {:skip, Exception.t(), pool_state}\n\n  @doc \"\"\"\n  Checks a worker back in the pool.\n\n  It receives the potentially-updated `client_state`, returned by the `checkout!/4`\n  anonymous function, and it must return either\n  `{:ok, worker_state, pool_state}` or `{:remove, reason, pool_state}`.\n\n  > #### Blocking the pool {: .warning}\n  >\n  > This callback is synchronous and therefore will block the pool.\n  > Avoid performing long work in here, instead do as much work as\n  > possible on the client.\n\n  Once the connection is checked in, it may immediately be handed\n  to another client, without traversing any of the messages in the\n  pool inbox.\n\n  This callback is optional.\n  \"\"\"\n  @doc callback: :worker\n  @callback handle_checkin(client_state, from, worker_state, pool_state) ::\n              {:ok, worker_state, pool_state} | {:remove, user_reason, pool_state}\n\n  @doc \"\"\"\n  Handles an update instruction from a checked out worker.\n\n  See `update/2` for more information.\n\n  This callback is optional.\n  \"\"\"\n  @doc callback: :worker\n  @callback handle_update(message :: term, worker_state, pool_state) ::\n              {:ok, worker_state, pool_state}\n\n  @doc \"\"\"\n  Receives a message in the pool and handles it as each worker.\n\n  It receives the `message` and it must return either\n  `{:ok, worker_state}` to update the worker state, or `{:remove, reason}` to\n  remove the worker.\n\n  Since there is only a single pool process that can receive messages, this\n  callback is executed once for every worker when the pool receives `message`.\n\n  > #### Blocking the pool {: .warning}\n  >\n  > This callback is synchronous and therefore will block the pool while it\n  > executes for each worker. Avoid performing long work in here.\n\n  This callback is optional.\n  \"\"\"\n  @doc callback: :worker\n  @callback handle_info(message :: term, worker_state) ::\n              {:ok, worker_state} | {:remove, user_reason}\n\n  @doc \"\"\"\n  Executed by the pool whenever a request to check out a worker is enqueued.\n\n  The `command` argument should be treated as an opaque value, but it can be\n  wrapped with some data to be used in `c:handle_checkout/4`.\n\n  It must return either `{:ok, maybe_wrapped_command, pool_state}` or\n  `{:skip, Exception.t(), pool_state}` if checkout is to be skipped.\n\n  > #### Blocking the pool {: .warning}\n  >\n  > This callback is synchronous and therefore will block the pool.\n  > Avoid performing long work in here.\n\n  This callback is optional.\n\n  ## Examples\n\n      @impl NimblePool\n      def handle_enqueue(command, pool_state) do\n        {:ok, {:wrapped, command}, pool_state}\n      end\n\n  \"\"\"\n  @doc callback: :pool\n  @callback handle_enqueue(command :: term, pool_state) ::\n              {:ok, maybe_wrapped_command :: term, pool_state}\n              | {:skip, Exception.t(), pool_state}\n\n  @doc \"\"\"\n  Terminates a worker.\n\n  The `reason` argument is:\n\n    * `:DOWN` whenever the client link breaks\n    * `:timeout` whenever the client times out\n    * one of `:throw`, `:error`, `:exit` whenever the client crashes with one\n      of the reasons above.\n    * `reason` if at any point you return `{:remove, reason}`\n    * if any callback raises, the raised exception will be given as `reason`.\n\n  It receives the latest known `worker_state`, which may not\n  be the latest state. For example, if a client checks out the\n  state and crashes, we don't fully know the `client_state`,\n  so the `c:terminate_worker/3` callback needs to take such scenarios\n  into account.\n\n  This callback must always return `{:ok, pool_state}` with the potentially-updated\n  pool state.\n\n  This callback is optional.\n  \"\"\"\n  @doc callback: :pool\n  @callback terminate_worker(\n              reason :: :DOWN | :timeout | :throw | :error | :exit | user_reason,\n              worker_state,\n              pool_state\n            ) ::\n              {:ok, pool_state}\n\n  @doc \"\"\"\n  Handle pings due to inactivity on the worker.\n\n  Executed whenever the idle worker periodic timer verifies that a worker has been idle\n  on the pool for longer than the `:worker_idle_timeout` pool configuration (in milliseconds).\n\n  This callback must return one of the following values:\n\n    * `{:ok, worker_state}`: Updates worker state.\n\n    * `{:remove, user_reason}`: The pool will proceed to the standard worker termination\n        defined in `terminate_worker/3`.\n\n    * `{:stop, user_reason}`: The entire pool process will be terminated, and `terminate_worker/3`\n        will be called for every worker on the pool.\n\n  This callback is optional.\n\n  ## Max idle pings\n\n  The `:max_idle_pings` pool option is useful to prevent sequential termination of a large number\n  of workers. However, it is important to keep in mind the following behaviours whenever\n  utilizing it.\n\n    * If you are not terminating workers with `c:handle_ping/2`, you may end up pinging only\n      the same workers over and over again because each cycle will ping only the first\n      `:max_idle_pings` workers.\n\n    * If you are terminating workers with `c:handle_ping/2`, the last worker may be terminated\n      after up to `worker_idle_timeout + worker_idle_timeout * ceil(number_of_workers/max_idle_pings)`,\n      instead of `2 * worker_idle_timeout` milliseconds of idle time.\n\n  For instance consider a pool with 10 workers and a ping of 1 second.\n\n  Given a negligible worker termination time and a worst-case scenario where all the workers\n  go idle right after a verification cycle is started, then without `max_idle_pings` the\n  last worker will be terminated in the next cycle (2 seconds), whereas with a\n  `max_idle_pings` of 2 the last worker will be terminated only in the 5th cycle (6 seconds).\n\n  ## Disclaimers\n\n    * On lazy pools, if no worker is currently on the pool the callback will never be called.\n      Therefore you can not rely on this callback to terminate empty lazy pools.\n\n    * On not lazy pools, if you return `{:remove, user_reason}` you may end up\n      terminating and initializing workers at the same time every idle verification cycle.\n\n    * On large pools, if many resources go idle at the same cycle, you may end up terminating\n      a large number of workers sequentially, which could lead to the pool being unable to\n      fulfill requests. See `:max_idle_pings` option to prevent this.\n\n  \"\"\"\n  @doc callback: :worker\n  @callback handle_ping(\n              worker_state,\n              pool_state\n            ) ::\n              {:ok, worker_state} | {:remove, user_reason()} | {:stop, user_reason()}\n\n  @doc \"\"\"\n  Handle pool termination.\n\n  The `reason` argmument is the same given to GenServer's terminate/2 callback.\n\n  It is not necessary to terminate workers here because the\n  `terminate_worker/3` callback has already been invoked.\n\n  This should be used only for clean up extra resources that can not be\n  handled by `terminate_worker/3` callback.\n\n  This callback is optional.\n  \"\"\"\n  @doc callback: :pool\n  @callback terminate_pool(\n              reason :: :DOWN | :timeout | :throw | :error | :exit | user_reason,\n              pool_state\n            ) :: :ok\n\n  @doc \"\"\"\n  Handle cancelled checkout requests.\n\n  This callback is executed when a checkout request is cancelled unexpectedly.\n\n  The context argument may be `:queued` or `:checked_out`:\n\n  * `:queued` means the cancellation happened before resource checkout. This may happen\n  when the pool is starving under load and can not serve resources.\n\n  * `:checked_out` means the cancellation happened after resource checkout. This may happen\n  when the function given to `checkout!/4` raises.\n\n  This callback is optional.\n  \"\"\"\n  @doc callback: :pool\n  @callback handle_cancelled(\n              context :: :queued | :checked_out,\n              pool_state\n            ) :: :ok\n\n  @optional_callbacks init_pool: 1,\n                      handle_checkin: 4,\n                      handle_info: 2,\n                      handle_enqueue: 2,\n                      handle_update: 3,\n                      handle_ping: 2,\n                      terminate_worker: 3,\n                      terminate_pool: 2,\n                      handle_cancelled: 2\n\n  @doc \"\"\"\n  Defines a pool to be started under the supervision tree.\n\n  It accepts the same options as `start_link/1` with the\n  addition or `:restart` and `:shutdown` that control the\n  \"Child Specification\".\n\n  ## Examples\n\n      NimblePool.child_spec(worker: {__MODULE__, :some_arg}, restart: :temporary)\n\n  \"\"\"\n  @spec child_spec(keyword) :: Supervisor.child_spec()\n  def child_spec(opts) when is_list(opts) do\n    {worker, _} = Keyword.fetch!(opts, :worker)\n    {restart, opts} = Keyword.pop(opts, :restart, :permanent)\n    {shutdown, opts} = Keyword.pop(opts, :shutdown, 5_000)\n\n    %{\n      id: worker,\n      start: {__MODULE__, :start_link, [opts]},\n      shutdown: shutdown,\n      restart: restart\n    }\n  end\n\n  @doc \"\"\"\n  Starts a pool.\n\n  ## Options\n\n    * `:worker` - a `{worker_mod, worker_init_arg}` tuple with the worker\n      module that implements the `NimblePool` behaviour and the worker\n      initial argument. This argument is **required**.\n\n    * `:pool_size` - how many workers in the pool. Defaults to `10`.\n\n    * `:lazy` - When `true`, workers are started lazily, only when necessary.\n      Defaults to `false`.\n\n    * `:worker_idle_timeout` - Timeout in milliseconds to tag a worker as idle.\n      If not nil, starts a periodic timer on the same frequency that will ping\n      all idle workers using `handle_ping/2` optional callback .\n      Defaults to no timeout.\n\n    * `:max_idle_pings` - Defines a limit to the number of workers that can be pinged\n      for each cycle of the `handle_ping/2` optional callback.\n      Defaults to no limit. See `handle_ping/2` for more details.\n\n  \"\"\"\n  @spec start_link(keyword) :: GenServer.on_start()\n  def start_link(opts) when is_list(opts) do\n    {{worker, arg}, opts} =\n      Keyword.pop_lazy(opts, :worker, fn ->\n        raise ArgumentError, \"missing required :worker option\"\n      end)\n\n    {pool_size, opts} = Keyword.pop(opts, :pool_size, 10)\n    {lazy, opts} = Keyword.pop(opts, :lazy, false)\n    {worker_idle_timeout, opts} = Keyword.pop(opts, :worker_idle_timeout, nil)\n    {max_idle_pings, opts} = Keyword.pop(opts, :max_idle_pings, -1)\n\n    unless is_atom(worker) do\n      raise ArgumentError, \"worker must be an atom, got: #{inspect(worker)}\"\n    end\n\n    unless is_integer(pool_size) and pool_size > 0 do\n      raise ArgumentError, \"pool_size must be a positive integer, got: #{inspect(pool_size)}\"\n    end\n\n    GenServer.start_link(\n      __MODULE__,\n      {worker, arg, pool_size, lazy, worker_idle_timeout, max_idle_pings},\n      opts\n    )\n  end\n\n  @doc \"\"\"\n  Stops the given `pool`.\n\n  The pool exits with the given `reason`. The pool has `timeout` milliseconds\n  to terminate, otherwise it will be brutally terminated.\n\n  ## Examples\n\n      NimblePool.stop(pool)\n      #=> :ok\n\n  \"\"\"\n  @spec stop(pool, reason :: term, timeout) :: :ok\n  def stop(pool, reason \\\\ :normal, timeout \\\\ :infinity) do\n    GenServer.stop(pool, reason, timeout)\n  end\n\n  @doc \"\"\"\n  Checks out a worker from the pool.\n\n  It expects a command, which will be passed to the `c:handle_checkout/4`\n  callback. The `c:handle_checkout/4` callback will return a client state,\n  which is given to the `function`.\n\n  The `function` receives two arguments, the request\n  (`{pid(), reference()}`) and the `client_state`.\n  The function must return a two-element tuple, where the first element is the\n  return value for `checkout!/4`, and the second element is the updated `client_state`,\n  which will be given as the first argument to `c:handle_checkin/4`.\n\n  `checkout!/4` also has an optional `timeout` value. This value will be applied\n  to the checkout operation itself. The \"check in\" operation happens asynchronously.\n  \"\"\"\n  @spec checkout!(pool, command :: term, function, timeout) :: result\n        when function: (from, client_state -> {result, client_state}), result: var\n  def checkout!(pool, command, function, timeout \\\\ 5_000) when is_function(function, 2) do\n    # Re-implementation of gen.erl call to avoid multiple monitors.\n    pid = GenServer.whereis(pool)\n\n    unless pid do\n      exit!(:noproc, :checkout, [pool])\n    end\n\n    ref = Process.monitor(pid)\n    send_call(pid, ref, {:checkout, command, deadline(timeout)})\n\n    receive do\n      {^ref, {:skipped, exception}} ->\n        raise exception\n\n      {^ref, client_state} ->\n        Process.demonitor(ref, [:flush])\n\n        try do\n          function.({pid, ref}, client_state)\n        catch\n          kind, reason ->\n            send(pid, {__MODULE__, :cancel, ref, kind})\n            :erlang.raise(kind, reason, __STACKTRACE__)\n        else\n          {result, client_state} ->\n            send(pid, {__MODULE__, :checkin, ref, client_state})\n            result\n        end\n\n      {:DOWN, ^ref, _, _, :noconnection} ->\n        exit!({:nodedown, get_node(pid)}, :checkout, [pool])\n\n      {:DOWN, ^ref, _, _, reason} ->\n        exit!(reason, :checkout, [pool])\n    after\n      timeout ->\n        send(pid, {__MODULE__, :cancel, ref, :timeout})\n        Process.demonitor(ref, [:flush])\n        exit!(:timeout, :checkout, [pool])\n    end\n  end\n\n  @doc \"\"\"\n  Sends an **update** instruction to the pool about the checked out worker.\n\n  This must be called inside the `checkout!/4` callback function with\n  the `from` value given to `c:handle_checkout/4`.\n\n  This is useful to update the pool's state before effectively\n  checking the state in, which is handy when transferring\n  resources requires two steps.\n  \"\"\"\n  @spec update(from, command :: term) :: :ok\n  def update({pid, ref} = _from, command) do\n    send(pid, {__MODULE__, :update, ref, command})\n    :ok\n  end\n\n  defp deadline(timeout) when is_integer(timeout) do\n    System.monotonic_time() + System.convert_time_unit(timeout, :millisecond, :native)\n  end\n\n  defp deadline(:infinity), do: :infinity\n\n  defp get_node({_, node}), do: node\n  defp get_node(pid) when is_pid(pid), do: node(pid)\n\n  defp send_call(pid, ref, message) do\n    # Auto-connect is asynchronous. But we still use :noconnect to make sure\n    # we send on the monitored connection, and not trigger a new auto-connect.\n    Process.send(pid, {:\"$gen_call\", {self(), ref}, message}, [:noconnect])\n  end\n\n  defp exit!(reason, fun, args) do\n    exit({reason, {__MODULE__, fun, args}})\n  end\n\n  ## Callbacks\n\n  @impl true\n  def init({worker, arg, pool_size, lazy, worker_idle_timeout, max_idle_pings}) do\n    Process.flag(:trap_exit, true)\n\n    case Code.ensure_loaded(worker) do\n      {:module, _} ->\n        :ok\n\n      {:error, reason} ->\n        raise ArgumentError, \"failed to load worker module #{inspect(worker)}: #{inspect(reason)}\"\n    end\n\n    lazy = if lazy, do: pool_size, else: nil\n\n    if worker_idle_timeout do\n      if function_exported?(worker, :handle_ping, 2) do\n        Process.send_after(self(), :check_idle, worker_idle_timeout)\n      else\n        IO.warn(\n          \":worker_idle_timeout was given but the worker does not export a handle_ping/2 callback\"\n        )\n      end\n    end\n\n    with {:ok, pool_state} <- do_init_pool(worker, arg) do\n      {pool_state, resources, async} =\n        if is_nil(lazy) do\n          Enum.reduce(1..pool_size, {pool_state, :queue.new(), %{}}, fn\n            _, {pool_state, resources, async} ->\n              init_worker(worker, pool_state, resources, async, worker_idle_timeout)\n          end)\n        else\n          {pool_state, :queue.new(), %{}}\n        end\n\n      state = %{\n        worker: worker,\n        queue: :queue.new(),\n        requests: %{},\n        monitors: %{},\n        resources: resources,\n        async: async,\n        state: pool_state,\n        lazy: lazy,\n        worker_idle_timeout: worker_idle_timeout,\n        max_idle_pings: max_idle_pings\n      }\n\n      {:ok, state}\n    end\n  end\n\n  @impl true\n  def handle_call({:checkout, command, deadline}, {pid, ref} = from, state) do\n    %{requests: requests, monitors: monitors, worker: worker, state: pool_state} = state\n    mon_ref = Process.monitor(pid)\n    requests = Map.put(requests, ref, {pid, mon_ref, :command, command, deadline})\n    monitors = Map.put(monitors, mon_ref, ref)\n    state = %{state | requests: requests, monitors: monitors}\n\n    case handle_enqueue(worker, command, pool_state) do\n      {:ok, command, pool_state} ->\n        {:noreply, maybe_checkout(command, mon_ref, deadline, from, %{state | state: pool_state})}\n\n      {:skip, exception, pool_state} ->\n        state = remove_request(%{state | state: pool_state}, ref, mon_ref)\n        {:reply, {:skipped, exception}, state}\n    end\n  end\n\n  @impl true\n  def handle_info({__MODULE__, :update, ref, command}, state) do\n    %{requests: requests, state: pool_state, worker: worker} = state\n\n    case requests do\n      %{^ref => {pid, mon_ref, :state, worker_state}} ->\n        {:ok, worker_state, pool_state} = worker.handle_update(command, worker_state, pool_state)\n        requests = Map.put(requests, ref, {pid, mon_ref, :state, worker_state})\n        {:noreply, %{state | requests: requests, state: pool_state}}\n\n      %{} ->\n        exit(:unexpected_precheckin)\n    end\n  end\n\n  @impl true\n  def handle_info({__MODULE__, :checkin, ref, worker_client_state}, state) do\n    %{\n      requests: requests,\n      resources: resources,\n      worker: worker,\n      state: pool_state,\n      worker_idle_timeout: worker_idle_timeout\n    } = state\n\n    case requests do\n      %{^ref => {pid, mon_ref, :state, worker_server_state}} ->\n        checkin =\n          if function_exported?(worker, :handle_checkin, 4) do\n            args = [worker_client_state, {pid, ref}, worker_server_state, pool_state]\n            apply_worker_callback(pool_state, worker, :handle_checkin, args)\n          else\n            {:ok, worker_server_state, pool_state}\n          end\n\n        {resources, state} =\n          case checkin do\n            {:ok, worker_server_state, pool_state} ->\n              {:queue.in({worker_server_state, get_metadata(worker_idle_timeout)}, resources),\n               %{state | state: pool_state}}\n\n            {:remove, reason, pool_state} ->\n              {resources,\n               remove_worker(reason, worker_server_state, %{state | state: pool_state})}\n          end\n\n        state = remove_request(state, ref, mon_ref)\n        {:noreply, maybe_checkout(%{state | resources: resources})}\n\n      %{} ->\n        exit(:unexpected_checkin)\n    end\n  end\n\n  @impl true\n  def handle_info({__MODULE__, :cancel, ref, reason}, state) do\n    cancel_request_ref(ref, reason, state)\n  end\n\n  @impl true\n  def handle_info({__MODULE__, :init_worker}, state) do\n    %{\n      async: async,\n      resources: resources,\n      worker: worker,\n      state: pool_state,\n      worker_idle_timeout: worker_idle_timeout\n    } = state\n\n    {pool_state, resources, async} =\n      init_worker(worker, pool_state, resources, async, worker_idle_timeout)\n\n    {:noreply, maybe_checkout(%{state | async: async, resources: resources, state: pool_state})}\n  end\n\n  @impl true\n  def handle_info({:DOWN, ref, _, _, _} = down, state) do\n    %{monitors: monitors, async: async} = state\n\n    case monitors do\n      %{^ref => request_ref} ->\n        cancel_request_ref(request_ref, :DOWN, state)\n\n      %{} ->\n        case async do\n          %{^ref => _} -> remove_async_ref(ref, state)\n          %{} -> maybe_handle_info(down, state)\n        end\n    end\n  end\n\n  @impl true\n  def handle_info({:EXIT, pid, _reason} = exit, state) do\n    %{async: async} = state\n\n    case async do\n      %{^pid => _} -> {:noreply, %{state | async: Map.delete(async, pid)}}\n      %{} -> maybe_handle_info(exit, state)\n    end\n  end\n\n  @impl true\n  def handle_info({ref, worker_state} = reply, state) when is_reference(ref) do\n    %{async: async, resources: resources, worker_idle_timeout: worker_idle_timeout} = state\n\n    case async do\n      %{^ref => _} ->\n        Process.demonitor(ref, [:flush])\n        resources = :queue.in({worker_state, get_metadata(worker_idle_timeout)}, resources)\n        async = Map.delete(async, ref)\n        state = %{state | async: async, resources: resources}\n        {:noreply, maybe_checkout(state)}\n\n      %{} ->\n        maybe_handle_info(reply, state)\n    end\n  end\n\n  @impl true\n  def handle_info(\n        :check_idle,\n        %{resources: resources, worker_idle_timeout: worker_idle_timeout} = state\n      ) do\n    case check_idle_resources(resources, state) do\n      {:ok, new_resources, new_state} ->\n        Process.send_after(self(), :check_idle, worker_idle_timeout)\n        {:noreply, %{new_state | resources: new_resources}}\n\n      {:stop, reason, state} ->\n        {:stop, {:shutdown, reason}, state}\n    end\n  end\n\n  @impl true\n  def handle_info(msg, state) do\n    maybe_handle_info(msg, state)\n  end\n\n  @impl true\n  def terminate(reason, %{worker: worker, resources: resources} = state) do\n    for {worker_server_state, _} <- :queue.to_list(resources) do\n      maybe_terminate_worker(reason, worker_server_state, state)\n    end\n\n    if function_exported?(worker, :terminate_pool, 2) do\n      worker.terminate_pool(reason, state)\n    end\n\n    :ok\n  end\n\n  defp do_init_pool(worker, arg) do\n    if function_exported?(worker, :init_pool, 1) do\n      worker.init_pool(arg)\n    else\n      {:ok, arg}\n    end\n  end\n\n  defp remove_async_ref(ref, state) do\n    %{\n      async: async,\n      resources: resources,\n      worker: worker,\n      state: pool_state,\n      worker_idle_timeout: worker_idle_timeout\n    } = state\n\n    # If an async worker failed to start, we try to start another one\n    # immediately, even if the pool is lazy, as we assume there is an\n    # immediate need for this resource.\n    {pool_state, resources, async} =\n      init_worker(worker, pool_state, resources, Map.delete(async, ref), worker_idle_timeout)\n\n    {:noreply, %{state | resources: resources, async: async, state: pool_state}}\n  end\n\n  defp cancel_request_ref(\n         ref,\n         reason,\n         %{requests: requests, worker: worker, state: pool_state} = state\n       ) do\n    case requests do\n      # Exited or timed out before we could serve it\n      %{^ref => {_, mon_ref, :command, _command, _deadline}} ->\n        if function_exported?(worker, :handle_cancelled, 2) do\n          args = [:queued, pool_state]\n          apply_worker_callback(worker, :handle_cancelled, args)\n        end\n\n        {:noreply, remove_request(state, ref, mon_ref)}\n\n      # Exited or errored during client processing\n      %{^ref => {_, mon_ref, :state, worker_server_state}} ->\n        if function_exported?(worker, :handle_cancelled, 2) do\n          args = [:checked_out, pool_state]\n          apply_worker_callback(worker, :handle_cancelled, args)\n        end\n\n        state = remove_request(state, ref, mon_ref)\n        {:noreply, remove_worker(reason, worker_server_state, state)}\n\n      # The client timed out, sent us a message, and we dropped the deadlined request\n      %{} ->\n        if function_exported?(worker, :handle_cancelled, 2) do\n          args = [:queued, pool_state]\n          apply_worker_callback(worker, :handle_cancelled, args)\n        end\n\n        {:noreply, state}\n    end\n  end\n\n  defp maybe_handle_info(msg, state) do\n    %{resources: resources, worker: worker, worker_idle_timeout: worker_idle_timeout} = state\n\n    if function_exported?(worker, :handle_info, 2) do\n      {resources, state} =\n        Enum.reduce(:queue.to_list(resources), {:queue.new(), state}, fn\n          {worker_server_state, _}, {resources, state} ->\n            case apply_worker_callback(worker, :handle_info, [msg, worker_server_state]) do\n              {:ok, worker_server_state} ->\n                {:queue.in({worker_server_state, get_metadata(worker_idle_timeout)}, resources),\n                 state}\n\n              {:remove, reason} ->\n                {resources, remove_worker(reason, worker_server_state, state)}\n            end\n        end)\n\n      {:noreply, %{state | resources: resources}}\n    else\n      {:noreply, state}\n    end\n  end\n\n  defp maybe_checkout(%{queue: queue, requests: requests} = state) do\n    case :queue.out(queue) do\n      {{:value, {pid, ref}}, queue} ->\n        case requests do\n          # The request still exists, so we are good to go\n          %{^ref => {^pid, mon_ref, :command, command, deadline}} ->\n            maybe_checkout(command, mon_ref, deadline, {pid, ref}, %{state | queue: queue})\n\n          # It should never happen\n          %{^ref => _} ->\n            exit(:unexpected_checkout)\n\n          # The request is no longer active, do nothing\n          %{} ->\n            maybe_checkout(%{state | queue: queue})\n        end\n\n      {:empty, _queue} ->\n        state\n    end\n  end\n\n  defp maybe_checkout(command, mon_ref, deadline, {pid, ref} = from, state) do\n    if past_deadline?(deadline) do\n      state = remove_request(state, ref, mon_ref)\n      maybe_checkout(state)\n    else\n      %{resources: resources, requests: requests, worker: worker, queue: queue, state: pool_state} =\n        state = init_worker_if_lazy_and_empty(state)\n\n      case :queue.out(resources) do\n        {{:value, {worker_server_state, _}}, resources} ->\n          args = [command, from, worker_server_state, pool_state]\n\n          case apply_worker_callback(pool_state, worker, :handle_checkout, args) do\n            {:ok, worker_client_state, worker_server_state, pool_state} ->\n              GenServer.reply({pid, ref}, worker_client_state)\n\n              requests = Map.put(requests, ref, {pid, mon_ref, :state, worker_server_state})\n              %{state | resources: resources, requests: requests, state: pool_state}\n\n            {:remove, reason, pool_state} ->\n              state = remove_worker(reason, worker_server_state, %{state | state: pool_state})\n              maybe_checkout(command, mon_ref, deadline, from, %{state | resources: resources})\n\n            {:skip, exception, pool_state} ->\n              GenServer.reply({pid, ref}, {:skipped, exception})\n              remove_request(%{state | state: pool_state}, ref, mon_ref)\n\n            other ->\n              raise \"\"\"\n              unexpected return from #{inspect(worker)}.handle_checkout/4.\n\n              Expected: {:ok, client_state, server_state, pool_state} | {:remove, reason, pool_state} | {:skip, Exception.t(), pool_state}\n              Got: #{inspect(other)}\n              \"\"\"\n          end\n\n        {:empty, _} ->\n          %{state | queue: :queue.in(from, queue)}\n      end\n    end\n  end\n\n  defp init_worker_if_lazy_and_empty(%{lazy: nil} = state), do: state\n\n  defp init_worker_if_lazy_and_empty(\n         %{lazy: lazy, resources: resources, worker_idle_timeout: worker_idle_timeout} = state\n       ) do\n    if lazy > 0 and :queue.is_empty(resources) do\n      %{async: async, worker: worker, state: pool_state} = state\n\n      {pool_state, resources, async} =\n        init_worker(worker, pool_state, resources, async, worker_idle_timeout)\n\n      %{state | async: async, resources: resources, state: pool_state, lazy: lazy - 1}\n    else\n      state\n    end\n  end\n\n  defp past_deadline?(deadline) when is_integer(deadline) do\n    System.monotonic_time() >= deadline\n  end\n\n  defp past_deadline?(:infinity), do: false\n\n  defp remove_worker(reason, worker_server_state, state) do\n    state = maybe_terminate_worker(reason, worker_server_state, state)\n\n    if lazy = state.lazy do\n      %{state | lazy: lazy + 1}\n    else\n      schedule_init()\n      state\n    end\n  end\n\n  defp check_idle_resources(resources, state) do\n    now_in_ms = System.monotonic_time(:millisecond)\n    do_check_idle_resources(resources, now_in_ms, state, :queue.new(), state.max_idle_pings)\n  end\n\n  defp do_check_idle_resources(resources, _now_in_ms, state, new_resources, 0) do\n    {:ok, :queue.join(new_resources, resources), state}\n  end\n\n  defp do_check_idle_resources(resources, now_in_ms, state, new_resources, remaining_pings) do\n    case :queue.out(resources) do\n      {:empty, _} ->\n        {:ok, new_resources, state}\n\n      {{:value, resource_data}, next_resources} ->\n        {worker_server_state, worker_metadata} = resource_data\n        time_diff = now_in_ms - worker_metadata\n\n        if time_diff >= state.worker_idle_timeout do\n          case maybe_ping_worker(worker_server_state, state) do\n            {:ok, new_worker_state} ->\n              # We don't need to update the worker_metadata because, by definition,\n              # if we are checking for idle resources again and the timestamp is the same,\n              # it is because it has to be checked again.\n              new_resource_data = {new_worker_state, worker_metadata}\n              new_resources = :queue.in(new_resource_data, new_resources)\n\n              do_check_idle_resources(\n                next_resources,\n                now_in_ms,\n                state,\n                new_resources,\n                remaining_pings - 1\n              )\n\n            {:remove, user_reason} ->\n              new_state = remove_worker(user_reason, worker_server_state, state)\n\n              do_check_idle_resources(\n                next_resources,\n                now_in_ms,\n                new_state,\n                new_resources,\n                remaining_pings - 1\n              )\n\n            {:stop, reason} ->\n              {:stop, reason, state}\n          end\n        else\n          {:ok, :queue.join(new_resources, resources), state}\n        end\n    end\n  end\n\n  defp maybe_ping_worker(worker_server_state, state) do\n    %{worker: worker, state: pool_state} = state\n\n    args = [worker_server_state, pool_state]\n\n    case apply_worker_callback(worker, :handle_ping, args) do\n      {:ok, worker_state} ->\n        {:ok, worker_state}\n\n      {:remove, user_reason} ->\n        {:remove, user_reason}\n\n      {:stop, user_reason} ->\n        {:stop, user_reason}\n\n      other ->\n        raise \"\"\"\n        unexpected return from #{inspect(worker)}.handle_ping/2.\n\n        Expected:\n\n          {:remove, reason}\n          | {:ok, worker_state}\n          | {:stop, reason}\n\n        Got: #{inspect(other)}\n        \"\"\"\n    end\n  end\n\n  defp maybe_terminate_worker(reason, worker_server_state, state) do\n    %{worker: worker, state: pool_state} = state\n\n    if function_exported?(worker, :terminate_worker, 3) do\n      args = [reason, worker_server_state, pool_state]\n\n      case apply_worker_callback(worker, :terminate_worker, args) do\n        {:ok, pool_state} ->\n          %{state | state: pool_state}\n\n        {:remove, _reason} ->\n          state\n\n        other ->\n          raise \"\"\"\n          unexpected return from #{inspect(worker)}.terminate_worker/3.\n\n          Expected:\n\n              {:ok, pool_state}\n\n          Got: #{inspect(other)}\n          \"\"\"\n      end\n    else\n      state\n    end\n  end\n\n  defp init_worker(worker, pool_state, resources, async, worker_idle_timeout) do\n    case apply_worker_callback(worker, :init_worker, [pool_state]) do\n      {:ok, worker_state, pool_state} ->\n        {pool_state, :queue.in({worker_state, get_metadata(worker_idle_timeout)}, resources),\n         async}\n\n      {:async, fun, pool_state} when is_function(fun, 0) ->\n        %{ref: ref, pid: pid} = Task.Supervisor.async(NimblePool.TaskSupervisor, fun)\n        {pool_state, resources, async |> Map.put(ref, pid) |> Map.put(pid, ref)}\n\n      {:remove, _reason} ->\n        send(self(), {__MODULE__, :init_worker})\n        {pool_state, resources, async}\n\n      other ->\n        raise \"\"\"\n        unexpected return from #{inspect(worker)}.init_worker/1.\n\n        Expected:\n\n            {:ok, worker_state, pool_state}\n            | {:async, (() -> worker_state), pool_state}\n\n        Got: #{inspect(other)}\n        \"\"\"\n    end\n  end\n\n  defp schedule_init() do\n    send(self(), {__MODULE__, :init_worker})\n  end\n\n  defp apply_worker_callback(worker, fun, args) do\n    do_apply_worker_callback(worker, fun, args, &{:remove, &1})\n  end\n\n  defp apply_worker_callback(pool_state, worker, fun, args) do\n    do_apply_worker_callback(worker, fun, args, &{:remove, &1, pool_state})\n  end\n\n  defp do_apply_worker_callback(worker, fun, args, catch_fun) do\n    try do\n      apply(worker, fun, args)\n    catch\n      kind, reason ->\n        reason = Exception.normalize(kind, reason, __STACKTRACE__)\n\n        Logger.error(\n          [\n            \"Error during #{inspect(worker)}.#{fun}/#{length(args)} callback:\\n\"\n            | Exception.format(kind, reason, __STACKTRACE__)\n          ],\n          crash_reason: {crash_reason(kind, reason), __STACKTRACE__}\n        )\n\n        catch_fun.(reason)\n    end\n  end\n\n  defp crash_reason(:throw, value), do: {:nocatch, value}\n  defp crash_reason(_, value), do: value\n\n  defp remove_request(pool_state, ref, mon_ref) do\n    requests = Map.delete(pool_state.requests, ref)\n    monitors = Map.delete(pool_state.monitors, mon_ref)\n    Process.demonitor(mon_ref, [:flush])\n    %{pool_state | requests: requests, monitors: monitors}\n  end\n\n  defp handle_enqueue(worker, command, pool_state) do\n    if function_exported?(worker, :handle_enqueue, 2) do\n      worker.handle_enqueue(command, pool_state)\n    else\n      {:ok, command, pool_state}\n    end\n  end\n\n  defp get_metadata(nil), do: nil\n  defp get_metadata(_worker_idle_timeout), do: System.monotonic_time(:millisecond)\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "0cb9a55a32012883138e6b5d0ee23268": "schema",
+      "14a795cd267bf2730b18028c1bc6a795": "fallback",
+      "15a5200c9c1d4d21c26e0e277976cda1": "schema",
+      "15d693f01b4b62f9b448a163083601a8": "schema",
+      "162f2dea7410303dbf0d1a61706eb554": "schema",
+      "1ea4c5bbbbe4c43aab7d53b0651f21f9": "fallback",
+      "1eb01ff8a6f30bf6f244f742045998d6": "fallback",
+      "1fd7878d16104f7fefebcbc4fa77f546": "schema",
+      "277c80d0210fe0a0b7814abb03e39abf": "schema",
+      "2a8a10cfddfda6fbcf9e9951d29dcf7b": "schema",
+      "2b6dbd6ddc86618b1d01323d44a20d9c": "schema",
+      "2c04296a41b295c28ca3597ea36ca30d": "fallback",
+      "2d1292c6f423a4182c6ccd43684ca91f": "schema",
+      "334e48ec877d46448818067fe2e4c63f": "schema",
+      "47e8257d7defda0704abac61a6e81b99": "schema",
+      "57599f3889b348a65ab70693f42fc655": "schema",
+      "620e05168bf8402d7009628d57e15505": "schema",
+      "69bed026b7f807d56a9ff71ae470c817": "schema",
+      "7f2ae420bae94fec9baf5dc04483a476": "schema",
+      "8ade2e503085f0d77a36f4623ed2a8d1": "schema",
+      "8fa35ef849342bed689f168f6dae6cfa": "schema",
+      "91dc92a05b75ceeecdf1f82b654cdf87": "schema",
+      "92038d7b62e0f4bef9d717ec80e82904": "schema",
+      "9bd1a4a530dfbc002fb5034e7dfccfab": "schema",
+      "bc5880fd2b94745bebec558106828bcb": "fallback",
+      "d137f4625e3cfb340f5900f582bbb89a": "fallback",
+      "d4197130c3af3c5ae6d8102c1849237b": "schema",
+      "e069df60970038cfc7b29f17727ec93b": "schema"
+    },
+    "metrics": {
+      "fallback_count": 6,
+      "fallback_time_ms": 9558,
+      "fanout": {
+        "0cb9a55a32012883138e6b5d0ee23268": 1,
+        "14a795cd267bf2730b18028c1bc6a795": 1,
+        "15a5200c9c1d4d21c26e0e277976cda1": 1,
+        "15d693f01b4b62f9b448a163083601a8": 1,
+        "162f2dea7410303dbf0d1a61706eb554": 1,
+        "1ea4c5bbbbe4c43aab7d53b0651f21f9": 1,
+        "1eb01ff8a6f30bf6f244f742045998d6": 1,
+        "1fd7878d16104f7fefebcbc4fa77f546": 1,
+        "277c80d0210fe0a0b7814abb03e39abf": 1,
+        "2a8a10cfddfda6fbcf9e9951d29dcf7b": 1,
+        "2b6dbd6ddc86618b1d01323d44a20d9c": 1,
+        "2c04296a41b295c28ca3597ea36ca30d": 1,
+        "2d1292c6f423a4182c6ccd43684ca91f": 1,
+        "334e48ec877d46448818067fe2e4c63f": 1,
+        "47e8257d7defda0704abac61a6e81b99": 1,
+        "57599f3889b348a65ab70693f42fc655": 1,
+        "620e05168bf8402d7009628d57e15505": 1,
+        "69bed026b7f807d56a9ff71ae470c817": 1,
+        "7f2ae420bae94fec9baf5dc04483a476": 1,
+        "8ade2e503085f0d77a36f4623ed2a8d1": 1,
+        "8fa35ef849342bed689f168f6dae6cfa": 1,
+        "91dc92a05b75ceeecdf1f82b654cdf87": 1,
+        "92038d7b62e0f4bef9d717ec80e82904": 1,
+        "9bd1a4a530dfbc002fb5034e7dfccfab": 1,
+        "bc5880fd2b94745bebec558106828bcb": 1,
+        "d137f4625e3cfb340f5900f582bbb89a": 1,
+        "d4197130c3af3c5ae6d8102c1849237b": 1,
+        "e069df60970038cfc7b29f17727ec93b": 1
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "body_literal_engine_disabled": 23,
+        "missing_oracle_site": 95,
+        "no_applicable_mutator": 2,
+        "unsupported_dispatch": 289
+      }
+    },
+    "mutation_kind": {
+      "0cb9a55a32012883138e6b5d0ee23268": "boolean_op",
+      "14a795cd267bf2730b18028c1bc6a795": "guard_type_test",
+      "15a5200c9c1d4d21c26e0e277976cda1": "arithmetic_op",
+      "15d693f01b4b62f9b448a163083601a8": "arithmetic_op",
+      "162f2dea7410303dbf0d1a61706eb554": "arithmetic_op",
+      "1ea4c5bbbbe4c43aab7d53b0651f21f9": "guard_type_test",
+      "1eb01ff8a6f30bf6f244f742045998d6": "guard_type_test",
+      "1fd7878d16104f7fefebcbc4fa77f546": "arithmetic_op",
+      "277c80d0210fe0a0b7814abb03e39abf": "arithmetic_op",
+      "2a8a10cfddfda6fbcf9e9951d29dcf7b": "arithmetic_op",
+      "2b6dbd6ddc86618b1d01323d44a20d9c": "comparison_boundary",
+      "2c04296a41b295c28ca3597ea36ca30d": "guard_type_test",
+      "2d1292c6f423a4182c6ccd43684ca91f": "arithmetic_op",
+      "334e48ec877d46448818067fe2e4c63f": "comparison_boundary",
+      "47e8257d7defda0704abac61a6e81b99": "comparison_negation",
+      "57599f3889b348a65ab70693f42fc655": "comparison_negation",
+      "620e05168bf8402d7009628d57e15505": "comparison_boundary",
+      "69bed026b7f807d56a9ff71ae470c817": "arithmetic_op",
+      "7f2ae420bae94fec9baf5dc04483a476": "comparison_negation",
+      "8ade2e503085f0d77a36f4623ed2a8d1": "arithmetic_op",
+      "8fa35ef849342bed689f168f6dae6cfa": "comparison_boundary",
+      "91dc92a05b75ceeecdf1f82b654cdf87": "comparison_negation",
+      "92038d7b62e0f4bef9d717ec80e82904": "arithmetic_op",
+      "9bd1a4a530dfbc002fb5034e7dfccfab": "arithmetic_op",
+      "bc5880fd2b94745bebec558106828bcb": "guard_type_test",
+      "d137f4625e3cfb340f5900f582bbb89a": "guard_type_test",
+      "d4197130c3af3c5ae6d8102c1849237b": "boolean_op",
+      "e069df60970038cfc7b29f17727ec93b": "arithmetic_op"
+    },
+    "persistent": null,
+    "phase_timings": {
+      "baseline_tests_ms": 1153,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 3311,
+      "oracle_build_ms": 9857,
+      "plan_generation_ms": 23,
+      "report_writing_ms": 2,
+      "schema_build_ms": 9709,
+      "schema_workers_ms": 10961,
+      "total_ms": 35681
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 28,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 28
+      },
+      "mode": "static",
+      "selected_tests_avg": 1.0,
+      "selected_tests_median": 1
+    },
+    "stable_id_to_integer": {
+      "0cb9a55a32012883138e6b5d0ee23268": 1,
+      "14a795cd267bf2730b18028c1bc6a795": 2,
+      "15a5200c9c1d4d21c26e0e277976cda1": 3,
+      "15d693f01b4b62f9b448a163083601a8": 4,
+      "162f2dea7410303dbf0d1a61706eb554": 5,
+      "1ea4c5bbbbe4c43aab7d53b0651f21f9": 6,
+      "1eb01ff8a6f30bf6f244f742045998d6": 7,
+      "1fd7878d16104f7fefebcbc4fa77f546": 8,
+      "277c80d0210fe0a0b7814abb03e39abf": 9,
+      "2a8a10cfddfda6fbcf9e9951d29dcf7b": 10,
+      "2b6dbd6ddc86618b1d01323d44a20d9c": 11,
+      "2c04296a41b295c28ca3597ea36ca30d": 12,
+      "2d1292c6f423a4182c6ccd43684ca91f": 13,
+      "334e48ec877d46448818067fe2e4c63f": 14,
+      "47e8257d7defda0704abac61a6e81b99": 15,
+      "57599f3889b348a65ab70693f42fc655": 16,
+      "620e05168bf8402d7009628d57e15505": 17,
+      "69bed026b7f807d56a9ff71ae470c817": 18,
+      "7f2ae420bae94fec9baf5dc04483a476": 19,
+      "8ade2e503085f0d77a36f4623ed2a8d1": 20,
+      "8fa35ef849342bed689f168f6dae6cfa": 21,
+      "91dc92a05b75ceeecdf1f82b654cdf87": 22,
+      "92038d7b62e0f4bef9d717ec80e82904": 23,
+      "9bd1a4a530dfbc002fb5034e7dfccfab": 24,
+      "bc5880fd2b94745bebec558106828bcb": 25,
+      "d137f4625e3cfb340f5900f582bbb89a": 26,
+      "d4197130c3af3c5ae6d8102c1849237b": 27,
+      "e069df60970038cfc7b29f17727ec93b": 28
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

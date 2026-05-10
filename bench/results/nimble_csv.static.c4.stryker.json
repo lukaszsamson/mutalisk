@@ -1,0 +1,61 @@
+{
+  "files": {},
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {},
+    "metrics": {
+      "fallback_count": 0,
+      "fallback_time_ms": 0,
+      "fanout": {},
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "body_literal_engine_disabled": 10,
+        "missing_oracle_site": 132,
+        "unsupported_dispatch": 3
+      }
+    },
+    "mutation_kind": {},
+    "persistent": null,
+    "phase_timings": {
+      "baseline_tests_ms": 543,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 0,
+      "oracle_build_ms": 2314,
+      "plan_generation_ms": 7,
+      "report_writing_ms": 1,
+      "schema_build_ms": 2304,
+      "schema_workers_ms": 2,
+      "total_ms": 5527
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 0,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {},
+      "mode": "static",
+      "selected_tests_avg": 0.0,
+      "selected_tests_median": 0
+    },
+    "stable_id_to_integer": {},
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

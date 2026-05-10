@@ -1,0 +1,56 @@
+target=plug repo=https://github.com/elixir-plug/plug.git ref=v1.19.1 sha=8723880aa55ec9aae26ec33bc2c107903ec16840 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  earmark_parser 1.4.44
+  ex_doc 0.39.2
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  mime 1.6.0
+  nimble_parsec 1.4.2
+  plug_crypto 2.0.0
+  telemetry 0.4.3
+* Getting mime (Hex package)
+* Getting plug_crypto (Hex package)
+* Getting telemetry (Hex package)
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mime
+Compiling 2 files (.ex)
+Generated mime app
+==> plug_crypto
+Compiling 5 files (.ex)
+Generated plug_crypto app
+==> plug
+===> Analyzing applications...
+===> Compiling telemetry
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> plug
+Compiling 1 file (.erl)
+Compiling 42 files (.ex)
+Generated plug app
+Schema build starting
+** (SyntaxError) invalid syntax found on nofile:239:32:
+     error: unexpected token: "\" (column 32, code point U+005C)
+     │
+ 239 │     iex> token(~S[\"<f\oo>\\"<b\ar>\"])
+     │                                ^
+     │
+     └─ nofile:239:32
+    (elixir 1.19.5) lib/code.ex:1103: Code.format_string!/2
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:95: Mut.SchemaPlacer.render/1
+    (mutalisk 0.1.0) lib/mut/schema_placer.ex:141: Mut.SchemaPlacer.instrument_file/2
+    (mutalisk 0.1.0) lib/mut/schema_build.ex:125: anonymous fn/3 in Mut.SchemaBuild.instrument_files/2
+    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
+    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3
+    (mutalisk 0.1.0) lib/mut/schema_build.ex:95: Mut.SchemaBuild.build_in_work_copy/3

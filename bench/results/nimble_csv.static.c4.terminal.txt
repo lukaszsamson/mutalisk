@@ -1,0 +1,74 @@
+target=nimble_csv repo=https://github.com/dashbitco/nimble_csv.git ref=v1.3.0 sha=2fc3cbf4b50ec504aa4f8d7ab9109c06ec9a7173 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.02s
+Unchanged:
+  benchee 1.1.0
+  deep_merge 1.0.0
+  earmark_parser 1.4.44
+  ex_doc 0.38.2
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+  statistex 1.0.0
+* Getting ex_doc (Hex package)
+* Getting benchee (Hex package)
+* Getting deep_merge (Hex package)
+* Getting statistex (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> nimble_csv
+Compiling 1 file (.ex)
+Generated nimble_csv app
+Schema build starting
+Schema build complete
+Mutation score: 0/0 = 100.0%
+
+Surviving mutants:
+  none
+
+Schema:    0/0 killed (100.0%)   wall: 0.0s
+Fallback:  0/0 killed (100.0%)   wall: 0.0s
+Skipped:   145 (body_literal_engine_disabled: 10, missing_oracle_site: 132, unsupported_dispatch: 3)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 0.0s
+Fallback wall-clock: 0.0% of total
+Fallback mutants: 0.0% of executed
+
+Phases:
+  oracle build:        2314 ms
+  baseline tests:       543 ms
+  plan generation:        7 ms
+  schema build:        2304 ms
+  schema workers:         2 ms
+  report writing:         1 ms
+  total:               5527 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          0
+  avg tests/mutant: 0.0
+  median tests/mutant: 0
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 5826ms
+bench.wall_ms=8000

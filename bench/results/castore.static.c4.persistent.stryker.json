@@ -1,0 +1,267 @@
+{
+  "files": {
+    "lib/mix/tasks/certdata.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/castore_test.exs"
+          ],
+          "description": "replace != with ==",
+          "duration": 15,
+          "id": "397e8bbd5a0c6ab6885a45c10fc01bb5",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 109
+            },
+            "start": {
+              "column": 20,
+              "line": 109
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "exit_status == 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/castore_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 50,
+          "id": "4352b1aed60bf9b3c0dbff0ec308811e",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 84,
+              "line": 171
+            },
+            "start": {
+              "column": 61,
+              "line": 171
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "length(date_time) != 15",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/castore_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 15,
+          "id": "66229b4e1793242ee244f0642f9ca29b",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 8,
+              "line": 72
+            },
+            "start": {
+              "column": 8,
+              "line": 72
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "MapSet.equal?(old_bundle, new_bundle)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/castore_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 51,
+          "id": "6a8d149332237ceb01565e4a925b248f",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 80,
+              "line": 167
+            },
+            "start": {
+              "column": 57,
+              "line": 167
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "length(date_time) != 13",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/castore_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 15,
+          "id": "9b18cac0e5b476b7b8aa084e005d3944",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 162
+            },
+            "start": {
+              "column": 33,
+              "line": 162
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "DateTime.to_unix(not_after) >= DateTime.to_unix(DateTime.utc_now())",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/castore_test.exs"
+          ],
+          "description": "replace < with <=",
+          "duration": 15,
+          "id": "d7886a1c32b9d6ac99fca0a4ce163850",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 162
+            },
+            "start": {
+              "column": 33,
+              "line": 162
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "DateTime.to_unix(not_after) <= DateTime.to_unix(DateTime.utc_now())",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Mix.Tasks.Certdata do\n  @moduledoc \"\"\"\n  Fetches an up-to-date version of the CA certificate store.\n\n  The certificate store is then stored in the private storage of this library. The path\n  to the CA certificate store can be retrieved through `CAStore.file_path/0`.\n\n  ## Usage\n\n  You can use this task to fetch an up-to-date version of the CA certificate store.\n\n      mix certdata\n\n  You can also use this task to verify if the currently stored certificate store is\n  up to date. To do that, use the `--check-outdated` option.\n\n      mix certdata --check-outdated\n\n  \"\"\"\n\n  use Mix.Task\n\n  require Record\n\n  Record.defrecordp(\n    :certificate,\n    :Certificate,\n    Record.extract(:Certificate, from_lib: \"public_key/include/OTP-PUB-KEY.hrl\")\n  )\n\n  Record.defrecordp(\n    :tbs_certificate,\n    :TBSCertificate,\n    Record.extract(:TBSCertificate, from_lib: \"public_key/include/OTP-PUB-KEY.hrl\")\n  )\n\n  Record.defrecordp(\n    :validity,\n    :Validity,\n    Record.extract(:Validity, from_lib: \"public_key/include/OTP-PUB-KEY.hrl\")\n  )\n\n  @shortdoc \"Fetches an up-to-date version of the CA certificate store\"\n\n  @mk_ca_bundle_url \"https://raw.githubusercontent.com/curl/curl/master/scripts/mk-ca-bundle.pl\"\n  @mk_ca_bundle_cmd \"mk-ca-bundle.pl\"\n  @ca_bundle \"ca-bundle.crt\"\n  @ca_bundle_target \"priv/cacerts.pem\"\n\n  @impl true\n  def run(args)\n\n  def run([]) do\n    bundle =\n      fetch_ca_bundle()\n      |> parse_bundle()\n      |> filter_expired()\n      |> rebuild_bundle()\n\n    File.write!(@ca_bundle_target, bundle)\n  end\n\n  def run([\"--check-outdated\"]) do\n    new_bundle =\n      fetch_ca_bundle()\n      |> parse_bundle()\n      |> filter_expired()\n\n    old_bundle = read_certificates_set(parse_bundle(File.read!(CAStore.file_path())))\n    new_bundle = read_certificates_set(new_bundle)\n\n    if not MapSet.equal?(old_bundle, new_bundle) do\n      Mix.raise(\"#{CAStore.file_path()} is outdated. Run \\\"mix certdata\\\" to update it.\",\n        exit_status: 100\n      )\n    end\n  end\n\n  def run(_args) do\n    Mix.raise(\"Invalid arguments. See `mix help certdata`.\")\n  end\n\n  defp fetch_ca_bundle do\n    fetch!(@mk_ca_bundle_url)\n\n    try do\n      File.chmod!(@mk_ca_bundle_cmd, 0o755)\n      cmd!(\"#{Path.expand(@mk_ca_bundle_cmd)} -u\")\n      File.read!(@ca_bundle)\n    after\n      File.rm!(@mk_ca_bundle_cmd)\n      File.rm!(@ca_bundle)\n    end\n  end\n\n  defp fetch!(url) do\n    if System.find_executable(\"curl\") do\n      cmd!(\"curl -LO #{url}\")\n    else\n      cmd!(\"wget #{url}\")\n    end\n  end\n\n  defp cmd!(cmd) do\n    Mix.shell().info([:magenta, \"Running: #{cmd}\"])\n\n    exit_status = Mix.shell().cmd(cmd)\n\n    if exit_status != 0 do\n      Mix.raise(\"Non-zero result (#{exit_status}) from command: #{cmd}\")\n    end\n  end\n\n  defp read_certificates_set({_comments, bundle}) do\n    MapSet.new(bundle)\n  end\n\n  defp parse_bundle(bundle) do\n    lines = String.split(bundle, \"\\n\", trim: true)\n    {comments, bundle} = Enum.split_while(lines, &String.starts_with?(&1, \"#\"))\n    {comments, chunk_certs(bundle, [])}\n  end\n\n  defp chunk_certs([name, \"=\" <> _ | lines], certs) do\n    {cert, [_ | lines]} = Enum.split_while(lines, &(&1 != \"-----END CERTIFICATE-----\"))\n    cert = {name, Enum.join(cert ++ [\"-----END CERTIFICATE-----\"], \"\\n\")}\n    chunk_certs(lines, [cert | certs])\n  end\n\n  defp chunk_certs([], certs) do\n    Enum.reverse(certs)\n  end\n\n  defp rebuild_bundle({comments, certs}) do\n    certs =\n      Enum.map(certs, fn {name, cert} ->\n        [name, ?\\n, :lists.duplicate(String.length(name), ?=), ?\\n, cert]\n      end)\n\n    [\n      Enum.intersperse(comments, ?\\n),\n      \"\\n\\n\\n\",\n      Enum.intersperse(certs, \"\\n\\n\"),\n      ?\\n\n    ]\n  end\n\n  defp filter_expired({comments, certs}) do\n    certs = Enum.reject(certs, fn {_name, cert} -> expired?(:public_key.pem_decode(cert)) end)\n    {comments, certs}\n  end\n\n  defp expired?([pem_entry]) do\n    not_after =\n      pem_entry\n      |> :public_key.pem_entry_decode()\n      |> certificate(:tbsCertificate)\n      |> tbs_certificate(:validity)\n      |> validity(:notAfter)\n      |> parse_asn1_date_time()\n\n    DateTime.to_unix(not_after) < DateTime.to_unix(DateTime.utc_now())\n  end\n\n  # Technically we would have to account for utcTime values between 1950 and\n  # 2000, but I think it is safe to ignore that here\n  defp parse_asn1_date_time({:utcTime, date_time}) when length(date_time) == 13 do\n    parse_asn1_date_time({:generalTime, [?2, ?0 | date_time]})\n  end\n\n  defp parse_asn1_date_time({:generalTime, date_time}) when length(date_time) == 15 do\n    [y1, y2, y3, y4, m1, m2, d1, d2 | _] = date_time\n\n    %DateTime{\n      year: List.to_integer([y1, y2, y3, y4]),\n      month: List.to_integer([m1, m2]),\n      day: List.to_integer([d1, d2]),\n      hour: 0,\n      minute: 0,\n      second: 0,\n      time_zone: \"Etc/UTC\",\n      zone_abbr: \"UTC\",\n      utc_offset: 0,\n      std_offset: 0\n    }\n  end\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "397e8bbd5a0c6ab6885a45c10fc01bb5": "schema",
+      "4352b1aed60bf9b3c0dbff0ec308811e": "fallback",
+      "66229b4e1793242ee244f0642f9ca29b": "schema",
+      "6a8d149332237ceb01565e4a925b248f": "fallback",
+      "9b18cac0e5b476b7b8aa084e005d3944": "schema",
+      "d7886a1c32b9d6ac99fca0a4ce163850": "schema"
+    },
+    "metrics": {
+      "fallback_count": 2,
+      "fallback_time_ms": 101,
+      "fanout": {
+        "397e8bbd5a0c6ab6885a45c10fc01bb5": 1,
+        "4352b1aed60bf9b3c0dbff0ec308811e": 1,
+        "66229b4e1793242ee244f0642f9ca29b": 1,
+        "6a8d149332237ceb01565e4a925b248f": 1,
+        "9b18cac0e5b476b7b8aa084e005d3944": 1,
+        "d7886a1c32b9d6ac99fca0a4ce163850": 1
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "attribute_engine_disabled": 5,
+        "body_literal_engine_disabled": 16,
+        "missing_oracle_site": 2,
+        "unsupported_dispatch": 91
+      }
+    },
+    "mutation_kind": {
+      "397e8bbd5a0c6ab6885a45c10fc01bb5": "comparison_negation",
+      "4352b1aed60bf9b3c0dbff0ec308811e": "guard_comparison_negation",
+      "66229b4e1793242ee244f0642f9ca29b": "unary_not_removal",
+      "6a8d149332237ceb01565e4a925b248f": "guard_comparison_negation",
+      "9b18cac0e5b476b7b8aa084e005d3944": "comparison_negation",
+      "d7886a1c32b9d6ac99fca0a4ce163850": "comparison_boundary"
+    },
+    "persistent": {
+      "app_startup_ms": {
+        "median": 2.8,
+        "total_apps": 20
+      },
+      "boot_ms": {
+        "max": 355,
+        "median": 319.5,
+        "p95": 355
+      },
+      "crash_count": 0,
+      "filter_lookup_ms": 0.0,
+      "filter_miss_count": 0,
+      "memory": {
+        "peak_processes_mb": 14.0,
+        "peak_total_mb": 57.6
+      },
+      "mix_fallback_count": 0,
+      "mutant_run_ms": {
+        "count": 4,
+        "median": 12.7,
+        "p95": 13.4
+      },
+      "reset_ms": {
+        "application_env": 0.0,
+        "ets": 1.1,
+        "on_exit": 0.0,
+        "persistent_term": 0.0,
+        "processes": 0.0
+      },
+      "restart_count": 0,
+      "test_load_ms": {
+        "median": 103.6,
+        "total_files": 8
+      },
+      "worker_count": 4
+    },
+    "phase_timings": {
+      "baseline_tests_ms": 410,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 150,
+      "oracle_build_ms": 2136,
+      "plan_generation_ms": 4,
+      "report_writing_ms": 1,
+      "schema_build_ms": 2239,
+      "schema_workers_ms": 18,
+      "total_ms": 6588
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 6,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 6
+      },
+      "mode": "static",
+      "selected_tests_avg": 1.0,
+      "selected_tests_median": 1
+    },
+    "stable_id_to_integer": {
+      "397e8bbd5a0c6ab6885a45c10fc01bb5": 1,
+      "4352b1aed60bf9b3c0dbff0ec308811e": 2,
+      "66229b4e1793242ee244f0642f9ca29b": 3,
+      "6a8d149332237ceb01565e4a925b248f": 4,
+      "9b18cac0e5b476b7b8aa084e005d3944": 5,
+      "d7886a1c32b9d6ac99fca0a4ce163850": 6
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

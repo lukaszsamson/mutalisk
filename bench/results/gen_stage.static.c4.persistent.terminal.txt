@@ -1,0 +1,3112 @@
+target=gen_stage repo=https://github.com/elixir-lang/gen_stage.git ref=v1.3.2 sha=d1532fa56482bc92d90abc777439ff8be34b5b1a selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.011s
+Unchanged:
+  earmark_parser 1.4.44
+  ex_doc 0.38.2
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> gen_stage
+Compiling 10 files (.ex)
+Generated gen_stage app
+Schema build starting
+Schema build complete
+[1/277] killed    lib/gen_stage/buffer.ex:151  Arithmetic  replace - with *
+[2/277] killed    lib/consumer_supervisor.ex:522  Arithmetic  replace - with *
+[3/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:190  Arithmetic  replace - with *
+[4/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:114  Arithmetic  replace - with *
+[5/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:135  Arithmetic  replace - with +
+[6/277] killed    lib/gen_stage/buffer.ex:180  ComparisonNegation  replace == with !=
+[7/277] killed    lib/gen_stage.ex:2376  Arithmetic  replace + with *
+[8/277] killed    lib/gen_stage/buffer.ex:104  Arithmetic  replace + with -
+[9/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:178  Arithmetic  replace - with *
+[10/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:217  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[11/277] killed    lib/gen_stage.ex:1857  ComparisonNegation  replace == with !=
+[12/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:82  Arithmetic  replace - with *
+[13/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:191  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[14/277] killed    lib/gen_stage/stream.ex:85  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[15/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:205  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[16/277] killed    lib/consumer_supervisor.ex:610  Arithmetic  replace - with *
+[17/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:201  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[18/277] killed    lib/gen_stage/stream.ex:85  Boolean  replace or with and
+[19/277] killed    lib/gen_stage/utils.ex:50  ComparisonNegation  replace > with <=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[20/277] killed    lib/gen_stage/utils.ex:105  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[21/277] killed    lib/gen_stage.ex:2425  Arithmetic  replace - with +
+[22/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:52  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[23/277] killed    lib/consumer_supervisor.ex:408  Arithmetic  replace div with rem
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[24/277] killed    lib/gen_stage/buffer.ex:154  Arithmetic  replace - with +
+[25/277] killed    lib/consumer_supervisor.ex:472  ComparisonNegation  replace > with <=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[26/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:150  Arithmetic  replace + with *
+[27/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:225  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[28/277] killed    lib/consumer_supervisor.ex:762  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[29/277] killed    lib/gen_stage.ex:2610  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[30/277] survived  lib/consumer_supervisor.ex:475  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[31/277] killed    lib/gen_stage/stream.ex:18  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[32/277] killed    lib/consumer_supervisor.ex:762  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[33/277] killed    lib/consumer_supervisor.ex:472  Arithmetic  replace + with -
+[34/277] killed    lib/consumer_supervisor.ex:861  ComparisonNegation  replace <= with >
+[35/277] killed    lib/gen_stage/buffer.ex:168  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[36/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:178  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[37/277] killed    lib/consumer_supervisor.ex:459  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[38/277] killed    lib/gen_stage/utils.ex:50  ComparisonBoundary  replace > with >=
+[39/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:217  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[40/277] killed    lib/gen_stage/buffer.ex:62  Arithmetic  replace + with *
+[41/277] killed    lib/gen_stage/buffer.ex:88  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+Logger - error: Logger - error: Logger - error: Logger - error: Logger - error: Logger - error: [42/277] killed    lib/consumer_supervisor.ex:450  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[43/277] killed    lib/gen_stage/utils.ex:123  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[44/277] killed    lib/gen_stage/buffer.ex:139  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[45/277] survived  lib/consumer_supervisor.ex:424  Arithmetic  replace + with -
+[46/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:69  Arithmetic  replace + with *
+[47/277] killed    lib/consumer_supervisor.ex:522  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[48/277] killed    lib/consumer_supervisor.ex:861  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[49/277] survived  lib/consumer_supervisor.ex:475  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[50/277] survived  lib/gen_stage/utils.ex:109  Arithmetic  replace - with *
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[51/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:225  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[52/277] killed    lib/gen_stage/utils.ex:136  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[53/277] survived  lib/consumer_supervisor.ex:752  Arithmetic  replace - with *
+[54/277] killed    lib/gen_stage/buffer.ex:85  Arithmetic  replace + with -
+[55/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:82  Arithmetic  replace - with +
+[56/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:52  Arithmetic  replace + with -
+[57/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:349  Arithmetic  replace - with *
+[58/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:308  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[59/277] killed    lib/gen_stage/buffer.ex:139  Arithmetic  replace - with +
+[60/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:201  Arithmetic  replace + with *
+[61/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:257  Arithmetic  replace + with -
+[62/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:257  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[63/277] survived  lib/consumer_supervisor.ex:752  Arithmetic  replace - with +
+[64/277] killed    lib/gen_stage/stream.ex:78  ComparisonNegation  replace != with ==
+[65/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:110  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[66/277] killed    lib/gen_stage.ex:2610  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[67/277] survived  lib/consumer_supervisor.ex:489  Arithmetic  replace + with *
+[68/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:72  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[69/277] survived  lib/consumer_supervisor.ex:489  Arithmetic  replace + with -
+[70/277] killed    lib/gen_stage/buffer.ex:176  Arithmetic  replace rem with div
+[71/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:72  Arithmetic  replace - with *
+[72/277] killed    lib/gen_stage.ex:2443  Arithmetic  replace - with +
+[73/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:201  Arithmetic  replace + with -
+[74/277] killed    lib/consumer_supervisor.ex:450  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[75/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:191  Arithmetic  replace + with -
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[76/277] killed    lib/consumer_supervisor.ex:861  Arithmetic  replace + with *
+[77/277] killed    lib/gen_stage/utils.ex:44  ComparisonBoundary  replace < with <=
+[78/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:124  UnaryNot  remove unary not
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[79/277] killed    lib/gen_stage/utils.ex:65  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[80/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:243  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+Logger - error: Logger - error: Logger - error: Logger - error: Logger - error: [81/277] killed    lib/gen_stage/stream.ex:85  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[82/277] killed    lib/gen_stage/buffer.ex:142  Arithmetic  replace - with *
+[83/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:114  Arithmetic  replace - with +
+[84/277] killed    lib/gen_stage/buffer.ex:176  Arithmetic  replace + with *
+[85/277] killed    lib/gen_stage/utils.ex:105  Arithmetic  replace - with *
+[86/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:201  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[87/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:205  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[88/277] killed    lib/gen_stage/buffer.ex:62  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[89/277] killed    lib/gen_stage/stream.ex:88  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[90/277] killed    lib/consumer_supervisor.ex:475  Arithmetic  replace + with *
+[91/277] survived  lib/consumer_supervisor.ex:472  ComparisonBoundary  replace > with >=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[92/277] survived  lib/gen_stage.ex:2425  Arithmetic  replace - with +
+[93/277] killed    lib/gen_stage/buffer.ex:172  Arithmetic  replace - with *
+[94/277] killed    lib/gen_stage/buffer.ex:88  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[95/277] survived  lib/gen_stage/stream.ex:18  Arithmetic  replace - with +
+[96/277] killed    lib/gen_stage/buffer.ex:151  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[97/277] killed    lib/gen_stage/buffer.ex:104  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[98/277] survived  lib/consumer_supervisor.ex:423  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[99/277] killed    lib/gen_stage/utils.ex:136  Arithmetic  replace + with *
+[100/277] killed    lib/gen_stage/utils.ex:37  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[101/277] killed    lib/gen_stage/buffer.ex:151  Arithmetic  replace - with *
+[102/277] killed    lib/gen_stage/buffer.ex:154  Arithmetic  replace - with +
+[103/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:106  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[104/277] killed    lib/consumer_supervisor.ex:610  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[105/277] killed    lib/consumer_supervisor.ex:772  Arithmetic  replace - with *
+[106/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:57  Boolean  replace || with &&
+[107/277] killed    lib/gen_stage/buffer.ex:154  Arithmetic  replace - with *
+[108/277] killed    lib/gen_stage/buffer.ex:73  Arithmetic  replace + with -
+[109/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:105  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[110/277] killed    lib/gen_stage/buffer.ex:142  Arithmetic  replace - with +
+[111/277] killed    lib/gen_stage/buffer.ex:172  Arithmetic  replace rem with div
+[112/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:308  Arithmetic  replace - with *
+[113/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:124  UnaryNot  remove unary not
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[114/277] killed    lib/gen_stage/buffer.ex:142  Arithmetic  replace - with *
+[115/277] killed    lib/gen_stage/buffer.ex:176  Arithmetic  replace + with -
+[116/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:349  Arithmetic  replace - with +
+[117/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:227  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[118/277] killed    lib/consumer_supervisor.ex:861  ComparisonBoundary  replace <= with <
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[119/277] survived  lib/consumer_supervisor.ex:341  Boolean  replace || with &&
+[120/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:105  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[121/277] killed    lib/consumer_supervisor.ex:772  Arithmetic  replace - with +
+[122/277] killed    lib/gen_stage/buffer.ex:168  Arithmetic  replace + with *
+[123/277] killed    lib/gen_stage/buffer.ex:85  Arithmetic  replace + with *
+[124/277] killed    lib/gen_stage.ex:2616  ComparisonNegation  replace != with ==
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[125/277] survived  lib/gen_stage/utils.ex:109  Arithmetic  replace - with +
+[126/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:59  ComparisonNegation  replace > with <=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[127/277] killed    lib/gen_stage/utils.ex:37  Boolean  replace and with or
+[128/277] killed    lib/gen_stage/buffer.ex:93  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[129/277] killed    lib/gen_stage.ex:2376  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[130/277] killed    lib/consumer_supervisor.ex:765  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[131/277] killed    lib/gen_stage/utils.ex:121  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[132/277] killed    lib/gen_stage/utils.ex:121  Arithmetic  replace - with *
+[133/277] killed    lib/gen_stage/utils.ex:40  UnaryNot  remove unary not
+[134/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:135  Arithmetic  replace - with *
+[135/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:189  Arithmetic  replace + with *
+[136/277] killed    lib/gen_stage/stream.ex:34  Boolean  replace || with &&
+[137/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:226  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[138/277] killed    lib/gen_stage/buffer.ex:154  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[139/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:59  ComparisonBoundary  replace > with >=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[140/277] killed    lib/gen_stage.ex:2622  ComparisonNegation  replace == with !=
+[141/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:72  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[142/277] killed    lib/gen_stage/buffer.ex:151  Arithmetic  replace - with +
+[143/277] killed    lib/gen_stage/utils.ex:44  ComparisonNegation  replace < with >=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[144/277] killed    lib/consumer_supervisor.ex:853  ComparisonBoundary  replace <= with <
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[145/277] killed    lib/gen_stage/stream.ex:18  Arithmetic  replace div with rem
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+Logger - error: Logger - error: Logger - error: [146/277] killed    lib/gen_stage/buffer.ex:142  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[147/277] killed    lib/gen_stage.ex:2610  Arithmetic  replace div with rem
+[148/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:69  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[149/277] survived  lib/gen_stage.ex:2425  Arithmetic  replace - with *
+[150/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:226  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[151/277] killed    lib/gen_stage.ex:2622  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[152/277] killed    lib/gen_stage.ex:2425  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[153/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:150  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[154/277] killed    lib/consumer_supervisor.ex:480  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[155/277] survived  lib/consumer_supervisor.ex:768  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[156/277] killed    lib/consumer_supervisor.ex:424  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[157/277] killed    lib/consumer_supervisor.ex:423  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[158/277] killed    lib/consumer_supervisor.ex:745  Arithmetic  replace - with +
+[159/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:106  Arithmetic  replace + with *
+[160/277] killed    lib/consumer_supervisor.ex:745  Arithmetic  replace - with *
+[161/277] killed    lib/gen_stage/buffer.ex:172  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[162/277] killed    lib/gen_stage/buffer.ex:93  Arithmetic  replace + with *
+[163/277] killed    lib/gen_stage/buffer.ex:168  Arithmetic  replace rem with div
+[164/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:227  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[165/277] killed    lib/gen_stage.ex:2443  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[166/277] killed    lib/gen_stage.ex:2635  ComparisonNegation  replace == with !=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[167/277] survived  lib/consumer_supervisor.ex:768  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[168/277] killed    lib/gen_stage/utils.ex:123  Arithmetic  replace - with *
+[169/277] survived  lib/consumer_supervisor.ex:489  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[170/277] survived  lib/consumer_supervisor.ex:475  Arithmetic  replace - with +
+[171/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:110  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[172/277] killed    lib/gen_stage.ex:2622  Boolean  replace or with and
+[173/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:189  Arithmetic  replace + with -
+[174/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:124  Boolean  replace and with or
+[175/277] killed    lib/consumer_supervisor.ex:853  ComparisonNegation  replace <= with >
+[176/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:72  Arithmetic  replace - with +
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[177/277] killed    lib/consumer_supervisor.ex:459  Arithmetic  replace + with -
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[178/277] survived  lib/gen_stage/dispatchers/partition_dispatcher.ex:243  Arithmetic  replace - with *
+[179/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:190  Arithmetic  replace - with +
+[180/277] killed    lib/gen_stage/buffer.ex:73  Arithmetic  replace + with *
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[181/277] survived  lib/consumer_supervisor.ex:472  Arithmetic  replace + with *
+[182/277] killed    lib/gen_stage/buffer.ex:168  Arithmetic  replace + with -
+[183/277] killed    lib/consumer_supervisor.ex:480  Arithmetic  replace + with -
+[184/277] killed    lib/gen_stage/buffer.ex:168  Arithmetic  replace - with *
+[185/277] survived  lib/consumer_supervisor.ex:489  Arithmetic  replace - with +
+[186/277] killed    lib/consumer_supervisor.ex:765  Arithmetic  replace - with *
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[187/277] killed    lib/gen_stage.ex:2570  GuardTypeTest  replace guard is_list with is_tuple
+[188/277] killed    lib/gen_stage.ex:2255  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module GenStage.Utils (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Utils.beam)
+    │
+  1 │ defmodule GenStage.Utils do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/utils.ex:1: GenStage.Utils (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[189/277] killed    lib/gen_stage.ex:1278  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+[190/277] killed    lib/gen_stage/utils.ex:88  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[191/277] survived  lib/consumer_supervisor.ex:703  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+[192/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:113  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.DemandDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.DemandDispatcher.beam)
+    │
+  1 │ defmodule GenStage.DemandDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/demand_dispatcher.ex:1: GenStage.DemandDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[193/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:121  GuardTypeTest  replace guard is_integer with is_float
+[194/277] survived  lib/gen_stage.ex:2575  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Utils (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Utils.beam)
+    │
+  1 │ defmodule GenStage.Utils do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/utils.ex:1: GenStage.Utils (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[195/277] killed    lib/gen_stage.ex:2406  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[196/277] killed    lib/consumer_supervisor.ex:481  GuardComparisonNegation  replace guard >= with <
+[197/277] killed    lib/gen_stage/stream.ex:250  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[198/277] killed    lib/gen_stage/utils.ex:110  GuardComparisonBoundary  replace guard < with <=
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+[199/277] killed    lib/gen_stage/streamer.ex:51  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[200/277] killed    lib/gen_stage.ex:1288  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[201/277] killed    lib/gen_stage.ex:2246  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+[202/277] killed    lib/gen_stage/stream.ex:164  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[203/277] killed    lib/gen_stage.ex:2070  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.DemandDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.DemandDispatcher.beam)
+    │
+  1 │ defmodule GenStage.DemandDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/demand_dispatcher.ex:1: GenStage.DemandDispatcher (module)
+
+[204/277] survived  lib/gen_stage/streamer.ex:51  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+[205/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:113  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[206/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:200  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[207/277] killed    lib/gen_stage.ex:1787  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[208/277] killed    lib/consumer_supervisor.ex:360  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[209/277] killed    lib/gen_stage/streamer.ex:36  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage.Utils (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Utils.beam)
+    │
+  1 │ defmodule GenStage.Utils do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/utils.ex:1: GenStage.Utils (module)
+
+[210/277] killed    lib/gen_stage.ex:1816  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[211/277] killed    lib/consumer_supervisor.ex:767  GuardComparisonNegation  replace guard != with ==
+[212/277] survived  lib/gen_stage/dispatchers/partition_dispatcher.ex:200  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[213/277] killed    lib/gen_stage/utils.ex:122  GuardComparisonNegation  replace guard <= with >
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Utils (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Utils.beam)
+    │
+  1 │ defmodule GenStage.Utils do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/utils.ex:1: GenStage.Utils (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[214/277] killed    lib/gen_stage/stream.ex:251  GuardComparisonNegation  replace guard == with !=
+[215/277] killed    lib/gen_stage/stream.ex:251  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+[216/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:183  GuardTypeTest  replace guard is_nil with is_atom
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+Logger - error: Logger - error: Logger - error: Logger - error:     warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[217/277] killed    lib/gen_stage/utils.ex:110  GuardComparisonNegation  replace guard < with >=
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+[218/277] killed    lib/consumer_supervisor.ex:398  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage.DemandDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.DemandDispatcher.beam)
+    │
+  1 │ defmodule GenStage.DemandDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/demand_dispatcher.ex:1: GenStage.DemandDispatcher (module)
+
+[219/277] killed    lib/gen_stage.ex:2395  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+[220/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:113  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[221/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:216  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+[222/277] survived  lib/gen_stage/dispatchers/partition_dispatcher.ex:329  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[223/277] killed    lib/consumer_supervisor.ex:319  GuardTypeTest  replace guard is_map with is_list
+[224/277] killed    lib/gen_stage.ex:1870  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+[225/277] killed    lib/consumer_supervisor.ex:319  GuardTypeTest  replace guard is_tuple with is_list
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[226/277] killed    lib/consumer_supervisor.ex:398  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[227/277] killed    lib/gen_stage.ex:1822  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[228/277] killed    lib/gen_stage.ex:1498  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage.BroadcastDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.BroadcastDispatcher.beam)
+    │
+  1 │ defmodule GenStage.BroadcastDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/broadcast_dispatcher.ex:1: GenStage.BroadcastDispatcher (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[229/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:206  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[230/277] killed    lib/gen_stage.ex:2596  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[231/277] survived  lib/gen_stage.ex:1943  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Utils (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Utils.beam)
+    │
+  1 │ defmodule GenStage.Utils do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/utils.ex:1: GenStage.Utils (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[232/277] killed    lib/gen_stage.ex:1498  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.BroadcastDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.BroadcastDispatcher.beam)
+    │
+  1 │ defmodule GenStage.BroadcastDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/broadcast_dispatcher.ex:1: GenStage.BroadcastDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[233/277] killed    lib/gen_stage/utils.ex:122  GuardComparisonBoundary  replace guard <= with <
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[234/277] killed    lib/gen_stage.ex:1288  GuardTypeTest  replace guard is_atom with is_nil
+[235/277] survived  lib/gen_stage.ex:1498  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+[236/277] killed    lib/gen_stage/dispatchers/partition_dispatcher.ex:329  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage.BroadcastDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.BroadcastDispatcher.beam)
+    │
+  1 │ defmodule GenStage.BroadcastDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/broadcast_dispatcher.ex:1: GenStage.BroadcastDispatcher (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[237/277] survived  lib/gen_stage/dispatchers/broadcast_dispatcher.ex:206  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[238/277] killed    lib/gen_stage.ex:2040  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[239/277] killed    lib/gen_stage.ex:1939  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.BroadcastDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.BroadcastDispatcher.beam)
+    │
+  1 │ defmodule GenStage.BroadcastDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/broadcast_dispatcher.ex:1: GenStage.BroadcastDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[240/277] killed    lib/gen_stage.ex:2740  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module GenStage.BroadcastDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.BroadcastDispatcher.beam)
+    │
+  1 │ defmodule GenStage.BroadcastDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/broadcast_dispatcher.ex:1: GenStage.BroadcastDispatcher (module)
+
+[241/277] survived  lib/gen_stage/dispatchers/broadcast_dispatcher.ex:177  GuardComparisonBoundary  replace guard <= with <
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[242/277] killed    lib/gen_stage/dispatchers/broadcast_dispatcher.ex:177  GuardComparisonNegation  replace guard <= with >
+    warning: redefining module GenStage.Buffer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Buffer.beam)
+    │
+  1 │ defmodule GenStage.Buffer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/buffer.ex:1: GenStage.Buffer (module)
+
+[243/277] killed    lib/gen_stage/buffer.ex:16  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[244/277] killed    lib/consumer_supervisor.ex:319  GuardTypeTest  replace guard is_atom with is_nil
+[245/277] survived  lib/gen_stage/dispatchers/broadcast_dispatcher.ex:206  GuardTypeTest  replace guard is_nil with is_atom
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+[246/277] killed    lib/gen_stage.ex:2040  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[247/277] killed    lib/gen_stage.ex:1278  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module GenStage.DemandDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.DemandDispatcher.beam)
+    │
+  1 │ defmodule GenStage.DemandDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/demand_dispatcher.ex:1: GenStage.DemandDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[248/277] killed    lib/gen_stage.ex:2701  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[249/277] killed    lib/consumer_supervisor.ex:441  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[250/277] survived  lib/gen_stage/dispatchers/partition_dispatcher.ex:216  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[251/277] survived  lib/gen_stage/dispatchers/demand_dispatcher.ex:121  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[252/277] killed    lib/gen_stage.ex:1875  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Buffer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Buffer.beam)
+    │
+  1 │ defmodule GenStage.Buffer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/buffer.ex:1: GenStage.Buffer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[253/277] killed    lib/gen_stage.ex:1828  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[254/277] survived  lib/consumer_supervisor.ex:401  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+[255/277] killed    lib/gen_stage/streamer.ex:47  GuardTypeTest  replace guard is_atom with is_nil
+[256/277] killed    lib/gen_stage/buffer.ex:16  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[257/277] killed    lib/gen_stage.ex:2087  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+[258/277] killed    lib/consumer_supervisor.ex:481  GuardComparisonBoundary  replace guard >= with >
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[259/277] killed    lib/consumer_supervisor.ex:171  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+[260/277] killed    lib/consumer_supervisor.ex:221  GuardTypeTest  replace guard is_list with is_tuple
+[261/277] killed    lib/gen_stage.ex:1498  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[262/277] survived  lib/gen_stage.ex:1875  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module GenStage.Buffer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Buffer.beam)
+    │
+  1 │ defmodule GenStage.Buffer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/buffer.ex:1: GenStage.Buffer (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[263/277] killed    lib/gen_stage/buffer.ex:117  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage.Buffer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Buffer.beam)
+    │
+  1 │ defmodule GenStage.Buffer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/buffer.ex:1: GenStage.Buffer (module)
+
+[264/277] killed    lib/gen_stage/buffer.ex:117  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[265/277] killed    lib/gen_stage.ex:2224  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.DemandDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.DemandDispatcher.beam)
+    │
+  1 │ defmodule GenStage.DemandDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/demand_dispatcher.ex:1: GenStage.DemandDispatcher (module)
+
+[266/277] killed    lib/gen_stage/dispatchers/demand_dispatcher.ex:104  GuardComparisonNegation  replace guard <= with >
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[267/277] killed    lib/consumer_supervisor.ex:401  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module GenStage.Stream (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Stream.beam)
+    │
+  1 │ defmodule GenStage.Stream do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/stream.ex:1: GenStage.Stream (module)
+
+[268/277] killed    lib/gen_stage.ex:2740  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[269/277] killed    lib/gen_stage.ex:2702  GuardComparisonNegation  replace guard == with !=
+[270/277] survived  lib/gen_stage.ex:2228  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.Buffer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Buffer.beam)
+    │
+  1 │ defmodule GenStage.Buffer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/buffer.ex:1: GenStage.Buffer (module)
+
+    warning: redefining module GenStage (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.beam)
+    │
+  1 │ defmodule GenStage do
+    │ ~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage.ex:1: GenStage (module)
+
+[271/277] killed    lib/gen_stage/buffer.ex:37  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.PartitionDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.PartitionDispatcher.beam)
+    │
+  1 │ defmodule GenStage.PartitionDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/partition_dispatcher.ex:1: GenStage.PartitionDispatcher (module)
+
+    warning: redefining module GenStage.Streamer (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.Streamer.beam)
+    │
+  1 │ defmodule GenStage.Streamer do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/streamer.ex:1: GenStage.Streamer (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+[272/277] killed    lib/gen_stage.ex:2702  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module ConsumerSupervisor (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.beam)
+    │
+  1 │ defmodule ConsumerSupervisor do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/consumer_supervisor.ex:1: ConsumerSupervisor (module)
+
+     warning: redefining module ConsumerSupervisor.Default (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.ConsumerSupervisor.Default.beam)
+     │
+ 142 │   defmodule Default do
+     │   ~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/consumer_supervisor.ex:142: ConsumerSupervisor.Default (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[273/277] survived  lib/gen_stage/dispatchers/partition_dispatcher.ex:113  GuardTypeTest  replace guard is_integer with is_number
+[274/277] survived  lib/consumer_supervisor.ex:433  GuardComparisonNegation  replace guard == with !=
+[275/277] killed    lib/gen_stage/stream.ex:171  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module GenStage.DemandDispatcher (current version loaded from _build/mut_schema/lib/gen_stage/ebin/Elixir.GenStage.DemandDispatcher.beam)
+    │
+  1 │ defmodule GenStage.DemandDispatcher do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/gen_stage/dispatchers/demand_dispatcher.ex:1: GenStage.DemandDispatcher (module)
+
+    warning: redefining module ConsumerSupervisorTest.Custom (current version defined in memory)
+    │
+ 16 │     defmodule Custom do
+    │     ~~~~~~~~~~~~~~~~~~~
+    │
+    └─ test/consumer_supervisor_test.exs:16: ConsumerSupervisorTest.Custom (module)
+
+     warning: redefining module GenStageTest.Custom (current version defined in memory)
+     │
+ 343 │     defmodule Custom do
+     │     ~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/gen_stage_test.exs:343: GenStageTest.Custom (module)
+
+[276/277] survived  lib/gen_stage/dispatchers/demand_dispatcher.ex:104  GuardComparisonBoundary  replace guard <= with <
+[277/277] killed    lib/gen_stage/stream.ex:15  GuardTypeTest  replace guard is_list with is_tuple
+Mutation score: 237/277 = 85.6%
+
+Surviving mutants:
+  lib/consumer_supervisor.ex:475 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:424 Arithmetic               replace + with -
+  lib/consumer_supervisor.ex:475 Arithmetic               replace + with -
+  lib/gen_stage/utils.ex:109 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:752 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:752 Arithmetic               replace - with +
+  lib/consumer_supervisor.ex:489 Arithmetic               replace + with *
+  lib/consumer_supervisor.ex:489 Arithmetic               replace + with -
+  lib/consumer_supervisor.ex:472 ComparisonBoundary       replace > with >=
+  lib/gen_stage.ex:2425 Arithmetic               replace - with +
+  lib/gen_stage/stream.ex:18 Arithmetic               replace - with +
+  lib/consumer_supervisor.ex:423 Arithmetic               replace - with +
+  lib/consumer_supervisor.ex:341 Boolean                  replace || with &&
+  lib/gen_stage/utils.ex:109 Arithmetic               replace - with +
+  lib/gen_stage.ex:2425 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:768 Arithmetic               replace - with +
+  lib/consumer_supervisor.ex:768 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:489 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:475 Arithmetic               replace - with +
+  lib/gen_stage/dispatchers/partition_dispatcher.ex:243 Arithmetic               replace - with *
+  lib/consumer_supervisor.ex:472 Arithmetic               replace + with *
+  lib/consumer_supervisor.ex:489 Arithmetic               replace - with +
+  lib/consumer_supervisor.ex:703 GuardComparisonNegation  replace guard != with ==
+  lib/gen_stage.ex:2575 GuardTypeTest            replace guard is_list with is_tuple
+  lib/gen_stage/streamer.ex:51 GuardComparisonBoundary  replace guard > with >=
+  lib/gen_stage/dispatchers/partition_dispatcher.ex:200 GuardTypeTest            replace guard is_integer with is_number
+  lib/gen_stage/dispatchers/partition_dispatcher.ex:329 GuardTypeTest            replace guard is_integer with is_number
+  lib/gen_stage.ex:1943 GuardTypeTest            replace guard is_list with is_tuple
+  lib/gen_stage.ex:1498 GuardComparisonBoundary  replace guard > with >=
+  lib/gen_stage/dispatchers/broadcast_dispatcher.ex:206 GuardTypeTest            replace guard is_integer with is_number
+  lib/gen_stage/dispatchers/broadcast_dispatcher.ex:177 GuardComparisonBoundary  replace guard <= with <
+  lib/gen_stage/dispatchers/broadcast_dispatcher.ex:206 GuardTypeTest            replace guard is_nil with is_atom
+  lib/gen_stage/dispatchers/partition_dispatcher.ex:216 GuardTypeTest            replace guard is_integer with is_number
+  lib/gen_stage/dispatchers/demand_dispatcher.ex:121 GuardTypeTest            replace guard is_integer with is_number
+  lib/consumer_supervisor.ex:401 GuardTypeTest            replace guard is_integer with is_number
+  lib/gen_stage.ex:1875 GuardTypeTest            replace guard is_atom with is_nil
+  lib/gen_stage.ex:2228 GuardTypeTest            replace guard is_list with is_tuple
+  lib/gen_stage/dispatchers/partition_dispatcher.ex:113 GuardTypeTest            replace guard is_integer with is_number
+  lib/consumer_supervisor.ex:433 GuardComparisonNegation  replace guard == with !=
+  lib/gen_stage/dispatchers/demand_dispatcher.ex:104 GuardComparisonBoundary  replace guard <= with <
+
+Schema:    164/186 killed (88.2%)   wall: 64.3s
+Fallback:  73/91 killed (80.2%)   wall: 46.6s
+  guard_comparison_boundary:    6/10 killed
+  guard_comparison_negation:    23/25 killed
+  guard_type_test:              44/56 killed
+Skipped:   1806 (attribute_engine_disabled: 2, body_literal_engine_disabled: 152, missing_oracle_site: 382, no_applicable_mutator: 8, unsupported_dispatch: 1262)
+Invalid:   0
+Errors:    0
+Timeouts:  0
+
+Run time: 110.9s
+Fallback wall-clock: 42.0% of total
+Fallback mutants: 32.9% of executed
+
+Phases:
+  oracle build:         2660 ms
+  baseline tests:       1852 ms
+  plan generation:        99 ms
+  schema build:         2426 ms
+  schema workers:      20135 ms
+  fallback workers:    21407 ms
+  report writing:         35 ms
+  total:               56657 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    277
+    all tests:          0
+  avg tests/mutant: 2.4
+  median tests/mutant: 2
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Persistent worker:
+  workers:     4
+  boot:        median 1925.0 ms (max 1941.0 ms)
+  app startup: median 2.3 ms (total apps: 8)
+  test load:   median 1729.1 ms (total files: 28)
+  mutant run:  median 13.4 ms (p95 747.0 ms, n=186)
+  reset hooks:
+    application_env: 0.0 ms
+    ets:             0.1 ms
+    processes:       0.0 ms
+    persistent_term: 0.0 ms
+    on_exit:         0.0 ms
+  filter lookup: 0.1 ms
+  memory: peak 65.9 MB total, 16.9 MB processes
+
+Mutalisk run complete in 56959ms
+bench.wall_ms=58000

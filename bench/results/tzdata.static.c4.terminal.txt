@@ -1,0 +1,109 @@
+target=tzdata repo=https://github.com/lau/tzdata.git ref=v1.1.3 sha=61fb7ecf68fb9a3dbf7aeb7669adc3d0f7360b33 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.022s
+Unchanged:
+  certifi 2.14.0
+  earmark_parser 1.4.43
+  ex_doc 0.37.2
+  hackney 1.23.0
+  idna 6.1.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  metrics 1.0.1
+  mimerl 1.3.0
+  nimble_parsec 1.4.2
+  parse_trans 3.4.1
+  ssl_verify_fun 1.1.7
+  unicode_util_compat 0.7.0
+* Getting hackney (Hex package)
+* Getting ex_doc (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+* Getting certifi (Hex package)
+* Getting idna (Hex package)
+* Getting metrics (Hex package)
+* Getting mimerl (Hex package)
+* Getting parse_trans (Hex package)
+* Getting ssl_verify_fun (Hex package)
+* Getting unicode_util_compat (Hex package)
+mix mut starting
+===> Analyzing applications...
+===> Compiling mimerl
+==> ssl_verify_fun
+Compiling 7 files (.erl)
+Generated ssl_verify_fun app
+==> tzdata
+===> Analyzing applications...
+===> Compiling unicode_util_compat
+===> Analyzing applications...
+===> Compiling idna
+===> Analyzing applications...
+===> Compiling certifi
+===> Analyzing applications...
+===> Compiling parse_trans
+===> Analyzing applications...
+===> Compiling metrics
+===> Analyzing applications...
+===> Compiling hackney
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> tzdata
+Compiling 17 files (.ex)
+Generated tzdata app
+** (Mix) baseline tests failed; aborting mutation run (full log: tmp/mut_baseline.log)
+
+Running ExUnit with seed: 42, max_cases: 24
+
+...............****...........................*....
+
+  1) doctest Tzdata.periods/1 (5) (TzdataTest)
+     test/tzdata_test.exs:3
+     Doctest failed
+     doctest:
+       iex> Tzdata.periods("Europe/Madrid") |> elem(1) |> Enum.take(1)
+       [%{from: %{standard: :min, utc: :min, wall: :min}, std_off: 0,
+         until: %{standard: 59989763760, utc: 59989764644, wall: 59989763760},
+         utc_off: -884, zone_abbr: "LMT"}]
+     code:  Tzdata.periods("Europe/Madrid") |> elem(1) |> Enum.take(1) === [%{from: %{standard: :min, utc: :min, wall: :min}, std_off: 0,
+              until: %{standard: 59989763760, utc: 59989764644, wall: 59989763760},
+              utc_off: -884, zone_abbr: "LMT"}]
+     left:  [
+              %{
+                until: %{
+                  standard: 59989765516,
+                  utc: 59989766400,
+                  wall: 59989765516
+                },
+                zone_abbr: "LMT",
+                from: %{standard: :min, utc: :min, wall: :min},
+                std_off: 0,
+                utc_off: -884
+              }
+            ]
+     right: [
+              %{
+                until: %{
+                  standard: 59989763760,
+                  utc: 59989764644,
+                  wall: 59989763760
+                },
+                zone_abbr: "LMT",
+                from: %{standard: :min, utc: :min, wall: :min},
+                std_off: 0,
+                utc_off: -884
+              }
+            ]
+     stacktrace:
+       lib/tzdata.ex:134: Tzdata (module)
+
+...........
+Finished in 0.8 seconds (0.7s async, 0.09s sync)
+17 doctests, 46 tests, 1 failure, 5 skipped
+

@@ -1,0 +1,901 @@
+target=mint repo=https://github.com/elixir-mint/mint.git ref=v1.8.0 sha=f697f1c866ee1e5c802d19142487a85ea9eb0174 selection=static concurrency=4
+mutalisk_path=mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.022s
+Unchanged:
+  castore 1.0.15
+  dialyxir 1.4.6
+  earmark_parser 1.4.44
+  erlex 0.2.7
+  ex_doc 0.38.4
+  excoveralls 0.18.5
+  hpax 1.0.3
+  jason 1.4.4
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  mox 1.2.0
+  nimble_ownership 1.0.2
+  nimble_parsec 1.4.2
+  stream_data 1.2.0
+* Getting castore (Hex package)
+* Getting hpax (Hex package)
+* Getting dialyxir (Hex package)
+* Getting ex_doc (Hex package)
+* Getting excoveralls (Hex package)
+* Getting mox (Hex package)
+* Getting stream_data (Hex package)
+* Getting nimble_ownership (Hex package)
+* Getting jason (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+* Getting erlex (Hex package)
+You have added/upgraded packages you could sponsor, run `mix hex.sponsor` to learn more
+mix mut starting
+==> stream_data
+Compiling 3 files (.ex)
+Generated stream_data app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> hpax
+Compiling 4 files (.ex)
+Generated hpax app
+==> erlex
+Compiling 1 file (.xrl)
+Compiling 1 file (.yrl)
+src/erlex_parser.yrl: Warning: conflicts: 27 shift/reduce, 0 reduce/reduce
+Compiling 2 files (.erl)
+Compiling 1 file (.ex)
+Generated erlex app
+==> castore
+Compiling 1 file (.ex)
+Generated castore app
+==> excoveralls
+Compiling 29 files (.ex)
+Generated excoveralls app
+==> dialyxir
+Compiling 67 files (.ex)
+Generated dialyxir app
+==> mutalisk
+Compiling 79 files (.ex)
+Generated mutalisk app
+==> nimble_ownership
+Compiling 2 files (.ex)
+Generated nimble_ownership app
+==> mox
+Compiling 2 files (.ex)
+Generated mox app
+==> mint
+Compiling 1 file (.erl)
+Compiling 25 files (.ex)
+Generated mint app
+Schema build starting
+Schema build complete
+[mutalisk] Warning: persistent worker detected Mox-class projects: Mox.Server mock-registry leaks across mutants under persistent. Known drift exists for this class — consider --worker-type mix. See docs/PERSISTENT_WORKER_GUIDE.md.
+[1/250] killed    lib/mint/http2.ex:2111  ComparisonNegation  replace > with <=
+[2/250] killed    lib/mint/http2.ex:1463  ComparisonNegation  replace > with <=
+[3/250] killed    lib/mint/http1.ex:1025  ComparisonNegation  replace != with ==
+[4/250] killed    lib/mint/http1.ex:871  ComparisonNegation  replace <= with >
+[5/250] killed    lib/mint/core/transport/ssl.ex:659  ComparisonNegation  replace == with !=
+[6/250] killed    lib/mint/http2.ex:1463  ComparisonBoundary  replace > with >=
+[7/250] killed    lib/mint/http2.ex:1456  ComparisonNegation  replace > with <=
+[8/250] killed    lib/mint/core/transport/ssl.ex:563  ComparisonBoundary  replace < with <=
+[9/250] killed    lib/mint/http2.ex:2357  Arithmetic  replace + with *
+[10/250] killed    lib/mint/http2/frame.ex:273  Arithmetic  replace - with *
+[11/250] killed    lib/mint/http2.ex:1226  Boolean  replace and with or
+[12/250] killed    lib/mint/http2.ex:2375  ComparisonNegation  replace > with <=
+[13/250] killed    lib/mint/core/transport/ssl.ex:660  ComparisonNegation  replace == with !=
+[14/250] killed    lib/mint/http2.ex:2037  ComparisonNegation  replace == with !=
+[15/250] killed    lib/mint/http2.ex:1226  ComparisonNegation  replace >= with <
+[16/250] killed    lib/mint/http2.ex:1218  ComparisonNegation  replace >= with <
+[17/250] killed    lib/mint/http2.ex:1226  ComparisonNegation  replace <= with >
+[18/250] killed    lib/mint/tunnel_proxy.ex:112  Arithmetic  replace + with *
+[20/250] killed    lib/mint/http2.ex:1302  ComparisonBoundary  replace >= with >
+[20/250] killed    lib/mint/http2/frame.ex:180  Arithmetic  replace + with -
+[21/250] killed    lib/mint/http2.ex:949  Arithmetic  replace - with +
+[22/250] killed    lib/mint/http2.ex:1708  ComparisonNegation  replace == with !=
+[23/250] killed    lib/mint/http1/parse.ex:70  Arithmetic  replace + with *
+[24/250] killed    lib/mint/http1.ex:970  ComparisonBoundary  replace >= with >
+[25/250] killed    lib/mint/http2/frame.ex:151  Arithmetic  replace + with -
+[26/250] killed    lib/mint/http2.ex:2436  ComparisonNegation  replace == with !=
+[27/250] killed    lib/mint/http2.ex:2175  ComparisonBoundary  replace > with >=
+[28/250] killed    lib/mint/http1.ex:1014  ComparisonNegation  replace == with !=
+[29/250] killed    lib/mint/http2.ex:1699  ComparisonNegation  replace == with !=
+[30/250] killed    lib/mint/http2/frame.ex:151  Arithmetic  replace + with *
+[31/250] killed    lib/mint/http2.ex:2071  ComparisonNegation  replace == with !=
+[32/250] killed    lib/mint/http2.ex:2375  ComparisonBoundary  replace > with >=
+[33/250] killed    lib/mint/http2.ex:1209  Arithmetic  replace - with *
+[34/250] killed    lib/mint/http1.ex:797  ComparisonBoundary  replace <= with <
+[35/250] killed    lib/mint/http2.ex:2430  ComparisonNegation  replace == with !=
+[36/250] killed    lib/mint/http2.ex:1763  ComparisonNegation  replace >= with <
+[37/250] killed    lib/mint/http1.ex:603  Arithmetic  replace + with *
+[38/250] killed    lib/mint/http2.ex:475  ComparisonNegation  replace == with !=
+[39/250] killed    lib/mint/http1.ex:1028  ComparisonNegation  replace == with !=
+[40/250] killed    lib/mint/http2/frame.ex:372  Arithmetic  replace - with *
+[41/250] killed    lib/mint/http2.ex:2197  Arithmetic  replace + with -
+[42/250] killed    lib/mint/http2.ex:2373  Arithmetic  replace + with *
+[43/250] killed    lib/mint/http2.ex:1218  ComparisonNegation  replace <= with >
+[44/250] killed    lib/mint/http2.ex:1796  ComparisonNegation  replace > with <=
+[45/250] killed    lib/mint/http2.ex:1855  Arithmetic  replace - with *
+[46/250] killed    lib/mint/http2.ex:1226  ComparisonBoundary  replace >= with >
+[47/250] killed    lib/mint/http2.ex:1398  ComparisonNegation  replace <= with >
+[48/250] killed    lib/mint/http1.ex:867  Arithmetic  replace - with +
+[49/250] killed    lib/mint/http2.ex:1796  ComparisonBoundary  replace > with >=
+[50/250] killed    lib/mint/http2.ex:1208  ComparisonNegation  replace > with <=
+[51/250] killed    lib/mint/http2.ex:2197  Arithmetic  replace + with *
+[52/250] killed    lib/mint/http2/frame.ex:342  Boolean  replace && with ||
+[53/250] killed    lib/mint/http1.ex:604  Arithmetic  replace + with -
+[54/250] killed    lib/mint/http2.ex:2111  ComparisonBoundary  replace > with >=
+[55/250] killed    lib/mint/http2.ex:1393  Arithmetic  replace + with *
+[56/250] killed    lib/mint/http2.ex:1226  ComparisonBoundary  replace <= with <
+[57/250] killed    lib/mint/http2/frame.ex:303  ComparisonNegation  replace == with !=
+[58/250] killed    lib/mint/http1.ex:604  Arithmetic  replace + with *
+[59/250] killed    lib/mint/http2/frame.ex:71  ComparisonNegation  replace == with !=
+[60/250] killed    lib/mint/http1.ex:871  ComparisonBoundary  replace <= with <
+[61/250] killed    lib/mint/http2.ex:1558  Boolean  replace and with or
+[62/250] killed    lib/mint/http2/frame.ex:344  Arithmetic  replace - with +
+[63/250] killed    lib/mint/http2.ex:1628  UnaryNot  remove unary not
+[64/250] killed    lib/mint/core/transport/ssl.ex:571  Boolean  replace or with and
+[65/250] killed    lib/mint/http2.ex:2119  UnaryNot  remove unary not
+[66/250] killed    lib/mint/http1.ex:603  Arithmetic  replace + with -
+[67/250] killed    lib/mint/http2/frame.ex:273  Arithmetic  replace - with *
+[68/250] killed    lib/mint/http2.ex:1451  ComparisonBoundary  replace > with >=
+[70/250] killed    lib/mint/http2.ex:1302  ComparisonNegation  replace >= with <
+[69/250] killed    lib/mint/http2.ex:1393  Arithmetic  replace + with -
+[71/250] killed    lib/mint/http2.ex:1271  ComparisonNegation  replace > with <=
+[72/250] killed    lib/mint/http2.ex:1271  ComparisonBoundary  replace > with >=
+[73/250] killed    lib/mint/http2.ex:2271  Boolean  replace or with and
+[74/250] killed    lib/mint/http1.ex:524  ComparisonNegation  replace == with !=
+[75/250] killed    lib/mint/http2.ex:1451  ComparisonNegation  replace > with <=
+[76/250] killed    lib/mint/http2.ex:1456  ComparisonBoundary  replace > with >=
+[77/250] killed    lib/mint/http2.ex:1271  Boolean  replace or with and
+[78/250] killed    lib/mint/http1.ex:793  Arithmetic  replace - with +
+[79/250] killed    lib/mint/http2/frame.ex:273  Arithmetic  replace - with +
+[80/250] killed    lib/mint/http1.ex:1020  ComparisonNegation  replace == with !=
+[81/250] killed    lib/mint/http2/frame.ex:344  Arithmetic  replace - with *
+[82/250] killed    lib/mint/http2.ex:1866  Arithmetic  replace - with *
+[83/250] killed    lib/mint/http1.ex:996  ComparisonNegation  replace != with ==
+[84/250] killed    lib/mint/http2.ex:2479  UnaryNot  remove unary not
+[85/250] killed    lib/mint/http2.ex:2457  Boolean  replace and with or
+[86/250] killed    lib/mint/http2.ex:2190  Arithmetic  replace - with *
+[87/250] killed    lib/mint/http2/frame.ex:342  Boolean  replace && with ||
+[88/250] killed    lib/mint/http2.ex:1209  Arithmetic  replace - with +
+[89/250] killed    lib/mint/http2.ex:2461  Boolean  replace and with or
+[90/250] killed    lib/mint/http2.ex:1393  Arithmetic  replace + with -
+[91/250] killed    lib/mint/http2.ex:1208  ComparisonBoundary  replace > with >=
+[92/250] killed    lib/mint/transport_error.ex:52  ComparisonBoundary  replace >= with >
+[93/250] killed    lib/mint/core/transport/ssl.ex:394  ComparisonNegation  replace == with !=
+[94/250] killed    lib/mint/http1.ex:1101  ComparisonNegation  replace == with !=
+[95/250] killed    lib/mint/http2.ex:1763  ComparisonBoundary  replace >= with >
+[96/250] killed    lib/mint/http1.ex:1072  ComparisonNegation  replace == with !=
+[97/250] killed    lib/mint/http2.ex:2190  Arithmetic  replace - with +
+[98/250] killed    lib/mint/http2.ex:1974  ComparisonBoundary  replace >= with >
+[99/250] killed    lib/mint/http2.ex:1551  ComparisonBoundary  replace <= with <
+[100/250] killed    lib/mint/http2.ex:1974  ComparisonNegation  replace >= with <
+[101/250] killed    lib/mint/http1.ex:1117  Boolean  replace or with and
+[102/250] killed    lib/mint/http2.ex:1551  Boolean  replace and with or
+[103/250] killed    lib/mint/http1.ex:792  ComparisonBoundary  replace > with >=
+[104/250] killed    lib/mint/http2.ex:949  Arithmetic  replace - with *
+[105/250] killed    lib/mint/http2/frame.ex:151  ComparisonNegation  replace == with !=
+[106/250] killed    lib/mint/http2.ex:1271  ComparisonNegation  replace > with <=
+[107/250] killed    lib/mint/http2.ex:1854  ComparisonBoundary  replace <= with <
+[108/250] killed    lib/mint/http2.ex:1763  Boolean  replace and with or
+[109/250] killed    lib/mint/tunnel_proxy.ex:55  Arithmetic  replace - with +
+[110/250] killed    lib/mint/http2.ex:1855  Arithmetic  replace - with +
+[111/250] killed    lib/mint/http2.ex:1148  ComparisonNegation  replace == with !=
+[112/250] killed    lib/mint/http2.ex:1551  ComparisonNegation  replace <= with >
+[113/250] killed    lib/mint/http1.ex:1020  Boolean  replace or with and
+[114/250] killed    lib/mint/http2.ex:1407  ComparisonNegation  replace > with <=
+[115/250] killed    lib/mint/http2.ex:2271  UnaryNot  remove unary not
+[116/250] killed    lib/mint/http2.ex:1865  ComparisonNegation  replace <= with >
+[117/250] killed    lib/mint/http2.ex:1793  Boolean  replace || with &&
+[118/250] killed    lib/mint/http1.ex:234  UnaryNot  remove unary not
+[119/250] killed    lib/mint/http2.ex:1196  ComparisonNegation  replace == with !=
+[120/250] killed    lib/mint/http2.ex:1699  Boolean  replace and with or
+[121/250] killed    lib/mint/http2.ex:2173  Arithmetic  replace + with -
+[122/250] killed    lib/mint/http1.ex:207  ComparisonNegation  replace == with !=
+[123/250] killed    lib/mint/http2.ex:1793  Arithmetic  replace + with -
+[124/250] killed    lib/mint/http2.ex:1291  ComparisonNegation  replace == with !=
+[125/250] killed    lib/mint/transport_error.ex:52  ComparisonNegation  replace >= with <
+[126/250] killed    lib/mint/http2.ex:2357  Arithmetic  replace + with -
+[127/250] killed    lib/mint/http2.ex:1704  ComparisonNegation  replace == with !=
+[128/250] killed    lib/mint/http1.ex:270  ComparisonNegation  replace == with !=
+[129/250] killed    lib/mint/http1.ex:524  Boolean  replace && with ||
+[130/250] killed    lib/mint/core/transport/ssl.ex:642  ComparisonNegation  replace == with !=
+[131/250] killed    lib/mint/core/transport/ssl.ex:563  ComparisonNegation  replace < with >=
+[132/250] killed    lib/mint/core/transport/ssl.ex:511  ComparisonNegation  replace == with !=
+[133/250] killed    lib/mint/core/transport/ssl.ex:659  Boolean  replace or with and
+[134/250] killed    lib/mint/http2.ex:1854  ComparisonNegation  replace <= with >
+[135/250] killed    lib/mint/core/transport/ssl.ex:443  ComparisonNegation  replace == with !=
+[136/250] killed    lib/mint/http2/frame.ex:266  ComparisonNegation  replace >= with <
+[137/250] killed    lib/mint/http2.ex:1972  ComparisonNegation  replace == with !=
+[138/250] killed    lib/mint/http2.ex:2359  ComparisonBoundary  replace > with >=
+[139/250] killed    lib/mint/core/transport/ssl.ex:740  ComparisonBoundary  replace >= with >
+[140/250] killed    lib/mint/http2.ex:2373  Arithmetic  replace + with -
+[141/250] killed    lib/mint/http2.ex:1704  ComparisonNegation  replace != with ==
+[143/250] killed    lib/mint/http2/frame.ex:298  ComparisonNegation  replace == with !=
+[142/250] killed    lib/mint/core/transport/ssl.ex:470  ComparisonNegation  replace >= with <
+[144/250] killed    lib/mint/http2.ex:2430  Boolean  replace and with or
+[145/250] killed    lib/mint/http2.ex:1218  ComparisonBoundary  replace <= with <
+[146/250] killed    lib/mint/http2.ex:1443  ComparisonNegation  replace != with ==
+[147/250] killed    lib/mint/http2.ex:2430  ComparisonNegation  replace == with !=
+[148/250] killed    lib/mint/http1.ex:865  ComparisonNegation  replace > with <=
+[149/250] killed    lib/mint/http2.ex:2166  Arithmetic  replace - with *
+[150/250] killed    lib/mint/http2.ex:2359  ComparisonNegation  replace > with <=
+[151/250] killed    lib/mint/http1.ex:867  Arithmetic  replace - with *
+[152/250] killed    lib/mint/http2/frame.ex:372  Arithmetic  replace - with +
+[153/250] killed    lib/mint/core/transport/ssl.ex:470  ComparisonBoundary  replace >= with >
+[154/250] killed    lib/mint/http2.ex:1704  Boolean  replace and with or
+[155/250] killed    lib/mint/http2.ex:1407  ComparisonBoundary  replace > with >=
+[156/250] killed    lib/mint/http2.ex:1865  ComparisonBoundary  replace <= with <
+[157/250] killed    lib/mint/http2.ex:1845  ComparisonNegation  replace != with ==
+[158/250] killed    lib/mint/http2/frame.ex:266  ComparisonBoundary  replace >= with >
+[159/250] killed    lib/mint/http2.ex:2166  Arithmetic  replace - with +
+[160/250] killed    lib/mint/http1.ex:865  ComparisonBoundary  replace > with >=
+[161/250] killed    lib/mint/http2/frame.ex:178  ComparisonNegation  replace == with !=
+[162/250] killed    lib/mint/http1.ex:793  Arithmetic  replace - with *
+[163/250] killed    lib/mint/http2.ex:1793  Arithmetic  replace + with *
+[164/250] killed    lib/mint/http2.ex:1218  Boolean  replace and with or
+[165/250] killed    lib/mint/http2.ex:1218  ComparisonBoundary  replace >= with >
+[166/250] killed    lib/mint/http1/request.ex:62  Boolean  replace or with and
+[167/250] killed    lib/mint/http2.ex:1393  Arithmetic  replace + with *
+[168/250] killed    lib/mint/http1.ex:797  ComparisonNegation  replace <= with >
+[169/250] killed    lib/mint/http2.ex:1845  Boolean  replace and with or
+[170/250] killed    lib/mint/tunnel_proxy.ex:55  Arithmetic  replace - with *
+[171/250] killed    lib/mint/http1.ex:1025  Boolean  replace && with ||
+[172/250] killed    lib/mint/http2.ex:1271  ComparisonBoundary  replace > with >=
+[173/250] killed    lib/mint/http2.ex:1398  ComparisonBoundary  replace <= with <
+[174/250] killed    lib/mint/core/transport/ssl.ex:740  ComparisonNegation  replace >= with <
+[175/250] killed    lib/mint/http2/frame.ex:273  Arithmetic  replace - with +
+[176/250] killed    lib/mint/http2.ex:2175  ComparisonNegation  replace > with <=
+[177/250] killed    lib/mint/http1.ex:456  ComparisonNegation  replace == with !=
+[178/250] killed    lib/mint/http2.ex:1866  Arithmetic  replace - with +
+[179/250] killed    lib/mint/http2.ex:1226  Boolean  replace and with or
+[180/250] killed    lib/mint/http2.ex:1393  Arithmetic  replace + with *
+[181/250] killed    lib/mint/http1/parse.ex:70  Arithmetic  replace + with -
+[182/250] killed    lib/mint/tunnel_proxy.ex:112  Arithmetic  replace + with -
+[183/250] killed    lib/mint/http2.ex:1218  Boolean  replace and with or
+[184/250] killed    lib/mint/http2.ex:1699  ComparisonNegation  replace == with !=
+[185/250] killed    lib/mint/http2.ex:2173  Arithmetic  replace + with *
+[186/250] killed    lib/mint/http2/frame.ex:180  Arithmetic  replace + with *
+[187/250] killed    lib/mint/http1.ex:970  ComparisonNegation  replace >= with <
+[188/250] killed    lib/mint/http2.ex:1393  Arithmetic  replace + with -
+[189/250] killed    lib/mint/http1.ex:968  UnaryNot  remove unary !
+[190/250] killed    lib/mint/http1.ex:792  ComparisonNegation  replace > with <=
+    warning: redefining module Mint.HTTP2.Frame (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.Frame.beam)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2.Frame (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.Frame.beam)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+    warning: redefining module Mint.HTTP2.Frame (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.Frame.beam)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[190/250] invalid   lib/mint/http1.ex:824  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module Mint.Core.Util (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.Core.Util.beam)
+    │
+  1 │ defmodule Mint.Core.Util do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/core/util.ex:1: Mint.Core.Util (module)
+
+[190/250] invalid   lib/mint/http2/frame.ex:59  GuardTypeTest  replace guard is_integer with is_number
+[190/250] invalid   lib/mint/http2/frame.ex:243  GuardComparisonNegation  replace guard != with ==
+[190/250] invalid   lib/mint/http2/frame.ex:221  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module Mint.TunnelProxy (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.TunnelProxy.beam)
+    │
+  1 │ defmodule Mint.TunnelProxy do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/tunnel_proxy.ex:1: Mint.TunnelProxy (module)
+
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[191/250] killed    lib/mint/core/util.ex:32  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[192/250] killed    lib/mint/tunnel_proxy.ex:95  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+[192/250] invalid   lib/mint/http2.ex:908  GuardComparisonBoundary  replace guard <= with <
+    warning: redefining module Mint.HTTP2.Frame (current version defined in memory)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[192/250] invalid   lib/mint/http1.ex:631  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP1.Parse (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.Parse.beam)
+    │
+  1 │ defmodule Mint.HTTP1.Parse do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1/parse.ex:1: Mint.HTTP1.Parse (module)
+
+    warning: redefining module Mint.HTTP1.Request (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.Request.beam)
+    │
+  1 │ defmodule Mint.HTTP1.Request do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1/request.ex:1: Mint.HTTP1.Request (module)
+
+[192/250] invalid   lib/mint/http2.ex:538  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[192/250] invalid   lib/mint/http1.ex:477  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+[193/250] killed    lib/mint/http1/parse.ex:22  GuardComparisonNegation  replace guard >= with <
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2/frame.ex:59  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1484  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http1.ex:613  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:715  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:944  GuardComparisonBoundary  replace guard < with <=
+    warning: redefining module Mint.HTTP2.Frame (current version defined in memory)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1253  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1087  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:980  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2/frame.ex:59  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1078  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1503  GuardComparisonNegation  replace guard <= with >
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1484  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1503  GuardComparisonBoundary  replace guard <= with <
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http1.ex:854  GuardComparisonBoundary  replace guard < with <=
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:1753  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[193/250] invalid   lib/mint/http2.ex:908  GuardTypeTest  replace guard is_integer with is_float
+    warning: redefining module Mint.Core.Util (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.Core.Util.beam)
+    │
+  1 │ defmodule Mint.Core.Util do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/core/util.ex:1: Mint.Core.Util (module)
+
+[193/250] invalid   lib/mint/http2.ex:944  GuardComparisonNegation  replace guard < with >=
+    warning: redefining module Mint.HTTP2.Frame (current version defined in memory)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[194/250] killed    lib/mint/core/util.ex:7  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[194/250] invalid   lib/mint/http2.ex:621  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP.beam)
+    │
+  1 │ defmodule Mint.HTTP do
+    │ ~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http.ex:1: Mint.HTTP (module)
+
+[194/250] invalid   lib/mint/http2.ex:908  GuardComparisonBoundary  replace guard >= with >
+    warning: redefining module Mint.HTTP (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP.beam)
+    │
+  1 │ defmodule Mint.HTTP do
+    │ ~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http.ex:1: Mint.HTTP (module)
+
+[195/250] killed    lib/mint/http.ex:144  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[196/250] killed    lib/mint/http.ex:142  GuardTypeTest  replace guard is_tuple with is_list
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+[196/250] invalid   lib/mint/http2/frame.ex:95  GuardComparisonBoundary  replace guard > with >=
+    warning: redefining module Mint.HTTP (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP.beam)
+    │
+  1 │ defmodule Mint.HTTP do
+    │ ~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http.ex:1: Mint.HTTP (module)
+
+[196/250] invalid   lib/mint/http2.ex:940  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+[197/250] killed    lib/mint/http.ex:132  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP1.Parse (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.Parse.beam)
+    │
+  1 │ defmodule Mint.HTTP1.Parse do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1/parse.ex:1: Mint.HTTP1.Parse (module)
+
+    warning: redefining module Mint.HTTP1.Request (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.Request.beam)
+    │
+  1 │ defmodule Mint.HTTP1.Request do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1/request.ex:1: Mint.HTTP1.Request (module)
+
+[197/250] invalid   lib/mint/http2.ex:1617  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[198/250] killed    lib/mint/http1/parse.ex:22  GuardComparisonBoundary  replace guard >= with >
+[198/250] invalid   lib/mint/http1.ex:300  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+    warning: redefining module Mint.HTTP1.Response (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.Response.beam)
+    │
+  1 │ defmodule Mint.HTTP1.Response do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1/response.ex:1: Mint.HTTP1.Response (module)
+
+[198/250] invalid   lib/mint/http1.ex:854  GuardComparisonNegation  replace guard < with >=
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[199/250] killed    lib/mint/http1/response.ex:41  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[199/250] invalid   lib/mint/http2.ex:685  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[199/250] invalid   lib/mint/http1.ex:622  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[199/250] invalid   lib/mint/http2.ex:908  GuardTypeTest  replace guard is_integer with is_number
+    warning: redefining module Mint.HTTP (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP.beam)
+    │
+  1 │ defmodule Mint.HTTP do
+    │ ~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http.ex:1: Mint.HTTP (module)
+
+[199/250] invalid   lib/mint/http2.ex:1096  GuardTypeTest  replace guard is_atom with is_nil
+    warning: redefining module Mint.HTTP (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP.beam)
+    │
+  1 │ defmodule Mint.HTTP do
+    │ ~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http.ex:1: Mint.HTTP (module)
+
+[199/250] invalid   lib/mint/http2.ex:908  GuardComparisonNegation  replace guard >= with <
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[200/250] killed    lib/mint/http.ex:135  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP2.Frame (current version defined in memory)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+[201/250] killed    lib/mint/http.ex:138  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http2.ex:1621  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP2.Frame (current version defined in memory)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http2.ex:980  GuardComparisonNegation  replace guard == with !=
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http1.ex:666  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http2/frame.ex:198  GuardComparisonNegation  replace guard != with ==
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http2/frame.ex:95  GuardComparisonNegation  replace guard > with <=
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+[201/250] invalid   lib/mint/http2.ex:1484  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2.Frame (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.Frame.beam)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http2.ex:656  GuardTypeTest  replace guard is_list with is_tuple
+    warning: redefining module Mint.HTTP2.Frame (current version defined in memory)
+    │
+  1 │ defmodule Mint.HTTP2.Frame do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2/frame.ex:1: Mint.HTTP2.Frame (module)
+
+[201/250] invalid   lib/mint/http2.ex:908  GuardComparisonNegation  replace guard <= with >
+    warning: redefining module Mint.HTTP1 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP1.beam)
+    │
+  1 │ defmodule Mint.HTTP1 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http1.ex:1: Mint.HTTP1 (module)
+
+    warning: redefining module Mint.HTTP2 (current version loaded from _build/mut_schema/lib/mint/ebin/Elixir.Mint.HTTP2.beam)
+    │
+  1 │ defmodule Mint.HTTP2 do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mint/http2.ex:1: Mint.HTTP2 (module)
+
+[201/250] invalid   lib/mint/http1.ex:477  GuardComparisonNegation  replace guard == with !=
+[201/250] invalid   lib/mint/http2/frame.ex:168  GuardComparisonNegation  replace guard != with ==
+[201/250] invalid   lib/mint/http1.ex:824  GuardComparisonNegation  replace guard > with <=
+[201/250] invalid   lib/mint/http2/frame.ex:185  GuardComparisonNegation  replace guard != with ==
+Mutation score: 201/201 = 100.0%
+
+Surviving mutants:
+  none
+
+Schema:    190/190 killed (100.0%)   wall: 3.5s
+Fallback:  11/60 killed (18.3%)   wall: 18.8s
+  guard_comparison_boundary:    1/8 killed
+  guard_comparison_negation:    6/27 killed
+  guard_type_test:              4/25 killed  recompile errors:
+    compile errors:    33
+    parse errors:      16
+    dep path errors:   0
+    unknown:           0
+
+Skipped:   2916 (attribute_engine_disabled: 13, body_literal_engine_disabled: 155, missing_oracle_site: 530, no_applicable_mutator: 17, unsupported_dispatch: 2201)
+Invalid:   49
+Errors:    0
+Timeouts:  0
+
+Run time: 22.3s
+Fallback wall-clock: 84.2% of total
+Fallback mutants: 24.0% of executed
+
+Phases:
+  oracle build:         5426 ms
+  baseline tests:       2958 ms
+  plan generation:       108 ms
+  schema build:         6345 ms
+  schema workers:       2872 ms
+  fallback workers:    14329 ms
+  report writing:         37 ms
+  total:               45575 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    250
+    all tests:          0
+  avg tests/mutant: 6.2
+  median tests/mutant: 6
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Persistent worker:
+  workers:     4
+  boot:        median 3132.0 ms (max 3363.0 ms)
+  app startup: median 51.1 ms (total apps: 92)
+  test load:   median 2852.6 ms (total files: 56)
+  mutant run:  median 9.8 ms (p95 20.5 ms, n=190)
+  reset hooks:
+    application_env: 0.1 ms
+    ets:             0.3 ms
+    processes:       0.0 ms
+    persistent_term: 0.0 ms
+    on_exit:         0.0 ms
+  filter lookup: 0.1 ms
+  crashes: 0  restarts: 0  filter-miss: 0  in-process compile errors: 33  parse errors: 16  mix fallbacks: 49
+  memory: peak 78.9 MB total, 19.1 MB processes
+
+Hint: persistent worker had high in-process fallback compile-error rate (81.7%). Consider --worker-type mix.
+
+Mutalisk run complete in 46237ms
+bench.wall_ms=50000

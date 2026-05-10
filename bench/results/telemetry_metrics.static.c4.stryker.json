@@ -1,0 +1,974 @@
+{
+  "files": {
+    "lib/telemetry_metrics.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace / with *",
+          "duration": 1080,
+          "id": "0d22fca1c5984008b9abf055c182585a",
+          "killedBy": [
+            "Telemetry.MetricsTest:summary/2 converts a measurement under key from one byte unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 785
+            },
+            "start": {
+              "column": 20,
+              "line": 785
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "1 * multiplier * divisor",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 1086,
+          "id": "1a33564771e5b3ff29d9610ff175be1b",
+          "killedBy": [
+            "Telemetry.MetricsTest:last_value/2 converts a result of measurement function from one regular time unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 725
+            },
+            "start": {
+              "column": 21,
+              "line": 725
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "measurement / conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 1063,
+          "id": "1a94813ca36c6dadf0fae3122e1e7425",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:can show metric name and unit conversion fun"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 734
+            },
+            "start": {
+              "column": 43,
+              "line": 734
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value + conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 1075,
+          "id": "23700d40b3aaf59904a34e749404c3dd",
+          "killedBy": [
+            "Telemetry.MetricsTest:summary/2 converts a measurement under key from one byte unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 785
+            },
+            "start": {
+              "column": 7,
+              "line": 785
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "1 - multiplier",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_nil with is_atom",
+          "duration": 1468,
+          "id": "23d0c491334f15f76d0a7452941bc599",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 90,
+              "line": 629
+            },
+            "start": {
+              "column": 78,
+              "line": 629
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_atom(drop)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 1450,
+          "id": "2884c6397e561b23a8852930fd8f34ea",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 69,
+              "line": 589
+            },
+            "start": {
+              "column": 43,
+              "line": 589
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "metric_or_event_name != \"\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard == with !=",
+          "duration": 1468,
+          "id": "2d3749a7cebccaa125cfcebbfa335de2",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 589
+            },
+            "start": {
+              "column": 13,
+              "line": 589
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "metric_or_event_name != []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace / with *",
+          "duration": 1092,
+          "id": "311c6295879ae15a0e63a2d3dd0e99d4",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:can show metric name and unit conversion fun"
+          ],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 772
+            },
+            "start": {
+              "column": 11,
+              "line": 772
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "1 * System.convert_time_unit(1, to_unit, from_unit)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1379,
+          "id": "434d7f7ce9d581d9f89cc21258890ed8",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 47,
+              "line": 668
+            },
+            "start": {
+              "column": 34,
+              "line": 668
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(list)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 1054,
+          "id": "5479ad63f63af1931fd312910498f0c9",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:can show metric name and unit conversion fun"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 734
+            },
+            "start": {
+              "column": 43,
+              "line": 734
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value / conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 1060,
+          "id": "5880eb0d473d93ab975957450cadf01d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 743
+            },
+            "start": {
+              "column": 29,
+              "line": 743
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "time_unit?(from_unit) or time_unit?(to_unit)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1363,
+          "id": "5c775c180331f2945c527b2c1300084e",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 47,
+              "line": 756
+            },
+            "start": {
+              "column": 34,
+              "line": 756
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(unit)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 1047,
+          "id": "5e7d25b53184aa0a83214c8e40722771",
+          "killedBy": [
+            "Telemetry.MetricsTest:distribution/2 converts a result of binary measurement function from one regular time unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 716
+            },
+            "start": {
+              "column": 21,
+              "line": 716
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "measurement / conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 973,
+          "id": "60b3f87340e5e22c8877d278d8e18fdd",
+          "killedBy": [
+            "Telemetry.MetricsTest:last_value/2 raises when second element of unit-conversion tuple is not a valid time unit"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 746
+            },
+            "start": {
+              "column": 29,
+              "line": 746
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "byte_unit?(from_unit) or byte_unit?(to_unit)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_nil with is_atom",
+          "duration": 1382,
+          "id": "7079d483c811062c50dfc356723f2b23",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 74,
+              "line": 629
+            },
+            "start": {
+              "column": 62,
+              "line": 629
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_atom(keep)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 970,
+          "id": "77c3ffda60ffc0c00400c6f322d5ab94",
+          "killedBy": [
+            "Telemetry.MetricsTest:last_value/2 converts a result of measurement function from one regular time unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 725
+            },
+            "start": {
+              "column": 21,
+              "line": 725
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "measurement - conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 952,
+          "id": "92a860d1e5439584d168dd9c8bd5deb0",
+          "killedBy": [
+            "Telemetry.MetricsTest:summary/2 converts a measurement under key from one byte unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 785
+            },
+            "start": {
+              "column": 7,
+              "line": 785
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "1 / multiplier",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 935,
+          "id": "98fbe2ab82748ae76314fb1261d32606",
+          "killedBy": [
+            "Telemetry.MetricsTest:summary/2 converts a measurement under key from one byte unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 7,
+              "line": 785
+            },
+            "start": {
+              "column": 7,
+              "line": 785
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "1 + multiplier",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1210,
+          "id": "a99a72d42bab4564ca3b5049345a6947",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 95,
+              "line": 593
+            },
+            "start": {
+              "column": 66,
+              "line": 593
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(metric_or_event_name)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 946,
+          "id": "b0ecc97d033b4cea78c871376a74feec",
+          "killedBy": [
+            "Telemetry.MetricsTest:last_value/2 converts a result of measurement function from one regular time unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 725
+            },
+            "start": {
+              "column": 21,
+              "line": 725
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "measurement + conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 967,
+          "id": "c39d326ecdc818c93d5495a6a1d458d4",
+          "killedBy": [
+            "Telemetry.MetricsTest:distribution/2 converts a result of binary measurement function from one regular time unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 716
+            },
+            "start": {
+              "column": 21,
+              "line": 716
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "measurement - conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 963,
+          "id": "c4d49069f611cebbac8bef66a31e0474",
+          "killedBy": [
+            "Telemetry.MetricsTest:last_value/2 raises when description is invalid"
+          ],
+          "location": {
+            "end": {
+              "column": 24,
+              "line": 688
+            },
+            "start": {
+              "column": 24,
+              "line": 688
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "is_binary(term) or String.valid?(term)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 979,
+          "id": "de1b96df64e7a5c6654bea513f4ca109",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:can show metric name and unit conversion fun"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 734
+            },
+            "start": {
+              "column": 43,
+              "line": 734
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "value - conversion_ratio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 994,
+          "id": "e2ad470450b393401b756a2718f3f430",
+          "killedBy": [
+            "Telemetry.MetricsTest:distribution/2 converts a result of binary measurement function from one regular time unit to another"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 716
+            },
+            "start": {
+              "column": 21,
+              "line": 716
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "measurement + conversion_ratio",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Telemetry.Metrics do\n  @moduledoc \"\"\"\n  Common interface for defining metrics based on\n  [`:telemetry`](https://github.com/beam-telemetry/telemetry) events.\n\n  Metrics are aggregations of Telemetry events with specific names, providing\n  a view of the system's behaviour over time.\n\n  To give a more concrete example, imagine that somewhere in your code there is\n  a function which sends an HTTP request, measures the time it took to get a\n  response, and emits an event with the information:\n\n      :telemetry.execute([:http, :request, :stop], %{duration: duration})\n\n  You could define a counter metric, which counts how many HTTP requests were\n  completed:\n\n      Telemetry.Metrics.counter(\"http.request.stop.duration\")\n\n  or you could use a summary metric to see statistics about the request duration:\n\n      Telemetry.Metrics.summary(\"http.request.stop.duration\")\n\n  This documentation is going to cover all the available metrics and how to use\n  them, as well as options, and how to integrate those metrics with reporters.\n\n  ## Metrics\n\n  There are five metric types provided by `Telemetry.Metrics`:\n\n    * `counter/2` which counts the total number of emitted events\n    * `sum/2` which keeps track of the sum of selected measurement\n    * `last_value/2` holding the value of the selected measurement from\n      the most recent event\n    * `summary/2` calculating statistics of the selected measurement,\n      like maximum, mean, percentiles etc.\n    * `distribution/2` which builds a histogram of selected measurement\n\n  The first argument to all metric functions is the metric name. Metric\n  name can be provided as a string (e.g. `\"http.request.stop.duration\"`) or a\n  list of atoms (`[:http, :request, :stop, :duration]`). The metric name is\n  automatically used to infer the telemetry event and measurement. For example,\n  In the `\"http.request.stop.duration\"` example, the source event name is\n  `[:http, :request, :stop]` and metric values are drawn from `:duration`\n  measurement. Like this:\n\n      [:http , :request, :stop]      :duration\n      <----- event name ------> <-- measurement -->\n\n  You can also explicitly specify the event name and measurement\n  if you prefer.\n\n  The second argument is a list of options. Below is the description of the\n  options common to all metric types:\n\n    * `:event_name` - the source event name. Can be represented either as a\n      string (e.g. `\"http.request\"`) or a list of atoms (`[:http, :request]`).\n      By default the event name is all but the last segment of the metric name.\n    * `:measurement` - the event measurement used as a source of a metric values.\n      By default it is the last segment of the metric name. It can be:\n      * a key in the event's measurements map\n      * an unary function accepting the whole measurements map and returning the\n        actual value to be used.\n      * a binary function accepting the measurements and metadata maps and\n        returning the actual value to be used.\n    * `:tags` - a subset of metadata keys by which aggregations will be broken down.\n      Defaults to an empty list.\n    * `:tag_values` - a function that receives the metadata and returns a map with\n      the tags as keys and their respective values. Defaults to returning the\n      metadata itself.\n    * `:keep` - a predicate function that evaluates the metadata and measurement\n      to conditionally record a given event. `:keep` and `:drop` cannot be\n      combined. Defaults to `nil`.\n    * `:drop` - a predicate function that evaluates the metadata and measurement\n      to conditionally skip recording a given event. `:keep` and `:drop` cannot\n      be combined. Defaults to `nil`.\n    * `:description` - human-readable description of the metric. Might be used by\n      reporters for documentation purposes. Defaults to `nil`.\n    * `:unit` - an atom describing the unit of selected measurement, typically in\n      singular, such as `:millisecond`, `:byte`, `:kilobyte`, etc. It may also be\n      a tuple indicating that a measurement should be converted from one unit to\n      another before a metric is updated. Currently, only time and byte unit\n      conversions are supported. We discuss those in detail in the \"Converting Units\"\n      section.\n    * `:reporter_options` - a keyword list of reporter-specific options for the metric.\n\n  ## Breaking down metric values by tags\n\n  Sometimes it's not enough to have a global overview of all HTTP requests received\n  or all DB queries made. It's often more helpful to break down this data, for example,\n  we might want to have separate metric values for each unique database table and\n  operation name (`select`, `insert` etc.) to see how these particular queries behave.\n\n  This is where tagging comes into play. All metric definitions accept a `:tags` option:\n\n      counter(\"db.query.duration\", tags: [:table, :operation])\n\n  The above definition means that we want to keep track of the number of queries, but\n  we want a separate counter for each unique pair of table and operation. Tag values are\n  fetched from event metadata - this means that in this example, `[:db, :query]` events\n  need to include `:table` and `:operation` keys in their payload:\n\n      :telemetry.execute([:db, :query], %{duration: 198}, %{table: \"users\", operation: \"insert\"})\n      :telemetry.execute([:db, :query], %{duration: 112}, %{table: \"users\", operation: \"select\"})\n      :telemetry.execute([:db, :query], %{duration: 201}, %{table: \"sessions\", operation: \"insert\"})\n      :telemetry.execute([:db, :query], %{duration: 212}, %{table: \"sessions\", operation: \"insert\"})\n\n  The result of aggregating the events above looks like this:\n\n  | table    | operation | count |\n  | -------- | --------- | ----- |\n  | users    | insert    | 1     |\n  | users    | select    | 1     |\n  | sessions | insert    | 2     |\n\n  The approach where we create a separate metric for some unique set of properties\n  is called a multi-dimensional data model.\n\n  ### Transforming event metadata for tagging\n\n  Finally, sometimes there is a need to modify event metadata before it's used for\n  tagging. Each metric definition accepts a function in `:tag_values` option which\n  transforms the metadata into desired shape. Note that this function is called for\n  each event, so it's important to keep it fast if the rate of events is high.\n\n  ## Converting Units\n\n  It might happen that the unit of measurement we're tracking is not the desirable unit\n  for the metric values, e.g. events are emitted by a 3rd-party library we do not control,\n  or a reporter we're using requires specific unit of measurement.\n\n  For these scenarios, each metric definition accepts a `:unit` option in a form of a tuple:\n\n      summary(\"http.request.stop.duration\", unit: {from_unit, to_unit})\n\n  This means that the measurement will be converted from `from_unit` to `to_unit` before\n  being used for updating the metric. Currently, only time and byte conversions are\n  supported.\n\n  ### Time Conversions\n\n  Most time measurements in the Erlang VM are done in the `:native` unit, which we need\n  to convert to the desired precision. The supported time units are: `:second`, `:millisecond`,\n  `:microsecond`, `:nanosecond` and `:native`.\n\n  For example, to convert HTTP request duration from `:native` time unit to milliseconds\n  you'd write:\n\n      summary(\"http.request.stop.duration\", unit: {:native, :millisecond})\n\n  ### Byte Conversions\n\n  Some metrics, like VM memory's usage are reported in bytes. You might want to convert this\n  to megabytes, for example. The supported byte units are: `:byte`, `:kilobyte` and `:megabyte`.\n\n  In order to convert a metric value from bytes to megabytes, you can write the following:\n\n      last_value(\"vm.memory.total\", unit: {:byte, :megabyte})\n\n  ## VM metrics\n\n  `Telemetry.Metrics` doesn't have a special treatment for the VM metrics - they need\n  to be based on the events like all other metrics.\n\n  `:telemetry_poller` package (http://hexdocs.pm/telemetry_poller) exposes a bunch of\n  VM-related metrics and also provides custom periodic measurements. You can add\n  telemetry poller as a dependency:\n\n      {:telemetry_poller, \"~> 0.4\"}\n\n  By simply adding `:telemetry_poller` as a dependency, two events will become available:\n\n    * `[:vm, :memory]` - contains the total memory, as well as the memory used for\n      binaries, processes, etc. See `erlang:memory/0` for all keys;\n    * `[:vm, :total_run_queue_lengths]` - returns the run queue lengths for CPU and\n      IO schedulers. It contains the `total`, `cpu` and `io` measurements;\n\n  You can consume those events with `Telemetry.Metrics` with the following sample metrics:\n\n      last_value(\"vm.memory.total\", unit: :byte)\n      last_value(\"vm.total_run_queue_lengths.total\")\n      last_value(\"vm.total_run_queue_lengths.cpu\")\n      last_value(\"vm.total_run_queue_lengths.io\")\n\n  If you want to change the frequency of those measurements, you can set the\n  following configuration in your config file:\n\n      config :telemetry_poller, :default, period: 5_000 # the default\n\n  Or disable it completely with:\n\n      config :telemetry_poller, :default, false\n\n  The `:telemetry_poller` package also allows you to run your own poller, which is\n  useful to retrieve process information or perform custom measurements periodically.\n  For example, to keep track of the number of users, inside a supervision tree, you could do:\n\n      measurements = [\n        {:process_info,\n         event: [:my_app, :worker],\n         name: MyApp.Worker,\n         keys: [:message_queue_len, :memory]},\n\n        {MyApp, :measure_users, []}\n      ]\n\n      Supervisor.start_link([\n        # Run the given measurements every 10 seconds\n        {:telemetry_poller, measurements: measurements(), period: 10_000}\n      ], strategy: :one_for_one)\n\n  Where `MyApp.measure_users/0` could be written like this:\n\n      defmodule MyApp do\n        def measure_users do\n          :telemetry.execute([:my_app, :users], %{total: MyApp.users_count()}, %{})\n        end\n      end\n\n  Now with measurements in place, you can define the metrics for the\n  events above:\n\n      last_value(\"my_app.worker.memory\", unit: :byte)\n      last_value(\"my_app.worker.message_queue_len\")\n      last_value(\"my_app.users.total\")\n\n  ## Optionally Recording Metric Events\n\n  There may be occasions where you want to record metrics differently or not at all based\n  upon metadata. Rather than depending on changing event names with prefixes, you can instead\n  provide a predicate function which returns true when you want the metric to be\n  processed for this event and false when you do not.\n\n  Let's examine some a few examples where optional recording can be helpful.\n\n  ### Filtering on Metadata\n\n  Let's assume you are using an HTTP client library in your application which has the following\n  event_name: `[:http_client, :request, :stop]`. You use this library in multiple places and\n  you'd like to monitor the request duration.\n\n  You can use the event provided by the library but you have very different acceptable\n  performance requirements for a critical request, so it would be better to provide a different\n  metric name for monitoring. The client library includes a user configured `:name` option which\n  you can set and is passed in the event metadata.\n\n  Let's create a default distribution metric and one for the high performance call.\n\n      distribution(\n        \"http.client.request.duration\",\n        event_name: [:http_client, :request, :stop],\n        drop: &(match?(%{name: :fast_client}, &1))\n      )\n\n      distribution(\n        \"http.fast.client.request.duration\",\n        event_name: [:http_client, :request, :stop],\n        keep: &(match?(%{name: :fast_client}, &1))\n      )\n\n  With this configuration, you can now monitor these requests separately. In the first example,\n  any events where the client's name is `:fast_client` will be dropped for that metric.\n  Conversely, any matching events in the second example metric will be kept.\n\n  Note: only `:keep` OR `:drop` may be set, never both.\n\n  ### Other Uses\n\n  Another potential use case for `:keep | :drop` could be per metric sampling rates. As long\n  as your function returns a boolean, it can determine if the event should be processed.\n\n  ### Reporter Support\n\n  Event optional recording must be supported by the reporter you are using. Check your reporter's\n  documentation before relying on this functionality.\n\n  The `keep` function should be evaluated by reporters _prior_ to `tag_values` using the\n  raw `:telemetry.metadata()` values from the event.\n\n  ## Reporters\n\n  So far, we have talked about metrics and how to describe them, but we haven't discussed\n  how those metrics are consumed and published to a system that provides data visualization,\n  aggregation, and more. The job of subscribing to events and processing the actual metrics\n  is a responsibility of reporters.\n\n  Generally speaking, a reporter is a process that you would start in your supervision\n  tree with a list of metrics as input. For example, `Telemetry.Metrics` ships with a\n  `Telemetry.Metrics.ConsoleReporter` module, which prints data to the terminal as an\n  example. You would start it as follows:\n\n      metrics = [\n        last_value(\"my_app.worker.memory\", unit: :byte),\n        last_value(\"my_app.worker.message_queue_len\"),\n        last_value(\"my_app.users.total\")\n      ]\n\n      Supervisor.start_link([\n        {Telemetry.Metrics.ConsoleReporter, metrics: metrics}\n      ], strategy: :one_for_one)\n\n  Reporters take metric definitions as an input, subscribe to relevant events and\n  aggregate data when the events are emitted. Reporters may push metrics to StatsD,\n  some time-series database, or exposing a HTTP endpoint for Prometheus to scrape.\n  In a nutshell, `Telemetry.Metrics` defines only how metrics of particular type\n  should behave and reporters provide the actual implementation for these aggregations.\n\n  Official reporters, maintained by the Observability Working Group of the Erlang\n  Ecosystem Foundation, can be found on the [BEAM Telemetry organization on GitHub](https://github.com/beam-telemetry/).\n  You may also [find community reporters on hex.pm](https://hex.pm/packages?search=telemetry_metrics).\n  You can also read the [Writing Reporters](writing_reporters.html) page for general\n  information on how to write a reporter.\n\n  ## Wiring it all up\n\n  Over the previous sections we discussed how to setup metrics and pass them to reporters\n  and how to configure a poller for measurements. We can wire it all up into a single\n  module as shown below. The example below would be used in the context of a Phoenix\n  application, where we have web metrics, database metrics (through Ecto) as well as\n  from the database, Phoenix metrics as well as VM metrics.\n\n  The first step is to add both `:telemetry_metrics` and `:telemetry_poller` as\n  dependencies:\n\n      [\n        {:telemetry_poller, \"~> 0.4\"},\n        {:telemetry_metrics, \"~> 0.4\"}\n      ]\n\n  Then you could define a module that wires everything up:\n\n      defmodule MyAppWeb.Telemetry do\n        use Supervisor\n        import Telemetry.Metrics\n\n        def start_link(arg) do\n          Supervisor.start_link(__MODULE__, arg, name: __MODULE__)\n        end\n\n        def init(_arg) do\n          children = [\n            {:telemetry_poller,\n             measurements: periodic_measurements(),\n             period: 10_000},\n            # Or TelemetryMetricsPrometheus or TelemetryMetricsFooBar\n            {TelemetryMetricsStatsd, metrics: metrics()}\n          ]\n\n          Supervisor.init(children, strategy: :one_for_one)\n        end\n\n        defp metrics do\n          [\n            # VM Metrics\n            last_value(\"vm.memory.total\", unit: :byte),\n            last_value(\"vm.total_run_queue_lengths.total\"),\n            last_value(\"vm.total_run_queue_lengths.cpu\"),\n            last_value(\"vm.total_run_queue_lengths.io\"),\n\n            last_value(\"my_app.worker.memory\", unit: :byte),\n            last_value(\"my_app.worker.message_queue_len\"),\n\n            # Database Time Metrics\n            summary(\"my_app.repo.query.total_time\", unit: {:native, :millisecond}),\n            summary(\"my_app.repo.query.decode_time\", unit: {:native, :millisecond}),\n            summary(\"my_app.repo.query.query_time\", unit: {:native, :millisecond}),\n            summary(\"my_app.repo.query.idle_time\", unit: {:native, :millisecond}),\n            summary(\"my_app.repo.query.queue_time\", unit: {:native, :millisecond}),\n\n            # Phoenix Time Metrics\n            summary(\"phoenix.endpoint.stop.duration\",\n                    unit: {:native, :millisecond}),\n            summary(\n              \"phoenix.router_dispatch.stop.duration\",\n              unit: {:native, :millisecond},\n              tags: [:plug]\n            )\n          ]\n        end\n\n        defp periodic_measurements do\n          [\n            {:process_info,\n             event: [:my_app, :worker],\n             name: Rumbl.Worker,\n             keys: [:message_queue_len, :memory]}\n          ]\n        end\n      end\n  \"\"\"\n\n  require Logger\n\n  alias Telemetry.Metrics.{Counter, Sum, LastValue, Summary, Distribution}\n\n  @typedoc \"\"\"\n  The name of the metric, either as string or a list of atoms.\n  \"\"\"\n  @type metric_name :: String.t() | normalized_metric_name()\n\n  @typedoc \"\"\"\n  The name of the metric represented as a list of atoms.\n  \"\"\"\n  @type normalized_metric_name :: [atom(), ...]\n\n  @type measurement ::\n          term()\n          | (:telemetry.event_measurements() -> number())\n          | (:telemetry.event_measurements(), :telemetry.event_metadata() -> number())\n  @type tag :: term()\n  @type tags :: [tag()]\n  @type tag_values :: (:telemetry.event_metadata() -> :telemetry.event_metadata())\n  @type predicate_fun ::\n          (:telemetry.event_metadata() -> boolean())\n          | (:telemetry.event_metadata(), :telemetry.event_measurements() -> boolean())\n  @type keep :: predicate_fun()\n  @type drop :: predicate_fun()\n  @type description :: nil | String.t()\n  @type unit :: atom()\n  @type time_unit_conversion() :: {time_unit(), time_unit()}\n  @type time_unit() :: :second | :millisecond | :microsecond | :nanosecond | :native\n  @type byte_unit() :: :megabyte | :kilobyte | :byte\n  @type byte_unit_conversion() :: {byte_unit(), byte_unit()}\n  @type reporter_options :: keyword()\n  @type metric_option ::\n          {:event_name, String.t() | :telemetry.event_name()}\n          | {:measurement, measurement()}\n          | {:tags, tags()}\n          | {:tag_values, tag_values()}\n          | {:keep, keep()}\n          | {:drop, drop()}\n          | {:description, description()}\n          | {:unit, unit() | time_unit_conversion() | byte_unit_conversion()}\n          | {:reporter_options, reporter_options()}\n  @type metric_options :: [metric_option()]\n\n  @typedoc \"\"\"\n  One of the base metric definitions.\n  \"\"\"\n  @type t() :: Counter.t() | LastValue.t() | Sum.t() | Summary.t() | Distribution.t()\n\n  # API\n\n  @doc \"\"\"\n  Returns a definition of counter metric.\n\n  Counter metric keeps track of the total number of specific events emitted.\n\n  The value of the counter is always incremented by one, regardless of the\n  value of the measurement. However, note the measurement must still be\n  available in the event, otherwise the event is not accounted for.\n\n  See the [\"Metrics\"](#module-metrics) section in the top-level documentation of this module for more\n  information.\n\n  ## Example\n\n      counter(\n        \"http.request.count\",\n        tags: [:controller, :action]\n      )\n  \"\"\"\n  @spec counter(metric_name(), metric_options()) :: Counter.t()\n  def counter(metric_name, options \\\\ []) do\n    struct(Counter, common_fields(metric_name, options))\n  end\n\n  @doc \"\"\"\n  Returns a definition of sum metric.\n\n  Sum metric keeps track of the sum of selected measurement's values carried by specific events.\n\n  See the [\"Metrics\"](#module-metrics) section in the top-level documentation of this module for more\n  information.\n\n  ## Example\n\n      sum(\n        \"user.session_count\",\n        event_name: \"user.session_count\",\n        measurement: :delta,\n        tags: [:role]\n      )\n  \"\"\"\n  @spec sum(metric_name(), metric_options()) :: Sum.t()\n  def sum(metric_name, options \\\\ []) do\n    struct(Sum, common_fields(metric_name, options))\n  end\n\n  @doc \"\"\"\n  Returns a definition of last value metric.\n\n  Last value keeps track of the selected measurement found in the most recent event.\n\n  See the [\"Metrics\"](#module-metrics) section in the top-level documentation of this module for more\n  information.\n\n  ## Example\n\n      last_value(\n        \"vm.memory.total\",\n        description: \"Total amount of memory allocated by the Erlang VM\", unit: :byte\n      )\n  \"\"\"\n  @spec last_value(metric_name(), metric_options()) :: LastValue.t()\n  def last_value(metric_name, options \\\\ []) do\n    struct(LastValue, common_fields(metric_name, options))\n  end\n\n  @doc \"\"\"\n  Returns a definition of summary metric.\n\n  This metric aggregates measurement's values into statistics, e.g. minimum and maximum, mean, or\n  percentiles. It is up to the reporter to decide which statistics exactly are exposed.\n\n  See the [\"Metrics\"](#module-metrics) section in the top-level documentation of this module for more\n  information.\n\n  ## Example\n\n      summary(\n        \"db.query.duration\",\n        tags: [:table],\n        unit: {:native, :millisecond}\n      )\n  \"\"\"\n  @spec summary(metric_name(), metric_options()) :: Summary.t()\n  def summary(metric_name, options \\\\ []) do\n    struct(Summary, common_fields(metric_name, options))\n  end\n\n  @doc \"\"\"\n  Returns a definition of distribution metric.\n\n  Distribution metric builds a histogram of selected measurement's values. It is up to the reporter\n  to decide how the boundaries of the distribution buckets are configured - via `:reporter_options`,\n  configuration of the aggregating system, or other means.\n\n  See the [\"Metrics\"](#module-metrics) section in the top-level documentation of this module for more\n  information.\n\n  ## Example\n\n      distribution(\n        \"http.request.duration\",\n        tags: [:controller, :action],\n      )\n\n  \"\"\"\n  @spec distribution(metric_name(), metric_options()) :: Distribution.t()\n  def distribution(metric_name, options \\\\ []) do\n    fields = common_fields(metric_name, options)\n    struct(Distribution, fields)\n  end\n\n  # Helpers\n\n  @spec common_fields(metric_name(), [metric_option() | {atom(), term()}]) :: map()\n  defp common_fields(metric_name, options) do\n    metric_name = validate_metric_or_event_name!(metric_name)\n    {event_name, [measurement]} = Enum.split(metric_name, -1)\n    {event_name, options} = Keyword.pop(options, :event_name, event_name)\n    {measurement, options} = Keyword.pop(options, :measurement, measurement)\n    {keep, options} = Keyword.pop(options, :keep)\n    {drop, options} = Keyword.pop(options, :drop)\n    validate_recording_rule_fun_options!(keep, drop)\n    keep = validate_recording_rule_fun!(keep)\n    drop = validate_recording_rule_fun!(drop)\n    event_name = validate_metric_or_event_name!(event_name)\n    {unit, options} = Keyword.pop(options, :unit, :unit)\n    {unit, conversion_ratio} = validate_unit!(unit)\n    measurement = maybe_convert_measurement(measurement, conversion_ratio)\n    validate_metric_options!(options)\n\n    options\n    |> fill_in_default_metric_options()\n    |> Map.new()\n    |> Map.merge(%{\n      name: metric_name,\n      event_name: event_name,\n      measurement: measurement,\n      keep: keep_fun(keep, drop),\n      unit: unit\n    })\n  end\n\n  @spec validate_metric_or_event_name!(term()) :: [atom(), ...]\n  defp validate_metric_or_event_name!(metric_or_event_name)\n       when metric_or_event_name == [] or metric_or_event_name == \"\" do\n    raise ArgumentError, \"metric or event name can't be empty\"\n  end\n\n  defp validate_metric_or_event_name!(metric_or_event_name) when is_list(metric_or_event_name) do\n    if Enum.all?(metric_or_event_name, &is_atom/1) do\n      metric_or_event_name\n    else\n      raise ArgumentError,\n            \"expected metric or event name to be a list of atoms or a string, \" <>\n              \"got #{inspect(metric_or_event_name)}\"\n    end\n  end\n\n  defp validate_metric_or_event_name!(metric_or_event_name)\n       when is_binary(metric_or_event_name) do\n    segments = String.split(metric_or_event_name, \".\")\n\n    if Enum.any?(segments, &(&1 == \"\")) do\n      raise ArgumentError,\n            \"metric or event name #{metric_or_event_name} contains leading, \" <>\n              \"trailing or consecutive dots\"\n    end\n\n    Enum.map(segments, &String.to_atom/1)\n  end\n\n  defp validate_metric_or_event_name!(term) do\n    raise ArgumentError,\n          \"expected metric name to be a string or a list of atoms, got #{inspect(term)}\"\n  end\n\n  defp validate_recording_rule_fun!(nil), do: nil\n  defp validate_recording_rule_fun!(fun) when is_function(fun, 1) or is_function(fun, 2), do: fun\n\n  defp validate_recording_rule_fun!(term) do\n    raise ArgumentError,\n          \"expected recording rule to be a function accepting either metadata or metadata and measurements, got #{inspect(term)}\"\n  end\n\n  defp validate_recording_rule_fun_options!(keep, drop) when is_nil(keep) or is_nil(drop), do: :ok\n\n  defp validate_recording_rule_fun_options!(_keep, _drop) do\n    raise ArgumentError,\n          \"either the keep or drop option may be set, but not both\"\n  end\n\n  defp keep_fun(nil, nil), do: nil\n  defp keep_fun(keep, nil), do: keep\n  defp keep_fun(nil, drop) when is_function(drop, 1), do: &(not drop.(&1))\n  defp keep_fun(nil, drop) when is_function(drop, 2), do: &(not drop.(&1, &2))\n\n  @spec fill_in_default_metric_options([metric_option()]) :: [metric_option()]\n  defp fill_in_default_metric_options(options) do\n    Keyword.merge(default_metric_options(), options)\n  end\n\n  @spec default_metric_options() :: [metric_option()]\n  defp default_metric_options() do\n    [\n      tags: [],\n      tag_values: & &1,\n      nil: nil,\n      description: nil,\n      reporter_options: []\n    ]\n  end\n\n  @spec validate_metric_options!([metric_option()]) :: :ok | no_return()\n  defp validate_metric_options!(options) do\n    if tags = Keyword.get(options, :tags), do: validate_tags!(tags)\n    if tag_values = Keyword.get(options, :tag_values), do: validate_tag_values!(tag_values)\n    if description = Keyword.get(options, :description), do: validate_description!(description)\n\n    if reporter_options = Keyword.get(options, :reporter_options),\n      do: validate_reporter_options!(reporter_options)\n  end\n\n  @spec validate_tags!(term()) :: :ok | no_return()\n  defp validate_tags!(list) when is_list(list) do\n    :ok\n  end\n\n  defp validate_tags!(term) do\n    raise ArgumentError, \"expected tag keys to be a list, got: #{inspect(term)}\"\n  end\n\n  @spec validate_tag_values!(term()) :: :ok | no_return()\n  defp validate_tag_values!(fun) when is_function(fun, 1) do\n    :ok\n  end\n\n  defp validate_tag_values!(term) do\n    raise ArgumentError,\n          \"expected tag_values fun to be a one-argument function, got: #{inspect(term)}\"\n  end\n\n  @spec validate_description!(term()) :: :ok | no_return()\n  defp validate_description!(term) do\n    if is_binary(term) and String.valid?(term) do\n      :ok\n    else\n      raise ArgumentError, \"expected description to be a string, got #{inspect(term)}\"\n    end\n  end\n\n  @spec validate_reporter_options!(term()) :: :ok | no_return()\n  defp validate_reporter_options!(reporter_options) do\n    if Keyword.keyword?(reporter_options) do\n      :ok\n    else\n      raise ArgumentError,\n            \"expected reporter options to be a keyword list, got #{inspect(reporter_options)}\"\n    end\n  end\n\n  @spec maybe_convert_measurement(measurement(), conversion_ratio :: non_neg_integer()) ::\n          measurement()\n  defp maybe_convert_measurement(measurement, 1) do\n    # Don't wrap measurement if no conversion is required.\n    measurement\n  end\n\n  defp maybe_convert_measurement(measurement, conversion_ratio)\n       when is_function(measurement, 2) do\n    fn measurements, metadata ->\n      if measurement = measurement.(measurements, metadata) do\n        measurement * conversion_ratio\n      end\n    end\n  end\n\n  defp maybe_convert_measurement(measurement, conversion_ratio)\n       when is_function(measurement, 1) do\n    fn measurements ->\n      if measurement = measurement.(measurements) do\n        measurement * conversion_ratio\n      end\n    end\n  end\n\n  defp maybe_convert_measurement(measurement, conversion_ratio) do\n    fn measurements ->\n      case measurements do\n        %{^measurement => nil} -> nil\n        %{^measurement => value} -> value * conversion_ratio\n        %{} -> nil\n      end\n    end\n  end\n\n  @spec validate_unit!(term()) :: {unit(), conversion_ratio :: number()} | no_return()\n  defp validate_unit!({from_unit, to_unit} = t) do\n    cond do\n      time_unit?(from_unit) and time_unit?(to_unit) ->\n        {to_unit, time_unit_conversion_ratio(from_unit, to_unit)}\n\n      byte_unit?(from_unit) and byte_unit?(to_unit) ->\n        {to_unit, byte_unit_conversion_ratio(from_unit, to_unit)}\n\n      true ->\n        raise ArgumentError,\n              \"expected both elements of the unit conversion tuple \" <>\n                \"to represent time or byte units, got #{inspect(t)}\"\n    end\n  end\n\n  defp validate_unit!(unit) when is_atom(unit) do\n    {unit, 1}\n  end\n\n  defp validate_unit!(term) do\n    raise ArgumentError,\n          \"expected unit to be an atom or a two-element tuple, got #{inspect(term)}\"\n  end\n\n  # Maybe warn or raise if the result of conversion is 0?\n  @spec time_unit_conversion_ratio(time_unit(), time_unit()) :: number()\n  defp time_unit_conversion_ratio(unit, unit), do: 1\n\n  defp time_unit_conversion_ratio(from_unit, to_unit) do\n    case System.convert_time_unit(1, from_unit, to_unit) do\n      0 ->\n        1 / System.convert_time_unit(1, to_unit, from_unit)\n\n      ratio ->\n        ratio\n    end\n  end\n\n  @spec byte_unit_conversion_ratio(byte_unit(), byte_unit()) :: number()\n  defp byte_unit_conversion_ratio(unit, unit), do: 1\n\n  defp byte_unit_conversion_ratio(from_unit, to_unit) do\n    multiplier = byte_unit_factor(to_unit)\n    divisor = byte_unit_factor(from_unit)\n    1 * multiplier / divisor\n  end\n\n  @spec byte_unit_factor(byte_unit()) :: number()\n  defp byte_unit_factor(:megabyte), do: 1\n  defp byte_unit_factor(:kilobyte), do: 1_000\n  defp byte_unit_factor(:byte), do: 1_000_000\n\n  @spec time_unit?(term()) :: boolean()\n  defp time_unit?(:native), do: true\n  defp time_unit?(:second), do: true\n  defp time_unit?(:millisecond), do: true\n  defp time_unit?(:microsecond), do: true\n  defp time_unit?(:nanosecond), do: true\n  defp time_unit?(_), do: false\n\n  @spec byte_unit?(term()) :: boolean()\n  defp byte_unit?(:byte), do: true\n  defp byte_unit?(:kilobyte), do: true\n  defp byte_unit?(:megabyte), do: true\n  defp byte_unit?(_), do: false\nend\n"
+    },
+    "lib/telemetry_metrics/console_reporter.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_number with is_integer",
+          "duration": 1476,
+          "id": "40d431cc79da4db41ffcd6cb2bd7d55c",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:can show metric name and unit conversion fun"
+          ],
+          "location": {
+            "end": {
+              "column": 37,
+              "line": 161
+            },
+            "start": {
+              "column": 23,
+              "line": 161
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_integer(int)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 937,
+          "id": "606fb06016cdcd617b75dfd066b15541",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:prints tag values measurements"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 103
+            },
+            "start": {
+              "column": 17,
+              "line": 103
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "keep?(metric, metadata, measurements)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 958,
+          "id": "71eff038f09a7b4d0ea5918faf3de9c9",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:prints tag values measurements"
+          ],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 108
+            },
+            "start": {
+              "column": 35,
+              "line": 108
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "metric.__struct__ != Telemetry.Metrics.Counter",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1373,
+          "id": "983e5ad50b1a6692d8eb79665feb1bf9",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 79,
+              "line": 136
+            },
+            "start": {
+              "column": 59,
+              "line": 136
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(measurement)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 953,
+          "id": "d8492295e46b6609f47d8f289a74c007",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 44
+            },
+            "start": {
+              "column": 28,
+              "line": 44
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "opts[:device] && :stdio",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 824,
+          "id": "ec84df19dfecbed0a6a61489d3175397",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:logs bad metrics"
+          ],
+          "location": {
+            "end": {
+              "column": 22,
+              "line": 47
+            },
+            "start": {
+              "column": 22,
+              "line": 47
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "opts[:metrics] &&\n  raise ArgumentError, \"the :metrics option is required by #{inspect(__MODULE__)}\"",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/console_reporter_test.exs",
+            "test/telemetry_metrics_test.exs"
+          ],
+          "description": "replace guard is_number with is_float",
+          "duration": 1215,
+          "id": "f4828670b039692def6986d1079e6e1d",
+          "killedBy": [
+            "Telemetry.Metrics.ConsoleReporterTest:prints tag values measurements"
+          ],
+          "location": {
+            "end": {
+              "column": 37,
+              "line": 161
+            },
+            "start": {
+              "column": 23,
+              "line": 161
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(int)",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Telemetry.Metrics.ConsoleReporter do\n  @moduledoc \"\"\"\n  A reporter that prints events and metrics to the terminal.\n\n  This is useful for debugging and discovering all available\n  measurements and metadata in an event.\n\n  For example, imagine the given metrics:\n\n      metrics = [\n        last_value(\"vm.memory.binary\", unit: :byte),\n        counter(\"vm.memory.total\")\n      ]\n\n  A console reporter can be started as a child of your supervision tree as:\n\n      {Telemetry.Metrics.ConsoleReporter, metrics: metrics}\n\n  Now when the \"vm.memory\" telemetry event is dispatched, we will see\n  reports like this:\n\n      [Telemetry.Metrics.ConsoleReporter] Got new event!\n      Event name: vm.memory\n      All measurements: %{binary: 100, total: 200}\n      All metadata: %{}\n\n      Metric measurement: :binary (last_value)\n      With value: 100 byte\n      And tag values: %{}\n\n      Metric measurement: :total (counter)\n      With value: 200\n      And tag values: %{}\n\n  In other words, every time there is an event for any of the registered\n  metrics, it prints the event measurement and metadata, and then it prints\n  information about each metric to the user.\n  \"\"\"\n  use GenServer\n  require Logger\n\n  def start_link(opts) do\n    server_opts = Keyword.take(opts, [:name])\n    device = opts[:device] || :stdio\n\n    metrics =\n      opts[:metrics] ||\n        raise ArgumentError, \"the :metrics option is required by #{inspect(__MODULE__)}\"\n\n    GenServer.start_link(__MODULE__, {metrics, device}, server_opts)\n  end\n\n  @impl true\n  def init({metrics, device}) do\n    Process.flag(:trap_exit, true)\n    groups = Enum.group_by(metrics, & &1.event_name)\n\n    for {event, metrics} <- groups do\n      id = {__MODULE__, event, self()}\n      :telemetry.attach(id, event, &__MODULE__.handle_event/4, {metrics, device})\n    end\n\n    {:ok, Map.keys(groups)}\n  end\n\n  @impl true\n  def terminate(_, events) do\n    for event <- events do\n      :telemetry.detach({__MODULE__, event, self()})\n    end\n\n    :ok\n  end\n\n  @doc false\n  def handle_event(event_name, measurements, metadata, {metrics, device}) do\n    prelude = \"\"\"\n    [#{inspect(__MODULE__)}] Got new event!\n    Event name: #{Enum.join(event_name, \".\")}\n    All measurements: #{inspect(measurements)}\n    All metadata: #{inspect(metadata)}\n    \"\"\"\n\n    parts =\n      for %struct{} = metric <- metrics do\n        header = \"\"\"\n\n        Metric measurement: #{measurement_name(metric)} (#{metric(struct)})\n        \"\"\"\n\n        [\n          header\n          | try do\n              measurement = extract_measurement(metric, measurements, metadata)\n              tags = extract_tags(metric, metadata)\n\n              cond do\n                is_nil(measurement) ->\n                  \"\"\"\n                  Measurement value missing (metric skipped)\n                  \"\"\"\n\n                not keep?(metric, metadata, measurements) ->\n                  \"\"\"\n                  Event dropped\n                  \"\"\"\n\n                metric.__struct__ == Telemetry.Metrics.Counter ->\n                  \"\"\"\n                  Tag values: #{inspect(tags)}\n                  \"\"\"\n\n                true ->\n                  \"\"\"\n                  With value: #{inspect(measurement)}#{unit(metric.unit)}#{info(measurement)}\n                  Tag values: #{inspect(tags)}\n                  \"\"\"\n              end\n            rescue\n              e ->\n                Logger.error([\n                  \"Could not format metric #{inspect(metric)}\\n\",\n                  Exception.format(:error, e, __STACKTRACE__)\n                ])\n\n                \"\"\"\n                Errored when processing (metric skipped - handler may detach!)\n                \"\"\"\n            end\n        ]\n      end\n\n    IO.puts(device, [prelude | parts])\n  end\n\n  defp measurement_name(%{measurement: measurement}) when is_atom(measurement),\n    do: inspect(measurement)\n\n  defp measurement_name(%{measurement: fun, name: name}) when is_function(fun) do\n    measurement = List.last(name)\n\n    \"#{inspect(measurement)} [via #{inspect(fun)}]\"\n  end\n\n  defp keep?(metric, metadata, measurements) do\n    case metric do\n      %{keep: nil} -> true\n      %{keep: keep} when is_function(keep, 1) -> keep.(metadata)\n      %{keep: keep} when is_function(keep, 2) -> keep.(metadata, measurements)\n    end\n  end\n\n  defp extract_measurement(metric, measurements, metadata) do\n    case metric.measurement do\n      fun when is_function(fun, 2) -> fun.(measurements, metadata)\n      fun when is_function(fun, 1) -> fun.(measurements)\n      key -> measurements[key]\n    end\n  end\n\n  defp info(int) when is_number(int), do: \"\"\n  defp info(_), do: \" (WARNING! measurement should be a number)\"\n\n  defp unit(:unit), do: \"\"\n  defp unit(unit), do: \" #{unit}\"\n\n  defp metric(Telemetry.Metrics.Counter), do: \"counter\"\n  defp metric(Telemetry.Metrics.Distribution), do: \"distribution\"\n  defp metric(Telemetry.Metrics.LastValue), do: \"last_value\"\n  defp metric(Telemetry.Metrics.Sum), do: \"sum\"\n  defp metric(Telemetry.Metrics.Summary), do: \"summary\"\n\n  defp extract_tags(metric, metadata) do\n    tag_values = metric.tag_values.(metadata)\n    Map.take(tag_values, metric.tags)\n  end\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "0d22fca1c5984008b9abf055c182585a": "schema",
+      "1a33564771e5b3ff29d9610ff175be1b": "schema",
+      "1a94813ca36c6dadf0fae3122e1e7425": "schema",
+      "23700d40b3aaf59904a34e749404c3dd": "schema",
+      "23d0c491334f15f76d0a7452941bc599": "fallback",
+      "2884c6397e561b23a8852930fd8f34ea": "fallback",
+      "2d3749a7cebccaa125cfcebbfa335de2": "fallback",
+      "311c6295879ae15a0e63a2d3dd0e99d4": "schema",
+      "40d431cc79da4db41ffcd6cb2bd7d55c": "fallback",
+      "434d7f7ce9d581d9f89cc21258890ed8": "fallback",
+      "5479ad63f63af1931fd312910498f0c9": "schema",
+      "5880eb0d473d93ab975957450cadf01d": "schema",
+      "5c775c180331f2945c527b2c1300084e": "fallback",
+      "5e7d25b53184aa0a83214c8e40722771": "schema",
+      "606fb06016cdcd617b75dfd066b15541": "schema",
+      "60b3f87340e5e22c8877d278d8e18fdd": "schema",
+      "7079d483c811062c50dfc356723f2b23": "fallback",
+      "71eff038f09a7b4d0ea5918faf3de9c9": "schema",
+      "77c3ffda60ffc0c00400c6f322d5ab94": "schema",
+      "92a860d1e5439584d168dd9c8bd5deb0": "schema",
+      "983e5ad50b1a6692d8eb79665feb1bf9": "fallback",
+      "98fbe2ab82748ae76314fb1261d32606": "schema",
+      "a99a72d42bab4564ca3b5049345a6947": "fallback",
+      "b0ecc97d033b4cea78c871376a74feec": "schema",
+      "c39d326ecdc818c93d5495a6a1d458d4": "schema",
+      "c4d49069f611cebbac8bef66a31e0474": "schema",
+      "d8492295e46b6609f47d8f289a74c007": "schema",
+      "de1b96df64e7a5c6654bea513f4ca109": "schema",
+      "e2ad470450b393401b756a2718f3f430": "schema",
+      "ec84df19dfecbed0a6a61489d3175397": "schema",
+      "f4828670b039692def6986d1079e6e1d": "fallback"
+    },
+    "metrics": {
+      "fallback_count": 10,
+      "fallback_time_ms": 13784,
+      "fanout": {
+        "0d22fca1c5984008b9abf055c182585a": 2,
+        "1a33564771e5b3ff29d9610ff175be1b": 2,
+        "1a94813ca36c6dadf0fae3122e1e7425": 2,
+        "23700d40b3aaf59904a34e749404c3dd": 2,
+        "23d0c491334f15f76d0a7452941bc599": 2,
+        "2884c6397e561b23a8852930fd8f34ea": 2,
+        "2d3749a7cebccaa125cfcebbfa335de2": 2,
+        "311c6295879ae15a0e63a2d3dd0e99d4": 2,
+        "40d431cc79da4db41ffcd6cb2bd7d55c": 2,
+        "434d7f7ce9d581d9f89cc21258890ed8": 2,
+        "5479ad63f63af1931fd312910498f0c9": 2,
+        "5880eb0d473d93ab975957450cadf01d": 2,
+        "5c775c180331f2945c527b2c1300084e": 2,
+        "5e7d25b53184aa0a83214c8e40722771": 2,
+        "606fb06016cdcd617b75dfd066b15541": 2,
+        "60b3f87340e5e22c8877d278d8e18fdd": 2,
+        "7079d483c811062c50dfc356723f2b23": 2,
+        "71eff038f09a7b4d0ea5918faf3de9c9": 2,
+        "77c3ffda60ffc0c00400c6f322d5ab94": 2,
+        "92a860d1e5439584d168dd9c8bd5deb0": 2,
+        "983e5ad50b1a6692d8eb79665feb1bf9": 2,
+        "98fbe2ab82748ae76314fb1261d32606": 2,
+        "a99a72d42bab4564ca3b5049345a6947": 2,
+        "b0ecc97d033b4cea78c871376a74feec": 2,
+        "c39d326ecdc818c93d5495a6a1d458d4": 2,
+        "c4d49069f611cebbac8bef66a31e0474": 2,
+        "d8492295e46b6609f47d8f289a74c007": 2,
+        "de1b96df64e7a5c6654bea513f4ca109": 2,
+        "e2ad470450b393401b756a2718f3f430": 2,
+        "ec84df19dfecbed0a6a61489d3175397": 2,
+        "f4828670b039692def6986d1079e6e1d": 2
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "body_literal_engine_disabled": 26,
+        "missing_oracle_site": 16,
+        "no_applicable_mutator": 1,
+        "unsupported_dispatch": 226
+      }
+    },
+    "mutation_kind": {
+      "0d22fca1c5984008b9abf055c182585a": "arithmetic_op",
+      "1a33564771e5b3ff29d9610ff175be1b": "arithmetic_op",
+      "1a94813ca36c6dadf0fae3122e1e7425": "arithmetic_op",
+      "23700d40b3aaf59904a34e749404c3dd": "arithmetic_op",
+      "23d0c491334f15f76d0a7452941bc599": "guard_type_test",
+      "2884c6397e561b23a8852930fd8f34ea": "guard_comparison_negation",
+      "2d3749a7cebccaa125cfcebbfa335de2": "guard_comparison_negation",
+      "311c6295879ae15a0e63a2d3dd0e99d4": "arithmetic_op",
+      "40d431cc79da4db41ffcd6cb2bd7d55c": "guard_type_test",
+      "434d7f7ce9d581d9f89cc21258890ed8": "guard_type_test",
+      "5479ad63f63af1931fd312910498f0c9": "arithmetic_op",
+      "5880eb0d473d93ab975957450cadf01d": "boolean_op",
+      "5c775c180331f2945c527b2c1300084e": "guard_type_test",
+      "5e7d25b53184aa0a83214c8e40722771": "arithmetic_op",
+      "606fb06016cdcd617b75dfd066b15541": "unary_not_removal",
+      "60b3f87340e5e22c8877d278d8e18fdd": "boolean_op",
+      "7079d483c811062c50dfc356723f2b23": "guard_type_test",
+      "71eff038f09a7b4d0ea5918faf3de9c9": "comparison_negation",
+      "77c3ffda60ffc0c00400c6f322d5ab94": "arithmetic_op",
+      "92a860d1e5439584d168dd9c8bd5deb0": "arithmetic_op",
+      "983e5ad50b1a6692d8eb79665feb1bf9": "guard_type_test",
+      "98fbe2ab82748ae76314fb1261d32606": "arithmetic_op",
+      "a99a72d42bab4564ca3b5049345a6947": "guard_type_test",
+      "b0ecc97d033b4cea78c871376a74feec": "arithmetic_op",
+      "c39d326ecdc818c93d5495a6a1d458d4": "arithmetic_op",
+      "c4d49069f611cebbac8bef66a31e0474": "boolean_op",
+      "d8492295e46b6609f47d8f289a74c007": "boolean_op",
+      "de1b96df64e7a5c6654bea513f4ca109": "arithmetic_op",
+      "e2ad470450b393401b756a2718f3f430": "arithmetic_op",
+      "ec84df19dfecbed0a6a61489d3175397": "boolean_op",
+      "f4828670b039692def6986d1079e6e1d": "guard_type_test"
+    },
+    "persistent": null,
+    "phase_timings": {
+      "baseline_tests_ms": 807,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 4962,
+      "oracle_build_ms": 10348,
+      "plan_generation_ms": 12,
+      "report_writing_ms": 2,
+      "schema_build_ms": 10505,
+      "schema_workers_ms": 5833,
+      "total_ms": 33207
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 31,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 0
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 31
+      },
+      "mode": "static",
+      "selected_tests_avg": 2.0,
+      "selected_tests_median": 2
+    },
+    "stable_id_to_integer": {
+      "0d22fca1c5984008b9abf055c182585a": 1,
+      "1a33564771e5b3ff29d9610ff175be1b": 2,
+      "1a94813ca36c6dadf0fae3122e1e7425": 3,
+      "23700d40b3aaf59904a34e749404c3dd": 4,
+      "23d0c491334f15f76d0a7452941bc599": 5,
+      "2884c6397e561b23a8852930fd8f34ea": 6,
+      "2d3749a7cebccaa125cfcebbfa335de2": 7,
+      "311c6295879ae15a0e63a2d3dd0e99d4": 8,
+      "40d431cc79da4db41ffcd6cb2bd7d55c": 9,
+      "434d7f7ce9d581d9f89cc21258890ed8": 10,
+      "5479ad63f63af1931fd312910498f0c9": 11,
+      "5880eb0d473d93ab975957450cadf01d": 12,
+      "5c775c180331f2945c527b2c1300084e": 13,
+      "5e7d25b53184aa0a83214c8e40722771": 14,
+      "606fb06016cdcd617b75dfd066b15541": 15,
+      "60b3f87340e5e22c8877d278d8e18fdd": 16,
+      "7079d483c811062c50dfc356723f2b23": 17,
+      "71eff038f09a7b4d0ea5918faf3de9c9": 18,
+      "77c3ffda60ffc0c00400c6f322d5ab94": 19,
+      "92a860d1e5439584d168dd9c8bd5deb0": 20,
+      "983e5ad50b1a6692d8eb79665feb1bf9": 21,
+      "98fbe2ab82748ae76314fb1261d32606": 22,
+      "a99a72d42bab4564ca3b5049345a6947": 23,
+      "b0ecc97d033b4cea78c871376a74feec": 24,
+      "c39d326ecdc818c93d5495a6a1d458d4": 25,
+      "c4d49069f611cebbac8bef66a31e0474": 26,
+      "d8492295e46b6609f47d8f289a74c007": 27,
+      "de1b96df64e7a5c6654bea513f4ca109": 28,
+      "e2ad470450b393401b756a2718f3f430": 29,
+      "ec84df19dfecbed0a6a61489d3175397": 30,
+      "f4828670b039692def6986d1079e6e1d": 31
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}
