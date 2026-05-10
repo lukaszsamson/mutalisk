@@ -3,6 +3,88 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.13 unreleased
+
+### M38 — v1.12 doc closure + spike-env-var cleanup (2026-05-10)
+
+Mechanical milestone. Closes v1.12's release-doc drift and
+removes spike-only env vars whose decisions concluded "don't
+ship."
+
+#### Doc fixes
+
+Most v1.12 doc drift was already cleaned in the pre-tag commit
+`2f13028`. M38 catches the last residual:
+
+- `docs/PERSISTENT_WORKER_GUIDE.md`: the example warning text in
+  the "Boot-time warning" section quoted the pre-M28 Mox message
+  `Mox.Server mock-registry leaks across mutants`. Updated to
+  match the current detector string (`residual cluster/peer-state
+  drift remains after M28's Mox.Server reset hook`).
+
+#### Spike-env-var cleanup
+
+The following were retained behind opt-in env vars after their
+spikes concluded "don't ship," with the policy that they could
+be resurrected from git if a future spike needed them. M38
+collects on that policy:
+
+- **`MUT_PERSISTENT_COMPILE_MODE=helper_process` removed.**
+  `Mut.Worker.PersistentRunner.compile_via_helper_process/1`
+  and its dispatch helpers deleted; default `compile_in_process/1`
+  body inlined. M29's spike doc remains the historical reference
+  (`docs/spikes/M29_recompile_isolation.md`).
+- **`MUT_PERSISTENT_POOL_RESET=apps_restart` removed.**
+  `Mut.Worker.PersistentRunner.Reset.reset_pool_apps/0` deleted.
+  M36's spike doc remains the reference
+  (`docs/spikes/M36_pool_warm_state.md`).
+- **`Persistent.port_env/1` env-var forwarding** narrowed back
+  to `MUT_PERSISTENT_DIAG` only.
+
+`reset_pool_us` was never plumbed through `MUT_RUN_METRICS` /
+metrics rollup / terminal block in the first place (only existed
+in the runner's reset_leaks/2 map), so the PLAN.md "remove
+reset_pool_us from MUT_RUN_METRICS" line is a no-op.
+
+#### Policy additions
+
+`docs/PERSISTENT_WORKER_GUIDE.md` gains:
+
+- **`:supervisor_init` policy note** in the "Boot-time warning"
+  section, distinguishing Ecto-class structural drift (mix-only)
+  from low-rate plug-class drift (supported with caveat; persistent
+  may be more thorough). Two-paragraph note, NOT a new
+  catalogue row.
+- **`mix mut.drift --json` schema** documented with one
+  per-target example, an example CI usage (jq one-liner), and
+  an explicit "stable for CI consumption from v1.13 forward"
+  contract. Any future schema change becomes a SemVer concern.
+
+#### Module changes
+
+- `lib/mut/worker/persistent_runner.ex`: removed
+  `compile_via_helper_process/1`, `do_compile_files_collecting_modules/1`,
+  `compile_mode/0`. `compile_in_process/1` body inlined from
+  `compile_in_main_process/1`. `reset_pool_apps/0` call removed
+  from `reset_leaks/2`; `reset_pool_us` field removed from the
+  metrics map.
+- `lib/mut/worker/persistent_runner/reset.ex`: removed
+  `reset_pool_apps/0`, `pool_reset_enabled?/0`, `do_reset_pool_apps/0`,
+  `@pool_apps` module attribute.
+- `lib/mut/worker/persistent.ex`: removed
+  `MUT_PERSISTENT_COMPILE_MODE` and `MUT_PERSISTENT_POOL_RESET`
+  from `port_env/1` forwarding.
+
+#### Acceptance
+
+- ✅ Stale-phrase grep clean: no occurrences of `M36 may close`,
+  `pool not yet`, `v1.11 catalogue` in v1.12+ contexts,
+  `Mox.Server mock-registry leaks`, `Ecto.Query planner.*caches`
+  in detector moduledoc.
+- ✅ `MUT_PERSISTENT_COMPILE_MODE` and `MUT_PERSISTENT_POOL_RESET`
+  no longer appear in `lib/`.
+- ✅ `bin/verify` green at all 9 layers.
+
 ## v1.12 unreleased
 
 ### M37 — Mutator-surface decision: ComparisonNegation already shipped (2026-05-10)

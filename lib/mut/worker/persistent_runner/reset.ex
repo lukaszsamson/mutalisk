@@ -336,59 +336,6 @@ defmodule Mut.Worker.PersistentRunner.Reset do
     :ok
   end
 
-  ## --- Pool-class app restart (M36 spike) --------------------------------
-
-  # M36 spike: aggressive pool-class reset. Stops and re-starts the
-  # OTP applications matching known HTTP-client / process-pool
-  # signatures between mutants, mirroring what mix-spawn does
-  # implicitly via per-fallback BEAM boot. Hypothesis: pool_warm_state
-  # drift on mint / nimble_pool comes from socket / pool-worker /
-  # registry state baked into the supervisor tree at boot; restarting
-  # the app reinitialises that state.
-  #
-  # Opt-in via `MUT_PERSISTENT_POOL_RESET=apps_restart`. Spike-only —
-  # not on any user-facing path. The decision doc at
-  # `docs/spikes/M36_pool_warm_state.md` records the measurement.
-  #
-  # Cost: stopping and restarting an OTP application drains and
-  # re-spawns its supervisor tree. For thin libraries (mint stops in
-  # <5 ms) this is cheap; for heavier apps it can dominate per-mutant
-  # wall. The spike measures actual cost on mint + nimble_pool.
-  @pool_apps [:mint, :finch, :nimble_pool]
-
-  @spec reset_pool_apps() :: :ok
-  def reset_pool_apps do
-    if pool_reset_enabled?() do
-      do_reset_pool_apps()
-    else
-      :ok
-    end
-  rescue
-    _ -> :ok
-  catch
-    _, _ -> :ok
-  end
-
-  defp pool_reset_enabled? do
-    System.get_env("MUT_PERSISTENT_POOL_RESET") == "apps_restart"
-  end
-
-  defp do_reset_pool_apps do
-    loaded =
-      Application.loaded_applications()
-      |> Enum.map(fn {app, _, _} -> app end)
-      |> MapSet.new()
-
-    Enum.each(@pool_apps, fn app ->
-      if MapSet.member?(loaded, app) do
-        _ = Application.stop(app)
-        _ = Application.ensure_all_started(app)
-      end
-    end)
-
-    :ok
-  end
-
   ## --- ExUnit OnExitHandler ----------------------------------------------
 
   @spec clear_on_exit_handler() :: :ok

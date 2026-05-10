@@ -223,9 +223,10 @@ per detection BEFORE the first worker BEAM starts:
 
 ```
 [mutalisk] Warning: persistent worker detected Mox-class projects:
-  Mox.Server mock-registry leaks across mutants under persistent.
-  Known drift exists for this class — consider --worker-type mix.
-  See docs/PERSISTENT_WORKER_GUIDE.md.
+  residual cluster/peer-state drift remains after M28's Mox.Server
+  reset hook (3-mutant residual on mox v1.2.0 self-tests). Known
+  drift exists for this class — consider --worker-type mix. See
+  docs/PERSISTENT_WORKER_GUIDE.md.
 ```
 
 Triggers (v1.12 catalogue):
@@ -263,6 +264,88 @@ terminal assertions are unaffected. The warning fires regardless
 of whether drift will actually manifest on this run — its job is
 to surface known-class limitations to users who don't know to
 look for them.
+
+### `:supervisor_init` policy note
+
+The drift bucketer's `:supervisor_init` heuristic fires on
+`mix=RuntimeError → persistent={Killed,Survived}` flips. It
+catches two structurally different patterns the boot warning
+does NOT distinguish:
+
+- **Ecto-class structural drift.** `Application.start/2`
+  reordering between mix-spawn and persistent surfaces an entire
+  cluster of `RuntimeError → Killed` flips (M30 measured 113 on
+  ecto v3.13.6). For these projects the boot warning's `:ecto`
+  row already routes the user at `--worker-type mix`; the
+  `:supervisor_init` count is a confirmation, not a new finding.
+- **Low-rate plug-class drift.** A handful of mutants in
+  supervisor-init paths on projects that are otherwise
+  persistent-safe (M27/M34 measured 16 on plug v1.19.1 = 4.8%
+  of mutants). These projects are NOT mix-only — the absolute
+  drift rate is small and persistent's outcome (`Killed`) is
+  arguably more thorough than mix-spawn's (`RuntimeError` from
+  test infrastructure crashing before the test runs). Run
+  `mix mut.drift --target <name>` to inspect; fall back to
+  `--worker-type mix` only if the `:supervisor_init` count
+  materially affects your kill rate.
+
+## `mix mut.drift --json` schema (stable for CI consumption)
+
+`mix mut.drift --target <name> --json` emits a single JSON
+object; `mix mut.drift --all --json` emits a JSON array of one
+object per target. Both forms have the same per-target shape:
+
+```json
+{
+  "target": "ecto",
+  "reports": {
+    "mix":        "bench/results/ecto.static.c4.stryker.json",
+    "persistent": "bench/results/ecto.static.c4.persistent.stryker.json"
+  },
+  "total":                 992,
+  "drift":                 231,
+  "drift_rate_pct":        23.29,
+  "unclassified_rate_pct": 0.0,
+  "buckets": {
+    "mox_class":       0,
+    "ecto_warm_state": 163,
+    "ecto_false_kill": 67,
+    "gettext_class":   0,
+    "parse_class":     0,
+    "pool_warm_state": 0,
+    "supervisor_init": 0,
+    "timeout_flap":    1,
+    "unclassified":    0
+  },
+  "bucket_samples": {
+    "ecto_warm_state": ["00a12f89...", "00bcd738...", "01f4f30c..."],
+    "ecto_false_kill": ["091582ac...", "0a4ab203...", "0a76a48d..."],
+    "timeout_flap":    ["87d5e58d..."]
+  },
+  "agree": {
+    "killed":   574,
+    "survived": 186,
+    "other":    {"CompileError": 1}
+  },
+  "mix_only":        [],
+  "persistent_only": []
+}
+```
+
+The schema is **stable for CI consumption from v1.13 forward**.
+Any future schema change becomes a SemVer concern (additive
+fields may appear; existing fields and their semantics will not
+change without a major-version bump). The `--sample-size N`
+flag (default 3) controls per-bucket sample count; `0` omits
+the `bucket_samples` field entries.
+
+Example CI usage (fail if `:supervisor_init` exceeds 20 mutants
+on the ecto target):
+
+```sh
+mix mut.drift --target ecto --json \
+  | jq -e '.buckets.supervisor_init <= 20'
+```
 
 ## Reading the persistent metrics block
 

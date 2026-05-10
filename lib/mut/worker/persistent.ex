@@ -445,11 +445,7 @@ defmodule Mut.Worker.Persistent do
     ]
 
     forwarded =
-      [
-        forward_env("MUT_PERSISTENT_DIAG"),
-        forward_env("MUT_PERSISTENT_COMPILE_MODE"),
-        forward_env("MUT_PERSISTENT_POOL_RESET")
-      ]
+      [forward_env("MUT_PERSISTENT_DIAG")]
       |> Enum.reject(&is_nil/1)
 
     extra = Keyword.get(opts, :env, [])
