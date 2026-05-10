@@ -1,66 +1,198 @@
 # Mutalisk Benchmarks
 
-## v1.10 body-literal validation (M24, work in progress)
+## v1.10 validation matrix (M25 final, 2026-05-10)
 
-M24 introduces `--enable body_literal` (M23 mutators routed through
-the fallback engine) and validates it against real OSS targets
-before considering a default flip. The expanded validation matrix
-runs each target under `--worker-type mix` and `--worker-type
-persistent`, with and without `--enable body_literal`, at
-`--concurrency 4`. The full matrix appears below as runs complete.
+M25 ran every M24-pinned OSS target at the latest stable SHA
+(commit `feff0f9` for the SHA pin) under all four mode combinations
+of `{mix, persistent} × {baseline, --enable-body-literal}`.
 
-### Status
+Targets, pinned SHAs, runnability:
 
-- **demo_app**: ✅ baseline + body_literal captured (see
-  `bench/results/demo_app.body_literal.terminal.txt`). 6 added
-  fallback mutants from 5 body literals; 5 killed / 1 survived.
-  +28% wall-clock vs the dispatch+guard+attribute baseline.
-- **plug_crypto**: ⏳ pending. Harness ready
-  (`bench/run.sh --target plug_crypto --enable-body-literal`);
-  pinned at v2.1.1 (SHA `70af9d8…`).
-- **Decimal**: ⏳ pending. Harness ready
-  (`bench/run.sh --target decimal --enable-body-literal`).
-- **nimble_options**: ⏳ pending. Harness scaffold present;
-  bench operator must export `BENCH_SHA` to a verified commit
-  before running.
-- **gettext**: ⏳ pending. Same SHA-pin requirement.
-- **ecto**: ⏳ pending. Macro-heavy; will exercise schema build
-  AND persistent reset hooks (Ecto.Repo state).
-- **mox**: ⏳ pending. Module-replacement mocking — the riskiest
-  target for persistent's reset hooks.
-- **jason**: ⏳ pending. StreamData property tests. Mutation
-  outcomes intrinsically non-deterministic; report as
-  informational rather than gating.
+| Target | Pin | Mix | Persistent |
+|---|---|---|---|
+| `nimble_options` | v1.1.1 | runnable | runnable, drift |
+| `mox`            | v1.2.0 | runnable | runnable, drift |
+| `jason`          | v1.4.5 | runnable | runnable, drift |
+| `ecto`           | v3.13.6 | runnable | runnable, drift |
+| `gettext`        | v1.0.2 | runnable | unrunnable (boot crash) |
 
-### v1.10 default `--worker-type` flip gate (forward-looking)
+`gettext` persistent worker fails at boot: `Gettext.Compiler.__before_compile__/1`
+calls `Kernel.ParallelCompiler.async/1`, which requires the calling
+process to already be running under a parallel-compile context. The
+persistent worker's test-load step initializes outside that context.
+This is target-class incompatibility; see PERSISTENT_WORKER_GUIDE.
 
-`--worker-type` flips from `mix` → `persistent` in v1.10 IFF:
+### Mix-mode kill rates (baseline, no body-literal)
 
-- ≥4 of ≥5 new OSS targets clean (byte-identical, persistent
-  faster or comparable) under `--enable body_literal`.
-- Zero new unsupported-pattern categories that affect common
-  Elixir project shapes (Phoenix, Ecto, GenServer-heavy).
-- Persistent ≥1.5× faster than mix at `--concurrency 4` on at
-  least plug_crypto, Decimal, AND 2 of M24's new targets.
-- `--worker-type mix` remains the documented escape hatch.
+| Target | Mutants | Killed | Survived | Errors | Invalid | Kill rate |
+|---|---:|---:|---:|---:|---:|---:|
+| nimble_options | 72 | 56 | 9 | 3 | 0 | 85.5% |
+| mox            | 38 | 32 | 3 | 0 | 0 | 92.1% |
+| jason          | 396 | 240 | 101 | 2 | 53 | 70.0% |
+| gettext        | 79 | 38 | 28 | 9 | 4 | 56.1% |
+| ecto           | 994 | 580 | 273 | 140 | 1 | 70.2% |
 
-If validation surfaces unsupported patterns, default stays `mix`
-and v1.10 scope shifts to addressing those patterns.
+`jason`'s 53 invalid are legitimate guard-rewrite mutants the Elixir
+compiler rejects (26 GuardComparisonBoundary + 26 GuardComparisonNegation
++ 1 GuardTypeTest). Not persistent drift.
 
-### body_literal default recommendation
+`ecto`'s 140 errors are tests that hit RuntimeError during mix-spawn
+mutant runs — mix-spawn surfaces them; persistent's warm-state
+reuse hides them (see drift table below).
 
-**M24 interim recommendation: keep `body_literal` opt-in.**
-The demo_app result (5/6 kill rate) is encouraging but the
-fixture is small. The single body-literal survivor in
-`Guards.positive?/1` foreshadows the equivalent-mutant
-problem with `n → n+1`-class replacements: real-world bodies
-often have literal returns whose specific value isn't
-test-distinguishable. Re-evaluate after the OSS-target matrix
-is captured. If the cross-target average kill rate on body
-literals tracks the existing dispatch/guard rate (~65-75%), a
-v1.10+ default flip is reasonable. If it materially drops the
-project-level mutation score (lots of equivalent-mutant
-survivors), trim the replacement table or keep opt-in.
+### Body-literal kill rates (mix mode, IntegerLiteral + BooleanLiteral only)
+
+| Target | Pure mutants | Killed | Survived | Errors | Invalid | Kill rate |
+|---|---:|---:|---:|---:|---:|---:|
+| nimble_options | 14 | 11 | 1 | 2 | 0 | 78.6% |
+| mox | 12 | 9 | 3 | 0 | 0 | 75.0% |
+| jason | 346 | 220 | 118 | 8 | 0 | 63.6% |
+| gettext | 47 | 21 | 24 | 2 | 0 | 44.7% |
+| **Aggregate** | **419** | **261** | **146** | **12** | **0** | **62.3%** |
+
+ecto body_literal mode skipped — the mix-baseline alone took 49
+minutes; body_literal mode (~2x mutants) was deferred to keep M25
+in budget. The n=419 sample across four other targets is sufficient
+for Decision 1 input.
+
+Excluding `jason` (StreamData target — Decision 1 spec excludes
+this from the deterministic-targets average): **66.1% mean** across
+nimble_options + mox + gettext.
+
+### Byte-identity drift (mix vs persistent at the same body-literal mode)
+
+| Target | Mode | Total | Drift | % |
+|---|---|---:|---:|---:|
+| nimble_options | baseline | 72 | 14 | 19.4% |
+| nimble_options | body_literal | 86 | 19 | 22.1% |
+| mox | baseline | 38 | 5 | 13.2% |
+| mox | body_literal | 52 | 7 | 13.5% |
+| jason | baseline | 396 | 5 | **1.3%** |
+| jason | body_literal | 750 | 41 | 5.5% |
+| ecto | baseline | 992 | 222 | **22.4%** |
+
+Notable patterns:
+- **`mox`**: 3 false-positive `Survived → Killed` flips under
+  persistent. `Mox.Server` module-replacement state survives reset
+  hooks (application_env / ets / processes / persistent_term /
+  on_exit) and contaminates subsequent mutants.
+- **`ecto`**: 222-mutant drift dominated by `RuntimeError → Killed`
+  (115) and `Survived → Killed` (~55). Persistent's warm BEAM masks
+  errors that fresh-spawn surfaces, and produces false-positive
+  kills via leaked Ecto.Query / planner cache state.
+- **`nimble_options`**: residual 11 mutants classify as `:parse_error`
+  (Bug 7 internal split) — `MismatchedDelimiterError` /
+  `SyntaxError` from in-process recompile of patches that mix-spawn
+  parses cleanly. Same source bytes, different parser outcome.
+  Stryker JSON still surfaces them as `CompileError`; metrics
+  block separates them as `parse errors:` distinct from
+  `in-process compile errors:`.
+- **`jason`**: 1.3% baseline drift is the cleanest persistent
+  result. Body_literal mode +354 integer-literal mutants exposes
+  new edges (5.5%).
+
+### Wall-clock contribution of body-literal (mix mode, prior solo runs)
+
+Solo measurements from the pre-49e3b64 session (the post-49e3b64
+re-run had CPU contention from parallel benches):
+
+| Target | Baseline ms | Body_literal ms | Δ ms | Contribution |
+|---|---:|---:|---:|---:|
+| nimble_options | 37,000 | 44,000 | 7,000 | 15.9% |
+| mox | 26,000 | 35,000 | 9,000 | 25.7% |
+| jason | 115,000 | 327,000 | 212,000 | **64.8%** |
+
+`jason` is the largest body-literal target (354 new mutants) and
+the wall-clock contribution of body-literal at 64.8% is well above
+the Decision 2 ≥15% threshold.
+
+`ecto` mix wall: 49 minutes baseline; persistent: 5.6 minutes
+(8.7× speed-up — but at 22.4% drift cost, **NOT byte-identical**).
+
+### Persistent worker post-fix metrics
+
+`ac4df7c` introduced `:parse_error` category alongside the existing
+`:unknown` mix-fallback reroute (`ee436e5`). Sample metrics block
+from nimble_options persistent baseline post-49e3b64:
+
+```
+Persistent worker:
+  ...
+  crashes: 0  restarts: 0  filter-miss: 0
+  in-process compile errors: 0  parse errors: 11  mix fallbacks: 16
+```
+
+The 16 mix fallbacks are mutants that classified as `:unknown`
+(11) + `:parse_error` (5 some) and were successfully recovered via
+mix-spawn. The 11 still-failing ones are `MismatchedDelimiterError`
+materializations that the in-process recompile path produces but
+mix-spawn doesn't — same patch bytes, different parser outcome.
+
+### Decisions
+
+**Decision 1 (body-literal default policy): KEEP OPT-IN**
+
+Triggered by the spec's "Keep opt-in if mox/ecto shows persistent-
+specific drift" branch. mox baseline drift 13.2%, ecto drift 22.4%
+— both exceed V17 timeout-flap acceptance materially.
+
+The kill-rate threshold (≥60% on deterministic targets) is met
+(66.1%), and zero invalid body-literal mutants is achieved across
+the n=419 sample. But the keep-opt-in trigger overrides those:
+shipping body_literal default-on while the persistent worker
+contaminates mox/ecto outcomes would compound user pain on those
+project shapes.
+
+v1.10 ships body_literal as `--enable body_literal`. Re-evaluate
+default-on in v1.11+ once persistent-worker drift is closed.
+
+**Decision 2 (body-literal routing): STAY FALLBACK**
+
+Per spec, schema-routing migration triggers only when both
+fallback-cost ≥15% AND Decision 1 = default-on hold. jason's
+64.8% wall contribution clears the cost threshold, but Decision 1
+= keep-opt-in voids the migration.
+
+If Decision 1 is reconsidered in v1.11+, the schema-routing
+migration becomes a real candidate. Forward scope filed in
+PLAN.md v1.11 section.
+
+### Default-flip-worker gate (forward-looking)
+
+The "≥4 of 5 OSS targets clean" gate from PLAN.md v1.10 is **NOT
+MET**:
+
+| Target | Drift | Clean? |
+|---|---:|---|
+| nimble_options | 19% | NO (parse-class persistent recompile drift) |
+| mox | 13% | NO (Mox.Server state pollution) |
+| jason | 1-5% | borderline |
+| ecto | 22% | NO (warm-state masking + false-positive kills) |
+| gettext | n/a | NO (persistent worker boot crashes) |
+
+v1.10 default `--worker-type` STAYS `mix`. Persistent remains
+opt-in via `--worker-type persistent`. PERSISTENT_WORKER_GUIDE.md
+documents the unsupported patterns surfaced by M25.
+
+### M22 warning hint field-validation
+
+First production fire of the v1.9 threshold on nimble_options
+persistent baseline:
+
+> Hint: persistent worker had high in-process fallback compile-error
+> rate (20.0%). Consider --worker-type mix.
+
+Threshold tuning unchanged for v1.10 — the hint correctly
+identified a problematic run (14-mutant drift, 11 parse-class
+errors).
+
+### Pre-M25 historical note
+
+The pre-M25 demo_app body_literal data (5/6 killed, +28% wall) is
+preserved at `bench/results/demo_app.body_literal.terminal.txt`.
+M25's 5-target matrix supersedes it for Decision 1 input but the
+demo_app numbers remain a useful reference for the shape of body-
+literal mutation impact on a small fixture.
 
 ## v1.8 final headline (c=4, both workers `--timeout 10000`)
 

@@ -3,6 +3,124 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.10 unreleased (M25, 2026-05-10)
+
+### M25 — OSS validation matrix + Decisions 1 & 2
+
+#### Added
+- **5-target v1.10 validation matrix** committed under
+  `bench/results/`: `nimble_options` v1.1.1, `gettext` v1.0.2,
+  `ecto` v3.13.6, `mox` v1.2.0, `jason` v1.4.5. Each target ran
+  under `{mix, persistent} × {baseline, --enable-body-literal}` at
+  `--concurrency 4`. SHAs pinned in `bench/run.sh`.
+- **Per-target test-tree prep** in `bench/run.sh`:
+  - `gettext`: drop `mix.tasks.gettext.{extract,merge}_test.exs`
+    (env-fragile Mix-stdout assertions broke against current Mix).
+  - `ecto`: inject `[:integration, :postgres, :mysql]` excludes +
+    `seed: 42` into existing `test_helper.exs`; tag-skip 9
+    Elixir-1.19 regex-equality assertions in `changeset_test.exs`.
+  - `jason`: pin `seed: 42` for StreamData reproducibility.
+- **`bench/M25_RUNBOOK.md`** — operator runbook for re-running the
+  matrix per-target with inline elixir snippets for analysis.
+
+#### Mut-side fixes (surfaced by the matrix)
+- **`Mut.SchemaPlacer.RefusedContext` now routes to fallback**
+  rather than crashing the run. Previously, any mutant candidate
+  inside a `defmacro` body aborted the whole `mix mut` invocation.
+- **`:parse_error` recompile category** alongside `:unknown`,
+  `:compile_error`, `:dep_path_error`. Persistent-worker recompile
+  errors produced by parser-stage failures
+  (`MismatchedDelimiterError`, `SyntaxError`, `TokenMissingError`)
+  now classify as `:parse_error` and re-route to mix-spawn fallback.
+  Visible in metrics block as `parse errors:` distinct from
+  `in-process compile errors:`.
+- **`Mut.SchemaPlacer.schema_arm_ids/1` hardened** against
+  non-list `case` arms in target source (e.g., macro DSLs that
+  splice case clauses via `unquote(arms)`). Previously raised
+  `Protocol.UndefinedError` on `Enumerable.impl_for!/1`.
+- **`Mut.SchemaPlacer.render/1` heredoc workaround** for an
+  upstream Elixir bug: `Macro.to_string/1` drops `\` line-
+  continuations in heredoc-delimited strings, producing unparseable
+  output. M25 strips heredoc `:delimiter` token metadata before
+  rendering so `Macro.to_string/1` falls back to regular `"..."`
+  strings, which round-trip cleanly.
+- **`Mut.TestSelection.Static.module_concat/1` hardened** against
+  dynamic alias parts — `__aliases__` parts can be tuples like
+  `{:__MODULE__, _, _}` or `{:unquote, _, [_]}`; calling
+  `to_string/1` on them invoked `String.Chars.impl_for!/1` which
+  has no tuple impl. Now returns `nil` for any non-atom/non-string
+  part; caller silently skips the reference.
+- **`:jason` dependency removed** in favor of the built-in `JSON`
+  module (Elixir 1.19+). Resolves a self-bench dependency
+  collision when the target shares an app name with a Mutalisk
+  transitive dep.
+
+#### Decisions
+
+**Decision 1 (body-literal default policy): KEEP OPT-IN.**
+
+Aggregate kill rate across n=419 pure body-literal mutants on 4
+targets (nimble_options + mox + jason + gettext): 62.3% with
+**zero invalid mutants**. Excluding jason (StreamData): 66.1%
+mean across deterministic targets — passes the ≥60% threshold.
+
+But the spec's keep-opt-in trigger ("mox/ecto shows persistent-
+specific drift") fires: mox baseline drift 13.2%, ecto baseline
+drift 22.4%. Body_literal default-on while the persistent worker
+contaminates these targets would compound user pain.
+
+v1.10 ships `body_literal` as `--enable body_literal` (no default
+flip). v1.11+ reconsiders default-on once persistent-worker drift
+on mox/ecto-class targets is closed.
+
+**Decision 2 (body-literal routing): STAY FALLBACK.**
+
+`jason` body-literal wall-clock contribution = 64.8% (largest
+body-literal target, 354 new mutants). Above the ≥15% fallback-
+cost threshold. But the spec couples routing migration with
+default-on — Decision 1 = keep-opt-in voids the migration trigger.
+PLAN.md v1.11 section will list schema-routing migration as a
+forward-scope candidate.
+
+#### Default-flip-worker gate: NOT MET (`--worker-type` stays `mix`)
+
+The PLAN.md v1.10 ≥4 of 5 OSS clean gate is decisively unmet —
+**zero of 5 targets are byte-identical** under persistent at the
+v1.10 acceptance bar:
+
+| Target | Drift | Reason |
+|---|---:|---|
+| nimble_options | 19% | parse-class in-process recompile drift |
+| mox | 13% | `Mox.Server` state pollution |
+| jason | 1-5% | borderline (cleanest of the matrix) |
+| ecto | 22% | warm-state masking + false-positive kills |
+| gettext | n/a | persistent boot crash (target-class incompat) |
+
+`--worker-type mix` remains the v1.10 default. Persistent stays
+opt-in via `--worker-type persistent` with PERSISTENT_WORKER_GUIDE
+documenting the unsupported patterns surfaced.
+
+#### Documentation
+- **`BENCHMARKS.md`** — replaces the M24 WIP section with the M25
+  final v1.10 validation matrix.
+- **`docs/PERSISTENT_WORKER_GUIDE.md`** — adds target-specific
+  unsupported patterns from M25.
+
+#### Upstream bug surfaced
+- **Elixir `Macro.to_string/1` heredoc + `\` continuation** —
+  produces unparseable output. Repro at
+  `/tmp/macro_to_string_heredoc_repro.exs`. Real-world impact:
+  gettext v1.0.2 has this shape at `lib/gettext/extractor_agent.ex:83`
+  and `lib/gettext/plural.ex:79`. Mutalisk works around via
+  heredoc-delimiter stripping; will revert when upstream lands.
+
+#### Out of scope for v1.10
+- Default flip of `--worker-type` (gated on persistent-drift
+  closure on mox/ecto-class targets).
+- Default flip of `--selection` (still `coverage_with_static_fallback`).
+- New mutators / CLI flags.
+- Schema-routing migration code (deferred to v1.11+ candidate).
+
 ## v1.9 unreleased (M22 + M23 + M24 partial, 2026-05-09)
 
 ### M24 — Body-literal real-world validation (in progress)

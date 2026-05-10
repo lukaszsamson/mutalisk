@@ -57,7 +57,11 @@ that reset model is supported:
 ## What doesn't work yet
 
 Some patterns are known not to play well with the in-memory model.
-If your suite uses any of these, stay on the default mix worker:
+If your suite uses any of these, stay on the default mix worker.
+
+The first four are persistent-resident patterns we've documented
+since v1.7. The remainder were surfaced by M25's 5-target OSS
+validation matrix at v1.10.
 
 - **NIFs that don't tolerate `:code` reload.** The fallback path
   recompiles modules in-process using `Code.compile_file/1` and
@@ -67,13 +71,65 @@ If your suite uses any of these, stay on the default mix worker:
   takes the whole worker down. The host auto-restarts the BEAM and
   routes the failing mutant via mix-spawn, so correctness is
   preserved — but performance suffers if a project crashes often.
-- **Heavy `Mox` usage.** Not yet validated end-to-end. The next
-  validation milestone should cover this; until then, mix is safer
-  if your suite leans on Mox.
 - **Tests depending on global per-test setup ordering.** ExUnit's
   module load order is captured once at boot; if your suite
   mutates that order at runtime, the persistent worker won't see
   the changes.
+
+### M25-surfaced unsupported patterns (v1.10)
+
+The following patterns produce **byte-identity drift** between
+mix-spawn and persistent runs — outcomes diverge in ways that are
+not timeout-flap and are not recoverable via the in-process
+fallback retries. Use `--worker-type mix` on these project shapes
+until the underlying drift is closed.
+
+- **`Mox.Server` module-replacement state.** Any project leaning
+  on Mox-style runtime mock injection. M25 mox v1.2.0 measured
+  13.2% baseline drift, including 3 false-positive `Survived →
+  Killed` flips: a previous mutant's mock state was visible to
+  later mutants' tests. The persistent worker's reset hooks
+  (`application_env`, `ets`, `processes`, `persistent_term`,
+  `on_exit`) do not clear `Mox.Server` internal mock registry.
+  Mocks defined with `Mox.defmock/2` survive sandbox reset.
+- **Compile-time docs/validation pipelines that use the same guards
+  being mutated.** When a library's compile-time hook (e.g.,
+  `nimble_options`'s `NimbleOptions.Docs.generate/1` evaluated at
+  module-compile time, or `gettext`'s `Gettext.Compiler.__before_compile__/1`)
+  walks its own schema using the very type guards a mutant
+  rewrites, the in-process recompile pipeline raises
+  `FunctionClauseError` / `ParallelCompiler.async/1` errors that
+  mix-spawn's fresh-process compile evaluates differently. Mutalisk
+  catches this as `:unknown` / `:parse_error` recompile category
+  and re-routes to mix-spawn, but a residual class manifests as
+  `MismatchedDelimiterError` / `SyntaxError` in the in-process
+  parser path that mix-spawn parses cleanly. Visible in metrics as
+  `parse errors:` count > 0.
+- **`gettext` v1.0+ projects.** Persistent worker boot fails:
+  `Gettext.Compiler.__before_compile__/1` calls
+  `Kernel.ParallelCompiler.async/1` which requires the calling
+  process to be running under a parallel-compile context. The
+  persistent worker's test-load step runs outside that context,
+  raising `ArgumentError: cannot spawn parallel compiler task`
+  before any mutant runs. Use `--worker-type mix` for gettext
+  projects unconditionally.
+- **Ecto-class warm-state contamination.** Projects with rich
+  module-attribute / ETS-backed compile-time caches (Ecto.Query
+  builder, planner cache, schema metadata). M25 ecto v3.13.6
+  measured **22.4% baseline drift**: persistent's warm BEAM masks
+  RuntimeErrors that mix-spawn surfaces (~140 `RuntimeError →
+  Killed` flips) and produces false-positive kills via leaked
+  Ecto.Query state (~55 `Survived → Killed` flips). The wall-clock
+  speedup is real (8.7× vs mix on ecto baseline) but the kill-rate
+  output is unsafe to consume.
+- **Macro-bodies with literal interpolated heredocs.** Until
+  Elixir's upstream `Macro.to_string/1` bug on heredoc
+  `\`-continuation is fixed, mutants in files with that shape
+  (gettext v1.0.2 `lib/gettext/extractor_agent.ex:83`,
+  `lib/gettext/plural.ex:79`) round-trip via Mutalisk's
+  heredoc-delimiter-stripping workaround. Output is correct
+  (single-line `"..."` strings round-trip cleanly) but produces
+  visible diffs vs source — purely cosmetic; correctness preserved.
 
 ## Reading the persistent metrics block
 
