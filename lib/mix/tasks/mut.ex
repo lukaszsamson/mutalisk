@@ -504,12 +504,9 @@ defmodule Mix.Tasks.Mut do
     )
   end
 
-  # Fallback mutants always route through the mix-spawn worker.
-  # In-process fallback recompile (V17 step 5) requires :code.purge +
-  # :code.load_binary to swap modules inside the persistent BEAM, with
-  # module-conflict edge cases that need a separate validation pass.
-  # Deferred to follow-up. The mix-spawn fallback path preserves the
-  # M17 "0 invalid Decimal fallback" baseline across worker types.
+  # Fallback mutants route through mix-spawn under --worker-type mix
+  # and through the persistent BEAM's in-process recompile path under
+  # --worker-type persistent (M21). See run_fallback_via/4 below.
 
   defp maybe_start_persistent_workers(%{worker_type: :persistent} = opts, pool) do
     server_opts = [test_timeout_ms: opts.test_timeout_ms]

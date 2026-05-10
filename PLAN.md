@@ -1371,7 +1371,7 @@ v1.9 deferred the OSS validation matrix because external-repo probing was sandbo
 - Equivalent-mutant rate signal.
 - Fallback wall-clock impact for body literals.
 - Persistent vs mix wall-clock per target.
-- Coverage default-flip field validation (v1.9's flip; how does it perform on OSS?).
+- Coverage selection field validation on OSS targets (the v1.9-planned default flip to `coverage_with_static_fallback` did not land; default remains `:static` per cli.ex:276; M25 still measures coverage selection's behaviour against the matrix).
 - Coverage + body_literal interaction validation.
 - M22 warning threshold field-tuning data.
 
@@ -1426,7 +1426,7 @@ If any deterministic target shows drift > V17 acceptance: PERSISTENT_WORKER_GUID
 - Equivalent-mutant rate (estimate: surviving mutants whose math is trivially indistinguishable).
 - Fallback wall-clock contribution (body literals route through fallback engine in v1.9 M23).
 
-**Coverage default-flip validation (v1.9 flipped to `coverage_with_static_fallback`)**:
+**Coverage selection validation** (the v1.9-planned default flip to `coverage_with_static_fallback` did NOT land; default `--selection` remains `:static` per `lib/mut/cli.ex:276`. M25 measures coverage selection's behaviour as a forward-looking signal — a future flip is gated on this data):
 - Coverage selection adds time on small projects with auto-fallback; should reduce time on larger projects.
 - Document any project where coverage selection produces false survivors or false kills (a real silent-drift bug if surfaced).
 
@@ -1570,79 +1570,187 @@ Evaluate each criterion against M25's data. Don't run new bench cycles; reuse M2
 
 ---
 
-# v1.11 milestones (forward-looking; M26 confirmed Outcome 3)
+# v1.11 milestones (M26 confirmed Outcome 3)
 
 M26 evaluated the v1.10 default-flip gate against M25's matrix data
 and selected **Outcome 3: defer flip; scope persistent-pattern
 fixes for v1.11**. The persistent worker remains opt-in. v1.11
-takes on the unsupported-pattern fixes M25 surfaced.
+takes on the unsupported-pattern fixes M25 surfaced AND restarts
+mutator-catalog growth, which v1.9 and v1.10 both deferred.
 
-## v1.11 scope (load-bearing)
+**Theme**: widen real-world validation while closing the biggest
+persistent correctness gaps. Three releases in a row without a new
+mutator weakens the value prop; one narrow fallback-safe mutator
+ships in v1.11.
 
-**M27 — `Mut.SchemaPlacer.render/1` heredoc fix tracking.** The v1.10
-heredoc-delimiter-stripping workaround (commit `49e3b64`) is in
-place. M27 is small: monitor upstream Elixir's `Macro.to_string/1`
-heredoc + `\` continuation bug; revert the workaround once upstream
-ships. Repro at `/tmp/macro_to_string_heredoc_repro.exs`.
+**Upstream Elixir heredoc fix is NOT a milestone.** It is unlikely
+to land in the v1.11 timeframe; it lives as a tracking note in
+CHANGELOG and a `# TODO` comment at the workaround site. When
+upstream ships, the revert is a single PR, not a milestone.
 
-**M28 — Mox.Server reset hook.** Persistent worker reset hooks
-currently cover `application_env`, `ets`, `processes`,
-`persistent_term`, `on_exit`. Add a Mox-aware reset that purges
-`Mox.Server`'s mock registry between mutants. M25 mox v1.2.0 data
-shows 13.2% drift incl. 3 false-positive `Survived → Killed` —
-target outcome is V17 timeout-flap-acceptance only.
+## v1.11 scope (committed)
 
-**M29 — Ecto warm-state contamination closure.** M25 ecto v3.13.6
-showed 22.4% drift split between (a) RuntimeError-recovery via
-warm BEAM (~115 mutants — persistent hides errors mix-spawn
-surfaces) and (b) false-positive kills via leaked Ecto.Query
-planner cache (~55 mutants). Each is a separate fix:
-  - (a) Reset hook for ETS-backed compile caches (planner cache,
-    schema metadata) between mutants.
-  - (b) Aggressive process-tree reset that takes down Repo
-    supervisors before each mutant; on_exit doesn't suffice.
+Four committed milestones. Order matters: cheap correctness wins
+first, then the spike, then the data-dependent fix.
 
-**M30 — Gettext-class compile-time hook compatibility.** The
-persistent worker boot fails on gettext v1.0+ because
-`Gettext.Compiler.__before_compile__/1` calls
-`Kernel.ParallelCompiler.async/1` outside a parallel-compile
-context. Two paths:
-  - (i) Run the persistent worker's test-load step under a
-    `Kernel.ParallelCompiler.compile/1` parent.
-  - (ii) Document target-class exclusion (current v1.10 stance);
-    no code change.
-  Pick after profiling the cost of (i).
+**M27 — OSS validation harness expansion + drift observability.**
+v1.10's lesson: 3 reference targets (demo_app, plug_crypto, Decimal)
+hide entire bug classes. Make real-life coverage a permanent asset,
+not a one-off bench cycle.
+- Pin ≥5 additional OSS targets beyond M25's set. Candidates:
+  `plug`, `phoenix_html` or `phoenix_template`, `telemetry_metrics`,
+  `broadway` or `oban` if locally runnable, `finch` or `mint`.
+- Each target classified as `clean` / `drift` / `unrunnable` /
+  `informational`. Per-target prep documented in `bench/run.sh` +
+  BENCHMARKS.md.
+- **Drift observability**: a small analysis command/script that
+  diffs mix-vs-persistent stable-id status partitions and
+  auto-buckets drift by heuristic (compile-error class, mox-class,
+  ecto-class, parse-class, …). Hand-classification was tractable
+  for 5 targets; it does not scale to 10+.
+- **Persistent boot-time warning** for known-bad target classes:
+  if persistent boot detects mox / ecto / gettext-class signatures,
+  emit a one-line "consider `--worker-type mix`" hint at startup.
+  Closes the user-experience gap M25's drift findings opened.
 
-**M31 — `:compile_error` parse-class residual reroute.** M25
-nimble_options residual 11 mutants surface as
-`MismatchedDelimiterError`/`SyntaxError` from in-process recompile
-that mix-spawn parses cleanly. `ac4df7c`/`49e3b64` rerouted
-`:unknown` and `:parse_error` classes; this residual classifies as
-`:compile_error` because the in-process recompiler's parser
-disagrees with mix-spawn's parser on the same patch bytes. Likely
-a source-load-path issue; investigate cumulative-patch state vs
-fresh source per mutant.
+Acceptance:
+- ≥5 new pinned targets benched + classified.
+- No future default-flip decision relies only on demo_app /
+  plug_crypto / Decimal.
+- Drift bucketing tool exits 0 with a per-bucket count table on
+  M25's existing data.
+- Persistent boot warning fires correctly on mox / gettext;
+  silent on plug_crypto / Decimal / nimble_options.
+
+**M28 — `Mox.Server` reset hook.** Cleanest correctness fix in the
+v1.11 set; ships first to bank a win regardless of M29's spike
+outcome.
+- Add a Mox-aware reset hook to persistent runner. Purges
+  `Mox.Server`'s mock registry between mutants. Tolerate
+  Mox-not-loaded targets (no-op).
+- Acceptance: mox baseline persistent drift drops to V17
+  timeout-flap acceptance. Zero regression on demo_app /
+  plug_crypto / Decimal. If the server's state model makes a
+  surgical reset infeasible, formally document mox-class as
+  mix-only with the exact reason in PERSISTENT_WORKER_GUIDE.
+
+**M29 — Persistent recompile isolation spike.** Ecto and
+nimble_options drift may share a root cause: persistent's
+in-process recompile (`Code.compile_file/1`) leaks compile-time
+state mix-spawn doesn't. Spike before committing to per-target
+fixes — isolation may subsume both M30 (Ecto) and the
+nimble_options parse-class residual at once.
+- Three modes to compare on `nimble_options` and `ecto`:
+  - Current persistent in-process compile.
+  - Helper-process compile (short-lived child process for the
+    recompile, persistent BEAM keeps test-load state warm).
+  - Mix-spawn fallback (baseline; already implemented).
+- Measure: drift partition vs mix-spawn, wall-clock cost,
+  memory footprint, fallback rate.
+- **Question**: is `Code.compile_file/1` fundamentally the wrong
+  primitive vs `Kernel.ParallelCompiler.compile_to_path/2`?
+- Output: a written decision doc — proceed with helper-process
+  isolation in v1.12, or attack drift target-class-by-target-class
+  via M30. Spike does NOT ship the chosen path; it only chooses.
+- Acceptance: decision doc committed under
+  `docs/spikes/M29_recompile_isolation.md`. Three-mode comparison
+  table on nimble_options and ecto. Recommendation explicit.
+
+**M30 — Ecto warm-state closure.** Sequenced after M29 because the
+spike's outcome may eliminate most of this work. If M29 picks
+helper-process isolation, M30 shrinks to "validate the spike fix
+clears Ecto drift."
+- M25 ecto v3.13.6 showed 22.4% drift split between (a)
+  RuntimeError-recovery via warm BEAM (~115 mutants — persistent
+  hides errors mix-spawn surfaces) and (b) false-positive kills
+  via leaked Ecto.Query planner cache (~55 mutants).
+- If isolation insufficient: implement target-specific resets —
+  reset ETS-backed compile caches (planner cache, schema metadata)
+  + Repo process-tree teardown between mutants.
+- If isolation closes most drift: validate residual drift is V17-
+  acceptance and document.
+- Acceptance: ecto persistent drift materially reduced (target:
+  V17 timeout-flap acceptance). If still unsafe, PERSISTENT_WORKER
+  _GUIDE explicitly classifies Ecto-class projects as mix-only with
+  the exact failure modes.
+
+## v1.11 stretch (commit only if committed milestones land with budget)
+
+**M31 — Gettext compatibility decision.** Do NOT block v1.11 on
+this if it turns into compiler plumbing.
+- Path (i): try loading tests under a real
+  `Kernel.ParallelCompiler` parent. If clean and cheap, ship it.
+- Path (ii): formally exclude gettext-class compile hooks as
+  mix-only. Document why; tag `--worker-type persistent` to
+  refuse-and-fallback-with-warning when gettext is detected
+  (already covered by M27's boot warning).
+- Acceptance: gettext persistent boots and runs with measured
+  drift, OR exclusion is explicit, tested, and documented.
+
+**M32 — Affected-test selection spike.** A spike, not a
+committed optimization. Silent-survivor risk dominates.
+- For schema mutants: map mutant module/function/line → covering
+  tests via existing coverage data.
+- For fallback mutants: include compile-connected dependents +
+  tests covering changed file/function. Open question whether
+  affected-tests interacts with the persistent in-process
+  fallback's compile-connected dependents logic — answer this
+  inside the spike.
+- Compare against `static` and `coverage_with_static_fallback` on
+  demo_app, plug_crypto, nimble_options, jason.
+- **Sharpened kill criterion**: ANY silent-survivor delta on ANY
+  target kills the optimization. "Mostly byte-identical" is not
+  acceptable — survivor drift is correctness regression
+  masquerading as a perf win. At v1.x maturity correctness
+  dominates.
+- Acceptance: if byte-identical (zero silent-survivor delta) on
+  reference targets + ≥2 OSS targets, promote to v1.12
+  implementation milestone. Otherwise, document and shelve.
+
+**M33 — Comparison-operator boundary mutator.** Restart catalog
+growth with one narrow, fallback-safe addition.
+- New schema mutator `Mut.Mutator.ComparisonBoundary`: in body
+  context only, mutate `<` ↔ `<=`, `>` ↔ `>=`. Off-by-one boundary
+  errors are a high-value mutation class with documented low
+  equivalent-mutant rate in arithmetic-heavy code.
+- Routes via the existing schema engine (operator dispatch already
+  supported by tracer oracle). No env walker required.
+- Atoms / strings / maps / lists stay deferred to v2 with the
+  env walker.
+- Acceptance: mutator unit-tested + golden_oracle/golden_instrument
+  layers green. Re-runs on plug_crypto + Decimal show non-zero
+  new mutants with kill rate ≥60% on reference targets.
+- Skip M33 if M27-M30 consumes the v1.11 budget; defer to v1.12.
 
 ## v1.11 default-flip gate (revised)
 
-Default `--worker-type` flips from `mix` → `persistent` IFF M28
-+ M29 close drift to V17 timeout-flap acceptance on mox + ecto
-class targets, AND `gettext`-class targets are either fixed
-(M30(i)) or formally documented as `--worker-type mix` only
-(M30(ii)).
+Default `--worker-type` flips from `mix` → `persistent` iff:
+- M28 closes mox-class drift to V17 timeout-flap acceptance, AND
+- M30 closes ecto-class drift to V17 timeout-flap acceptance, AND
+- gettext-class targets are either fixed (M31 path i) or
+  formally documented as `--worker-type mix` only (M31 path ii).
 
-If only some of M28-M31 land, gate stays unmet; default stays
-`mix`. v1.12 inherits whichever didn't land.
+M29's spike output may change this gate's wording in v1.12 if it
+recommends helper-process isolation over per-target resets. The
+default-flip itself is **not a v1.11 goal**; it is an outcome only
+if the gate happens to be met. v1.11 ships even if all three
+conditions fail (worker stays opt-in; default stays `mix`).
 
-## v1.11 horizon (deferred — not v1.11 scope unless persistent-fix milestones complete early)
+## v1.11 horizon (not v1.11 scope)
 
 - **Body-literal schema-routing migration** (M25 Decision 2 candidate).
   Re-evaluate after Decision 1 ever flips default-on; until then
   the routing decision stays "fallback".
+- **Helper-process recompile isolation implementation**, if M29
+  spike recommends it. v1.12 candidate.
+- **Affected-tests selection implementation**, if M32 spike
+  promotes. v1.12 candidate.
 - **Env walker** (the long-deferred v2 architecture work). Unblocks
   float/string/atom/list/map/tuple body literals AND
   pattern-position literals AND variable mutators AND better
-  attribute classification. v1.12+ candidate.
+  attribute classification. v2 work.
+- **Upstream Elixir heredoc fix revert**. Tracking note + TODO
+  comment, not a milestone. Single PR when upstream lands.
 
 # Out of scope for v1.10 (do not let it sneak in)
 

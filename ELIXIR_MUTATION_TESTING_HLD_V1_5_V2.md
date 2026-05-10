@@ -697,6 +697,30 @@ Three possible outcomes: flip default to persistent, keep mix default with exten
 - Persistent worker fixes for unsupported patterns surfaced in M25/M26.
 - Or env walker (the long-deferred v2 architecture work) if v1.10 closes cleanly.
 
+### v1.11 (4 committed + 3 stretch milestones)
+
+M26 closed v1.10 with Outcome 3 (defer default-flip; scope persistent fixes for v1.11). v1.11's theme is **widen real-world validation while closing the biggest persistent correctness gaps** — and restart mutator-catalog growth, which v1.9 and v1.10 both deferred.
+
+**Committed milestones (sequenced):**
+
+**M27 — OSS validation harness expansion + drift observability.** v1.10's lesson: 3 reference targets hide entire bug classes. M27 makes real-life coverage a permanent asset — pin ≥5 additional OSS targets (plug, phoenix_html/template, telemetry_metrics, broadway/oban, finch/mint), classify each as clean/drift/unrunnable/informational, and ship a drift-bucketing tool that auto-partitions mix-vs-persistent stable-id status diffs by heuristic class. Also adds a persistent boot-time warning for known-bad target signatures (mox/ecto/gettext) so users get told to use `--worker-type mix` rather than silently hitting drift. Closes the user-experience gap M25's findings opened.
+
+**M28 — `Mox.Server` reset hook.** Cheapest correctness fix; banks a v1.11 win regardless of M29's spike outcome. Adds Mox-aware reset to the persistent runner (no-op when Mox isn't loaded). Acceptance: mox baseline drift drops to V17 timeout-flap acceptance.
+
+**M29 — Persistent recompile isolation spike.** Ecto + nimble_options drift may share a root cause: in-process `Code.compile_file/1` leaks compile-time state mix-spawn doesn't. Spike compares three modes (current in-process, helper-process compile, mix-spawn fallback) on nimble_options + ecto. Output is a written decision doc, not shipped code. May subsume M30 + the parse-class residual at once.
+
+**M30 — Ecto warm-state closure.** Sequenced after M29 because the spike's outcome may eliminate most of this work. If isolation insufficient: target-specific ETS-cache reset + Repo process-tree teardown. If isolation closes drift: validate residual is V17-acceptance and document.
+
+**Stretch milestones (commit only with budget):**
+
+- **M31 Gettext compatibility decision** — fix via `Kernel.ParallelCompiler` parent OR formally exclude.
+- **M32 Affected-test selection spike** — sharpened kill criterion: ANY silent-survivor delta on ANY target kills the optimization. Survivor drift is correctness regression masquerading as a perf win.
+- **M33 Comparison-operator boundary mutator** — one narrow, fallback-safe schema mutator (`<` ↔ `<=`, `>` ↔ `>=`). Restarts catalog growth without env walker. Atoms/strings/maps/lists stay v2.
+
+**Explicitly NOT a milestone**: upstream Elixir `Macro.to_string/1` heredoc fix revert. Unlikely to land in the v1.11 window. Tracked via CHANGELOG note + `# TODO` at the workaround site; revert is a single PR when upstream ships.
+
+**Default-flip gate (revised)**: `--worker-type` flips iff M28 closes mox-drift, M30 closes ecto-drift, AND gettext-class is either fixed (M31 path i) or formally documented as mix-only (M31 path ii). The flip is **not a v1.11 goal** — v1.11 ships even if the gate stays unmet. M29's spike output may rewrite this gate for v1.12.
+
 ### v2
 
 - Lean env walker.

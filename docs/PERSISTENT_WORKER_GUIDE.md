@@ -1,17 +1,22 @@
 # Persistent worker guide
 
 > **Status:** opt-in. The default worker remains `--worker-type mix`.
-> The persistent worker is production-ready as of v1.8 against the
-> reference targets (demo_app, plug_crypto, Decimal). Use it when
-> you want Mutalisk to be faster; stay on the default when you want
-> the most boring possible execution model.
+> The persistent worker is byte-identical to mix on the reference
+> targets (demo_app, plug_crypto, Decimal). M25 OSS validation
+> (v1.10) found drift on real-world targets — see "What doesn't
+> work yet" below for specifics. Use it when you want Mutalisk to
+> be faster on a project shape we've validated; stay on the
+> default when you want the most boring possible execution model.
 
 ## TL;DR
 
 Pass `--worker-type persistent` and you get a dedicated ExUnit BEAM
 per sandbox that stays warm across mutants instead of paying mix-test
 boot cost on every mutant. Faster on real targets (~2× on Decimal at
-`c=4`). Outcomes are byte-identical to the mix worker.
+`c=4`). Outcomes are byte-identical to the mix worker on the v1.8
+reference targets (demo_app, plug_crypto, Decimal); M25's broader
+OSS matrix surfaced drift on macro-heavy and Mox-class targets
+(see below).
 
 ```sh
 MIX_ENV=test mix mut --worker-type persistent
@@ -211,7 +216,11 @@ Relevant flags:
 - `--enable body_literal` — opt in to integer / boolean body-literal
   mutators (M23). These route through the fallback engine; expect
   added fallback wall-clock proportional to the literal count.
-  Currently opt-in pending the M24 OSS-target validation matrix.
+  Stays opt-in in v1.10 per M25's Decision 1: aggregate kill rate
+  passes thresholds (62.3% across n=419 / 0 invalid) but the
+  mox/ecto persistent-drift trigger fires the keep-opt-in branch.
+  Re-evaluated in v1.11+ once M28 (Mox.Server reset) and M29 (Ecto
+  warm-state closure) land.
 
 Configuration via `config :mut`:
 

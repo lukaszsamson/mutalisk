@@ -22,22 +22,35 @@ for v1.11).** `--worker-type mix` remains the v1.10 default.
 Persistent stays opt-in.
 
 #### v1.11 milestones scoped (PLAN.md update)
-- **M27** Track upstream Elixir `Macro.to_string/1` heredoc fix
-  and revert M25's heredoc-delimiter-stripping workaround.
+
+Committed:
+- **M27** OSS validation harness expansion + drift observability.
+  Pin ≥5 additional OSS targets; ship drift-bucketing tool;
+  add persistent boot-time warning for known-bad target classes.
 - **M28** `Mox.Server` reset hook between mutants.
-- **M29** Ecto warm-state contamination closure (compile-cache
-  reset + Repo process-tree reset).
-- **M30** Gettext-class compile-time hook compatibility (run
-  test-load under `Kernel.ParallelCompiler.compile/1` parent OR
-  formally exclude target class).
-- **M31** Investigate residual `:compile_error` parse-class
-  in-process-recompile drift on nimble_options (11 mutants).
+- **M29** Persistent recompile isolation spike (in-process vs
+  helper-process vs mix-spawn). Spike output is a decision doc,
+  not shipped code.
+- **M30** Ecto warm-state closure, sequenced after M29.
+
+Stretch (commit only with budget):
+- **M31** Gettext compatibility decision (fix via
+  `Kernel.ParallelCompiler` parent OR formally exclude).
+- **M32** Affected-test selection spike. Sharpened kill criterion:
+  any silent-survivor delta on any target kills the optimization.
+- **M33** Comparison-operator boundary mutator (`<` ↔ `<=`,
+  `>` ↔ `>=`). Restarts catalog growth without env walker.
+
+NOT a milestone: upstream Elixir `Macro.to_string/1` heredoc fix
+revert. Tracked as a CHANGELOG note + TODO; single PR when
+upstream lands.
 
 #### v1.11 default-flip gate (revised)
-Default `--worker-type` flips iff M28 + M29 close drift to V17
-timeout-flap acceptance on mox + ecto class targets, AND
-gettext-class targets either fixed (M30 path i) or formally
-documented `--worker-type mix` only (M30 path ii).
+Default `--worker-type` flips iff M28 closes mox-drift, M30 closes
+ecto-drift, AND gettext-class is either fixed (M31 path i) or
+formally documented `--worker-type mix` only (M31 path ii).
+The flip is **not a v1.11 goal** — v1.11 ships even if the gate
+stays unmet.
 
 ### M25 — OSS validation matrix + Decisions 1 & 2
 
@@ -151,7 +164,9 @@ documenting the unsupported patterns surfaced.
 #### Out of scope for v1.10
 - Default flip of `--worker-type` (gated on persistent-drift
   closure on mox/ecto-class targets).
-- Default flip of `--selection` (still `coverage_with_static_fallback`).
+- Default flip of `--selection` (still `:static`; the flip to
+  `:coverage_with_static_fallback` planned in earlier PLAN
+  drafts did not land — see lib/mut/cli.ex:276).
 - New mutators / CLI flags.
 - Schema-routing migration code (deferred to v1.11+ candidate).
 
