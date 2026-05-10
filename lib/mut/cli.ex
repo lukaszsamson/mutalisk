@@ -20,7 +20,8 @@ defmodule Mut.Cli do
             test_paths: [String.t()],
             keep_work_copy: boolean,
             worker_type: :mix | :persistent,
-            test_timeout_ms: pos_integer
+            test_timeout_ms: pos_integer,
+            quiet_boot_warning: boolean
           }
 
     defstruct [
@@ -37,7 +38,8 @@ defmodule Mut.Cli do
       :test_paths,
       :keep_work_copy,
       :worker_type,
-      :test_timeout_ms
+      :test_timeout_ms,
+      :quiet_boot_warning
     ]
   end
 
@@ -106,7 +108,8 @@ defmodule Mut.Cli do
           debug_plan: :boolean,
           keep_work_copy: :boolean,
           worker_type: :string,
-          test_timeout_ms: :integer
+          test_timeout_ms: :integer,
+          quiet_boot_warning: :boolean
         ],
         aliases: []
       )
@@ -155,7 +158,13 @@ defmodule Mut.Cli do
          test_paths: test_paths,
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          worker_type: worker_type,
-         test_timeout_ms: test_timeout_ms
+         test_timeout_ms: test_timeout_ms,
+         quiet_boot_warning:
+           Keyword.get(
+             parsed,
+             :quiet_boot_warning,
+             Keyword.get(config, :quiet_boot_warning, false)
+           )
        }}
     end
   end

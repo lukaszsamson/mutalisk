@@ -73,6 +73,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.TestSelection.Static
   alias Mut.Worker
   alias Mut.Worker.Persistent
+  alias Mut.Worker.Persistent.Detector, as: PersistentDetector
 
   @requirements ["app.config"]
   # Buffer added on top of `--test-timeout-ms` for the host-side
@@ -511,6 +512,8 @@ defmodule Mix.Tasks.Mut do
   defp maybe_start_persistent_workers(%{worker_type: :persistent} = opts, pool) do
     server_opts = [test_timeout_ms: opts.test_timeout_ms]
 
+    maybe_emit_boot_warning(opts, pool)
+
     pool.sandboxes
     |> Enum.map(fn sandbox ->
       case Persistent.start_link(sandbox, server_opts) do
@@ -522,6 +525,29 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp maybe_start_persistent_workers(_opts, _pool), do: %{}
+
+  # M27: persistent boot-time warning. Inspect the sandbox's compiled
+  # dep tree for known-bad target signatures (mox / ecto / gettext)
+  # and emit a one-line stderr hint per detection. Suppressed by
+  # `--quiet-boot-warning` for CI cleanliness. Fires before the first
+  # worker starts so the warning is visible even if boot itself
+  # fails. Never blocks; never raises.
+  defp maybe_emit_boot_warning(%{quiet_boot_warning: true}, _pool), do: :ok
+
+  defp maybe_emit_boot_warning(_opts, %{sandboxes: sandboxes}) do
+    case Enum.min_by(sandboxes, & &1.id, fn -> nil end) do
+      %Sandbox{path: path} -> emit_boot_warnings(PersistentDetector.detect(path))
+      nil -> :ok
+    end
+  end
+
+  defp emit_boot_warnings([]), do: :ok
+
+  defp emit_boot_warnings(detections) do
+    Enum.each(detections, fn detection ->
+      IO.puts(:stderr, PersistentDetector.format_warning(detection))
+    end)
+  end
 
   defp stop_persistent_workers(servers) do
     Enum.each(servers, fn {_id, pid} ->
