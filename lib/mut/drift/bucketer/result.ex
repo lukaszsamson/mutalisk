@@ -21,6 +21,7 @@ defmodule Mut.Drift.Bucketer.Result do
               ecto_false_kill: 0,
               gettext_class: 0,
               parse_class: 0,
+              pool_warm_state: 0,
               timeout_flap: 0,
               unclassified: 0
             }

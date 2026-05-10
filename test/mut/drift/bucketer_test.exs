@@ -142,6 +142,28 @@ defmodule Mut.Drift.BucketerTest do
       assert Map.get(result.buckets, :unclassified) == 1
     end
 
+    test "pool_warm_state catches HTTP-client mix=Survived → persistent=Killed" do
+      mix = report("lib/mint/http2.ex", [mutant("a", "Survived")])
+      pers = report("lib/mint/http2.ex", [mutant("a", "Killed")])
+      result = Bucketer.analyze(mix, pers, "mint")
+      assert Map.get(result.buckets, :pool_warm_state) == 1
+    end
+
+    test "pool_warm_state fires on nimble_pool target" do
+      mix = report("lib/nimble_pool.ex", [mutant("a", "Survived")])
+      pers = report("lib/nimble_pool.ex", [mutant("a", "Killed")])
+      result = Bucketer.analyze(mix, pers, "nimble_pool")
+      assert Map.get(result.buckets, :pool_warm_state) == 1
+    end
+
+    test "pool_warm_state does not fire on Killed → Survived (only false-kill direction)" do
+      mix = report("lib/mint/http2.ex", [mutant("a", "Killed")])
+      pers = report("lib/mint/http2.ex", [mutant("a", "Survived")])
+      result = Bucketer.analyze(mix, pers, "mint")
+      assert Map.get(result.buckets, :pool_warm_state) == 0
+      assert Map.get(result.buckets, :unclassified) == 1
+    end
+
     test "timeout_flap takes priority over ecto" do
       mix = report("lib/ecto/x.ex", [mutant("a", "Timeout")])
       pers = report("lib/ecto/x.ex", [mutant("a", "Killed")])

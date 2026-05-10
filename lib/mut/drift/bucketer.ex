@@ -44,6 +44,14 @@ defmodule Mut.Drift.Bucketer do
                            parse_error markers, OR the mutant is a
                            CompileError on persistent that mix did
                            not compile-error.
+    * `:pool_warm_state` — target/file matches HTTP-client or
+                           process-pool shapes (mint, finch,
+                           nimble_pool, plug, hackney, …) AND the
+                           drift is mix=Survived → persistent=Killed
+                           (warm BEAM holds connection/pool state
+                           that propagates across mutants). M27
+                           surfaced this on mint v1.8.0 and
+                           nimble_pool v1.1.0.
     * `:unclassified`    — anything else.
 
   Heuristics are best-effort. They consume only data observable in
@@ -63,6 +71,7 @@ defmodule Mut.Drift.Bucketer do
           | :ecto_warm_state
           | :ecto_false_kill
           | :parse_class
+          | :pool_warm_state
           | :unclassified
 
   @drift_buckets [
@@ -71,6 +80,7 @@ defmodule Mut.Drift.Bucketer do
     :ecto_false_kill,
     :gettext_class,
     :parse_class,
+    :pool_warm_state,
     :timeout_flap,
     :unclassified
   ]
@@ -148,6 +158,7 @@ defmodule Mut.Drift.Bucketer do
       ecto_warm_state?(mix, persistent, target) -> :ecto_warm_state
       ecto_false_kill?(mix, persistent, target) -> :ecto_false_kill
       parse_class?(mix, persistent) -> :parse_class
+      pool_warm_state?(mix, persistent, target) -> :pool_warm_state
       true -> :unclassified
     end
   end
@@ -202,6 +213,22 @@ defmodule Mut.Drift.Bucketer do
   end
 
   defp parse_signal?(_), do: false
+
+  # M27 surfaced this on mint v1.8.0 and nimble_pool v1.1.0: the
+  # warm persistent BEAM accumulates HTTP-client / process-pool
+  # state (sockets, pool workers, registry entries) that mix-spawn
+  # would re-create per run, producing false-positive `Killed`s on
+  # mutants mix marks `Survived`. Different root cause from Ecto's
+  # planner-cache leak but same drift direction. Apps in this
+  # bucket: HTTP clients (mint, finch, hackney, gun) and process
+  # pools (nimble_pool, plug — Plug.Conn pool, poolboy).
+  @pool_app_names ~w(mint finch hackney gun nimble_pool plug poolboy connection)
+
+  defp pool_warm_state?(mix, persistent, target) do
+    target_match?(target, mix, persistent, @pool_app_names) and
+      mix["status"] == "Survived" and
+      persistent["status"] == "Killed"
+  end
 
   ## ---- target / file-path matching ---------------------------------------
 
