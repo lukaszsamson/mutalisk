@@ -51,7 +51,7 @@ persistent drift on new project shapes only).
 | `nimble_csv` | `v1.3.0` (`2fc3cbf`) | 0 | 0 | 0 | — | — | — | — | informational (defmacro-heavy, 0 mutants) |
 | `gen_stage` | `v1.3.2` (`d1532fa`) | 186 | 91 | 277 | mix-baseline-flake | 85.6% | — | — | informational (mix flaked one timing test) |
 | `phoenix_html` | `v4.3.0` (`8cfd3e3`) | 45 | 48 | 93 | 81.7% | 81.7% | 0 | — | clean (post-M34) |
-| `plug` | `v1.19.1` (`8723880`) | 225 | 127 | 352 | 97.6% | 98.0% | 17 (4.8%) | unclassified ×16 + parse_class ×1 | drift (post-M34); supervisor-init class on `lib/plug/router/utils.ex` |
+| `plug` | `v1.19.1` (`8723880`) | 225 | 127 | 352 | 97.6% | 98.0% | 17 (4.8%) | supervisor_init ×16 + parse_class ×1 | drift (post-M34, post-M35 bucketer); supervisor-init class on `lib/plug/router/utils.ex` |
 | `phoenix_pubsub` | `v2.2.0` (`086e0af`) | 78 | 35 | 113 | 71.4% | — | — | — | unrunnable (post-M34): persistent boot fails when test/support/cluster.ex calls `Mix.State.get/2` on a node where Mix isn't bootstrapped — test-infra issue, NOT a SchemaPlacer crash |
 | `finch` | `v0.9.1` (`0530e34`) | — | — | — | — | — | — | — | unrunnable: `:x509` transitive dep fails on Erlang/OTP 28 |
 | `ex_machina` | `v2.8.0` (`d1ec5e4`) | — | — | — | — | — | — | — | unrunnable: `:credo` dev dep fails on Elixir 1.19 (regex char-class) |

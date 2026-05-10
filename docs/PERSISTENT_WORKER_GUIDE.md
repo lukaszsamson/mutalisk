@@ -228,25 +228,27 @@ per detection BEFORE the first worker BEAM starts:
   See docs/PERSISTENT_WORKER_GUIDE.md.
 ```
 
-Triggers (v1.11 catalogue):
+Triggers (v1.12 catalogue):
 
 | Detected dep | Signature | Suggested action |
 |---|---|---|
 | `:mox` | `:mox` | M28's reset hook closes local-node Mox state. Use `--worker-type mix` if your suite spans Erlang nodes (residual cluster-state drift). |
 | `:ecto`, `:ecto_sql` | `:ecto` | M30 confirmed Ecto-class drift is supervisor-init structural, not cache-state. Use `--worker-type mix` for Ecto-class projects. |
 | `:gettext` | `:gettext` | M31 confirmed gettext-class is mix-only (Gettext.Compiler.__before_compile__/1 boot-fails outside a parallel-compile parent). Use `--worker-type mix`. |
-| `:mint`, `:finch`, `:nimble_pool` | `:pool` | M27 surfaced `pool_warm_state` drift (mint 19.6%, nimble_pool 14.3% — `mix=Survived → persistent=Killed`). Persistent worker is **supported**, not mix-only. Run `mix mut.drift --target <name>` after a first persistent run; if `pool_warm_state` is non-trivial, fall back to `--worker-type mix`. M36 may close this class. |
+| `:mint`, `:finch`, `:nimble_pool` | `:pool` | M27 surfaced `pool_warm_state` drift (mint 19.6%, nimble_pool 14.3% — `mix=Survived → persistent=Killed`). Persistent worker is **supported**, not mix-only. M36 confirmed reset hooks are ineffective on pure-library OTP apps (mint and nimble_pool declare no `:mod` supervisor entry, so there's nothing to reset); the drift direction means persistent may be more thorough rather than wrong. Run `mix mut.drift --target <name>` to inspect the `:pool_warm_state` bucket; fall back to `--worker-type mix` only if the drift count materially affects your kill rate. |
 
 The warning is a *heads-up*, not a diagnosis. A clean Ecto setup
 will still trigger it; a Mox-using project that already knows the
-limitation will still trigger it. The v1.11 catalogue retains all
-three rows: M28's reset hook closed local-node Mox state but the
+limitation will still trigger it. The v1.12 catalogue retains all
+four rows: M28's reset hook closed local-node Mox state but the
 cluster-state residual remains; M30 confirmed Ecto-class is
 structurally mix-only (supervisor-init reordering is not
 addressable by reset hooks); M31 confirmed Gettext-class is
-mix-only on `Kernel.ParallelCompiler` parent-context grounds.
-Rows are removed only when the entire drift class closes — none
-of the three closed in v1.11.
+mix-only on `Kernel.ParallelCompiler` parent-context grounds;
+M36 confirmed pool-class drift is not addressable by reset hooks
+either, but unlike the other three is `supported with caveat`
+rather than mix-only. Rows are removed only when the entire
+drift class closes — none of the four closed in v1.12.
 
 To suppress for CI cleanliness:
 
@@ -261,13 +263,6 @@ terminal assertions are unaffected. The warning fires regardless
 of whether drift will actually manifest on this run — its job is
 to surface known-class limitations to users who don't know to
 look for them.
-
-HTTP-client / process-pool projects (`mint`, `finch`,
-`nimble_pool`) are NOT yet in the boot-warning catalogue. M27
-surfaced this drift class but extending the detector is a v1.12
-follow-up — for now, run `mix mut.drift --target <name>` after
-your first persistent run and look for the `:pool_warm_state`
-bucket.
 
 ## Reading the persistent metrics block
 

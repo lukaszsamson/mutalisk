@@ -17,14 +17,26 @@ defmodule Mut.Worker.Persistent.Detector do
   Returns a list of `{atom_signature, message}` pairs. An empty
   list means the persistent worker should boot silently.
 
-  ## Signature catalogue
+  ## Signature catalogue (v1.12)
 
-    * `:mox`     — `Mox.Server` mock-registry leaks across mutants
-                   (see `docs/PERSISTENT_WORKER_GUIDE.md`).
-    * `:ecto`    — Warm-BEAM contamination of `Ecto.Query` planner
-                   and schema metadata caches.
-    * `:gettext` — `Gettext.Compiler.__before_compile__/1` fails
-                   under non-parallel-compile boot context.
+    * `:mox`     — M28 reset hook closes local-node Mox state;
+                   residual cluster/peer-state drift remains for
+                   multi-node Mox suites. See PERSISTENT_WORKER_GUIDE.
+    * `:ecto`    — M30 confirmed Ecto-class drift is supervisor-
+                   init structural, not cache-state.
+                   `--worker-type mix` recommended.
+    * `:gettext` — M31 confirmed `Gettext.Compiler.__before_compile__/1`
+                   boot-fails outside a parallel-compile parent
+                   context. `--worker-type mix` required.
+    * `:pool`    — M27 surfaced `:pool_warm_state` drift on `:mint`,
+                   `:finch`, `:nimble_pool` (mint 19.6%,
+                   nimble_pool 14.3%). Persistent worker is
+                   `supported with caveat` rather than mix-only —
+                   M36 confirmed reset hooks ineffective on these
+                   pure-library OTP apps; drift direction
+                   (`mix=Survived → persistent=Killed`) suggests
+                   persistent may be more thorough rather than
+                   wrong. Verify via `mix mut.drift`.
 
   Designed to be extensible: the catalogue is a flat list of
   `{app_atom, signature_atom, human_message}` tuples. Add new
