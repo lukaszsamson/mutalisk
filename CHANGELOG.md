@@ -5,6 +5,80 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.12 unreleased
 
+### M37 — Mutator-surface decision: ComparisonNegation already shipped (2026-05-10)
+
+PLAN.md scoped M37 as either (a) ship one narrow schema-routed
+mutator candidate (`Mut.Mutator.ComparisonNegation` for `==` ↔
+`!=` and the strict / boundary variants), or (b) formally defer
+all catalog growth to the env walker (v2). v1.12 lands outcome
+(a) — but, as with M33's ComparisonBoundary, the candidate was
+already implemented in v1.5 (commit `06e8398`, 2026-05-03) and
+M37's v1.12 work is bench validation only.
+
+#### Pre-existing implementation matches the M37 candidate
+
+`lib/mut/mutator/comparison_negation.ex` already mutates the
+full target set:
+
+| Operator | Replacement |
+|---|---|
+| `<` | `>=` |
+| `<=` | `>` |
+| `>` | `<=` |
+| `>=` | `<` |
+| `==` | `!=` |
+| `!=` | `==` |
+| `===` | `!==` |
+| `!==` | `===` |
+
+It is schema-routed (`@kind :comparison_negation`, dispatch
+oracle), body-context-only (`ctx.env_context == nil`), and
+stable_id-safe (no migration). All three M37 decision criteria
+pass.
+
+Wired into `Mut.Mutator.Defaults` and the CLI mutator name
+table. 4 unit tests at
+`test/mut/mutator/comparison_negation_test.exs` pass.
+golden_oracle and golden_instrument verify layers are green.
+
+#### Bench validation across the M25 + M27 + M34 corpus
+
+| Target | Mutants | Killed | Other | Kill rate |
+|---|---:|---:|---|---:|
+| plug_crypto v2.1.1 | 7 | 6 | 1 Survived | 85.7% |
+| Decimal | 118 | 109 | 9 Survived | 92.4% |
+| nimble_options v1.1.1 | 2 | 2 | — | 100.0% |
+| mox v1.2.0 | 4 | 4 | — | 100.0% |
+| jason v1.4.5 | 8 | 6 | 2 RuntimeError | 75.0% |
+| mint v1.8.0 | 72 | 66 | 6 Survived | 91.7% |
+| plug v1.19.1 | 38 | 33 | 1 CE / 4 RE | 86.8% |
+| phoenix_html v4.3.0 | 12 | 12 | — | 100.0% |
+
+Kill rates 75–100% across all 8 reference + OSS targets, well
+above the 60% bar M33 originally scoped (and which M33
+reframed as an observation rather than acceptance). 261 mutants
+of mutation surface from the catalog as a whole. Per the M33
+reframing, kill rate is reported as an observation — it is a
+property of the project's test suite, not the mutator.
+
+#### M37 acceptance
+
+Per PLAN.md acceptance: "(a) one new schema-routed mutator
+landed, unit-tested, golden layers green, validated on ≥4
+targets." All sub-criteria are met:
+
+- ✅ One schema-routed mutator (ComparisonNegation).
+- ✅ Unit-tested.
+- ✅ golden_oracle and golden_instrument layers green
+  (`bin/verify` exits 0).
+- ✅ Validated on 8 targets (plug_crypto + Decimal + 6 OSS),
+  exceeding the ≥4 bar.
+
+**No code changes.** PLAN.md's M37 entry is marked complete.
+v1.12 catalog growth is closed; further mutator additions
+(atoms / strings / maps / lists / list-construction) remain
+deferred to v2 with the env walker.
+
 ### M36 — Pool-warm-state characterization spike: stance unchanged (2026-05-10)
 
 PLAN.md scoped M36 as a characterization spike before any

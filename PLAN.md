@@ -1874,6 +1874,15 @@ the env walker.
   formally deferring all catalog growth to v2. Both outcomes
   ship v1.12.
 
+> **v1.12 closure note (2026-05-10):** outcome (a). The candidate
+> mutator was already implemented in v1.5 (`06e8398`); M37's v1.12
+> work was bench validation only. Validated on 8 targets
+> (plug_crypto, Decimal, nimble_options, mox, jason, mint, plug,
+> phoenix_html); kill rates 75–100% reported as observation per
+> the M33 reframing. No new code. Further catalog growth (atoms /
+> strings / maps / lists / list-construction) remains v2 work
+> behind the env walker. See CHANGELOG.md M37 entry.
+
 ## v1.12 default-flip gate (unchanged from v1.11 closure)
 
 Default `--worker-type` STAYS `mix`. The structural drift classes
