@@ -33,7 +33,7 @@ defmodule Mut.Worker.Persistent.Detector do
 
   @signatures [
     {:mox, :mox,
-     "Mox-class projects: Mox.Server mock-registry leaks across mutants under persistent."},
+     "Mox-class projects: residual cluster/peer-state drift remains after M28's Mox.Server reset hook (3-mutant residual on mox v1.2.0 self-tests)."},
     {:ecto, :ecto,
      "Ecto-class projects: warm BEAM contaminates Ecto.Query planner / schema metadata caches."},
     {:ecto_sql, :ecto,

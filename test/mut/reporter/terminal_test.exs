@@ -203,7 +203,8 @@ defmodule Mut.Reporter.TerminalTest do
             ets: 0,
             processes: 0,
             persistent_term: 0,
-            on_exit: 0
+            on_exit: 0,
+            mox: 0
           },
           filter_lookup_ms: 0,
           crash_count: 0,

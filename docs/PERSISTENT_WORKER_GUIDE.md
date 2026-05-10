@@ -89,14 +89,23 @@ not timeout-flap and are not recoverable via the in-process
 fallback retries. Use `--worker-type mix` on these project shapes
 until the underlying drift is closed.
 
-- **`Mox.Server` module-replacement state.** Any project leaning
-  on Mox-style runtime mock injection. M25 mox v1.2.0 measured
-  13.2% baseline drift, including 3 false-positive `Survived →
-  Killed` flips: a previous mutant's mock state was visible to
-  later mutants' tests. The persistent worker's reset hooks
-  (`application_env`, `ets`, `processes`, `persistent_term`,
-  `on_exit`) do not clear `Mox.Server` internal mock registry.
-  Mocks defined with `Mox.defmock/2` survive sandbox reset.
+- **Mox cluster/peer-state leaks (residual after M28).** v1.11
+  M28 added a `Mox.Server` reset hook that terminates and restarts
+  Mox's `NimbleOwnership` worker via the supervisor between
+  mutants. The hook successfully clears local-node mock registry
+  state (expectations, allowances, history, stubs). However, mox
+  v1.2.0's own self-tests include `MoxTest.ClusterTest`, which
+  spawns peer Erlang nodes via `:peer.start/1` and runs Mox
+  across the cluster. The peer-node controllers are torn down by
+  the `processes` reset hook, but residual cluster-state leaks
+  manifest as 3 of mox v1.2.0's 38 mutants flipping
+  `mix=Survived → persistent=Killed`. All 3 are killed by
+  `MoxTest.ClusterTest` tests; non-cluster Mox usage is now
+  byte-identical between worker types. A project using Mox in
+  the standard local-node way is unaffected; a project running
+  its own multi-node Mox tests will still see drift. Closing the
+  cluster-state residual is sequenced behind M29's recompile
+  isolation spike.
 - **Compile-time docs/validation pipelines that use the same guards
   being mutated.** When a library's compile-time hook (e.g.,
   `nimble_options`'s `NimbleOptions.Docs.generate/1` evaluated at
@@ -173,7 +182,7 @@ Triggers (v1.11 catalogue):
 
 | Detected dep | Signature | Suggested action |
 |---|---|---|
-| `:mox` | `:mox` | Use `--worker-type mix` until M28's `Mox.Server` reset hook lands. |
+| `:mox` | `:mox` | M28's reset hook closes local-node Mox state. Use `--worker-type mix` if your suite spans Erlang nodes (residual cluster-state drift). |
 | `:ecto`, `:ecto_sql` | `:ecto` | Use `--worker-type mix` until M30's warm-state closure lands. |
 | `:gettext` | `:gettext` | Use `--worker-type mix` (gettext-class projects boot-fail under persistent). |
 

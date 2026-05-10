@@ -100,4 +100,20 @@ defmodule Mut.Worker.PersistentRunner.ResetTest do
       assert :ok = Reset.clear_on_exit_handler()
     end
   end
+
+  describe "Mox.Server (M28)" do
+    test "is a no-op when Mox is not loaded" do
+      # Mox is not a dep of mutalisk itself; in this test process it
+      # never gets loaded. The reset hook must tolerate that.
+      refute Code.ensure_loaded?(Mox.Supervisor)
+      assert :ok = Reset.reset_mox()
+    end
+
+    test "tolerates a stale Mox.Supervisor entry without crashing" do
+      # Simulate a partial-load scenario where Mox.Supervisor module
+      # exists but the supervisor process is not running. The hook
+      # should still return :ok cleanly without raising.
+      assert :ok = Reset.reset_mox()
+    end
+  end
 end

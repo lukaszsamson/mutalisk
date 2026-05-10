@@ -103,6 +103,7 @@ defmodule Mut.Worker.PersistentRunner.Diag do
           reset_processes_us: us(),
           reset_persistent_term_us: us(),
           reset_on_exit_us: us(),
+          reset_mox_us: us(),
           memory_total: non_neg_integer(),
           memory_processes: non_neg_integer()
         }) :: :ok
@@ -144,7 +145,7 @@ defmodule Mut.Worker.PersistentRunner.Diag do
   # forward compatibility for runners emitting fields the host doesn't
   # know about.
   @boot_keys ~w(boot_us app_startup_us app_startup_count test_load_us test_load_count memory_total memory_processes)
-  @run_keys ~w(run_us filter_us reset_app_env_us reset_ets_us reset_processes_us reset_persistent_term_us reset_on_exit_us memory_total memory_processes)
+  @run_keys ~w(run_us filter_us reset_app_env_us reset_ets_us reset_processes_us reset_persistent_term_us reset_on_exit_us reset_mox_us memory_total memory_processes)
 
   defp atomize_keys(map, kind) do
     keys = if kind == :boot, do: @boot_keys, else: @run_keys

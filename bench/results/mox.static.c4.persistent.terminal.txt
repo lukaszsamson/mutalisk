@@ -1,8 +1,8 @@
 target=mox repo=https://github.com/dashbitco/mox.git ref=v1.2.0 sha=5dd54291520f64e73186606befcaf5729307b237 selection=static concurrency=4
-mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+mutalisk_path=mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.021s
+Resolution completed in 0.016s
 Unchanged:
   castore 1.0.5
   earmark_parser 1.4.26
@@ -27,26 +27,6 @@ Unchanged:
 mix mut starting
 ==> jason
 Compiling 10 files (.ex)
-    warning: using single-quoted strings to represent charlists is deprecated.
-    Use ~c"" if you indeed want a charlist or use "" instead.
-    You may run "mix format --migrate" to change all single-quoted
-    strings to use the ~c sigil and fix this warning.
-    │
- 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
-    │                                                     ~
-    │
-    └─ lib/codegen.ex:51:53
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
-     │                                                ~
-     │
-     └─ lib/codegen.ex:118:48
-
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
@@ -106,6 +86,26 @@ Compiling 10 files (.ex)
      │                                                                     ~
      │
      └─ lib/formatter.ex:201:69
+
+    warning: using single-quoted strings to represent charlists is deprecated.
+    Use ~c"" if you indeed want a charlist or use "" instead.
+    You may run "mix format --migrate" to change all single-quoted
+    strings to use the ~c sigil and fix this warning.
+    │
+ 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
+    │                                                     ~
+    │
+    └─ lib/codegen.ex:51:53
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
+     │                                                ~
+     │
+     └─ lib/codegen.ex:118:48
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -764,19 +764,19 @@ Compiling 10 files (.ex)
      │
      └─ lib/encoder.ex:224: (file)
 
-     warning: Decimal.to_string/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
-     │
- 228 │     [?", decimal.to_string(value), ?"]
-     │                  ~
-     │
-     └─ lib/encoder.ex:228:18: Jason.Encoder.Decimal.encode/2
-
      warning: Decimal.to_string/2 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
      │
  242 │     [?", decimal.to_string(value, :normal), ?"]
      │                  ~
      │
      └─ lib/encode.ex:242:18: Jason.Encode.struct/4
+
+     warning: Decimal.to_string/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
+     │
+ 228 │     [?", decimal.to_string(value), ?"]
+     │                  ~
+     │
+     └─ lib/encoder.ex:228:18: Jason.Encoder.Decimal.encode/2
 
 warning: struct Decimal.Error is undefined (module Decimal.Error is not available or is yet to be defined)
 └─ lib/decoder.ex: Jason.Decoder.float_decode_function/1
@@ -810,7 +810,7 @@ Compiling 29 files (.ex)
 
 Generated excoveralls app
 ==> mutalisk
-Compiling 75 files (.ex)
+Compiling 79 files (.ex)
 Generated mutalisk app
 ==> nimble_ownership
 Compiling 2 files (.ex)
@@ -925,292 +925,377 @@ Compiling 4 files (.ex)
 Generated mox app
 Schema build starting
 Schema build complete
-[1/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
-[2/38] killed    lib/mox.ex:857  Arithmetic  replace - with *
-[3/38] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
-[4/38] killed    lib/mox.ex:1018  Arithmetic  replace + with *
-[5/38] killed    lib/mox.ex:443  UnaryNot  remove unary not
-     warning: redefining module MyScientificMock (current version defined in memory)
-     │
- 428 │     for behaviour <- behaviours do
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778401509-1jwbdQ-schema/lib/mox.ex:428: MyScientificMock (module)
-
+[mutalisk] Warning: persistent worker detected Mox-class projects: Mox.Server mock-registry leaks across mutants under persistent. Known drift exists for this class — consider --worker-type mix. See docs/PERSISTENT_WORKER_GUIDE.md.
+[1/38] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
+[2/38] killed    lib/mox.ex:1018  Arithmetic  replace + with *
+[3/38] killed    lib/mox.ex:857  Arithmetic  replace - with *
+[4/38] killed    lib/mox.ex:443  UnaryNot  remove unary not
+[5/38] killed    lib/mox.ex:1017  Boolean  replace || with &&
 [6/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
-      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
-      │
- 1010 │       defmodule CalculatorServer_Lazy do
-      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+     warning: redefining module MyMock (current version defined in memory)
+     │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyMock (module)
 
-[7/38] killed    lib/mox.ex:911  Arithmetic  replace + with -
-[8/38] killed    lib/mox.ex:1018  Arithmetic  replace + with -
-[9/38] killed    lib/mox.ex:850  Boolean  replace or with and
-[10/38] killed    lib/mox.ex:1017  Boolean  replace || with &&
-[11/38] killed    lib/mox.ex:911  Arithmetic  replace + with *
-      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
-      │
- 1010 │       defmodule CalculatorServer_Lazy do
-      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+     warning: redefining module OneBehaviourMock (current version defined in memory)
+     │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: OneBehaviourMock (module)
 
      warning: redefining module MyScientificMock (current version defined in memory)
      │
  428 │     for behaviour <- behaviours do
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1778401509-1jwbdQ-schema/lib/mox.ex:428: MyScientificMock (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyScientificMock (module)
 
-[12/38] killed    lib/mox.ex:469  UnaryNot  remove unary not
-[13/38] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
-[14/38] killed    lib/mox.ex:857  Arithmetic  replace - with +
-    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
-    │
-  1 │ defmodule Mox do
-    │ ~~~~~~~~~~~~~~~~
-    │
-    └─ lib/mox.ex:1: Mox (module)
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MultiBehaviourMock (module)
 
-    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
-    │
-  1 │ defmodule Mox do
-    │ ~~~~~~~~~~~~~~~~
-    │
-    └─ lib/mox.ex:1: Mox (module)
+      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
+      │
+ 1010 │       defmodule CalculatorServer_Lazy do
+      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
 
-    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
-    │
-  1 │ defmodule Mox do
-    │ ~~~~~~~~~~~~~~~~
-    │
-    └─ lib/mox.ex:1: Mox (module)
+[7/38] killed    lib/mox.ex:911  Arithmetic  replace + with *
+     warning: redefining module MyFalseMock (current version defined in memory)
+     │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyFalseMock (module)
 
-    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
-    │
-  1 │ defmodule Mox do
-    │ ~~~~~~~~~~~~~~~~
-    │
-    └─ lib/mox.ex:1: Mox (module)
+     warning: redefining module MyTrueMock (current version defined in memory)
+     │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyTrueMock (module)
 
-     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     warning: redefining module OneBehaviourMock (current version defined in memory)
      │
- 275 │   defmodule UnexpectedCallError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: OneBehaviourMock (module)
 
-     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+[8/38] killed    lib/mox.ex:850  Boolean  replace or with and
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
      │
- 275 │   defmodule UnexpectedCallError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MultiBehaviourMock (module)
 
-     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     warning: redefining module MyTrueMock (current version defined in memory)
      │
- 275 │   defmodule UnexpectedCallError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyTrueMock (module)
 
-     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+[9/38] killed    lib/mox.ex:911  Arithmetic  replace + with -
+     warning: redefining module MyMultiMock (current version defined in memory)
      │
- 275 │   defmodule UnexpectedCallError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyMultiMock (module)
 
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     warning: redefining module OneBehaviourMock (current version defined in memory)
      │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: OneBehaviourMock (module)
 
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+[10/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
      │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MultiBehaviourMock (module)
 
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+[11/38] killed    lib/mox.ex:1018  Arithmetic  replace + with -
+     warning: redefining module MyScientificMock (current version defined in memory)
      │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
-     │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
-
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
-
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
-
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyScientificMock (module)
 
      warning: redefining module MyScientificMock (current version defined in memory)
      │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyScientificMock (module)
+
+     warning: redefining module MyFalseMock (current version defined in memory)
+     │
+ 428 │     for behaviour <- behaviours do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ tmp/mut_work/mut-1778411869-1ZThSA-schema/lib/mox.ex:428: MyFalseMock (module)
+
+      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
+      │
+ 1010 │       defmodule CalculatorServer_Lazy do
+      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+
+[12/38] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
+[13/38] killed    lib/mox.ex:857  Arithmetic  replace - with +
+[14/38] killed    lib/mox.ex:469  UnaryNot  remove unary not
+    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
+    │
+  1 │ defmodule Mox do
+    │ ~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mox.ex:1: Mox (module)
+
+    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
+    │
+  1 │ defmodule Mox do
+    │ ~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mox.ex:1: Mox (module)
+
+    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
+    │
+  1 │ defmodule Mox do
+    │ ~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mox.ex:1: Mox (module)
+
+    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
+    │
+  1 │ defmodule Mox do
+    │ ~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mox.ex:1: Mox (module)
+
+     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     │
+ 275 │   defmodule UnexpectedCallError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     │
+ 275 │   defmodule UnexpectedCallError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     │
+ 275 │   defmodule UnexpectedCallError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     │
+ 275 │   defmodule UnexpectedCallError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
+
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
+
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
+
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
+
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: MyScientificMock (module)
+     └─ lib/mox.ex:491: CalcMock (module)
 
-     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
      │
- 984 │       defmodule CalculatorServer do
-     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
+
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
+      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
+      │
+ 1010 │       defmodule CalculatorServer_Lazy do
+      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
      warning: redefining module OneBehaviourMock (current version defined in memory)
      │
@@ -1226,12 +1311,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MultiBehaviourMock (module)
 
-     warning: redefining module MyMock (current version defined in memory)
+     warning: redefining module MyTrueMock (current version defined in memory)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: MyMock (module)
+     └─ lib/mox.ex:491: MyTrueMock (module)
 
 [15/38] killed    lib/mox.ex:758  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
@@ -1241,35 +1326,28 @@ Schema build complete
     │
     └─ lib/mox.ex:1: Mox (module)
 
-     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
-     │
- 275 │   defmodule UnexpectedCallError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
-
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
-     │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
 [16/38] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
+     warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
+     │
+ 275 │   defmodule UnexpectedCallError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
+    │
+  1 │ defmodule Mox do
+    │ ~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mox.ex:1: Mox (module)
+
 [17/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_float
-    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
-    │
-  1 │ defmodule Mox do
-    │ ~~~~~~~~~~~~~~~~
-    │
-    └─ lib/mox.ex:1: Mox (module)
-
-    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
-    │
-  1 │ defmodule Mox do
-    │ ~~~~~~~~~~~~~~~~
-    │
-    └─ lib/mox.ex:1: Mox (module)
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
 
      warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
      │
@@ -1277,6 +1355,20 @@ Schema build complete
      │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+    warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
+    │
+  1 │ defmodule Mox do
+    │ ~~~~~~~~~~~~~~~~
+    │
+    └─ lib/mox.ex:1: Mox (module)
+
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
 
      warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
      │
@@ -1292,13 +1384,6 @@ Schema build complete
      │
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
-     │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
      warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -1320,12 +1405,26 @@ Schema build complete
      │
      └─ lib/mox.ex:491: SciCalcMock (module)
 
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
      warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
 
      warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
      │
@@ -1341,12 +1440,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: CalcMock (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: CalcMock (module)
+     └─ lib/mox.ex:491: SciCalcMock (module)
 
      warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
      │
@@ -1362,12 +1461,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: SciCalcOnlyMock (module)
 
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
 
      warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
      │
@@ -1383,12 +1482,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: SciCalcMock (module)
 
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: SciCalcMock (module)
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
 
      warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
@@ -1397,12 +1496,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
 
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
 
      warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
      │
@@ -1411,27 +1510,6 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
 
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
      warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -1439,12 +1517,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
 
      warning: redefining module MyScientificMock (current version defined in memory)
      │
@@ -1453,12 +1531,26 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyScientificMock (module)
 
-     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
      │
- 984 │       defmodule CalculatorServer do
-     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyFalseMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyFalseMock (module)
+
+      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
+      │
+ 1010 │       defmodule CalculatorServer_Lazy do
+      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
 
      warning: redefining module OneBehaviourMock (current version defined in memory)
      │
@@ -1481,12 +1573,26 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyTrueMock (module)
 
+     warning: redefining module OneBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: OneBehaviourMock (module)
+
      warning: redefining module MyMock (current version defined in memory)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MyMock (module)
+
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MultiBehaviourMock (module)
 
      warning: redefining module MyTrueMock (current version defined in memory)
      │
@@ -1495,12 +1601,12 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyTrueMock (module)
 
-     warning: redefining module MyMock (current version defined in memory)
+     warning: redefining module MyMultiMock (current version defined in memory)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: MyMock (module)
+     └─ lib/mox.ex:491: MyMultiMock (module)
 
 [17/38] invalid   lib/mox.ex:468  GuardTypeTest  replace guard is_list with is_tuple
     warning: redefining module Mox (current version defined in memory)
@@ -1546,7 +1652,7 @@ Schema build complete
      │
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
-[19/38] killed    lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
+[19/38] killed    lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
     │
   1 │ defmodule Mox do
@@ -1616,6 +1722,13 @@ Schema build complete
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMock (module)
 
 [20/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
@@ -1632,7 +1745,6 @@ Schema build complete
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
 
-[21/38] killed    lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
      warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
      │
  279 │   defmodule VerificationError do
@@ -1640,6 +1752,7 @@ Schema build complete
      │
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
+[21/38] killed    lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
     │
   1 │ defmodule Mox do
@@ -1696,13 +1809,6 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
      warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -1710,19 +1816,26 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
 
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
      warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
 
      warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
      │
@@ -1789,7 +1902,6 @@ Schema build complete
     │
     └─ lib/mox.ex:1: Mox (module)
 
-[23/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
      warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
      │
  275 │   defmodule UnexpectedCallError do
@@ -1797,12 +1909,13 @@ Schema build complete
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+[23/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
      │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: CalcMock (module)
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
 
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
     │
@@ -1811,26 +1924,12 @@ Schema build complete
     │
     └─ lib/mox.ex:1: Mox (module)
 
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
-     │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
+     └─ lib/mox.ex:491: CalcMock (module)
 
      warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
      │
@@ -1839,19 +1938,19 @@ Schema build complete
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
 
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
 
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+     └─ lib/mox.ex:491: SciCalcMock (module)
 
      warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
      │
@@ -1860,75 +1959,12 @@ Schema build complete
      │
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
-
-      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
-      │
- 1010 │       defmodule CalculatorServer_Lazy do
-      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
-
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
      warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
 
      warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
      │
@@ -1937,34 +1973,6 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
 
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
-
      warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -1978,41 +1986,6 @@ Schema build complete
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
-
-     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
-     │
- 984 │       defmodule CalculatorServer do
-     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
-
-     warning: redefining module MyTrueMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyTrueMock (module)
-
-     warning: redefining module MyMultiMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMultiMock (module)
-
-     warning: redefining module MyFalseMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyFalseMock (module)
-
-     warning: redefining module MyScientificMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyScientificMock (module)
 
      warning: redefining module OneBehaviourMock (current version defined in memory)
      │
@@ -2028,6 +2001,83 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MultiBehaviourMock (module)
 
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module MyScientificMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyScientificMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
+
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
+
      warning: redefining module MyMock (current version defined in memory)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2035,12 +2085,96 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMock (module)
 
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyScientificMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyScientificMock (module)
+
+     warning: redefining module MyFalseMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyFalseMock (module)
+
+     warning: redefining module OneBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: OneBehaviourMock (module)
+
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MultiBehaviourMock (module)
+
+     warning: redefining module MyTrueMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyTrueMock (module)
+
+     warning: redefining module MyMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMock (module)
+
+     warning: redefining module MyMultiMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMultiMock (module)
+
       warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
       │
  1010 │       defmodule CalculatorServer_Lazy do
       │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       │
       └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+
+     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
+     │
+ 984 │       defmodule CalculatorServer do
+     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
 
 [24/38] killed    lib/mox.ex:571  GuardComparisonNegation  replace guard >= with <
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
@@ -2121,27 +2255,6 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
 
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
-
-      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
-      │
- 1010 │       defmodule CalculatorServer_Lazy do
-      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
-
      warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2149,12 +2262,26 @@ Schema build complete
      │
      └─ lib/mox.ex:491: CalcMock (module)
 
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
      warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
      warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
      │
@@ -2190,6 +2317,41 @@ Schema build complete
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMock (module)
+
+     warning: redefining module OneBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: OneBehaviourMock (module)
+
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MultiBehaviourMock (module)
+
+     warning: redefining module MyTrueMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyTrueMock (module)
+
+     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
+     │
+ 984 │       defmodule CalculatorServer do
+     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
 
 [26/38] killed    lib/mox.ex:546  GuardComparisonNegation  replace guard >= with <
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
@@ -2228,19 +2390,19 @@ Schema build complete
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
 
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
-     │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
      warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
+     │
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
 
      warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
      │
@@ -2277,19 +2439,19 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
      warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
 
      warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
      │
@@ -2363,12 +2525,33 @@ Schema build complete
     │
     └─ lib/mox.ex:1: Mox (module)
 
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
      warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
      │
  275 │   defmodule UnexpectedCallError do
      │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
 
      warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
      │
@@ -2377,27 +2560,6 @@ Schema build complete
      │
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
      warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2426,12 +2588,26 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     warning: redefining module OneBehaviourMock (current version defined in memory)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: CalcMock (module)
+     └─ lib/mox.ex:491: OneBehaviourMock (module)
+
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MultiBehaviourMock (module)
+
+     warning: redefining module MyScientificMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyScientificMock (module)
 
       warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
       │
@@ -2440,33 +2616,28 @@ Schema build complete
       │
       └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
 
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+Logger - error:      warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: SciCalcOnlyMock (module)
 
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+Runtime terminating during boot ({badarg,[{io,put_chars,[standard_error,[<<42,42,32,40,69,88,73,84,32,102,114,111,109,32,35,80,73,68,60,48,46,57,52,46,48,62,41,32,97,110,32,101,120,99,101,112,116,105,111,110,32,119,97,115,32,114,97,105,115,101,100,58,10,32,32,32,32,42,42,32,40,65,114,103,117,109,101,110,116,69,114,114,111,114,41,32,101,114,114,111,114,115,32,119,101,114,101,32,102,111,117,110,100,32,97,116,32,116,104,101,32,103,105,118,101,110,32,97,114,103,117,109,101,110,116,115,58,10,10,32,32,42,32,49,115,116,32,97,114,103,117,109,101,110,116,58,32,116,104,101,32,100,101,118,105,99,101,32,100,111,101,115,32,110,111,116,32,101,120,105,115,116,10,10,32,32,32,32,32,32,32,32,40,115,116,100,108,105,98,32,55,46,50,41,32,105,111,46,101,114,108,58,50,48,50,58,32,58,105,111,46,112,117,116,95,99,104,97,114,115,40,58,115,116,97,110,100,97,114,100,95,101,114,114,111,114,44,32,91,34,42,42,32,40,69,114,108,97,110,103,69,114,114,111,114,41,32,69,114,108,97,110,103,32,101,114,114,111,114,58,32,58,116,101,114,109,105,110,
+
+Crash dump is being written to: erl_crash.dump...     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: SciCalcMock (module)
-
-     warning: redefining module MyMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMock (module)
-
-     warning: redefining module MyTrueMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyTrueMock (module)
 
      warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
@@ -2496,9 +2667,7 @@ Schema build complete
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
-Logger - error: Runtime terminating during boot ({badarg,[{io,put_chars,[standard_error,[<<42,42,32,40,69,88,73,84,32,102,114,111,109,32,35,80,73,68,60,48,46,57,52,46,48,62,41,32,97,110,32,101,120,99,101,112,116,105,111,110,32,119,97,115,32,114,97,105,115,101,100,58,10,32,32,32,32,42,42,32,40,65,114,103,117,109,101,110,116,69,114,114,111,114,41,32,101,114,114,111,114,115,32,119,101,114,101,32,102,111,117,110,100,32,97,116,32,116,104,101,32,103,105,118,101,110,32,97,114,103,117,109,101,110,116,115,58,10,10,32,32,42,32,49,115,116,32,97,114,103,117,109,101,110,116,58,32,116,104,101,32,100,101,118,105,99,101,32,100,111,101,115,32,110,111,116,32,101,120,105,115,116,10,10,32,32,32,32,32,32,32,32,40,115,116,100,108,105,98,32,55,46,50,41,32,105,111,46,101,114,108,58,50,48,50,58,32,58,105,111,46,112,117,116,95,99,104,97,114,115,40,58,115,116,97,110,100,97,114,100,95,101,114,114,111,114,44,32,91,34,42,42,32,40,69,114,108,97,110,103,69,114,114,111,114,41,32,69,114,108,97,110,103,32,101,114,114,111,114,58,32,58,116,101,114,109,105,110,
-
-Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
+[30/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
     warning: redefining module Mox (current version defined in memory)
     │
   1 │ defmodule Mox do
@@ -2521,12 +2690,33 @@ Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:38
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
 [31/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_float
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
     │
   1 │ defmodule Mox do
     │ ~~~~~~~~~~~~~~~~
     │
     └─ lib/mox.ex:1: Mox (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
 
      warning: redefining module Mox.UnexpectedCallError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.UnexpectedCallError.beam)
      │
@@ -2535,34 +2725,6 @@ Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:38
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
 
-     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
-     │
- 279 │   defmodule VerificationError do
-     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:279: Mox.VerificationError (module)
-
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: CalcMock (module)
-
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
      warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2570,6 +2732,7 @@ Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:38
      │
      └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
 
+done
      warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2577,12 +2740,12 @@ Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:38
      │
      └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
 
-     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
      │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 279 │   defmodule VerificationError do
+     │   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ lib/mox.ex:491: CalcMock (module)
+     └─ lib/mox.ex:279: Mox.VerificationError (module)
 
      warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
      │
@@ -2591,13 +2754,6 @@ Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:38
      │
      └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
 
-     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
-
      warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2605,27 +2761,12 @@ Crash dump is being written to: erl_crash.dump...[30/38] killed    lib/mox.ex:38
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
-     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMock (module)
-
-done
-     warning: redefining module MyScientificMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyScientificMock (module)
-
-     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
+      │
+ 1010 │       defmodule CalculatorServer_Lazy do
+      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
 
      warning: redefining module OneBehaviourMock (current version defined in memory)
      │
@@ -2634,40 +2775,12 @@ done
      │
      └─ lib/mox.ex:491: OneBehaviourMock (module)
 
-     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
-
      warning: redefining module MultiBehaviourMock (current version defined in memory)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
      │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
      └─ lib/mox.ex:491: MultiBehaviourMock (module)
-
-     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
-
-     warning: redefining module MyMock (current version defined in memory)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMock (module)
-
-     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
-     │
- 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
-     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     │
-     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
      warning: redefining module MyTrueMock (current version defined in memory)
      │
@@ -2683,19 +2796,12 @@ done
      │
      └─ lib/mox.ex:491: MyMultiMock (module)
 
-     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
+     warning: redefining module MyMock (current version defined in memory)
      │
- 984 │       defmodule CalculatorServer do
-     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      │
-     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
-
-      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
-      │
- 1010 │       defmodule CalculatorServer_Lazy do
-      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+     └─ lib/mox.ex:491: MyMock (module)
 
      warning: redefining module MyFalseMock (current version defined in memory)
      │
@@ -2704,8 +2810,91 @@ done
      │
      └─ lib/mox.ex:491: MyFalseMock (module)
 
-[32/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_number
-[33/38] killed    lib/mox.ex:946  GuardTypeTest  replace guard is_list with is_tuple
+     warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: CalcMock (module)
+
+     warning: redefining module MyScientificMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyScientificMock (module)
+
+     warning: redefining module SciCalcOnlyMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcOnlyMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcOnlyMock (module)
+
+     warning: redefining module MoxTest.CalculatorServer (current version defined in memory)
+     │
+ 984 │       defmodule CalculatorServer do
+     │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/mox_test.exs:984: MoxTest.CalculatorServer (module)
+
+     warning: redefining module SciCalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMock (module)
+
+     warning: redefining module SciCalcMockWithoutOptional (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.SciCalcMockWithoutOptional.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: SciCalcMockWithoutOptional (module)
+
+     warning: redefining module MyMockWithoutModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithoutModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithoutModuledoc (module)
+
+     warning: redefining module MyMockWithFalseModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithFalseModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithFalseModuledoc (module)
+
+     warning: redefining module MyMockWithStringModuledoc (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.MyMockWithStringModuledoc.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
+
+     warning: redefining module MyMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyMock (module)
+
+     warning: redefining module OneBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: OneBehaviourMock (module)
+
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MultiBehaviourMock (module)
+
+[32/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_number
     warning: redefining module Mox (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.beam)
     │
   1 │ defmodule Mox do
@@ -2720,7 +2909,7 @@ done
      │
      └─ lib/mox.ex:275: Mox.UnexpectedCallError (module)
 
-[34/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_number
+[33/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_number
      warning: redefining module Mox.VerificationError (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.Mox.VerificationError.beam)
      │
  279 │   defmodule VerificationError do
@@ -2728,6 +2917,7 @@ done
      │
      └─ lib/mox.ex:279: Mox.VerificationError (module)
 
+[34/38] killed    lib/mox.ex:946  GuardTypeTest  replace guard is_list with is_tuple
      warning: redefining module CalcMock (current version loaded from _build/mut_schema/lib/mox/ebin/Elixir.CalcMock.beam)
      │
  491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
@@ -2777,9 +2967,37 @@ done
      │
      └─ lib/mox.ex:491: MyMockWithStringModuledoc (module)
 
+      warning: redefining module MoxTest.CalculatorServer_Lazy (current version defined in memory)
+      │
+ 1010 │       defmodule CalculatorServer_Lazy do
+      │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ test/mox_test.exs:1010: MoxTest.CalculatorServer_Lazy (module)
+
+     warning: redefining module OneBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: OneBehaviourMock (module)
+
+     warning: redefining module MultiBehaviourMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MultiBehaviourMock (module)
+
+     warning: redefining module MyTrueMock (current version defined in memory)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ lib/mox.ex:491: MyTrueMock (module)
+
 [35/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
 
-10:25:23.140 [error] Mut.Worker.Persistent #PID<0.1243.0> received unexpected message in handle_info/2: {:EXIT, #Port<0.52>, :normal}
+13:18:15.481 [error] Mut.Worker.Persistent #PID<0.1261.0> received unexpected message in handle_info/2: {:EXIT, #Port<0.51>, :normal}
 
 [36/38] killed    lib/mox.ex:1026  GuardComparisonNegation  replace guard == with !=
 Mutation score: 36/36 = 100.0%
@@ -2787,8 +3005,8 @@ Mutation score: 36/36 = 100.0%
 Surviving mutants:
   none
 
-Schema:    14/14 killed (100.0%)   wall: 0.3s
-Fallback:  22/24 killed (91.7%)   wall: 5.9s
+Schema:    14/14 killed (100.0%)   wall: 1.3s
+Fallback:  22/24 killed (91.7%)   wall: 7.2s
   guard_comparison_boundary:    2/2 killed
   guard_comparison_negation:    3/3 killed
   guard_type_test:              17/19 killed  recompile errors:
@@ -2802,19 +3020,19 @@ Invalid:   2
 Errors:    0
 Timeouts:  0
 
-Run time: 6.2s
-Fallback wall-clock: 94.6% of total
+Run time: 8.5s
+Fallback wall-clock: 84.2% of total
 Fallback mutants: 63.2% of executed
 
 Phases:
-  oracle build:         4012 ms
-  baseline tests:       1038 ms
-  plan generation:        12 ms
-  schema build:         3337 ms
-  schema workers:        132 ms
-  fallback workers:     3950 ms
+  oracle build:         3931 ms
+  baseline tests:       1963 ms
+  plan generation:        13 ms
+  schema build:         4127 ms
+  schema workers:        410 ms
+  fallback workers:     4671 ms
   report writing:          2 ms
-  total:               15158 ms
+  total:               27080 ms
 
 Selection:
   mode: static
@@ -2832,21 +3050,22 @@ Test timeout: 10000 ms
 
 Persistent worker:
   workers:     4
-  boot:        median 551.5 ms (max 586.0 ms)
-  app startup: median 28.4 ms (total apps: 56)
-  test load:   median 330.4 ms (total files: 12)
-  mutant run:  median 27.3 ms (p95 47.4 ms, n=14)
+  boot:        median 2915.5 ms (max 4989.0 ms)
+  app startup: median 92.4 ms (total apps: 56)
+  test load:   median 892.9 ms (total files: 12)
+  mutant run:  median 72.0 ms (p95 248.1 ms, n=14)
   reset hooks:
     application_env: 0.0 ms
-    ets:             0.2 ms
+    ets:             0.3 ms
     processes:       0.0 ms
     persistent_term: 0.0 ms
     on_exit:         0.0 ms
+    mox:             2.1 ms
   filter lookup: 0.0 ms
   crashes: 1  restarts: 1  filter-miss: 0  in-process compile errors: 0  parse errors: 2  mix fallbacks: 4
-  memory: peak 61.5 MB total, 15.1 MB processes
+  memory: peak 62.2 MB total, 15.6 MB processes
 
 Hint: persistent worker had high in-process fallback compile-error rate (8.3%). Consider --worker-type mix.
 
-Mutalisk run complete in 15529ms
-bench.wall_ms=18000
+Mutalisk run complete in 27476ms
+bench.wall_ms=30000

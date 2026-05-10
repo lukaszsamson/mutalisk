@@ -5,6 +5,61 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.11 unreleased
 
+### M28 — `Mox.Server` reset hook for local-node mock state (2026-05-10)
+
+Adds a Mox-aware reset hook to the persistent worker. Between
+mutants, `Mut.Worker.PersistentRunner.Reset.reset_mox/0` asks
+`Mox.Supervisor` to terminate and restart its child (the
+`NimbleOwnership` GenServer registered as `Mox.Server`), wiping
+all expectations, allowances, history, and stubs. Mocks defined
+by `Mox.defmock/2` are compiled modules and survive the
+restart. The hook spins on `Process.whereis(Mox.Server)` for up
+to 50 ms after `restart_child/2` to defeat any race where the
+supervisor returns before NimbleOwnership's `init/1` finishes.
+
+The hook is a no-op when `:mox` is not loaded — Mox is not a
+runtime dep of mutalisk, and projects without Mox pay zero cost.
+
+#### Acceptance findings
+
+Bench-validated on `mox` v1.2.0 (the M25 reference target).
+Result: **the 3 `Survived → Killed` flips M25's CHANGELOG
+attributed to "Mox.Server module-replacement state" are NOT
+local-node mock-registry leaks**. After M28, all 3 still flip;
+all 3 are killed by tests in `MoxTest.ClusterTest`, which spawns
+peer Erlang nodes via `:peer.start/1` and runs Mox across the
+cluster. Non-cluster Mox usage is now byte-identical between
+worker types; the residual is multi-node mock state.
+
+This finding is exactly what M27's bucketer expansion was
+designed to surface — the symptom looked like Mox.Server state
+in M25's narrow corpus, but with M28 in place the underlying
+cluster-state vector reveals itself. The 3-mutant residual is
+re-classified as cluster/peer-state drift (a NEW unsupported
+pattern documented in `PERSISTENT_WORKER_GUIDE.md`) and
+sequenced behind M29's recompile-isolation spike, which may
+subsume it.
+
+The persistent boot-warning catalogue keeps the `:mox` row
+because mox-using projects with cluster tests (or other
+peer-node distributed tests) still see drift. Catalogue entries
+are removed only when the entire drift class closes.
+
+#### Module additions
+
+- `Mut.Worker.PersistentRunner.Reset.reset_mox/0`
+- `reset_mox_us` field in `MUT_RUN_METRICS` runner protocol.
+- `mox` row in the `Persistent worker > reset hooks` terminal
+  block (median ms).
+
+#### Default-flip gate (unchanged)
+
+M28 does NOT close mox-class drift to V17 timeout-flap acceptance
+on the M27-expanded corpus, so the v1.11 default-flip gate
+remains gated on M30 (Ecto warm-state) AND a follow-up that
+closes the cluster-state residual. The v1.10 default
+(`--worker-type mix`) stays.
+
 ### M27 — OSS validation harness expansion + drift observability (2026-05-10)
 
 v1.10's lesson was that 3 reference targets hide entire bug classes.

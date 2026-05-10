@@ -35,6 +35,35 @@ targets are kept in the harness so future operators on different
 toolchains (older Elixir / OTP / patched x509 / patched credo)
 can rerun without re-pinning.
 
+### M28 — Mox.Server reset hook validation (2026-05-10)
+
+Re-bench of mox v1.2.0 after `Mut.Worker.PersistentRunner.Reset.reset_mox/0`
+landed:
+
+| Mode | Score | Killed | Survived | CompileError | Drift vs mix |
+|---|---:|---:|---:|---:|---|
+| pre-M28 mix | 86.8% | 33 | 5 | 0 | — |
+| pre-M28 persistent | 86.8% | 33 | 0 | 5 | 5 (3 mox_class + 2 parse_class) |
+| post-M28 mix | 92.1% | 35 | 3 | 0 | — |
+| post-M28 persistent | 100.0% | 36 | 0 | 2 | 5 (3 mox_class + 2 parse_class) |
+
+The drift count is unchanged (5), but the pre/post comparison
+reveals the 3 `Survived → Killed` mutants are NOT Mox.Server
+state leaks. All 3 are killed by `MoxTest.ClusterTest` tests
+that spawn peer Erlang nodes; the residual is cluster/peer-state
+drift, not local-node mock-registry state. M28's hook closed the
+local-node vector cleanly (no test failures from cumulative
+expect/4 calls or stale allowances). The cluster-state residual
+is sequenced behind M29's recompile-isolation spike.
+
+The 2 `Killed → CompileError` mutants are persistent's in-process
+recompile parser disagreeing with mix-spawn — `:parse_class`,
+M29-territory.
+
+(Mix-mode scores diverge from M25's 86.8% baseline because the
+test-execution environment changed across runs; mix and persistent
+were both re-measured at the same toolchain.)
+
 ### v1.11 unsupported patterns (new beyond M25's four)
 
 M27 surfaced two new unsupported-pattern classes documented in

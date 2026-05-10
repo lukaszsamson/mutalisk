@@ -572,13 +572,15 @@ defmodule Mut.Worker.PersistentRunner do
         end)
 
       {_, on_exit_us} = Diag.time(fn -> Reset.clear_on_exit_handler() end)
+      {_, mox_us} = Diag.time(fn -> Reset.reset_mox() end)
 
       %{
         reset_app_env_us: app_env_us,
         reset_ets_us: ets_us,
         reset_processes_us: processes_us,
         reset_persistent_term_us: persistent_term_us,
-        reset_on_exit_us: on_exit_us
+        reset_on_exit_us: on_exit_us,
+        reset_mox_us: mox_us
       }
     else
       Reset.reset_app_env(baseline.app_env)
@@ -586,6 +588,7 @@ defmodule Mut.Worker.PersistentRunner do
       Reset.reset_registered(baseline.registered)
       Reset.reset_persistent_terms(baseline.persistent_terms, [{Mut.Runtime, :active_mutant}])
       Reset.clear_on_exit_handler()
+      Reset.reset_mox()
       %{}
     end
   end

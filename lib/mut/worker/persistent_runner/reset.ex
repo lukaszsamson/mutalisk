@@ -168,6 +168,88 @@ defmodule Mut.Worker.PersistentRunner.Reset do
     _ -> :ok
   end
 
+  ## --- Mox.Server (M28) --------------------------------------------------
+
+  # Mox v1.x stores per-test expectations / allowances / stubs in a
+  # `NimbleOwnership` GenServer registered as `Mox.Server`, supervised
+  # by `Mox.Supervisor` (one_for_one, child_id `Mox`). Between mutants
+  # the persistent worker leaves this state in place — mutant N's
+  # expectations leak into mutant N+1, producing both false-negative
+  # `Killed → Survived` flips (a previous mutant's stub answers in
+  # place of the current mutant's failing path) and false-positive
+  # `Survived → Killed` flips (cumulative `expect/4` calls overflow
+  # exactly-N invocation counts). M25 mox v1.2.0 measured 13.2%
+  # drift; M27's bucketer attributed 3 of 5 drifting mutants to this
+  # class.
+  #
+  # Mocks themselves are compiled modules created by `Mox.defmock/2`
+  # — they do not live in the NimbleOwnership process state. So
+  # tearing the server down and letting the supervisor restart it
+  # gives us a clean slate without losing test-load setup.
+  #
+  # Strategy: ask the supervisor to terminate + restart the `Mox`
+  # child. Tolerate the case where Mox isn't loaded (no-op) or the
+  # supervisor was never started (no-op). Never raises; never blocks
+  # the mutant pipeline.
+  @spec reset_mox() :: :ok
+  def reset_mox do
+    cond do
+      not mox_loaded?() ->
+        :ok
+
+      Process.whereis(Mox.Supervisor) == nil ->
+        :ok
+
+      true ->
+        restart_mox_child()
+    end
+  rescue
+    _ -> :ok
+  catch
+    _, _ -> :ok
+  end
+
+  defp mox_loaded? do
+    Code.ensure_loaded?(Mox.Supervisor)
+  end
+
+  defp restart_mox_child do
+    sup = Mox.Supervisor
+
+    # `terminate_child/2` returns `:ok` regardless of whether the
+    # child was actually running. `restart_child/2` then either
+    # spawns a fresh worker or returns `{:error, :running}` if the
+    # supervisor already restarted on its own; both are fine.
+    _ = Supervisor.terminate_child(sup, Mox)
+    _ = Supervisor.restart_child(sup, Mox)
+    wait_for_mox_server(50)
+    :ok
+  end
+
+  # The supervisor's restart_child is synchronous through to
+  # `start_child`, but NimbleOwnership performs further setup in its
+  # `init/1` callback (creates ETS tables, monitors). The tests that
+  # follow may call into Mox.Server immediately and hit a race where
+  # the named process exists but its state is incomplete. Spin until
+  # `Process.whereis/1` returns a live pid; bounded by attempt count
+  # so we never block the mutant pipeline on a failed start.
+  defp wait_for_mox_server(0), do: :ok
+
+  defp wait_for_mox_server(attempts) do
+    case Process.whereis(Mox.Server) do
+      pid when is_pid(pid) ->
+        if Process.alive?(pid), do: :ok, else: retry_wait(attempts)
+
+      _ ->
+        retry_wait(attempts)
+    end
+  end
+
+  defp retry_wait(attempts) do
+    Process.sleep(1)
+    wait_for_mox_server(attempts - 1)
+  end
+
   ## --- ExUnit OnExitHandler ----------------------------------------------
 
   @spec clear_on_exit_handler() :: :ok
