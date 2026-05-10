@@ -5,6 +5,83 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.12 unreleased
 
+### M36 — Pool-warm-state characterization spike: stance unchanged (2026-05-10)
+
+PLAN.md scoped M36 as a characterization spike before any
+reset-hook implementation, with three options on the table:
+reset hook, mix-spawn reroute, or formal mix-only classification.
+
+**Decision: maintain v1.11/M35's "supported with caveat" stance.
+Do NOT ship a reset hook for pool-class.**
+
+#### Method
+
+Implemented `Reset.reset_pool_apps/0` (the strongest reset hook
+the spike could land — `Application.stop/1` + `ensure_all_started/1`
+on `:mint`/`:finch`/`:nimble_pool`), gated by
+`MUT_PERSISTENT_POOL_RESET=apps_restart`. Spike-only; not on any
+user-facing path. The originally-scoped `process_tree_kill` mode
+collapsed into `apps_restart` because mint and nimble_pool both
+declare their `application` callback without a `:mod` supervisor
+entry — there is nothing for `process_tree_kill` to restart that
+`apps_restart` doesn't already cover.
+
+#### Findings (full analysis at `docs/spikes/M36_pool_warm_state.md`)
+
+Re-bench mint v1.8.0 and nimble_pool v1.1.0 in three modes
+(mix / persistent default / persistent apps_restart):
+
+- **`apps_restart` produces byte-identical outcomes to the
+  default reset stack on both targets.** 0 mutants disagree.
+  Wall and memory delta are zero to ms-level resolution.
+- The leak class is **not** pool / socket / supervisor state —
+  mint and nimble_pool are pure-library OTP applications with
+  no `:mod` supervisor callback, so there is nothing for the
+  reset hook to tear down or rebuild.
+- Most-likely cause of the drift: **persistent finds more kills
+  than mix on these targets**, possibly because persistent's
+  warm BEAM exercises code paths mix-spawn's fresh-init
+  doesn't. The drift direction is `mix=Survived → persistent=Killed`
+  — losing kill signal by routing back to mix would be a
+  regression, not a fix.
+
+#### Why not the other two options
+
+- **Mix-spawn reroute** would replace persistent's Killed with
+  mix's Survived for these mutants — losing kill signal rather
+  than recovering correctness.
+- **Mix-only classification** is wrong for this class. Persistent
+  produces the same kill rate or higher than mix at 2-5× wall
+  speedup, which is exactly what the persistent worker is for.
+  Forcing `--worker-type mix` would cost users real perf for a
+  "drift" that may be persistent being more thorough.
+
+#### Parse-class subsection
+
+The 4 residual `:parse_class` mutants across the corpus
+(2 nimble_options + 2 mox) cannot be reached by any of M36's
+candidate modes — they live in the in-process recompile parser
+path. M29's helper-process spike already established this. The
+host's existing `:parse_error` recompile-category fallback
+already routes these mutants via mix-spawn for an authoritative
+verdict, so no additional disposition is needed. Documented in
+the spike doc.
+
+#### Module changes
+
+- `Mut.Worker.PersistentRunner.Reset.reset_pool_apps/0` (spike-
+  only, env-gated). Wired into `reset_leaks/2`; no-op when env
+  var is unset.
+- `reset_pool_us` field added to `MUT_RUN_METRICS`.
+- `MUT_PERSISTENT_POOL_RESET` forwarded by the persistent host's
+  port environment.
+
+The spike does NOT promote a reset hook to default behaviour.
+Pool-class detection in the boot warning (M35), the drift
+bucketer's `:pool_warm_state` heuristic (M27), and the
+`mix mut.drift` triage workflow (M35) remain the user-facing
+disposition.
+
 ### M35 — Pool-warm-state boot warning + drift bucketer hardening (2026-05-10)
 
 Bundles two M27 follow-throughs deferred from v1.11 close.
