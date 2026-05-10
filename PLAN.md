@@ -1570,17 +1570,79 @@ Evaluate each criterion against M25's data. Don't run new bench cycles; reuse M2
 
 ---
 
-# v1.11 horizon (forward-looking, not v1.10 scope)
+# v1.11 milestones (forward-looking; M26 confirmed Outcome 3)
 
-If v1.10 lands cleanly:
+M26 evaluated the v1.10 default-flip gate against M25's matrix data
+and selected **Outcome 3: defer flip; scope persistent-pattern
+fixes for v1.11**. The persistent worker remains opt-in. v1.11
+takes on the unsupported-pattern fixes M25 surfaced.
 
-- **v1.11 scope = body-literal schema migration** (if M25 Decision 2 demanded it). The stable_id migration is the load-bearing change; expect a SPEC amendment for the input format.
-- **v1.11+ = env walker** (the long-deferred v2 architecture work). Unblocks float/string/atom/list/map/tuple body literals AND pattern-position literals AND variable mutators AND better attribute classification.
+## v1.11 scope (load-bearing)
 
-If M25/M26 surface unsupported persistent patterns:
+**M27 — `Mut.SchemaPlacer.render/1` heredoc fix tracking.** The v1.10
+heredoc-delimiter-stripping workaround (commit `49e3b64`) is in
+place. M27 is small: monitor upstream Elixir's `Macro.to_string/1`
+heredoc + `\` continuation bug; revert the workaround once upstream
+ships. Repro at `/tmp/macro_to_string_heredoc_repro.exs`.
 
-- **v1.11 scope = persistent fixes for surfaced patterns** (e.g., Mox-class module-replacement reset, Ecto.Repo process-tree reset).
-- Default flip deferred to v1.12+ until fixes validate on the relevant targets.
+**M28 — Mox.Server reset hook.** Persistent worker reset hooks
+currently cover `application_env`, `ets`, `processes`,
+`persistent_term`, `on_exit`. Add a Mox-aware reset that purges
+`Mox.Server`'s mock registry between mutants. M25 mox v1.2.0 data
+shows 13.2% drift incl. 3 false-positive `Survived → Killed` —
+target outcome is V17 timeout-flap-acceptance only.
+
+**M29 — Ecto warm-state contamination closure.** M25 ecto v3.13.6
+showed 22.4% drift split between (a) RuntimeError-recovery via
+warm BEAM (~115 mutants — persistent hides errors mix-spawn
+surfaces) and (b) false-positive kills via leaked Ecto.Query
+planner cache (~55 mutants). Each is a separate fix:
+  - (a) Reset hook for ETS-backed compile caches (planner cache,
+    schema metadata) between mutants.
+  - (b) Aggressive process-tree reset that takes down Repo
+    supervisors before each mutant; on_exit doesn't suffice.
+
+**M30 — Gettext-class compile-time hook compatibility.** The
+persistent worker boot fails on gettext v1.0+ because
+`Gettext.Compiler.__before_compile__/1` calls
+`Kernel.ParallelCompiler.async/1` outside a parallel-compile
+context. Two paths:
+  - (i) Run the persistent worker's test-load step under a
+    `Kernel.ParallelCompiler.compile/1` parent.
+  - (ii) Document target-class exclusion (current v1.10 stance);
+    no code change.
+  Pick after profiling the cost of (i).
+
+**M31 — `:compile_error` parse-class residual reroute.** M25
+nimble_options residual 11 mutants surface as
+`MismatchedDelimiterError`/`SyntaxError` from in-process recompile
+that mix-spawn parses cleanly. `ac4df7c`/`49e3b64` rerouted
+`:unknown` and `:parse_error` classes; this residual classifies as
+`:compile_error` because the in-process recompiler's parser
+disagrees with mix-spawn's parser on the same patch bytes. Likely
+a source-load-path issue; investigate cumulative-patch state vs
+fresh source per mutant.
+
+## v1.11 default-flip gate (revised)
+
+Default `--worker-type` flips from `mix` → `persistent` IFF M28
++ M29 close drift to V17 timeout-flap acceptance on mox + ecto
+class targets, AND `gettext`-class targets are either fixed
+(M30(i)) or formally documented as `--worker-type mix` only
+(M30(ii)).
+
+If only some of M28-M31 land, gate stays unmet; default stays
+`mix`. v1.12 inherits whichever didn't land.
+
+## v1.11 horizon (deferred — not v1.11 scope unless persistent-fix milestones complete early)
+
+- **Body-literal schema-routing migration** (M25 Decision 2 candidate).
+  Re-evaluate after Decision 1 ever flips default-on; until then
+  the routing decision stays "fallback".
+- **Env walker** (the long-deferred v2 architecture work). Unblocks
+  float/string/atom/list/map/tuple body literals AND
+  pattern-position literals AND variable mutators AND better
+  attribute classification. v1.12+ candidate.
 
 # Out of scope for v1.10 (do not let it sneak in)
 

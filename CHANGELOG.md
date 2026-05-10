@@ -3,7 +3,41 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## v1.10 unreleased (M25, 2026-05-10)
+## v1.10 unreleased (M25 + M26, 2026-05-10)
+
+### M26 — Persistent worker default-flip decision: Outcome 3 (defer)
+
+Applied the v1.10 default-flip gate criteria from PLAN.md against
+M25's matrix data. No new bench runs (per M26 spec).
+
+| Gate criterion | Result |
+|---|---|
+| ≥4 of 5 OSS targets clean (byte-identical) | ❌ 0 of 5 |
+| Zero new unsupported-pattern categories | ❌ 4 new (Mox.Server, Gettext.Compiler boot, Ecto warm-state, parse-class recompile) |
+| Persistent ≥1.5× faster on plug_crypto + Decimal + 2 M25 targets | ⚠️ Partial (jason ≈ comparable; ecto 8.7× but drift unsafe) |
+| `--worker-type mix` remains documented escape hatch | ✅ |
+
+**Outcome chosen: 3 (defer flip; scope persistent-pattern fixes
+for v1.11).** `--worker-type mix` remains the v1.10 default.
+Persistent stays opt-in.
+
+#### v1.11 milestones scoped (PLAN.md update)
+- **M27** Track upstream Elixir `Macro.to_string/1` heredoc fix
+  and revert M25's heredoc-delimiter-stripping workaround.
+- **M28** `Mox.Server` reset hook between mutants.
+- **M29** Ecto warm-state contamination closure (compile-cache
+  reset + Repo process-tree reset).
+- **M30** Gettext-class compile-time hook compatibility (run
+  test-load under `Kernel.ParallelCompiler.compile/1` parent OR
+  formally exclude target class).
+- **M31** Investigate residual `:compile_error` parse-class
+  in-process-recompile drift on nimble_options (11 mutants).
+
+#### v1.11 default-flip gate (revised)
+Default `--worker-type` flips iff M28 + M29 close drift to V17
+timeout-flap acceptance on mox + ecto class targets, AND
+gettext-class targets either fixed (M30 path i) or formally
+documented `--worker-type mix` only (M30 path ii).
 
 ### M25 — OSS validation matrix + Decisions 1 & 2
 
