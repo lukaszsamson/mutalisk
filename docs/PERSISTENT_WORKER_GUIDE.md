@@ -127,6 +127,25 @@ until the underlying drift is closed.
   Ecto.Query state (~55 `Survived → Killed` flips). The wall-clock
   speedup is real (8.7× vs mix on ecto baseline) but the kill-rate
   output is unsafe to consume.
+- **HTTP-client / process-pool warm state.** Projects with HTTP
+  clients (`mint`, `finch`, `hackney`, `gun`) or generic process
+  pools (`nimble_pool`, `poolboy`, `connection`). M27 mint v1.8.0
+  measured 49/250 mutants (19.6%) where `mix=Survived →
+  persistent=Killed` — the warm BEAM accumulates sockets, pool
+  workers, and registry entries across mutants in a way mix-spawn
+  re-creates per run. `nimble_pool` v1.1.0 shows the same direction
+  at 4/28 (14.3%). Different root cause from Ecto warm state, same
+  drift direction. Reset hooks (`processes`) clear named process
+  trees but not the longer-lived registry entries these libraries
+  cache. Auto-classified as `:pool_warm_state` by `mix mut.drift`.
+- **SchemaPlacer escaped-quote crash.** Files containing strings
+  with embedded `\\"..\\"` sequences (HTML / header content /
+  fixture stubs) crash `Mut.SchemaPlacer.render/1` via
+  `Code.format_string!/2`. Mutalisk regression; both
+  `--worker-type mix` and `--worker-type persistent` fail
+  identically. Surfaced by M27 on `phoenix_html` v4.3.0,
+  `plug` v1.19.1, and `phoenix_pubsub` v2.2.0. Targets crash
+  before any mutant runs. v1.11 follow-up; tracked in BENCHMARKS.md.
 - **Macro-bodies with literal interpolated heredocs.** Until
   Elixir's upstream `Macro.to_string/1` bug on heredoc
   `\`-continuation is fixed, mutants in files with that shape
@@ -135,6 +154,55 @@ until the underlying drift is closed.
   heredoc-delimiter-stripping workaround. Output is correct
   (single-line `"..."` strings round-trip cleanly) but produces
   visible diffs vs source — purely cosmetic; correctness preserved.
+
+## Boot-time warning
+
+When `--worker-type persistent` boots, Mutalisk scans the project's
+compiled-dep tree (`_build/mut_schema/lib/<app>/ebin`) for
+known-bad target signatures and emits a one-line stderr warning
+per detection BEFORE the first worker BEAM starts:
+
+```
+[mutalisk] Warning: persistent worker detected Mox-class projects:
+  Mox.Server mock-registry leaks across mutants under persistent.
+  Known drift exists for this class — consider --worker-type mix.
+  See docs/PERSISTENT_WORKER_GUIDE.md.
+```
+
+Triggers (v1.11 catalogue):
+
+| Detected dep | Signature | Suggested action |
+|---|---|---|
+| `:mox` | `:mox` | Use `--worker-type mix` until M28's `Mox.Server` reset hook lands. |
+| `:ecto`, `:ecto_sql` | `:ecto` | Use `--worker-type mix` until M30's warm-state closure lands. |
+| `:gettext` | `:gettext` | Use `--worker-type mix` (gettext-class projects boot-fail under persistent). |
+
+The warning is a *heads-up*, not a diagnosis. A clean Ecto setup
+will still trigger it; a Mox-using project that already knows the
+limitation will still trigger it. Catalogue is intentionally
+narrow — entries are removed as their drift class closes
+(M28 retires the mox row; M30 retires the ecto row).
+
+To suppress for CI cleanliness:
+
+```sh
+mix mut --worker-type persistent --quiet-boot-warning
+# or in config :mut:
+config :mut, quiet_boot_warning: true
+```
+
+The warning lands on stderr; Stryker JSON output and stdout-parsed
+terminal assertions are unaffected. The warning fires regardless
+of whether drift will actually manifest on this run — its job is
+to surface known-class limitations to users who don't know to
+look for them.
+
+HTTP-client / process-pool projects (`mint`, `finch`,
+`nimble_pool`) are NOT yet in the boot-warning catalogue. M27
+surfaced this drift class but extending the detector is a v1.12
+follow-up — for now, run `mix mut.drift --target <name>` after
+your first persistent run and look for the `:pool_warm_state`
+bucket.
 
 ## Reading the persistent metrics block
 

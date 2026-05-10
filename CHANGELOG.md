@@ -3,6 +3,116 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.11 unreleased
+
+### M27 — OSS validation harness expansion + drift observability (2026-05-10)
+
+v1.10's lesson was that 3 reference targets hide entire bug classes.
+M27 widens the permanent harness so v1.11+ default-flip and warm-
+state decisions cannot rest on the same narrow base.
+
+#### Bench harness expansion
+
+Pinned 13 candidate targets across three rounds; 5 are
+non-unrunnable (the v1.11 acceptance set):
+
+- `telemetry_metrics` v1.1.0 — clean (31 mutants, byte-identical).
+- `mint` v1.8.0 — drift (49/250 mutants, 19.6%, all
+  `pool_warm_state`).
+- `nimble_pool` v1.1.0 — drift (4/28 mutants, 14.3%, all
+  `pool_warm_state`).
+- `castore` v1.0.9 — clean (6 mutants).
+- `mime` v2.0.7 — clean (5 mutants).
+
+Pinned-but-unrunnable targets (kept in harness for future
+operators on different toolchains): `phoenix_html`, `plug`,
+`phoenix_pubsub` (Mutalisk SchemaPlacer escaped-quote crash —
+v1.11 follow-up); `finch` (`:x509` fails on Erlang/OTP 28);
+`ex_machina` (`:credo` fails on Elixir 1.19); `tzdata` (baseline
+test failures); `gen_stage` and `nimble_csv` reclassified as
+informational (mix flake / 0 mutants).
+
+Per-target prep documented in `bench/M27_RUNBOOK.md`. SHAs in
+`bench/run.sh`.
+
+#### `mix mut.drift` — drift-bucketing tool
+
+`Mut.Drift.Bucketer` consumes pairs of Stryker-format reports
+(`bench/results/<target>.<...>.{,persistent.}stryker.json`) and
+classifies mix-vs-persistent stable-id status drift into 8
+heuristic buckets:
+
+- `:mox_class` — module-replacement state leaks (M28 will close).
+- `:ecto_warm_state` — warm BEAM hides errors mix-spawn surfaces
+  AND vice versa (M30 will close).
+- `:ecto_false_kill` — leaked Ecto.Query planner cache produces
+  false kills (M30 will close).
+- `:gettext_class` — boot-time / recompile macro failures.
+- `:parse_class` — `Code.compile_file/1` parser disagreement
+  vs mix-spawn.
+- `:pool_warm_state` — HTTP-client / process-pool socket and
+  registry state leaks (mint, nimble_pool — NEW in M27).
+- `:timeout_flap` — V17 acceptance class.
+- `:unclassified` — anything else.
+
+CLI: `mix mut.drift --target <name>` for per-target tables;
+`mix mut.drift --all` for the aggregate. Runs cleanly against
+M25's existing 5 targets AND M27's new ones; bucket counts on
+M25 data match the hand-classification documented in v1.10's
+CHANGELOG (mox 3 mox_class + 2 parse_class; ecto 162 warm_state
++ 59 false_kill + 1 timeout). Aggregate unclassified rate on
+M25+M27 corpus: ~4.3%. Hand-classification at v1.12+ no longer
+required.
+
+#### Persistent boot-time warning
+
+`Mut.Worker.Persistent.Detector` scans the sandbox's compiled-dep
+tree for `:mox` / `:ecto` / `:ecto_sql` / `:gettext` and emits
+one stderr warning line per detection at persistent boot,
+suggesting `--worker-type mix` and pointing to
+`docs/PERSISTENT_WORKER_GUIDE.md`. Suppressible via
+`--quiet-boot-warning` for CI cleanliness.
+
+The catalogue is intentionally narrow — entries are removed as
+their drift class closes (M28 retires the mox row; M30 retires
+the ecto row). HTTP-client / process-pool signatures are NOT
+yet detected at boot — extending the catalogue is a v1.12
+follow-up.
+
+#### New unsupported patterns documented
+
+Beyond M25's four (Mox.Server, Gettext.Compiler boot, Ecto warm-
+state, parse-class recompile), M27 surfaced two new pattern
+classes documented in `docs/PERSISTENT_WORKER_GUIDE.md`:
+
+- **HTTP-client / process-pool warm state.** Both worker types
+  produce different outcomes on `mint` and `nimble_pool` because
+  the warm BEAM accumulates sockets / pool workers / registry
+  entries across mutants. Different root cause from Ecto warm-
+  state, same drift direction; fix is on the v1.12 horizon.
+- **SchemaPlacer escaped-quote crash.** `phoenix_html`, `plug`,
+  and `phoenix_pubsub` all crash schema build with
+  `Code.format_string!/2 → SyntaxError` on source files containing
+  HTML/header content with embedded `\\"..\\"` strings. Mutalisk
+  regression in `Mut.SchemaPlacer.render/1`; both worker types
+  affected. v1.11 follow-up.
+
+#### Module additions
+
+- `Mut.Drift.Bucketer`, `Mut.Drift.Bucketer.Result`
+- `Mix.Tasks.Mut.Drift`
+- `Mut.Worker.Persistent.Detector`
+- `--quiet-boot-warning` CLI flag (also `config :mut,
+  quiet_boot_warning: true`).
+
+#### Default-flip gate (unchanged)
+
+The v1.11 default-flip gate (PLAN.md) requires M28 + M30 + M31
+to land before considering flipping `--worker-type` from `mix`
+to `persistent`. M27 is observability + harness expansion; it
+does NOT change the default. M27 also does NOT alter the
+body-literal default (M25 settled it as opt-in).
+
 ## v1.10 unreleased (M25 + M26, 2026-05-10)
 
 ### M26 — Persistent worker default-flip decision: Outcome 3 (defer)

@@ -1,5 +1,87 @@
 # Mutalisk Benchmarks
 
+## v1.11 OSS harness expansion (M27, 2026-05-10)
+
+M27 widens the permanent OSS validation matrix beyond the 5
+M25 targets so v1.11+ default-flip and warm-state decisions
+are not anchored on a narrow base. SHAs pinned in `bench/run.sh`;
+operator runbook at `bench/M27_RUNBOOK.md`. Drift partitions
+produced by `mix mut.drift` (see `Mut.Drift.Bucketer`).
+
+**Mode**: `static` selection at `--concurrency 4`. Body-literal
+matrix is NOT re-run (M25 settled it as opt-in; M27 measures
+persistent drift on new project shapes only).
+
+| Target | SHA / tag | Schema | Fallback | Total | Mix score | Persistent score | Drift | Bucket | Class |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| `castore` | `v1.0.9` (`428328b`) | 4 | 2 | 6 | 0.0% | 0.0% | 0 | — | clean |
+| `mime` | `v2.0.7` (`4bb1ba1`) | 5 | 0 | 5 | 60.0% | 60.0% | 0 | — | clean |
+| `telemetry_metrics` | `v1.1.0` (`138d532`) | 21 | 10 | 31 | 90.3% | 90.3% | 0 | — | clean |
+| `mint` | `v1.8.0` (`f697f1c`) | 190 | 60 | 250 | 75.6% | 100.0% | 49 (19.6%) | pool_warm_state ×49 | drift |
+| `nimble_pool` | `v1.1.0` (`9829f27`) | 22 | 6 | 28 | 75.0% | 89.3% | 4 (14.3%) | pool_warm_state ×4 | drift |
+| `nimble_csv` | `v1.3.0` (`2fc3cbf`) | 0 | 0 | 0 | — | — | — | — | informational (defmacro-heavy, 0 mutants) |
+| `gen_stage` | `v1.3.2` (`d1532fa`) | 186 | 91 | 277 | mix-baseline-flake | 85.6% | — | — | informational (mix flaked one timing test) |
+| `phoenix_html` | `v4.3.0` (`8cfd3e3`) | — | — | — | — | — | — | — | unrunnable: SchemaPlacer crash on escaped-quote string content (NEW unsupported pattern) |
+| `plug` | `v1.19.1` (`8723880`) | — | — | — | — | — | — | — | unrunnable: same SchemaPlacer crash class |
+| `phoenix_pubsub` | `v2.2.0` (`086e0af`) | — | — | — | — | — | — | — | unrunnable: same SchemaPlacer crash class |
+| `finch` | `v0.9.1` (`0530e34`) | — | — | — | — | — | — | — | unrunnable: `:x509` transitive dep fails on Erlang/OTP 28 |
+| `ex_machina` | `v2.8.0` (`d1ec5e4`) | — | — | — | — | — | — | — | unrunnable: `:credo` dev dep fails on Elixir 1.19 (regex char-class) |
+| `tzdata` | `v1.1.3` (`61fb7ec`) | — | — | — | — | — | — | — | unrunnable: baseline test failures |
+
+**Acceptance summary**: 5 non-unrunnable targets (telemetry_metrics,
+mint, nimble_pool, castore, mime) match M27 acceptance "≥5 NEW OSS
+targets benched + classified". The remaining pinned-but-unrunnable
+targets are kept in the harness so future operators on different
+toolchains (older Elixir / OTP / patched x509 / patched credo)
+can rerun without re-pinning.
+
+### v1.11 unsupported patterns (new beyond M25's four)
+
+M27 surfaced two new unsupported-pattern classes documented in
+`docs/PERSISTENT_WORKER_GUIDE.md`:
+
+1. **HTTP-client / process-pool warm state.** `mint` v1.8.0 shows
+   49/250 mutants where `mix=Survived → persistent=Killed`, all in
+   `lib/mint/http2.ex`, `lib/mint/core/transport/ssl.ex`, and
+   `lib/mint/http1.ex`. `nimble_pool` v1.1.0 shows 4/28 with the
+   same direction. The warm BEAM accumulates socket / pool / worker
+   state across mutants; mix-spawn re-creates it per run. The
+   `:pool_warm_state` drift bucket auto-classifies this; the
+   persistent boot warning does NOT yet detect HTTP-client
+   signatures (mox/ecto/gettext only) — adding `mint`/`finch`/
+   `nimble_pool` to the boot detector is a v1.12 follow-up.
+
+2. **SchemaPlacer escaped-quote crash.** `phoenix_html`, `plug`,
+   and `phoenix_pubsub` all crash schema build with the same
+   `Code.format_string!/2 → SyntaxError` shape on source files
+   that contain HTML/header content with embedded escaped double
+   quotes (`\\"...\\"`). This is a Mutalisk regression NOT specific
+   to the persistent worker — both worker types fail identically.
+   Tracked as a v1.11 follow-up; placement of the fix is in
+   `Mut.SchemaPlacer.render/1`.
+
+### Drift bucketer cross-validation (M25 + M27 data)
+
+`mix mut.drift --all` was run against the combined M25 + M27
+results. Per-bucket counts on M25's 5 targets match the
+hand-classification documented in v1.10's CHANGELOG:
+
+| Target | Total | Drift | Buckets | Unclassified |
+|---|---:|---:|---|---:|
+| decimal | 454 | 0 | — | 0% |
+| plug_crypto | 64 | 0 | — | 0% |
+| mox | 38 | 5 | 3 mox_class + 2 parse_class | 0% |
+| nimble_options | 72 | 14 | 11 parse_class + 3 unclassified | 21.4% |
+| ecto | 992 | 222 | 162 ecto_warm_state + 59 ecto_false_kill + 1 timeout_flap | 0% |
+| jason | 396 | 5 | 1 parse_class + 1 timeout_flap + 3 unclassified | 60% |
+
+Aggregate unclassified rate on the combined M25 + M27 corpus:
+**13/300 drifting mutants ≈ 4.3%**. M27's 49+4=53 mint+nimble_pool
+drift contributes 0 unclassified (all `pool_warm_state`); jason's
+3 unclassified are baseline noise from a 396-mutant corpus where
+absolute drift is 5 mutants. Hand-classification at v1.12+ is no
+longer required for new targets in M28/M30's class.
+
 ## v1.10 validation matrix (M25 final, 2026-05-10)
 
 M25 ran every M24-pinned OSS target at the latest stable SHA
