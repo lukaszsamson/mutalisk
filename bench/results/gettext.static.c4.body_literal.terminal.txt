@@ -1,0 +1,372 @@
+target=gettext repo=https://github.com/elixir-gettext/gettext.git ref=v1.0.2 sha=e3180f138bda49c7607b709ec74133c47c24c81d selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.018s
+Unchanged:
+  castore 1.0.10
+  earmark_parser 1.4.44
+  ex_doc 0.39.1
+  excoveralls 0.18.3
+  expo 1.1.0
+  jason 1.4.4
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting expo (Hex package)
+* Getting castore (Hex package)
+* Getting jason (Hex package)
+* Getting ex_doc (Hex package)
+* Getting excoveralls (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> castore
+Compiling 1 file (.ex)
+Generated castore app
+==> excoveralls
+Compiling 29 files (.ex)
+    warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
+    │
+ 17 │            |> List.zip
+    │                    ~
+    │
+    └─ lib/excoveralls/stop_words.ex:17:20: ExCoveralls.StopWords.do_filter/2
+
+Generated excoveralls app
+==> expo
+Compiling 2 files (.erl)
+Compiling 22 files (.ex)
+     warning: a struct for Expo.Messages is expected on struct update:
+
+         %Expo.Messages{po | file: path}
+
+     but got type:
+
+         dynamic()
+
+     where "po" was given the type:
+
+         # type: dynamic()
+         # from: lib/expo/mo.ex:132:20
+         {:ok, po} <- Expo.MO.Parser.parse(contents, Keyword.put_new(options, :file, path))
+
+     when defining the variable "po", you must also pattern match on "%Expo.Messages{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 133 │       {:ok, %Messages{po | file: path}}
+     │             ~
+     │
+     └─ lib/expo/mo.ex:133:13: Expo.MO.parse_file/2
+
+    warning: a struct for Expo.Messages is expected on struct update:
+
+        %Expo.Messages{po | file: Keyword.get(opts, :file)}
+
+    but got type:
+
+        dynamic()
+
+    where "po" was given the type:
+
+        # type: dynamic()
+        # from: lib/expo/po/parser.ex:17:20
+        {:ok, po} <- check_for_duplicates(po)
+
+    when defining the variable "po", you must also pattern match on "%Expo.Messages{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 18 │       {:ok, %Messages{po | file: Keyword.get(opts, :file)}}
+    │             ~
+    │
+    └─ lib/expo/po/parser.ex:18:13: Expo.PO.Parser.parse/2
+
+Generated expo app
+==> mutalisk
+Compiling 75 files (.ex)
+Generated mutalisk app
+==> gettext
+Compiling 19 files (.ex)
+Generated gettext app
+Schema build starting
+Schema build complete
+[1/137] killed    lib/gettext/extractor.ex:321  Boolean  replace || with &&
+[2/137] survived  lib/mix/tasks/gettext.extract.ex:68  Boolean  replace || with &&
+[3/137] survived  lib/mix/tasks/gettext.merge.ex:308  ComparisonBoundary  replace >= with >
+[4/137] error     lib/gettext/macros.ex:681  Boolean  replace || with &&
+[5/137] killed    lib/gettext/fuzzy.ex:21  ComparisonNegation  replace >= with <
+[6/137] killed    lib/gettext/merger.ex:163  ComparisonNegation  replace == with !=
+[7/137] survived  lib/gettext/compiler.ex:720  Arithmetic  replace - with *
+[8/137] killed    lib/gettext/merger.ex:312  ComparisonNegation  replace == with !=
+[9/137] killed    lib/gettext/extractor.ex:396  ComparisonNegation  replace == with !=
+[10/137] killed    lib/gettext.ex:808  UnaryNot  remove unary not
+[11/137] survived  lib/gettext/compiler.ex:720  Arithmetic  replace - with +
+[12/137] survived  lib/mix/tasks/gettext.merge.ex:308  ComparisonNegation  replace <= with >
+[13/137] killed    lib/gettext/extractor.ex:254  ComparisonNegation  replace == with !=
+[14/137] killed    lib/gettext/fuzzy.ex:21  ComparisonBoundary  replace >= with >
+[15/137] killed    lib/gettext/extractor.ex:197  ComparisonNegation  replace != with ==
+[16/137] survived  lib/mix/tasks/gettext.merge.ex:322  ComparisonNegation  replace == with !=
+[17/137] killed    lib/gettext/extractor_agent.ex:51  Boolean  replace || with &&
+[18/137] error     lib/gettext/compiler.ex:595  Boolean  replace && with ||
+[19/137] survived  lib/mix/tasks/gettext.merge.ex:308  Boolean  replace and with or
+[20/137] killed    lib/gettext/merger.ex:160  ComparisonNegation  replace != with ==
+[21/137] killed    lib/gettext/merger.ex:138  Arithmetic  replace - with +
+[22/137] error     lib/gettext/compiler.ex:393  Boolean  replace || with &&
+[23/137] error     lib/gettext/compiler.ex:635  Boolean  replace && with ||
+[24/137] survived  lib/mix/tasks/gettext.extract.ex:118  UnaryNot  remove unary not
+[25/137] survived  lib/mix/tasks/gettext.extract.ex:94  ComparisonNegation  replace == with !=
+[26/137] killed    lib/gettext/extractor.ex:209  ComparisonNegation  replace != with ==
+[27/137] killed    lib/gettext/macros.ex:771  Boolean  replace || with &&
+[28/137] survived  lib/mix/tasks/gettext.merge.ex:318  Arithmetic  replace - with +
+[29/137] survived  lib/mix/tasks/gettext.merge.ex:302  Boolean  replace || with &&
+[30/137] survived  lib/mix/tasks/gettext.merge.ex:308  ComparisonBoundary  replace <= with <
+[31/137] survived  lib/gettext/compiler.ex:365  Boolean  replace || with &&
+[32/137] killed    lib/gettext/extractor.ex:63  Boolean  replace && with ||
+[33/137] survived  lib/mix/tasks/gettext.merge.ex:162  ComparisonNegation  replace == with !=
+[34/137] killed    lib/gettext/extractor_agent.ex:90  ComparisonNegation  replace != with ==
+[35/137] killed    lib/gettext/merger.ex:253  UnaryNot  remove unary not
+[36/137] survived  lib/mix/tasks/gettext.merge.ex:140  Boolean  replace || with &&
+[37/137] survived  lib/mix/tasks/gettext.merge.ex:308  ComparisonNegation  replace >= with <
+[38/137] survived  lib/mix/tasks/gettext.merge.ex:162  Boolean  replace and with or
+[39/137] survived  lib/mix/tasks/gettext.merge.ex:318  Arithmetic  replace - with *
+[40/137] killed    lib/gettext/merger.ex:249  UnaryNot  remove unary not
+[41/137] killed    lib/gettext/merger.ex:138  Arithmetic  replace - with *
+[42/137] killed    lib/gettext/merger.ex:260  BooleanLiteral  replace boolean literal true with false
+[43/137] killed    lib/gettext/extractor.ex:199  IntegerLiteral  replace integer literal 0 with 1
+[44/137] killed    lib/gettext.ex:1124  GuardTypeTest  replace guard is_atom with is_nil
+[44/137] invalid   lib/gettext/compiler.ex:35  Boolean  replace || with &&
+[45/137] survived  lib/gettext/merger.ex:238  IntegerLiteral  replace integer literal 0 with 1
+[45/137] invalid   lib/gettext/merger.ex:10  AttributeLiteral  replace attribute literal "# \"msgid\"s in this file come from POT (.pot) files.\n##\n## Do not add, change, or remove \"msgid\"s manually here as\n## they're tied to the ones in the corresponding POT file\n## (with the same domain).\n##\n## Use \"mix gettext.extract --merge\" or \"mix gettext.merge\"\n## to merge POT files into PO files.\n" with ""
+[46/137] killed    lib/gettext/interpolation/default.ex:217  GuardTypeTest  replace guard is_atom with is_nil
+[47/137] survived  lib/gettext/compiler.ex:720  IntegerLiteral  replace integer literal 1 with 0
+[48/137] survived  lib/gettext/compiler.ex:345  GuardTypeTest  replace guard is_nil with is_atom
+[49/137] killed    lib/gettext/extractor.ex:310  BooleanLiteral  replace boolean literal true with false
+[49/137] invalid   lib/gettext.ex:619  Boolean  replace && with ||
+[50/137] survived  lib/mix/tasks/gettext.extract.ex:138  BooleanLiteral  replace boolean literal false with true
+[51/137] killed    lib/gettext/extractor.ex:396  IntegerLiteral  replace integer literal 0 with 1
+[52/137] survived  lib/gettext.ex:984  GuardTypeTest  replace guard is_integer with is_number
+[53/137] killed    lib/gettext/extractor.ex:22  AttributeLiteral  replace attribute literal "elixir-autogen" with ""
+[54/137] survived  lib/mix/tasks/gettext.merge.ex:213  BooleanLiteral  replace boolean literal false with true
+[55/137] survived  lib/mix/tasks/gettext.merge.ex:299  BooleanLiteral  replace boolean literal false with true
+[56/137] survived  lib/gettext/merger.ex:227  BooleanLiteral  replace boolean literal true with false
+[57/137] survived  lib/gettext/merger.ex:235  IntegerLiteral  replace integer literal 0 with 1
+[58/137] killed    lib/gettext.ex:608  GuardComparisonNegation  replace guard == with !=
+[59/137] error     lib/gettext/interpolation/default.ex:148  GuardTypeTest  replace guard is_list with is_tuple
+[60/137] survived  lib/mix/tasks/gettext.extract.ex:3  AttributeLiteral  replace attribute literal true with false
+[61/137] killed    lib/gettext/extractor.ex:342  BooleanLiteral  replace boolean literal false with true
+[62/137] killed    lib/gettext.ex:984  GuardTypeTest  replace guard is_map with is_list
+[63/137] survived  lib/gettext/plural.ex:332  GuardTypeTest  replace guard is_integer with is_number
+[64/137] survived  lib/gettext/extractor.ex:397  BooleanLiteral  replace boolean literal true with false
+[65/137] survived  lib/gettext.ex:978  GuardTypeTest  replace guard is_list with is_tuple
+[66/137] killed    lib/gettext.ex:814  BooleanLiteral  replace boolean literal true with false
+[67/137] survived  lib/gettext/extractor.ex:396  GuardTypeTest  replace guard is_nil with is_atom
+[68/137] killed    lib/gettext.ex:983  GuardTypeTest  replace guard is_atom with is_nil
+[69/137] killed    lib/gettext/merger.ex:253  BooleanLiteral  replace boolean literal true with false
+[70/137] killed    lib/gettext/merger.ex:138  IntegerLiteral  replace integer literal 0 with 1
+[71/137] killed    lib/gettext/extractor.ex:408  BooleanLiteral  replace boolean literal false with true
+[72/137] survived  lib/gettext.ex:984  GuardComparisonBoundary  replace guard >= with >
+[73/137] killed    lib/gettext/merger.ex:59  IntegerLiteral  replace integer literal 0 with 1
+[74/137] survived  lib/mix/tasks/gettext.extract.ex:5  AttributeLiteral  replace attribute literal "Extracts messages from source code" with ""
+[75/137] survived  lib/gettext/plural.ex:357  BooleanLiteral  replace boolean literal true with false
+[76/137] killed    lib/gettext.ex:855  GuardTypeTest  replace guard is_atom with is_nil
+[77/137] survived  lib/gettext/merger.ex:236  IntegerLiteral  replace integer literal 0 with 1
+[77/137] invalid   lib/gettext/compiler.ex:39  Boolean  replace || with &&
+[78/137] killed    lib/gettext/merger.ex:138  IntegerLiteral  replace integer literal 1 with 0
+[79/137] error     lib/gettext/compiler.ex:674  IntegerLiteral  replace integer literal 0 with 1
+[80/137] error     lib/gettext/macros.ex:742  GuardTypeTest  replace guard is_atom with is_nil
+[81/137] survived  lib/gettext/plural.ex:357  IntegerLiteral  replace integer literal 2 with 3
+[82/137] survived  lib/gettext.ex:669  IntegerLiteral  replace integer literal 1 with 0
+[83/137] survived  lib/gettext/macros.ex:726  GuardTypeTest  replace guard is_nil with is_atom
+[84/137] killed    lib/gettext/merger.ex:59  IntegerLiteral  replace integer literal 0 with 1
+[85/137] survived  lib/gettext/compiler.ex:671  IntegerLiteral  replace integer literal 0 with 1
+[86/137] killed    lib/gettext/compiler.ex:12  AttributeLiteral  replace attribute literal "default" with ""
+[87/137] survived  lib/mix/tasks/gettext.merge.ex:300  BooleanLiteral  replace boolean literal true with false
+[88/137] killed    lib/gettext/plural.ex:357  IntegerLiteral  replace integer literal 2 with 0
+[89/137] killed    lib/gettext/plural.ex:309  GuardTypeTest  replace guard is_integer with is_float
+[90/137] error     lib/gettext.ex:622  GuardTypeTest  replace guard is_atom with is_nil
+[91/137] killed    lib/gettext.ex:850  GuardTypeTest  replace guard is_list with is_tuple
+[92/137] survived  lib/mix/tasks/gettext.merge.ex:124  AttributeLiteral  replace attribute literal 0.8 with 0.0
+[93/137] survived  lib/mix/tasks/gettext.extract.ex:139  IntegerLiteral  replace integer literal 120000 with 0
+[94/137] survived  lib/gettext/plural.ex:332  GuardTypeTest  replace guard is_integer with is_float
+[95/137] survived  lib/mix/tasks/gettext.merge.ex:318  IntegerLiteral  replace integer literal 1 with 0
+[96/137] survived  lib/gettext/compiler.ex:504  BooleanLiteral  replace boolean literal true with false
+[97/137] survived  lib/mix/tasks/gettext.merge.ex:322  IntegerLiteral  replace integer literal 1 with 0
+[98/137] killed    lib/gettext/merger.ex:249  BooleanLiteral  replace boolean literal true with false
+[99/137] survived  lib/mix/tasks/gettext.extract.ex:139  IntegerLiteral  replace integer literal 120000 with 120001
+[100/137] survived  lib/gettext/macros.ex:732  GuardTypeTest  replace guard is_nil with is_atom
+[101/137] survived  lib/gettext/merger.ex:137  GuardComparisonBoundary  replace guard > with >=
+[102/137] survived  lib/gettext/merger.ex:237  IntegerLiteral  replace integer literal 0 with 1
+[103/137] error     lib/gettext/compiler.ex:733  GuardTypeTest  replace guard is_list with is_tuple
+[104/137] killed    lib/gettext/merger.ex:59  IntegerLiteral  replace integer literal 0 with 1
+[105/137] killed    lib/gettext/merger.ex:246  GuardTypeTest  replace guard is_list with is_tuple
+[106/137] killed    lib/gettext/extractor.ex:321  BooleanLiteral  replace boolean literal false with true
+[107/137] survived  lib/gettext/extractor.ex:325  BooleanLiteral  replace boolean literal true with false
+[108/137] survived  lib/gettext/plural.ex:309  GuardTypeTest  replace guard is_integer with is_number
+[109/137] survived  lib/mix/tasks/gettext.merge.ex:3  AttributeLiteral  replace attribute literal true with false
+[110/137] error     lib/gettext/compiler.ex:759  GuardTypeTest  replace guard is_list with is_tuple
+[111/137] killed    lib/gettext.ex:984  GuardTypeTest  replace guard is_integer with is_float
+[112/137] survived  lib/mix/tasks/gettext.merge.ex:124  AttributeLiteral  replace attribute literal 0.8 with 1.8
+[113/137] killed    lib/gettext/merger.ex:56  GuardTypeTest  replace guard is_list with is_tuple
+[113/137] invalid   lib/gettext/compiler.ex:37  Boolean  replace || with &&
+[114/137] killed    lib/gettext/interpolation/default.ex:113  GuardTypeTest  replace guard is_atom with is_nil
+[115/137] killed    lib/gettext.ex:984  GuardComparisonNegation  replace guard >= with <
+[116/137] survived  lib/gettext/compiler.ex:720  IntegerLiteral  replace integer literal 0 with 1
+[117/137] killed    lib/gettext.ex:855  GuardTypeTest  replace guard is_map with is_list
+[118/137] killed    lib/gettext/fuzzy.ex:77  IntegerLiteral  replace integer literal 0 with 1
+[119/137] error     lib/gettext/compiler.ex:13  AttributeLiteral  replace attribute literal "*/LC_MESSAGES/*.po" with ""
+[120/137] survived  lib/mix/tasks/gettext.merge.ex:5  AttributeLiteral  replace attribute literal "Merge template files into message files" with ""
+[121/137] survived  lib/gettext/extractor.ex:411  BooleanLiteral  replace boolean literal false with true
+[122/137] killed    lib/gettext/merger.ex:100  BooleanLiteral  replace boolean literal false with true
+[123/137] killed    lib/gettext/extractor.ex:199  IntegerLiteral  replace integer literal 1 with 0
+[124/137] killed    lib/gettext/merger.ex:220  GuardTypeTest  replace guard is_list with is_tuple
+[125/137] killed    lib/gettext/compiler.ex:11  AttributeLiteral  replace attribute literal "priv/gettext" with ""
+[126/137] survived  lib/gettext/plural.ex:385  IntegerLiteral  replace integer literal 1 with 0
+[127/137] killed    lib/gettext.ex:1168  GuardTypeTest  replace guard is_atom with is_nil
+[128/137] killed    lib/gettext/interpolation/default.ex:105  GuardTypeTest  replace guard is_list with is_tuple
+[129/137] killed    lib/gettext/merger.ex:59  IntegerLiteral  replace integer literal 0 with 1
+[130/137] error     lib/gettext/plural.ex:367  IntegerLiteral  replace integer literal 1 with 0
+[131/137] killed    lib/gettext/merger.ex:59  IntegerLiteral  replace integer literal 0 with 1
+[132/137] killed    lib/gettext/merger.ex:137  GuardComparisonNegation  replace guard > with <=
+Mutation score: 61/120 = 50.8%
+
+Surviving mutants:
+  lib/mix/tasks/gettext.extract.ex:68 Boolean                  replace || with &&
+  lib/mix/tasks/gettext.merge.ex:308 ComparisonBoundary       replace >= with >
+  lib/gettext/compiler.ex:720 Arithmetic               replace - with *
+  lib/gettext/compiler.ex:720 Arithmetic               replace - with +
+  lib/mix/tasks/gettext.merge.ex:308 ComparisonNegation       replace <= with >
+  lib/mix/tasks/gettext.merge.ex:322 ComparisonNegation       replace == with !=
+  lib/mix/tasks/gettext.merge.ex:308 Boolean                  replace and with or
+  lib/mix/tasks/gettext.extract.ex:118 UnaryNot                 remove unary not
+  lib/mix/tasks/gettext.extract.ex:94 ComparisonNegation       replace == with !=
+  lib/mix/tasks/gettext.merge.ex:318 Arithmetic               replace - with +
+  lib/mix/tasks/gettext.merge.ex:302 Boolean                  replace || with &&
+  lib/mix/tasks/gettext.merge.ex:308 ComparisonBoundary       replace <= with <
+  lib/gettext/compiler.ex:365 Boolean                  replace || with &&
+  lib/mix/tasks/gettext.merge.ex:162 ComparisonNegation       replace == with !=
+  lib/mix/tasks/gettext.merge.ex:140 Boolean                  replace || with &&
+  lib/mix/tasks/gettext.merge.ex:308 ComparisonNegation       replace >= with <
+  lib/mix/tasks/gettext.merge.ex:162 Boolean                  replace and with or
+  lib/mix/tasks/gettext.merge.ex:318 Arithmetic               replace - with *
+  lib/gettext/merger.ex:238 IntegerLiteral           replace integer literal 0 with 1
+  lib/gettext/compiler.ex:720 IntegerLiteral           replace integer literal 1 with 0
+  lib/gettext/compiler.ex:345 GuardTypeTest            replace guard is_nil with is_atom
+  lib/mix/tasks/gettext.extract.ex:138 BooleanLiteral           replace boolean literal false with true
+  lib/gettext.ex:984 GuardTypeTest            replace guard is_integer with is_number
+  lib/mix/tasks/gettext.merge.ex:213 BooleanLiteral           replace boolean literal false with true
+  lib/mix/tasks/gettext.merge.ex:299 BooleanLiteral           replace boolean literal false with true
+  lib/gettext/merger.ex:227 BooleanLiteral           replace boolean literal true with false
+  lib/gettext/merger.ex:235 IntegerLiteral           replace integer literal 0 with 1
+  lib/mix/tasks/gettext.extract.ex:3 AttributeLiteral         replace attribute literal true with false
+  lib/gettext/plural.ex:332 GuardTypeTest            replace guard is_integer with is_number
+  lib/gettext/extractor.ex:397 BooleanLiteral           replace boolean literal true with false
+  lib/gettext.ex:978 GuardTypeTest            replace guard is_list with is_tuple
+  lib/gettext/extractor.ex:396 GuardTypeTest            replace guard is_nil with is_atom
+  lib/gettext.ex:984 GuardComparisonBoundary  replace guard >= with >
+  lib/mix/tasks/gettext.extract.ex:5 AttributeLiteral         replace attribute literal "Extracts messages from source code" with ""
+  lib/gettext/plural.ex:357 BooleanLiteral           replace boolean literal true with false
+  lib/gettext/merger.ex:236 IntegerLiteral           replace integer literal 0 with 1
+  lib/gettext/plural.ex:357 IntegerLiteral           replace integer literal 2 with 3
+  lib/gettext.ex:669 IntegerLiteral           replace integer literal 1 with 0
+  lib/gettext/macros.ex:726 GuardTypeTest            replace guard is_nil with is_atom
+  lib/gettext/compiler.ex:671 IntegerLiteral           replace integer literal 0 with 1
+  lib/mix/tasks/gettext.merge.ex:300 BooleanLiteral           replace boolean literal true with false
+  lib/mix/tasks/gettext.merge.ex:124 AttributeLiteral         replace attribute literal 0.8 with 0.0
+  lib/mix/tasks/gettext.extract.ex:139 IntegerLiteral           replace integer literal 120000 with 0
+  lib/gettext/plural.ex:332 GuardTypeTest            replace guard is_integer with is_float
+  lib/mix/tasks/gettext.merge.ex:318 IntegerLiteral           replace integer literal 1 with 0
+  lib/gettext/compiler.ex:504 BooleanLiteral           replace boolean literal true with false
+  lib/mix/tasks/gettext.merge.ex:322 IntegerLiteral           replace integer literal 1 with 0
+  lib/mix/tasks/gettext.extract.ex:139 IntegerLiteral           replace integer literal 120000 with 120001
+  lib/gettext/macros.ex:732 GuardTypeTest            replace guard is_nil with is_atom
+  lib/gettext/merger.ex:137 GuardComparisonBoundary  replace guard > with >=
+  lib/gettext/merger.ex:237 IntegerLiteral           replace integer literal 0 with 1
+  lib/gettext/extractor.ex:325 BooleanLiteral           replace boolean literal true with false
+  lib/gettext/plural.ex:309 GuardTypeTest            replace guard is_integer with is_number
+  lib/mix/tasks/gettext.merge.ex:3 AttributeLiteral         replace attribute literal true with false
+  lib/mix/tasks/gettext.merge.ex:124 AttributeLiteral         replace attribute literal 0.8 with 1.8
+  lib/gettext/compiler.ex:720 IntegerLiteral           replace integer literal 0 with 1
+  lib/mix/tasks/gettext.merge.ex:5 AttributeLiteral         replace attribute literal "Merge template files into message files" with ""
+  lib/gettext/extractor.ex:411 BooleanLiteral           replace boolean literal false with true
+  lib/gettext/plural.ex:385 IntegerLiteral           replace integer literal 1 with 0
+
+Schema:    19/41 killed (46.3%)   wall: 46.8s
+Fallback:  42/96 killed (43.8%)   wall: 143.0s
+  attribute_bool_flip:          0/2 killed
+  attribute_float_replace:      0/2 killed
+  attribute_string_replace:     3/7 killed
+  boolean_literal_flip:         9/19 killed
+  boolean_op:                   0/4 killed
+  guard_comparison_boundary:    0/2 killed
+  guard_comparison_negation:    3/3 killed
+  guard_type_test:              15/29 killed
+  integer_literal_replace:      12/28 killed  recompile errors:
+    compile errors:    0
+    parse errors:      1
+    dep path errors:   0
+    unknown:           0
+
+Skipped:   1249 (missing_oracle_site: 90, no_applicable_mutator: 26, unsupported_dispatch: 1133)
+Invalid:   5
+Errors:    12
+Timeouts:  0
+
+Run time: 189.8s
+Fallback wall-clock: 75.3% of total
+Fallback mutants: 70.1% of executed
+
+Phases:
+  oracle build:         3685 ms
+  baseline tests:        930 ms
+  plan generation:        48 ms
+  schema build:         3680 ms
+  schema workers:      13086 ms
+  fallback workers:    40845 ms
+  report writing:         10 ms
+  total:               62812 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    137
+    all tests:          0
+  avg tests/mutant: 6.7
+  median tests/mutant: 7
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 63247ms
+bench.wall_ms=66000

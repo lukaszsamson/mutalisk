@@ -1,0 +1,131 @@
+target=gettext repo=https://github.com/elixir-gettext/gettext.git ref=v1.0.2 sha=e3180f138bda49c7607b709ec74133c47c24c81d selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Error opening ETS file /Users/lukaszsamson/.hex/cache.ets: :badfile
+Resolving Hex dependencies...
+Resolution completed in 0.019s
+Unchanged:
+  castore 1.0.10
+  earmark_parser 1.4.44
+  ex_doc 0.39.1
+  excoveralls 0.18.3
+  expo 1.1.0
+  jason 1.4.4
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.2
+  nimble_parsec 1.4.2
+* Getting expo (Hex package)
+* Getting castore (Hex package)
+* Getting jason (Hex package)
+* Getting ex_doc (Hex package)
+* Getting excoveralls (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> castore
+Compiling 1 file (.ex)
+Generated castore app
+==> excoveralls
+Compiling 29 files (.ex)
+    warning: List.zip/1 is deprecated. Use Enum.zip/1 instead
+    │
+ 17 │            |> List.zip
+    │                    ~
+    │
+    └─ lib/excoveralls/stop_words.ex:17:20: ExCoveralls.StopWords.do_filter/2
+
+Generated excoveralls app
+==> expo
+Compiling 2 files (.erl)
+Compiling 22 files (.ex)
+     warning: a struct for Expo.Messages is expected on struct update:
+
+         %Expo.Messages{po | file: path}
+
+     but got type:
+
+         dynamic()
+
+     where "po" was given the type:
+
+         # type: dynamic()
+         # from: lib/expo/mo.ex:132:20
+         {:ok, po} <- Expo.MO.Parser.parse(contents, Keyword.put_new(options, :file, path))
+
+     when defining the variable "po", you must also pattern match on "%Expo.Messages{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 133 │       {:ok, %Messages{po | file: path}}
+     │             ~
+     │
+     └─ lib/expo/mo.ex:133:13: Expo.MO.parse_file/2
+
+    warning: a struct for Expo.Messages is expected on struct update:
+
+        %Expo.Messages{po | file: Keyword.get(opts, :file)}
+
+    but got type:
+
+        dynamic()
+
+    where "po" was given the type:
+
+        # type: dynamic()
+        # from: lib/expo/po/parser.ex:17:20
+        {:ok, po} <- check_for_duplicates(po)
+
+    when defining the variable "po", you must also pattern match on "%Expo.Messages{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 18 │       {:ok, %Messages{po | file: Keyword.get(opts, :file)}}
+    │             ~
+    │
+    └─ lib/expo/po/parser.ex:18:13: Expo.PO.Parser.parse/2
+
+Generated expo app
+==> mutalisk
+Compiling 75 files (.ex)
+Generated mutalisk app
+==> gettext
+Compiling 19 files (.ex)
+Generated gettext app
+Schema build starting
+Schema build complete
+** (ArgumentError) cannot spawn parallel compiler task because the current file is not being compiled/required
+    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:89: Kernel.ParallelCompiler.inner_async/1
+    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:57: Kernel.ParallelCompiler.async/1
+    (elixir 1.19.5) lib/enum.ex:1696: anonymous fn/3 in Enum.map/2
+    (stdlib 7.2) maps.erl:894: :maps.fold_1/4
+    (elixir 1.19.5) lib/enum.ex:2532: Enum.map/2
+    (gettext 1.0.2) lib/gettext/compiler.ex:443: Gettext.Compiler.compile_po_files/3
+    (gettext 1.0.2) expanding macro: Gettext.Compiler.__before_compile__/1
+** (Mix) persistent worker start failed: {:worker_exited_during_boot, 1, ""}

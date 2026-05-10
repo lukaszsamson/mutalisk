@@ -2,7 +2,7 @@ target=gettext repo=https://github.com/elixir-gettext/gettext.git ref=v1.0.2 sha
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.017s
+Resolution completed in 0.015s
 Unchanged:
   castore 1.0.10
   earmark_parser 1.4.44
@@ -118,20 +118,13 @@ Generated mutalisk app
 Compiling 19 files (.ex)
 Generated gettext app
 Schema build starting
-** (TokenMissingError) token missing on nofile:135:4:
-     error: missing terminator: """ (for heredoc starting at line 104)
-     │
- 104 │       Logger.warning("""
-     │                      └ unclosed delimiter
- ...
- 135 │ end
-     │    └ missing closing delimiter (expected """)
-     │
-     └─ nofile:135:4
-    (elixir 1.19.5) lib/code.ex:1103: Code.format_string!/2
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:94: Mut.SchemaPlacer.render/1
-    (mutalisk 0.1.0) lib/mut/schema_placer.ex:106: Mut.SchemaPlacer.instrument_file/2
-    (mutalisk 0.1.0) lib/mut/schema_build.ex:125: anonymous fn/3 in Mut.SchemaBuild.instrument_files/2
-    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
-    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3
-    (mutalisk 0.1.0) lib/mut/schema_build.ex:95: Mut.SchemaBuild.build_in_work_copy/3
+Schema build complete
+** (ArgumentError) cannot spawn parallel compiler task because the current file is not being compiled/required
+    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:89: Kernel.ParallelCompiler.inner_async/1
+    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:57: Kernel.ParallelCompiler.async/1
+    (elixir 1.19.5) lib/enum.ex:1696: anonymous fn/3 in Enum.map/2
+    (stdlib 7.2) maps.erl:894: :maps.fold_1/4
+    (elixir 1.19.5) lib/enum.ex:2532: Enum.map/2
+    (gettext 1.0.2) lib/gettext/compiler.ex:443: Gettext.Compiler.compile_po_files/3
+    (gettext 1.0.2) expanding macro: Gettext.Compiler.__before_compile__/1
+** (Mix) persistent worker start failed: {:worker_exited_during_boot, 1, ""}
