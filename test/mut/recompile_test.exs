@@ -56,16 +56,26 @@ defmodule Mut.RecompileTest do
     end
   end
 
-  test "categorize/1 recognizes compile errors" do
+  test "categorize/1 recognizes compile errors (semantic)" do
     samples = [
       "mut.recompile errors: [{\"lib/x.ex\", 1, \"unexpected token\"}]",
-      "** (CompileError) lib/x.ex: cannot compile module X",
-      "** (SyntaxError) lib/x.ex:5: syntax error before: end",
-      "** (TokenMissingError) lib/x.ex:5: missing terminator"
+      "** (CompileError) lib/x.ex: cannot compile module X"
     ]
 
     for s <- samples do
       assert Recompile.categorize(s) == :compile_error, "expected :compile_error for: #{s}"
+    end
+  end
+
+  test "categorize/1 recognizes parse-class errors" do
+    samples = [
+      "** (SyntaxError) lib/x.ex:5: syntax error before: end",
+      "** (TokenMissingError) lib/x.ex:5: missing terminator",
+      "** (MismatchedDelimiterError) lib/x.ex:5: mismatched closing delimiter"
+    ]
+
+    for s <- samples do
+      assert Recompile.categorize(s) == :parse_error, "expected :parse_error for: #{s}"
     end
   end
 
@@ -78,7 +88,11 @@ defmodule Mut.RecompileTest do
     assert Recompile.categorize("random noise without markers") == :unknown
   end
 
-  test "recompile returns :compile_error category for syntactically broken patch" do
+  test "recompile returns :parse_error category for syntactically broken patch" do
+    # `def add(a, b), do: a +\nend` is a parse-level failure (TokenMissingError
+    # on the trailing `+`), not a CompileError. Recompile categorizes
+    # parse-class output under :parse_error so the host can route persistent
+    # in-process parse failures to mix-spawn for an authoritative verdict.
     {:ok, schema_result} = schema_result_for("compile-error")
 
     {:ok, pool} =
@@ -92,7 +106,7 @@ defmodule Mut.RecompileTest do
     assert {:error, {:recompile_failed, category, _code, _output}} =
              Recompile.recompile(sandbox, ["lib/arith.ex"], [], app: "demo_app")
 
-    assert category == :compile_error
+    assert category == :parse_error
 
     sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
     File.rm_rf!(schema_result.work_copy_root)

@@ -202,6 +202,40 @@ defmodule Mut.TestSelection.StaticTest do
     assert Static.covering_tests(analysis, nil, paths) == paths
   end
 
+  test "analyze tolerates aliases with non-literal parts (__MODULE__, unquote)" do
+    # M25 follow-up: ecto's static analyzer crashed on alias parts that
+    # are AST tuples rather than atoms. `Module.concat` ultimately calls
+    # `to_string/1` on each part, which raises String.Chars.impl_for!/1
+    # for tuples. We now treat such aliases as non-references (no entry
+    # in the index, no crash).
+    path =
+      write_test("dynamic_alias_parts", """
+      defmodule DynamicAliasPartsTest do
+        use ExUnit.Case, async: true
+
+        defmacrop dyn_module(name) do
+          quote do
+            __MODULE__.unquote(name)
+          end
+        end
+
+        test "self-alias" do
+          # __MODULE__.Inner is an __aliases__ node whose parts list
+          # is [{:__MODULE__, _, _}, :Inner]. Must not crash analyze/1.
+          fun = &__MODULE__.Inner.value/0
+          assert is_function(fun, 0)
+        end
+      end
+      """)
+
+    # Bug behavior: raised Protocol.UndefinedError from
+    # String.Chars.impl_for!/1. Fixed: returns cleanly with no entry
+    # for the dynamic alias.
+    analysis = Static.analyze([Path.dirname(path)])
+    assert is_map(analysis.index)
+    refute Map.has_key?(analysis.index, :__MODULE__)
+  end
+
   defp write_test(name, source) do
     path = Path.expand(Path.join(["tmp", "tests", "test_selection", name, "sample_test.exs"]))
     File.rm_rf!(Path.dirname(path))

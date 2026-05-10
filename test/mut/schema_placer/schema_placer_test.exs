@@ -172,6 +172,40 @@ defmodule Mut.SchemaPlacerTest do
              SchemaPlacer.instrument_file(path, [])
   end
 
+  test "render/1 round-trips heredocs with trailing interpolation" do
+    # M25 follow-up: gettext lib/gettext/extractor_agent.ex:83 has a heredoc
+    # whose content ends with an interpolation immediately before the
+    # closing `"""` (the source uses a backslash line-continuation to
+    # suppress the trailing newline). `Macro.to_string/1` preserves the
+    # heredoc delimiter via `:delimiter` metadata but does NOT preserve
+    # the backslash continuation, so it re-emits as
+    # `"""\nfoo: #{x}"""` -- with the closing `"""` on the same line as
+    # the interpolation, which neither `Code.string_to_quoted/1` nor
+    # `Code.format_string!/1` can parse (TokenMissingError: missing
+    # terminator """). We strip heredoc delimiter metadata before
+    # rendering so the output falls back to regular `"..."` strings.
+    source =
+      "defmodule Sample do\n" <>
+        "  def f(x) do\n" <>
+        "    Logger.warning(\"\"\"\n" <>
+        "    foo: \#{x}\\\n" <>
+        "    \"\"\")\n" <>
+        "  end\n" <>
+        "end\n"
+
+    path = Path.expand("tmp/schema_placer_heredoc.ex")
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, source)
+    on_exit(fn -> File.rm(path) end)
+
+    assert {:ok, rendered, %SchemaPlacer.PlacementMap{}, []} =
+             SchemaPlacer.instrument_file(path, [])
+
+    # Rendered output must be re-parseable.
+    assert {:ok, _ast} = Mut.SourceParse.parse_string(rendered, path)
+    assert rendered =~ "Logger.warning("
+  end
+
   test "rendered hoist variable does not collide with a user mut_active binding" do
     source =
       "defmodule Sample do\n  def f(a), do: (mut_active = a + 1; mut_active * (a - 1))\nend"

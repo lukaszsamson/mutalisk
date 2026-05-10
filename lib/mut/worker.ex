@@ -13,7 +13,7 @@ defmodule Mut.Worker do
     defstruct [:status, :duration_ms, :killing_test, :raw_output, :recompile_category]
 
     @type status :: :killed | :survived | :timeout | :error | :invalid
-    @type recompile_category :: :compile_error | :dep_path_error | :unknown | nil
+    @type recompile_category :: :compile_error | :parse_error | :dep_path_error | :unknown | nil
     @type t :: %__MODULE__{
             status: status,
             duration_ms: non_neg_integer,

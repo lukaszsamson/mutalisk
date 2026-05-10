@@ -98,11 +98,15 @@ defmodule Mut.Reporter.Terminal do
     crash_rate = safe_rate(Map.get(p, :crash_count, 0), total_persistent)
     filter_miss_rate = safe_rate(Map.get(p, :filter_miss_count, 0), total_persistent)
 
+    # M22 hint counts both compile and parse errors -- parse-class
+    # in-process failures are also "the persistent worker disagreed
+    # with mix-spawn" signals, even though they auto-recover via
+    # mix-spawn fallback.
     compile_errors =
       snapshot.recompile_categories
       |> case do
         nil -> 0
-        %{} = cats -> Map.get(cats, :compile_error, 0)
+        %{} = cats -> Map.get(cats, :compile_error, 0) + Map.get(cats, :parse_error, 0)
       end
 
     compile_error_rate = safe_rate(compile_errors, fallback_total)
@@ -178,16 +182,16 @@ defmodule Mut.Reporter.Terminal do
     filter_miss = Map.get(p, :filter_miss_count, 0)
     mix_fallback = Map.get(p, :mix_fallback_count, 0)
 
-    compile_errors =
+    {compile_errors, parse_errors} =
       case snapshot.recompile_categories do
-        nil -> 0
-        %{} = cats -> Map.get(cats, :compile_error, 0)
+        nil -> {0, 0}
+        %{} = cats -> {Map.get(cats, :compile_error, 0), Map.get(cats, :parse_error, 0)}
       end
 
-    if crashes + restarts + filter_miss + mix_fallback + compile_errors == 0 do
+    if crashes + restarts + filter_miss + mix_fallback + compile_errors + parse_errors == 0 do
       ""
     else
-      "  crashes: #{crashes}  restarts: #{restarts}  filter-miss: #{filter_miss}  in-process compile errors: #{compile_errors}  mix fallbacks: #{mix_fallback}\n"
+      "  crashes: #{crashes}  restarts: #{restarts}  filter-miss: #{filter_miss}  in-process compile errors: #{compile_errors}  parse errors: #{parse_errors}  mix fallbacks: #{mix_fallback}\n"
     end
   end
 
@@ -210,11 +214,13 @@ defmodule Mut.Reporter.Terminal do
       ""
     else
       compile_n = Map.get(cats, :compile_error, 0)
+      parse_n = Map.get(cats, :parse_error, 0)
       dep_n = Map.get(cats, :dep_path_error, 0)
       unknown_n = Map.get(cats, :unknown, 0)
 
       "  recompile errors:\n" <>
         "    compile errors:    #{compile_n}\n" <>
+        "    parse errors:      #{parse_n}\n" <>
         "    dep path errors:   #{dep_n}\n" <>
         "    unknown:           #{unknown_n}\n"
     end

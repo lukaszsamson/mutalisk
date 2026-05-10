@@ -83,44 +83,44 @@ defmodule Mut.TestSelection.Static do
   end
 
   defp referenced_module({:alias, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
-    do: module_concat(parts)
+    do: safe_module_concat(parts)
 
   defp referenced_module({:import, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
-    do: module_concat(parts)
+    do: safe_module_concat(parts)
 
   defp referenced_module({:require, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
-    do: module_concat(parts)
+    do: safe_module_concat(parts)
 
   defp referenced_module({:use, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
-    do: module_concat(parts)
+    do: safe_module_concat(parts)
 
   defp referenced_module(
          {:@, _meta, [{:behaviour, _behaviour_meta, [{:__aliases__, _alias_meta, parts}]}]}
        ),
-       do: module_concat(parts)
+       do: safe_module_concat(parts)
 
   defp referenced_module({:defmodule, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
-    do: module_concat(parts)
+    do: safe_module_concat(parts)
 
   defp referenced_module({:apply, _meta, [{:__aliases__, _alias_meta, parts}, _name, _args]}),
-    do: module_concat(parts)
+    do: safe_module_concat(parts)
 
   defp referenced_module(
          {{:., _dot_meta, [{:__aliases__, _kernel_meta, [:Kernel]}, :apply]}, _meta,
           [{:__aliases__, _alias_meta, parts}, _name, _args]}
        ),
-       do: module_concat(parts)
+       do: safe_module_concat(parts)
 
   defp referenced_module(
          {{:., _dot_meta, [:erlang, :apply]}, _meta,
           [{:__aliases__, _alias_meta, parts}, _name, _args]}
        ),
-       do: module_concat(parts)
+       do: safe_module_concat(parts)
 
   defp referenced_module(
          {{:., _dot_meta, [{:__aliases__, _alias_meta, parts}, _name]}, _meta, _args}
        ),
-       do: module_concat(parts)
+       do: safe_module_concat(parts)
 
   defp referenced_module(
          {:&, _meta,
@@ -132,7 +132,7 @@ defmodule Mut.TestSelection.Static do
              ]}
           ]}
        ),
-       do: module_concat(parts)
+       do: safe_module_concat(parts)
 
   defp referenced_module(_node), do: nil
 
@@ -188,6 +188,28 @@ defmodule Mut.TestSelection.Static do
     |> Enum.with_index(1)
     |> Enum.map(fn {_part, count} -> parts |> Enum.take(count) |> module_concat() end)
   end
+
+  # `__aliases__` parts are normally atoms (`[:Foo, :Bar]`), but the AST
+  # also admits dynamic parts:
+  #
+  #   * `__MODULE__.Foo` -> [{:__MODULE__, _, _}, :Foo]
+  #   * `unquote(x).Foo` -> [{:unquote, _, [_]}, :Foo]
+  #
+  # These cannot be resolved statically. Calling `Module.concat` on them
+  # via `to_string/1` raises `Protocol.UndefinedError` from
+  # `String.Chars.impl_for!/1`. Treat any non-literal-part list as
+  # dynamic dispatch (return nil); the caller already records dynamic
+  # files separately.
+  defp safe_module_concat(parts) do
+    if Enum.all?(parts, &literal_alias_part?/1) do
+      module_concat(parts)
+    else
+      nil
+    end
+  end
+
+  defp literal_alias_part?(part) when is_atom(part) or is_binary(part), do: true
+  defp literal_alias_part?(_other), do: false
 
   defp suffix_convention_tests(index, module) do
     target = Atom.to_string(module)

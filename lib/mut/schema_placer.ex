@@ -90,10 +90,45 @@ defmodule Mut.SchemaPlacer do
   @spec render(Macro.t()) :: String.t()
   def render(ast) do
     ast
+    |> strip_heredoc_delimiters()
     |> Macro.to_string()
     |> Code.format_string!()
     |> IO.iodata_to_binary()
     |> Kernel.<>("\n")
+  end
+
+  # `Macro.to_string/1` honors `:delimiter` token metadata when re-emitting
+  # string and bitstring nodes. For heredoc-delimited strings (`"\"\"\""` or
+  # `"'''"`) whose source uses a `\` line-continuation before the closing
+  # delimiter (gettext lib/gettext/extractor_agent.ex:83 and
+  # lib/gettext/plural.ex:79 are real-world cases), the round-trip drops
+  # the continuation and emits the closing `"""` on the same line as the
+  # last interpolation -- e.g.
+  #
+  #     Logger.warning("""
+  #     foo: #{x}""")
+  #
+  # which neither `Code.string_to_quoted/1` nor `Code.format_string!/1`
+  # can parse (TokenMissingError: missing terminator """).
+  #
+  # We strip the heredoc delimiter metadata so `Macro.to_string/1` falls
+  # back to regular `"..."` strings, which round-trip cleanly. Other
+  # delimiters (sigils, charlists) are left intact.
+  defp strip_heredoc_delimiters(ast) do
+    Macro.prewalk(ast, fn
+      {atom, meta, args} when is_list(meta) ->
+        case Keyword.get(meta, :delimiter) do
+          d when d in ["\"\"\"", "'''"] ->
+            new_meta = meta |> Keyword.delete(:delimiter) |> Keyword.delete(:indentation)
+            {atom, new_meta, args}
+
+          _other ->
+            {atom, meta, args}
+        end
+
+      other ->
+        other
+    end)
   end
 
   @spec instrument_file(file :: Path.t(), [Mutant.t()]) ::

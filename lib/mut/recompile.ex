@@ -37,9 +37,14 @@ defmodule Mut.Recompile do
   @typedoc """
   Why a recompile failed. Each category surfaces differently in reports:
 
-    * `:compile_error` — the patched Elixir source did not compile
-      (syntax error, type mismatch, undefined helper inside the
-      patched module, etc.).
+    * `:compile_error` — the patched Elixir source compiled to a
+      semantic failure (CompileError: type mismatch, undefined helper
+      inside the patched module, function-head pattern violation, etc.).
+    * `:parse_error` — the patched bytes did not parse (SyntaxError,
+      TokenMissingError, MismatchedDelimiterError). Surfaced separately
+      from `:compile_error` so the host can route persistent in-process
+      parse failures to mix-spawn for an authoritative verdict (see
+      `Mut.Worker.run_fallback_in_process/5`).
     * `:dep_path_error` — compilation reached a module that should
       have been on `-pa` (a sibling module or a dep) but was not
       loadable. Indicates a sandbox materialisation problem rather
@@ -47,7 +52,7 @@ defmodule Mut.Recompile do
     * `:unknown` — the elixir invocation failed but the output didn't
       match a known category. Surface verbatim for triage.
   """
-  @type error_category :: :compile_error | :dep_path_error | :unknown
+  @type error_category :: :compile_error | :parse_error | :dep_path_error | :unknown
 
   @type result ::
           :ok
@@ -88,8 +93,15 @@ defmodule Mut.Recompile do
       output =~ ~r/UndefinedFunctionError/ ->
         :dep_path_error
 
-      output =~ "mut.recompile errors:" or output =~ "** (CompileError)" or
-        output =~ "** (SyntaxError)" or output =~ "** (TokenMissingError)" ->
+      # Parse-class failures: MismatchedDelimiterError was added in
+      # Elixir 1.17 and does not inherit from SyntaxError. Surface all
+      # three under `:parse_error` so the host's persistent <-> mix-spawn
+      # routing can distinguish them from semantic CompileError.
+      output =~ "** (MismatchedDelimiterError)" or output =~ "** (SyntaxError)" or
+          output =~ "** (TokenMissingError)" ->
+        :parse_error
+
+      output =~ "mut.recompile errors:" or output =~ "** (CompileError)" ->
         :compile_error
 
       true ->
