@@ -5,6 +5,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.11 unreleased
 
+### M31 — Gettext compatibility: classified mix-only (2026-05-10)
+
+PLAN.md scoped two paths for M31:
+
+- **Path (i):** wrap the persistent worker's test-load step in
+  `Kernel.ParallelCompiler.compile/2` so `Gettext.Compiler.__before_compile__/1`'s
+  `Kernel.ParallelCompiler.async/1` call has the parent context
+  it requires.
+- **Path (ii):** formally exclude gettext-class as mix-only.
+
+v1.11 takes Path (ii). M29's recompile-isolation spike already
+showed `Kernel.ParallelCompiler` for the fallback path doesn't
+subsume warm-state drift, so the plumbing cost of Path (i)
+buys only gettext boot and not a broader correctness
+improvement. M30 separately classified Ecto-class as mix-only
+on structural grounds. Persistent's principled-mix-only set is
+now: Ecto, Gettext, and (with caveats per M28) clustered Mox.
+
+The boot-warning catalogue's `:gettext` row is updated to name
+the underlying compile-context requirement and direct users to
+`--worker-type mix`. No code changes beyond the message
+update; `Mut.Worker.Persistent.Detector` already detected the
+signature in M27.
+
+Path (i) remains a v1.12+ option if the underlying compiler
+plumbing cost drops or if a `gettext`-shape becomes a primary
+v1.12 acceptance class.
+
 ### M30 — Ecto warm-state closure: classified mix-only (2026-05-10)
 
 Ships `Mut.Worker.PersistentRunner.Reset.reset_ecto/0`, modeled on

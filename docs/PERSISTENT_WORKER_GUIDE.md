@@ -119,14 +119,40 @@ until the underlying drift is closed.
   `MismatchedDelimiterError` / `SyntaxError` in the in-process
   parser path that mix-spawn parses cleanly. Visible in metrics as
   `parse errors:` count > 0.
-- **`gettext` v1.0+ projects.** Persistent worker boot fails:
+- **`gettext` v1.0+ projects are mix-only (M31 closure).**
+  Persistent worker boot fails:
   `Gettext.Compiler.__before_compile__/1` calls
   `Kernel.ParallelCompiler.async/1` which requires the calling
   process to be running under a parallel-compile context. The
   persistent worker's test-load step runs outside that context,
   raising `ArgumentError: cannot spawn parallel compiler task`
-  before any mutant runs. Use `--worker-type mix` for gettext
-  projects unconditionally.
+  before any mutant runs.
+
+  M31 evaluated the two paths from PLAN.md:
+
+  - **Path (i): wrap the test-load step in
+    `Kernel.ParallelCompiler.compile/2`.** Would establish the
+    required parent context, but introduces a non-trivial
+    refactor of the runner's boot path (compile + load are
+    interleaved with reset-baseline capture, which assumes a
+    plain process), and the M29 spike's measurement of
+    `Kernel.ParallelCompiler` for the fallback path showed
+    helper-process isolation does not subsume the warm-state
+    drift class anyway. Investing the plumbing buys gettext
+    boot, but other gettext-class drift would surface
+    immediately and is itself unaddressed.
+  - **Path (ii): formally exclude gettext-class as mix-only.**
+    Boot-warning catalogue's `:gettext` row makes this explicit
+    and points users at `--worker-type mix`. Gettext-using
+    projects already routed there at v1.10 by M25's bench
+    classification.
+
+  v1.11 takes Path (ii). The persistent boot warning fires on
+  any project with `:gettext` in its compiled-dep tree; the
+  message names gettext-class as unsupported and points to
+  `--worker-type mix`. Path (i) remains a v1.12+ option if the
+  underlying compiler-plumbing cost drops or if a
+  `gettext`-shape becomes a primary v1.12 acceptance class.
 - **Ecto-class projects are mix-only (M30 closure).** v1.11 M30
   shipped `Mut.Worker.PersistentRunner.Reset.reset_ecto/0`, which
   walks ETS tables owned by `Elixir.Ecto.*`-named processes and
@@ -204,7 +230,7 @@ Triggers (v1.11 catalogue):
 |---|---|---|
 | `:mox` | `:mox` | M28's reset hook closes local-node Mox state. Use `--worker-type mix` if your suite spans Erlang nodes (residual cluster-state drift). |
 | `:ecto`, `:ecto_sql` | `:ecto` | M30 confirmed Ecto-class drift is supervisor-init structural, not cache-state. Use `--worker-type mix` for Ecto-class projects. |
-| `:gettext` | `:gettext` | Use `--worker-type mix` (gettext-class projects boot-fail under persistent). |
+| `:gettext` | `:gettext` | M31 confirmed gettext-class is mix-only (Gettext.Compiler.__before_compile__/1 boot-fails outside a parallel-compile parent). Use `--worker-type mix`. |
 
 The warning is a *heads-up*, not a diagnosis. A clean Ecto setup
 will still trigger it; a Mox-using project that already knows the

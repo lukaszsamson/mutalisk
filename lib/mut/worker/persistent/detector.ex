@@ -39,7 +39,7 @@ defmodule Mut.Worker.Persistent.Detector do
     {:ecto_sql, :ecto,
      "Ecto-class projects: supervisor-init structural drift cannot be closed by reset hooks (M30 finding); use --worker-type mix."},
     {:gettext, :gettext,
-     "Gettext-class projects: persistent boot may fail in Gettext.Compiler.__before_compile__/1."}
+     "Gettext-class projects: persistent worker is unsupported (M31 finding) — Gettext.Compiler.__before_compile__/1 requires a parallel-compile parent context that the persistent test-load step does not provide. Use --worker-type mix."}
   ]
 
   @typedoc "Detected signature: `{signature_atom, human_message}`."
