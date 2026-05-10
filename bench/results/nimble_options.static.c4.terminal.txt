@@ -2,7 +2,7 @@ target=nimble_options repo=https://github.com/dashbitco/nimble_options.git ref=v
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.015s
+Resolution completed in 0.016s
 Unchanged:
   castore 1.0.5
   earmark_parser 1.4.39
@@ -816,42 +816,42 @@ Generated nimble_options app
 Schema build starting
 Schema build complete
 [1/72] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with *
-[2/72] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with *
-[3/72] killed    lib/nimble_options.ex:671  Boolean  replace and with or
-[4/72] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with -
-[5/72] killed    lib/nimble_options.ex:805  Arithmetic  replace + with -
-[6/72] killed    lib/nimble_options/docs.ex:35  ComparisonNegation  replace == with !=
-[7/72] killed    lib/nimble_options/docs.ex:83  Boolean  replace && with ||
-[8/72] killed    lib/nimble_options.ex:805  Arithmetic  replace + with *
-[9/72] killed    lib/nimble_options/docs.ex:21  Boolean  replace || with &&
-[10/72] killed    lib/nimble_options.ex:671  ComparisonNegation  replace != with ==
-[11/72] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with +
-[12/72] killed    lib/nimble_options/docs.ex:88  Boolean  replace && with ||
+[2/72] killed    lib/nimble_options.ex:671  Boolean  replace and with or
+[3/72] killed    lib/nimble_options/docs.ex:44  Arithmetic  replace + with -
+[4/72] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with *
+[5/72] killed    lib/nimble_options/docs.ex:83  Boolean  replace && with ||
+[6/72] killed    lib/nimble_options.ex:805  Arithmetic  replace + with *
+[7/72] killed    lib/nimble_options.ex:805  Arithmetic  replace + with -
+[8/72] killed    lib/nimble_options/docs.ex:35  ComparisonNegation  replace == with !=
+[9/72] killed    lib/nimble_options/docs.ex:88  Boolean  replace && with ||
+[10/72] killed    lib/nimble_options/docs.ex:21  Boolean  replace || with &&
+[11/72] killed    lib/nimble_options.ex:671  ComparisonNegation  replace != with ==
+[12/72] survived  lib/nimble_options/docs.ex:14  Arithmetic  replace - with +
 [13/72] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with *
-[14/72] killed    lib/nimble_options/docs.ex:60  Boolean  replace && with ||
-[15/72] killed    lib/nimble_options/docs.ex:97  Boolean  replace && with ||
-[16/72] killed    lib/nimble_options.ex:965  Boolean  replace and with or
+[14/72] killed    lib/nimble_options/docs.ex:97  Boolean  replace && with ||
+[15/72] killed    lib/nimble_options.ex:965  Boolean  replace and with or
+[16/72] killed    lib/nimble_options/docs.ex:60  Boolean  replace && with ||
 [17/72] killed    lib/nimble_options/docs.ex:64  Arithmetic  replace + with -
 [18/72] killed    lib/nimble_options.ex:345  GuardTypeTest  replace guard is_list with is_tuple
 [19/72] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_atom with is_nil
-[20/72] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_list with is_tuple
-[21/72] killed    lib/nimble_options.ex:634  GuardTypeTest  replace guard is_integer with is_float
+[20/72] killed    lib/nimble_options.ex:634  GuardTypeTest  replace guard is_integer with is_float
+[21/72] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_list with is_tuple
 [22/72] error     lib/nimble_options.ex:495  GuardTypeTest  replace guard is_map with is_list
-[23/72] killed    lib/nimble_options.ex:863  GuardTypeTest  replace guard is_list with is_tuple
-[24/72] killed    lib/nimble_options.ex:601  GuardComparisonNegation  replace guard < with >=
-[25/72] survived  lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_number
+[23/72] killed    lib/nimble_options.ex:601  GuardComparisonNegation  replace guard < with >=
+[24/72] survived  lib/nimble_options.ex:1000  GuardTypeTest  replace guard is_integer with is_number
+[25/72] killed    lib/nimble_options.ex:863  GuardTypeTest  replace guard is_list with is_tuple
 [26/72] killed    lib/nimble_options.ex:634  GuardComparisonNegation  replace guard == with !=
-[27/72] killed    lib/nimble_options.ex:593  GuardTypeTest  replace guard is_integer with is_float
-[28/72] survived  lib/nimble_options.ex:1000  GuardComparisonBoundary  replace guard >= with >
-[29/72] survived  lib/nimble_options.ex:876  GuardTypeTest  replace guard is_nil with is_atom
+[27/72] survived  lib/nimble_options.ex:1000  GuardComparisonBoundary  replace guard >= with >
+[28/72] survived  lib/nimble_options.ex:876  GuardTypeTest  replace guard is_nil with is_atom
+[29/72] killed    lib/nimble_options.ex:593  GuardTypeTest  replace guard is_integer with is_float
 [30/72] killed    lib/nimble_options.ex:601  GuardComparisonBoundary  replace guard < with <=
 [31/72] killed    lib/nimble_options.ex:1010  GuardTypeTest  replace guard is_atom with is_nil
 [32/72] killed    lib/nimble_options.ex:609  GuardComparisonBoundary  replace guard < with <=
 [33/72] killed    lib/nimble_options.ex:1000  GuardComparisonNegation  replace guard >= with <
 [34/72] survived  lib/nimble_options.ex:601  GuardTypeTest  replace guard is_integer with is_number
 [35/72] killed    lib/nimble_options/docs.ex:4  GuardTypeTest  replace guard is_list with is_tuple
-[36/72] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_number
-[37/72] killed    lib/nimble_options.ex:601  GuardTypeTest  replace guard is_integer with is_float
+[36/72] killed    lib/nimble_options.ex:601  GuardTypeTest  replace guard is_integer with is_float
+[37/72] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_number
 [38/72] killed    lib/nimble_options.ex:625  GuardTypeTest  replace guard is_atom with is_nil
 [39/72] killed    lib/nimble_options.ex:738  GuardTypeTest  replace guard is_atom with is_nil
 [40/72] killed    lib/nimble_options.ex:742  GuardTypeTest  replace guard is_nil with is_atom
@@ -878,8 +878,8 @@ Schema build complete
 [61/72] killed    lib/nimble_options.ex:853  GuardTypeTest  replace guard is_list with is_tuple
 [62/72] killed    lib/nimble_options.ex:345  GuardTypeTest  replace guard is_list with is_tuple
 [63/72] killed    lib/nimble_options.ex:1031  GuardTypeTest  replace guard is_list with is_tuple
-[64/72] killed    lib/nimble_options.ex:634  GuardComparisonNegation  replace guard >= with <
-[65/72] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_integer
+[64/72] killed    lib/nimble_options.ex:617  GuardTypeTest  replace guard is_float with is_integer
+[65/72] killed    lib/nimble_options.ex:634  GuardComparisonNegation  replace guard >= with <
 [66/72] killed    lib/nimble_options.ex:609  GuardTypeTest  replace guard is_integer with is_float
 [67/72] killed    lib/nimble_options.ex:686  GuardTypeTest  replace guard is_map with is_list
 [68/72] killed    lib/nimble_options.ex:609  GuardComparisonNegation  replace guard < with >=
@@ -901,8 +901,8 @@ Surviving mutants:
   lib/nimble_options.ex:634 GuardTypeTest            replace guard is_integer with is_number
   lib/nimble_options.ex:932 GuardTypeTest            replace guard is_tuple with is_list
 
-Schema:    15/17 killed (88.2%)   wall: 13.8s
-Fallback:  44/55 killed (80.0%)   wall: 71.2s
+Schema:    15/17 killed (88.2%)   wall: 14.4s
+Fallback:  44/55 killed (80.0%)   wall: 74.2s
   guard_comparison_boundary:    3/4 killed
   guard_comparison_negation:    6/6 killed
   guard_type_test:              35/45 killed
@@ -911,19 +911,19 @@ Invalid:   0
 Errors:    3
 Timeouts:  0
 
-Run time: 85.0s
+Run time: 88.6s
 Fallback wall-clock: 83.8% of total
 Fallback mutants: 76.4% of executed
 
 Phases:
-  oracle build:         3509 ms
-  baseline tests:        618 ms
-  plan generation:        20 ms
-  schema build:         3640 ms
-  schema workers:       3893 ms
-  fallback workers:    20367 ms
+  oracle build:         3894 ms
+  baseline tests:        628 ms
+  plan generation:        21 ms
+  schema build:         3552 ms
+  schema workers:       4048 ms
+  fallback workers:    21324 ms
   report writing:          4 ms
-  total:               32495 ms
+  total:               33908 ms
 
 Selection:
   mode: static
@@ -939,5 +939,5 @@ Selection:
 Concurrency: 4 workers
 Test timeout: 10000 ms
 
-Mutalisk run complete in 32807ms
-bench.wall_ms=35000
+Mutalisk run complete in 34232ms
+bench.wall_ms=37000

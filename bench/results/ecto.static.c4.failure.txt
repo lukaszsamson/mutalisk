@@ -2,7 +2,7 @@ target=ecto repo=https://github.com/elixir-ecto/ecto.git ref=v3.13.6 sha=285329f
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.014s
+Resolution completed in 0.016s
 Unchanged:
   decimal 2.3.0
   earmark_parser 1.4.44
@@ -14,7 +14,6 @@ Unchanged:
   nimble_parsec 1.4.2
   telemetry 1.2.1
 * Getting telemetry (Hex package)
-* creating /Users/lukaszsamson/elixir/.mix/elixir/1-19-otp-28/rebar3
 * Getting decimal (Hex package)
 * Getting jason (Hex package)
 * Getting ex_doc (Hex package)
@@ -214,16 +213,6 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:183:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
  187 │        when byte in '0123456789' do
      │                     ~
      │
@@ -234,40 +223,10 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
-     │                                                                             ~
-     │
-     └─ lib/formatter.ex:189:77
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
  195 │        when byte in '0123456789' do
      │                     ~
      │
      └─ lib/decoder.ex:195:21
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
-     │                                                                      ~
-     │
-     └─ lib/formatter.ex:195:70
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
-     │                                                                     ~
-     │
-     └─ lib/formatter.ex:201:69
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -654,6 +613,16 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
+ 183 │   defp pp_byte(byte, rest, output, depth, true = _empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:183:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
  449 │         string(rest, original, skip + 2, stack, decode, [acc | '/'], 0)
      │                                                                ~
      │
@@ -674,10 +643,30 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
+ 189 │   defp pp_byte(byte, rest, output, depth, false = empty, opts) when byte in '}]' do
+     │                                                                             ~
+     │
+     └─ lib/formatter.ex:189:77
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
  451 │         string(rest, original, skip + 2, stack, decode, [acc | '\\'], 0)
      │                                                                ~
      │
      └─ lib/decoder.ex:451:64
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 195 │   defp pp_byte(byte, rest, output, depth, _empty, opts) when byte in ',' do
+     │                                                                      ~
+     │
+     └─ lib/formatter.ex:195:70
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -704,10 +693,10 @@ Compiling 10 files (.ex)
      You may run "mix format --migrate" to change all single-quoted
      strings to use the ~c sigil and fix this warning.
      │
- 695 │        when byte in '\s\n\r\t' do
-     │                     ~
+ 201 │   defp pp_byte(byte, rest, output, depth, empty, opts) when byte in ':' do
+     │                                                                     ~
      │
-     └─ lib/decoder.ex:695:21
+     └─ lib/formatter.ex:201:69
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -759,6 +748,16 @@ Compiling 10 files (.ex)
      │
      └─ lib/encode.ex:284:46
 
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 695 │        when byte in '\s\n\r\t' do
+     │                     ~
+     │
+     └─ lib/decoder.ex:695:21
+
 Generated jason app
 ==> ecto
 ===> Analyzing applications...
@@ -769,85 +768,19 @@ Generated mutalisk app
 ==> ecto
 Compiling 56 files (.ex)
 Generated ecto app
-** (Mix) baseline tests failed; aborting mutation run (full log: /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_baseline.log)
+Schema build starting
+Schema build complete
+** (Protocol.UndefinedError) protocol String.Chars not implemented for Tuple
 
-.....
+Got value:
 
-  8) test unique_constraint/3 (Ecto.ChangesetTest)
-     test/ecto/changeset_test.exs:2716
-     Assertion with == failed
-     code:  assert constraints(changeset) == [
-              %{
-                type: :unique,
-                field: :title,
-                constraint: ~r/whatever\d+/,
-                match: :exact,
-                error_message: "is taken",
-                error_type: :unique
-              }
-            ]
-     left:  [
-              %{
-                match: :exact,
-                type: :unique,
-                constraint: ~r/whatever\d+/,
-                error_type: :unique,
-                field: :title,
-                error_message: "is taken"
-              }
-            ]
-     right: [
-              %{
-                match: :exact,
-                type: :unique,
-                constraint: ~r/whatever\d+/,
-                error_type: :unique,
-                field: :title,
-                error_message: "is taken"
-              }
-            ]
-     stacktrace:
-       test/ecto/changeset_test.exs:2782: (test)
+    {:__MODULE__, [line: 8, column: 9], nil}
 
-........
-
-  9) test exclusion_constraint/3 (Ecto.ChangesetTest)
-     test/ecto/changeset_test.exs:3340
-     Assertion with == failed
-     code:  assert constraints(changeset) == [
-              %{
-                type: :exclusion,
-                field: :title,
-                constraint: ~r/whatever\d+/,
-                match: :exact,
-                error_message: "is invalid",
-                error_type: :exclusion
-              }
-            ]
-     left:  [
-              %{
-                match: :exact,
-                type: :exclusion,
-                constraint: ~r/whatever\d+/,
-                error_type: :exclusion,
-                field: :title,
-                error_message: "is invalid"
-              }
-            ]
-     right: [
-              %{
-                match: :exact,
-                type: :exclusion,
-                constraint: ~r/whatever\d+/,
-                error_type: :exclusion,
-                field: :title,
-                error_message: "is invalid"
-              }
-            ]
-     stacktrace:
-       test/ecto/changeset_test.exs:3422: (test)
-
-..........................................................................................................................
-Finished in 4.2 seconds (4.1s async, 0.1s sync)
-97 doctests, 1414 tests, 9 failures
-
+    (elixir 1.19.5) lib/string/chars.ex:7: String.Chars.impl_for!/1
+    (elixir 1.19.5) lib/string/chars.ex:26: String.Chars.to_string/1
+    (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+    (mutalisk 0.1.0) lib/mut/test_selection/static.ex:228: Mut.TestSelection.Static.module_concat/1
+    (mutalisk 0.1.0) lib/mut/test_selection/static.ex:80: Mut.TestSelection.Static.record_node/3
+    (mutalisk 0.1.0) lib/mut/test_selection/static.ex:72: Mut.TestSelection.Static.traverse/3
+    (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:400: Mix.Tasks.Mut.build_selection_context/7

@@ -9,10 +9,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1346,
+          "duration": 1768,
           "id": "0070f6db97a940dd7998a3aceb2c1c94",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with args"
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} can also cast the value of an option"
           ],
           "location": {
             "end": {
@@ -34,7 +34,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1349,
+          "duration": 1800,
           "id": "019f9b61e291ef92938c79847900bde2",
           "killedBy": [
             "NimbleOptionsTest:type validation valid timeout"
@@ -59,7 +59,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1323,
+          "duration": 1753,
           "id": "029e70252c5bc7f99df4a6e862f98f35",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
@@ -84,7 +84,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1393,
+          "duration": 1785,
           "id": "073c2ad39f77bb2fc161458d0cde2ab8",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -109,7 +109,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 825,
+          "duration": 1050,
           "id": "0f9305ff26912183e6ffb20e5c856de9",
           "killedBy": [
             "NimbleOptionsTest:nested options with custom keys validate empty keys for :non_empty_keyword_list"
@@ -134,7 +134,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1235,
+          "duration": 2911,
           "id": "10a9b79094d504a154658867526b7d59",
           "killedBy": [],
           "location": {
@@ -157,7 +157,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 1111,
+          "duration": 2459,
           "id": "1a73dbd10b25073c5b9f5efdb9e26e1d",
           "killedBy": [],
           "location": {
@@ -173,7 +173,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_list(opts)",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:61\\n     ** (BadMapError) expected a map, got:\\n\\n         [\\n           producer: [\\n             type: :non_empty_keyword_list,\\n             doc: \\\"The producer.\\\\n\\\\nWhich is very cool.\\\\n\\\",\\n             keys: [\\n               nested: [\\n                 type: :integer,\\n                 doc: \\\"The nestedness.\\\\n\\\\nIt should be quite nested.\\\\n\\\"\\n               ]\\n             ]\\n           ]\\n         ]\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (stdlib 7.2) maps.erl:1303: :maps.to_list([producer: [type: :non_empty_keyword_list, doc: \\\"The producer.\\\\n\\\\nWhich is very cool.\\\\n\\\", keys: [nested: [type: :integer, doc: \\\"The nestedness.\\\\n\\\\nIt should be quite nested.\\\\n\\\"]]]])\\n       test/nimble_options/docs_test.exs:95: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_finished\",\"duration_us\":8021}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (BadMapError) expected a map, got:\n\n    [an_option: []]\n\n    (stdlib 7.2) maps.erl:1303: :maps.to_list([an_option: []])\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 override docs for recursive keys\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/4/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 override docs for recursive keys\",\"event\":\"test_finished\",\"duration_us\":81459}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (BadMapError) expected a map, got:\n\n    [an_option: []]\n\n    (stdlib 7.2) maps.erl:1303: :maps.to_list([an_option: []])\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
         },
         {
           "coveredBy": [
@@ -181,7 +181,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1249,
+          "duration": 2818,
           "id": "20a652dd07c3d2ce388fad3d0df58913",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid non negative integer"
@@ -206,10 +206,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1269,
+          "duration": 1772,
           "id": "2a3020e3b996b628c8067ea4971eb66f",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:list, subtype} with a :non_empty_keyword_list subtype"
+            "NimbleOptionsTest:type validation invalid {:list, subtype}"
           ],
           "location": {
             "end": {
@@ -231,7 +231,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace boolean literal true with false",
-          "duration": 1198,
+          "duration": 1780,
           "id": "396df1eed505f60365ed01ff7e3bfa78",
           "killedBy": [],
           "location": {
@@ -247,7 +247,7 @@
           "mutatorName": "BooleanLiteral",
           "replacement": "false",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 stop generating docs recursively if type has no :keys (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:290\\n     ** (CondClauseError) no cond clause evaluated to a truthy value\\n     code: assert {:ok, ^opts} = NimbleOptions.validate(opts, schema)\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:588: NimbleOptions.validate_value/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:561: NimbleOptions.validate_option/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\\n       (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\\n       (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\\n       (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\\n       (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\\n       (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\\n       (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       (nimble_options 1.1.1) lib/nimble_options.ex:346: NimbleOptions.validate/2\\n       test/nimble_options/docs_test.exs:301: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 stop generating docs recursively if type has no :keys\",\"event\":\"test_finished\",\"duration_us\":5954}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (CondClauseError) no cond clause evaluated to a truthy value\n    (nimble_options 1.1.1) lib/nimble_options.ex:588: NimbleOptions.validate_value/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:561: NimbleOptions.validate_option/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\n    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\n    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\n    (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\n    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\n    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\n    (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":2499}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:61\\n     ** (CondClauseError) no cond clause evaluated to a truthy value\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:588: NimbleOptions.validate_value/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:561: NimbleOptions.validate_option/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\\n       (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\\n       (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\\n       (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\\n       (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\\n       (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\\n       (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:95: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_finished\",\"duration_us\":7982}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (CondClauseError) no cond clause evaluated to a truthy value\n    (nimble_options 1.1.1) lib/nimble_options.ex:588: NimbleOptions.validate_value/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:561: NimbleOptions.validate_option/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\n    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\n    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\n    (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:542: NimbleOptions.reduce_options/2\n    (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3\n    (elixir 1.19.5) lib/enum.ex:2574: Enum.reduce_while/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:535: NimbleOptions.validate_options/2\n    (nimble_options 1.1.1) lib/nimble_options.ex:508: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n"
         },
         {
           "coveredBy": [
@@ -255,10 +255,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1319,
+          "duration": 1892,
           "id": "3b85b137b0814d54998bd884f9dd6bdc",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid timeout"
+            "NimbleOptionsTest:type validation valid timeout"
           ],
           "location": {
             "end": {
@@ -280,7 +280,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1289,
+          "duration": 1853,
           "id": "3bf0fe184509d1b46f32725063b3ae82",
           "killedBy": [],
           "location": {
@@ -303,7 +303,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 1177,
+          "duration": 1684,
           "id": "455b7285d89610bf26514db91051d218",
           "killedBy": [],
           "location": {
@@ -319,7 +319,7 @@
           "mutatorName": "BooleanLiteral",
           "replacement": "true",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_finished\",\"duration_us\":5856}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_finished\",\"duration_us\":30}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 uses the type_doc option\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 uses the type_doc option (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:98\\n     ** (ArgumentError) invalid NimbleOptions schema. Reason: required :required option not found, received options: [:type, :type_doc, :doc] (in options [:foo])\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:375: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:116: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 uses the type_doc option\",\"event\":\"test_finished\",\"duration_us\":8807}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (ArgumentError) invalid NimbleOptions schema. Reason: required :type option not found, received options: [] (in options [:an_option])\n    (nimble_options 1.1.1) lib/nimble_options.ex:375: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":1039}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 passing specific indentation\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 passing specific indentation\",\"event\":\"test_finished\",\"duration_us\":11059}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_finished\",\"duration_us\":1513}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_finished\",\"duration_us\":31}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generates deprecated information\",\"event\":\"test_finished\",\"duration_us\":9}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":6}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:61\\n     ** (ArgumentError) invalid NimbleOptions schema. Reason: required :required option not found, received options: [:type, :doc, :keys] (in options [:producer])\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:375: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:95: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation\",\"event\":\"test_finished\",\"duration_us\":14472}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (ArgumentError) invalid NimbleOptions schema. Reason: required :type option not found, received options: [] (in options [:an_option])\n    (nimble_options 1.1.1) lib/nimble_options.ex:375: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
         },
         {
           "coveredBy": [
@@ -327,7 +327,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 788,
+          "duration": 867,
           "id": "4bd65e23ab93262ec765b13a89da6e4e",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -352,7 +352,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1331,
+          "duration": 1815,
           "id": "4e7d40724753ce4c7d3ff614a41dd266",
           "killedBy": [],
           "location": {
@@ -375,10 +375,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1215,
+          "duration": 1465,
           "id": "536ad5204ff6e52cb274c98cbbeee961",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:map, key_type, value_type}"
+            "NimbleOptionsTest:type validation invalid integer"
           ],
           "location": {
             "end": {
@@ -400,7 +400,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1208,
+          "duration": 1460,
           "id": "5569009fc6c2db81272a93f4f5af4cf7",
           "killedBy": [
             "NimbleOptionsTest:type validation valid non negative integer"
@@ -425,10 +425,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1172,
+          "duration": 1452,
           "id": "597d964bdb543da3a0dc607dace41c84",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with args"
+            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with empty args"
           ],
           "location": {
             "end": {
@@ -450,7 +450,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with <=",
-          "duration": 1209,
+          "duration": 1296,
           "id": "5a549de0ab03723a5fc8d656ef7bbd35",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -475,7 +475,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1235,
+          "duration": 1288,
           "id": "5adde818ee3640268cc76f514b485e79",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:fun, arity}"
@@ -500,7 +500,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 776,
+          "duration": 860,
           "id": "5e1edeac6873e335255713804d9480ef",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -525,7 +525,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1245,
+          "duration": 1292,
           "id": "60b83f98c968f821f2564ad443c941f5",
           "killedBy": [],
           "location": {
@@ -548,7 +548,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1273,
+          "duration": 1307,
           "id": "628fefcdd99d20ebf9030701bea7f443",
           "killedBy": [
             "NimbleOptionsTest:type validation {:custom, mod, fun, args} enforces the returned value of the function"
@@ -573,7 +573,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1329,
+          "duration": 1484,
           "id": "62e707e8bf97dd25c844f131a8e71173",
           "killedBy": [
             "NimbleOptionsTest:default value is not treated as values of received options when showing validation error"
@@ -598,7 +598,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_float with is_number",
-          "duration": 1378,
+          "duration": 1521,
           "id": "6c5ac97cea62365fe8b3aa4f5fe04e3c",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid float"
@@ -623,7 +623,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1345,
+          "duration": 1542,
           "id": "774c69a920f6711b70703a3317b2287f",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
@@ -648,7 +648,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1160,
+          "duration": 1251,
           "id": "78bcb6c9ee29833cc7c9a2692d0816b8",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -673,7 +673,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1172,
+          "duration": 1303,
           "id": "7d2b0d7426e028c69563e47992e3dd6e",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid mfa"
@@ -698,7 +698,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1165,
+          "duration": 1283,
           "id": "7f630fc8ef95dcbb4cc9d1b39f77f31f",
           "killedBy": [
             "NimbleOptionsTest:type validation valid timeout"
@@ -723,10 +723,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 751,
+          "duration": 813,
           "id": "81a48defcaa303cefecc6eb070f84f1d",
           "killedBy": [
-            "NimbleOptionsTest:doctest module NimbleOptions (2)"
+            "NimbleOptionsTest:type validation {:list, subtype} with a :non_empty_keyword_list subtype"
           ],
           "location": {
             "end": {
@@ -748,7 +748,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1147,
+          "duration": 1265,
           "id": "831860a6dadb1b8b698ba1d3ea13a2b0",
           "killedBy": [],
           "location": {
@@ -771,10 +771,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1227,
+          "duration": 1217,
           "id": "87b48056a448cf20e7856a8d3c6b2dde",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid {:or, subtypes} with nested :or"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with simple subtypes"
           ],
           "location": {
             "end": {
@@ -796,7 +796,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1247,
+          "duration": 1298,
           "id": "8bfd260806d4a7d72531e1b1fcda3723",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mfa"
@@ -821,7 +821,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1278,
+          "duration": 1313,
           "id": "903f4de5ca1ae41567e483d930b37431",
           "killedBy": [
             "NimbleOptionsTest:option_typespec/1 ranges with step"
@@ -846,7 +846,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1295,
+          "duration": 1329,
           "id": "9346bc9d0755b820b11462045d7c7d6b",
           "killedBy": [],
           "location": {
@@ -869,10 +869,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1227,
+          "duration": 1354,
           "id": "954166fad2ec8ec51c53b3415eb3c5a7",
           "killedBy": [
-            "NimbleOptionsTest:nested options with custom keys required options missing for map"
+            "NimbleOptionsTest:type validation invalid :map"
           ],
           "location": {
             "end": {
@@ -894,7 +894,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1203,
+          "duration": 1373,
           "id": "9ca41075ada7276b4970e28af50bf012",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid integer"
@@ -919,7 +919,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1209,
+          "duration": 1160,
           "id": "a59b17a825122265cf24848f2dc74b50",
           "killedBy": [],
           "location": {
@@ -935,7 +935,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(schema)",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 uses the type_doc option\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 uses the type_doc option (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:98\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1\\n\\n     The following arguments were given to NimbleOptions.new!/1:\\n\\n         # 1\\n         [foo: [type: :string, type_doc: \\\"`t:SomeModule.t/0`\\\", doc: \\\"The foo.\\\"], bar: [type: :string, type_doc: \\\"`t:SomeModule.t/0`\\\"], baz: [type: :integer, type_doc: false, doc: \\\"The bar.\\\"], quux: [type: :integer, type_doc: false, doc: false]]\\n\\n     Attempted function clauses (showing 1 out of 1):\\n\\n         def new!(schema) when is_tuple(schema)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:116: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 uses the type_doc option\",\"event\":\"test_finished\",\"duration_us\":15114}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1    \n    \n    The following arguments were given to NimbleOptions.new!/1:\n    \n        # 1\n        [an_option: []]\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def new!(+schema+) when -is_tuple(schema)-\n    \n    (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 generate inline indented docs for nested options (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:20\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1\\n\\n     The following arguments were given to NimbleOptions.new!/1:\\n\\n         # 1\\n         [producer: [type: :non_empty_keyword_list, doc: \\\"The producer. Supported options:\\\", keys: [module: [type: :mod_arg, doc: \\\"The module.\\\"], rate_limiting: [type: :non_empty_keyword_list, doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\", keys: [allowed_messages: [type: :pos_integer, doc: \\\"Number of messages per interval.\\\"], interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]]]]], other_key: [type: :string]]\\n\\n     Attempted function clauses (showing 1 out of 1):\\n\\n         def new!(schema) when is_tuple(schema)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:58: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/3/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_finished\",\"duration_us\":7405}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.new!/1    \n    \n    The following arguments were given to NimbleOptions.new!/1:\n    \n        # 1\n        [an_option: []]\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def new!(+schema+) when -is_tuple(schema)-\n    \n    (nimble_options 1.1.1) lib/nimble_options.ex:369: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
         },
         {
           "coveredBy": [
@@ -943,7 +943,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1363,
+          "duration": 1259,
           "id": "a5a08c636728d70e217594217ecba098",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
@@ -968,10 +968,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 1299,
+          "duration": 1225,
           "id": "a6a15f55ccab797dd8a91d3bf4e266a2",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:tuple, tuple_def}"
+            "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
           ],
           "location": {
             "end": {
@@ -993,7 +993,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1400,
+          "duration": 1231,
           "id": "b311175ec61c6854d123d61005dec458",
           "killedBy": [],
           "location": {
@@ -1016,7 +1016,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1395,
+          "duration": 1177,
           "id": "b5c5e246bd7687a3783f31df86e7989a",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -1041,7 +1041,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_tuple with is_list",
-          "duration": 1361,
+          "duration": 1227,
           "id": "bb3cccf9c6e6be4d30a5803051062cb3",
           "killedBy": [],
           "location": {
@@ -1064,7 +1064,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1107,
+          "duration": 1195,
           "id": "bb8845235b5d8aa8fe3db9c90ad1414f",
           "killedBy": [],
           "location": {
@@ -1080,7 +1080,7 @@
           "mutatorName": "GuardTypeTest",
           "replacement": "is_tuple(opts)",
           "status": "RuntimeError",
-          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 override docs for recursive keys\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 override docs for recursive keys\",\"event\":\"test_finished\",\"duration_us\":5039}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate subsections for nested options\",\"event\":\"test_finished\",\"duration_us\":21}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 keep indentation of multiline doc\",\"event\":\"test_finished\",\"duration_us\":2791}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false\",\"event\":\"test_finished\",\"duration_us\":2}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_started\"}\n{\"module\":\"NimbleOptions.DocsTest\",\"status\":\"passed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 autogenerated type docs\",\"event\":\"test_finished\",\"duration_us\":37}\n{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 uses the type_doc option\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 uses the type_doc option (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:98\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3\\n\\n     The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\\n\\n         # 1\\n         [foo: [type: :string, type_doc: \\\"`t:SomeModule.t/0`\\\", doc: \\\"The foo.\\\"], bar: [type: :string, type_doc: \\\"`t:SomeModule.t/0`\\\"], baz: [type: :integer, type_doc: false, doc: \\\"The bar.\\\"], quux: [type: :integer, type_doc: false, doc: false]]\\n\\n         # 2\\n         [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \\\"The type of the option item.\\\"], required: [type: :boolean, default: false, doc: \\\"Defines if the option item is required.\\\"], default: [type: :any, doc: \\\"The default value for the option item if that option is not specified. This value\\\\nis *validated* according to the given `:type`. This means that you cannot\\\\nhave, for example, `type: :integer` and use `default: \\\\\\\"a string\\\\\\\"`.\\\\n\\\"], keys: [type: :keyword_list, doc: \\\"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\\\nit defines which set of keys are accepted for the option item. The value of the\\\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\\\n`keys: [*: [type: :integer]]`.\\\\n\\\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \\\"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\\\n\\\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The documentation for the option item.\\\"], subsection: [type: :string, doc: \\\"The title of separate subsection of the options' documentation\\\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The type doc to use *in the documentation* for the option item. If `false`,\\\\nno type documentation is added to the item. If it's a string, it can be\\\\nanything. For example, you can use `\\\\\\\"a list of PIDs\\\\\\\"`, or you can use\\\\na typespec reference that ExDoc can link to the type definition, such as\\\\n`` \\\\\\\"`t:binary/0`\\\\\\\" ``. You can use Markdown in this documentation. If the\\\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\\\ndocumentation automatically if it can do it unambiguously. For example,\\\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\\\nauto-generated type doc.\\\\n\\\"], type_spec: [type: :any, type_doc: \\\"`t:Macro.t/0`\\\", doc: \\\"The quoted spec to use *in the typespec* for the option item. You should use this\\\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\\\nterm. For example, if you have an `:exception` option that is validated with a\\\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\\\n\\\"]]]]\\n\\n         # 3\\n         []\\n\\n     Attempted function clauses (showing 3 out of 3):\\n\\n         defp validate_options_with_schema_and_path(opts, fun, path) when is_function(fun)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_tuple(opts)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:116: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778331520-dLUlNw/1/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 uses the type_doc option\",\"event\":\"test_finished\",\"duration_us\":3106}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3    \n    \n    The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\n    \n        # 1\n        [an_option: []]\n    \n        # 2\n        [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \"The type of the option item.\"], required: [type: :boolean, default: false, doc: \"Defines if the option item is required.\"], default: [type: :any, doc: \"The default value for the option item if that option is not specified. This value\\nis *validated* according to the given `:type`. This means that you cannot\\nhave, for example, `type: :integer` and use `default: \\\"a string\\\"`.\\n\"], keys: [type: :keyword_list, doc: \"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\nit defines which set of keys are accepted for the option item. The value of the\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\n`keys: [*: [type: :integer]]`.\\n\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\n\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The documentation for the option item.\"], subsection: [type: :string, doc: \"The title of separate subsection of the options' documentation\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The type doc to use *in the documentation* for the option item. If `false`,\\nno type documentation is added to the item. If it's a string, it can be\\nanything. For example, you can use `\\\"a list of PIDs\\\"`, or you can use\\na typespec reference that ExDoc can link to the type definition, such as\\n`` \\\"`t:binary/0`\\\" ``. You can use Markdown in this documentation. If the\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\ndocumentation automatically if it can do it unambiguously. For example,\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\nauto-generated type doc.\\n\"], type_spec: [type: :any, type_doc: \"`t:Macro.t/0`\", doc: \"The quoted spec to use *in the typespec* for the option item. You should use this\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\nterm. For example, if you have an `:exception` option that is validated with a\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\n\"]]]]\n    \n        # 3\n        []\n    \n    Attempted function clauses (showing 3 out of 3):\n    \n        defp validate_options_with_schema_and_path(+opts+, +fun+, +path+) when -is_function(fun)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_map(opts)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_tuple(opts)-\n    \n    (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+          "statusReason": "{\"module\":\"NimbleOptions.DocsTest\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_started\"}\n{\"error\":\"  1) test NimbleOptions.docs/1 generate inline indented docs for nested options (NimbleOptions.DocsTest)\\n     test/nimble_options/docs_test.exs:20\\n     ** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3\\n\\n     The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\\n\\n         # 1\\n         [producer: [type: :non_empty_keyword_list, doc: \\\"The producer. Supported options:\\\", keys: [module: [type: :mod_arg, doc: \\\"The module.\\\"], rate_limiting: [type: :non_empty_keyword_list, doc: \\\"A list of options to enable and configure rate limiting. Supported options:\\\\n\\\", keys: [allowed_messages: [type: :pos_integer, doc: \\\"Number of messages per interval.\\\"], interval: [required: true, type: :pos_integer, doc: \\\"The interval.\\\"]]]]], other_key: [type: :string]]\\n\\n         # 2\\n         [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \\\"The type of the option item.\\\"], required: [type: :boolean, default: false, doc: \\\"Defines if the option item is required.\\\"], default: [type: :any, doc: \\\"The default value for the option item if that option is not specified. This value\\\\nis *validated* according to the given `:type`. This means that you cannot\\\\nhave, for example, `type: :integer` and use `default: \\\\\\\"a string\\\\\\\"`.\\\\n\\\"], keys: [type: :keyword_list, doc: \\\"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\\\nit defines which set of keys are accepted for the option item. The value of the\\\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\\\n`keys: [*: [type: :integer]]`.\\\\n\\\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \\\"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\\\n\\\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The documentation for the option item.\\\"], subsection: [type: :string, doc: \\\"The title of separate subsection of the options' documentation\\\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \\\"`t:String.t/0` or `false`\\\", doc: \\\"The type doc to use *in the documentation* for the option item. If `false`,\\\\nno type documentation is added to the item. If it's a string, it can be\\\\nanything. For example, you can use `\\\\\\\"a list of PIDs\\\\\\\"`, or you can use\\\\na typespec reference that ExDoc can link to the type definition, such as\\\\n`` \\\\\\\"`t:binary/0`\\\\\\\" ``. You can use Markdown in this documentation. If the\\\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\\\ndocumentation automatically if it can do it unambiguously. For example,\\\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\\\nauto-generated type doc.\\\\n\\\"], type_spec: [type: :any, type_doc: \\\"`t:Macro.t/0`\\\", doc: \\\"The quoted spec to use *in the typespec* for the option item. You should use this\\\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\\\nterm. For example, if you have an `:exception` option that is validated with a\\\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\\\n\\\"]]]]\\n\\n         # 3\\n         []\\n\\n     Attempted function clauses (showing 3 out of 3):\\n\\n         defp validate_options_with_schema_and_path(opts, fun, path) when is_function(fun)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts)\\n         defp validate_options_with_schema_and_path(opts, schema, path) when is_tuple(opts)\\n\\n     code: assert NimbleOptions.docs(NimbleOptions.new!(schema)) == docs\\n     stacktrace:\\n       (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\\n       (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\\n       test/nimble_options/docs_test.exs:58: (test)\\n\",\"module\":\"NimbleOptions.DocsTest\",\"status\":\"failed\",\"file\":\"/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_sandboxes/mut-1778393998-uXyDOA/2/test/nimble_options/docs_test.exs\",\"test\":\"NimbleOptions.docs/1 generate inline indented docs for nested options\",\"event\":\"test_finished\",\"duration_us\":8124}\n\n== Compilation error in file test/nimble_options_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleOptions.validate_options_with_schema_and_path/3    \n    \n    The following arguments were given to NimbleOptions.validate_options_with_schema_and_path/3:\n    \n        # 1\n        [an_option: []]\n    \n        # 2\n        [*: [type: :keyword_list, keys: [type: [type: {:custom, NimbleOptions, :validate_type, []}, default: :any, doc: \"The type of the option item.\"], required: [type: :boolean, default: false, doc: \"Defines if the option item is required.\"], default: [type: :any, doc: \"The default value for the option item if that option is not specified. This value\\nis *validated* according to the given `:type`. This means that you cannot\\nhave, for example, `type: :integer` and use `default: \\\"a string\\\"`.\\n\"], keys: [type: :keyword_list, doc: \"Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,\\nit defines which set of keys are accepted for the option item. The value of the\\n`:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.\\nUse `:*` as the key to allow multiple arbitrary keys and specify their schema:\\n`keys: [*: [type: :integer]]`.\\n\", keys: &NimbleOptions.options_schema/0], deprecated: [type: :string, doc: \"Defines a message to indicate that the option item is deprecated. The message will be displayed as a warning when passing the item.\\n\"], doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The documentation for the option item.\"], subsection: [type: :string, doc: \"The title of separate subsection of the options' documentation\"], type_doc: [type: {:or, [:string, {:in, [false]}]}, type_doc: \"`t:String.t/0` or `false`\", doc: \"The type doc to use *in the documentation* for the option item. If `false`,\\nno type documentation is added to the item. If it's a string, it can be\\nanything. For example, you can use `\\\"a list of PIDs\\\"`, or you can use\\na typespec reference that ExDoc can link to the type definition, such as\\n`` \\\"`t:binary/0`\\\" ``. You can use Markdown in this documentation. If the\\n`:type_doc` option is not present, NimbleOptions tries to produce a type\\ndocumentation automatically if it can do it unambiguously. For example,\\nif `type: :integer`, NimbleOptions will use `t:integer/0` as the\\nauto-generated type doc.\\n\"], type_spec: [type: :any, type_doc: \"`t:Macro.t/0`\", doc: \"The quoted spec to use *in the typespec* for the option item. You should use this\\nwhen the auto-generated spec is not specific enough. For example, if you are performing\\ncustom validation on an option (with the `{:custom, ...}` type), then the\\ngenerated type spec for that option will always be `t:term/0`, but you can use\\nthis option to customize that. The value for this option **must** be a quoted Elixir\\nterm. For example, if you have an `:exception` option that is validated with a\\n`{:custom, ...}` type (based on `is_exception/1`), you can override the type\\nspec for that option to be `quote(do: Exception.t())`. *Available since v1.1.0*.\\n\"]]]]\n    \n        # 3\n        []\n    \n    Attempted function clauses (showing 3 out of 3):\n    \n        defp validate_options_with_schema_and_path(+opts+, +fun+, +path+) when -is_function(fun)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_map(opts)-\n        defp validate_options_with_schema_and_path(+opts+, +schema+, +path+) when -is_tuple(opts)-\n    \n    (nimble_options 1.1.1) lib/nimble_options.ex:491: NimbleOptions.validate_options_with_schema_and_path/3\n    (nimble_options 1.1.1) lib/nimble_options.ex:370: NimbleOptions.new!/1\n    test/nimble_options_test.exs:1855: (module)\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:648: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.19.5) lib/kernel/parallel_compiler.ex:531: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
         },
         {
           "coveredBy": [
@@ -1088,10 +1088,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1229,
+          "duration": 1334,
           "id": "bde079a777a57718db045ba0843a0bcf",
           "killedBy": [
-            "NimbleOptionsTest:type validation {:custom, mod, fun, args} with empty args"
+            "NimbleOptionsTest:type validation valid {:or, subtypes} with compound subtypes"
           ],
           "location": {
             "end": {
@@ -1113,7 +1113,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1236,
+          "duration": 1337,
           "id": "c04a8c12415a48613525b31da5d2a5d1",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:tuple, tuple_def}"
@@ -1138,7 +1138,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1262,
+          "duration": 1349,
           "id": "c8676a0887a60354a9abfd8d5e93ad80",
           "killedBy": [
             "NimbleOptionsTest:type validation valid {:struct, struct_name}"
@@ -1163,7 +1163,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1267,
+          "duration": 1361,
           "id": "cd0b0b12e7df29652c4ac68813b4f31c",
           "killedBy": [
             "NimbleOptionsTest:type validation valid mod_arg"
@@ -1188,10 +1188,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1376,
+          "duration": 1322,
           "id": "d02129c107cb8dffd37d527e94d9a9e7",
           "killedBy": [
-            "NimbleOptionsTest:type validation invalid {:or, subtypes}"
+            "NimbleOptionsTest::doc invalid documentation for key"
           ],
           "location": {
             "end": {
@@ -1213,7 +1213,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1283,
+          "duration": 1188,
           "id": "d1eeb58dd18e9a1fddea33633ca23b70",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
@@ -1238,7 +1238,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace and with or",
-          "duration": 807,
+          "duration": 904,
           "id": "e2215fb855a35b33caaae4a528149b08",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:or, subtypes} with nested keyword lists"
@@ -1263,7 +1263,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1307,
+          "duration": 1248,
           "id": "e68f994996b6fc5cb43785aecf5f39d4",
           "killedBy": [
             "NimbleOptionsTest:type validation {:list, subtype} with a :keyword_list subtype"
@@ -1288,10 +1288,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1301,
+          "duration": 1263,
           "id": "e69dace77d472110db789826b6ad5eac",
           "killedBy": [
-            "NimbleOptionsTest:type validation valid timeout"
+            "NimbleOptionsTest:type validation invalid timeout"
           ],
           "location": {
             "end": {
@@ -1313,7 +1313,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_float with is_integer",
-          "duration": 1209,
+          "duration": 1237,
           "id": "e96cadb63de6f8600ea18ac2747287c4",
           "killedBy": [
             "NimbleOptionsTest:type validation valid float"
@@ -1338,7 +1338,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1232,
+          "duration": 1235,
           "id": "ecd9d6c91de0565d137699acba63d887",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -1363,10 +1363,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 1276,
+          "duration": 1213,
           "id": "f1b33c0ca7d7e3311ae76bcd43791ef6",
           "killedBy": [
-            "NimbleOptionsTest:nested options with predefined keys known options for map"
+            "NimbleOptionsTest:nested options show up in error messages for options that we validate for map"
           ],
           "location": {
             "end": {
@@ -1388,7 +1388,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard < with >=",
-          "duration": 1288,
+          "duration": 1228,
           "id": "f4972e130686a9686b6986617815cd89",
           "killedBy": [
             "NimbleOptionsTest:type validation valid positive integer"
@@ -1413,10 +1413,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1328,
+          "duration": 1186,
           "id": "f629228fd9347b4ba0125671fa4b0df0",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 autogenerated type docs"
           ],
           "location": {
             "end": {
@@ -1438,10 +1438,10 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1261,
+          "duration": 1212,
           "id": "f6a99aa3ef59fa66f96dc0f013012375",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 autogenerated type docs"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
           ],
           "location": {
             "end": {
@@ -1463,7 +1463,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1259,
+          "duration": 1205,
           "id": "fb7d901609fc3a114ca49c5755811004",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
@@ -1488,7 +1488,7 @@
             "test/nimble_options/docs_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1279,
+          "duration": 1245,
           "id": "fc8d6bffba6906549bb365ebc8b02d26",
           "killedBy": [
             "NimbleOptionsTest:type validation invalid {:fun, arity}"
@@ -1519,7 +1519,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1187,
+          "duration": 2537,
           "id": "0cbc4007fad2ed2326c0ea7d9d037763",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
@@ -1544,10 +1544,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 813,
+          "duration": 1034,
           "id": "153c25b36be8d18bba98b4ef50c5ebe7",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
           ],
           "location": {
             "end": {
@@ -1569,7 +1569,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 798,
+          "duration": 1056,
           "id": "2e332aaccee32562dc3a1b7e51fa0640",
           "killedBy": [],
           "location": {
@@ -1592,10 +1592,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 10 with 11",
-          "duration": 1256,
+          "duration": 1679,
           "id": "380a2042e5ab1a3d60005c79f844cc75",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
           ],
           "location": {
             "end": {
@@ -1617,10 +1617,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 788,
+          "duration": 1026,
           "id": "3f1ea37e39498b6467672b166a9c69c9",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
           ],
           "location": {
             "end": {
@@ -1642,10 +1642,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1264,
+          "duration": 1806,
           "id": "43c1430de432353a42e76376126d5e8d",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
           ],
           "location": {
             "end": {
@@ -1667,10 +1667,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1148,
+          "duration": 1405,
           "id": "53493520e49382ea41e31f7eff9154eb",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
           ],
           "location": {
             "end": {
@@ -1692,10 +1692,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1291,
+          "duration": 1474,
           "id": "64010f6a6993a544f03c789e55ae9ef5",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate subsections for nested options"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false"
           ],
           "location": {
             "end": {
@@ -1717,10 +1717,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 792,
+          "duration": 843,
           "id": "7267f5b99d043f81e3b56ede9be6ec02",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
           ],
           "location": {
             "end": {
@@ -1742,10 +1742,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 785,
+          "duration": 828,
           "id": "745a0d9ab7ba2728ba49c172c5f81b11",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1767,7 +1767,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 766,
+          "duration": 858,
           "id": "74f25423b43da7100e59b6a74c19d656",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
@@ -1792,10 +1792,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 750,
+          "duration": 790,
           "id": "7fdb129dc40c0616b73670a9261816c5",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option doesn't appear in the documentation when the :doc option is false"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 generate inline indented docs for nested options"
           ],
           "location": {
             "end": {
@@ -1817,7 +1817,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 781,
+          "duration": 800,
           "id": "82d309d246a48373579703fd94acf85e",
           "killedBy": [],
           "location": {
@@ -1840,10 +1840,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 10 with 0",
-          "duration": 1177,
+          "duration": 1229,
           "id": "94f430ba32b64854060b36a32fdcd966",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
           ],
           "location": {
             "end": {
@@ -1865,7 +1865,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1175,
+          "duration": 1330,
           "id": "9bf1c2970ca9058f6f1e637314508c05",
           "killedBy": [
             "NimbleOptionsTest:option_typespec/1 all possible types"
@@ -1890,7 +1890,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 1196,
+          "duration": 1317,
           "id": "a1a42c70c2283d0bfba0dd88afa3b21f",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
@@ -1915,10 +1915,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 772,
+          "duration": 913,
           "id": "a510d58025ec970bb9996db9b6703e69",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 passing specific indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
           ],
           "location": {
             "end": {
@@ -1940,7 +1940,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1361,
+          "duration": 1173,
           "id": "b7514836a3074e041f85885a292fde96",
           "killedBy": [],
           "location": {
@@ -1963,7 +1963,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 797,
+          "duration": 896,
           "id": "bebad99e4effb3d9e76c965a861c2133",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
@@ -1988,7 +1988,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 1198,
+          "duration": 1288,
           "id": "c22aa142fbdadf7af891ec4c1f232578",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
@@ -2013,10 +2013,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace boolean literal true with false",
-          "duration": 1218,
+          "duration": 1297,
           "id": "c57017ce599513d2c71961096e589ef1",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 autogenerated type docs"
           ],
           "location": {
             "end": {
@@ -2038,10 +2038,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1226,
+          "duration": 1343,
           "id": "cbdb53a0bb2ebecb707673ddcb776084",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 uses the type_doc option"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 the option and its children don't appear in the documentation when the :doc option is false"
           ],
           "location": {
             "end": {
@@ -2063,10 +2063,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace && with ||",
-          "duration": 823,
+          "duration": 920,
           "id": "e9c82ea4d6716c5f04bb200317b20147",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 stop generating docs recursively if type has no :keys"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 override docs for recursive keys"
           ],
           "location": {
             "end": {
@@ -2088,7 +2088,7 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 621,
+          "duration": 629,
           "id": "f80390c710140571755a758bbf35890d",
           "killedBy": [
             "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
@@ -2113,10 +2113,10 @@
             "test/nimble_options_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1091,
+          "duration": 1137,
           "id": "fd33ef2ff24070683d3a8955983230fa",
           "killedBy": [
-            "NimbleOptions.DocsTest:NimbleOptions.docs/1 supports paragraphs and keeps the correct indentation"
+            "NimbleOptions.DocsTest:NimbleOptions.docs/1 keep indentation of multiline doc"
           ],
           "location": {
             "end": {
@@ -2232,7 +2232,7 @@
     },
     "metrics": {
       "fallback_count": 69,
-      "fallback_time_ms": 86634,
+      "fallback_time_ms": 100835,
       "fanout": {
         "0070f6db97a940dd7998a3aceb2c1c94": 2,
         "019f9b61e291ef92938c79847900bde2": 2,
@@ -2419,15 +2419,15 @@
     },
     "persistent": null,
     "phase_timings": {
-      "baseline_tests_ms": 607,
+      "baseline_tests_ms": 613,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 24560,
-      "oracle_build_ms": 3223,
+      "fallback_workers_ms": 28727,
+      "oracle_build_ms": 3584,
       "plan_generation_ms": 22,
       "report_writing_ms": 5,
-      "schema_build_ms": 3308,
-      "schema_workers_ms": 3766,
-      "total_ms": 35936
+      "schema_build_ms": 3598,
+      "schema_workers_ms": 4267,
+      "total_ms": 41240
     },
     "recompile_categories": {
       "compile_error": 0,

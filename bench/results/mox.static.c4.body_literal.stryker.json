@@ -9,10 +9,10 @@
             "test/cluster_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 991,
+          "duration": 1033,
           "id": "028140767d66376ef79cd91e4b6e58e1",
           "killedBy": [
-            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
+            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
           ],
           "location": {
             "end": {
@@ -34,10 +34,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 1287,
+          "duration": 1550,
           "id": "0446c4affb4b80d8e459f1897d53c350",
           "killedBy": [
-            "MoxTest:defmock/2 accepts a list of callbacks to skip"
+            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
           ],
           "location": {
             "end": {
@@ -59,7 +59,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1775,
+          "duration": 2008,
           "id": "11cbce8a9c5a77584d65184d54e399f6",
           "killedBy": [],
           "location": {
@@ -82,10 +82,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1289,
+          "duration": 1562,
           "id": "1360d751f30091b830065bc72eda812e",
           "killedBy": [
-            "MoxTest:defmock/2 defines a mock function for all callbacks by default"
+            "MoxTest:defmock/2 raises if :skip_optional_callbacks is not a list or boolean"
           ],
           "location": {
             "end": {
@@ -107,10 +107,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace - with *",
-          "duration": 971,
+          "duration": 1056,
           "id": "15083cc3497dac0faf7bdf7c8f8ba9d9",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -132,7 +132,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1309,
+          "duration": 1567,
           "id": "1f4713614a50fd28713b1259d99322c6",
           "killedBy": [
             "MoxTest:allow/3 raises if you try to define expectations on allowed process"
@@ -157,10 +157,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1250,
+          "duration": 1311,
           "id": "268327b5d0475b6833182dcf18e60270",
           "killedBy": [
-            "MoxTest:stub_with/2 stubs all functions with functions from a module"
+            "MoxTest:stub_with/2 can override stubs"
           ],
           "location": {
             "end": {
@@ -182,7 +182,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 964,
+          "duration": 1061,
           "id": "290aec500216e46180841bd0eab3333b",
           "killedBy": [
             "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
@@ -207,10 +207,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace != with ==",
-          "duration": 975,
+          "duration": 997,
           "id": "320623ef37a1aa89c241068e3e778b46",
           "killedBy": [
-            "MoxTest:allow/3 allows different processes to share mocks from child process"
+            "MoxTest:verify_on_exit!/0 verifies all mocks even if none is used in private mode"
           ],
           "location": {
             "end": {
@@ -232,7 +232,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1238,
+          "duration": 1329,
           "id": "3f8721021c575dcd6fbd7da33a639feb",
           "killedBy": [
             "MoxTest:deny/3 raises if function is not in behaviour"
@@ -257,10 +257,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1251,
+          "duration": 1295,
           "id": "46ea55007958d0e880d0a1e14c7b23e6",
           "killedBy": [
-            "MoxTest:defmock/2 accepts a list of callbacks to skip"
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks is not an optional callback"
           ],
           "location": {
             "end": {
@@ -282,10 +282,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1252,
+          "duration": 1348,
           "id": "495fca562da8c896a8d6f2d15bc364d3",
           "killedBy": [
-            "MoxTest:allow/3 allowances are reclaimed if the owner process dies"
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
           ],
           "location": {
             "end": {
@@ -307,7 +307,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_nil with is_atom",
-          "duration": 1739,
+          "duration": 1834,
           "id": "4e5f8845fceb6af841549521a8bb0583",
           "killedBy": [],
           "location": {
@@ -330,10 +330,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 882,
+          "duration": 1736,
           "id": "4f1b623323df6c0028e2210959100216",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+            "MoxTest:expect/4 raises if all expectations are consumed"
           ],
           "location": {
             "end": {
@@ -355,10 +355,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1305,
+          "duration": 1327,
           "id": "55261fb0cf661bded7e162cdaa191aaf",
           "killedBy": [
-            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
+            "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
           ],
           "location": {
             "end": {
@@ -380,7 +380,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace boolean literal true with false",
-          "duration": 1320,
+          "duration": 1305,
           "id": "6c4dec116ac7e6a6b0337373e7ece652",
           "killedBy": [
             "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
@@ -405,10 +405,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1308,
+          "duration": 1390,
           "id": "6eae7c60cdf225d83f533c9729aab278",
           "killedBy": [
-            "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
+            "MoxTest.ClusterTest:an allowance can commute over the cluster in private mode"
           ],
           "location": {
             "end": {
@@ -430,10 +430,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1177,
+          "duration": 1329,
           "id": "7e5af2097fb9705e66d2e5671ef1df0b",
           "killedBy": [
-            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks is not an optional callback"
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
           ],
           "location": {
             "end": {
@@ -455,10 +455,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1197,
+          "duration": 1312,
           "id": "82b8f0a48ca47d50ce47a1171ae82bb8",
           "killedBy": [
-            "MoxTest:allow/3 raises if you try to allow process with existing expectations set"
+            "MoxTest:stub/3 allows repeated invocations"
           ],
           "location": {
             "end": {
@@ -480,10 +480,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with *",
-          "duration": 854,
+          "duration": 1803,
           "id": "97945a919ec7ba25968a69b386134a2a",
           "killedBy": [
-            "MoxTest:expect/4 allows asserting that function is not called"
+            "MoxTest:deny/3 allows asserting that function is not called"
           ],
           "location": {
             "end": {
@@ -505,10 +505,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1240,
+          "duration": 1358,
           "id": "992e8d3228ca2ac82afd68b93f74813d",
           "killedBy": [
-            "MoxTest:deny/3 allows asserting that function is not called"
+            "MoxTest:deny/3 raises if a non-mock is given"
           ],
           "location": {
             "end": {
@@ -530,10 +530,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1222,
+          "duration": 1335,
           "id": "9a5ce6dffe3248a4ce8a6aef82791271",
           "killedBy": [
-            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
+            "MoxTest:defmock/2 raises if :skip_optional_callbacks is not a list or boolean"
           ],
           "location": {
             "end": {
@@ -555,7 +555,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace attribute literal 30000 with 30001",
-          "duration": 1654,
+          "duration": 3120,
           "id": "a1779da38b942527fbc82059727d9104",
           "killedBy": [],
           "location": {
@@ -578,7 +578,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1170,
+          "duration": 2355,
           "id": "a1c283b3932e4d08cfa921c017a83c37",
           "killedBy": [
             "MoxTest:deny/3 allows asserting that function is not called"
@@ -603,10 +603,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace || with &&",
-          "duration": 856,
+          "duration": 1704,
           "id": "a6a75841bf3bc69c4d7e88a4864d0eb8",
           "killedBy": [
-            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
+            "MoxTest:stub_with/2 can override stubs"
           ],
           "location": {
             "end": {
@@ -628,10 +628,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1191,
+          "duration": 2612,
           "id": "ad7284d7bc1afba8484969e0d0a6b08b",
           "killedBy": [
-            "MoxTest:stub/3 overwrites earlier stubs"
+            "MoxTest:expect/4 raises if all expectations are consumed, even when a stub is defined"
           ],
           "location": {
             "end": {
@@ -653,7 +653,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1190,
+          "duration": 2614,
           "id": "ad72dd8113716102a4c94cd15269b4e7",
           "killedBy": [
             "MoxTest:verify_on_exit!/0 raises if the mocks are not called"
@@ -678,7 +678,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1205,
+          "duration": 1474,
           "id": "adbdcf5b3c696f27c6c87c8500245558",
           "killedBy": [
             "MoxTest:deny/3 allows asserting that function is not called"
@@ -703,7 +703,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1737,
+          "duration": 1786,
           "id": "aeebda250921ffbed8adadc32b1973c0",
           "killedBy": [],
           "location": {
@@ -726,10 +726,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1251,
+          "duration": 1289,
           "id": "b8131bb577d5766b7849db765890036c",
           "killedBy": [
-            "MoxTest:stub_with/2 stubs all functions with functions from a module"
+            "MoxTest:stub_with/2 Leaves behaviours not implemented by the module un-stubbed"
           ],
           "location": {
             "end": {
@@ -751,10 +751,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 928,
+          "duration": 1757,
           "id": "ba7149b1f4a576b7802756c48914fe54",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
+            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
           ],
           "location": {
             "end": {
@@ -776,7 +776,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard == with !=",
-          "duration": 1294,
+          "duration": 1351,
           "id": "bb2b60be0022f26594e3fbaaec18bb29",
           "killedBy": [
             "MoxTest.ClusterTest:an allowance can commute over the cluster in global mode"
@@ -801,7 +801,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 858,
+          "duration": 1333,
           "id": "bc967d1873e23926feb1951e4109c270",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -826,7 +826,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace boolean literal false with true",
-          "duration": 1231,
+          "duration": 1274,
           "id": "c234b6c05d85dbf482fa4510b9e89841",
           "killedBy": [
             "MoxTest:defmock/2 accepts true to indicate no optional functions should be generated"
@@ -851,10 +851,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace + with -",
-          "duration": 849,
+          "duration": 1232,
           "id": "c26b511de9ee6bd613c93a59944e65fa",
           "killedBy": [
-            "MoxTest:expect/4 raises if all expectations are consumed"
+            "MoxTest:verify!/0 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -876,10 +876,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with <",
-          "duration": 1212,
+          "duration": 1246,
           "id": "c32c7305b8288615f9c79fa781a07afd",
           "killedBy": [
-            "MoxTest:verify_on_exit!/0 raises if the mocks are not called"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -901,7 +901,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard >= with >",
-          "duration": 1292,
+          "duration": 1294,
           "id": "c8d2a9fbbc096d0c9db39b1a43177fd8",
           "killedBy": [
             "MoxTest:expect/4 allows asserting that function is not called"
@@ -926,7 +926,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 0 with 1",
-          "duration": 1704,
+          "duration": 1806,
           "id": "cb455fd273de6b29b04faf6d15a77a84",
           "killedBy": [],
           "location": {
@@ -949,10 +949,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1192,
+          "duration": 1330,
           "id": "cc0be5e06ae4c703bee0f92e23841fb3",
           "killedBy": [
-            "MoxTest:deny/3 raises even when a stub is defined"
+            "MoxTest:stub/3 allows repeated invocations"
           ],
           "location": {
             "end": {
@@ -974,10 +974,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1182,
+          "duration": 1321,
           "id": "cf53e63f854b2db908e8958ca8dcced7",
           "killedBy": [
-            "MoxTest:defmock/2 accepts false to indicate all functions should be generated"
+            "MoxTest:defmock/2 accepts a list of callbacks to skip"
           ],
           "location": {
             "end": {
@@ -999,10 +999,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace or with and",
-          "duration": 842,
+          "duration": 1256,
           "id": "d3954c9c82add592f7ac86a43fb69267",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+            "MoxTest:verify!/1 verifies all mocks for the current process in private mode"
           ],
           "location": {
             "end": {
@@ -1024,10 +1024,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_map with is_list",
-          "duration": 1199,
+          "duration": 1319,
           "id": "d41639a74d48ae07454bdcccf0b25b1c",
           "killedBy": [
-            "MoxTest:stub_with/2 Leaves behaviours not implemented by the module un-stubbed"
+            "MoxTest:allow/3 allows different processes to share mocks from child process"
           ],
           "location": {
             "end": {
@@ -1049,10 +1049,10 @@
             "test/cluster_test.exs"
           ],
           "description": "remove unary not",
-          "duration": 847,
+          "duration": 1255,
           "id": "d90d5cb3b4649efde1bfdc9f836711af",
           "killedBy": [
-            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks does not exist"
+            "MoxTest:defmock/2 raises if a callback in :skip_optional_callbacks is not an optional callback"
           ],
           "location": {
             "end": {
@@ -1074,7 +1074,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1749,
+          "duration": 1843,
           "id": "da4d06faee12f73c7b5c701b0e52436c",
           "killedBy": [],
           "location": {
@@ -1097,10 +1097,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_float",
-          "duration": 1268,
+          "duration": 1284,
           "id": "e156c949962d0aba8fb749e42186643d",
           "killedBy": [
-            "MoxTest:allow/3 raises if you try to define expectations on allowed process"
+            "MoxTest:allow/3 raises if you try to allow process with existing expectations set"
           ],
           "location": {
             "end": {
@@ -1122,9 +1122,11 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_integer with is_number",
-          "duration": 1805,
+          "duration": 1378,
           "id": "e2f46bf1c1a6fcca3988c5be07a8efe0",
-          "killedBy": [],
+          "killedBy": [
+            "MoxTest:allow/3 allows different processes to share mocks from parent process"
+          ],
           "location": {
             "end": {
               "column": 61,
@@ -1137,7 +1139,7 @@
           },
           "mutatorName": "GuardTypeTest",
           "replacement": "is_number(n)",
-          "status": "Survived"
+          "status": "Killed"
         },
         {
           "coveredBy": [
@@ -1145,10 +1147,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_list with is_tuple",
-          "duration": 1341,
+          "duration": 1311,
           "id": "e5a006e5aa26cff4a8353808556c8161",
           "killedBy": [
-            "MoxTest:allow/3 allowances support locally registered processes"
+            "MoxTest:expect/4 is invoked n times by a sub-process in private mode on Elixir 1.8"
           ],
           "location": {
             "end": {
@@ -1170,10 +1172,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace guard is_atom with is_nil",
-          "duration": 1261,
+          "duration": 1182,
           "id": "ea6d36dd69ca69882f4a98355533da35",
           "killedBy": [
-            "MoxTest:deny/3 allows asserting that function is not called"
+            "MoxTest:deny/3 raises if you try to add expectations from non global process"
           ],
           "location": {
             "end": {
@@ -1195,10 +1197,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace - with +",
-          "duration": 694,
+          "duration": 770,
           "id": "eab60343ebdd703bef08097ee2523ecb",
           "killedBy": [
-            "MoxTest:verify!/1 verifies all mocks for current process in global mode"
+            "MoxTest:verify!/0 verifies all mocks for the current process in global mode"
           ],
           "location": {
             "end": {
@@ -1220,7 +1222,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace integer literal 1 with 0",
-          "duration": 1256,
+          "duration": 1144,
           "id": "eb8900e88b5308032fd25c1bb57ada85",
           "killedBy": [
             "MoxTest:deny/3 allows asserting that function is not called"
@@ -1245,10 +1247,10 @@
             "test/cluster_test.exs"
           ],
           "description": "replace == with !=",
-          "duration": 676,
+          "duration": 727,
           "id": "ed1ded3093bc0b87ac98d3c4801cc18a",
           "killedBy": [
-            "MoxTest:allow/3 allowances support processes registered through a Registry"
+            "MoxTest:allow/3 raises if you try to allow itself"
           ],
           "location": {
             "end": {
@@ -1270,7 +1272,7 @@
             "test/cluster_test.exs"
           ],
           "description": "replace attribute literal 30000 with 0",
-          "duration": 1238,
+          "duration": 1117,
           "id": "f5d34ebe5bbf5b814ed2a59d6f618b97",
           "killedBy": [
             "MoxTest:verify!/1 verifies all mocks for current process in global mode"
@@ -1355,7 +1357,7 @@
     },
     "metrics": {
       "fallback_count": 38,
-      "fallback_time_ms": 50781,
+      "fallback_time_ms": 58610,
       "fanout": {
         "028140767d66376ef79cd91e4b6e58e1": 2,
         "0446c4affb4b80d8e459f1897d53c350": 2,
@@ -1474,15 +1476,15 @@
     },
     "persistent": null,
     "phase_timings": {
-      "baseline_tests_ms": 1059,
+      "baseline_tests_ms": 1066,
       "coverage_collection_ms": 0,
-      "fallback_workers_ms": 14979,
-      "oracle_build_ms": 3367,
-      "plan_generation_ms": 14,
-      "report_writing_ms": 2,
-      "schema_build_ms": 3288,
-      "schema_workers_ms": 3400,
-      "total_ms": 26590
+      "fallback_workers_ms": 17522,
+      "oracle_build_ms": 4469,
+      "plan_generation_ms": 12,
+      "report_writing_ms": 3,
+      "schema_build_ms": 3449,
+      "schema_workers_ms": 4838,
+      "total_ms": 31832
     },
     "recompile_categories": {
       "compile_error": 0,

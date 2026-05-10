@@ -2,7 +2,7 @@ target=mox repo=https://github.com/dashbitco/mox.git ref=v1.2.0 sha=5dd54291520f
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.016s
+Resolution completed in 0.015s
 Unchanged:
   castore 1.0.5
   earmark_parser 1.4.26
@@ -27,26 +27,6 @@ Unchanged:
 mix mut starting
 ==> jason
 Compiling 10 files (.ex)
-    warning: using single-quoted strings to represent charlists is deprecated.
-    Use ~c"" if you indeed want a charlist or use "" instead.
-    You may run "mix format --migrate" to change all single-quoted
-    strings to use the ~c sigil and fix this warning.
-    │
- 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
-    │                                                     ~
-    │
-    └─ lib/codegen.ex:51:53
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
-     │                                                ~
-     │
-     └─ lib/codegen.ex:118:48
-
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
      You may run "mix format --migrate" to change all single-quoted
@@ -106,6 +86,76 @@ Compiling 10 files (.ex)
      │                                                                     ~
      │
      └─ lib/formatter.ex:201:69
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 164 │     ']'
+     │     ~
+     │
+     └─ lib/encode.ex:164:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 193 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:193:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 211 │     '}'
+     │     ~
+     │
+     └─ lib/encode.ex:211:5
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                            ~
+     │
+     └─ lib/encode.ex:284:28
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+     │                                              ~
+     │
+     └─ lib/encode.ex:284:46
+
+    warning: using single-quoted strings to represent charlists is deprecated.
+    Use ~c"" if you indeed want a charlist or use "" instead.
+    You may run "mix format --migrate" to change all single-quoted
+    strings to use the ~c sigil and fix this warning.
+    │
+ 51 │     collapse_static(List.flatten(["{", elements] ++ '}'))
+    │                                                     ~
+    │
+    └─ lib/codegen.ex:51:53
+
+     warning: using single-quoted strings to represent charlists is deprecated.
+     Use ~c"" if you indeed want a charlist or use "" instead.
+     You may run "mix format --migrate" to change all single-quoted
+     strings to use the ~c sigil and fix this warning.
+     │
+ 118 │       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
+     │                                                ~
+     │
+     └─ lib/codegen.ex:118:48
 
      warning: using single-quoted strings to represent charlists is deprecated.
      Use ~c"" if you indeed want a charlist or use "" instead.
@@ -707,56 +757,6 @@ Compiling 10 files (.ex)
      │
      └─ lib/decoder.ex:695:21
 
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 164 │     ']'
-     │     ~
-     │
-     └─ lib/encode.ex:164:5
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 193 │     '}'
-     │     ~
-     │
-     └─ lib/encode.ex:193:5
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 211 │     '}'
-     │     ~
-     │
-     └─ lib/encode.ex:211:5
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
-     │                            ~
-     │
-     └─ lib/encode.ex:284:28
-
-     warning: using single-quoted strings to represent charlists is deprecated.
-     Use ~c"" if you indeed want a charlist or use "" instead.
-     You may run "mix format --migrate" to change all single-quoted
-     strings to use the ~c sigil and fix this warning.
-     │
- 284 │   slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
-     │                                              ~
-     │
-     └─ lib/encode.ex:284:46
-
      warning: you are implementing a protocol for Decimal but said module is not available. Make sure the module name is correct. If Decimal is an optional dependency, please wrap the protocol implementation in a Code.ensure_loaded?(Decimal) check
      │
  224 │ defimpl Jason.Encoder, for: Decimal do
@@ -764,19 +764,19 @@ Compiling 10 files (.ex)
      │
      └─ lib/encoder.ex:224: (file)
 
-     warning: Decimal.to_string/2 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
-     │
- 242 │     [?", decimal.to_string(value, :normal), ?"]
-     │                  ~
-     │
-     └─ lib/encode.ex:242:18: Jason.Encode.struct/4
-
      warning: Decimal.to_string/1 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
      │
  228 │     [?", decimal.to_string(value), ?"]
      │                  ~
      │
      └─ lib/encoder.ex:228:18: Jason.Encoder.Decimal.encode/2
+
+     warning: Decimal.to_string/2 is undefined (module Decimal is not available or is yet to be defined). Make sure the module name is correct and has been specified in full (or that an alias has been defined)
+     │
+ 242 │     [?", decimal.to_string(value, :normal), ?"]
+     │                  ~
+     │
+     └─ lib/encode.ex:242:18: Jason.Encode.struct/4
 
 warning: struct Decimal.Error is undefined (module Decimal.Error is not available or is yet to be defined)
 └─ lib/decoder.ex: Jason.Decoder.float_decode_function/1
@@ -925,18 +925,18 @@ Compiling 4 files (.ex)
 Generated mox app
 Schema build starting
 Schema build complete
-[1/38] killed    lib/mox.ex:443  UnaryNot  remove unary not
-[2/38] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
-[3/38] killed    lib/mox.ex:857  Arithmetic  replace - with *
-[4/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
-[5/38] killed    lib/mox.ex:911  Arithmetic  replace + with *
-[6/38] killed    lib/mox.ex:1017  Boolean  replace || with &&
-[7/38] killed    lib/mox.ex:1018  Arithmetic  replace + with *
+[1/38] killed    lib/mox.ex:861  ComparisonNegation  replace != with ==
+[2/38] killed    lib/mox.ex:857  Arithmetic  replace - with *
+[3/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
+[4/38] killed    lib/mox.ex:443  UnaryNot  remove unary not
+[5/38] killed    lib/mox.ex:1018  Arithmetic  replace + with *
+[6/38] killed    lib/mox.ex:911  Arithmetic  replace + with *
+[7/38] killed    lib/mox.ex:1017  Boolean  replace || with &&
 [8/38] killed    lib/mox.ex:850  ComparisonNegation  replace == with !=
-[9/38] killed    lib/mox.ex:850  Boolean  replace or with and
+[9/38] killed    lib/mox.ex:911  Arithmetic  replace + with -
 [10/38] killed    lib/mox.ex:1018  Arithmetic  replace + with -
-[11/38] killed    lib/mox.ex:469  UnaryNot  remove unary not
-[12/38] killed    lib/mox.ex:911  Arithmetic  replace + with -
+[11/38] killed    lib/mox.ex:850  Boolean  replace or with and
+[12/38] killed    lib/mox.ex:469  UnaryNot  remove unary not
 [13/38] killed    lib/mox.ex:857  Arithmetic  replace - with +
 [14/38] killed    lib/mox.ex:765  ComparisonNegation  replace == with !=
 [15/38] killed    lib/mox.ex:468  GuardTypeTest  replace guard is_list with is_tuple
@@ -944,19 +944,19 @@ Schema build complete
 [17/38] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
 [18/38] killed    lib/mox.ex:758  GuardTypeTest  replace guard is_atom with is_nil
 [19/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
-[20/38] killed    lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
-[21/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_list with is_tuple
-[22/38] survived  lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
-[23/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
-[24/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
+[20/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_list with is_tuple
+[21/38] killed    lib/mox.ex:571  GuardComparisonBoundary  replace guard >= with >
+[22/38] survived  lib/mox.ex:1015  GuardTypeTest  replace guard is_nil with is_atom
+[23/38] killed    lib/mox.ex:386  GuardTypeTest  replace guard is_atom with is_nil
+[24/38] killed    lib/mox.ex:571  GuardTypeTest  replace guard is_atom with is_nil
 [25/38] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
 [26/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_atom with is_nil
 [27/38] killed    lib/mox.ex:571  GuardComparisonNegation  replace guard >= with <
 [28/38] killed    lib/mox.ex:632  GuardTypeTest  replace guard is_atom with is_nil
 [29/38] killed    lib/mox.ex:546  GuardComparisonNegation  replace guard >= with <
 [30/38] killed    lib/mox.ex:1026  GuardComparisonNegation  replace guard == with !=
-[31/38] killed    lib/mox.ex:546  GuardComparisonBoundary  replace guard >= with >
-[32/38] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
+[31/38] killed    lib/mox.ex:596  GuardTypeTest  replace guard is_atom with is_nil
+[32/38] killed    lib/mox.ex:546  GuardComparisonBoundary  replace guard >= with >
 [33/38] killed    lib/mox.ex:1015  GuardTypeTest  replace guard is_map with is_list
 [34/38] survived  lib/mox.ex:571  GuardTypeTest  replace guard is_integer with is_number
 [35/38] killed    lib/mox.ex:546  GuardTypeTest  replace guard is_integer with is_float
@@ -966,33 +966,33 @@ Schema build complete
 Mutation score: 35/38 = 92.1%
 
 Surviving mutants:
-  lib/mox.ex:571 GuardComparisonBoundary  replace guard >= with >
+  lib/mox.ex:1015 GuardTypeTest            replace guard is_nil with is_atom
   lib/mox.ex:571 GuardTypeTest            replace guard is_integer with is_number
   lib/mox.ex:546 GuardTypeTest            replace guard is_integer with is_number
 
-Schema:    14/14 killed (100.0%)   wall: 12.3s
-Fallback:  21/24 killed (87.5%)   wall: 33.4s
-  guard_comparison_boundary:    1/2 killed
+Schema:    14/14 killed (100.0%)   wall: 11.9s
+Fallback:  21/24 killed (87.5%)   wall: 35.6s
+  guard_comparison_boundary:    2/2 killed
   guard_comparison_negation:    3/3 killed
-  guard_type_test:              17/19 killed
+  guard_type_test:              16/19 killed
 Skipped:   366 (attribute_engine_disabled: 1, body_literal_engine_disabled: 12, missing_oracle_site: 38, no_applicable_mutator: 1, unsupported_dispatch: 314)
 Invalid:   0
 Errors:    0
 Timeouts:  0
 
-Run time: 45.7s
-Fallback wall-clock: 73.1% of total
+Run time: 47.5s
+Fallback wall-clock: 74.9% of total
 Fallback mutants: 63.2% of executed
 
 Phases:
-  oracle build:         3328 ms
-  baseline tests:       1146 ms
+  oracle build:         3720 ms
+  baseline tests:       1197 ms
   plan generation:        13 ms
-  schema build:         3305 ms
-  schema workers:       3434 ms
-  fallback workers:    10138 ms
+  schema build:         3553 ms
+  schema workers:       3329 ms
+  fallback workers:    10730 ms
   report writing:          2 ms
-  total:               21871 ms
+  total:               23017 ms
 
 Selection:
   mode: static
@@ -1008,5 +1008,5 @@ Selection:
 Concurrency: 4 workers
 Test timeout: 10000 ms
 
-Mutalisk run complete in 22230ms
-bench.wall_ms=25000
+Mutalisk run complete in 23437ms
+bench.wall_ms=26000

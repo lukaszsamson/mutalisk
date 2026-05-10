@@ -1,0 +1,599 @@
+target=jason repo=https://github.com/michalmuskala/jason.git ref=v1.4.5 sha=4ede42858eb19f80ec9e863aab52df466eab8608 selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.017s
+Unchanged:
+  decimal 2.3.0
+  dialyxir 1.4.7
+  earmark_parser 1.4.44
+  erlex 0.2.8
+  ex_doc 0.40.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.3
+  nimble_parsec 1.4.2
+  stream_data 1.3.0
+* Getting decimal (Hex package)
+* Getting dialyxir (Hex package)
+* Getting ex_doc (Hex package)
+* Getting stream_data (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+* Getting erlex (Hex package)
+You have added/upgraded packages you could sponsor, run `mix hex.sponsor` to learn more
+mix mut starting
+==> stream_data
+Compiling 3 files (.ex)
+Generated stream_data app
+==> erlex
+Compiling 1 file (.xrl)
+Compiling 1 file (.yrl)
+src/erlex_parser.yrl: Warning: conflicts: 27 shift/reduce, 0 reduce/reduce
+Compiling 2 files (.erl)
+Compiling 1 file (.ex)
+Generated erlex app
+==> decimal
+Compiling 4 files (.ex)
+Generated decimal app
+==> dialyxir
+Compiling 67 files (.ex)
+Generated dialyxir app
+==> mutalisk
+Compiling 75 files (.ex)
+Generated mutalisk app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+Schema build starting
+Schema build complete
+[1/396] killed    lib/decoder.ex:235  Arithmetic  replace + with *
+[2/396] survived  lib/encode.ex:626  Arithmetic  replace + with *
+[3/396] killed    lib/decoder.ex:119  Arithmetic  replace + with *
+[4/396] survived  lib/codegen.ex:119  ComparisonBoundary  replace < with <=
+[5/396] killed    lib/decoder.ex:274  Arithmetic  replace + with *
+[6/396] killed    lib/decoder.ex:195  Arithmetic  replace + with -
+[7/396] killed    lib/decoder.ex:117  Arithmetic  replace + with *
+[8/396] survived  lib/encode.ex:643  Arithmetic  replace + with *
+[9/396] killed    lib/encode.ex:437  Arithmetic  replace + with *
+[10/396] survived  lib/decoder.ex:261  Arithmetic  replace + with -
+[11/396] killed    lib/encode.ex:318  Arithmetic  replace + with -
+[12/396] survived  lib/encode.ex:614  Arithmetic  replace + with -
+[13/396] killed    lib/decoder.ex:356  Arithmetic  replace + with -
+[14/396] survived  lib/encode.ex:607  Arithmetic  replace + with -
+[15/396] killed    lib/formatter.ex:231  Arithmetic  replace + with -
+[16/396] killed    lib/decoder.ex:419  Arithmetic  replace + with *
+[17/396] survived  lib/encode.ex:302  Arithmetic  replace + with -
+[18/396] killed    lib/decoder.ex:332  Arithmetic  replace + with *
+[19/396] killed    lib/decoder.ex:284  Arithmetic  replace + with -
+[20/396] killed    lib/decoder.ex:451  Arithmetic  replace + with *
+[21/396] killed    lib/decoder.ex:266  Arithmetic  replace + with *
+[22/396] killed    lib/decoder.ex:312  Arithmetic  replace + with -
+[23/396] killed    lib/encode.ex:350  Arithmetic  replace + with -
+[24/396] killed    lib/decoder.ex:210  Arithmetic  replace + with *
+[25/396] killed    lib/encode.ex:362  Arithmetic  replace + with -
+[26/396] killed    lib/formatter.ex:175  Arithmetic  replace + with *
+[27/396] killed    lib/decoder.ex:395  Arithmetic  replace + with *
+[28/396] killed    lib/decoder.ex:160  Arithmetic  replace + with *
+[29/396] killed    lib/decoder.ex:127  Arithmetic  replace + with -
+[30/396] survived  lib/formatter.ex:130  Boolean  replace || with &&
+[31/396] killed    lib/decoder.ex:361  Arithmetic  replace + with -
+[32/396] killed    lib/decoder.ex:204  Arithmetic  replace + with -
+[33/396] killed    lib/decoder.ex:195  Arithmetic  replace + with *
+[34/396] killed    lib/decoder.ex:402  Arithmetic  replace + with -
+[35/396] killed    lib/decoder.ex:312  Arithmetic  replace + with *
+[36/396] survived  lib/encode.ex:620  Arithmetic  replace + with -
+[37/396] survived  lib/decoder.ex:484  Arithmetic  replace + with *
+[38/396] survived  lib/encode.ex:556  Arithmetic  replace + with -
+[39/396] killed    lib/decoder.ex:377  Arithmetic  replace + with *
+[40/396] killed    lib/decoder.ex:366  Arithmetic  replace + with *
+[41/396] killed    lib/decoder.ex:175  Arithmetic  replace + with *
+[42/396] survived  lib/encode.ex:620  Arithmetic  replace + with -
+[43/396] killed    lib/formatter.ex:176  Arithmetic  replace + with *
+[44/396] killed    lib/decoder.ex:315  Arithmetic  replace + with *
+[45/396] killed    lib/decoder.ex:179  Arithmetic  replace + with -
+[46/396] killed    lib/decoder.ex:172  Arithmetic  replace + with -
+[47/396] survived  lib/encode.ex:620  Arithmetic  replace + with *
+[48/396] killed    lib/encode.ex:511  Arithmetic  replace + with -
+[49/396] killed    lib/encode.ex:419  Arithmetic  replace + with -
+[50/396] survived  lib/decoder.ex:455  Arithmetic  replace + with -
+[51/396] survived  lib/decoder.ex:479  Arithmetic  replace + with -
+[52/396] killed    lib/decoder.ex:395  Arithmetic  replace + with -
+[53/396] killed    lib/decoder.ex:121  Arithmetic  replace + with -
+[54/396] survived  lib/decoder.ex:482  Arithmetic  replace - with +
+[55/396] killed    lib/formatter.ex:173  ComparisonNegation  replace == with !=
+[56/396] killed    lib/decoder.ex:410  Arithmetic  replace + with -
+[57/396] killed    lib/decoder.ex:121  Arithmetic  replace + with *
+[58/396] killed    lib/decoder.ex:451  Arithmetic  replace + with -
+[59/396] survived  lib/encode.ex:556  Arithmetic  replace + with *
+[60/396] survived  lib/decoder.ex:422  Arithmetic  replace + with -
+[61/396] killed    lib/decoder.ex:179  Arithmetic  replace + with *
+[62/396] killed    lib/decoder.ex:308  Arithmetic  replace + with *
+[63/396] killed    lib/decoder.ex:187  Arithmetic  replace + with -
+[64/396] survived  lib/encode.ex:632  Arithmetic  replace + with *
+[65/396] survived  lib/decoder.ex:428  Arithmetic  replace + with *
+[66/396] killed    lib/decoder.ex:117  Arithmetic  replace + with -
+[67/396] killed    lib/encode.ex:511  Arithmetic  replace + with -
+[68/396] killed    lib/decoder.ex:215  Arithmetic  replace + with -
+[69/396] survived  lib/decoder.ex:273  Arithmetic  replace + with *
+[70/396] survived  lib/decoder.ex:484  Arithmetic  replace - with +
+[71/396] killed    lib/decoder.ex:284  Arithmetic  replace + with *
+[72/396] survived  lib/encode.ex:607  Arithmetic  replace + with *
+[73/396] killed    lib/formatter.ex:185  Arithmetic  replace - with +
+[74/396] killed    lib/encode.ex:442  Arithmetic  replace + with -
+[75/396] killed    lib/decoder.ex:408  Arithmetic  replace + with *
+[76/396] survived  lib/decoder.ex:434  Arithmetic  replace + with -
+[77/396] survived  lib/encode.ex:607  Arithmetic  replace + with *
+[78/396] killed    lib/encode.ex:473  Arithmetic  replace + with *
+[79/396] killed    lib/formatter.ex:135  Boolean  replace || with &&
+[80/396] killed    lib/decoder.ex:219  Arithmetic  replace + with -
+[81/396] killed    lib/encode.ex:527  Arithmetic  replace + with -
+[82/396] survived  lib/encode.ex:426  Arithmetic  replace + with -
+[83/396] survived  lib/decoder.ex:261  Arithmetic  replace + with *
+[84/396] survived  lib/encode.ex:643  Arithmetic  replace + with -
+[85/396] killed    lib/decoder.ex:241  Arithmetic  replace + with -
+[86/396] killed    lib/encode.ex:580  Arithmetic  replace - with +
+[87/396] killed    lib/decoder.ex:272  Arithmetic  replace - with *
+[88/396] killed    lib/decoder.ex:284  Arithmetic  replace + with -
+[89/396] killed    lib/decoder.ex:281  Arithmetic  replace + with -
+[90/396] killed    lib/codegen.ex:119  Boolean  replace or with and
+[91/396] killed    lib/formatter.ex:231  Arithmetic  replace + with *
+[92/396] killed    lib/decoder.ex:192  Arithmetic  replace + with *
+[93/396] killed    lib/decoder.ex:141  Arithmetic  replace + with *
+[94/396] killed    lib/encode.ex:445  Arithmetic  replace + with *
+[95/396] survived  lib/decoder.ex:424  Arithmetic  replace + with *
+[96/396] killed    lib/decoder.ex:379  Arithmetic  replace + with -
+[97/396] error     lib/codegen.ex:119  ComparisonNegation  replace < with >=
+[98/396] killed    lib/encode.ex:355  Arithmetic  replace + with -
+[99/396] survived  lib/decoder.ex:424  Arithmetic  replace + with -
+[100/396] killed    lib/formatter.ex:176  Arithmetic  replace + with -
+[101/396] survived  lib/decoder.ex:483  Arithmetic  replace - with +
+[102/396] survived  lib/codegen.ex:119  Boolean  replace or with and
+[103/396] survived  lib/encode.ex:614  Arithmetic  replace + with *
+[104/396] survived  lib/encode.ex:457  Arithmetic  replace + with *
+[105/396] killed    lib/encode.ex:398  Arithmetic  replace + with *
+[106/396] killed    lib/encode.ex:511  Arithmetic  replace + with *
+[107/396] killed    lib/decoder.ex:192  Arithmetic  replace + with -
+[108/396] survived  lib/decoder.ex:484  Arithmetic  replace + with -
+[109/396] killed    lib/encode.ex:431  Arithmetic  replace + with *
+[110/396] killed    lib/decoder.ex:664  Arithmetic  replace - with *
+[111/396] killed    lib/decoder.ex:410  Arithmetic  replace + with *
+[112/396] killed    lib/decoder.ex:146  Arithmetic  replace + with *
+[113/396] survived  lib/encode.ex:388  Arithmetic  replace + with -
+[114/396] survived  lib/decoder.ex:183  ComparisonBoundary  replace > with >=
+[115/396] killed    lib/decoder.ex:179  Arithmetic  replace + with -
+[116/396] killed    lib/decoder.ex:426  Arithmetic  replace + with -
+[117/396] killed    lib/decoder.ex:183  ComparisonNegation  replace > with <=
+[118/396] killed    lib/decoder.ex:356  Arithmetic  replace + with *
+[119/396] killed    lib/decoder.ex:398  Arithmetic  replace + with *
+[120/396] killed    lib/formatter.ex:247  ComparisonNegation  replace == with !=
+[121/396] killed    lib/decoder.ex:109  Arithmetic  replace + with -
+[122/396] survived  lib/decoder.ex:482  Arithmetic  replace - with *
+[123/396] killed    lib/encode.ex:343  Arithmetic  replace + with -
+[124/396] killed    lib/decoder.ex:459  Arithmetic  replace + with *
+[125/396] survived  lib/decoder.ex:700  Arithmetic  replace + with *
+[126/396] survived  lib/encode.ex:607  Arithmetic  replace + with -
+[127/396] killed    lib/decoder.ex:332  Arithmetic  replace + with -
+[128/396] killed    lib/decoder.ex:402  Arithmetic  replace + with *
+[129/396] survived  lib/decoder.ex:483  Arithmetic  replace - with *
+[130/396] killed    lib/decoder.ex:175  Arithmetic  replace + with -
+[131/396] survived  lib/encode.ex:572  Arithmetic  replace + with *
+[132/396] killed    lib/encode.ex:483  Arithmetic  replace + with *
+[133/396] killed    lib/decoder.ex:287  Arithmetic  replace + with *
+[134/396] killed    lib/formatter.ex:175  Arithmetic  replace + with -
+[135/396] killed    lib/decoder.ex:434  Arithmetic  replace + with *
+[136/396] killed    lib/decoder.ex:123  Arithmetic  replace + with *
+[137/396] killed    lib/formatter.ex:190  Arithmetic  replace - with +
+[138/396] killed    lib/decoder.ex:656  Arithmetic  replace + with -
+[139/396] killed    lib/decoder.ex:419  Arithmetic  replace + with -
+[140/396] killed    lib/decoder.ex:400  Arithmetic  replace + with -
+[141/396] killed    lib/decoder.ex:227  Arithmetic  replace + with *
+[142/396] killed    lib/decoder.ex:443  Arithmetic  replace + with *
+[143/396] survived  lib/decoder.ex:474  Arithmetic  replace + with -
+[144/396] killed    lib/decoder.ex:660  Arithmetic  replace + with -
+[145/396] survived  lib/encode.ex:426  Arithmetic  replace + with *
+[146/396] killed    lib/encode.ex:577  Arithmetic  replace + with -
+[147/396] killed    lib/encode.ex:350  Arithmetic  replace + with *
+[148/396] killed    lib/encode.ex:522  Arithmetic  replace + with *
+[149/396] killed    lib/decoder.ex:334  Arithmetic  replace + with *
+[150/396] survived  lib/encode.ex:388  Arithmetic  replace + with *
+[151/396] killed    lib/decoder.ex:160  Arithmetic  replace + with -
+[152/396] killed    lib/decoder.ex:227  Arithmetic  replace + with -
+[153/396] survived  lib/encode.ex:567  Arithmetic  replace + with -
+[154/396] killed    lib/encode.ex:350  Arithmetic  replace + with -
+[155/396] killed    lib/encode.ex:355  Arithmetic  replace + with *
+[156/396] survived  lib/encode.ex:426  Arithmetic  replace + with *
+[157/396] killed    lib/encode.ex:504  Arithmetic  replace + with -
+[158/396] killed    lib/decoder.ex:404  Arithmetic  replace + with *
+[159/396] survived  lib/encode.ex:614  Arithmetic  replace + with -
+[160/396] killed    lib/decoder.ex:179  Arithmetic  replace + with *
+[161/396] survived  lib/decoder.ex:474  Arithmetic  replace + with *
+[162/396] killed    lib/encode.ex:530  Arithmetic  replace + with *
+[163/396] killed    lib/encode.ex:511  Arithmetic  replace + with *
+[164/396] killed    lib/decoder.ex:406  Arithmetic  replace + with *
+[165/396] survived  lib/decoder.ex:273  Arithmetic  replace + with -
+[166/396] killed    lib/encode.ex:504  Arithmetic  replace + with *
+[167/396] killed    lib/encode.ex:522  Arithmetic  replace + with *
+[168/396] survived  lib/encode.ex:632  Arithmetic  replace + with -
+[169/396] killed    lib/decoder.ex:656  Arithmetic  replace + with *
+[170/396] survived  lib/decoder.ex:504  UnaryNot  remove unary not
+[171/396] killed    lib/formatter.ex:174  ComparisonNegation  replace == with !=
+[172/396] survived  lib/encode.ex:562  Arithmetic  replace + with -
+[173/396] killed    lib/decoder.ex:134  Arithmetic  replace + with *
+[174/396] killed    lib/decoder.ex:222  Arithmetic  replace + with -
+[175/396] killed    lib/decoder.ex:204  Arithmetic  replace + with *
+[176/396] killed    lib/decoder.ex:445  Arithmetic  replace + with *
+[177/396] killed    lib/encode.ex:437  Arithmetic  replace + with -
+[178/396] survived  lib/decoder.ex:445  Arithmetic  replace + with -
+[179/396] killed    lib/decoder.ex:274  Arithmetic  replace + with *
+[180/396] killed    lib/encode.ex:419  Arithmetic  replace + with *
+[181/396] killed    lib/encode.ex:577  Arithmetic  replace + with *
+[182/396] killed    lib/decoder.ex:404  Arithmetic  replace + with -
+[183/396] killed    lib/decoder.ex:398  Arithmetic  replace + with -
+[184/396] survived  lib/decoder.ex:430  Arithmetic  replace + with *
+[185/396] killed    lib/encode.ex:359  Arithmetic  replace + with -
+[186/396] survived  lib/encode.ex:562  Arithmetic  replace + with *
+[187/396] killed    lib/decoder.ex:334  Arithmetic  replace + with -
+[188/396] survived  lib/decoder.ex:449  Arithmetic  replace + with -
+[189/396] killed    lib/decoder.ex:187  Arithmetic  replace + with *
+[190/396] killed    lib/decoder.ex:377  Arithmetic  replace + with -
+[191/396] survived  lib/encode.ex:626  Arithmetic  replace + with *
+[192/396] survived  lib/encode.ex:572  Arithmetic  replace + with -
+[193/396] killed    lib/encode.ex:318  Arithmetic  replace + with *
+[194/396] survived  lib/decoder.ex:432  Arithmetic  replace + with -
+[195/396] killed    lib/encode.ex:587  Arithmetic  replace + with *
+[196/396] killed    lib/decoder.ex:235  Arithmetic  replace + with -
+[197/396] survived  lib/encode.ex:626  Arithmetic  replace + with -
+[198/396] killed    lib/decoder.ex:241  Arithmetic  replace + with *
+[199/396] survived  lib/encode.ex:643  Arithmetic  replace + with *
+[200/396] survived  lib/encode.ex:626  Arithmetic  replace + with -
+[201/396] killed    lib/encode.ex:362  Arithmetic  replace + with *
+[202/396] killed    lib/decoder.ex:274  Arithmetic  replace + with -
+[203/396] killed    lib/formatter.ex:190  Arithmetic  replace - with *
+[204/396] killed    lib/decoder.ex:664  Arithmetic  replace - with +
+[205/396] survived  lib/encode.ex:567  Arithmetic  replace + with *
+[206/396] killed    lib/decoder.ex:287  Arithmetic  replace + with -
+[207/396] survived  lib/codegen.ex:119  ComparisonBoundary  replace > with >=
+[208/396] survived  lib/decoder.ex:428  Arithmetic  replace + with -
+[209/396] killed    lib/encode.ex:522  Arithmetic  replace + with -
+[210/396] killed    lib/decoder.ex:341  Arithmetic  replace + with *
+[211/396] killed    lib/decoder.ex:272  Arithmetic  replace - with +
+[212/396] killed    lib/encode.ex:516  Arithmetic  replace + with -
+[213/396] killed    lib/encode.ex:516  Arithmetic  replace + with *
+[214/396] killed    lib/decoder.ex:210  Arithmetic  replace + with -
+[215/396] killed    lib/encode.ex:445  Arithmetic  replace + with -
+[216/396] survived  lib/decoder.ex:484  Arithmetic  replace - with *
+[217/396] survived  lib/decoder.ex:453  Arithmetic  replace + with -
+[218/396] killed    lib/decoder.ex:406  Arithmetic  replace + with -
+[219/396] survived  lib/decoder.ex:483  Arithmetic  replace + with -
+[220/396] killed    lib/decoder.ex:258  Arithmetic  replace + with -
+[221/396] survived  lib/encode.ex:643  Arithmetic  replace + with -
+[222/396] survived  lib/decoder.ex:222  Arithmetic  replace + with *
+[223/396] survived  lib/encode.ex:620  Arithmetic  replace + with *
+[224/396] killed    lib/decoder.ex:426  Arithmetic  replace + with *
+[225/396] killed    lib/decoder.ex:215  Arithmetic  replace + with *
+[226/396] survived  lib/decoder.ex:455  Arithmetic  replace + with *
+[227/396] killed    lib/decoder.ex:441  Arithmetic  replace + with *
+[228/396] killed    lib/encode.ex:483  Arithmetic  replace + with -
+[229/396] killed    lib/encode.ex:580  Arithmetic  replace - with *
+[230/396] killed    lib/decoder.ex:134  Arithmetic  replace + with -
+[231/396] killed    lib/encode.ex:635  Arithmetic  replace - with *
+[232/396] killed    lib/decoder.ex:422  Arithmetic  replace + with *
+[233/396] killed    lib/formatter.ex:210  ComparisonNegation  replace == with !=
+[234/396] survived  lib/decoder.ex:432  Arithmetic  replace + with *
+[235/396] killed    lib/decoder.ex:141  Arithmetic  replace + with -
+[236/396] survived  lib/encode.ex:632  Arithmetic  replace + with -
+[237/396] killed    lib/decoder.ex:123  Arithmetic  replace + with -
+[238/396] killed    lib/decoder.ex:272  Arithmetic  replace - with +
+[239/396] killed    lib/decoder.ex:366  Arithmetic  replace + with -
+[240/396] killed    lib/decoder.ex:447  Arithmetic  replace + with *
+[241/396] killed    lib/encode.ex:431  Arithmetic  replace + with -
+[242/396] killed    lib/encode.ex:530  Arithmetic  replace + with -
+[243/396] killed    lib/encode.ex:350  Arithmetic  replace + with *
+[244/396] killed    lib/formatter.ex:185  Arithmetic  replace - with *
+[245/396] killed    lib/encode.ex:473  Arithmetic  replace + with -
+[246/396] killed    lib/decoder.ex:419  Arithmetic  replace + with -
+[247/396] killed    lib/encode.ex:522  Arithmetic  replace + with -
+[248/396] killed    lib/decoder.ex:258  Arithmetic  replace + with *
+[249/396] survived  lib/encode.ex:457  Arithmetic  replace + with -
+[250/396] killed    lib/decoder.ex:127  Arithmetic  replace + with *
+[251/396] killed    lib/decoder.ex:395  Arithmetic  replace + with *
+[252/396] killed    lib/decoder.ex:301  Arithmetic  replace - with +
+[253/396] killed    lib/decoder.ex:660  Arithmetic  replace + with *
+[254/396] survived  lib/decoder.ex:700  Arithmetic  replace + with -
+[255/396] killed    lib/decoder.ex:219  Arithmetic  replace + with *
+[256/396] killed    lib/decoder.ex:315  Arithmetic  replace + with -
+[257/396] killed    lib/decoder.ex:308  Arithmetic  replace + with -
+[258/396] killed    lib/decoder.ex:119  Arithmetic  replace + with -
+[259/396] killed    lib/encode.ex:527  Arithmetic  replace + with *
+[260/396] survived  lib/encode.ex:600  Arithmetic  replace + with *
+[261/396] killed    lib/decoder.ex:361  Arithmetic  replace + with *
+[262/396] survived  lib/decoder.ex:479  Arithmetic  replace + with *
+[263/396] survived  lib/decoder.ex:447  Arithmetic  replace + with -
+[264/396] killed    lib/decoder.ex:449  Arithmetic  replace + with *
+[265/396] killed    lib/decoder.ex:379  Arithmetic  replace + with *
+[266/396] killed    lib/decoder.ex:274  Arithmetic  replace + with -
+[267/396] killed    lib/decoder.ex:230  Arithmetic  replace + with -
+[268/396] killed    lib/encode.ex:587  Arithmetic  replace + with -
+[269/396] killed    lib/decoder.ex:230  Arithmetic  replace + with *
+[270/396] killed    lib/decoder.ex:200  Arithmetic  replace + with -
+[271/396] killed    lib/decoder.ex:200  Arithmetic  replace + with *
+[272/396] killed    lib/decoder.ex:109  Arithmetic  replace + with *
+[273/396] killed    lib/decoder.ex:172  Arithmetic  replace + with *
+[274/396] killed    lib/decoder.ex:266  Arithmetic  replace + with -
+[275/396] killed    lib/decoder.ex:400  Arithmetic  replace + with *
+[276/396] killed    lib/formatter.ex:246  ComparisonNegation  replace == with !=
+[277/396] survived  lib/decoder.ex:441  Arithmetic  replace + with -
+[278/396] killed    lib/decoder.ex:395  Arithmetic  replace + with -
+[279/396] survived  lib/decoder.ex:483  Arithmetic  replace + with *
+[280/396] survived  lib/encode.ex:632  Arithmetic  replace + with *
+[281/396] killed    lib/decoder.ex:419  Arithmetic  replace + with *
+[282/396] killed    lib/decoder.ex:459  Arithmetic  replace + with -
+[283/396] killed    lib/decoder.ex:272  Arithmetic  replace - with *
+[284/396] killed    lib/decoder.ex:408  Arithmetic  replace + with -
+[285/396] survived  lib/encode.ex:600  Arithmetic  replace + with -
+[286/396] killed    lib/encode.ex:442  Arithmetic  replace + with *
+[287/396] killed    lib/encode.ex:437  Arithmetic  replace + with -
+[288/396] error     lib/codegen.ex:119  ComparisonNegation  replace > with <=
+[289/396] killed    lib/decoder.ex:341  Arithmetic  replace + with -
+[290/396] killed    lib/encode.ex:359  Arithmetic  replace + with *
+[291/396] survived  lib/encode.ex:614  Arithmetic  replace + with *
+[292/396] killed    lib/decoder.ex:284  Arithmetic  replace + with *
+[293/396] survived  lib/encode.ex:302  Arithmetic  replace + with *
+[294/396] killed    lib/decoder.ex:146  Arithmetic  replace + with -
+[295/396] killed    lib/decoder.ex:301  Arithmetic  replace - with *
+[296/396] killed    lib/encode.ex:343  Arithmetic  replace + with *
+[297/396] killed    lib/decoder.ex:281  Arithmetic  replace + with *
+[298/396] survived  lib/encode.ex:426  Arithmetic  replace + with -
+[299/396] killed    lib/encode.ex:635  Arithmetic  replace - with +
+[300/396] survived  lib/decoder.ex:443  Arithmetic  replace + with -
+[301/396] killed    lib/decoder.ex:453  Arithmetic  replace + with *
+[302/396] killed    lib/encode.ex:437  Arithmetic  replace + with *
+[303/396] killed    lib/encode.ex:398  Arithmetic  replace + with -
+[304/396] survived  lib/decoder.ex:430  Arithmetic  replace + with -
+[304/396] invalid   lib/encode.ex:611  GuardComparisonBoundary  replace guard <= with <
+[304/396] invalid   lib/encode.ex:430  GuardComparisonNegation  replace guard <= with >
+[304/396] invalid   lib/encode.ex:575  GuardComparisonBoundary  replace guard <= with <
+[304/396] invalid   lib/encode.ex:629  GuardComparisonBoundary  replace guard <= with <
+[304/396] invalid   lib/encode.ex:392  GuardComparisonNegation  replace guard <= with >
+[304/396] invalid   lib/encode.ex:570  GuardComparisonBoundary  replace guard <= with <
+[304/396] invalid   lib/encode.ex:294  GuardTypeTest  replace guard is_integer with is_float
+[305/396] survived  lib/encode.ex:77  GuardTypeTest  replace guard is_atom with is_nil
+[306/396] killed    lib/decoder.ex:9  GuardComparisonNegation  replace guard == with !=
+[307/396] survived  lib/encode.ex:89  GuardTypeTest  replace guard is_float with is_integer
+[307/396] invalid   lib/decoder.ex:405  GuardComparisonBoundary  replace guard <= with <
+[308/396] survived  lib/codegen.ex:97  GuardTypeTest  replace guard is_integer with is_float
+[309/396] killed    lib/encode.ex:85  GuardTypeTest  replace guard is_integer with is_number
+[310/396] survived  lib/encode.ex:294  GuardTypeTest  replace guard is_integer with is_number
+[311/396] survived  lib/decoder.ex:524  GuardComparisonNegation  replace guard <= with >
+[312/396] killed    lib/encode.ex:423  GuardComparisonNegation  replace guard === with !==
+[312/396] invalid   lib/decoder.ex:565  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:487  GuardComparisonBoundary  replace guard <= with <
+[312/396] invalid   lib/decoder.ex:403  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:402  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:487  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:322  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:526  GuardComparisonBoundary  replace guard <= with <
+[312/396] invalid   lib/encode.ex:326  GuardComparisonBoundary  replace guard <= with <
+[312/396] invalid   lib/encode.ex:354  GuardComparisonBoundary  replace guard <= with <
+[312/396] invalid   lib/decoder.ex:547  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:526  GuardComparisonNegation  replace guard <= with >
+[312/396] invalid   lib/encode.ex:515  GuardComparisonBoundary  replace guard <= with <
+[313/396] survived  lib/encode.ex:266  GuardTypeTest  replace guard is_atom with is_nil
+[313/396] invalid   lib/encode.ex:354  GuardComparisonNegation  replace guard <= with >
+[314/396] killed    lib/encode.ex:381  GuardComparisonNegation  replace guard === with !==
+[314/396] invalid   lib/encode.ex:477  GuardComparisonNegation  replace guard <= with >
+[315/396] survived  lib/formatter.ex:243  GuardTypeTest  replace guard is_integer with is_number
+[315/396] invalid   lib/encode.ex:358  GuardComparisonBoundary  replace guard <= with <
+[315/396] invalid   lib/encode.ex:392  GuardComparisonBoundary  replace guard <= with <
+[316/396] killed    lib/encode.ex:466  GuardComparisonNegation  replace guard === with !==
+[316/396] invalid   lib/encode.ex:560  GuardComparisonNegation  replace guard <= with >
+[317/396] killed    lib/formatter.ex:243  GuardTypeTest  replace guard is_integer with is_float
+[317/396] invalid   lib/encode.ex:565  GuardComparisonNegation  replace guard <= with >
+[317/396] invalid   lib/decoder.ex:429  GuardComparisonBoundary  replace guard <= with <
+[317/396] invalid   lib/decoder.ex:403  GuardComparisonBoundary  replace guard <= with <
+[317/396] invalid   lib/encode.ex:358  GuardComparisonNegation  replace guard <= with >
+[317/396] invalid   lib/encode.ex:430  GuardComparisonBoundary  replace guard <= with <
+[317/396] invalid   lib/encode.ex:629  GuardComparisonNegation  replace guard <= with >
+[317/396] invalid   lib/encode.ex:560  GuardComparisonBoundary  replace guard <= with <
+[318/396] killed    lib/encode.ex:599  GuardComparisonNegation  replace guard === with !==
+[318/396] invalid   lib/encode.ex:617  GuardComparisonNegation  replace guard <= with >
+[318/396] invalid   lib/encode.ex:570  GuardComparisonNegation  replace guard <= with >
+[318/396] invalid   lib/decoder.ex:429  GuardComparisonNegation  replace guard <= with >
+[319/396] killed    lib/encode.ex:311  GuardComparisonNegation  replace guard === with !==
+[319/396] invalid   lib/encode.ex:611  GuardComparisonNegation  replace guard <= with >
+[320/396] killed    lib/encode.ex:418  GuardComparisonNegation  replace guard === with !==
+[320/396] invalid   lib/encode.ex:575  GuardComparisonNegation  replace guard <= with >
+[320/396] invalid   lib/decoder.ex:427  GuardComparisonNegation  replace guard <= with >
+[321/396] killed    lib/encode.ex:342  GuardComparisonNegation  replace guard === with !==
+[322/396] killed    lib/encode.ex:604  GuardComparisonNegation  replace guard === with !==
+[323/396] killed    lib/encode.ex:508  GuardComparisonNegation  replace guard === with !==
+[324/396] killed    lib/encode.ex:386  GuardComparisonNegation  replace guard === with !==
+[325/396] survived  lib/fragment.ex:14  GuardTypeTest  replace guard is_list with is_tuple
+[326/396] survived  lib/encode.ex:101  GuardTypeTest  replace guard is_map with is_list
+[327/396] killed    lib/encode.ex:471  GuardComparisonNegation  replace guard === with !==
+[327/396] invalid   lib/decoder.ex:547  GuardComparisonBoundary  replace guard <= with <
+[328/396] killed    lib/encode.ex:173  GuardComparisonNegation  replace guard == with !=
+[328/396] invalid   lib/encode.ex:441  GuardComparisonNegation  replace guard <= with >
+[328/396] invalid   lib/decoder.ex:405  GuardComparisonNegation  replace guard <= with >
+[328/396] invalid   lib/encode.ex:477  GuardComparisonBoundary  replace guard <= with <
+[328/396] invalid   lib/encode.ex:565  GuardComparisonBoundary  replace guard <= with <
+[328/396] invalid   lib/encode.ex:515  GuardComparisonNegation  replace guard <= with >
+[328/396] invalid   lib/encode.ex:322  GuardComparisonBoundary  replace guard <= with <
+[329/396] killed    lib/ordered_object.ex:30  GuardTypeTest  replace guard is_list with is_tuple
+[330/396] killed    lib/formatter.ex:157  GuardTypeTest  replace guard is_integer with is_float
+[331/396] killed    lib/encode.ex:85  GuardTypeTest  replace guard is_integer with is_float
+[332/396] killed    lib/jason.ex:224  GuardComparisonNegation  replace guard !== with ===
+[332/396] invalid   lib/decoder.ex:565  GuardComparisonBoundary  replace guard <= with <
+[333/396] killed    lib/encode.ex:174  GuardTypeTest  replace guard is_list with is_tuple
+[334/396] survived  lib/encode.ex:93  GuardTypeTest  replace guard is_list with is_tuple
+[335/396] killed    lib/encode.ex:503  GuardComparisonNegation  replace guard === with !==
+[335/396] invalid   lib/encode.ex:402  GuardComparisonBoundary  replace guard <= with <
+[336/396] survived  lib/codegen.ex:97  GuardTypeTest  replace guard is_integer with is_number
+[337/396] survived  lib/encode.ex:89  GuardTypeTest  replace guard is_float with is_number
+[337/396] invalid   lib/encode.ex:617  GuardComparisonBoundary  replace guard <= with <
+[338/396] survived  lib/decoder.ex:524  GuardComparisonBoundary  replace guard <= with <
+[338/396] invalid   lib/decoder.ex:427  GuardComparisonBoundary  replace guard <= with <
+[339/396] killed    lib/encode.ex:554  GuardComparisonNegation  replace guard === with !==
+[339/396] invalid   lib/encode.ex:441  GuardComparisonBoundary  replace guard <= with <
+[340/396] killed    lib/encode.ex:549  GuardComparisonNegation  replace guard === with !==
+[341/396] killed    lib/encode.ex:347  GuardComparisonNegation  replace guard === with !==
+[342/396] killed    lib/encode.ex:316  GuardComparisonNegation  replace guard === with !==
+[342/396] invalid   lib/encode.ex:623  GuardComparisonBoundary  replace guard <= with <
+[342/396] invalid   lib/encode.ex:326  GuardComparisonNegation  replace guard <= with >
+[342/396] invalid   lib/encode.ex:623  GuardComparisonNegation  replace guard <= with >
+[343/396] survived  lib/formatter.ex:157  GuardTypeTest  replace guard is_integer with is_number
+Mutation score: 238/341 = 69.8%
+
+Surviving mutants:
+  lib/encode.ex:626 Arithmetic               replace + with *
+  lib/codegen.ex:119 ComparisonBoundary       replace < with <=
+  lib/encode.ex:643 Arithmetic               replace + with *
+  lib/decoder.ex:261 Arithmetic               replace + with -
+  lib/encode.ex:614 Arithmetic               replace + with -
+  lib/encode.ex:607 Arithmetic               replace + with -
+  lib/encode.ex:302 Arithmetic               replace + with -
+  lib/formatter.ex:130 Boolean                  replace || with &&
+  lib/encode.ex:620 Arithmetic               replace + with -
+  lib/decoder.ex:484 Arithmetic               replace + with *
+  lib/encode.ex:556 Arithmetic               replace + with -
+  lib/encode.ex:620 Arithmetic               replace + with -
+  lib/encode.ex:620 Arithmetic               replace + with *
+  lib/decoder.ex:455 Arithmetic               replace + with -
+  lib/decoder.ex:479 Arithmetic               replace + with -
+  lib/decoder.ex:482 Arithmetic               replace - with +
+  lib/encode.ex:556 Arithmetic               replace + with *
+  lib/decoder.ex:422 Arithmetic               replace + with -
+  lib/encode.ex:632 Arithmetic               replace + with *
+  lib/decoder.ex:428 Arithmetic               replace + with *
+  lib/decoder.ex:273 Arithmetic               replace + with *
+  lib/decoder.ex:484 Arithmetic               replace - with +
+  lib/encode.ex:607 Arithmetic               replace + with *
+  lib/decoder.ex:434 Arithmetic               replace + with -
+  lib/encode.ex:607 Arithmetic               replace + with *
+  lib/encode.ex:426 Arithmetic               replace + with -
+  lib/decoder.ex:261 Arithmetic               replace + with *
+  lib/encode.ex:643 Arithmetic               replace + with -
+  lib/decoder.ex:424 Arithmetic               replace + with *
+  lib/decoder.ex:424 Arithmetic               replace + with -
+  lib/decoder.ex:483 Arithmetic               replace - with +
+  lib/codegen.ex:119 Boolean                  replace or with and
+  lib/encode.ex:614 Arithmetic               replace + with *
+  lib/encode.ex:457 Arithmetic               replace + with *
+  lib/decoder.ex:484 Arithmetic               replace + with -
+  lib/encode.ex:388 Arithmetic               replace + with -
+  lib/decoder.ex:183 ComparisonBoundary       replace > with >=
+  lib/decoder.ex:482 Arithmetic               replace - with *
+  lib/decoder.ex:700 Arithmetic               replace + with *
+  lib/encode.ex:607 Arithmetic               replace + with -
+  lib/decoder.ex:483 Arithmetic               replace - with *
+  lib/encode.ex:572 Arithmetic               replace + with *
+  lib/decoder.ex:474 Arithmetic               replace + with -
+  lib/encode.ex:426 Arithmetic               replace + with *
+  lib/encode.ex:388 Arithmetic               replace + with *
+  lib/encode.ex:567 Arithmetic               replace + with -
+  lib/encode.ex:426 Arithmetic               replace + with *
+  lib/encode.ex:614 Arithmetic               replace + with -
+  lib/decoder.ex:474 Arithmetic               replace + with *
+  lib/decoder.ex:273 Arithmetic               replace + with -
+  lib/encode.ex:632 Arithmetic               replace + with -
+  lib/decoder.ex:504 UnaryNot                 remove unary not
+  lib/encode.ex:562 Arithmetic               replace + with -
+  lib/decoder.ex:445 Arithmetic               replace + with -
+  lib/decoder.ex:430 Arithmetic               replace + with *
+  lib/encode.ex:562 Arithmetic               replace + with *
+  lib/decoder.ex:449 Arithmetic               replace + with -
+  lib/encode.ex:626 Arithmetic               replace + with *
+  lib/encode.ex:572 Arithmetic               replace + with -
+  lib/decoder.ex:432 Arithmetic               replace + with -
+  lib/encode.ex:626 Arithmetic               replace + with -
+  lib/encode.ex:643 Arithmetic               replace + with *
+  lib/encode.ex:626 Arithmetic               replace + with -
+  lib/encode.ex:567 Arithmetic               replace + with *
+  lib/codegen.ex:119 ComparisonBoundary       replace > with >=
+  lib/decoder.ex:428 Arithmetic               replace + with -
+  lib/decoder.ex:484 Arithmetic               replace - with *
+  lib/decoder.ex:453 Arithmetic               replace + with -
+  lib/decoder.ex:483 Arithmetic               replace + with -
+  lib/encode.ex:643 Arithmetic               replace + with -
+  lib/decoder.ex:222 Arithmetic               replace + with *
+  lib/encode.ex:620 Arithmetic               replace + with *
+  lib/decoder.ex:455 Arithmetic               replace + with *
+  lib/decoder.ex:432 Arithmetic               replace + with *
+  lib/encode.ex:632 Arithmetic               replace + with -
+  lib/encode.ex:457 Arithmetic               replace + with -
+  lib/decoder.ex:700 Arithmetic               replace + with -
+  lib/encode.ex:600 Arithmetic               replace + with *
+  lib/decoder.ex:479 Arithmetic               replace + with *
+  lib/decoder.ex:447 Arithmetic               replace + with -
+  lib/decoder.ex:441 Arithmetic               replace + with -
+  lib/decoder.ex:483 Arithmetic               replace + with *
+  lib/encode.ex:632 Arithmetic               replace + with *
+  lib/encode.ex:600 Arithmetic               replace + with -
+  lib/encode.ex:614 Arithmetic               replace + with *
+  lib/encode.ex:302 Arithmetic               replace + with *
+  lib/encode.ex:426 Arithmetic               replace + with -
+  lib/decoder.ex:443 Arithmetic               replace + with -
+  lib/decoder.ex:430 Arithmetic               replace + with -
+  lib/encode.ex:77 GuardTypeTest            replace guard is_atom with is_nil
+  lib/encode.ex:89 GuardTypeTest            replace guard is_float with is_integer
+  lib/codegen.ex:97 GuardTypeTest            replace guard is_integer with is_float
+  lib/encode.ex:294 GuardTypeTest            replace guard is_integer with is_number
+  lib/decoder.ex:524 GuardComparisonNegation  replace guard <= with >
+  lib/encode.ex:266 GuardTypeTest            replace guard is_atom with is_nil
+  lib/formatter.ex:243 GuardTypeTest            replace guard is_integer with is_number
+  lib/fragment.ex:14 GuardTypeTest            replace guard is_list with is_tuple
+  lib/encode.ex:101 GuardTypeTest            replace guard is_map with is_list
+  lib/encode.ex:93 GuardTypeTest            replace guard is_list with is_tuple
+  lib/codegen.ex:97 GuardTypeTest            replace guard is_integer with is_number
+  lib/encode.ex:89 GuardTypeTest            replace guard is_float with is_number
+  lib/decoder.ex:524 GuardComparisonBoundary  replace guard <= with <
+  lib/formatter.ex:157 GuardTypeTest            replace guard is_integer with is_number
+
+Schema:    213/304 killed (70.1%)   wall: 296.1s
+Fallback:  25/92 killed (27.2%)   wall: 66.0s
+  guard_comparison_boundary:    0/27 killed
+  guard_comparison_negation:    19/46 killed
+  guard_type_test:              6/19 killed  recompile errors:
+    compile errors:    1
+    dep path errors:   0
+    unknown:           0
+
+Skipped:   1509 (attribute_engine_disabled: 4, body_literal_engine_disabled: 231, missing_oracle_site: 95, no_applicable_mutator: 12, unsupported_dispatch: 1167)
+Invalid:   53
+Errors:    2
+Timeouts:  0
+
+Run time: 362.1s
+Fallback wall-clock: 18.2% of total
+Fallback mutants: 23.2% of executed
+
+Phases:
+  oracle build:          4492 ms
+  baseline tests:         672 ms
+  plan generation:         41 ms
+  schema build:          5202 ms
+  schema workers:       76126 ms
+  fallback workers:     24004 ms
+  report writing:          28 ms
+  total:               111256 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    396
+    all tests:          0
+  avg tests/mutant: 5.1
+  median tests/mutant: 5
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 111825ms
+bench.wall_ms=115000
