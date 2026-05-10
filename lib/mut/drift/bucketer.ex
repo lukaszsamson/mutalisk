@@ -52,6 +52,20 @@ defmodule Mut.Drift.Bucketer do
                            that propagates across mutants). M27
                            surfaced this on mint v1.8.0 and
                            nimble_pool v1.1.0.
+    * `:supervisor_init` — `mix=RuntimeError → persistent={Killed,
+                           Survived}`. Mix-spawn re-runs
+                           `Application.start/2` per fallback
+                           mutant, so mutations that break
+                           supervised initialization surface as
+                           test-framework RuntimeError under mix.
+                           Persistent worker doesn't re-run init,
+                           so the same mutation reaches tests
+                           against an already-initialized
+                           supervisor tree. M30 documented this on
+                           ecto (caught by `:ecto_warm_state`);
+                           M35 promoted the generic case to its
+                           own bucket after plug v1.19.1 surfaced
+                           the same pattern outside ecto.
     * `:unclassified`    — anything else.
 
   Heuristics are best-effort. They consume only data observable in
@@ -72,6 +86,7 @@ defmodule Mut.Drift.Bucketer do
           | :ecto_false_kill
           | :parse_class
           | :pool_warm_state
+          | :supervisor_init
           | :unclassified
 
   @drift_buckets [
@@ -81,6 +96,7 @@ defmodule Mut.Drift.Bucketer do
     :gettext_class,
     :parse_class,
     :pool_warm_state,
+    :supervisor_init,
     :timeout_flap,
     :unclassified
   ]
@@ -151,15 +167,22 @@ defmodule Mut.Drift.Bucketer do
   """
   @spec bucket_for(map(), map(), String.t() | nil) :: bucket()
   def bucket_for(mix, persistent, target) do
-    cond do
-      timeout_flap?(mix, persistent) -> :timeout_flap
-      gettext_class?(mix, persistent, target) -> :gettext_class
-      mox_class?(mix, persistent, target) -> :mox_class
-      ecto_warm_state?(mix, persistent, target) -> :ecto_warm_state
-      ecto_false_kill?(mix, persistent, target) -> :ecto_false_kill
-      parse_class?(mix, persistent) -> :parse_class
-      pool_warm_state?(mix, persistent, target) -> :pool_warm_state
-      true -> :unclassified
+    # Heuristics ranked from most-specific to least-specific.
+    # Adding a heuristic = append `{name, predicate}` to the list.
+    heuristics = [
+      {:timeout_flap, fn -> timeout_flap?(mix, persistent) end},
+      {:gettext_class, fn -> gettext_class?(mix, persistent, target) end},
+      {:mox_class, fn -> mox_class?(mix, persistent, target) end},
+      {:ecto_warm_state, fn -> ecto_warm_state?(mix, persistent, target) end},
+      {:ecto_false_kill, fn -> ecto_false_kill?(mix, persistent, target) end},
+      {:parse_class, fn -> parse_class?(mix, persistent) end},
+      {:pool_warm_state, fn -> pool_warm_state?(mix, persistent, target) end},
+      {:supervisor_init, fn -> supervisor_init?(mix, persistent) end}
+    ]
+
+    case Enum.find(heuristics, fn {_name, pred} -> pred.() end) do
+      {bucket, _} -> bucket
+      nil -> :unclassified
     end
   end
 
@@ -228,6 +251,21 @@ defmodule Mut.Drift.Bucketer do
     target_match?(target, mix, persistent, @pool_app_names) and
       mix["status"] == "Survived" and
       persistent["status"] == "Killed"
+  end
+
+  # M35: generic supervisor-init drift class. Mix-spawn re-runs
+  # `Application.start/2` per fallback mutant, so mutations that
+  # break supervised initialization surface as a test-framework
+  # `RuntimeError` under mix. Persistent worker loads apps once at
+  # boot — the mutation reaches tests against an already-
+  # initialized supervisor tree, which often kills cleanly. M30
+  # documented this on ecto (caught earlier by `:ecto_warm_state`);
+  # M35 promoted the generic case after plug v1.19.1 surfaced the
+  # same pattern outside ecto. Ranked AFTER target-specific buckets
+  # so ecto / mox / pool-class flips still attribute to their named
+  # buckets first.
+  defp supervisor_init?(mix, persistent) do
+    mix["status"] == "RuntimeError" and persistent["status"] in ["Killed", "Survived"]
   end
 
   ## ---- target / file-path matching ---------------------------------------

@@ -44,8 +44,12 @@ defmodule Mix.Tasks.Mut.Drift do
     target: :string,
     all: :boolean,
     results_dir: :string,
-    suffix: :string
+    suffix: :string,
+    json: :boolean,
+    sample_size: :integer
   ]
+
+  @default_sample_size 3
 
   @impl Mix.Task
   def run(argv) do
@@ -73,20 +77,35 @@ defmodule Mix.Tasks.Mut.Drift do
       exit({:shutdown, 1})
     end
 
-    pairs
-    |> Enum.sort_by(fn {target, _, _} -> target end)
-    |> Enum.each(fn {target, mix_path, persistent_path} ->
-      result = analyse_pair(target, mix_path, persistent_path)
-      print_table(result)
-      IO.puts("")
-    end)
+    sorted = Enum.sort_by(pairs, fn {target, _, _} -> target end)
+
+    if Keyword.get(opts, :json) do
+      payload =
+        Enum.map(sorted, fn {target, mix_path, persistent_path} ->
+          result = analyse_pair(target, mix_path, persistent_path)
+          json_payload(result, mix_path, persistent_path, opts)
+        end)
+
+      IO.puts(Mut.JSON.encode!(payload))
+    else
+      Enum.each(sorted, fn {target, mix_path, persistent_path} ->
+        result = analyse_pair(target, mix_path, persistent_path)
+        print_table(result, mix_path, persistent_path, opts)
+        IO.puts("")
+      end)
+    end
   end
 
   defp analyse_one(results_dir, target, opts) do
     case find_pair(results_dir, target, Keyword.get(opts, :suffix)) do
       {mix_path, persistent_path} ->
         result = analyse_pair(target, mix_path, persistent_path)
-        print_table(result)
+
+        if Keyword.get(opts, :json) do
+          IO.puts(Mut.JSON.encode!(json_payload(result, mix_path, persistent_path, opts)))
+        else
+          print_table(result, mix_path, persistent_path, opts)
+        end
 
       :error ->
         Mix.shell().error(
@@ -101,6 +120,46 @@ defmodule Mix.Tasks.Mut.Drift do
     mix_report = mix_path |> File.read!() |> Mut.JSON.decode!()
     persistent_report = persistent_path |> File.read!() |> Mut.JSON.decode!()
     Bucketer.analyze(mix_report, persistent_report, target)
+  end
+
+  # M35: per-bucket sample stable_ids for triage. Caller supplies
+  # `--sample-size N` (default 3); samples are taken in stable_id
+  # sort order so the same input produces the same output across
+  # CI runs.
+  defp samples(%Result{drift: drift}, opts) do
+    size = Keyword.get(opts, :sample_size, @default_sample_size)
+
+    drift
+    |> Enum.group_by(& &1.bucket)
+    |> Map.new(fn {bucket, entries} ->
+      ids =
+        entries
+        |> Enum.sort_by(& &1.id)
+        |> Enum.take(size)
+        |> Enum.map(& &1.id)
+
+      {bucket, ids}
+    end)
+  end
+
+  defp json_payload(%Result{} = result, mix_path, persistent_path, opts) do
+    %{
+      target: result.target,
+      reports: %{mix: mix_path, persistent: persistent_path},
+      total: Result.total(result),
+      drift: Result.drift_total(result),
+      drift_rate_pct: Result.drift_rate(result),
+      unclassified_rate_pct: Result.unclassified_rate(result),
+      buckets: result.buckets,
+      bucket_samples: samples(result, opts),
+      agree: %{
+        killed: length(result.agree_killed),
+        survived: length(result.agree_survived),
+        other: result.agree_other
+      },
+      mix_only: result.mix_only,
+      persistent_only: result.persistent_only
+    }
   end
 
   ## ---- discovery ---------------------------------------------------------
@@ -183,15 +242,18 @@ defmodule Mix.Tasks.Mut.Drift do
 
   ## ---- formatting --------------------------------------------------------
 
-  defp print_table(%Result{} = result) do
+  defp print_table(%Result{} = result, mix_path, persistent_path, opts) do
     total = Result.total(result)
     drift = Result.drift_total(result)
     drift_pct = Result.drift_rate(result)
     unclassified_pct = Result.unclassified_rate(result)
 
     target = result.target || "(unknown)"
+    bucket_samples = samples(result, opts)
 
     IO.puts("Target: #{target}")
+    IO.puts("Reports: mix=#{mix_path}")
+    IO.puts("         persistent=#{persistent_path}")
     IO.puts("─────────────────────────────")
     IO.puts(pad("Total mutants:", "#{total}"))
 
@@ -210,9 +272,8 @@ defmodule Mix.Tasks.Mut.Drift do
     IO.puts(pad("Drift:", "#{drift}  (#{drift_pct}%)"))
 
     Enum.each(Bucketer.drift_buckets(), fn bucket ->
-      label = "  #{bucket}:"
       count = Map.get(result.buckets, bucket, 0)
-      IO.puts(pad(label, "#{count}"))
+      IO.puts(pad("  #{bucket}:", bucket_line(count, bucket_samples[bucket])))
     end)
 
     if result.mix_only != [] or result.persistent_only != [] do
@@ -221,6 +282,14 @@ defmodule Mix.Tasks.Mut.Drift do
     end
 
     IO.puts(pad("Unclassified rate (of drift):", "#{unclassified_pct}%"))
+  end
+
+  defp bucket_line(0, _), do: "0"
+  defp bucket_line(count, nil), do: "#{count}"
+  defp bucket_line(count, []), do: "#{count}"
+
+  defp bucket_line(count, samples) do
+    "#{count}  e.g. #{Enum.join(samples, ", ")}"
   end
 
   defp maybe_other(0), do: ""

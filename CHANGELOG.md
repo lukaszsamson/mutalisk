@@ -5,6 +5,83 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.12 unreleased
 
+### M35 — Pool-warm-state boot warning + drift bucketer hardening (2026-05-10)
+
+Bundles two M27 follow-throughs deferred from v1.11 close.
+
+#### Pool-class boot-warning catalogue
+
+`Mut.Worker.Persistent.Detector` gains three rows:
+
+| Detected dep | Signature | Persistent stance |
+|---|---|---|
+| `:mint` | `:pool` | supported with caveat |
+| `:finch` | `:pool` | supported with caveat |
+| `:nimble_pool` | `:pool` | supported with caveat |
+
+Multiple matches collapse into a single `:pool` detection (mirroring
+`:ecto`/`:ecto_sql`). The catalogue does NOT preemptively add
+`:poolboy`/`:hackney`/`:gun`/`:connection` — the bucketer's
+`@pool_app_names` heuristic still catches drift on those names if
+a real target surfaces it; the boot warning is a separate UX
+artifact and waits for evidence.
+
+Unlike Ecto / Gettext / clustered-Mox, pool-class is **not**
+classified as mix-only. M27's measurement showed real drift
+(mint 19.6%, nimble_pool 14.3%) but persistent still produces
+useful kill counts; users decide per-project. M36 may close the
+class via reset hooks; until then, the warning directs users at
+`mix mut.drift --target <name>` for verification.
+
+#### Drift bucketer hardening
+
+- New heuristic **`:supervisor_init`** for `mix=RuntimeError →
+  persistent={Killed,Survived}` flips outside the target-specific
+  buckets. M30 documented this on ecto (caught earlier by
+  `:ecto_warm_state`); M27's plug v1.19.1 bench surfaced the same
+  pattern in `lib/plug/router/utils.ex` and was previously
+  unclassified. Ranked AFTER target-specific heuristics so ecto /
+  mox / pool flips still attribute to their named buckets first.
+- New flag **`--json`** for CI consumption. Output includes
+  per-bucket counts, sample stable_ids per bucket, total /
+  drift / unclassified rate, agree counts, and the resolved mix
+  + persistent report paths.
+- New flag **`--sample-size N`** (default 3) controls how many
+  sample stable_ids per bucket the report includes.
+- Terminal output now includes the resolved report paths above
+  the per-target table and `e.g. <id>, <id>, ...` after each
+  non-empty bucket count for triage.
+- Per-bucket unit test coverage extended; existing 18 tests
+  grow to 21 with `:supervisor_init` cases.
+
+#### Aggregate unclassified rate
+
+Re-evaluated on the M25 + M27 + M34 corpus (13 targets, 329
+drifting mutants):
+
+| Pre-M35 | Post-M35 |
+|---:|---:|
+| 22 / 329 = 6.69% | **1 / 329 = 0.30%** |
+
+The 21 reattributed mutants split as:
+- jason: 2 → `:supervisor_init`
+- nimble_options: 3 → `:supervisor_init`
+- plug: 16 → `:supervisor_init`
+
+The single residual unclassified mutant on jason is an
+isolated `Killed → Survived` flake on a property-test path.
+Well under the 5% acceptance bar.
+
+#### Module changes
+
+- `Mut.Worker.Persistent.Detector` — three new `:pool` rows.
+- `Mut.Drift.Bucketer` — `:supervisor_init` heuristic; the
+  `cond`-style dispatch in `bucket_for/3` refactored to a
+  data-driven `Enum.find/2` walk so adding heuristics doesn't
+  inflate cyclomatic complexity.
+- `Mix.Tasks.Mut.Drift` — `--json`, `--sample-size`, terminal
+  output enriched with report paths and per-bucket samples.
+
 ### M34 — `Mut.SchemaPlacer` escaped-quote fix (2026-05-10)
 
 Mutalisk regression that blocked 3 OSS targets pinned in M27

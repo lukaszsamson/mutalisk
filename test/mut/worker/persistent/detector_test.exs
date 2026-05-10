@@ -38,6 +38,30 @@ defmodule Mut.Worker.Persistent.DetectorTest do
       sigs = Enum.map(detections, fn {sig, _} -> sig end) |> Enum.sort()
       assert sigs == [:ecto, :gettext, :mox]
     end
+
+    test "fires :pool signature on :mint dep" do
+      assert [{:pool, msg}] = Detector.detect_in_apps([:mint])
+      assert msg =~ "HTTP-client"
+    end
+
+    test "fires :pool signature on :finch dep" do
+      assert [{:pool, _}] = Detector.detect_in_apps([:finch])
+    end
+
+    test "fires :pool signature on :nimble_pool dep" do
+      assert [{:pool, msg}] = Detector.detect_in_apps([:nimble_pool])
+      assert msg =~ "Pool-class"
+    end
+
+    test "collapses multiple pool deps into a single :pool detection" do
+      detections = Detector.detect_in_apps([:mint, :finch, :nimble_pool])
+      assert length(detections) == 1
+      assert [{:pool, _}] = detections
+    end
+
+    test "silent on plug_crypto/Decimal/demo_app shapes" do
+      assert Detector.detect_in_apps([:plug_crypto, :decimal, :demo_app]) == []
+    end
   end
 
   describe "format_warning/1" do

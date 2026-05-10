@@ -39,7 +39,13 @@ defmodule Mut.Worker.Persistent.Detector do
     {:ecto_sql, :ecto,
      "Ecto-class projects: supervisor-init structural drift cannot be closed by reset hooks (M30 finding); use --worker-type mix."},
     {:gettext, :gettext,
-     "Gettext-class projects: persistent worker is unsupported (M31 finding) — Gettext.Compiler.__before_compile__/1 requires a parallel-compile parent context that the persistent test-load step does not provide. Use --worker-type mix."}
+     "Gettext-class projects: persistent worker is unsupported (M31 finding) — Gettext.Compiler.__before_compile__/1 requires a parallel-compile parent context that the persistent test-load step does not provide. Use --worker-type mix."},
+    {:mint, :pool,
+     "HTTP-client / pool projects: warm BEAM accumulates socket / pool / registry state across mutants (M27 mint v1.8.0 measured 49/250 = 19.6% pool_warm_state drift). Persistent worker is supported but verify outcomes via mix mut.drift if drift matters."},
+    {:finch, :pool,
+     "HTTP-client / pool projects: warm BEAM accumulates socket / pool / registry state across mutants. Persistent worker is supported but verify outcomes via mix mut.drift."},
+    {:nimble_pool, :pool,
+     "Pool-class projects: warm BEAM accumulates pool worker / registry state across mutants (M27 nimble_pool v1.1.0 measured 4/28 = 14.3% pool_warm_state drift). Persistent worker is supported but verify outcomes via mix mut.drift."}
   ]
 
   @typedoc "Detected signature: `{signature_atom, human_message}`."

@@ -161,7 +161,32 @@ defmodule Mut.Drift.BucketerTest do
       pers = report("lib/mint/http2.ex", [mutant("a", "Survived")])
       result = Bucketer.analyze(mix, pers, "mint")
       assert Map.get(result.buckets, :pool_warm_state) == 0
+      # Killed → Survived on a pool-class target with no other heuristic match
+      # falls through to supervisor_init? No — supervisor_init requires mix=RuntimeError.
+      # So the residual is unclassified.
       assert Map.get(result.buckets, :unclassified) == 1
+    end
+
+    test "supervisor_init fires on mix=RuntimeError → persistent=Killed for unrelated targets" do
+      mix = report("lib/foo.ex", [mutant("a", "RuntimeError")])
+      pers = report("lib/foo.ex", [mutant("a", "Killed")])
+      result = Bucketer.analyze(mix, pers, "foo")
+      assert Map.get(result.buckets, :supervisor_init) == 1
+    end
+
+    test "supervisor_init fires on mix=RuntimeError → persistent=Survived" do
+      mix = report("lib/foo.ex", [mutant("a", "RuntimeError")])
+      pers = report("lib/foo.ex", [mutant("a", "Survived")])
+      result = Bucketer.analyze(mix, pers, "foo")
+      assert Map.get(result.buckets, :supervisor_init) == 1
+    end
+
+    test "supervisor_init does not pre-empt ecto_warm_state on ecto target" do
+      mix = report("lib/ecto/query.ex", [mutant("a", "RuntimeError")])
+      pers = report("lib/ecto/query.ex", [mutant("a", "Killed")])
+      result = Bucketer.analyze(mix, pers, "ecto")
+      assert Map.get(result.buckets, :ecto_warm_state) == 1
+      assert Map.get(result.buckets, :supervisor_init) == 0
     end
 
     test "timeout_flap takes priority over ecto" do

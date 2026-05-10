@@ -235,6 +235,7 @@ Triggers (v1.11 catalogue):
 | `:mox` | `:mox` | M28's reset hook closes local-node Mox state. Use `--worker-type mix` if your suite spans Erlang nodes (residual cluster-state drift). |
 | `:ecto`, `:ecto_sql` | `:ecto` | M30 confirmed Ecto-class drift is supervisor-init structural, not cache-state. Use `--worker-type mix` for Ecto-class projects. |
 | `:gettext` | `:gettext` | M31 confirmed gettext-class is mix-only (Gettext.Compiler.__before_compile__/1 boot-fails outside a parallel-compile parent). Use `--worker-type mix`. |
+| `:mint`, `:finch`, `:nimble_pool` | `:pool` | M27 surfaced `pool_warm_state` drift (mint 19.6%, nimble_pool 14.3% — `mix=Survived → persistent=Killed`). Persistent worker is **supported**, not mix-only. Run `mix mut.drift --target <name>` after a first persistent run; if `pool_warm_state` is non-trivial, fall back to `--worker-type mix`. M36 may close this class. |
 
 The warning is a *heads-up*, not a diagnosis. A clean Ecto setup
 will still trigger it; a Mox-using project that already knows the
