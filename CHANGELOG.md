@@ -76,7 +76,8 @@ Decision rationale (full analysis at
 3. The current `coverage_with_static_fallback` mode already
    provides fanout reduction at a softer correctness contract.
 
-`coverage_with_static_fallback` remains v1.11's selection default.
+`static` remains v1.11's selection default; `coverage_with_static_fallback`
+is the recommended opt-in for fanout reduction without correctness loss.
 M32 reopens in v1.12+ only if a real user report establishes
 demand AND one of the underlying primitives (`:cover` per-test
 attribution, ExUnit dependency exposure) gains capability that
@@ -205,8 +206,9 @@ in M25's narrow corpus, but with M28 in place the underlying
 cluster-state vector reveals itself. The 3-mutant residual is
 re-classified as cluster/peer-state drift (a NEW unsupported
 pattern documented in `PERSISTENT_WORKER_GUIDE.md`) and
-sequenced behind M29's recompile-isolation spike, which may
-subsume it.
+open at v1.11 close: M29's spike declined helper-process
+isolation as a general fix, and a multi-node-aware reset hook
+is v1.12+ scope.
 
 The persistent boot-warning catalogue keeps the `:mox` row
 because mox-using projects with cluster tests (or other
@@ -250,7 +252,7 @@ non-unrunnable (the v1.11 acceptance set):
 Pinned-but-unrunnable targets (kept in harness for future
 operators on different toolchains): `phoenix_html`, `plug`,
 `phoenix_pubsub` (Mutalisk SchemaPlacer escaped-quote crash —
-v1.11 follow-up); `finch` (`:x509` fails on Erlang/OTP 28);
+v1.12 follow-up); `finch` (`:x509` fails on Erlang/OTP 28);
 `ex_machina` (`:credo` fails on Elixir 1.19); `tzdata` (baseline
 test failures); `gen_stage` and `nimble_csv` reclassified as
 informational (mix flake / 0 mutants).
@@ -296,11 +298,13 @@ suggesting `--worker-type mix` and pointing to
 `docs/PERSISTENT_WORKER_GUIDE.md`. Suppressible via
 `--quiet-boot-warning` for CI cleanliness.
 
-The catalogue is intentionally narrow — entries are removed as
-their drift class closes (M28 retires the mox row; M30 retires
-the ecto row). HTTP-client / process-pool signatures are NOT
-yet detected at boot — extending the catalogue is a v1.12
-follow-up.
+The catalogue is intentionally narrow — rows are removed only
+when the entire drift class closes. The v1.11 catalogue retains
+all three rows (mox, ecto, gettext): M28 closed local-node Mox
+state but cluster-state residual remains; M30 + M31 classified
+ecto-class and gettext-class as structurally mix-only. HTTP-
+client / process-pool signatures are NOT yet detected at boot —
+extending the catalogue is a v1.12 follow-up.
 
 #### New unsupported patterns documented
 
@@ -318,7 +322,7 @@ classes documented in `docs/PERSISTENT_WORKER_GUIDE.md`:
   `Code.format_string!/2 → SyntaxError` on source files containing
   HTML/header content with embedded `\\"..\\"` strings. Mutalisk
   regression in `Mut.SchemaPlacer.render/1`; both worker types
-  affected. v1.11 follow-up.
+  affected. v1.12 follow-up.
 
 #### Module additions
 

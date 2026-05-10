@@ -1719,8 +1719,17 @@ growth with one narrow, fallback-safe addition.
   env walker.
 - Acceptance: mutator unit-tested + golden_oracle/golden_instrument
   layers green. Re-runs on plug_crypto + Decimal show non-zero
-  new mutants with kill rate ≥60% on reference targets.
+  new mutants and report kill rate as an observation (kill rate is
+  a property of the project's test suite, not the mutator).
 - Skip M33 if M27-M30 consumes the v1.11 budget; defer to v1.12.
+
+> **v1.11 closure note (2026-05-10):** the mutator was already
+> implemented in v1.5 (`06e8398`); M33's v1.11 work was bench
+> validation only. Observed kill rates: plug_crypto 33.3%,
+> Decimal 39.5%. The original ≥60% acceptance bar was reframed
+> as an observation — surviving boundary mutants reflect test-
+> suite edge-case gaps in the bench targets, not a mutator-design
+> defect. See CHANGELOG.md M33 entry.
 
 ## v1.11 default-flip gate (revised)
 

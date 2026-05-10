@@ -29,9 +29,9 @@ suite. At v1.x maturity correctness must dominate perf.
 
 | Mode | Granularity | Default |
 |---|---|---|
-| `static` | All test files in modules statically connected to the mutant. | M0–M24 default. |
-| `coverage` | Test files whose `:cover` traces hit the mutant's line, function, or module. | M19+ option. |
-| `coverage_with_static_fallback` | `coverage` per mutant; falls back to `static` for mutants the coverage oracle didn't observe. | v1.10 default. |
+| `static` | All test files in modules statically connected to the mutant. | v1.x default. |
+| `coverage` | Test files whose `:cover` traces hit the mutant's line, function, or module. | M19+ opt-in. |
+| `coverage_with_static_fallback` | `coverage` per mutant; falls back to `static` for mutants the coverage oracle didn't observe. | M19+ opt-in; recommended for fanout reduction without correctness loss. |
 
 `coverage_with_static_fallback` already reduces fanout to ~2× on
 demo_app, ~1.5× on Decimal vs `static`. The remaining work for
@@ -200,6 +200,8 @@ regression is not acceptable, only the implementation cost shifts.
 - No code changes.
 - No bench result files.
 
-The `coverage_with_static_fallback` mode remains v1.11's selection
-default. v1.12+ may revisit the per-test granularity question if
+`static` remains v1.11's selection default;
+`coverage_with_static_fallback` is the recommended opt-in for
+fanout reduction without correctness loss. v1.12+ may revisit
+the per-test granularity question if
 the reopening criteria above are met.

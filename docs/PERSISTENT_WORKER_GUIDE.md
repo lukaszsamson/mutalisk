@@ -104,8 +104,9 @@ until the underlying drift is closed.
   byte-identical between worker types. A project using Mox in
   the standard local-node way is unaffected; a project running
   its own multi-node Mox tests will still see drift. Closing the
-  cluster-state residual is sequenced behind M29's recompile
-  isolation spike.
+  cluster-state residual is open at v1.11 close: M29's spike
+  declined helper-process isolation, and a multi-node-aware
+  reset hook is v1.12+ scope.
 - **Compile-time docs/validation pipelines that use the same guards
   being mutated.** When a library's compile-time hook (e.g.,
   `nimble_options`'s `NimbleOptions.Docs.generate/1` evaluated at
@@ -200,7 +201,7 @@ until the underlying drift is closed.
   `--worker-type mix` and `--worker-type persistent` fail
   identically. Surfaced by M27 on `phoenix_html` v4.3.0,
   `plug` v1.19.1, and `phoenix_pubsub` v2.2.0. Targets crash
-  before any mutant runs. v1.11 follow-up; tracked in BENCHMARKS.md.
+  before any mutant runs. v1.12 follow-up; tracked in BENCHMARKS.md.
 - **Macro-bodies with literal interpolated heredocs.** Until
   Elixir's upstream `Macro.to_string/1` bug on heredoc
   `\`-continuation is fixed, mutants in files with that shape
@@ -234,9 +235,14 @@ Triggers (v1.11 catalogue):
 
 The warning is a *heads-up*, not a diagnosis. A clean Ecto setup
 will still trigger it; a Mox-using project that already knows the
-limitation will still trigger it. Catalogue is intentionally
-narrow — entries are removed as their drift class closes
-(M28 retires the mox row; M30 retires the ecto row).
+limitation will still trigger it. The v1.11 catalogue retains all
+three rows: M28's reset hook closed local-node Mox state but the
+cluster-state residual remains; M30 confirmed Ecto-class is
+structurally mix-only (supervisor-init reordering is not
+addressable by reset hooks); M31 confirmed Gettext-class is
+mix-only on `Kernel.ParallelCompiler` parent-context grounds.
+Rows are removed only when the entire drift class closes — none
+of the three closed in v1.11.
 
 To suppress for CI cleanliness:
 

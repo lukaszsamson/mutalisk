@@ -37,8 +37,8 @@ Crashes Mutalisk schema build with `Code.format_string!/2 →
 SyntaxError` on source files containing strings with embedded
 escaped double quotes (HTML header content). Same failure on both
 worker types — Mutalisk regression in `Mut.SchemaPlacer.render/1`,
-not a persistent-specific drift signal. Tracked as a v1.11
-follow-up.
+not a persistent-specific drift signal. Tracked as a v1.12
+follow-up (did not land in v1.11).
 
 ### `telemetry_metrics` (v1.1.0) — CLEAN
 

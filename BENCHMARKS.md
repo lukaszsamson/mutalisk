@@ -116,7 +116,7 @@ M27 surfaced two new unsupported-pattern classes documented in
    that contain HTML/header content with embedded escaped double
    quotes (`\\"...\\"`). This is a Mutalisk regression NOT specific
    to the persistent worker — both worker types fail identically.
-   Tracked as a v1.11 follow-up; placement of the fix is in
+   Tracked as a v1.12 follow-up; placement of the fix is in
    `Mut.SchemaPlacer.render/1`.
 
 ### Drift bucketer cross-validation (M25 + M27 data)
