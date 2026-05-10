@@ -334,6 +334,29 @@ defmodule Mut.Worker.PersistentRunner do
   end
 
   defp compile_in_process(files) do
+    case compile_mode() do
+      :helper_process -> compile_via_helper_process(files)
+      _in_process -> compile_in_main_process(files)
+    end
+  end
+
+  # M29 spike: compile-mode dispatch. Default `:in_process` mirrors
+  # M21's behavior (Code.compile_file/1 in the persistent BEAM's
+  # main process). `:helper_process` runs the compile in a short-
+  # lived Task to test the hypothesis that fresh-process state
+  # isolates compile-time hooks (parse-class residual on
+  # nimble_options, warm-state cache leakage on ecto). The mode is
+  # opt-in via `MUT_PERSISTENT_COMPILE_MODE` env var; not
+  # plumbed through the CLI because M29 is a measurement spike,
+  # not a shipped feature. See `docs/spikes/M29_recompile_isolation.md`.
+  defp compile_mode do
+    case System.get_env("MUT_PERSISTENT_COMPILE_MODE") do
+      "helper_process" -> :helper_process
+      _ -> :in_process
+    end
+  end
+
+  defp compile_in_main_process(files) do
     {modules, _binaries_or_other} =
       Enum.reduce(files, {[], []}, fn file, {modules_acc, _} ->
         compiled = Code.compile_file(file)
@@ -375,6 +398,62 @@ defmodule Mut.Worker.PersistentRunner do
   defp parse_error?(%mod{}) do
     mod in [SyntaxError, TokenMissingError] or
       mod == :"Elixir.MismatchedDelimiterError"
+  end
+
+  # M29 spike: helper-process compile. Spawns a short-lived child
+  # process to invoke `Code.compile_file/1` for each patched file.
+  # Hypothesis: the parse-class residual on nimble_options and the
+  # warm-state false-kills on ecto come from in-main-process
+  # compile-time state — process dictionary entries, message-queue
+  # crud, the `:elixir_compiler_*` per-process tag — that a fresh
+  # process won't have. ETS state owned by the compiler is shared
+  # across processes (and survives), so this only isolates
+  # process-local state.
+  #
+  # Module bytecode produced by `Code.compile_file/1` is loaded into
+  # the global module table via `:code.load_binary/3` inside the
+  # call, so the parent process sees the new modules immediately
+  # after the child terminates. We don't need to ship binaries back.
+  #
+  # Wall-clock cost: one Task spawn per fallback file. Empirically
+  # ~0.2 ms per file on M2 hardware — negligible vs the 50-2000 ms
+  # compile time itself. Memory cost: temporary 100-300 KB process
+  # heap, garbage-collected when the Task exits.
+  defp compile_via_helper_process(files) do
+    parent = self()
+
+    task =
+      Task.async(fn ->
+        try do
+          {:ok, do_compile_files_collecting_modules(files)}
+        rescue
+          error in CompileError ->
+            {:error, :compile_error, Exception.message(error)}
+
+          error ->
+            cond do
+              parse_error?(error) ->
+                {:error, :parse_error, Exception.message(error)}
+
+              match?(%UndefinedFunctionError{}, error) ->
+                {:error, :dep_path_error, Exception.message(error)}
+
+              true ->
+                {:error, :unknown, Exception.message(error)}
+            end
+        end
+      end)
+
+    _ = parent
+    Task.await(task, :infinity)
+  end
+
+  defp do_compile_files_collecting_modules(files) do
+    Enum.reduce(files, [], fn file, acc ->
+      compiled = Code.compile_file(file)
+      acc ++ Enum.map(compiled, fn {m, _bin} -> m end)
+    end)
+    |> Enum.uniq()
   end
 
   defp restore_modules(modules) do

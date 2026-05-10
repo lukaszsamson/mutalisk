@@ -1,5 +1,5 @@
 target=ecto repo=https://github.com/elixir-ecto/ecto.git ref=v3.13.6 sha=285329f63d34b610d754fd16d07f6c95ae52bfc7 selection=static concurrency=4
-mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+mutalisk_path=mutalisk
 deps.get starting
 Resolving Hex dependencies...
 Resolution completed in 0.014s

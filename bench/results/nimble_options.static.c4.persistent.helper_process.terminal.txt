@@ -1,5 +1,5 @@
 target=nimble_options repo=https://github.com/dashbitco/nimble_options.git ref=v1.1.1 sha=cc80e7e6fdb9bbbe6a4614b2e2e81ca4012fc264 selection=static concurrency=4
-mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+mutalisk_path=mutalisk
 deps.get starting
 Resolving Hex dependencies...
 Resolution completed in 0.016s
