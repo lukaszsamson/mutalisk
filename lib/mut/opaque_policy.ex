@@ -1,4 +1,6 @@
 defmodule Mut.OpaquePolicy do
+  @dialyzer {:no_opaque, [trusted_kernel_control_flow?: 3]}
+
   @moduledoc """
   Classifies AST call nodes as known-safe forms vs opaque macro
   boundaries. M39 spec section "User Macro Opacity Policy" is
