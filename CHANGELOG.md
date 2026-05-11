@@ -5,6 +5,85 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.13 unreleased
 
+### M39 — Env walker design spike: go for v1.14 (2026-05-11)
+
+PLAN.md scoped M39 as the substantive v1.13 milestone: design
+the env walker that unblocks v2's mutator catalog
+(string/atom/list/map/tuple body literals, pattern-position
+literals, variable mutators, better attribute classification).
+Spike output is a written design doc; no code ships.
+
+**Decision: go for v1.14 first implementation, with narrow
+scope.** Full design at `docs/spikes/M39_env_walker.md`. The
+spike answers all 7 PLAN.md questions:
+
+1. **Context discrimination.** Recursive descent over source
+   AST returned by `Code.string_to_quoted/2` (literal-encoder
+   mode). Explicit per-form context transitions for
+   `defmodule`, `def`, `fn`, `case`, `with`, `try`, `quote`,
+   `=`, `when`, `^`, and the `if`/`unless` Kernel macros.
+   Generic recursion only after the form is known not to
+   change context.
+2. **User macro opacity policy.** The walker does NOT expand
+   macros. `Macro.expand/2`, `Macro.expand_once/2`, `Code.eval_*`,
+   `Code.compile_*`, `Kernel.ParallelCompiler`, `:elixir_expand`,
+   `:elixir_module`, and `:elixir_def` are explicitly
+   forbidden in production. Known-safe Kernel control-flow
+   macros (`if`, `unless`) require tracer-oracle proof; any
+   unproven macro call becomes an `:opaque` boundary with
+   `:untrusted_descendant` children.
+3. **Public-API surface.** Eleven public APIs identified, all
+   stable in Elixir ≥ 1.17 (mutalisk's floor is 1.19). No floor
+   bump needed. `Macro.Env.define_import/4`,
+   `expand_import/5`, `expand_require/6`, `fetch_alias/2`,
+   `fetch_macro_alias/2`, and direct private-field access are
+   intentionally NOT used.
+4. **Stable-ID strategy.** **No migration required.** Existing
+   dispatch-shaped mutants keep their current stable-id input;
+   `EnvSnapshot` fields are not added to stable-id input;
+   synthetic expansion nodes (the `case` emitted by `if`) are
+   never used for IDs. The v1.14 acceptance gate includes
+   byte-identity validation on demo_app, plug_crypto, Decimal,
+   and plug with env walker enabled vs disabled.
+5. **Cold-compile cost.** Measured via throwaway `elixir -e`
+   prototype on Elixir 1.19.5 / OTP 28: parse+walk wall is
+   3.4 ms on demo_app (8 files), 6.4 ms on Decimal (4 files),
+   34.4 ms on plug (42 files). All three are well under the
+   hard gate (10% of oracle-build wall on Decimal/plug): 0.06% /
+   0.21% / 0.72% respectively. Even 10x slowdown in production
+   wouldn't approach the gate.
+6. **Mutator ordering.** Recommended sequence: string body
+   literals → float → atom (with atom-table policy) →
+   list/map/tuple → better attribute classification →
+   pattern-position literals → variable mutators. Justified on
+   equivalent-mutant rate and walker-complexity grounds. The
+   first v1.14 mutator is **string body literals only**;
+   `Mut.Mutator.StringLiteral`, fallback-routed, scope
+   `:function_body`, context `nil`, trust `:trusted`.
+7. **v1.14 go/no-go gate.** Production deliverables:
+   `Mut.EnvSnapshot`, `Mut.EnvOracle`, `Mut.OpaquePolicy`,
+   `Mut.EnvWalker`, orchestrator integration for `StringLiteral`.
+   LOC estimate: ~970 production + ~450 test. Acceptance:
+   byte-identical existing dispatch stable IDs; no `Macro.expand`
+   or compiler-internal API in the walker; defguard bodies
+   classified as guard context; parse+walk ≤ 10% of oracle
+   wall on Decimal and plug; validation on demo_app +
+   plug_crypto + Decimal + plug + one macro-heavy target
+   (gettext or phoenix_html).
+
+The spike doc explicitly forbids: expanding user macros,
+calling `:elixir_expand` directly, treating `if`/`unless` as
+guard-safe (they expand to `case`), modifying
+`Mut.AstWalk.dispatch_candidates/2` or any existing candidate
+walker. The env walker is added as a **fifth candidate source**
+consumed only by `Mut.Mutator.StringLiteral`. Migration of
+existing walkers behind `EnvWalker` is a v1.15+ milestone with
+its own stable-id byte-identity gate.
+
+No production code shipped. Spike doc at
+`docs/spikes/M39_env_walker.md`. PLAN.md v1.13 horizon updated
+to reference v1.14 first implementation.
+
 ### M38 — v1.12 doc closure + spike-env-var cleanup (2026-05-10)
 
 Mechanical milestone. Closes v1.12's release-doc drift and

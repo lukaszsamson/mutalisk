@@ -1922,6 +1922,241 @@ does not gate the default.
   (mix-only is the documented disposition; reopen only on a
   fundamentally different approach, not on incremental hooks).
 
+# v1.13 milestones (doc closure + env walker design)
+
+v1.12 closed with two M27 follow-throughs landed (M34 SchemaPlacer
+fix, M35 pool-warm-state boot warning + bucketer hardening), the
+pool-class characterized as "supported with caveat" (M36), and
+ComparisonNegation validated (M37). The recurring "deferred to v2
+with the env walker" has been sitting in PLAN.md since v1.5; v1.13
+is when that gets actually scoped.
+
+**Theme**: doc closure for v1.12 + design the env walker without
+implementing it. v1.13 ships two milestones — one mechanical, one
+substantive.
+
+**Default `--worker-type` does NOT flip in v1.13.** Closed
+structurally; v1.13 does not relitigate.
+
+**Default `--selection` does NOT flip in v1.13.** Coverage stays
+opt-in.
+
+## v1.13 scope (committed)
+
+**M38 — v1.12 documentation closure + spike-env-var cleanup.**
+Mechanical milestone. Cleans v1.12's release-doc inconsistencies
+and removes spike-only env vars whose decisions concluded "don't
+ship."
+
+Doc fixes:
+- `docs/PERSISTENT_WORKER_GUIDE.md`: rename "v1.11 catalogue" →
+  "v1.12 catalogue"; update the "all three rows / none closed"
+  paragraph to reflect four rows post-M35; delete the stale
+  paragraph claiming pool projects are "NOT yet in the boot-
+  warning catalogue" (M35 added them); rewrite the pool row's
+  "M36 may close this class" → "M36 confirmed reset hooks
+  ineffective on pure-library OTP apps; pool drift is
+  `mix=Survived → persistent=Killed`, persistent may be more
+  thorough rather than wrong."
+- `BENCHMARKS.md`: plug v1.19.1 row's bucket annotation updated
+  from `unclassified ×16 + parse_class ×1` to
+  `:supervisor_init ×16 + parse_class ×1` (M35's heuristic
+  reattribution).
+- `lib/mut/worker/persistent/detector.ex` moduledoc: catalogue
+  text updated to match the `@signatures` data table — add
+  `:pool` row, narrow `:mox` description to clustered/peer-state
+  residual (M28 finding), narrow `:ecto` description to
+  supervisor-init structural drift (M30 finding).
+
+Spike-env-var cleanup:
+- Remove `MUT_PERSISTENT_COMPILE_MODE=helper_process` and
+  `compile_via_helper_process/1` (M29's spike; concluded
+  "don't ship"). Resurrect from git if a future spike needs it.
+- Remove `MUT_PERSISTENT_POOL_RESET=apps_restart` and
+  `reset_pool_apps/0` (M36's spike; concluded "supported with
+  caveat, no reset hook"). Same resurrection policy.
+- Remove `reset_pool_us` from `MUT_RUN_METRICS` and the
+  Persistent worker reset-hooks terminal block.
+- Remove env-var forwarding entries from `Persistent.port_env/1`.
+
+Policy additions to the guide:
+- `:supervisor_init` policy note distinguishing Ecto-class
+  (mix-only, structural — `Application.start/2` reordering)
+  from low-rate plug-class drift (supported, ~5%; persistent
+  may be more thorough). Two-sentence note in the boot-warning
+  section, NOT a new catalogue row.
+- `mix mut.drift --json` schema: documented in the guide with
+  one mix-target and one all-targets example. Schema is
+  considered stable for CI consumption from this point forward
+  (any future schema change becomes a SemVer concern).
+
+Out of M38 scope:
+- `--fail-on-drift` flag for `mix mut.drift`. Add when a real
+  user asks; don't preemptively design a CI gating contract.
+- Any rewriting of the `@signatures` data table (only the
+  moduledoc text is stale).
+- Any change to the persistent worker's behavior (this is doc
+  + cleanup only).
+
+Acceptance:
+- Grep-based stale-phrase checks pass: no occurrences of
+  `M36 may close`, `pool not yet`, `v1.11 catalogue` (in
+  v1.12+ contexts), `Mox.Server mock-registry leaks` (in
+  detector moduledoc), `Ecto.Query planner.*caches` (in
+  detector moduledoc).
+- `MUT_PERSISTENT_COMPILE_MODE` and `MUT_PERSISTENT_POOL_RESET`
+  do not appear in `lib/`.
+- `bin/verify` green.
+
+**M39 — Env walker design spike.** The substantive v1.13
+milestone. Design the env walker that unblocks v2's mutator
+catalog (string/atom/list/map/tuple body literals, pattern-
+position literals, variable mutators, better attribute
+classification). Spike output is a written design doc; no code
+ships.
+
+Reference implementation to study (NOT to copy):
+- `~/elixir_sense/lib/elixir_sense/core/compiler.ex` and
+  related modules. ElixirSense's compiler module performs an
+  AST traversal of module and function bodies using public
+  `Macro.Env` APIs. It does NOT invoke macros, evaluate code,
+  or run module callbacks — expansion is best-effort, which
+  is exactly the contract we need. ElixirSense expands a bit
+  differently in modules and functions than `:elixir_expand`
+  does, and it goes marginally further than mutalisk needs
+  (it tries to expand more constructs to collect richer
+  metadata for IDE features); the mutalisk walker should aim
+  for the strict subset that establishes context without
+  collecting symbol-table data.
+
+Why NOT use `:elixir_expand` directly:
+- `:elixir_expand` performs full evaluation + expansion,
+  writes modules and functions to internal compiler ETS
+  tables, and interacts with the real compiler. It is not
+  isolatable, parallelizable, or safe to run inside a
+  long-lived persistent worker without state contamination.
+  ElixirSense's approach (best-effort traversal using only
+  public `Macro.Env` APIs) is what makes the walker usable as
+  a host-side oracle pass.
+
+Design doc deliverable at `docs/spikes/M39_env_walker.md` must
+answer:
+
+1. **Context discrimination.** Concrete AST-walk strategy for
+   distinguishing body / guard / pattern / quote / macro
+   contexts. Map each context to its `Mut.EnvSnapshot`
+   classification (`:trusted`, `:opaque`, `:untrusted_descendant`,
+   `:quoted`, `:generated`). Reference the elixir_sense
+   approach where it informs the design; deviate where
+   mutalisk's narrower needs justify a simpler walk.
+2. **User macro opacity policy.** Non-negotiable: the walker
+   does NOT expand user macros. Document how unknown macro
+   calls are classified (`:opaque` boundary; descendants
+   become `:untrusted_descendant`). Confirm that no macro
+   expansion path exists in the proposed walker by inspection,
+   not by testing.
+3. **Public-API surface.** Enumerate the `Macro.Env` APIs the
+   walker depends on. Note any that are "public but
+   undocumented" (similar to v1.7's ExUnit private-API
+   reliance, which forced the Elixir 1.18.0 floor). If the
+   walker forces a higher Elixir floor, that's a v2 release-
+   note item.
+4. **Stable-ID strategy.** Critical: declare whether the env
+   walker can be added without a stable_id migration
+   (preferred — keeps v1's bytestream identity contract
+   intact) or forces one. If migration is forced, the
+   acceptance bar for the first implementation milestone
+   shifts (it becomes a stable_id migration milestone, not a
+   mutator addition milestone).
+5. **Cold-compile cost estimate.** Walker traversal time on
+   demo_app + Decimal + plug, measured by prototype if
+   needed. Hard constraint: walker must not double oracle-
+   build wall on Decimal-class projects. v1.5 picked tracer-
+   only specifically to avoid compile-time walker cost; if
+   the env walker can't beat that constraint, the design
+   pivots (incremental walker? walker-on-demand for mutated
+   modules only?). A negative outcome here is a real result.
+6. **Mutator ordering for first implementation.** Which
+   mutators become possible in what order. Likely sequence:
+   string body literals → atom body literals (with
+   atom-table-pollution policy) → list/map/tuple body
+   literals → pattern-position literals → variable mutators.
+   Justify the ordering on equivalent-mutant rate and walker-
+   complexity grounds.
+7. **Go/no-go gate for v1.14 implementation.** Concrete
+   acceptance criteria for the first implementation milestone:
+   LOC estimate, target cold-compile overhead, byte-identity
+   preservation for v1's existing dispatch-shaped mutants
+   (env walker MUST NOT regress the tracer oracle's coverage),
+   validation target set.
+
+Acceptance for M39:
+- Design doc committed at `docs/spikes/M39_env_walker.md`.
+- All seven questions answered concretely (not "TBD").
+- Cold-compile cost number measured, not estimated. Prototype
+  walker (throwaway) acceptable to land the measurement;
+  prototype is NOT shipped code.
+- Stable-ID migration policy explicit (yes/no, with rationale).
+- Go/no-go recommendation explicit. v1.14 implementation
+  milestone scope written into PLAN.md as a horizon item if
+  go.
+
+Out of M39 scope:
+- Any production code path. This is a spike like M29 / M32 /
+  M36. Prototype code stays in `tmp/` or a throwaway branch.
+- Implementing any new mutator. M37 was the v1.12 closure for
+  catalog growth; v1.13 does not ship new mutators.
+- Pattern-mutator framework design. Pattern-position literals
+  are first-class in M39's ordering, but the higher-risk
+  pattern mutators (pin/unpin variable swaps, arity changes)
+  remain v2 design work.
+
+> **v1.13 closure note (2026-05-11):** decision = **go for v1.14**.
+> Spike doc committed at `docs/spikes/M39_env_walker.md` with
+> explicit answers to all 7 PLAN.md questions: context
+> discrimination (recursive descent over source AST with explicit
+> per-form context transitions), user macro opacity policy (no
+> expansion; tracer-oracle proof required for `Kernel.if`/`unless`
+> trust), public-API surface (no floor bump beyond 1.19),
+> stable-ID strategy (no migration; existing dispatch IDs
+> preserved), cold-compile cost (parse+walk ≤ 0.72% of oracle
+> build on plug — well below the 10% gate), mutator ordering
+> (string → float → atom → list/map/tuple → attribute → pattern
+> → variable), and v1.14 go/no-go gate (~970 production + ~450
+> test LOC; first mutator: `Mut.Mutator.StringLiteral` only).
+> See CHANGELOG.md M39 entry.
+
+## v1.13 horizon (not v1.13 scope)
+
+- **Env walker first implementation** — v1.14 candidate iff
+  M39 returns go. Likely string body literals as the first
+  mutator (lowest equivalent-mutant rate, simplest walker
+  context).
+- **Stable_id migration** — v1.14+ if M39 says forced.
+  Otherwise indefinitely deferred.
+- **Atom-table pollution policy** — v1.14 design item for the
+  atom-literal mutator. Whether to whitelist replacements,
+  bound the atom-creation rate per run, or refuse to mutate
+  atoms by default.
+- **Pattern mutator framework** — v2 work; M39 documents
+  feasibility, doesn't design.
+- **Variable mutators** — v2 work; M39 enumerates but doesn't
+  design.
+
+## Explicitly NOT v1.13
+
+- Persistent default flip (closed structurally).
+- Coverage default flip (deferred until persistent stabilizes).
+- Affected-test selection (M32 shelved; reopening criteria
+  documented there).
+- Helper-process recompile isolation (M29 rejected).
+- Reopening Ecto / Gettext / clustered-Mox persistent support.
+- Body-literal schema routing migration.
+- Any new mutator (M37 was the v1.12 catalog-growth closure).
+- New CLI flags (`--fail-on-drift` deferred until requested).
+- Stable_id input changes (any future migration is its own
+  explicit milestone, gated on M39's migration policy).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
