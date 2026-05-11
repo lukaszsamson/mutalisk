@@ -45,7 +45,7 @@ defmodule Mut.Cli do
 
   @known_reporters [:terminal, :stryker_json]
   @known_selection_modes [:static, :coverage, :coverage_with_static_fallback]
-  @known_targets [:dispatch, :guard, :module_attribute, :body_literal]
+  @known_targets [:dispatch, :guard, :module_attribute, :body_literal, :env_walker]
   @known_mutators [
     "arithmetic",
     "comparison_boundary",

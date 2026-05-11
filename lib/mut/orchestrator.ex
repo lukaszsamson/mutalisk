@@ -9,16 +9,28 @@ defmodule Mut.Orchestrator do
   alias Mut.Oracle.DispatchSite
   alias Mut.Plan
 
-  @type target :: :dispatch | :guard | :module_attribute | :body_literal
+  @type target :: :dispatch | :guard | :module_attribute | :body_literal | :env_walker
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
     mutators = Keyword.get(opts, :mutators, Defaults.list())
     enabled_targets = Keyword.get(opts, :enabled_targets, [:dispatch, :guard])
 
+    # M40 commit 3: build the tracer-macro index once per plan so the
+    # walker can resolve if/unless to Kernel.if/2 / Kernel.unless/2
+    # with proof (M39 spec, OpaquePolicy.trusted_kernel_control_flow?/3).
+    # `:env_walker` opt-in: when not in enabled_targets, no parsing or
+    # walking happens (byte-identity gate is binding).
+    macro_index =
+      if :env_walker in enabled_targets do
+        Mut.EnvOracle.build_macro_index(oracle.sites)
+      else
+        nil
+      end
+
     work_copy_root
     |> files(opts)
-    |> Enum.map(&process_file(work_copy_root, &1, oracle, mutators, enabled_targets))
+    |> Enum.map(&process_file(work_copy_root, &1, oracle, mutators, enabled_targets, macro_index))
     |> combine_results()
     |> Plan.finalize()
   end
@@ -40,7 +52,7 @@ defmodule Mut.Orchestrator do
   defp filtered?(_file, nil), do: false
   defp filtered?(file, %Regex{} = regex), do: Regex.match?(regex, file)
 
-  defp process_file(root, relative_file, oracle, mutators, enabled_targets) do
+  defp process_file(root, relative_file, oracle, mutators, enabled_targets, macro_index) do
     path = Path.join(root, relative_file)
     {:ok, {ast, source}} = Mut.SourceParse.parse(path)
 
@@ -75,19 +87,58 @@ defmodule Mut.Orchestrator do
         source
       )
 
+    # M40 commit 3: env-walker fifth candidate source. Disabled
+    # unless `:env_walker` is in enabled_targets. M40 commit 5 lands
+    # the StringLiteral mutator that consumes env_snapshots; in
+    # commit 3 the walker runs (when enabled) but produces no
+    # fallback entries — only contributing to the `Mut.EnvOracle`
+    # diagnostics histogram (commit 6).
+    env_snapshots =
+      if :env_walker in enabled_targets do
+        env_walker_snapshots(path, relative_file, source, macro_index)
+      else
+        []
+      end
+
+    {env_fallback, env_skips} =
+      env_walker_results(env_snapshots, enabled_targets, mutators, source)
+
     %Plan{
       schema: schema,
-      fallback: attribute_fallback ++ guard_fallback ++ body_literal_fallback,
+      fallback: attribute_fallback ++ guard_fallback ++ body_literal_fallback ++ env_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
           dispatch_skips ++
           attribute_skips ++
           guard_skips ++
-          body_literal_skips,
+          body_literal_skips ++
+          env_skips,
       matched_pairs: matched
     }
   end
+
+  defp env_walker_snapshots(_path, relative_file, source, macro_index) do
+    case Mut.EnvWalker.parse_string(source, relative_file) do
+      {:ok, encoded_ast} ->
+        Mut.EnvWalker.collect_literal_snapshots(encoded_ast,
+          file: relative_file,
+          source: source,
+          macro_index: macro_index
+        )
+
+      _ ->
+        []
+    end
+  end
+
+  # M40 commit 3: walker is wired but no mutator consumes its
+  # snapshots yet. StringLiteral lands in commit 5. The skip list
+  # here is intentionally empty; commit 6 will surface env-walker
+  # diagnostics via Mut.EnvOracle.skip_histogram instead of the
+  # per-mutant skip pipeline.
+  defp env_walker_results([], _enabled, _mutators, _source), do: {[], []}
+  defp env_walker_results(_snapshots, _enabled, _mutators, _source), do: {[], []}
 
   defp body_literal_fallback_results(candidates, enabled_targets, mutators, source) do
     if :body_literal in enabled_targets do
