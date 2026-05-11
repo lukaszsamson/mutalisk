@@ -5,6 +5,86 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.14 unreleased
 
+### M41 — Real-target validation + StringLiteral default decision (2026-05-11)
+
+Plan-level validation matrix on the M40 acceptance set
+(demo_app, plug_crypto v2.1.1, Decimal, plug v1.19.1,
+phoenix_html v4.3.0). Full decision doc at
+`docs/decisions/M41_string_literal_decision.md`.
+
+Two production fixes shipped as part of M41 measurement:
+
+- **Walker `literal_span/3` end-byte regression** — `:token`
+  metadata is not propagated by the parser's `:literal_encoder`
+  option for string literals. Pre-fix, all string literals at
+  the same `ast_path` collapsed to identical stable IDs.
+  Decimal exposed 9 collisions on 19 mutants. Fix falls back to
+  `:end_of_expression` token metadata when `:token` is absent
+  so distinct physical sites produce distinct byte spans. All 5
+  targets now produce unique IDs per string literal.
+- **`ast_path_hash` JSON encoding** — env walker emitted a raw
+  SHA-256 binary which contains bytes that `elixir_json`
+  refuses as UTF-8. Mirrored `Mut.AstWalk.path_hash/1`'s
+  16-byte SHA-256 prefix + `Base.encode16(case: :lower)`
+  encoding. JSON-safe.
+- **`fallback_env_context/3` missing clause** — orchestrator's
+  fallback-context dispatcher had no `:env_walker` clause;
+  every string-literal candidate hit a FunctionClauseError on
+  any target with body string literals. Added.
+
+#### Validation matrix
+
+| Target | Default IDs | env_walker IDs | New IDs | Lost IDs | StringLiteral count |
+|---|---:|---:|---:|---:|---:|
+| demo_app | 31 | 31 | 0 | **0** | 0 |
+| plug_crypto v2.1.1 | 64 | 71 | 7 | **0** | 7 |
+| Decimal | 456 | 475 | 19 | **0** | 19 |
+| plug v1.19.1 | 352 | 469 | 117 | **0** | 117 |
+| phoenix_html v4.3.0 | 93 | 115 | 22 | **0** | 22 |
+
+**Stable-ID churn for existing mutants = 0 on all 5 targets.**
+M40's byte-identity acceptance binds; M41 confirms it on the
+full acceptance corpus.
+
+#### Decision: `keep_opt_in`
+
+`--enable env_walker --mutators string_literal` stays the
+required opt-in surface. Reasoning (full at the decision doc):
+
+- M41 produced plan-level evidence only (no test execution).
+  The `expand_table` criteria (equivalent <20% AND kill ≥60%)
+  cannot be evaluated without kill-rate measurement.
+- Kill rates are a property of the project's test suite, not
+  the mutator (consistent with M33 / M37 reframings).
+- No unknown invalid class surfaced; opaque-policy false
+  negatives in plan-level inspection: zero.
+
+Interpolated-string disposition (M39 deferred): no demand
+surfaced; no v1.15 milestone scoped at M41 close.
+
+#### Sidecar observations
+
+- **plug** shows a 33% mutant-surface increase (352 → 469);
+  largest target-class win when users opt in.
+- **phoenix_html**'s opaque policy correctly excludes
+  `@doc ~S"""..."""` sigil heredoc bodies on all 22 new
+  mutants. M34 SchemaPlacer closure + M40 walker stack cleanly.
+- **Decimal** scales linearly at +4%; M23 + comparison +
+  boolean + guard mutators already cover most of its surface.
+- **demo_app** correctly produces 0 string mutants.
+
+#### Acceptance
+
+- ✅ Zero stable-ID churn (5/5 targets).
+- ✅ Parse+walk gate holds in production
+  (Decimal ~8 s, plug ~12 s — 14× headroom on M39's 10% gate).
+- ✅ No-expansion grep gate holds (walker uses only
+  `Code.string_to_quoted/2` + AST matches).
+- ✅ Decision doc at `docs/decisions/M41_string_literal_decision.md`.
+- ✅ BENCHMARKS.md gains v1.14 section.
+- ✅ PERSISTENT_WORKER_GUIDE.md notes env walker runs at plan
+  time (host process); both worker types see identical plans.
+
 ### M40 — Env walker + StringLiteral mutator (2026-05-11)
 
 v1.14's substantive milestone. M39 returned **GO**; M40 ships the

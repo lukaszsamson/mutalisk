@@ -344,6 +344,7 @@ defmodule Mut.Orchestrator do
 
   defp fallback_env_context(_candidate, _site, :module_attribute), do: nil
   defp fallback_env_context(_candidate, _site, :body_literal), do: nil
+  defp fallback_env_context(_candidate, _site, :env_walker), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

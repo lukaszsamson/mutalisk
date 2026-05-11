@@ -1,5 +1,65 @@
 # Mutalisk Benchmarks
 
+## v1.14 env walker + StringLiteral mutator (M40 + M41, 2026-05-11)
+
+M40 shipped `Mut.EnvWalker` as a fifth candidate source and
+`Mut.Mutator.StringLiteral` as the first env-walker-backed
+mutator. Both behind opt-in flags
+(`--enable env_walker --mutators string_literal`).
+
+M41 ran plan-level byte-identity validation on the M40
+acceptance set (demo_app + plug_crypto + Decimal + plug +
+phoenix_html). Full decision doc at
+`docs/decisions/M41_string_literal_decision.md`.
+
+### Plan-level matrix (5 targets × {default, env_walker enabled})
+
+| Target | Default IDs | env_walker IDs | New IDs | Lost IDs | StringLiteral mutants |
+|---|---:|---:|---:|---:|---:|
+| demo_app | 31 | 31 | 0 | **0** | 0 |
+| plug_crypto v2.1.1 | 64 | 71 | 7 | **0** | 7 |
+| Decimal | 456 | 475 | 19 | **0** | 19 |
+| plug v1.19.1 | 352 | 469 | 117 | **0** | 117 |
+| phoenix_html v4.3.0 | 93 | 115 | 22 | **0** | 22 |
+
+**Stable-ID churn for existing mutants is zero on all five
+targets.** M40's binding byte-identity gate holds. Each new
+StringLiteral mutant has a unique stable-ID; literal_span
+computation falls back to `:end_of_expression` token metadata
+when `:token` is unavailable on string literal AST nodes
+(JSON-safe ast_path_hash via `Base.encode16` mirrors the M23
+walker).
+
+Plan-only validation: no test execution. Kill rates for the
+new mutants are operator-driven measurements; M41 records the
+mutant surface, not the kill counts.
+
+### Decision
+
+`keep_opt_in`. The mutator stays behind
+`--enable env_walker` / `--mutators string_literal` defaults.
+Kill-rate evaluation is operator work; M41's plan-level evidence
+cannot establish the `expand_table` criteria
+(equivalent <20% AND kill ≥60%) without test runs, and the
+conservative outcome is consistent with M33 / M37 reframings:
+kill rate is a property of the test suite, not the mutator.
+
+### Sidecar observations
+
+- **plug** shows a **33% mutant-surface increase** (352 → 469).
+  Real-world surface that users on plug-class projects will
+  benefit from when opting in.
+- **phoenix_html**'s opaque policy correctly excludes
+  `@doc ~S"""...""" ` sigil heredoc bodies — none of the 22 new
+  mutants live inside docstrings. The M34 SchemaPlacer closure
+  + env walker land cleanly on Phoenix-class targets.
+- **Decimal** scales +4% (456 → 475). Smaller proportion than
+  plug because most of Decimal's mutation surface is already
+  covered by M23 integer-literal / comparison / boolean / guard
+  mutators.
+- **demo_app** correctly produces zero string mutants (the
+  fixture is arithmetic-/comparison-/boolean-only by design).
+
 ## v1.12 SchemaPlacer escaped-quote fix (M34, 2026-05-10)
 
 M34 narrowed `Mut.SchemaPlacer.strip_heredoc_delimiters/1` to

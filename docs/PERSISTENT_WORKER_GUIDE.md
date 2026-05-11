@@ -458,6 +458,31 @@ CLI flags override config.
   Persistent and mix are byte-identical on outcomes against the
   reference targets — divergence is a bug, please report.
 
+## Env walker (v1.14 opt-in)
+
+`--enable env_walker --mutators string_literal` activates
+`Mut.EnvWalker` and the v1.14 `StringLiteral` mutator. The env
+walker runs at **plan time in the host process** — it parses
+source AST with the `literal_encoder` option and classifies
+each `:__block__`-wrapped literal node by context / scope /
+trust. The walker does NOT run inside the persistent BEAM and
+does NOT change per-mutant runtime behavior in either worker.
+
+Implications:
+
+- **Both worker types see identical plans.** With env walker
+  enabled, mix-spawn and persistent both pick up the new
+  StringLiteral mutants identically. The drift bucketer
+  (`mix mut.drift`) treats them the same as any other fallback
+  mutant.
+- **No env-walker-specific persistent metrics.** The persistent
+  reset-hooks block is unchanged; M40 added no per-mutant runner
+  state for env-walker mutants.
+- **Plan-time cost is paid once per run.** Parse + walk wall on
+  the M40 acceptance corpus measures 3.4 ms (demo_app) to
+  34 ms (plug). The 10% gate (M39's hard constraint) has 14×
+  headroom on Decimal- and plug-class projects.
+
 ## Reporting issues
 
 If the persistent worker produces different mutant outcomes than

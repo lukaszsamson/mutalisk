@@ -254,22 +254,40 @@ defmodule Mut.EnvWalker do
   end
 
   defp literal_span(state, meta, _snap) do
-    with line when is_integer(line) <- Keyword.get(meta, :line),
-         column when is_integer(column) <- Keyword.get(meta, :column),
-         token when is_binary(token) <- Keyword.get(meta, :token) do
-      end_column = column + String.length(token)
+    line = Keyword.get(meta, :line)
+    column = Keyword.get(meta, :column)
+
+    if is_integer(line) and is_integer(column) do
+      {end_line, end_column} = literal_end(meta, line, column)
 
       %SourceSpan{
         file: state.file,
         start_line: line,
         start_column: column,
-        end_line: line,
+        end_line: end_line,
         end_column: end_column,
         start_byte: byte_offset(state, line, column),
-        end_byte: byte_offset(state, line, end_column)
+        end_byte: byte_offset(state, end_line, end_column)
       }
-    else
-      _ -> nil
+    end
+  end
+
+  # `:token` (raw source text) is the cleanest end indicator, but
+  # the literal_encoder option does not propagate `:token` for
+  # string / atom literals. Fall back to `:end_of_expression` (the
+  # newline-trailing marker the parser emits with token_metadata)
+  # so different physical sites produce distinct byte spans even
+  # when the source value is the same.
+  defp literal_end(meta, line, column) do
+    cond do
+      token = Keyword.get(meta, :token) ->
+        if is_binary(token), do: {line, column + String.length(token)}, else: {line, column + 1}
+
+      end_of_expr = Keyword.get(meta, :end_of_expression) ->
+        {Keyword.get(end_of_expr, :line, line), Keyword.get(end_of_expr, :column, column + 1)}
+
+      true ->
+        {line, column + 1}
     end
   end
 
@@ -281,7 +299,14 @@ defmodule Mut.EnvWalker do
   end
 
   defp path_hash(path) do
-    :crypto.hash(:sha256, :erlang.term_to_binary(path))
+    # Mirror Mut.AstWalk.path_hash/1: 16-byte SHA-256 prefix, base-16
+    # lower-cased. The hex encoding keeps the value JSON-safe (some
+    # raw binary hashes contain bytes that elixir_json refuses as
+    # UTF-8).
+    :sha256
+    |> :crypto.hash(:erlang.term_to_binary(path))
+    |> binary_part(0, 16)
+    |> Base.encode16(case: :lower)
   end
 
   defp literal_value?(value) when is_binary(value), do: true

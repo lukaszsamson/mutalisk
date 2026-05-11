@@ -2157,6 +2157,243 @@ Out of M39 scope:
 - Stable_id input changes (any future migration is its own
   explicit milestone, gated on M39's migration policy).
 
+# v1.14 milestones (env walker first implementation)
+
+M39 returned **GO** for v1.14 with measured cold-walk cost
+0.06%/0.21%/0.72% of oracle wall on demo_app/Decimal/plug —
+14× headroom against the 10% hard gate. v1.14 ships the env
+walker as a fifth candidate source and `Mut.Mutator.StringLiteral`
+as the first env-walker-backed mutator, behind opt-in flags.
+
+**Theme**: first env-walker implementation, narrow mutator
+surface, no stable-id migration. M39 declared no migration
+required; v1.14 acceptance enforces it.
+
+**Defaults do NOT change in v1.14.** `--worker-type mix`,
+`--selection static`, env walker disabled unless
+`--enable env_walker` / `--enable string_literal`.
+
+Two milestones, mirroring M19's pattern (one large
+implementation milestone with internal commit pacing + one
+validation/decision milestone).
+
+## v1.14 scope (committed)
+
+**M40 — Env walker + StringLiteral mutator
+(foundation through integration).** One milestone, ~970
+production LOC + ~450 test LOC per M39's estimate. Ships the
+entire bundle behind opt-in. M19 precedent: large
+implementation milestones use internal commit pacing rather
+than splitting into multiple shippable milestones.
+
+Step-by-step deliverables (7 commits):
+
+1. `Mut.EnvSnapshot` + `Mut.OpaquePolicy` data types. No
+   walker yet. Unit tests on classification helpers and the
+   `:trusted` / `:opaque` / `:untrusted_descendant` / `:quoted`
+   / `:generated` enum.
+2. `Mut.EnvWalker` skeleton — recursive descent over special
+   forms (`defmodule`, `def`, `defp`, `defmacro`, `defmacrop`,
+   `defguard`, `defguardp`, `fn`, `case`, `with`, `try`,
+   `quote`, `unquote`, `=`, `when`, `^`). No oracle
+   integration yet. Per-form tests on body / guard / pattern /
+   quote / macro context discrimination. Opaque-boundary
+   tests for unknown macro calls.
+3. `Mut.EnvOracle` (in-memory index from source-span →
+   snapshot) + orchestrator hook as fifth candidate source
+   alongside `dispatch_candidates`, `guard_candidates`,
+   `attribute_candidates`, `body_literal_candidates`.
+   Disabled by default; orchestrator wiring test only.
+4. Defguard / `if` / `unless` trusted-only-with-tracer-proof
+   logic. M39's key constraint: these are trusted ONLY when
+   the tracer oracle confirms they resolve to
+   `Kernel.if/2` / `Kernel.unless/2` / `Kernel.defguard/1`,
+   not user redefinitions. Sequence before the mutator so the
+   trust contract is battle-tested first.
+5. `Mut.Mutator.StringLiteral` — fallback-routed (not schema-
+   routed; v1.14 does not force a stable-id migration), scope
+   `:function_body`, context `nil`, trust `:trusted`.
+   Replacement table: non-empty → `""`. Empty → skip.
+   Interpolated strings (`"x#{y}"`) → skip per M39 ordering
+   item 6 (source-span replacement not yet proven safe).
+6. Diagnostics + metrics: skip-reason histogram
+   (`:opaque` / `:quoted` / `:generated` / `:missing_span` /
+   `:untrusted_descendant`), env-walker `parse_ms` and
+   `walk_ms` in `Mut.Metrics.Snapshot`, reporter integration
+   (terminal block + Stryker JSON `mutalisk.env_walker` key).
+7. Public `--enable env_walker` / `--enable string_literal`
+   flags, CHANGELOG entry, BENCHMARKS scaffolding for M41,
+   all 9 `bin/verify` layers green.
+
+Acceptance gates (whole milestone):
+
+- **Byte-identity gate** (hardest). Existing dispatch /
+  guard / attribute / body-literal stable IDs unchanged on
+  demo_app, plug_crypto, Decimal, and plug. Verified via a
+  stable-id diff harness comparing pre-M40 HEAD's plan
+  against post-M40 HEAD's plan with `--enable env_walker`
+  ON and OFF. Env walker MUST NOT regress the tracer
+  oracle's coverage.
+- **No-expansion gate**. Automated grep over env-walker code
+  paths: zero occurrences of `Macro.expand`, `Macro.expand_once`,
+  `Code.eval_`, `Code.compile_`, `Kernel.ParallelCompiler`,
+  `:elixir_expand`, `:elixir_module`, `:elixir_def`,
+  `Macro.Env.expand_import`, `Macro.Env.expand_require`,
+  `Macro.Env.define_import`, `Macro.Env.fetch_alias`,
+  `Macro.Env.fetch_macro_alias`. M39 enumerated the forbidden
+  list; M40 automates the check as a verify layer.
+- **Cold-compile gate**. `parse_ms + walk_ms ≤ 10% of
+  oracle_build_ms` on Decimal and plug, measured in CI per
+  run. M39's prototype reported 0.21% / 0.72% — 14× headroom.
+  Hard regression bar; if production overhead inflates past
+  10×, fix before merge.
+- **Opt-in default**. Env walker disabled unless
+  `--enable env_walker` or `--enable string_literal` is set.
+  Default `bin/verify` runs do NOT exercise the walker.
+  Verify this via a default-run plan-diff (pre-M40 plan ==
+  default-flags post-M40 plan).
+- **No regression of existing mutators**. Decimal's integer-
+  literal + boolean-literal + body-literal kill counts
+  unchanged. Demo_app fixture stable IDs unchanged.
+- **All 9 `bin/verify` layers green.**
+
+Subagent brief (for a fresh agent picking up M40):
+- M39's design doc at `docs/spikes/M39_env_walker.md` is
+  binding. Do not deviate from the 11 public APIs enumerated
+  in M39's answer to question 3 without explicit re-design.
+- Use `~/elixir_sense/lib/elixir_sense/core/compiler.ex` as a
+  reference for the AST-traversal pattern. ElixirSense's
+  walker collects more than mutalisk needs (symbol-table
+  metadata for IDE features); strip to context-only.
+- Do NOT migrate any existing `Mut.AstWalk` walker behind
+  EnvWalker. That's v1.15+ and has its own byte-identity gate.
+- Fallback-route, not schema-route. Schema routing for
+  literals is a separate stable-id migration decision (M25
+  Decision 2 territory).
+
+**M41 — Real-target validation + StringLiteral default
+decision.** Mirrors M24 / M25's matrix-then-decide shape.
+Runs the matrix exactly once; uses the data to decide
+whether StringLiteral stays opt-in, expands its replacement
+table, or reverts to opt-in-experimental.
+
+Validation matrix (5 targets × `{enabled, disabled}` ×
+`{mix, persistent}`):
+
+- demo_app — fixture-level proof: hand-placed string literals
+  are killed by the demo test suite. Smallest signal, fastest
+  feedback.
+- plug_crypto — small dispatch-heavy baseline.
+- Decimal — large arithmetic-heavy byte-identity stress.
+- plug — M34-unblocked, supervisor-init drift class.
+- phoenix_html — M34-unblocked macro-heavy target. Tests
+  opaque-policy classification on `@doc ~S"""…"""` sigil
+  heredocs and EEx-generated internals.
+
+(gettext as alternative macro-heavy target is mix-only per
+M31; phoenix_html exercises the opaque policy harder and is
+the primary pick. If budget allows, run gettext under
+`--worker-type mix` as a secondary informational target.)
+
+Measure per target:
+- New string mutants surfaced (count + sample stable_ids).
+- Kill / survived / error / invalid counts.
+- Env-walker parse + walk time vs oracle wall.
+- Stable-ID diff for existing mutants (MUST be zero).
+- Skip-reason histogram counts
+  (`:opaque` / `:quoted` / `:generated` / `:missing_span`).
+- Mutant-run wall delta vs disabled.
+
+Decision output at `docs/decisions/M41_string_literal_decision.md`,
+mirroring M25 / M36 decision-doc conventions:
+
+1. **StringLiteral default policy**:
+   - `keep_opt_in` (conservative default) — if invalid rate
+     ≥10% on any target OR opaque-policy false negatives
+     detected (trusted mutants inside known DSL-generated
+     internals).
+   - `expand_table` — if equivalent-mutant rate <20% AND kill
+     rate ≥60%. Candidate replacements: `non-empty → "x"`,
+     `non-empty → " " + s`.
+   - `defer_further` — if matrix surfaces an unknown invalid
+     class. Revert to opt-in-experimental flag (separate from
+     `string_literal`) and re-spike in v1.15.
+
+2. **Interpolated-string disposition**: M39 deferred until
+   source-span replacement is proven safe. M41 records
+   whether the matrix surfaced demand for interpolated-string
+   mutation; if yes, scope a v1.15 milestone.
+
+Side validations (same data, no new bench cycles):
+- Env-walker overhead on persistent vs mix workers (M40's
+  cold-compile gate applies to mix-spawn; persistent's warm
+  BEAM amortizes parse but not walk).
+- Opaque-policy effectiveness: false positives (trusted
+  mutants the policy should have rejected) and false
+  negatives (opaque rejections that were actually safe).
+- Skip-reason distribution informs v1.15+ walker hardening.
+
+Acceptance:
+- Zero stable-ID churn for existing mutants on all 5 targets.
+- Parse + walk gate holds in production on Decimal and plug.
+- No-expansion grep gate holds.
+- Decision doc committed with explicit recommendation.
+- BENCHMARKS.md gains a v1.14 section.
+- `PERSISTENT_WORKER_GUIDE.md` notes interaction (if any)
+  between env walker and persistent worker.
+
+> **v1.14 closure note (2026-05-11):** decision = `keep_opt_in`.
+> Plan-level validation matrix on 5 acceptance targets confirms
+> zero stable-ID churn (binding M40 byte-identity gate);
+> kill-rate evaluation is operator-driven and out of M41's
+> plan-only scope. Three production fixes shipped as part of
+> M41 measurement: literal_span end-byte regression on string
+> literals (fell back to `:end_of_expression` when `:token` is
+> absent), JSON-safe `ast_path_hash` encoding (Base16 hex
+> mirroring `Mut.AstWalk.path_hash/1`), and the missing
+> `fallback_env_context(_, _, :env_walker)` orchestrator clause.
+> See CHANGELOG.md M41 entry + `docs/decisions/M41_string_literal_decision.md`.
+
+## v1.14 horizon (not v1.14 scope)
+
+- **Float / atom / list / map / tuple body literals** — M39's
+  ordering item 6. v1.15+ candidate. Atom mutator requires
+  atom-table pollution policy (see horizon below).
+- **Atom-table pollution policy** — design item for the
+  atom-literal mutator. Whitelist replacements? Bound
+  atom-creation rate per run? Refuse to mutate atoms by
+  default? v1.15+ design.
+- **Pattern-position literals** — M39 ordering, v1.15+.
+- **Variable mutators** — M39 ordering, v1.15+.
+- **Interpolated-string mutation** — M41 decision input;
+  v1.15+ if demand surfaces.
+- **Migrating existing walkers behind EnvWalker** — v1.15+
+  with its own byte-identity gate per M39's "key
+  architectural commitments." Forbidden in v1.14.
+- **Body-literal schema-routing migration** — orthogonal to
+  env walker; gated on body-literal default-on, which has
+  not happened.
+
+## Explicitly NOT v1.14
+
+- Schema-routing for any env-walker mutator. v1.14 routes
+  through fallback exclusively. Stable-id migration is
+  v1.15+ if ever.
+- Migrating existing `Mut.AstWalk` walkers behind
+  `EnvWalker`. M39 explicitly forbids this in v1.14.
+- Persistent default flip (closed structurally).
+- Coverage default flip.
+- Affected-test selection (M32 shelved).
+- Helper-process recompile isolation (M29 rejected).
+- Reopening Ecto / Gettext / clustered-Mox persistent
+  support.
+- Stable-ID input changes. M39 declared none required;
+  reopen only if a future mutator forces one (would be its
+  own explicit migration milestone).
+- New CLI flags beyond `--enable env_walker` and
+  `--enable string_literal`.
+- `--fail-on-drift` for `mix mut.drift`.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
