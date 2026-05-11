@@ -67,6 +67,8 @@ defmodule Mut.EnvWalker do
 
   alias Mut.EnvSnapshot
   alias Mut.OpaquePolicy
+  alias Mut.Oracle.AstCandidate
+  alias Mut.SourceSpan
 
   @parser_opts [columns: true, token_metadata: true, emit_warnings: false]
 
@@ -113,6 +115,46 @@ defmodule Mut.EnvWalker do
   defp literal_encoder(literal, meta), do: {:ok, {:__block__, meta, [literal]}}
 
   @doc """
+  Walks the AST and returns `[{Mut.Oracle.AstCandidate.t(),
+  Mut.EnvSnapshot.t()}]` pairs for each string literal whose
+  snapshot is body-literal-eligible
+  (`Mut.EnvSnapshot.body_literal_eligible?/1`).
+
+  This is the candidate-source function the orchestrator wires
+  into `env_walker_results/4` for M40's `StringLiteral` mutator.
+  Only string-valued literals are returned; integer / boolean /
+  atom literals are out of scope for v1.14 first implementation
+  (M39 mutator-ordering item 1).
+  """
+  @spec collect_string_literal_candidates(Macro.t(), collect_opts()) ::
+          [{AstCandidate.t(), EnvSnapshot.t()}]
+  def collect_string_literal_candidates(ast, opts) when is_list(opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.get(opts, :source, "")
+    macro_index = Keyword.get(opts, :macro_index)
+    line_offsets = compute_line_offsets(source)
+
+    initial_state = %{
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      macro_index: macro_index,
+      ast_path: [],
+      module: nil,
+      function: nil,
+      context: nil,
+      scope: :top_level,
+      trust_level: :trusted,
+      snapshots: [],
+      candidates: [],
+      collect_strings?: true
+    }
+
+    state = walk(ast, initial_state)
+    Enum.reverse(state.candidates)
+  end
+
+  @doc """
   Walks the AST and returns a list of `Mut.EnvSnapshot` records
   for each `:__block__`-wrapped literal node.
   """
@@ -134,7 +176,9 @@ defmodule Mut.EnvWalker do
       context: nil,
       scope: :top_level,
       trust_level: :trusted,
-      snapshots: []
+      snapshots: [],
+      candidates: [],
+      collect_strings?: false
     }
 
     state = walk(ast, initial_state)
@@ -149,7 +193,8 @@ defmodule Mut.EnvWalker do
   end
 
   # Literal block — possible mutation target.
-  defp maybe_emit_literal_snapshot(state, {:__block__, meta, [value]}) when is_list(meta) do
+  defp maybe_emit_literal_snapshot(state, {:__block__, meta, [value]} = node)
+       when is_list(meta) do
     cond do
       not literal_value?(value) ->
         state
@@ -158,11 +203,86 @@ defmodule Mut.EnvWalker do
         emit_snapshot(state, meta, :generated)
 
       true ->
-        emit_snapshot(state, meta, state.trust_level)
+        state
+        |> emit_snapshot(meta, state.trust_level)
+        |> maybe_emit_string_candidate(node, value, meta)
     end
   end
 
   defp maybe_emit_literal_snapshot(state, _node), do: state
+
+  # M40 commit 5: surface string-literal AstCandidates for the
+  # StringLiteral mutator. Only emitted when the state is
+  # configured to collect strings (collect_string_literal_candidates/2)
+  # AND the snapshot we just emitted is body-literal-eligible.
+  defp maybe_emit_string_candidate(%{collect_strings?: false} = state, _node, _value, _meta),
+    do: state
+
+  defp maybe_emit_string_candidate(state, _node, value, _meta) when not is_binary(value),
+    do: state
+
+  defp maybe_emit_string_candidate(state, _node, "", _meta), do: state
+
+  defp maybe_emit_string_candidate(state, node, _value, meta) do
+    [latest_snap | _] = state.snapshots
+
+    if EnvSnapshot.body_literal_eligible?(latest_snap) do
+      candidate = build_string_candidate(state, node, meta, latest_snap)
+      %{state | candidates: [{candidate, latest_snap} | state.candidates]}
+    else
+      state
+    end
+  end
+
+  defp build_string_candidate(state, node, meta, snap) do
+    line = Keyword.get(meta, :line)
+    column = Keyword.get(meta, :column)
+
+    %AstCandidate{
+      file: state.file,
+      line: line,
+      column: column,
+      syntactic_name: :__string_literal__,
+      syntactic_arity: 0,
+      source_span: literal_span(state, meta, snap),
+      env_context: nil,
+      enclosing_module: state.module,
+      ast_path: state.ast_path,
+      ast_path_hash: path_hash(state.ast_path),
+      node: node
+    }
+  end
+
+  defp literal_span(state, meta, _snap) do
+    with line when is_integer(line) <- Keyword.get(meta, :line),
+         column when is_integer(column) <- Keyword.get(meta, :column),
+         token when is_binary(token) <- Keyword.get(meta, :token) do
+      end_column = column + String.length(token)
+
+      %SourceSpan{
+        file: state.file,
+        start_line: line,
+        start_column: column,
+        end_line: line,
+        end_column: end_column,
+        start_byte: byte_offset(state, line, column),
+        end_byte: byte_offset(state, line, end_column)
+      }
+    else
+      _ -> nil
+    end
+  end
+
+  defp byte_offset(state, line, column) do
+    case Enum.at(state.line_offsets, line - 1) do
+      nil -> nil
+      base -> base + column - 1
+    end
+  end
+
+  defp path_hash(path) do
+    :crypto.hash(:sha256, :erlang.term_to_binary(path))
+  end
 
   defp literal_value?(value) when is_binary(value), do: true
   defp literal_value?(value) when is_atom(value), do: true
@@ -206,7 +326,7 @@ defmodule Mut.EnvWalker do
     module = resolve_module_alias(module_ast, state.module)
     inner = %{state | module: module, scope: :module_body, function: nil, context: nil}
     inner = walk(body, inner)
-    %{state | snapshots: inner.snapshots}
+    %{state | snapshots: inner.snapshots, candidates: inner.candidates}
   end
 
   # `def name(...) [when ...] do body end` and friends.
@@ -347,7 +467,7 @@ defmodule Mut.EnvWalker do
     body_state = %{head_state | scope: body_scope, context: body_context}
     body_state = walk(body, body_state)
 
-    %{state | snapshots: body_state.snapshots}
+    %{state | snapshots: body_state.snapshots, candidates: body_state.candidates}
   end
 
   defp body_scope_for(:defmacro), do: :macro_definition
@@ -384,7 +504,7 @@ defmodule Mut.EnvWalker do
         head_state = walk_clause_head(head, %{acc | context: :match})
         body_state = %{head_state | context: nil}
         body_state = walk(body, body_state)
-        %{acc | snapshots: body_state.snapshots}
+        %{acc | snapshots: body_state.snapshots, candidates: body_state.candidates}
 
       _, acc ->
         acc
@@ -513,7 +633,7 @@ defmodule Mut.EnvWalker do
 
   defp walk_in_context(node, state, context) do
     inner = walk(node, %{state | context: context})
-    %{state | snapshots: inner.snapshots}
+    %{state | snapshots: inner.snapshots, candidates: inner.candidates}
   end
 
   defp walk_in_trust(args, state, descendant_trust, descendant_scope) do
@@ -524,7 +644,7 @@ defmodule Mut.EnvWalker do
         &walk(&1, &2)
       )
 
-    %{state | snapshots: inner.snapshots}
+    %{state | snapshots: inner.snapshots, candidates: inner.candidates}
   end
 
   ## --- helpers -----------------------------------------------------------

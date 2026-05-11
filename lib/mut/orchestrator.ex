@@ -93,15 +93,15 @@ defmodule Mut.Orchestrator do
     # commit 3 the walker runs (when enabled) but produces no
     # fallback entries — only contributing to the `Mut.EnvOracle`
     # diagnostics histogram (commit 6).
-    env_snapshots =
+    env_pairs =
       if :env_walker in enabled_targets do
-        env_walker_snapshots(path, relative_file, source, macro_index)
+        env_walker_candidates(path, relative_file, source, macro_index)
       else
         []
       end
 
     {env_fallback, env_skips} =
-      env_walker_results(env_snapshots, enabled_targets, mutators, source)
+      env_walker_results(env_pairs, enabled_targets, mutators, source)
 
     %Plan{
       schema: schema,
@@ -118,10 +118,10 @@ defmodule Mut.Orchestrator do
     }
   end
 
-  defp env_walker_snapshots(_path, relative_file, source, macro_index) do
+  defp env_walker_candidates(_path, relative_file, source, macro_index) do
     case Mut.EnvWalker.parse_string(source, relative_file) do
       {:ok, encoded_ast} ->
-        Mut.EnvWalker.collect_literal_snapshots(encoded_ast,
+        Mut.EnvWalker.collect_string_literal_candidates(encoded_ast,
           file: relative_file,
           source: source,
           macro_index: macro_index
@@ -132,13 +132,23 @@ defmodule Mut.Orchestrator do
     end
   end
 
-  # M40 commit 3: walker is wired but no mutator consumes its
-  # snapshots yet. StringLiteral lands in commit 5. The skip list
-  # here is intentionally empty; commit 6 will surface env-walker
-  # diagnostics via Mut.EnvOracle.skip_histogram instead of the
-  # per-mutant skip pipeline.
-  defp env_walker_results([], _enabled, _mutators, _source), do: {[], []}
-  defp env_walker_results(_snapshots, _enabled, _mutators, _source), do: {[], []}
+  # M40 commit 5: env-walker fallback results. Candidates from
+  # `Mut.EnvWalker.collect_string_literal_candidates/2` are routed
+  # through the standard fallback mutant pipeline when the
+  # `:env_walker` target is enabled. The candidate stream is
+  # already filtered to body-literal-eligible snapshots; the
+  # mutator's own `applicable?/2` enforces engine and shape
+  # constraints defensively.
+  defp env_walker_results([], _enabled_targets, _mutators, _source), do: {[], []}
+
+  defp env_walker_results(pairs, enabled_targets, mutators, source) do
+    if :env_walker in enabled_targets do
+      candidates = Enum.map(pairs, fn {candidate, _snap} -> candidate end)
+      enabled_fallback_results(candidates, :env_walker, nil, mutators, source)
+    else
+      {[], []}
+    end
+  end
 
   defp body_literal_fallback_results(candidates, enabled_targets, mutators, source) do
     if :body_literal in enabled_targets do

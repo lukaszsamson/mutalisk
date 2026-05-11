@@ -14,7 +14,8 @@ defmodule Mut.Mutator.Defaults do
       Mut.Mutator.GuardTypeTest,
       Mut.Mutator.AttributeLiteral,
       Mut.Mutator.IntegerLiteral,
-      Mut.Mutator.BooleanLiteral
+      Mut.Mutator.BooleanLiteral,
+      Mut.Mutator.StringLiteral
     ]
   end
 

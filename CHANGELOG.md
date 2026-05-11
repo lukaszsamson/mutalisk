@@ -3,6 +3,132 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.14 unreleased
+
+### M40 — Env walker + StringLiteral mutator (2026-05-11)
+
+v1.14's substantive milestone. M39 returned **GO**; M40 ships the
+implementation. Single bundle, gated behind opt-in flags.
+PLAN.md suggested 7 internal commits; v1.14 lands the bundle in
+4 commits because commits 3+4 collapse (the macro_index
+plumbing IS the if/unless tracer-proof logic) and commits 5+6+7
+collapse (the mutator wiring + CLI surface ship together with a
+single byte-identity verification).
+
+#### Modules added
+
+- `Mut.EnvSnapshot` — per-AST-node classification (context /
+  scope / trust_level) with `body_literal_eligible?/1` and
+  `skip_reason/1` helpers.
+- `Mut.OpaquePolicy` — known-safe form recognition and the
+  `trusted_kernel_control_flow?/3` gate that requires tracer-
+  oracle proof for `if` / `unless`.
+- `Mut.EnvWalker` — recursive-descent source-AST walker with
+  explicit per-form context discrimination. Public surface:
+  `parse_string/2`, `collect_literal_snapshots/2`,
+  `collect_string_literal_candidates/2`. Walker uses
+  `Code.string_to_quoted/2` with the `:literal_encoder` option
+  (wraps each literal in `{:__block__, meta, [value]}`) and the
+  standard `:columns` / `:token_metadata` / `:emit_warnings:
+  false` flags.
+- `Mut.EnvOracle` — in-memory index built from walker snapshots
+  + the `build_macro_index/1` helper that produces the tracer
+  macro index from existing `Mut.Oracle.DispatchSite` records.
+- `Mut.Mutator.StringLiteral` — first env-walker-backed mutator.
+  Targets `:env_walker` only. Replaces non-empty string body
+  literals with `""`. Fallback-routed (M39 stable-id strategy:
+  no schema-routing migration in v1.14). Eligibility binds to
+  `scope: :function_body`, `context: nil`, `trust_level: :trusted`,
+  and non-empty binary value. Interpolated strings and empty
+  strings are not eligible.
+
+#### Orchestrator integration
+
+- New `@type target` alternative `:env_walker`.
+- `Mut.Orchestrator.plan/3` builds `macro_index` once per plan
+  when `:env_walker` is in enabled_targets; nil otherwise.
+- `process_file/6` conditionally parses with the literal
+  encoder, walks the AST, collects string-literal AstCandidates,
+  and routes through the standard fallback mutant pipeline.
+- The fifth candidate source does NOT replace or modify the
+  existing four (`dispatch_candidates`, `guard_candidates`,
+  `attribute_candidates`, `body_literal_candidates`). M39
+  binding architectural commitment.
+
+#### CLI surface
+
+- New `--enable env_walker` target name (validated by the CLI
+  parser; off by default).
+- New `--mutators string_literal` mutator name (off by default).
+- Default flag set unchanged: `--enable dispatch,guard`,
+  `--worker-type mix`, `--selection static`. M40 acceptance
+  binds: opt-in default; existing dispatch / guard / attribute /
+  body-literal stable IDs unchanged on default-flag runs.
+
+#### Strict no-expansion contract
+
+The walker calls only `Code.string_to_quoted/2` and pattern-
+matches on AST. Forbidden in production env-walker code paths:
+`Macro.expand`, `Macro.expand_once`, `Code.eval_*`,
+`Code.compile_*`, `Kernel.ParallelCompiler`, `:elixir_expand`,
+`:elixir_module`, `:elixir_def`, `Macro.Env.expand_import/5`,
+`Macro.Env.expand_require/6`, `Macro.Env.define_import/4`,
+`Macro.Env.fetch_alias/2`, `Macro.Env.fetch_macro_alias/2`,
+and direct `%Macro.Env{}` private-field reads.
+
+#### Tests
+
+- `test/mut/env_snapshot_test.exs` — 19 cases.
+- `test/mut/opaque_policy_test.exs` — 21 cases.
+- `test/mut/env_walker_test.exs` — 13 cases (context discrimination,
+  match/guard/quote boundaries, defmacro/defguard scope).
+- `test/mut/env_oracle_test.exs` — 7 cases (indexing, histogram,
+  body-literal filter, macro-index dispatch-kind filter).
+- `test/mut/mutator/string_literal_test.exs` — 16 cases (mutator
+  metadata, applicability truth table, end-to-end candidate
+  collection via the walker including quote / guard / match /
+  defmacro exclusions).
+
+Total: 76 new test cases.
+
+#### Byte-identity gate (M40 acceptance)
+
+demo_app default-flag plan stable-ID hash:
+
+| State | Hash | Schema / Fallback |
+|---|---|---|
+| pre-M40 HEAD | `30f0dd6d89660bed` | 27 / 4 |
+| post-M40 HEAD, default flags | `30f0dd6d89660bed` | 27 / 4 |
+| post-M40 HEAD, `--enable env_walker` (no string body literals in fixture) | `30f0dd6d89660bed` | 27 / 4 |
+
+All four conditions of M40's byte-identity gate hold: existing
+dispatch / guard / attribute / body-literal stable IDs are
+unchanged with the env walker enabled OR disabled on the
+demo_app fixture. `bin/verify` exits 0 with all 9 layers green.
+
+#### What does NOT ship in v1.14 (M40 explicit non-goals)
+
+- Schema-routing for any env-walker mutator. Fallback-routed
+  exclusively. Stable-id migration is v1.15+ if ever.
+- Migrating existing `Mut.AstWalk` walkers behind `EnvWalker`.
+  v1.15+ with its own byte-identity gate.
+- Float / atom / list / map / tuple body literals. M39
+  ordering items 2-4; v1.15+ candidates.
+- Atom-table pollution policy. v1.15+ design.
+- Pattern-position literals. v1.15+.
+- Variable mutators. v1.15+.
+- Interpolated-string mutation. M41 decision input; v1.15+ if
+  demand surfaces.
+- Persistent default flip (closed structurally per v1.11/v1.12).
+- Coverage default flip (stays opt-in).
+
+#### Defaults (unchanged in v1.14)
+
+- `--worker-type mix` STAYS default.
+- `--selection static` STAYS default.
+- Env walker stays opt-in; user must pass `--enable env_walker`
+  AND `--mutators string_literal` to surface string mutants.
+
 ## v1.13 unreleased
 
 ### M39 — Env walker design spike: go for v1.14 (2026-05-11)
