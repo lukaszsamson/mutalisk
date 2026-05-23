@@ -5,6 +5,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.15 unreleased
 
+### M44 — Low-noise literal expansion: Float + Nil + StringLiteral table (2026-05-23)
+
+Two new env-walker literal mutators plus a richer StringLiteral table.
+All fallback-routed and opt-in (`--enable env_walker`); the default
+pipeline is unaffected.
+
+- `Mut.Mutator.FloatLiteral` — body-context float literals: `0.0 → 1.0`;
+  finite `f → 0.0` and `f → f + 1.0`.
+- `Mut.Mutator.NilLiteral` — body-context `nil → :__mut_nil__` (single
+  closed replacement; match/guard positions excluded).
+- `StringLiteral` expand_table: adds `s → "x"` (skipped when `s == "x"`)
+  and `s → " " <> s`. The M40 `s → ""` row is unchanged, so its stable
+  ID does not churn.
+- `Mut.EnvWalker.collect_literal_candidates/2` generalizes string
+  candidate collection to string + float + nil; `collect_string_literal_candidates/2`
+  is retained (string-only).
+- Golden mutation list `test/golden/mutations/literals_env.json` over a
+  standalone `test/fixtures/literals_sample.ex` (kept out of demo_app/lib
+  so the oracle golden and demo_app stable IDs are untouched).
+
+Byte-identity gate (existing mutants, no churn) verified on the full
+v1.15 corpus — demo_app, plug_crypto (+14 env), Decimal (+38 env;
+FloatLiteral and NilLiteral exercised on real code), plug (+234 env),
+and phoenix_html (+44 env). Default-flag plans are byte-identical on
+every target and no existing env-flag stable ID changed.
+
 ### M43 — EnvWalker consolidation: deferred to v1.16 (2026-05-23)
 
 Release valve exercised. A pre-implementation spike proved the

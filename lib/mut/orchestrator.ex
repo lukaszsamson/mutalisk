@@ -121,7 +121,7 @@ defmodule Mut.Orchestrator do
   defp env_walker_candidates(_path, relative_file, source, macro_index) do
     case Mut.EnvWalker.parse_string(source, relative_file) do
       {:ok, encoded_ast} ->
-        Mut.EnvWalker.collect_string_literal_candidates(encoded_ast,
+        Mut.EnvWalker.collect_literal_candidates(encoded_ast,
           file: relative_file,
           source: source,
           macro_index: macro_index
@@ -132,13 +132,13 @@ defmodule Mut.Orchestrator do
     end
   end
 
-  # M40 commit 5: env-walker fallback results. Candidates from
-  # `Mut.EnvWalker.collect_string_literal_candidates/2` are routed
-  # through the standard fallback mutant pipeline when the
-  # `:env_walker` target is enabled. The candidate stream is
-  # already filtered to body-literal-eligible snapshots; the
-  # mutator's own `applicable?/2` enforces engine and shape
-  # constraints defensively.
+  # M40 commit 5 (strings) + M44 (float / nil): env-walker fallback
+  # results. Candidates from `Mut.EnvWalker.collect_literal_candidates/2`
+  # are routed through the standard fallback mutant pipeline when the
+  # `:env_walker` target is enabled. The candidate stream is already
+  # filtered to body-literal-eligible snapshots; each mutator's own
+  # `applicable?/2` enforces engine and shape constraints, so a literal
+  # whose mutator is disabled becomes a skip, not a mutant.
   defp env_walker_results([], _enabled_targets, _mutators, _source), do: {[], []}
 
   defp env_walker_results(pairs, enabled_targets, mutators, source) do

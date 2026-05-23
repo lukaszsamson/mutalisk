@@ -55,6 +55,8 @@ defmodule Mut.Cli do
     "integer_literal",
     "boolean_literal",
     "string_literal",
+    "float_literal",
+    "nil_literal",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -402,6 +404,8 @@ defmodule Mut.Cli do
       "integer_literal" => Mut.Mutator.IntegerLiteral,
       "boolean_literal" => Mut.Mutator.BooleanLiteral,
       "string_literal" => Mut.Mutator.StringLiteral,
+      "float_literal" => Mut.Mutator.FloatLiteral,
+      "nil_literal" => Mut.Mutator.NilLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
     }
   end

@@ -3,7 +3,6 @@ defmodule Mut.Mutator.StringLiteralTest do
 
   alias Mut.Context
   alias Mut.EnvWalker
-  alias Mut.Mutation
   alias Mut.Mutator.StringLiteral
 
   describe "name/0 and metadata" do
@@ -62,14 +61,34 @@ defmodule Mut.Mutator.StringLiteralTest do
   end
 
   describe "mutate/2" do
-    test "produces one mutation replacing the literal with empty string" do
+    test "M44 expand_table: empty, x, and prepend-space; M40 row first and unchanged" do
       node = {:__block__, [line: 1, column: 5], ["hello"]}
       ctx = ctx(engine: :fallback, env_context: nil)
-      [%Mutation{} = m] = StringLiteral.mutate(node, ctx)
+      mutations = StringLiteral.mutate(node, ctx)
 
-      assert match?({:__block__, _, [""]}, m.mutated_ast)
-      assert m.mutation_kind == :string_literal
-      assert m.metadata == %{from: "hello", to: ""}
+      assert Enum.all?(mutations, &(&1.mutation_kind == :string_literal))
+      tos = Enum.map(mutations, & &1.metadata.to)
+      assert tos == ["", "x", " hello"]
+
+      # The M40 `→ ""` row must stay byte-identical so its stable ID
+      # does not churn.
+      [empty | _] = mutations
+      assert empty.metadata == %{from: "hello", to: ""}
+      assert match?({:__block__, _, [""]}, empty.mutated_ast)
+      assert empty.description == "replace non-empty string literal with \"\""
+    end
+
+    test "the x-replacement row is dropped as equivalent when the source is already x" do
+      node = {:__block__, [line: 1, column: 5], ["x"]}
+      ctx = ctx(engine: :fallback, env_context: nil)
+
+      mutations =
+        node
+        |> StringLiteral.mutate(ctx)
+        |> Enum.reject(&StringLiteral.equivalent?/1)
+
+      tos = Enum.map(mutations, & &1.metadata.to)
+      assert tos == ["", " x"]
     end
 
     test "produces no mutations for ineligible nodes" do

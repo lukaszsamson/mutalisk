@@ -1,0 +1,92 @@
+[
+  {
+    "column": 15,
+    "description": "replace float literal 3.14 with 0.0",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "3.14",
+    "kind": "float_literal",
+    "line": 11,
+    "mutator": "FloatLiteral",
+    "to": "0.0"
+  },
+  {
+    "column": 15,
+    "description": "replace float literal 3.14 with 4.140000000000001",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "3.14",
+    "kind": "float_literal",
+    "line": 11,
+    "mutator": "FloatLiteral",
+    "to": "4.140000000000001"
+  },
+  {
+    "column": 25,
+    "description": "replace float literal 0.0 with 1.0",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "0.0",
+    "kind": "float_literal",
+    "line": 13,
+    "mutator": "FloatLiteral",
+    "to": "1.0"
+  },
+  {
+    "column": 21,
+    "description": "prepend space to string literal",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "\"hello\"",
+    "kind": "string_literal",
+    "line": 15,
+    "mutator": "StringLiteral",
+    "to": "\" hello\""
+  },
+  {
+    "column": 21,
+    "description": "replace non-empty string literal with \"\"",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "\"hello\"",
+    "kind": "string_literal",
+    "line": 15,
+    "mutator": "StringLiteral",
+    "to": "\"\""
+  },
+  {
+    "column": 21,
+    "description": "replace non-empty string literal with \"x\"",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "\"hello\"",
+    "kind": "string_literal",
+    "line": 15,
+    "mutator": "StringLiteral",
+    "to": "\"x\""
+  },
+  {
+    "column": 22,
+    "description": "prepend space to string literal",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "\"x\"",
+    "kind": "string_literal",
+    "line": 17,
+    "mutator": "StringLiteral",
+    "to": "\" x\""
+  },
+  {
+    "column": 22,
+    "description": "replace non-empty string literal with \"\"",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "\"x\"",
+    "kind": "string_literal",
+    "line": 17,
+    "mutator": "StringLiteral",
+    "to": "\"\""
+  },
+  {
+    "column": 20,
+    "description": "replace nil literal with :__mut_nil__",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": "nil",
+    "kind": "nil_literal",
+    "line": 19,
+    "mutator": "NilLiteral",
+    "to": ":__mut_nil__"
+  }
+]

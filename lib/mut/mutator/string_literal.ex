@@ -1,8 +1,20 @@
 defmodule Mut.Mutator.StringLiteral do
   @moduledoc """
   M40 first env-walker-backed mutator. Replaces non-empty string
-  body literals with `""`. Fallback-routed (M39 stable-id strategy:
-  no schema-routing migration in v1.14).
+  body literals. Fallback-routed (M39 stable-id strategy: no
+  schema-routing migration in v1.14).
+
+  Replacement table (M44 expand_table; all behind the env-walker
+  opt-in):
+
+    * `s` → `""`            (M40 original)
+    * `s` → `"x"`           (M44; skipped when `s == "x"`)
+    * `s` → `" " <> s`      (M44 prepend-space)
+
+  Each replacement is a distinct mutant with distinct `to` metadata,
+  so the M44 rows leave the M40 `→ ""` mutant's stable ID unchanged
+  (no churn). Interpolated strings remain out of scope (M39 item 6;
+  M41 recorded no demand).
 
   Eligibility (M39 binding):
 
@@ -14,7 +26,7 @@ defmodule Mut.Mutator.StringLiteral do
       M39 mutator-ordering item 6 defers source-span replacement
       for interpolated content to v1.15+.
 
-  The walker (`Mut.EnvWalker.collect_string_literal_candidates/2`)
+  The walker (`Mut.EnvWalker.collect_literal_candidates/2`)
   enforces all four eligibility conditions before this mutator
   sees a candidate. `applicable?/2` also checks defensively so
   the mutator is correct when called directly.
@@ -53,6 +65,7 @@ defmodule Mut.Mutator.StringLiteral do
   end
 
   @impl true
+  def equivalent?(%Mutation{metadata: %{from: from, to: to}}), do: from == to
   def equivalent?(_mutation), do: false
 
   @spec compatible?(AstCandidate.t(), DispatchSite.t() | nil) :: boolean
@@ -67,15 +80,29 @@ defmodule Mut.Mutator.StringLiteral do
   defp non_empty_string_literal?(_), do: false
 
   defp build_mutations({:__block__, meta, [value]} = node) when is_binary(value) do
-    [
+    value
+    |> replacements()
+    |> Enum.map(fn {to, description} ->
       %Mutation{
         original_ast: node,
-        mutated_ast: {:__block__, meta, [""]},
-        description: "replace non-empty string literal with \"\"",
+        mutated_ast: {:__block__, meta, [to]},
+        description: description,
         mutation_kind: :string_literal,
         guard_safe?: false,
-        metadata: %{from: value, to: ""}
+        metadata: %{from: value, to: to}
       }
+    end)
+  end
+
+  # The M40 `→ ""` row is listed first and unchanged so its metadata
+  # (`%{from: value, to: ""}`) — and therefore its stable ID — is
+  # byte-identical to v1.14. The `→ "x"` row collapses to a no-op via
+  # `equivalent?/1` when the source value is already "x".
+  defp replacements(value) do
+    [
+      {"", "replace non-empty string literal with \"\""},
+      {"x", "replace non-empty string literal with \"x\""},
+      {" " <> value, "prepend space to string literal"}
     ]
   end
 end

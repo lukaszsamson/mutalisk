@@ -1,5 +1,27 @@
 # Mutalisk Benchmarks
 
+## v1.15 low-noise literals (M44, 2026-05-23)
+
+Added `FloatLiteral`, `NilLiteral`, and the `StringLiteral` expand_table
+(`→ "x"`, prepend-space). All opt-in (`--enable env_walker`).
+
+Byte-identity gate — for each target, the pre-M44 plan stable-id set vs
+the post-M44 set, same flags:
+
+| Target | default flags | `--enable env_walker` |
+|---|---|---|
+| demo_app | identical (33) | n/a (no body literals) |
+| plug_crypto v2.1.1 | identical (173) | all 180 preserved, +14 |
+| Decimal | identical (780) | all 799 preserved, +38 |
+| plug v1.19.1 | identical (753) | all 870 preserved, +234 |
+| phoenix_html v4.3.0 | identical (212) | all 234 preserved, +44 |
+
+No existing mutant's stable ID changed on any of the five corpus
+targets (the `+N` are the new StringLiteral expand rows). With all
+three new mutators enabled, Decimal surfaced 57 StringLiteral, 6
+NilLiteral, and 1 FloatLiteral mutants — confirming the float/nil paths
+execute end-to-end on real code.
+
 ## v1.15 worker-type removal (M42, 2026-05-23)
 
 The opt-in persistent worker was removed in v1.15; `mix` is the

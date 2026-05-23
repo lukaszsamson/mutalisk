@@ -147,7 +147,49 @@ defmodule Mut.EnvWalker do
       trust_level: :trusted,
       snapshots: [],
       candidates: [],
-      collect_strings?: true
+      literal_kinds: [:string]
+    }
+
+    state = walk(ast, initial_state)
+    Enum.reverse(state.candidates)
+  end
+
+  @doc """
+  Walks the AST and returns `[{Mut.Oracle.AstCandidate.t(),
+  Mut.EnvSnapshot.t()}]` pairs for every body-literal-eligible
+  string, float, and `nil` literal (M44 low-noise literal set).
+
+  This is the candidate source the orchestrator wires in for the
+  v1.15 env-walker literal mutators (StringLiteral / FloatLiteral /
+  NilLiteral). A candidate is emitted regardless of which mutators
+  are enabled; the orchestrator's per-mutator `applicable?/2` filters
+  the stream, so an enabled-but-unmatched candidate becomes a skip,
+  never a spurious mutant. Integer / boolean body literals stay with
+  `Mut.AstWalk.body_literal_candidates/1` (their stable IDs predate
+  the env walker).
+  """
+  @spec collect_literal_candidates(Macro.t(), collect_opts()) ::
+          [{AstCandidate.t(), EnvSnapshot.t()}]
+  def collect_literal_candidates(ast, opts) when is_list(opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.get(opts, :source, "")
+    macro_index = Keyword.get(opts, :macro_index)
+    line_offsets = compute_line_offsets(source)
+
+    initial_state = %{
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      macro_index: macro_index,
+      ast_path: [],
+      module: nil,
+      function: nil,
+      context: nil,
+      scope: :top_level,
+      trust_level: :trusted,
+      snapshots: [],
+      candidates: [],
+      literal_kinds: [:string, :float, :nil_lit]
     }
 
     state = walk(ast, initial_state)
@@ -178,7 +220,7 @@ defmodule Mut.EnvWalker do
       trust_level: :trusted,
       snapshots: [],
       candidates: [],
-      collect_strings?: false
+      literal_kinds: []
     }
 
     state = walk(ast, initial_state)
@@ -205,36 +247,44 @@ defmodule Mut.EnvWalker do
       true ->
         state
         |> emit_snapshot(meta, state.trust_level)
-        |> maybe_emit_string_candidate(node, value, meta)
+        |> maybe_emit_literal_candidate(node, value, meta)
     end
   end
 
   defp maybe_emit_literal_snapshot(state, _node), do: state
 
-  # M40 commit 5: surface string-literal AstCandidates for the
-  # StringLiteral mutator. Only emitted when the state is
-  # configured to collect strings (collect_string_literal_candidates/2)
-  # AND the snapshot we just emitted is body-literal-eligible.
-  defp maybe_emit_string_candidate(%{collect_strings?: false} = state, _node, _value, _meta),
-    do: state
+  # M40 commit 5 (strings) + M44 (float / nil): surface literal
+  # AstCandidates for the env-walker literal mutators. A candidate is
+  # emitted only when the value's kind is in `state.literal_kinds`
+  # (so `collect_literal_snapshots/2` emits none) AND the snapshot we
+  # just emitted is body-literal-eligible.
+  defp maybe_emit_literal_candidate(state, node, value, meta) do
+    case literal_candidate_name(value, state.literal_kinds) do
+      nil ->
+        state
 
-  defp maybe_emit_string_candidate(state, _node, value, _meta) when not is_binary(value),
-    do: state
+      syntactic_name ->
+        [latest_snap | _] = state.snapshots
 
-  defp maybe_emit_string_candidate(state, _node, "", _meta), do: state
-
-  defp maybe_emit_string_candidate(state, node, _value, meta) do
-    [latest_snap | _] = state.snapshots
-
-    if EnvSnapshot.body_literal_eligible?(latest_snap) do
-      candidate = build_string_candidate(state, node, meta, latest_snap)
-      %{state | candidates: [{candidate, latest_snap} | state.candidates]}
-    else
-      state
+        if EnvSnapshot.body_literal_eligible?(latest_snap) do
+          candidate = build_literal_candidate(state, node, meta, latest_snap, syntactic_name)
+          %{state | candidates: [{candidate, latest_snap} | state.candidates]}
+        else
+          state
+        end
     end
   end
 
-  defp build_string_candidate(state, node, meta, snap) do
+  defp literal_candidate_name(value, kinds) do
+    cond do
+      is_binary(value) and value != "" and :string in kinds -> :__string_literal__
+      is_float(value) and :float in kinds -> :__float_literal__
+      is_nil(value) and :nil_lit in kinds -> :__nil_literal__
+      true -> nil
+    end
+  end
+
+  defp build_literal_candidate(state, node, meta, snap, syntactic_name) do
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
 
@@ -242,7 +292,7 @@ defmodule Mut.EnvWalker do
       file: state.file,
       line: line,
       column: column,
-      syntactic_name: :__string_literal__,
+      syntactic_name: syntactic_name,
       syntactic_arity: 0,
       source_span: literal_span(state, meta, snap),
       env_context: nil,

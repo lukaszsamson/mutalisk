@@ -36,6 +36,33 @@ defmodule Mut.Mutator.GoldenMutationsTest do
     end)
   end
 
+  @env_literal_mutators [
+    Mut.Mutator.StringLiteral,
+    Mut.Mutator.FloatLiteral,
+    Mut.Mutator.NilLiteral
+  ]
+
+  test "env-walker literal mutation list matches golden" do
+    relative = "test/fixtures/literals_sample.ex"
+    source = File.read!(Path.expand("test/fixtures/literals_sample.ex"))
+    {:ok, ast} = Mut.EnvWalker.parse_string(source, relative)
+
+    actual =
+      ast
+      |> Mut.EnvWalker.collect_literal_candidates(file: relative, source: source)
+      |> Enum.flat_map(fn {candidate, _snap} -> env_literal_mutations(candidate) end)
+      |> Enum.sort_by(&sort_key/1)
+
+    golden = Path.join(@mutation_golden_root, "literals_env.json")
+
+    if System.get_env("MUT_REGOLD") == "1" do
+      File.mkdir_p!(@mutation_golden_root)
+      File.write!(golden, Mut.JSON.encode!(actual, pretty: true) <> "\n")
+    end
+
+    assert actual == Mut.JSON.decode!(File.read!(golden))
+  end
+
   test "matched fixture candidates all produce dispatch mutations except fallback-only guard candidates" do
     assert [] = matched_zero_mutations() -- expected_guard_zero_mutations()
   end
@@ -196,6 +223,37 @@ defmodule Mut.Mutator.GoldenMutationsTest do
     }
     |> Enum.reject(fn {_key, value} -> is_nil(value) end)
     |> Map.new()
+  end
+
+  defp env_literal_mutations(candidate) do
+    context = %Context{
+      file: candidate.file,
+      source_span: candidate.source_span,
+      ast_path: candidate.ast_path,
+      ast_path_hash: candidate.ast_path_hash,
+      env_context: nil,
+      engine: :fallback
+    }
+
+    Enum.flat_map(@env_literal_mutators, fn mutator ->
+      candidate.node
+      |> mutator.mutate(context)
+      |> Enum.reject(&mutator.equivalent?/1)
+      |> Enum.map(&env_entry(candidate, mutator, &1))
+    end)
+  end
+
+  defp env_entry(candidate, mutator, mutation) do
+    %{
+      "file" => candidate.file,
+      "line" => candidate.line,
+      "column" => candidate.column,
+      "mutator" => mutator.name(),
+      "kind" => Atom.to_string(mutation.mutation_kind),
+      "description" => mutation.description,
+      "from" => inspect(mutation.metadata.from),
+      "to" => inspect(mutation.metadata.to)
+    }
   end
 
   defp sort_key(entry) do
