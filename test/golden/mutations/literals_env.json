@@ -31,16 +31,6 @@
   },
   {
     "column": 21,
-    "description": "prepend space to string literal",
-    "file": "test/fixtures/literals_sample.ex",
-    "from": "\"hello\"",
-    "kind": "string_literal",
-    "line": 15,
-    "mutator": "StringLiteral",
-    "to": "\" hello\""
-  },
-  {
-    "column": 21,
     "description": "replace non-empty string literal with \"\"",
     "file": "test/fixtures/literals_sample.ex",
     "from": "\"hello\"",
@@ -58,16 +48,6 @@
     "line": 15,
     "mutator": "StringLiteral",
     "to": "\"x\""
-  },
-  {
-    "column": 22,
-    "description": "prepend space to string literal",
-    "file": "test/fixtures/literals_sample.ex",
-    "from": "\"x\"",
-    "kind": "string_literal",
-    "line": 17,
-    "mutator": "StringLiteral",
-    "to": "\" x\""
   },
   {
     "column": 22,

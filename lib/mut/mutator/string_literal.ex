@@ -4,17 +4,16 @@ defmodule Mut.Mutator.StringLiteral do
   body literals. Fallback-routed (M39 stable-id strategy: no
   schema-routing migration in v1.14).
 
-  Replacement table (M44 expand_table; all behind the env-walker
-  opt-in):
+  Replacement table (behind the env-walker opt-in):
 
     * `s` → `""`            (M40 original)
     * `s` → `"x"`           (M44; skipped when `s == "x"`)
-    * `s` → `" " <> s`      (M44 prepend-space)
 
   Each replacement is a distinct mutant with distinct `to` metadata,
-  so the M44 rows leave the M40 `→ ""` mutant's stable ID unchanged
-  (no churn). Interpolated strings remain out of scope (M39 item 6;
-  M41 recorded no demand).
+  so adding/removing a row never churns the others' stable IDs.
+  M49 dropped the M44 prepend-space row (`s → " " <> s`): M46 execution
+  showed it was equivalent-heavy and dragged the kill rate. Interpolated
+  strings remain out of scope (M39 item 6; M41 recorded no demand).
 
   Eligibility (M39 binding):
 
@@ -80,9 +79,7 @@ defmodule Mut.Mutator.StringLiteral do
   defp non_empty_string_literal?(_), do: false
 
   defp build_mutations({:__block__, meta, [value]} = node) when is_binary(value) do
-    value
-    |> replacements()
-    |> Enum.map(fn {to, description} ->
+    Enum.map(replacements(), fn {to, description} ->
       %Mutation{
         original_ast: node,
         mutated_ast: {:__block__, meta, [to]},
@@ -94,15 +91,16 @@ defmodule Mut.Mutator.StringLiteral do
     end)
   end
 
-  # The M40 `→ ""` row is listed first and unchanged so its metadata
-  # (`%{from: value, to: ""}`) — and therefore its stable ID — is
-  # byte-identical to v1.14. The `→ "x"` row collapses to a no-op via
-  # `equivalent?/1` when the source value is already "x".
-  defp replacements(value) do
+  # The `→ ""` and `→ "x"` rows are unchanged so their metadata — and
+  # therefore their stable IDs — are byte-identical across releases. The
+  # `→ "x"` row collapses to a no-op via `equivalent?/1` when the source
+  # value is already "x". M49 dropped the M44 prepend-space row
+  # (`s → " " <> s`): execution showed it was equivalent-heavy and dragged
+  # the kill rate (see docs/decisions/M46_string_literal_table.md).
+  defp replacements do
     [
       {"", "replace non-empty string literal with \"\""},
-      {"x", "replace non-empty string literal with \"x\""},
-      {" " <> value, "prepend space to string literal"}
+      {"x", "replace non-empty string literal with \"x\""}
     ]
   end
 end

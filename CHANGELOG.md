@@ -5,6 +5,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.16 unreleased
 
+### M49 — StringLiteral table trim (2026-05-23)
+
+Remove the equivalent-heavy prepend-space row (`s → " " <> s`) from
+`Mut.Mutator.StringLiteral`; M46 execution showed it dragged the kill
+rate (especially on Decimal). The opt-in table is now just `s → ""` and
+`s → "x"`.
+
+- Removing a replacement deletes only its own mutants; the retained
+  `→ ""` / `→ "x"` rows keep identical metadata, so their stable IDs are
+  unchanged (verified pre/post on plug_crypto — 14 retained IDs
+  byte-identical; prepend-space mutants gone).
+- Fixture golden `literals_env.json` updated (prepend-space rows removed
+  only).
+
 ### M48 — AtomLiteral default-on + mutator default-tier flag model (2026-05-23)
 
 Makes AtomLiteral default-on (M46 decision) **without** leaking the other

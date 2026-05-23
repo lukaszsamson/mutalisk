@@ -61,14 +61,14 @@ defmodule Mut.Mutator.StringLiteralTest do
   end
 
   describe "mutate/2" do
-    test "M44 expand_table: empty, x, and prepend-space; M40 row first and unchanged" do
+    test "table is empty + x (M49 dropped the prepend-space row); M40 row unchanged" do
       node = {:__block__, [line: 1, column: 5], ["hello"]}
       ctx = ctx(engine: :fallback, env_context: nil)
       mutations = StringLiteral.mutate(node, ctx)
 
       assert Enum.all?(mutations, &(&1.mutation_kind == :string_literal))
       tos = Enum.map(mutations, & &1.metadata.to)
-      assert tos == ["", "x", " hello"]
+      assert tos == ["", "x"]
 
       # The M40 `→ ""` row must stay byte-identical so its stable ID
       # does not churn.
@@ -88,7 +88,7 @@ defmodule Mut.Mutator.StringLiteralTest do
         |> Enum.reject(&StringLiteral.equivalent?/1)
 
       tos = Enum.map(mutations, & &1.metadata.to)
-      assert tos == ["", " x"]
+      assert tos == [""]
     end
 
     test "produces no mutations for ineligible nodes" do
