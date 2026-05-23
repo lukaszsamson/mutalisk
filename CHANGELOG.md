@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.16 unreleased
 
+### M51 — EnvWalker consolidation design + proof (spike, 2026-05-23)
+
+Design/proof spike; **no production code**. Extends
+`docs/decisions/M43_envwalker_consolidation.md` with a concrete redesign
+(two frame-based traversals — plain AST for dispatch/guard/attribute,
+`literal_encoder` AST for body_literal + the env-walker literals — with a
+per-candidate-type path policy so neither family's stable IDs churn) and
+a go/no-go.
+
+Throwaway proof (`bench/spike/m51_consolidation_proof.exs`): the existing
+frame/path classifier (`body_literal`'s `body_position?`) and `EnvWalker`'s
+env descent **agree on body-eligibility in 6/7 positions** (function body,
+guard, pattern, match LHS, quote, module attribute); the sole divergence
+is the **trust** dimension (opaque-macro descendants), which scopes the
+only new work. Path orthogonality (env fields on frames cannot change a
+positional path) holds by inspection.
+
+**Outcome: feasible, recommend DEFER** — no perf payoff (M39: cold-walk
+<1% of oracle wall), only dedup, against real byte-identity migration
+risk in the trust layer. Documented trigger + ~500–700 LOC estimate
+(net reduction) for a v1.17 milestone if justified.
+
 ### M50 — CollectionEmpty maps + n-tuples (2026-05-23)
 
 Closes M45's deferred collection shapes. CollectionEmpty (opt-in) now

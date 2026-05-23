@@ -86,3 +86,99 @@ plug_crypto 173 (no env_walker) / 180 (with env_walker, +7 StringLiteral).
   (keeping AstWalk's path encoding), not the reverse. That is a different,
   larger milestone and should carry its own stable-id migration analysis
   if any encoding changes.
+
+---
+
+# M51 — Consolidation design + proof (v1.16 spike, 2026-05-23)
+
+**Outcome: FEASIBLE, but recommend DEFER (low ROI).** No migration code
+shipped. The proof retires the central risk; the recommendation is to
+implement only when a maintenance trigger justifies it.
+
+## The two incompatibilities, restated
+
+1. **Path encoding** — env-walker literals key identity off byte spans
+   with `ast_path = []`; the AstWalk families (dispatch/guard/attribute/
+   body_literal) key off positional `{:elem, kind, idx}` paths.
+2. **Parse mode** — dispatch/guard/attribute walk the **plain** AST;
+   body_literal AND the env-walker literals walk the **`literal_encoder`**
+   AST (literals wrapped in `{:__block__, …}`).
+
+## Refined redesign (grounded in the current code)
+
+The five passes collapse to **two frame-based traversals, one per parse
+mode** — not one:
+
+- **Pass A — plain AST.** Merge `dispatch_candidates` +
+  `guard_candidates` + `attribute_candidates` (today three separate
+  `Macro.traverse` calls already sharing the `enter_path`/`push_frame`
+  frame model) into one pre/post that runs all three detectors. Positional
+  paths unchanged → no churn.
+- **Pass B — `literal_encoder` AST.** Merge `body_literal_candidates`
+  with the env-walker literals (string/float/nil/atom/collection). `EnvWalker`'s
+  bespoke recursive descent is **deleted**; its env classification is
+  absorbed into Pass B's frame model. Per-candidate-type path policy:
+  body_literal keeps positional paths (its identity); env-walker literals
+  emit `ast_path = []` and keep byte-span identity (their identity). Both
+  read scope/context/trust from the current frame.
+
+This is viable because **`body_literal` already does AstWalk-style env
+classification** on the `literal_encoder` AST: `body_position?(path)`
+decides function-body vs guard vs pattern vs quote vs attribute purely
+from the ancestor path. Pass B is body_literal's traversal, extended to
+also emit the env-walker literals.
+
+## Proof (`bench/spike/m51_consolidation_proof.exs`, throwaway)
+
+For literals placed in each syntactic position, compare the two existing
+body-eligibility classifiers — `body_literal`'s frame/path model
+(`body_position?`) vs `EnvWalker`'s env descent:
+
+| Position | path/frame clf | env clf | |
+|---|---|---|---|
+| function body | eligible | eligible | agree |
+| guard | no | no | agree |
+| function-head pattern | no | no | agree |
+| match LHS | no | no | agree |
+| quote body | no | no | agree |
+| module attribute | no | no | agree |
+| **opaque-macro body** | **eligible** | **no** | **trust gap** |
+
+**The frame/path model already reproduces EnvWalker's scope + context
+classification (6/7).** The sole divergence is the **trust** dimension:
+EnvWalker marks descendants of an unknown macro call `:untrusted` and
+skips them; `body_position?` has no trust notion. So Pass B must add
+opaque-macro boundary tracking (the `Mut.OpaquePolicy` logic EnvWalker
+already encapsulates) to its pre/post hooks.
+
+**Path orthogonality** (no churn for path-based candidates): `enter_path/2`
+computes `parent.path ++ [{:elem, parent.kind, parent.next_index}]` from
+only those three frame keys. Adding `scope`/`context`/`trust` fields to
+the frame map cannot change a path — provable by inspection; body_literal
+candidate paths are already independent of any env state.
+
+## Go/no-go
+
+- **Feasibility: GO.** No fundamental blocker. The path encodings are
+  reconcilable via per-type policy within one traversal; env classification
+  is reproducible from frames; the only new work is the bounded trust layer.
+- **Recommendation: DEFER.** ROI is low:
+  - **No perf payoff** — M39 measured env-walker cold-walk at <1% of
+    oracle wall; the parallel fifth-source design carries no meaningful tax.
+  - **Only payoff is dedup** (~5 passes → 2; `EnvWalker`'s ~700-line
+    descent deleted), against a **real byte-identity migration risk**
+    concentrated in reproducing EnvWalker's exact opaque-macro/quote trust
+    classification — any divergence churns env-walker literal eligibility.
+- **Trigger to revisit:** a third `literal_encoder` consumer appears, the
+  dual-walker maintenance cost bites, or a bug forces unification.
+
+## Estimate (for a v1.17 implementation milestone, if triggered)
+
+- ~500–700 LOC touched; **net reduction** ~300–500 LOC (EnvWalker descent
+  removed, minus the trust layer added to Pass B).
+- Hard gate identical to M43: stable IDs byte-identical for **every**
+  existing mutator (dispatch/guard/attribute/integer/boolean + string/
+  float/nil/atom/collection) on demo_app, plug_crypto, Decimal, plug,
+  phoenix_html. The risk surface is Pass B's trust classification; gate
+  with the M40/M41 stable-id diff harness per parse mode.
+- No-expansion grep gate (M40) extended to the merged Pass B.
