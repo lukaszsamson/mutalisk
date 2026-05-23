@@ -2394,6 +2394,271 @@ Acceptance:
   `--enable string_literal`.
 - `--fail-on-drift` for `mix mut.drift`.
 
+# v1.15 milestones (prune worker types + grow env-walker literals)
+
+v1.14 closed with `keep_opt_in` for StringLiteral and zero
+stable-ID churn. v1.15 changes register: it is a **pruning +
+focused mutator expansion** release, not infrastructure. Two
+moves: (1) delete the persistent-worker subsystem, which closed
+structurally in v1.11, is slower than `mix` on the targets that
+matter, and taxes every other workstream with dual-worker
+validation; (2) reinvest that freed budget into the env-walker
+literal catalogue.
+
+The env walker (v1.14) and coverage selection (v1.5) stay. Only
+the persistent worker leaves.
+
+**Defaults do NOT flip in v1.15.** `--worker-type` is *removed*
+(`mix` becomes the only worker; `--worker-type mix` is a
+deprecated warn-once no-op for one release, `persistent` errors).
+`--selection static` stays default — coverage stays opt-in.
+New mutators ship opt-in; M46 decides defaults from execution
+data. Elixir floor stays `>= 1.19.0`.
+
+Five milestones. The low-risk core is **M42 + M44 + M46**
+(removal + low-noise literals + validation). **M43** (walker
+consolidation, pure refactor) and **M45** (atom + collection,
+the noisy literals) are designated release valves: each can slip
+to v1.16 at zero downstream cost if budget tightens.
+
+## v1.15 scope (committed)
+
+**M42 — Worker-type removal + model/doc simplification.**
+
+*Goal:* `mix` is the only worker. Delete the persistent
+subsystem and everything that exists solely to manage worker-type
+divergence. Mutation outcomes are unchanged.
+
+*Inputs:* HLD v1.15 §M42; v1.11/v1.12 outcome notes (structural
+default-flip close); BENCHMARKS persistent-vs-mix rows.
+
+*Deliverables:*
+- Delete `lib/mut/worker/persistent.ex`,
+  `lib/mut/worker/persistent_runner.ex`,
+  `lib/mut/worker/persistent_runner/reset.ex`,
+  `lib/mut/worker/persistent_runner/diag.ex`,
+  `lib/mut/worker/persistent/detector.ex` and their tests
+  (~2,250 LOC).
+- Delete `lib/mix/tasks/mut.drift.ex`,
+  `lib/mut/drift/bucketer.ex`, `lib/mut/drift/bucketer/result.ex`
+  and their tests — these triage mix-vs-persistent stable-id
+  diffs and have no standalone consumer.
+- Strip the `--worker-type` branch from `lib/mut/cli.ex`,
+  `lib/mix/tasks/mut.ex`, `lib/mut/worker.ex`. Keep
+  `--worker-type mix` as a deprecated no-op that warns once;
+  `--worker-type persistent` exits non-zero with a message
+  pointing at the CHANGELOG.
+- Remove the `e2e_persistent` layer from `bin/verify` and any
+  `mix mut.e2e` persistent path.
+- Drop persistent metric blocks from `lib/mut/metrics.ex`,
+  `lib/mut/reporter/terminal.ex`,
+  `lib/mut/reporter/stryker_json.ex`.
+- Clean persistent references in `lib/mut/application.ex`,
+  `lib/mut/runtime.ex`, `lib/mut/schema_placer.ex`,
+  `lib/mut/recompile.ex`, `lib/mix/tasks/mut/e2e.ex`.
+- Delete `docs/PERSISTENT_WORKER_GUIDE.md`. Prune the now-moot
+  mix-only catalogue and structural-drift prose from docs.
+  **Keep** the SchemaPlacer escaped-quote note — that bug
+  affected both worker types.
+- README/CHANGELOG/BENCHMARKS accuracy pass: the README still
+  describes sequential execution, static-only selection, and
+  "no arbitrary literals" — all stale since v1.5/v1.9/v1.14.
+  Bring them in line with the simpler post-removal model
+  (concurrency, coverage opt-in, env-walker literals opt-in,
+  single worker).
+
+*Acceptance:*
+- Remaining `bin/verify` layers green (one fewer layer).
+- demo_app / plug_crypto / Decimal stable-id sets AND kill
+  counts byte-identical to v1.14 `mix`-worker runs.
+- `grep -rn 'persistent\|worker_type\|worker-type' lib/`
+  returns nothing except the deprecated-flag warn-once shim.
+- No dangling references in docs to deleted modules/flags.
+
+*Out of scope:* New mutators. Touching the env walker. Coverage.
+
+**M43 — EnvWalker consolidation (byte-identity gated). ⚠️ release valve — SLIPPED to v1.16 (2026-05-23).**
+
+> **Status: deferred to v1.16.** A pre-implementation spike proved the
+> byte-identity gate cannot be met by making `EnvWalker` the single
+> candidate source: `EnvWalker` emits `ast_path = []` for every literal
+> (identity via byte span — the M41 design) while the four `AstWalk`
+> walkers emit detailed positional paths; unifying forces one encoding
+> and churns the other side. Release valve exercised per the clause
+> below. Evidence + the v1.16 redesign direction (AstWalk absorbs
+> EnvWalker, not the reverse) in
+> `docs/decisions/M43_envwalker_consolidation.md`. M44/M45 are
+> unaffected and proceed against the parallel fifth-source EnvWalker.
+
+*Goal:* Make `EnvWalker` the single source of mutation
+candidates. M40 explicitly deferred this to v1.15+ with its own
+byte-identity gate.
+
+*Inputs:* HLD v1.15 §M43; `docs/spikes/M39_env_walker.md`;
+M40's stable-id diff harness; the four existing walkers in
+`lib/mut/ast_walk.ex`.
+
+*Deliverables:*
+- Migrate `dispatch_candidates/2`, `guard_candidates/2`,
+  `attribute_candidates/2`, `body_literal_candidates/1` to derive
+  context from `EnvWalker` snapshots rather than standalone
+  `Macro.traverse` passes. `EnvWalker` becomes *the* walker; the
+  fifth-source plumbing collapses into the primary path.
+- Extend the M40 no-expansion grep verify layer to cover the
+  migrated code paths.
+- Reuse M40/M41's stable-id diff harness as the gate.
+
+*Acceptance:*
+- Stable IDs byte-identical for every existing mutator
+  (dispatch / guard / attribute / integer / boolean / string)
+  on demo_app, plug_crypto, Decimal, plug. **Any churn stops the
+  migration** — fall back to the parallel fifth-source design and
+  reschedule to v1.16.
+- Cold-walk still ≤10% of oracle-build wall on Decimal and plug.
+- No-expansion grep gate green on migrated paths.
+- All kill counts unchanged.
+
+*Out of scope:* New mutators. Schema routing. Any stable-id
+input change (a churn here is a failure, not a migration).
+
+*Release-valve note:* This milestone has no user-visible payoff
+and the most regression surface. If v1.15 runs long, cut it to
+v1.16; M44/M45 do not depend on it.
+
+**M44 — Low-noise literal expansion: Float + Nil + String table.**
+
+*Goal:* Add the two lowest-noise next literals per M39 ordering
+plus a richer StringLiteral table. All env-walker, fallback-
+routed, opt-in.
+
+*Inputs:* HLD v1.15 §M44; M39 ordering; M41 StringLiteral
+decision (`keep_opt_in`); `Mut.Mutator.StringLiteral` as the
+reference implementation.
+
+*Deliverables:*
+- `Mut.Mutator.FloatLiteral`: body-context float literals.
+  Replacements `0.0 → 1.0`, finite `f → 0.0`, `f → f + 1.0`,
+  with equivalent-mutant filters (skip where the float feeds a
+  position the filter flags as no-op). `targets/0 == [:literal]`,
+  `applicable?/2` requires `engine == :fallback` and trusted
+  body context.
+- `Mut.Mutator.NilLiteral`: body-context `nil`. Replacement
+  `nil → :__mut_nil__`-class sentinel (closed, single
+  replacement); pattern and guard positions excluded.
+- `StringLiteral` `expand_table`: add `non-empty → "x"` and
+  prepend-space (`s → " " <> s`) replacements behind the existing
+  opt-in. Interpolated-string handling only if M41/validation
+  recorded demand (M41 did not; default off).
+- Per-mutator unit tests + fixture golden mutation lists.
+  Invalid rate tracked per mutator.
+
+*Acceptance:*
+- Zero stable-id churn for existing mutants on demo_app,
+  plug_crypto, Decimal, plug, phoenix_html.
+- New mutators disabled unless `--enable env_walker` plus the
+  per-mutator enable; default `bin/verify` does not exercise them.
+- Golden mutation lists committed for the fixture.
+
+*Out of scope:* Atom and collection literals (M45). Default
+decisions (M46). Schema routing.
+
+**M45 — Higher-noise literals: Atom + Collection. ⚠️ release valve, gated.**
+
+*Goal:* Add the two highest-noise literals in the v1.15 set,
+each gated on a designed policy and on M44's invalid-rate signal.
+
+*Inputs:* HLD v1.15 §M45; M39's atom-table-pollution flag; M44's
+invalid-rate findings.
+
+*Deliverables:*
+- **Atom-table-pollution policy (designed before code):** a
+  closed allowlist of atom↔atom swaps (e.g. `:ok ↔ :error`,
+  `:lt`/`:gt`/`:eq` rotations). Never synthesize a new atom.
+  `true`/`false` excluded (BooleanLiteral owns them). Document
+  the allowlist and its rationale in the mutator moduledoc.
+- `Mut.Mutator.AtomLiteral`: body-context atom literals from the
+  allowlist only. Env-walker, fallback-routed, opt-in.
+- `Mut.Mutator.CollectionEmpty`: body-position list/map/tuple →
+  empty (`[a] → []`, `%{k: v} → %{}`, `{a, b} → {}`). Skip
+  already-empty literals and any pattern position. Env-walker,
+  fallback-routed, opt-in.
+- Per-mutator unit tests + fixture golden lists. Invalid AND
+  equivalent-ish survivor rate tracked per mutator.
+
+*Acceptance:*
+- Zero stable-id churn for existing mutants on the corpus.
+- If M44's validation surfaced an unknown invalid class, this
+  milestone defers to v1.16 and ships only the atom policy doc.
+- New mutators opt-in; default `bin/verify` does not exercise
+  them.
+
+*Out of scope:* Pattern-position and variable mutators (v1.16+).
+Default decisions (M46).
+
+**M46 — Literal execution validation + default decisions.**
+
+*Goal:* Promote the v1.15 literal mutators from plan-level to
+execution-level evidence and decide each one's default policy.
+Mirrors M25/M41's matrix-then-decide shape.
+
+*Inputs:* HLD v1.15 §M46; M44/M45 mutators; M25/M41 threshold
+conventions; `bench/run.sh` harness.
+
+*Deliverables:*
+- Validation matrix on demo_app (fixture proof), plug_crypto
+  (small dispatch-heavy baseline), Decimal (byte-identity
+  stress), plug (M34-unblocked), phoenix_html (macro-heavy
+  opaque-policy stress). All under the now-sole `mix` worker.
+- Per target × per mutator: new mutants surfaced, kill /
+  survived / error / **invalid** counts, equivalent-ish
+  survivors, env-walker parse+walk time, stable-id diff for
+  existing mutants (MUST be zero), skip-reason histogram.
+- Decision docs at `docs/decisions/M46_float_literal.md`,
+  `M46_nil_literal.md`, `M46_atom_literal.md`,
+  `M46_collection_empty.md`, `M46_string_literal_table.md`:
+  per mutator, one of `keep_opt_in` / `default_on` /
+  `fold_into_literal_preset`, using the M25/M41 thresholds
+  (kill ≥60%, equivalent <20%, invalid <10%). If two or more
+  literals warrant default-on, design the `--enable literal`
+  preset; otherwise defer the preset.
+
+*Acceptance:*
+- Decision docs committed for all five literal mutators.
+- BENCHMARKS.md gains a v1.15 section per target × mutator ×
+  enablement.
+- Zero stable-id churn for existing mutants on all five targets.
+- env-walker parse+walk gate (≤10% oracle wall) holds in
+  production on Decimal and plug.
+- No-expansion grep gate holds.
+
+## v1.15 horizon (not v1.15 scope)
+
+- **Pattern-position literal mutators** — v1.16+/v2; need the
+  invalid/equivalent data M46 begins gathering.
+- **Variable mutators** — v1.16+/v2 per M39 ordering.
+- **Schema routing for env-walker literals** — separate stable-id
+  migration if ever; gated on a literal going default-on.
+- **`--enable literal` preset** — designed in M46 only if ≥2
+  literals warrant default-on; otherwise v1.16.
+- **M43 walker consolidation**, if cut as a release valve.
+
+## Explicitly NOT v1.15
+
+- Coverage default flip. Coverage stays opt-in — less invasive
+  than worker types and useful diagnostically, but unproven as a
+  default on more real projects.
+- Schema routing for any env-walker mutator. Fallback-only
+  persists.
+- Pattern-position and variable mutators.
+- Function-call deletion / return-value replacement (deferred
+  indefinitely; high false-positive risk).
+- Persistent worker in any deprecated-in-place form. It is
+  deleted, not frozen.
+- Stable-id input changes; cross-run history; wrapper guard
+  schemata.
+- New CLI flags beyond the per-mutator `--enable` toggles (and
+  the M46 `--enable literal` preset iff M46 designs it).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
