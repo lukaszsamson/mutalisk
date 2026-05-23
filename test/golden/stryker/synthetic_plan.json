@@ -184,7 +184,6 @@
       "stable-survived": "arithmetic_op",
       "stable-timeout": "arithmetic_op"
     },
-    "persistent": null,
     "phase_timings": {
       "baseline_tests_ms": 2000,
       "coverage_collection_ms": 0,

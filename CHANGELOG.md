@@ -3,6 +3,49 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.15 unreleased
+
+### M43 — EnvWalker consolidation: deferred to v1.16 (2026-05-23)
+
+Release valve exercised. A pre-implementation spike proved the
+byte-identity gate cannot be met by making `EnvWalker` the single
+candidate source — `EnvWalker` keys literal identity off byte spans
+with `ast_path = []` (the M41 design), while the four `AstWalk` walkers
+key off detailed positional paths; unifying churns one side. No
+production code changed. Evidence and the v1.16 redesign direction are
+in `docs/decisions/M43_envwalker_consolidation.md`. M44/M45 proceed
+against the parallel fifth-source `EnvWalker` unchanged.
+
+### M42 — Worker-type removal + model/doc simplification (2026-05-23)
+
+**Breaking:** the opt-in persistent worker is removed. `mix` is the
+only worker. Mutation outcomes are unchanged.
+
+- **`--worker-type` removed.** `--worker-type mix` (and
+  `config :mut, worker_type: :mix`) is accepted as a deprecated
+  no-op that warns once; `--worker-type persistent` is rejected
+  with a pointer to this entry. The `worker_type` field is gone
+  from `Mut.Cli.Options`.
+- **Deleted modules (~2,250 LOC):** `Mut.Worker.Persistent`,
+  `Mut.Worker.PersistentRunner` (+ `Reset`, `Diag`),
+  `Mut.Worker.Persistent.Detector`, and their tests.
+- **Deleted drift triage:** `Mix.Tasks.Mut.Drift`,
+  `Mut.Drift.Bucketer` (+ `Result`) and their tests — these only
+  triaged mix-vs-persistent stable-id divergence.
+- **Removed wiring:** the persistent metric block from
+  `Mut.Metrics` / `Mut.Reporter.Terminal` /
+  `Mut.Reporter.StrykerJson` (the Stryker `mutalisk.persistent`
+  extension key no longer appears); the persistent boot-time
+  warning and its `--quiet-boot-warning` flag; the in-process
+  fallback recompile path (`Mut.Worker.run_fallback_in_process/5`).
+- **Removed verify layer:** `e2e_persistent` dropped from
+  `bin/verify`; `mix mut.e2e` no longer takes `--worker-type`.
+- **Deleted `docs/PERSISTENT_WORKER_GUIDE.md`** and brought
+  README in line with the current model (parallel workers,
+  opt-in coverage selection, opt-in env-walker literals, single
+  worker). The SchemaPlacer escaped-quote note is retained — that
+  bug affected the mix worker too.
+
 ## v1.14 unreleased
 
 ### M41 — Real-target validation + StringLiteral default decision (2026-05-11)

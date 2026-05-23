@@ -4,7 +4,6 @@ defmodule Mut.Worker do
   alias Mut.Mutant
   alias Mut.Sandbox
   alias Mut.Worker.Formatter
-  alias Mut.Worker.Persistent
 
   defmodule Result do
     @moduledoc "Worker execution result."
@@ -98,137 +97,6 @@ defmodule Mut.Worker do
     end
   end
 
-  @doc """
-  M21 in-process fallback recompile path.
-
-  Same prepare-patch flow as `run_fallback/4` (validate sandbox,
-  render + apply patch, read manifest, compute dependents) but
-  delegates the recompile + test execution to the persistent BEAM
-  via `Mut.Worker.Persistent.run_fallback/5` instead of spawning
-  a fresh `mix test`. The persistent BEAM compiles the patched
-  files in-process, runs ExUnit, and restores originals from the
-  schema-build ebins.
-
-  On `:filter_miss` / `:timeout` / `:crashed`, falls back to the
-  mix-spawn path (`run_fallback/4`) for the same sandbox + mutant.
-  On `:compile_error`, materialises a Result with status: :invalid
-  and the appropriate `recompile_category` — mix-retry would just
-  fail with the same compile error.
-
-  Always calls `Sandbox.reset/1` in the `after` clause to revert
-  the source patch, matching `run_fallback/4`'s semantics.
-  """
-  @spec run_fallback_in_process(
-          GenServer.server(),
-          Sandbox.t(),
-          Mutant.t(),
-          [String.t()],
-          keyword
-        ) ::
-          Result.t()
-  def run_fallback_in_process(
-        server,
-        %Sandbox{} = sandbox,
-        %Mutant{} = mutant,
-        test_files,
-        opts \\ []
-      )
-      when is_list(test_files) and is_list(opts) do
-    started = System.monotonic_time(:millisecond)
-
-    try do
-      with :ok <- validate_sandbox(sandbox),
-           {:ok, patch} <- render_patch(sandbox, mutant),
-           :ok <- Mut.FallbackPatch.apply(patch, sandbox.path),
-           {:ok, manifest} <- read_manifest(sandbox, opts),
-           dependents <-
-             manifest
-             |> Mut.Recompile.dependents(dependent_modules(mutant), dep_kinds(mutant))
-             |> Enum.to_list() do
-        compile_files = [patch.file | dependents]
-
-        case Persistent.run_fallback(
-               server,
-               mutant.id,
-               compile_files,
-               test_files,
-               timeout_ms: Keyword.get(opts, :timeout_ms, @default_timeout_ms)
-             ) do
-          %Result{} = result ->
-            %{result | duration_ms: elapsed(started)}
-
-          {:compile_error, category, message} when category in [:unknown, :parse_error] ->
-            # M25 diagnosis (nimble_options): in-process recompile
-            # failures in two categories disagree systematically with
-            # mix-spawn:
-            #
-            #   `:unknown` — patched file's compile-time code raised a
-            #     non-CompileError exception (e.g., FunctionClauseError)
-            #     inside `Code.compile_file/1`. Persistent BEAM state is
-            #     the cause; a fresh `Kernel.ParallelCompiler` subprocess
-            #     accepts the same patch.
-            #
-            #   `:parse_error` — `MismatchedDelimiterError` / `SyntaxError`
-            #     / `TokenMissingError` on patched bytes that mix-spawn
-            #     parses cleanly. Same source bytes, different parser
-            #     verdict; observed on nimble_options' guard mutants.
-            #
-            # Both route to mix-spawn for an authoritative verdict (same
-            # recovery contract as `:filter_miss | :timeout | :crashed`).
-            # The patch is still applied to the sandbox. If mix-spawn
-            # ALSO fails, the resulting `%Result{status: :invalid,
-            # recompile_category: ...}` is the truthful verdict and
-            # matches the mix-only baseline.
-            #
-            # We DO NOT fall back for `:compile_error` and
-            # `:dep_path_error` — those are taxonomies the in-process
-            # path agrees with mix-spawn on, and falling back would
-            # double-cost every truly broken patch.
-            _persistent_message = message
-            _persistent_category = category
-            run_fallback(sandbox, mutant, test_files, opts)
-
-          {:compile_error, category, message} ->
-            %Result{
-              status: :invalid,
-              duration_ms: elapsed(started),
-              raw_output: message,
-              recompile_category: category
-            }
-
-          reply when reply in [:filter_miss, :timeout, :crashed] ->
-            # Persistent path couldn't deliver a verdict. Fall back to
-            # the mix-spawn fallback for this single mutant; the
-            # source patch is still applied and Sandbox.reset in the
-            # `after` clause will revert. We re-run the FULL prepare
-            # flow inside run_fallback/4 because Sandbox.reset has
-            # not yet fired — but that double-render is cheap, and
-            # this branch is rare on real targets.
-            run_fallback(sandbox, mutant, test_files, opts)
-        end
-      else
-        {:error, :missing_source_span} ->
-          %Result{
-            status: :invalid,
-            duration_ms: elapsed(started),
-            raw_output: "missing_source_span"
-          }
-
-        {:error, reason} ->
-          %Result{status: :error, duration_ms: elapsed(started), raw_output: inspect(reason)}
-      end
-    rescue
-      exception ->
-        %Result{
-          status: :error,
-          duration_ms: elapsed(started),
-          raw_output: Exception.message(exception)
-        }
-    after
-      Sandbox.reset(sandbox)
-    end
-  end
-
   @spec env(non_neg_integer) :: [{String.t(), String.t()}]
   def env(mutant_id) when is_integer(mutant_id) and mutant_id >= 0 do
     [
@@ -251,13 +119,12 @@ defmodule Mut.Worker do
       "--no-archives-check",
       "--max-failures",
       "1",
-      # Match the persistent runner's per-test timeout so mix and
-      # persistent are comparable apples-to-apples. Mutation-test
-      # workloads need fast detection of infinite loops in mutants;
-      # ExUnit's default 60 s was per-target-test, not per-mutant,
-      # and dominated wall-clock on Decimal (21 timeouts * 60 s).
-      # Tests legitimately needing more can override per-test via
-      # @tag timeout:, or raise the global with --test-timeout-ms.
+      # Per-test timeout. Mutation-test workloads need fast detection
+      # of infinite loops in mutants; ExUnit's default 60 s was
+      # per-target-test, not per-mutant, and dominated wall-clock on
+      # Decimal (21 timeouts * 60 s). Tests legitimately needing more
+      # can override per-test via @tag timeout:, or raise the global
+      # with --test-timeout-ms.
       "--timeout",
       Integer.to_string(test_timeout_ms),
       "--formatter",

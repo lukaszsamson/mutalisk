@@ -15,7 +15,6 @@ defmodule Mut.CliTest do
     assert opts.reporters == [:terminal, :stryker_json]
     assert opts.output_path == "stryker.report.json"
     assert opts.concurrency == min(System.schedulers_online(), 4)
-    assert opts.worker_type == :mix
     assert opts.max_mutants == nil
     assert opts.debug_plan == false
     assert opts.selection == :static
@@ -136,6 +135,20 @@ defmodule Mut.CliTest do
 
     assert {:error, message} = Cli.parse(["--test-timeout-ms", "700000"])
     assert message =~ "--test-timeout-ms must be an integer between"
+  end
+
+  test "--worker-type mix is a deprecated warn-once no-op" do
+    warning =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert {:ok, %Options{}} = Cli.parse(["--worker-type", "mix"])
+      end)
+
+    assert warning =~ "--worker-type is deprecated"
+  end
+
+  test "--worker-type persistent is rejected" do
+    assert {:error, message} = Cli.parse(["--worker-type", "persistent"])
+    assert message =~ "no longer supported"
   end
 
   test "resolves mutators and aliases" do

@@ -25,7 +25,6 @@ defmodule Mut.Metrics do
       :selection,
       :concurrency,
       :recompile_categories,
-      :persistent,
       :test_timeout_ms,
       :ledger
     ]
@@ -75,38 +74,8 @@ defmodule Mut.Metrics do
               schedulers_online: pos_integer()
             },
             recompile_categories: %{atom() => non_neg_integer()},
-            persistent: persistent_block() | nil,
             test_timeout_ms: pos_integer() | nil,
             ledger: [ledger_entry()]
-          }
-
-    @typedoc """
-    M20 Phase A diagnostics block. `nil` when `--worker-type mix` was
-    in effect; reporters suppress the section in that case.
-
-    All times are in milliseconds at the snapshot boundary; the wire
-    protocol with the persistent worker is microseconds (see
-    `Mut.Worker.PersistentRunner.Diag`).
-    """
-    @type persistent_block :: %{
-            worker_count: non_neg_integer(),
-            boot_ms: %{median: number(), p95: number(), max: number()},
-            app_startup_ms: %{median: number(), total_apps: non_neg_integer()},
-            test_load_ms: %{median: number(), total_files: non_neg_integer()},
-            mutant_run_ms: %{median: number(), p95: number(), count: non_neg_integer()},
-            reset_ms: %{
-              application_env: number(),
-              ets: number(),
-              processes: number(),
-              persistent_term: number(),
-              on_exit: number()
-            },
-            filter_lookup_ms: number(),
-            crash_count: non_neg_integer(),
-            restart_count: non_neg_integer(),
-            filter_miss_count: non_neg_integer(),
-            mix_fallback_count: non_neg_integer(),
-            memory: %{peak_total_mb: float(), peak_processes_mb: float()}
           }
   end
 
@@ -225,21 +194,6 @@ defmodule Mut.Metrics do
   @spec snapshot(pid :: GenServer.server()) :: Snapshot.t()
   def snapshot(pid), do: GenServer.call(pid, :snapshot)
 
-  @doc """
-  Records per-worker diagnostic metrics from `Mut.Worker.Persistent`
-  servers. Called once at run end when `--worker-type persistent` is in
-  effect. Each entry in `workers` is a `Mut.Worker.Persistent.metrics/1`
-  view; this function folds them into a single
-  `Snapshot.persistent_block/0`.
-
-  Pass an empty list (or skip the call) to leave `snapshot.persistent`
-  as `nil`.
-  """
-  @spec record_persistent_workers(GenServer.server(), [map()]) :: :ok
-  def record_persistent_workers(pid, workers) when is_list(workers) do
-    GenServer.cast(pid, {:record_persistent_workers, workers})
-  end
-
   @spec set_test_timeout_ms(GenServer.server(), pos_integer()) :: :ok
   def set_test_timeout_ms(pid, ms) when is_integer(ms) and ms > 0 do
     GenServer.cast(pid, {:set_test_timeout_ms, ms})
@@ -267,7 +221,6 @@ defmodule Mut.Metrics do
        selected_test_counts: [],
        concurrency: nil,
        recompile_categories: %{compile_error: 0, dep_path_error: 0, unknown: 0},
-       persistent_workers: nil,
        test_timeout_ms: nil,
        started_ms: monotonic_ms(),
        ledger: []
@@ -366,10 +319,6 @@ defmodule Mut.Metrics do
     {:noreply, %{state | concurrency: concurrency}}
   end
 
-  def handle_cast({:record_persistent_workers, workers}, state) do
-    {:noreply, %{state | persistent_workers: workers}}
-  end
-
   def handle_cast({:set_test_timeout_ms, ms}, state) do
     {:noreply, %{state | test_timeout_ms: ms}}
   end
@@ -450,125 +399,10 @@ defmodule Mut.Metrics do
       selection: selection_snapshot(state),
       concurrency: concurrency_snapshot(state.concurrency),
       recompile_categories: state.recompile_categories,
-      persistent: persistent_snapshot(state.persistent_workers),
       test_timeout_ms: state.test_timeout_ms,
       ledger: ledger
     }
   end
-
-  defp persistent_snapshot(nil), do: nil
-  defp persistent_snapshot([]), do: nil
-
-  defp persistent_snapshot(workers) when is_list(workers) do
-    boot_ms_values = for w <- workers, w.boot_ms > 0, do: w.boot_ms
-    boot_metrics = workers |> Enum.map(&Map.get(&1, :boot_metrics)) |> Enum.reject(&is_nil/1)
-    run_metrics = Enum.flat_map(workers, &Map.get(&1, :run_metrics, []))
-
-    %{
-      worker_count: length(workers),
-      boot_ms: %{
-        median: median(boot_ms_values),
-        p95: percentile(boot_ms_values, 95),
-        max: max_or_zero(boot_ms_values)
-      },
-      app_startup_ms: app_startup_block(boot_metrics),
-      test_load_ms: test_load_block(boot_metrics),
-      mutant_run_ms: mutant_run_block(run_metrics),
-      reset_ms: reset_block(run_metrics),
-      filter_lookup_ms: us_to_ms(median(field(run_metrics, :filter_us))),
-      crash_count: sum_field(workers, :crash_count),
-      restart_count: sum_field(workers, :restart_count),
-      filter_miss_count: sum_field(workers, :filter_miss_count),
-      mix_fallback_count: sum_field(workers, :mix_fallback_count),
-      memory: memory_block(workers)
-    }
-  end
-
-  defp app_startup_block(boot_metrics) do
-    %{
-      median: us_to_ms(median(field(boot_metrics, :app_startup_us))),
-      total_apps: boot_metrics |> Enum.map(&(&1[:app_startup_count] || 0)) |> Enum.sum()
-    }
-  end
-
-  defp test_load_block(boot_metrics) do
-    %{
-      median: us_to_ms(median(field(boot_metrics, :test_load_us))),
-      total_files: boot_metrics |> Enum.map(&(&1[:test_load_count] || 0)) |> Enum.sum()
-    }
-  end
-
-  defp mutant_run_block(run_metrics) do
-    run_us = field(run_metrics, :run_us)
-
-    %{
-      median: us_to_ms(median(run_us)),
-      p95: us_to_ms(percentile(run_us, 95)),
-      count: length(run_us)
-    }
-  end
-
-  defp reset_block(run_metrics) do
-    %{
-      application_env: us_to_ms(median(field(run_metrics, :reset_app_env_us))),
-      ets: us_to_ms(median(field(run_metrics, :reset_ets_us))),
-      processes: us_to_ms(median(field(run_metrics, :reset_processes_us))),
-      persistent_term: us_to_ms(median(field(run_metrics, :reset_persistent_term_us))),
-      on_exit: us_to_ms(median(field(run_metrics, :reset_on_exit_us))),
-      mox: us_to_ms(median(field(run_metrics, :reset_mox_us))),
-      ecto: us_to_ms(median(field(run_metrics, :reset_ecto_us)))
-    }
-  end
-
-  defp memory_block(workers) do
-    peak_total = workers |> Enum.map(&Map.get(&1, :memory_peak_total, 0)) |> Enum.max(fn -> 0 end)
-
-    peak_processes =
-      workers |> Enum.map(&Map.get(&1, :memory_peak_processes, 0)) |> Enum.max(fn -> 0 end)
-
-    %{peak_total_mb: bytes_to_mb(peak_total), peak_processes_mb: bytes_to_mb(peak_processes)}
-  end
-
-  defp field(run_metrics, key),
-    do: for(m <- run_metrics, is_integer(m[key]), do: m[key])
-
-  defp sum_field(workers, key),
-    do: workers |> Enum.map(&Map.get(&1, key, 0)) |> Enum.sum()
-
-  defp us_to_ms(nil), do: 0.0
-  defp us_to_ms(0), do: 0.0
-  defp us_to_ms(us) when is_number(us), do: Float.round(us / 1000.0, 1)
-
-  defp bytes_to_mb(bytes) when is_integer(bytes) and bytes > 0,
-    do: Float.round(bytes / (1024 * 1024), 1)
-
-  defp bytes_to_mb(_), do: 0.0
-
-  defp median([]), do: 0
-  defp median([single]), do: single
-
-  defp median(values) do
-    sorted = Enum.sort(values)
-    n = length(sorted)
-
-    if rem(n, 2) == 0 do
-      (Enum.at(sorted, div(n, 2) - 1) + Enum.at(sorted, div(n, 2))) / 2
-    else
-      Enum.at(sorted, div(n, 2))
-    end
-  end
-
-  defp percentile([], _), do: 0
-  defp percentile([single], _), do: single
-
-  defp percentile(values, pct) do
-    sorted = Enum.sort(values)
-    index = max(0, min(length(sorted) - 1, ceil(length(sorted) * pct / 100) - 1))
-    Enum.at(sorted, index)
-  end
-
-  defp max_or_zero([]), do: 0
-  defp max_or_zero(values), do: Enum.max(values)
 
   defp concurrency_snapshot(nil) do
     schedulers = System.schedulers_online()

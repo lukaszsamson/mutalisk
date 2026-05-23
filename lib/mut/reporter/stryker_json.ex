@@ -108,34 +108,9 @@ defmodule Mut.Reporter.StrykerJson do
       "metrics" => metrics_extension(snapshot),
       "concurrency" => concurrency_extension(snapshot.concurrency),
       "recompile_categories" => recompile_categories_extension(snapshot.recompile_categories),
-      "persistent" => persistent_extension(snapshot.persistent),
       "test_timeout_ms" => snapshot.test_timeout_ms || 10_000
     }
   end
-
-  defp persistent_extension(nil), do: nil
-
-  defp persistent_extension(%{} = block) do
-    %{
-      "worker_count" => Map.get(block, :worker_count, 0),
-      "boot_ms" => stringify_inner(Map.get(block, :boot_ms, %{})),
-      "app_startup_ms" => stringify_inner(Map.get(block, :app_startup_ms, %{})),
-      "test_load_ms" => stringify_inner(Map.get(block, :test_load_ms, %{})),
-      "mutant_run_ms" => stringify_inner(Map.get(block, :mutant_run_ms, %{})),
-      "reset_ms" => stringify_inner(Map.get(block, :reset_ms, %{})),
-      "filter_lookup_ms" => Map.get(block, :filter_lookup_ms, 0),
-      "crash_count" => Map.get(block, :crash_count, 0),
-      "restart_count" => Map.get(block, :restart_count, 0),
-      "filter_miss_count" => Map.get(block, :filter_miss_count, 0),
-      "mix_fallback_count" => Map.get(block, :mix_fallback_count, 0),
-      "memory" => stringify_inner(Map.get(block, :memory, %{}))
-    }
-  end
-
-  defp stringify_inner(map) when is_map(map),
-    do: Map.new(map, fn {k, v} -> {atom_string(k) || to_string(k), v} end)
-
-  defp stringify_inner(other), do: other
 
   defp recompile_categories_extension(nil), do: %{}
   defp recompile_categories_extension(%{} = cats), do: atom_keyed_counts(cats)

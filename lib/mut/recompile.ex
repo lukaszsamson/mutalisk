@@ -42,9 +42,7 @@ defmodule Mut.Recompile do
       inside the patched module, function-head pattern violation, etc.).
     * `:parse_error` — the patched bytes did not parse (SyntaxError,
       TokenMissingError, MismatchedDelimiterError). Surfaced separately
-      from `:compile_error` so the host can route persistent in-process
-      parse failures to mix-spawn for an authoritative verdict (see
-      `Mut.Worker.run_fallback_in_process/5`).
+      from `:compile_error` for report classification.
     * `:dep_path_error` — compilation reached a module that should
       have been on `-pa` (a sibling module or a dep) but was not
       loadable. Indicates a sandbox materialisation problem rather
@@ -95,8 +93,8 @@ defmodule Mut.Recompile do
 
       # Parse-class failures: MismatchedDelimiterError was added in
       # Elixir 1.17 and does not inherit from SyntaxError. Surface all
-      # three under `:parse_error` so the host's persistent <-> mix-spawn
-      # routing can distinguish them from semantic CompileError.
+      # three under `:parse_error` so reports can distinguish them from
+      # semantic CompileError.
       output =~ "** (MismatchedDelimiterError)" or output =~ "** (SyntaxError)" or
           output =~ "** (TokenMissingError)" ->
         :parse_error

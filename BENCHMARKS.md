@@ -1,5 +1,15 @@
 # Mutalisk Benchmarks
 
+## v1.15 worker-type removal (M42, 2026-05-23)
+
+The opt-in persistent worker was removed in v1.15; `mix` is the
+only worker. The persistent-vs-mix comparison rows recorded in
+the v1.7–v1.10 sections below are retained as the historical
+measurement record that informed the removal decision — they
+describe a worker that no longer ships. v1.15 mutation outcomes
+(stable-id sets and kill counts) are byte-identical to the v1.14
+`mix`-worker runs.
+
 ## v1.14 env walker + StringLiteral mutator (M40 + M41, 2026-05-11)
 
 M40 shipped `Mut.EnvWalker` as a fifth candidate source and

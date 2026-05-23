@@ -25,11 +25,7 @@ ENABLED_LAYERS=(
   integration_schema
   integration_fallback
   e2e_mut
-  e2e_persistent
 )
-# e2e_persistent runs `mix mut.e2e --worker-type persistent`.
-# Demo_app, plug_crypto and Decimal byte-identity under persistent
-# have all been validated; see BENCHMARKS.md.
 
 ALL_LAYERS=(
   lint
@@ -40,7 +36,6 @@ ALL_LAYERS=(
   integration_schema
   integration_fallback
   e2e_mut
-  e2e_persistent
 )
 
 # layer -> milestone that enables it (for skipped messages)
@@ -53,7 +48,6 @@ declare -A LAYER_MILESTONE=(
   [integration_schema]=M8
   [integration_fallback]=M10
   [e2e_mut]=M13
-  [e2e_persistent]=M19
 )
 
 is_enabled() {
@@ -116,11 +110,6 @@ run_integration_fallback() {
 run_e2e_mut() {
   step e2e_mut
   mix mut.e2e
-}
-
-run_e2e_persistent() {
-  step e2e_persistent
-  mix mut.e2e --worker-type persistent
 }
 
 run_layer() {

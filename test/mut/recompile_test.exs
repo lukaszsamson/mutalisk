@@ -91,8 +91,8 @@ defmodule Mut.RecompileTest do
   test "recompile returns :parse_error category for syntactically broken patch" do
     # `def add(a, b), do: a +\nend` is a parse-level failure (TokenMissingError
     # on the trailing `+`), not a CompileError. Recompile categorizes
-    # parse-class output under :parse_error so the host can route persistent
-    # in-process parse failures to mix-spawn for an authoritative verdict.
+    # parse-class output under :parse_error so reports can distinguish it
+    # from semantic CompileError.
     {:ok, schema_result} = schema_result_for("compile-error")
 
     {:ok, pool} =

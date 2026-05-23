@@ -10,29 +10,27 @@ defmodule Mix.Tasks.Mut.E2e do
   @golden_stable_ids Path.expand("test/golden/plan/demo_app_stable_ids.json")
 
   @impl Mix.Task
-  def run(argv) do
+  def run(_argv) do
     Mix.Task.run("app.start")
 
-    {extra_flags, label_suffix} = parse_extra(argv)
-
-    default = run_fixture!("default" <> label_suffix, extra_flags)
+    default = run_fixture!("default", [])
 
     coverage =
       run_fixture!(
-        "coverage" <> label_suffix,
-        ["--selection", "coverage_with_static_fallback"] ++ extra_flags
+        "coverage",
+        ["--selection", "coverage_with_static_fallback"]
       )
 
     attribute =
       run_fixture!(
-        "attribute" <> label_suffix,
-        ["--enable", "dispatch,guard,module_attribute"] ++ extra_flags
+        "attribute",
+        ["--enable", "dispatch,guard,module_attribute"]
       )
 
     repeated =
       run_fixture!(
-        "repeat" <> label_suffix,
-        ["--enable", "dispatch,guard,module_attribute"] ++ extra_flags
+        "repeat",
+        ["--enable", "dispatch,guard,module_attribute"]
       )
 
     assert_default!(default)
@@ -50,16 +48,6 @@ defmodule Mix.Tasks.Mut.E2e do
     IO.puts("mut.e2e stable_ids=#{length(stable_ids(attribute.report))}")
     IO.puts("mut.e2e stryker_json=:ok")
     IO.puts("mut.e2e fixture_status=clean")
-  end
-
-  defp parse_extra(argv) do
-    {parsed, _rest, _invalid} =
-      OptionParser.parse(argv, strict: [worker_type: :string])
-
-    case Keyword.get(parsed, :worker_type) do
-      nil -> {[], ""}
-      type -> {["--worker-type", type], ".#{type}"}
-    end
   end
 
   defp run_fixture!(label, flags) do
@@ -140,9 +128,9 @@ defmodule Mix.Tasks.Mut.E2e do
 
       # M22: byte-identity check on the actual stable_id partitioning,
       # not just count totals. Catches the silent-drift class where
-      # coverage selection's narrowed test list under persistent
-      # would flip a specific mutant from killed to survived while
-      # leaving the totals unchanged.
+      # coverage selection's narrowed test list would flip a specific
+      # mutant from killed to survived while leaving the totals
+      # unchanged.
       static_set = stable_ids_by_status(static.report, status)
       coverage_set = stable_ids_by_status(coverage.report, status)
 

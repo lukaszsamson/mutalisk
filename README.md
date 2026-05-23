@@ -35,9 +35,9 @@ See `mix help mut` for full CLI flags. Common config:
 ## Per-test timeout policy (v1.8+)
 
 Mutalisk runs ExUnit with a **10 000 ms per-test timeout**, not
-the ExUnit default of 60 000 ms. This applies to both worker
-types (`--worker-type mix` passes `mix test --timeout 10000`;
-`--worker-type persistent` configures it in `ExUnit.start/1`).
+the ExUnit default of 60 000 ms (passed as `mix test --timeout
+10000`). Override with `--test-timeout-ms` or
+`config :mut, test_timeout_ms: N`.
 
 This is a deliberate mutation-testing policy, not an
 implementation detail:
@@ -67,11 +67,12 @@ See [BENCHMARKS.md](BENCHMARKS.md) for the v1 real-project smoke run. The refere
 
 ## Limitations
 
-Mutalisk v1 does not mutate DSL-emitted code, user macro bodies, patterns, arbitrary literals outside enabled module attributes, or generated code. It uses static test selection and sequential workers; coverage-based selection, parallel workers, incremental history, and wrapper-schemata are candidates for later versions.
+Mutalisk does not mutate DSL-emitted code, user macro bodies, patterns, or generated code. Test selection is static by default with coverage-based selection available opt-in (`--selection coverage` / `coverage_with_static_fallback`). Mutants run in parallel (`--concurrency N`, default `min(schedulers_online, 4)`). Body-context literal mutators (integer, boolean, string) are available opt-in via `--enable`. Incremental history and wrapper-schemata are candidates for later versions.
+
+Mutation runs use a single worker model (a fresh `mix test` per mutant). The opt-in persistent worker was removed in v1.15; `--worker-type mix` is accepted as a deprecated no-op and `--worker-type persistent` is rejected.
 
 Authoritative project documents:
 
 - [ELIXIR_MUTATION_TESTING_SPEC.md](ELIXIR_MUTATION_TESTING_SPEC.md)
 - [PLAN.md](PLAN.md)
 - [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md)
-- [docs/PERSISTENT_WORKER_GUIDE.md](docs/PERSISTENT_WORKER_GUIDE.md)
