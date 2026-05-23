@@ -2671,6 +2671,211 @@ conventions; `bench/run.sh` harness.
 - New CLI flags beyond the per-mutator `--enable` toggles (and
   the M46 `--enable literal` preset iff M46 designs it).
 
+# v1.16 milestones (default-policy + literal-reporting robustness)
+
+v1.15 (M42–M46) shipped on master (`8bbe479..e12c5cd`). It left
+a small, well-characterized backlog. v1.16's theme is **harvest +
+harden**: deliver the one decided-but-undelivered default
+(AtomLiteral), fix the literal-reporting robustness bug M46
+surfaced, trim the noisiest literal row, close the
+collection-shape gap — and explicitly *not* force the M43
+consolidation refactor (M39 measured env-walker cold-walk cost at
+<1% of oracle wall, so the parallel design carries no meaningful
+tax; ROI of consolidation is unproven).
+
+Not a broad catalog push. The only catalog change is closing
+CollectionEmpty's deferred shapes; no genuinely new mutator type
+ships.
+
+**Defaults DO change in v1.16 — once, additively.** AtomLiteral
+becomes default-on (M46 decision), the first env-walker mutator
+in the default plan. Existing stable IDs are unchanged; new
+AtomLiteral mutants are added. String/Float/Nil/Collection stay
+opt-in. `--selection static` and coverage-opt-in unchanged.
+Elixir floor stays `>= 1.19.0`.
+
+Five milestones. Core ship value is **M47 + M48 + M49** (all
+small). **M50** (collection shapes) is gated with a release valve
+to v1.17. **M51** (consolidation design/proof) is a cuttable
+spike — cut first if budget tightens.
+
+## v1.16 scope (committed)
+
+**M47 — Literal-reporting robustness.**
+
+*Goal:* One un-renderable mutant diff must never abort the whole
+report.
+
+*Inputs:* v1.16 backlog item 4; the M46 plug-run incident
+(`Mut.Reporter.StrykerJson.files/3` raised `TokenMissingError`
+rendering one mutant's diff, aborting the JSON write *after* all
+1,390 mutants ran).
+
+*Deliverables:*
+- Guard diff rendering in `lib/mut/reporter/stryker_json.ex` so a
+  render failure for one mutant is caught, recorded with a marker
+  (e.g. diff omitted + reason), and does not propagate.
+- Same guard in `lib/mut/reporter/terminal.ex`.
+- Regression fixture: a mutant whose rendered diff trips the
+  `Macro.to_string`/tokenizer path (escape-trap content), proving
+  graceful degradation.
+
+*Acceptance:*
+- Fixture escape-trap mutant renders or degrades without raising.
+- plug v1.19.1 literal run writes valid Stryker JSON end-to-end.
+- All `bin/verify` layers green.
+
+*Out of scope:* Root-causing the `Macro.to_string` heredoc/escape
+issue upstream (workaround + marker is sufficient).
+
+**M48 — AtomLiteral default-on + mutator default-tier flag model.**
+
+*Goal:* Make AtomLiteral default-on **without** leaking the other
+four env-walker literals into the default plan.
+
+*Inputs:* v1.16 backlog item 3; `docs/decisions/M46_atom_literal.md`;
+the current all-or-nothing `:env_walker` `enabled_targets` model
+in `lib/mut/cli.ex` + `lib/mut/orchestrator.ex`;
+`lib/mut/mutator/defaults.ex` (today lists all mutators flat).
+
+*Deliverables:*
+- Per-mutator granularity within the env-walker source: enabling
+  the walker no longer implies running every env-walker mutator.
+- A clean tier split in the flag/config model: **default-on set /
+  opt-in set / named presets** (replacing today's flat
+  `Defaults.list/0` + coarse `:env_walker` target). Document the
+  tiers.
+- AtomLiteral moves to the default-on tier; env walker runs by
+  default but only AtomLiteral is active by default.
+  String/Float/Nil/Collection remain `--enable`-only.
+- Preserve every existing `--enable` flag and the M46 span
+  behavior.
+
+*Acceptance:*
+- Default `mix mut` plan includes AtomLiteral mutants and
+  excludes String/Float/Nil/Collection (verified by plan diff on
+  demo_app + Decimal).
+- All non-env-walker stable IDs byte-identical to v1.15 on
+  demo_app, plug_crypto, Decimal, plug.
+- `--enable string_literal` / `--enable env_walker` etc. still
+  produce the v1.15 plans.
+- All `bin/verify` layers green.
+
+*Out of scope:* The `--enable literal` preset (needs ≥2 default-on
+candidates; only AtomLiteral qualifies — deferred). New default-on
+literals beyond AtomLiteral.
+
+**M49 — StringLiteral table trim.**
+
+*Goal:* Drop the equivalent-heavy prepend-space row; keep the
+useful opt-in rows.
+
+*Inputs:* v1.16 backlog item 5;
+`docs/decisions/M46_string_literal_table.md` (prepend-space drags
+kill rate, especially on Decimal).
+
+*Deliverables:*
+- Remove the `s → " " <> s` replacement from
+  `Mut.Mutator.StringLiteral`. Keep `s → ""` and `s → "x"`
+  (both opt-in).
+- Update fixture golden mutation lists.
+
+*Acceptance:*
+- Prepend-space mutants absent from plans corpus-wide.
+- Remaining StringLiteral stable IDs unchanged (identity keys on
+  span + replacement; removing a replacement deletes only its own
+  mutants).
+- All `bin/verify` layers green.
+
+*Out of scope:* Re-tuning the kept rows (M46 already decided
+`keep_opt_in` for the table).
+
+**M50 — CollectionEmpty maps + n-tuples (gated; release valve).**
+
+*Goal:* Close M45's deferred collection shapes safely.
+
+*Inputs:* v1.16 backlog item 2; M45 closure note (maps/n-tuples
+are unwrapped AST nodes needing a separate walk pass +
+struct-map exclusion).
+
+*Deliverables:*
+- Map literal emptying `%{...} → %{}` with **strict struct-map
+  exclusion** (`%S{}` / `{:%{}, [{:|, …}]}` struct forms never
+  emptied).
+- N-tuple emptying `{a, b, c} → {}` for arity ≥ 3 (2-tuple
+  already shipped in M45).
+- Separate walk pass over the unwrapped `{:%{}, …}` / `{:{}, …}`
+  nodes (the `literal_encoder` wrapping M45 relied on does not
+  cover these).
+- Per-mutator unit tests + fixture golden lists; invalid AND
+  equivalent-ish survivor rate tracked.
+
+*Acceptance:*
+- Zero stable-id churn for existing mutants on the corpus.
+- Per-mutator invalid rate < 10%.
+- Struct maps provably never emptied (fixture asserts a
+  `%MyStruct{...}` literal is skipped).
+- Opt-in (CollectionEmpty stays `keep_opt_in` per M46).
+
+*Release valve:* If struct exclusion or shape noise cannot be made
+clean within budget, ship only the design note and defer maps
+and/or n-tuples to v1.17.
+
+*Out of scope:* Pattern-position collection mutations; default-on
+for CollectionEmpty (M46 said opt-in).
+
+**M51 — EnvWalker consolidation design + proof (spike; cuttable).**
+
+*Goal:* Decide, with a small proof, whether the v1.17 M43
+consolidation is worth implementing — without writing migration
+code.
+
+*Inputs:* `docs/decisions/M43_envwalker_consolidation.md` (the
+v1.15 deferral evidence and redesign direction); M39's cold-walk
+measurements.
+
+*Deliverables:*
+- Extend the M43 decision doc into a concrete redesign:
+  **AstWalk absorbs EnvWalker's trust/context classification into
+  its existing frame-based traversal**, keeping AstWalk's path
+  encoding (the reverse churns stable IDs — proven in v1.15).
+- A *tiny* proof (throwaway, not in `lib/`) that trust/context can
+  be attached to AstWalk frames without changing any existing
+  stable id.
+- Explicit go/no-go for a v1.17 implementation milestone, with a
+  LOC estimate and the byte-identity migration analysis any
+  encoding change would require.
+
+*Acceptance:*
+- Updated decision doc committed; go/no-go explicit.
+- No production code changed; M47–M50's green state preserved.
+
+*Release-valve note:* Cut first if v1.16 budget tightens. M50 does
+not depend on it (M45 confirmed maps/tuples are doable as a
+standalone walk pass).
+
+## v1.16 horizon (not v1.16 scope)
+
+- **M43 consolidation implementation** — v1.17 iff M51 returns go.
+- **`--enable literal` preset** — when a second literal reaches
+  default-on.
+- **Pattern-position and variable mutators** — still gated on the
+  richer v2 env walker.
+- **Coverage default flip** — still deferred.
+
+## Explicitly NOT v1.16
+
+- M43 consolidation *implementation* (design/proof only via M51).
+- Schema routing for any env-walker mutator. Fallback-only
+  persists.
+- New default-on literals beyond AtomLiteral.
+- Pattern-position / variable mutators; function-call deletion /
+  return-value replacement.
+- Coverage default flip; cross-run history; wrapper guard
+  schemata.
+- Stable-id input changes beyond M46's already-shipped one-time
+  span migration.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

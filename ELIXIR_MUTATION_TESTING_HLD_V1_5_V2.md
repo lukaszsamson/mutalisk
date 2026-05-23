@@ -861,6 +861,32 @@ This is a pruning-plus-focused-expansion release, not infrastructure. The env wa
 - Persistent worker in any form — it is removed, not deprecated-in-place.
 - Stable-id input changes; cross-run history; wrapper guard schemata.
 
+**v1.15 outcome (2026-05-23):** all five milestones resolved across commits `8bbe479..e12c5cd`. M42 removed the persistent worker (~5,000 LOC deleted, ~125 added); `mix` is the only worker, `--worker-type mix` is a deprecated warn-once no-op, `persistent` is rejected. M43 was **slipped to v1.16** via its release valve — a pre-implementation spike against real plan data proved the byte-identity gate cannot be met by making `EnvWalker` the single source (incompatible `ast_path` encodings: `EnvWalker` emits `[]` and keys on byte spans; `AstWalk` uses positional paths), so the redesign must instead be *AstWalk absorbs EnvWalker's trust/context*. M44 shipped FloatLiteral, NilLiteral, and a StringLiteral table expansion (all opt-in, byte-identity verified on 5 targets). M45 shipped AtomLiteral (closed allowlist) and CollectionEmpty (lists + 2-tuples only; maps + n-tuples slipped to v1.16). M46's execution-level validation surfaced and fixed a latent `literal_span` bug (scalar spans were ~1 char → invalid mutants; the fix intentionally churned String/Atom/Nil opt-in stable IDs as a one-time migration) and decided defaults: **AtomLiteral `default_on`** (only literal clearing the per-target-minimum threshold rule), the other four `keep_opt_in`. Defaults unchanged at ship: `--selection static`, env walker opt-in.
+
+### v1.16 (5 milestones — default-policy + literal-reporting robustness)
+
+v1.15 ended a removal-plus-expansion arc and left a small, well-characterized backlog. v1.16's theme is **harvest + harden**: deliver the one decided-but-undelivered default (AtomLiteral), fix the literal-reporting robustness bug M46 surfaced, trim the noisiest literal row, close the collection-shape gap — and explicitly *not* force the M43 consolidation refactor, whose ROI is unproven (M39 measured env-walker cold-walk cost at <1% of oracle wall, so the parallel design carries no meaningful tax).
+
+This is a default-policy and robustness release, not a broad catalog push. No genuinely new mutator type ships; the only catalog change is closing CollectionEmpty's deferred shapes.
+
+**Defaults DO change in v1.16 — once, additively.** AtomLiteral becomes default-on (M46 decision). This is the first env-walker mutator in the default plan. The change is additive: existing stable IDs are unchanged; new AtomLiteral mutants are added. The other four env-walker literals (String/Float/Nil/Collection) stay opt-in. `--selection static` and coverage-opt-in are unchanged.
+
+**M47 — Literal-reporting robustness.** Fix the M46-surfaced bug: `Mut.Reporter.StrykerJson.files/3` raised `TokenMissingError` rendering one plug mutant's diff and aborted the entire JSON write *after* all 1,390 mutants had run — a full run's results lost at the reporting step. Guard diff rendering so a single un-renderable mutant degrades gracefully (skip-with-marker) instead of crashing the report; apply the same guard to the terminal reporter. Acceptance: a fixture mutant with escape-trap diff content renders or degrades without aborting; the plug v1.19.1 literal run writes valid JSON.
+
+**M48 — AtomLiteral default-on + mutator default-tier flag model.** The substance is the flag architecture, not a boolean. Today `:env_walker` is an all-or-nothing `enabled_targets` entry — adding it to the default set would silently activate String/Float/Nil/Collection too. M48 introduces per-mutator granularity within the env-walker source and a clean tier split: **default-on set / opt-in set / named presets**. Make AtomLiteral default-on (env walker runs by default, but only AtomLiteral is active by default); keep the other four `--enable`-only; preserve every existing `--enable` flag. Acceptance: default `mix mut` plan includes AtomLiteral mutants and excludes String/Float/Nil/Collection; all non-env-walker stable IDs byte-identical; `--enable string_literal` etc. still work; the M46 span behavior is preserved.
+
+**M49 — StringLiteral table trim.** Remove the equivalent-heavy prepend-space row (`s → " " <> s`; M46 flagged it as kill-rate-dragging, especially on Decimal). Keep `s → ""` and `s → "x"` opt-in. Removing a replacement deletes those mutants; the remaining rows' stable IDs must be unchanged (identity keys on span + replacement). Acceptance: prepend-space mutants absent from plans; remaining StringLiteral IDs unchanged on the corpus; golden lists updated.
+
+**M50 — CollectionEmpty maps + n-tuples (gated; release valve).** Close M45's deferred shapes: map `%{...} → %{}` (with strict struct-map `%S{}` exclusion) and n-tuple `{a, b, c} → {}`. These are unwrapped AST nodes (`{:%{}, …}`, `{:{}, …}`) needing a separate walk pass beyond the `literal_encoder`-wrapped shapes M45 handled. Hard gates: byte-identity for existing mutants; per-mutator invalid rate <10%; struct maps never emptied (verified by fixture). Release valve: if struct exclusion or shape noise can't be made clean, ship only the design note and defer to v1.17.
+
+**M51 — EnvWalker consolidation design + proof (spike; cuttable).** Per the harvest theme, do *not* implement M43's migration. Extend `docs/decisions/M43_envwalker_consolidation.md` into a concrete redesign (AstWalk absorbs EnvWalker's trust/context classification into its frame traversal, keeping AstWalk's path encoding) plus a *tiny* proof that trust/context can attach to AstWalk frames without stable-id churn. No migration code ships. Output: updated decision doc + explicit go/no-go for a v1.17 implementation milestone. Cut first if budget tightens; M50 does not depend on it (M45 confirmed maps/tuples are doable as a standalone walk pass).
+
+**Explicitly NOT in v1.16:**
+- M43 consolidation *implementation* (design/proof only via M51; migration is v1.17+ if proven worth it).
+- Pattern-position literal mutators and variable mutators (still gated on the richer v2 env walker).
+- Schema routing for any env-walker mutator; the `--enable literal` preset (needs ≥2 default-on candidates; only AtomLiteral qualifies).
+- Coverage default flip; function-call deletion / return-value replacement; cross-run history; stable-id input changes (beyond M46's already-shipped one-time span migration).
+
 ### v2
 
 - Lean env walker.
