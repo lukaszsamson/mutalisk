@@ -51,6 +51,26 @@ defmodule Mut.Mutator.CollectionEmptyTest do
       assert m.metadata == %{collection: :tuple}
       assert match?({:__block__, _, [{}]}, m.mutated_ast)
     end
+
+    test "M50: map empties to %{}" do
+      node = {:%{}, [], [{:a, 1}, {:b, 2}]}
+      assert [m] = CollectionEmpty.mutate(node, ctx([]))
+      assert m.metadata == %{collection: :map}
+      assert m.mutated_ast == {:%{}, [], []}
+    end
+
+    test "M50: n-tuple (arity >= 3) empties to {}" do
+      node = {:{}, [], [1, 2, 3]}
+      assert [m] = CollectionEmpty.mutate(node, ctx([]))
+      assert m.metadata == %{collection: :tuple}
+      assert m.mutated_ast == {:{}, [], []}
+    end
+
+    test "M50: empty map, map-update, and arity<3 tuple are not applicable" do
+      refute CollectionEmpty.applicable?({:%{}, [], []}, ctx([]))
+      refute CollectionEmpty.applicable?({:%{}, [], [{:|, [], [{:m, [], nil}, [a: 1]]}]}, ctx([]))
+      refute CollectionEmpty.applicable?({:{}, [], [1]}, ctx([]))
+    end
   end
 
   describe "end-to-end via env walker" do
@@ -87,6 +107,47 @@ defmodule Mut.Mutator.CollectionEmptyTest do
       colls =
         Enum.filter(pairs, fn {c, _} ->
           c.syntactic_name in [:__list_literal__, :__tuple_literal__]
+        end)
+
+      assert colls == []
+    end
+
+    test "M50: collects bare maps and n-tuples; never struct maps, map-updates, or arity-2 tuples here" do
+      src = ~S'''
+      defmodule Foo do
+        def m, do: %{a: 1, b: 2}
+        def t, do: {1, 2, 3}
+        def s, do: %Bar{x: 1}
+        def u(map), do: %{map | a: 1}
+      end
+      '''
+
+      {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+      names =
+        EnvWalker.collect_literal_candidates(ast, file: "lib/foo.ex", source: src)
+        |> Enum.map(fn {c, _} -> c.syntactic_name end)
+
+      assert :__map_literal__ in names
+      assert :__ntuple_literal__ in names
+      # struct %Bar{} and map-update %{map | …} produce NO collection candidate.
+      assert Enum.count(names, &(&1 == :__map_literal__)) == 1
+      assert Enum.count(names, &(&1 == :__ntuple_literal__)) == 1
+    end
+
+    test "M50 struct exclusion: a %MyStruct{...} literal is never emptied" do
+      src = ~S'''
+      defmodule Foo do
+        def build, do: %MyStruct{a: 1, b: 2}
+      end
+      '''
+
+      {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+      pairs = EnvWalker.collect_literal_candidates(ast, file: "lib/foo.ex", source: src)
+
+      colls =
+        Enum.filter(pairs, fn {c, _} ->
+          c.syntactic_name in [:__map_literal__, :__ntuple_literal__]
         end)
 
       assert colls == []

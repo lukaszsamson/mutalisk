@@ -633,6 +633,21 @@ defmodule Mut.EnvWalker do
   # `&function/arity` capture — body of capture stays in normal context.
   defp descend({:&, _meta, args}, state), do: descend_args(args, state)
 
+  # M50 struct exclusion: `%S{...}` is NEVER emptied. In a body-eligible
+  # position, descend the alias and the field pairs directly so the inner
+  # `%{}` never reaches `classify_call(:%{}, …)` (which would emit a map
+  # candidate). This matches the generic path's descent for candidates —
+  # field pairs are 2-tuple leaves either way. In non-eligible positions
+  # the map candidate is never emitted anyway, so they fall through.
+  defp descend(
+         {:%, _meta, [aliasexpr, {:%{}, _m, pairs}]},
+         %{scope: :function_body, context: nil, trust_level: :trusted} = state
+       )
+       when is_list(pairs) do
+    state = walk(aliasexpr, state)
+    descend_args(pairs, state)
+  end
+
   # Generic call node.
   defp descend({name, meta, args}, state) when is_atom(name) and is_list(args) do
     classify_call(name, meta, args, state)
@@ -801,6 +816,22 @@ defmodule Mut.EnvWalker do
 
   ## --- call classification -----------------------------------------------
 
+  # M50: bare map / n-tuple literals are unwrapped AST nodes (the
+  # literal_encoder does not wrap them). Emit a CollectionEmpty candidate
+  # (when body-eligible), then descend exactly as `classify_user_call`
+  # would for that scope — so existing inner candidates are unchanged.
+  defp classify_call(:%{}, meta, pairs, state) do
+    state
+    |> maybe_emit_map_candidate(meta, pairs)
+    |> then(&classify_user_call(:%{}, meta, pairs, &1))
+  end
+
+  defp classify_call(:{}, meta, elems, state) do
+    state
+    |> maybe_emit_ntuple_candidate(meta, elems)
+    |> then(&classify_user_call(:{}, meta, elems, &1))
+  end
+
   defp classify_call(name, meta, args, state) do
     cond do
       OpaquePolicy.known_special_form?(name) ->
@@ -812,6 +843,35 @@ defmodule Mut.EnvWalker do
       true ->
         classify_user_call(name, meta, args, state)
     end
+  end
+
+  # `%{...} → %{}`: skip empty maps and map-update (`%{m | …}`) forms.
+  defp maybe_emit_map_candidate(state, meta, pairs) do
+    cond do
+      :collection not in state.literal_kinds -> state
+      pairs == [] -> state
+      map_update?(pairs) -> state
+      not body_eligible?(state) -> state
+      true -> add_collection_candidate(state, {:%{}, meta, pairs}, meta, :__map_literal__)
+    end
+  end
+
+  # `{a, b, c} → {}`: only arity >= 3 (2-tuples ship via the wrapped path).
+  defp maybe_emit_ntuple_candidate(state, meta, elems) do
+    cond do
+      :collection not in state.literal_kinds -> state
+      length(elems) < 3 -> state
+      not body_eligible?(state) -> state
+      true -> add_collection_candidate(state, {:{}, meta, elems}, meta, :__ntuple_literal__)
+    end
+  end
+
+  defp map_update?([{:|, _meta, _args} | _rest]), do: true
+  defp map_update?(_pairs), do: false
+
+  defp add_collection_candidate(state, node, meta, syntactic_name) do
+    candidate = build_collection_candidate(state, node, meta, syntactic_name)
+    %{state | candidates: [{candidate, state_snapshot(state)} | state.candidates]}
   end
 
   defp classify_kernel_control_flow(name, meta, args, state) do

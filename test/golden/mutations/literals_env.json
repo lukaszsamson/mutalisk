@@ -96,5 +96,23 @@
     "kind": "collection_empty",
     "line": 25,
     "mutator": "CollectionEmpty"
+  },
+  {
+    "collection": "map",
+    "column": 21,
+    "description": "empty map literal",
+    "file": "test/fixtures/literals_sample.ex",
+    "kind": "collection_empty",
+    "line": 27,
+    "mutator": "CollectionEmpty"
+  },
+  {
+    "collection": "tuple",
+    "column": 19,
+    "description": "empty tuple literal",
+    "file": "test/fixtures/literals_sample.ex",
+    "kind": "collection_empty",
+    "line": 29,
+    "mutator": "CollectionEmpty"
   }
 ]

@@ -5,6 +5,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.16 unreleased
 
+### M50 — CollectionEmpty maps + n-tuples (2026-05-23)
+
+Closes M45's deferred collection shapes. CollectionEmpty (opt-in) now
+also empties bare maps and n-tuples:
+
+- `%{...} → %{}` (non-empty; **struct maps `%S{}` and map-update `%{m | …}`
+  forms are never emptied**) and `{a, b, c} → {}` (arity ≥ 3; 2-tuples
+  shipped in M45 via the wrapped path).
+- These are unwrapped AST nodes (`{:%{}, …}` / `{:{}, …}`), detected by a
+  dedicated `Mut.EnvWalker` pass that intercepts them in `classify_call`
+  (preserving the existing scope-dependent descent) and excludes struct
+  inner maps via a body-eligible `{:%, …}` descend clause.
+- Struct exclusion proven by unit test + golden (`%Coord{}` /
+  `%MyStruct{}` literals produce no candidate).
+
+Acceptance verified: zero stable-id churn for existing mutants
+(plug_crypto +7 map/n-tuple, every prior ID preserved); per-mutator
+invalid rate 0% on plug_crypto (20 mutants) and Decimal (39); default
+plan still excludes CollectionEmpty (stays opt-in per M46). lint, unit
+(353), golden, e2e_mut all green.
+
 ### M49 — StringLiteral table trim (2026-05-23)
 
 Remove the equivalent-heavy prepend-space row (`s → " " <> s`) from
