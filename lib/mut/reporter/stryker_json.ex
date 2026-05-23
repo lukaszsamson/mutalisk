@@ -173,11 +173,27 @@ defmodule Mut.Reporter.StrykerJson do
     mutated_source
   end
 
-  defp replacement(%Mutant{mutated_ast: ast}) do
+  defp replacement(%Mutant{mutated_ast: ast}), do: render_ast(ast)
+
+  # M47: rendering one mutant's diff must never abort the whole report.
+  # `Code.format_string!/1` re-parses `Macro.to_string/1`'s output, which
+  # raises (e.g. TokenMissingError) for fragments that are not standalone-
+  # parseable — heredoc-delimited literals (`delimiter: ~s(""")`) are the
+  # known trigger. Degrade: fall back to the unformatted render, then to a
+  # marker, rather than crashing after a full run.
+  defp render_ast(ast) do
     ast
     |> Macro.to_string()
     |> Code.format_string!()
     |> IO.iodata_to_binary()
+  rescue
+    _ -> unformatted_ast(ast)
+  end
+
+  defp unformatted_ast(ast) do
+    Macro.to_string(ast)
+  rescue
+    exception -> "<replacement unavailable: #{inspect(exception.__struct__)}>"
   end
 
   defp location(%Mutant{span: {start_line, start_column, end_line, end_column}}) do

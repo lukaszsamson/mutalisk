@@ -32,6 +32,28 @@ defmodule Mut.Reporter.StrykerJsonTest do
     assert rendered["mutalisk"]["selection"]["mode"] == "coverage_with_static_fallback"
   end
 
+  test "M47: a heredoc-delimited mutant diff degrades instead of aborting the report" do
+    # `Macro.to_string/1` renders this as a heredoc fragment that
+    # `Code.format_string!/1` cannot re-parse (TokenMissingError) — the
+    # M46 plug-run crash. The report must still render.
+    trap_ast = {:__block__, [delimiter: ~s["""], line: 1, column: 1], ["some text\n"]}
+
+    {snapshot, plan} = fixture_snapshot_and_plan([:survived])
+    [mutant] = plan.schema
+    mutant = %{mutant | mutated_ast: trap_ast}
+    plan = %{plan | schema: [mutant]}
+    snapshot = %{snapshot | ledger: [%{entry(mutant) | mutant: mutant}]}
+
+    rendered = StrykerJson.render(snapshot, plan, source_loader(), [])
+    decoded = rendered |> Mut.JSON.encode!() |> Mut.JSON.decode!()
+
+    [result] = decoded["files"]["lib/a.ex"]["mutants"]
+    assert is_binary(result["replacement"])
+    # Degraded to the unformatted render (still informative), not crashed.
+    assert result["replacement"] =~ "some text"
+    assert :ok = StrykerJson.validate(rendered)
+  end
+
   test "validate accepts known good shape and rejects missing fields" do
     {snapshot, plan} = fixture_snapshot_and_plan([:killed])
     rendered = StrykerJson.render(snapshot, plan, source_loader(), [])

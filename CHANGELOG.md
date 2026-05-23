@@ -3,6 +3,27 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.16 unreleased
+
+### M47 — Literal-reporting robustness (2026-05-23)
+
+Fix the M46-surfaced crash: `Mut.Reporter.StrykerJson` rendered each
+mutant's `replacement` via `Macro.to_string |> Code.format_string!`, and
+`Code.format_string!/1` raised `TokenMissingError` re-parsing fragments
+that aren't standalone-parseable (heredoc-delimited literals are the
+trigger). One un-renderable mutant aborted the entire JSON write — on the
+plug v1.19.1 literal run, all 1,390 results were lost at the reporting
+step.
+
+- `replacement/1` now degrades: format failure → unformatted
+  `Macro.to_string` (still an informative diff); render failure →
+  `<replacement unavailable: …>` marker. A single bad mutant can no
+  longer abort the report.
+- The terminal reporter renders only `location` / `mutator_name` /
+  `description` (precomputed strings) — no AST-render path, so no guard
+  is applicable there.
+- Regression test: a heredoc-delimited mutant renders without raising.
+
 ## v1.15 unreleased
 
 ### M46 — Literal execution validation + span fix + default decisions (2026-05-23)
