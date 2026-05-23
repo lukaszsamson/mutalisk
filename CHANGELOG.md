@@ -5,6 +5,36 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.15 unreleased
 
+### M45 — Higher-noise literals: Atom + Collection (2026-05-23)
+
+Two env-walker literal mutators with the highest equivalent/invalid
+risk in the release. Both fallback-routed and opt-in (`--enable
+env_walker`); the default pipeline is unaffected.
+
+- `Mut.Mutator.AtomLiteral` — body-context atoms from a **closed
+  allowlist** (`:ok↔:error`; `:lt/:gt/:eq → the other two`). Never
+  synthesizes a new atom; `true`/`false`/`nil` excluded (owned by
+  BooleanLiteral / NilLiteral). Policy documented in the mutator
+  moduledoc.
+- `Mut.Mutator.CollectionEmpty` — non-empty list `[...] → []` and
+  2-tuple `{a, b} → {}`. Detection rides the parser's `literal_encoder`,
+  which wraps genuine `[...]`/`{a,b}` literals but leaves structural
+  keyword-list args and `do:` blocks unwrapped — so options/blocks are
+  never mutated.
+- **Maps (`%{...}`) and n-tuples (`{a,b,c}`) are deferred to v1.16**:
+  they are unwrapped AST nodes needing a separate walk pass plus
+  struct-map exclusion, cleaner to build alongside the EnvWalker
+  consolidation (M43, also v1.16).
+- `EnvWalker.collect_literal_candidates/2` now also surfaces atom and
+  list/2-tuple candidates; collections use a `:closing`-based span.
+- Golden `literals_env.json` extended with atom/list/tuple cases.
+
+Byte-identity: with the new mutators disabled the plan is byte-identical
+to M44 on plug_crypto and Decimal (default and env flags); enabling them
+is purely additive (Decimal +106: AtomLiteral 70, CollectionEmpty 36,
+all 844 prior env IDs preserved). Invalid/equivalent rates are M46's to
+measure.
+
 ### M44 — Low-noise literal expansion: Float + Nil + StringLiteral table (2026-05-23)
 
 Two new env-walker literal mutators plus a richer StringLiteral table.

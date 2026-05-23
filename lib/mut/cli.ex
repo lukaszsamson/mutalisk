@@ -57,6 +57,8 @@ defmodule Mut.Cli do
     "string_literal",
     "float_literal",
     "nil_literal",
+    "atom_literal",
+    "collection_empty",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -406,6 +408,8 @@ defmodule Mut.Cli do
       "string_literal" => Mut.Mutator.StringLiteral,
       "float_literal" => Mut.Mutator.FloatLiteral,
       "nil_literal" => Mut.Mutator.NilLiteral,
+      "atom_literal" => Mut.Mutator.AtomLiteral,
+      "collection_empty" => Mut.Mutator.CollectionEmpty,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
     }
   end

@@ -17,7 +17,9 @@ defmodule Mut.Mutator.Defaults do
       Mut.Mutator.BooleanLiteral,
       Mut.Mutator.StringLiteral,
       Mut.Mutator.FloatLiteral,
-      Mut.Mutator.NilLiteral
+      Mut.Mutator.NilLiteral,
+      Mut.Mutator.AtomLiteral,
+      Mut.Mutator.CollectionEmpty
     ]
   end
 

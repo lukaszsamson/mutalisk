@@ -39,7 +39,9 @@ defmodule Mut.Mutator.GoldenMutationsTest do
   @env_literal_mutators [
     Mut.Mutator.StringLiteral,
     Mut.Mutator.FloatLiteral,
-    Mut.Mutator.NilLiteral
+    Mut.Mutator.NilLiteral,
+    Mut.Mutator.AtomLiteral,
+    Mut.Mutator.CollectionEmpty
   ]
 
   test "env-walker literal mutation list matches golden" do
@@ -250,11 +252,13 @@ defmodule Mut.Mutator.GoldenMutationsTest do
       "column" => candidate.column,
       "mutator" => mutator.name(),
       "kind" => Atom.to_string(mutation.mutation_kind),
-      "description" => mutation.description,
-      "from" => inspect(mutation.metadata.from),
-      "to" => inspect(mutation.metadata.to)
+      "description" => mutation.description
     }
+    |> Map.merge(env_metadata(mutation.metadata))
   end
+
+  defp env_metadata(%{from: from, to: to}), do: %{"from" => inspect(from), "to" => inspect(to)}
+  defp env_metadata(%{collection: kind}), do: %{"collection" => Atom.to_string(kind)}
 
   defp sort_key(entry) do
     {entry["file"], entry["line"], entry["column"] || 0, entry["mutator"], entry["kind"],

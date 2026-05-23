@@ -88,5 +88,33 @@
     "line": 19,
     "mutator": "NilLiteral",
     "to": ":__mut_nil__"
+  },
+  {
+    "column": 19,
+    "description": "replace atom literal :ok with :error",
+    "file": "test/fixtures/literals_sample.ex",
+    "from": ":ok",
+    "kind": "atom_literal",
+    "line": 21,
+    "mutator": "AtomLiteral",
+    "to": ":error"
+  },
+  {
+    "collection": "tuple",
+    "column": 19,
+    "description": "empty tuple literal",
+    "file": "test/fixtures/literals_sample.ex",
+    "kind": "collection_empty",
+    "line": 23,
+    "mutator": "CollectionEmpty"
+  },
+  {
+    "collection": "list",
+    "column": 18,
+    "description": "empty list literal",
+    "file": "test/fixtures/literals_sample.ex",
+    "kind": "collection_empty",
+    "line": 25,
+    "mutator": "CollectionEmpty"
   }
 ]

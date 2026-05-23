@@ -1,5 +1,22 @@
 # Mutalisk Benchmarks
 
+## v1.15 higher-noise literals: atom + collection (M45, 2026-05-23)
+
+Added `AtomLiteral` (closed allowlist) and `CollectionEmpty` (list +
+2-tuple; maps / n-tuples deferred to v1.16). Both opt-in.
+
+Byte-identity: with atom/collection disabled, the plan is byte-identical
+to M44 on plug_crypto (173 default / 194 env) and Decimal (780 / 844) —
+the new candidates become skips, not mutants. Enabling them is purely
+additive:
+
+| Target | env (no atom/coll) | + atom/coll | new mutants |
+|---|---:|---:|---|
+| Decimal | 844 | 950 | +106 (AtomLiteral 70, CollectionEmpty 36) |
+
+All 844 prior env stable IDs preserved. Invalid/equivalent rates are
+deferred to M46's execution-level validation.
+
 ## v1.15 low-noise literals (M44, 2026-05-23)
 
 Added `FloatLiteral`, `NilLiteral`, and the `StringLiteral` expand_table

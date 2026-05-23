@@ -67,7 +67,7 @@ See [BENCHMARKS.md](BENCHMARKS.md) for the v1 real-project smoke run. The refere
 
 ## Limitations
 
-Mutalisk does not mutate DSL-emitted code, user macro bodies, patterns, or generated code. Test selection is static by default with coverage-based selection available opt-in (`--selection coverage` / `coverage_with_static_fallback`). Mutants run in parallel (`--concurrency N`, default `min(schedulers_online, 4)`). Body-context literal mutators (integer, boolean, string, float, nil) are available opt-in via `--enable`. Incremental history and wrapper-schemata are candidates for later versions.
+Mutalisk does not mutate DSL-emitted code, user macro bodies, patterns, or generated code. Test selection is static by default with coverage-based selection available opt-in (`--selection coverage` / `coverage_with_static_fallback`). Mutants run in parallel (`--concurrency N`, default `min(schedulers_online, 4)`). Body-context literal mutators (integer, boolean, string, float, nil, allowlisted atoms, and list/2-tuple emptying) are available opt-in via `--enable`. Incremental history and wrapper-schemata are candidates for later versions.
 
 Mutation runs use a single worker model (a fresh `mix test` per mutant). The opt-in persistent worker was removed in v1.15; `--worker-type mix` is accepted as a deprecated no-op and `--worker-type persistent` is rejected.
 

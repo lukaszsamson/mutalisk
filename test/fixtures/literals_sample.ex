@@ -17,4 +17,10 @@ defmodule LiteralsSample do
   def already_x, do: "x"
 
   def nothing, do: nil
+
+  def status, do: :ok
+
+  def coords, do: {1, 2}
+
+  def items, do: [1, 2, 3]
 end

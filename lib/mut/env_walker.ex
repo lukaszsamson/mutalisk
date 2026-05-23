@@ -189,7 +189,7 @@ defmodule Mut.EnvWalker do
       trust_level: :trusted,
       snapshots: [],
       candidates: [],
-      literal_kinds: [:string, :float, :nil_lit]
+      literal_kinds: [:string, :float, :nil_lit, :atom, :collection]
     }
 
     state = walk(ast, initial_state)
@@ -238,16 +238,22 @@ defmodule Mut.EnvWalker do
   defp maybe_emit_literal_snapshot(state, {:__block__, meta, [value]} = node)
        when is_list(meta) do
     cond do
-      not literal_value?(value) ->
-        state
-
-      generated?(meta, state.file) ->
+      literal_value?(value) and generated?(meta, state.file) ->
         emit_snapshot(state, meta, :generated)
 
-      true ->
+      literal_value?(value) ->
         state
         |> emit_snapshot(meta, state.trust_level)
         |> maybe_emit_literal_candidate(node, value, meta)
+
+      # M45: list / 2-tuple literals are wrapped by the literal_encoder
+      # (structural keyword-list args and do-blocks are NOT), so a
+      # wrapped collection value is always a genuine source literal.
+      collection_literal?(value) and not generated?(meta, state.file) ->
+        maybe_emit_collection_candidate(state, node, value, meta)
+
+      true ->
+        state
     end
   end
 
@@ -277,11 +283,55 @@ defmodule Mut.EnvWalker do
 
   defp literal_candidate_name(value, kinds) do
     cond do
-      is_binary(value) and value != "" and :string in kinds -> :__string_literal__
+      string_candidate?(value, kinds) -> :__string_literal__
       is_float(value) and :float in kinds -> :__float_literal__
       is_nil(value) and :nil_lit in kinds -> :__nil_literal__
+      atom_candidate?(value, kinds) -> :__atom_literal__
       true -> nil
     end
+  end
+
+  defp string_candidate?(value, kinds), do: is_binary(value) and value != "" and :string in kinds
+
+  defp atom_candidate?(value, kinds),
+    do: is_atom(value) and value not in [true, false, nil] and :atom in kinds
+
+  # M45 collection candidates. List / 2-tuple literals do not produce a
+  # snapshot (only scalars do, to keep `collect_literal_snapshots/2`
+  # unchanged); eligibility is read directly from state, which matches
+  # `EnvSnapshot.body_literal_eligible?/1` on a state-derived snapshot.
+  defp maybe_emit_collection_candidate(state, node, value, meta) do
+    cond do
+      :collection not in state.literal_kinds ->
+        state
+
+      not body_eligible?(state) ->
+        state
+
+      true ->
+        name = if is_list(value), do: :__list_literal__, else: :__tuple_literal__
+        candidate = build_collection_candidate(state, node, meta, name)
+        %{state | candidates: [{candidate, state_snapshot(state)} | state.candidates]}
+    end
+  end
+
+  defp collection_literal?(value) when is_list(value), do: value != []
+  defp collection_literal?(value) when is_tuple(value) and tuple_size(value) == 2, do: true
+  defp collection_literal?(_), do: false
+
+  defp body_eligible?(state) do
+    state.scope == :function_body and state.context == nil and state.trust_level == :trusted
+  end
+
+  defp state_snapshot(state) do
+    %EnvSnapshot{
+      file: state.file,
+      module: state.module,
+      function: state.function,
+      context: state.context,
+      scope: state.scope,
+      trust_level: state.trust_level
+    }
   end
 
   defp build_literal_candidate(state, node, meta, snap, syntactic_name) do
@@ -309,6 +359,51 @@ defmodule Mut.EnvWalker do
 
     if is_integer(line) and is_integer(column) do
       {end_line, end_column} = literal_end(meta, line, column)
+
+      %SourceSpan{
+        file: state.file,
+        start_line: line,
+        start_column: column,
+        end_line: end_line,
+        end_column: end_column,
+        start_byte: byte_offset(state, line, column),
+        end_byte: byte_offset(state, end_line, end_column)
+      }
+    end
+  end
+
+  defp build_collection_candidate(state, node, meta, syntactic_name) do
+    %AstCandidate{
+      file: state.file,
+      line: Keyword.get(meta, :line),
+      column: Keyword.get(meta, :column),
+      syntactic_name: syntactic_name,
+      syntactic_arity: 0,
+      source_span: collection_span(state, meta),
+      env_context: nil,
+      enclosing_module: state.module,
+      ast_path: state.ast_path,
+      ast_path_hash: path_hash(state.ast_path),
+      node: node
+    }
+  end
+
+  # Collections close with a bracket/brace whose position the parser
+  # records under `:closing` — the precise span end. The fallback patch
+  # splices this byte range, so it must cover the whole literal.
+  defp collection_span(state, meta) do
+    line = Keyword.get(meta, :line)
+    column = Keyword.get(meta, :column)
+
+    if is_integer(line) and is_integer(column) do
+      {end_line, end_column} =
+        case Keyword.get(meta, :closing) do
+          closing when is_list(closing) ->
+            {Keyword.get(closing, :line, line), Keyword.get(closing, :column, column) + 1}
+
+          _ ->
+            {line, column + 1}
+        end
 
       %SourceSpan{
         file: state.file,

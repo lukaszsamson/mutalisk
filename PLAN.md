@@ -2564,6 +2564,18 @@ decisions (M46). Schema routing.
 
 **M45 — Higher-noise literals: Atom + Collection. ⚠️ release valve, gated.**
 
+> **Status: shipped 2026-05-23, with a scope trim.** `AtomLiteral`
+> (closed allowlist) and `CollectionEmpty` for **lists and 2-tuples**
+> landed. **Maps (`%{...}`) and n-tuples (`{a,b,c}`) are deferred to
+> v1.16**: list/2-tuple literals are wrapped by the parser's
+> `literal_encoder` (so they are cleanly distinguished from structural
+> keyword-list args / `do:` blocks), but maps and n-tuples are unwrapped
+> AST nodes (`{:%{}, ...}` / `{:{}, ...}`) that need a separate walk pass
+> plus struct-map exclusion — cleaner to build alongside the EnvWalker
+> consolidation (M43, also v1.16). Byte-identity held on plug_crypto and
+> Decimal; new mutators exercised on Decimal (+106). M44 surfaced no
+> invalid class, so the gate did not force a full deferral.
+
 *Goal:* Add the two highest-noise literals in the v1.15 set,
 each gated on a designed policy and on M44's invalid-rate signal.
 
