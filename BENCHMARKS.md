@@ -1,5 +1,70 @@
 # Mutalisk Benchmarks
 
+## v1.15 literal execution validation + span fix (M46, 2026-05-23)
+
+First **execution-level** validation of the env-walker literal mutators
+(M40/M44/M45 were plan-level only). `mix` worker, `--concurrency 4`,
+`--enable dispatch,guard,module_attribute,body_literal,env_walker` with
+all literal mutators on.
+
+### The span-correctness fix (and its intentional churn)
+
+Execution surfaced that the env-walker **scalar** literal span covered
+~1 character, not the whole literal (the parser's `literal_encoder` drops
+`:token` for strings/atoms; the walker fell back to a 1-char span). So
+StringLiteral mutated to invalid source (100% CompileError) and
+Atom/Nil mutated to garbage-but-compiling values (`:ok→:errorok`). M41
+only checked stable-ID *distinctness*, never execution, so it was latent.
+
+`Mut.EnvWalker.literal_span` now scans the source for the true end
+(`:token` length for numbers; `:delimiter` scan for strings/quoted atoms;
+value length for bare atoms/`nil`). This **intentionally churns** the
+stable IDs of StringLiteral / AtomLiteral / NilLiteral — a one-time
+correctness migration; those mutators never produced a valid mutant
+before. FloatLiteral (`:token`) and CollectionEmpty (`:closing`) already
+had correct spans and did not churn; non-literal and AstWalk body-literal
+mutants are untouched (default-flag plans verified byte-identical).
+
+### Per-mutator kill / invalid (post-fix)
+
+| Mutator | demo_app | plug_crypto | Decimal | phoenix_html | plug |
+|---|---|---|---|---|---|
+| StringLiteral table | — | 85.7% k / 0 inv (21) | **26.3%** / 0 (57) | 90.9% / 0 (66) | 87.1% / 0 (351) |
+| AtomLiteral | — | 66.7% / 0 (6) | 91.4% / 0 (70) | — | 94.9% / 0 (59) |
+| CollectionEmpty | 100% / 0 (1) | 100% / 0 (13) | **69.4%** / 0 (36) | 100% / 0 (36) | 94.3% / 1.5% (196) |
+| NilLiteral | — | — | **16.7%** / 0 (6) | 100% / 0 (1) | 100% / 0 (31) |
+| FloatLiteral | — | — | 0% / 0 (1) | — | — |
+
+(`k` = kill rate; `inv` = invalid (CompileError) rate; `(n)` = mutant
+count. `—` = no body-literal of that kind in the target. Decimal — a
+fixed-point library with many non-behavioural data/error-string literals
+— is the consistent low outlier, **bold**.) plug's per-mutator counts
+were recovered from the streaming log: the Stryker JSON writer hit a
+`TokenMissingError` rendering one mutant's diff (a reporter-robustness
+bug, tracked for follow-up; orthogonal to the literal validation — all
+1390 plug mutants executed).
+
+### Decisions (docs/decisions/M46_*.md)
+
+Decision rule: a `default_on` flip affects every user, so it requires
+clearing thresholds on **every meaningful-sample target**, not just the
+count-weighted aggregate (which plug's large clean counts would dominate).
+
+| Mutator | Decision | Why |
+|---|---|---|
+| AtomLiteral | **default_on** | per-target kill 66.7 / 91.4 / 94.9 — all ≥60%; 0 invalid; clears on every target |
+| CollectionEmpty | keep_opt_in | aggregate 91.9% but Decimal alone 30.6% survivors (per-target noise) |
+| StringLiteral table | keep_opt_in | aggregate 80.5% but Decimal 26.3% kill; prepend-space row equivalent-heavy |
+| NilLiteral | keep_opt_in | aggregate 86.8% but Decimal 16.7% kill |
+| FloatLiteral | keep_opt_in | n=1, insufficient evidence |
+
+Only AtomLiteral clears `default_on` (the flip itself is bundled with
+v1.16 env-walker default-enablement), so the `--enable literal` preset is
+deferred (rule requires ≥2). Invalid is ≤1.1% across the corpus post-fix.
+env-walker parse+walk stays well under the 10% oracle-wall gate (Decimal
+plan_generation 151 ms vs oracle 3064 ms = 4.9%; plug parse+walk 34 ms,
+~1% of its multi-second oracle build).
+
 ## v1.15 higher-noise literals: atom + collection (M45, 2026-05-23)
 
 Added `AtomLiteral` (closed allowlist) and `CollectionEmpty` (list +

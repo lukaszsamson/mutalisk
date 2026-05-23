@@ -334,17 +334,20 @@ defmodule Mut.EnvWalker do
     }
   end
 
-  defp build_literal_candidate(state, node, meta, snap, syntactic_name) do
-    line = Keyword.get(meta, :line)
-    column = Keyword.get(meta, :column)
-
+  defp build_literal_candidate(
+         state,
+         {:__block__, _m, [value]} = node,
+         meta,
+         _snap,
+         syntactic_name
+       ) do
     %AstCandidate{
       file: state.file,
-      line: line,
-      column: column,
+      line: Keyword.get(meta, :line),
+      column: Keyword.get(meta, :column),
       syntactic_name: syntactic_name,
       syntactic_arity: 0,
-      source_span: literal_span(state, meta, snap),
+      source_span: literal_span(state, meta, value),
       env_context: nil,
       enclosing_module: state.module,
       ast_path: state.ast_path,
@@ -353,12 +356,21 @@ defmodule Mut.EnvWalker do
     }
   end
 
-  defp literal_span(state, meta, _snap) do
+  # M46: the span must cover the FULL literal so the fallback patch
+  # splices the right byte range. Numbers carry `:token` (length known);
+  # strings / quoted atoms carry only `:delimiter` (scan to the matching
+  # close); bare atoms / `nil` / `true` / `false` carry neither (the
+  # source length is derivable from the value). The pre-M46 code fell to
+  # a 1-char span for the delimiter/bare cases, which produced invalid
+  # (string) or garbage (atom/nil) mutations.
+  defp literal_span(state, meta, value) do
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
+    start_byte = byte_offset(state, line, column)
 
-    if is_integer(line) and is_integer(column) do
-      {end_line, end_column} = literal_end(meta, line, column)
+    if is_integer(line) and is_integer(column) and is_integer(start_byte) do
+      end_byte = literal_end_byte(state.source, start_byte, meta, value)
+      {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
 
       %SourceSpan{
         file: state.file,
@@ -366,10 +378,61 @@ defmodule Mut.EnvWalker do
         start_column: column,
         end_line: end_line,
         end_column: end_column,
-        start_byte: byte_offset(state, line, column),
-        end_byte: byte_offset(state, end_line, end_column)
+        start_byte: start_byte,
+        end_byte: end_byte
       }
     end
+  end
+
+  defp literal_end_byte(source, start_byte, meta, value) do
+    cond do
+      token = Keyword.get(meta, :token) ->
+        start_byte + byte_size(to_string(token))
+
+      delimiter = Keyword.get(meta, :delimiter) ->
+        scan_delimited_end(source, start_byte, delimiter)
+
+      is_atom(value) ->
+        # `:ok` is `:` + atom text; `nil` / `true` / `false` are the bare
+        # word. Both are derivable from the value with no escapes.
+        prefix = if value in [nil, true, false], do: 0, else: 1
+        start_byte + prefix + byte_size(Atom.to_string(value))
+
+      true ->
+        start_byte + 1
+    end
+  end
+
+  defp scan_delimited_end(source, start_byte, delimiter) do
+    dsize = byte_size(delimiter)
+    scan_delimiter_close(source, start_byte + dsize, delimiter, dsize)
+  end
+
+  defp scan_delimiter_close(source, pos, delimiter, dsize) do
+    cond do
+      pos + dsize > byte_size(source) ->
+        byte_size(source)
+
+      binary_part(source, pos, dsize) == delimiter ->
+        pos + dsize
+
+      binary_part(source, pos, 1) == "\\" ->
+        scan_delimiter_close(source, pos + 2, delimiter, dsize)
+
+      true ->
+        scan_delimiter_close(source, pos + 1, delimiter, dsize)
+    end
+  end
+
+  defp byte_to_line_col(line_offsets, byte) do
+    line_index =
+      line_offsets
+      |> Enum.take_while(&(&1 <= byte))
+      |> length()
+      |> max(1)
+
+    offset = Enum.at(line_offsets, line_index - 1, 0)
+    {line_index, byte - offset + 1}
   end
 
   defp build_collection_candidate(state, node, meta, syntactic_name) do
@@ -414,25 +477,6 @@ defmodule Mut.EnvWalker do
         start_byte: byte_offset(state, line, column),
         end_byte: byte_offset(state, end_line, end_column)
       }
-    end
-  end
-
-  # `:token` (raw source text) is the cleanest end indicator, but
-  # the literal_encoder option does not propagate `:token` for
-  # string / atom literals. Fall back to `:end_of_expression` (the
-  # newline-trailing marker the parser emits with token_metadata)
-  # so different physical sites produce distinct byte spans even
-  # when the source value is the same.
-  defp literal_end(meta, line, column) do
-    cond do
-      token = Keyword.get(meta, :token) ->
-        if is_binary(token), do: {line, column + String.length(token)}, else: {line, column + 1}
-
-      end_of_expr = Keyword.get(meta, :end_of_expression) ->
-        {Keyword.get(end_of_expr, :line, line), Keyword.get(end_of_expr, :column, column + 1)}
-
-      true ->
-        {line, column + 1}
     end
   end
 

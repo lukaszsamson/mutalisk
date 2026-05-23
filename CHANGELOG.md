@@ -5,6 +5,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.15 unreleased
 
+### M46 — Literal execution validation + span fix + default decisions (2026-05-23)
+
+First execution-level (not plan-level) validation of the env-walker
+literal mutators across the corpus, and the resulting default-policy
+decisions.
+
+- **Span-correctness fix (`Mut.EnvWalker.literal_span`).** Execution
+  revealed the scalar literal span covered ~1 char, not the whole
+  literal — StringLiteral mutated to invalid source (100% CompileError),
+  Atom/Nil to garbage values. The walker now scans the source for the
+  true end. **This intentionally churns StringLiteral / AtomLiteral /
+  NilLiteral stable IDs** — a one-time correctness migration (those
+  mutators never produced a valid mutant before). FloatLiteral and
+  CollectionEmpty were already correct and did not churn; non-literal
+  and AstWalk body-literal mutants are unchanged (default-flag plans
+  verified byte-identical).
+- **Decisions** (`docs/decisions/M46_*.md`): AtomLiteral → `default_on`
+  (66.7–91.4% kill, 0 invalid); StringLiteral table / CollectionEmpty /
+  NilLiteral / FloatLiteral → `keep_opt_in`. Only one literal clears
+  default-on, so the `--enable literal` preset is deferred. The
+  default-on flip itself is bundled with v1.16 env-walker
+  default-enablement.
+- Invalid rate is 0% across the corpus post-fix; env-walker parse+walk
+  stays under the 10% oracle-wall gate (Decimal 4.9%).
+- BENCHMARKS gains the per-mutator × per-target execution matrix.
+
 ### M45 — Higher-noise literals: Atom + Collection (2026-05-23)
 
 Two env-walker literal mutators with the highest equivalent/invalid
