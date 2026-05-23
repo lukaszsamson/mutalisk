@@ -64,6 +64,20 @@ defmodule Mut.Cli do
     "body_literal"
   ]
 
+  # M48 tier model. With neither --enable nor --mutators, the default plan
+  # runs the v1 dispatch+guard mutators PLUS AtomLiteral (M46 default_on
+  # decision): the env walker runs by default but only AtomLiteral is
+  # active. String/Float/Nil/Collection stay opt-in. Any explicit --enable
+  # or --mutators selects from the full set with v1.15 gating semantics.
+  # @default_on_mutators mirrors `Mut.Mutator.Defaults.default_on/0` as CLI
+  # names (a test asserts they resolve to the same modules).
+  @default_on_mutators ~w(
+    arithmetic comparison_boundary comparison_negation boolean unary_not
+    guard_comparison_boundary guard_comparison_negation guard_type_test
+    atom_literal
+  )
+  @default_enabled_targets [:dispatch, :guard, :env_walker]
+
   @spec parse([String.t()], keyword) :: {:ok, Options.t()} | {:error, String.t()}
   def parse(argv, config \\ []) when is_list(argv) and is_list(config) do
     case parse_argv(argv) do
@@ -222,22 +236,42 @@ defmodule Mut.Cli do
   end
 
   defp mutators(parsed, config) do
-    value = Keyword.get(parsed, :mutators, Keyword.get(config, :mutators))
+    explicit = Keyword.get(parsed, :mutators, Keyword.get(config, :mutators))
 
-    with {:ok, names} <- maybe_name_list(value),
-         :ok <- validate_mutators(names) do
-      {:ok, names}
+    cond do
+      not is_nil(explicit) ->
+        with {:ok, names} <- maybe_name_list(explicit),
+             :ok <- validate_mutators(names) do
+          {:ok, names}
+        end
+
+      # Explicit --enable (or config) selects from the full set with v1.15
+      # gating; nil resolves to Defaults.list/0.
+      enable_given?(parsed, config) ->
+        {:ok, nil}
+
+      # Pure default: the default-on tier (v1 dispatch+guard + AtomLiteral).
+      true ->
+        {:ok, @default_on_mutators}
     end
   end
 
   defp enabled_targets(parsed, config) do
     value =
-      Keyword.get(parsed, :enable, Keyword.get(config, :enabled_targets, [:dispatch, :guard]))
+      Keyword.get(
+        parsed,
+        :enable,
+        Keyword.get(config, :enabled_targets, @default_enabled_targets)
+      )
 
     with {:ok, targets} <- atom_list(value, &target_atom/1),
          :ok <- validate_targets(targets) do
       {:ok, targets}
     end
+  end
+
+  defp enable_given?(parsed, config) do
+    Keyword.has_key?(parsed, :enable) or Keyword.has_key?(config, :enabled_targets)
   end
 
   defp fail_at(parsed, config) do

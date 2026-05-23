@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.16 unreleased
 
+### M48 — AtomLiteral default-on + mutator default-tier flag model (2026-05-23)
+
+Makes AtomLiteral default-on (M46 decision) **without** leaking the other
+env-walker literals into the default plan. The change is additive:
+existing stable IDs are unchanged; AtomLiteral mutants are added.
+
+- **Tier model** (`Mut.Mutator.Defaults`): `default_on/0` (v1
+  dispatch+guard mutators + AtomLiteral) / `opt_in/0` (module-attribute,
+  body-literal, and the String/Float/Nil/Collection env literals) /
+  `list/0` (full set, used for registry registration). Presets remain
+  deferred (only one literal is default-on).
+- **CLI**: with neither `--enable` nor `--mutators`, the default plan now
+  runs the default-on tier and the env-walker source (so AtomLiteral
+  runs, but only AtomLiteral among the env literals). Any explicit
+  `--enable`/`--mutators` selects from the full set with v1.15 gating —
+  so `--enable …,env_walker` still activates all five env literals.
+- Default `enabled_targets` is now `[:dispatch, :guard, :env_walker]`.
+- Verified byte-identity: the default plan's non-env-walker stable IDs
+  are identical to v1.15 on demo_app, plug_crypto, Decimal, and plug; the
+  default adds exactly the AtomLiteral mutants (plug_crypto +6, Decimal
+  +70, plug +59, demo_app +0) and zero String/Float/Nil/Collection.
+
 ### M47 — Literal-reporting robustness (2026-05-23)
 
 Fix the M46-surfaced crash: `Mut.Reporter.StrykerJson` rendered each

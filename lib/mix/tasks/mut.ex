@@ -9,8 +9,12 @@ defmodule Mix.Tasks.Mut do
     --mutators NAMES         Comma-separated mutator name list
     --enable TARGETS         Comma-separated enabled targets:
                               dispatch (default), guard (default),
-                              module_attribute (opt-in),
-                              body_literal (opt-in)
+                              env_walker (default: only AtomLiteral
+                              active; pass it explicitly to run all
+                              env-walker literals), module_attribute
+                              (opt-in), body_literal (opt-in).
+                              Passing --enable selects the full mutator
+                              set gated by the listed targets.
     --fail-at SCORE          Mutation score threshold; exit 1 below
                               (default: 80)
     --reporters NAMES        Comma-separated: terminal, stryker-json

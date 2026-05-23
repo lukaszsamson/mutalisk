@@ -4,13 +4,23 @@ defmodule Mut.CliTest do
   alias Mix.Tasks.Mut, as: MutTask
   alias Mut.Cli
   alias Mut.Cli.Options
+  alias Mut.Mutator
 
   test "defaults come from config with built-in fallbacks" do
     assert {:ok, %Options{} = opts} = Cli.parse([], [])
 
     assert opts.files == ["lib"]
-    assert opts.mutators == nil
-    assert opts.enabled_targets == [:dispatch, :guard]
+    # M48: pure-default tier — dispatch+guard mutators + AtomLiteral, env
+    # walker source on so AtomLiteral runs, but only AtomLiteral among the
+    # env-walker literals.
+    assert opts.enabled_targets == [:dispatch, :guard, :env_walker]
+    assert "atom_literal" in opts.mutators
+
+    refute Enum.any?(
+             opts.mutators,
+             &(&1 in ~w(string_literal float_literal nil_literal collection_empty))
+           )
+
     assert opts.fail_at == 80.0
     assert opts.reporters == [:terminal, :stryker_json]
     assert opts.output_path == "stryker.report.json"
@@ -19,6 +29,34 @@ defmodule Mut.CliTest do
     assert opts.debug_plan == false
     assert opts.selection == :static
     assert opts.test_paths == ["test"]
+  end
+
+  test "M48: default-on tier resolves to v1 dispatch+guard mutators + AtomLiteral" do
+    {:ok, opts} = Cli.parse([], [])
+    resolved = Cli.resolve_mutators(opts.mutators)
+
+    assert resolved == Mutator.Defaults.default_on()
+    assert Mutator.AtomLiteral in resolved
+    refute Mutator.StringLiteral in resolved
+  end
+
+  test "M48: explicit --enable env_walker activates the full env-walker set (v1.15 compat)" do
+    {:ok, opts} =
+      Cli.parse(["--enable", "dispatch,guard,module_attribute,body_literal,env_walker"])
+
+    # nil mutators => full set via resolve_mutators/1
+    assert opts.mutators == nil
+    resolved = Cli.resolve_mutators(opts.mutators)
+
+    assert Enum.all?(
+             [
+               Mutator.StringLiteral,
+               Mutator.FloatLiteral,
+               Mutator.NilLiteral,
+               Mutator.CollectionEmpty
+             ],
+             &(&1 in resolved)
+           )
   end
 
   test "CLI flags override config" do
