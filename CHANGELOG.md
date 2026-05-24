@@ -5,6 +5,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.17 unreleased
 
+### M55 — broad OSS validation + combined decisions (2026-05-24)
+
+Validated the v1.17 catalogue on a representative subset of the OSS corpus
+(decimal, jason, gettext, plug — math / binary / macro-codegen / dispatch),
+pinned SHAs. Both new opt-in surfaces clear the invalid < 10% bar:
+
+- **variable invalid rate:** 0.39%–1.45% across the subset.
+- **pattern-position literals:** ~0% invalid.
+
+**Decisions** (`docs/decisions/M55_corpus_validation.md`):
+- **pattern-position literals + variable mutators: keep_opt_in.** Variable
+  mutation errors (not false-negatives) heavily in codegen modules (gettext
+  27%, plug 6%); kill rates swing 49–88%. No new default-on flips beyond M46.
+- **schema-routing (M52): confirmed.** One ~2.6 s schema build is shared by all
+  schema mutants vs the fallback engine's per-mutant recompile (~0.4–2.1 s);
+  the literal bucket now rides ~free on the dispatch build.
+
+The matrix surfaced and fixed a real defect (commit `da89799`): bitstring type
+specifiers were mis-collected as variables, cutting jason's variable invalid
+rate from 19% → 1.25%. BENCHMARKS v1.17 section added.
+
+*Subset note:* the full 10-target matrix (adds ecto, credo, req, timex, makeup,
+oban — not yet wired in `bench/run.sh`, several need baseline prep) is
+follow-up; the four executed targets cover the shapes the decisions hinge on.
+
 ### M54 — variable mutators + walker binding-scope tracking (2026-05-24)
 
 New opt-in `:variable` target with `Mut.Mutator.VariableReplace`: replace an

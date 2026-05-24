@@ -1,5 +1,36 @@
 # Mutalisk Benchmarks
 
+## v1.17 literals-first-class + v2 surface (M52–M55, 2026-05-24)
+
+### M55 — new opt-in surfaces on the OSS subset
+
+`--enable pattern_literal,variable` with the new mutators, pinned SHAs
+(`bench/run.sh`). The acceptance bar is **invalid < 10%**.
+
+| Target | shape | total | killed | kill% | **variable invalid** | pattern-lit | errors |
+|---|---|---:|---:|---:|---:|---:|---:|
+| decimal | math | 835 | 735 | 88.0 | **0.76%** (6/787) | 43/48 | 0 |
+| jason | JSON/binary | 2177 | 1531 | 70.3 | **1.25%** (27/2160) | clean | 8 |
+| gettext | macro/codegen | 790 | 386 | 48.9 | **0.39%** (3/769) | 11/21 | 211 |
+| plug | dispatch/web | 3444 | 2308 | 67.0 | **1.45%** (47/3242) | 158/202 | 202 |
+
+Both new surfaces clear the invalid bar. Variable mutation produces many
+**errors** (detections, not false negatives) in codegen-heavy modules
+(gettext 27%, plug 6%) — swapping a variable in a function that builds quoted
+code breaks dependent compilation. Both stay **opt-in** (see
+`docs/decisions/M55_corpus_validation.md`). A bitstring-specifier defect found
+here (`<<rest::bits>>` mis-read as a variable) cut jason's variable invalid
+rate from 19% → 1.25% (commit `da89799`).
+
+### M52 — schema vs fallback wall-clock (perf verdict)
+
+decimal default plan: a single **2.6 s** instrumented schema build is shared by
+all 366 schema mutants (then test-only runs); the fallback engine recompiles
+**once per mutant** — ~0.43 s/mutant on decimal's small modules, ~2.1 s/mutant
+on plug (7168 s / 3444). Routing the scalar-literal catalogue to schema (M52)
+removes a recompile per literal mutant; the literal bucket now rides ~free on
+the dispatch schema build. **Verdict: keep literals on schema.**
+
 ## v1.16 harvest + harden (M47–M51, 2026-05-23)
 
 ### M48 — default-plan delta (AtomLiteral default-on)

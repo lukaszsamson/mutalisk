@@ -3093,6 +3093,19 @@ projects); `bench/run.sh`; M25/M41 threshold conventions.
 *Out of scope:* Acting on default-flip decisions that need a
 follow-up migration (those scope into v1.18).
 
+*Status (2026-05-24): DELIVERED (representative subset).* Ran the new opt-in
+surfaces on decimal / jason / gettext / plug (math / binary / macro-codegen /
+dispatch). Both clear invalid < 10% (variable 0.39–1.45%; pattern ~0%).
+**Decisions:** pattern-position + variable both **keep_opt_in** (variable
+errors heavily in codegen code; no new default-on beyond AtomLiteral);
+schema-routing (M52) **confirmed** (one ~2.6s build vs per-mutant recompile
+~0.4–2.1s). Found+fixed a bitstring-specifier defect (`da89799`; jason variable
+invalid 19% → 1.25%). Zero churn holds by construction (new targets opt-in).
+Docs: `docs/decisions/M55_corpus_validation.md`, BENCHMARKS v1.17, CHANGELOG.
+*Deviation:* full 10-target matrix (adds ecto/credo/req/timex/makeup/oban — not
+wired in `bench/run.sh`, several need baseline prep) is follow-up; the four
+executed targets cover the decision-relevant shapes. `bin/verify` green.
+
 ## v1.17 horizon (not v1.17 scope)
 
 - **Schema routing for non-literal mutators** — only if M55's perf
