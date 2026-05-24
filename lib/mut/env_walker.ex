@@ -909,8 +909,14 @@ defmodule Mut.EnvWalker do
 
   defp current_bound_vars(state), do: Map.get(state, :bound_vars, MapSet.new())
 
-  # A clause head is `[patterns...]` or `[{:when, _, [pattern, guard]}]`.
-  defp clause_head_patterns([{:when, _meta, [pattern, _guard]}]), do: pattern
+  # A clause head is `[patterns...]` or `[{:when, _, [pattern..., guard]}]`.
+  # A `when` node's last element is the guard; everything before it is a
+  # binding pattern. Drop the guard so guard-referenced names (which are reads,
+  # not bindings) never reach `pattern_vars/1` — handles multi-arg `fn`/`def`
+  # clause heads, not just the single-pattern shape.
+  defp clause_head_patterns([{:when, _meta, parts}]) when is_list(parts) and parts != [],
+    do: Enum.drop(parts, -1)
+
   defp clause_head_patterns(patterns), do: patterns
 
   # Variable names bound by a pattern (or list of patterns). Pins (`^x` reads
@@ -928,6 +934,13 @@ defmodule Mut.EnvWalker do
           # AST-shaped as a variable but is NOT a binding; neutralize it so it
           # is never collected or offered as a swap target.
           {{:"::", meta, [left, :__mut_spec__]}, acc}
+
+        {:\\, meta, [param, _default]}, acc ->
+          # Default argument `param \\ expr`: only `param` binds. The default
+          # expression is NOT a binding and may contain identifiers that are
+          # not in-scope variables (`@attr` -> bare `attr`, 0-arity calls);
+          # collecting them would offer undefined-variable swap targets.
+          {{:\\, meta, [param, :__mut_default__]}, acc}
 
         {name, _meta, ctx} = node, acc when is_atom(name) and is_atom(ctx) ->
           if bindable_var?(name), do: {node, MapSet.put(acc, name)}, else: {node, acc}

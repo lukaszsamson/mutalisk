@@ -89,6 +89,36 @@ defmodule Mut.EnvWalkerVariableTest do
     assert vars(src) == [{:original, [:len]}, {:len, [:original]}]
   end
 
+  test "default-argument expressions are not collected as bindings (@attr, calls)" do
+    # `timeout \\ @default_timeout` — `default_timeout` (the attribute name
+    # stripped of `@`) must NOT become a swap target; a bare `default_timeout`
+    # in the body is an undefined variable. Only `req`/`timeout` bind.
+    src = ~S'''
+    defmodule Foo do
+      @default_timeout 5000
+      def call(req, timeout \\ @default_timeout) do
+        send(req, timeout)
+      end
+    end
+    '''
+
+    assert vars(src) == [{:req, [:timeout]}, {:timeout, [:req]}]
+  end
+
+  test "guard variables in multi-arg clause heads are not collected" do
+    src = ~S'''
+    defmodule Foo do
+      def run(a, b) do
+        f = fn x, y when x > limit -> x + y + a + b end
+        f.(a, b)
+      end
+    end
+    '''
+
+    # No `:limit` (guard ref) anywhere in the alternative sets.
+    refute Enum.any?(vars(src), fn {_name, alts} -> :limit in alts end)
+  end
+
   test "variable candidates have env_context nil (reads)" do
     src = ~S'''
     defmodule Foo do
