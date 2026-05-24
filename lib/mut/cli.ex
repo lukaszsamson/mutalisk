@@ -68,6 +68,7 @@ defmodule Mut.Cli do
     "atom_literal",
     "collection_empty",
     "variable_replace",
+    "variable_to_literal",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -454,6 +455,7 @@ defmodule Mut.Cli do
       "atom_literal" => Mut.Mutator.AtomLiteral,
       "collection_empty" => Mut.Mutator.CollectionEmpty,
       "variable_replace" => Mut.Mutator.VariableReplace,
+      "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
     }
   end

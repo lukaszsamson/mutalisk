@@ -1,6 +1,10 @@
-# M56 (DRAFT PLAN) — VariableToLiteral, the deferred M54 mutator
+# M56 — VariableToLiteral, the deferred M54 mutator
 
-**Status:** proposal for review (not implemented). Picks up the
+**Status: IMPLEMENTED (2026-05-24).** Shipped the operator-only first slice
+(`:number`/`:binary`/`:list` hints; boolean deferred), hint carried on the
+candidate/`Context`, opt-in via explicit `--mutators variable_to_literal`
+(absent from `Defaults.list/0`). `bin/verify` green. The keep/cut equivalent-
+rate measurement is the remaining open item (M55 corpus follow-up). Picks up the
 `VariableToLiteral` deferral recorded in `docs/decisions/M54_variable_mutators.md`.
 
 ## Why it was deferred

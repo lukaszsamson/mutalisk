@@ -119,6 +119,32 @@ defmodule Mut.EnvWalkerVariableTest do
     refute Enum.any?(vars(src), fn {_name, alts} -> :limit in alts end)
   end
 
+  test "type-determining operators hint their direct variable operands (M56)" do
+    src = ~S'''
+    defmodule Foo do
+      def calc(a, b), do: a + b
+      def cat(s, t), do: s <> t
+      def merge(xs, ys), do: xs ++ ys
+      def viacall(p, q), do: g(p) + q
+    end
+    '''
+
+    {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+    hints =
+      ast
+      |> EnvWalker.collect_variable_candidates(file: "lib/foo.ex", source: src)
+      |> Enum.map(fn {c, _} -> {elem(c.node, 0), c.type_hint} end)
+
+    # a/b numeric, s/t binary, xs/ys list; `g(p)` is a call (not a direct
+    # operand) so `p` is NOT hinted; `q` is a direct numeric operand.
+    assert {:a, :number} in hints
+    assert {:s, :binary} in hints
+    assert {:xs, :list} in hints
+    assert {:p, nil} in hints
+    assert {:q, :number} in hints
+  end
+
   test "variable candidates have env_context nil (reads)" do
     src = ~S'''
     defmodule Foo do

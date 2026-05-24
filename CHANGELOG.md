@@ -5,6 +5,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.17 unreleased
 
+### M56 — VariableToLiteral mutator (2026-05-24)
+
+Implements the M54-deferred `VariableToLiteral`: replaces an in-scope variable
+*read* with a boundary literal of its **syntactically-evident** type, inferred
+without macro expansion or type inference (M39 contract).
+
+- `Mut.EnvWalker` threads a one-shot `type_hint` to a variable that is a DIRECT
+  operand of a type-determining operator — `:number` (`+ - * /`), `:binary`
+  (`<>`), `:list` (`++`/`--`). The hint is **shallow**: `a + 1` hints `a`, but
+  `f(x) + 1` does NOT hint `x`. Carried on the candidate/`Context`
+  (`type_hint`), not overloaded onto `bound_vars`.
+- `Mut.Mutator.VariableToLiteral` maps `:number → 0`, `:binary → ""`,
+  `:list → []`. Fallback-routed, target `:variable`.
+- **Rollout (explicit):** absent from `Defaults.list/0`, so `--enable variable`
+  (which runs `VariableReplace`) does NOT silently gain it — reachable only via
+  `--mutators variable_to_literal`. Boolean hints (`and`/`or`) deferred (they
+  have short-circuit control-flow handling).
+
+Incorporates Codex review feedback (narrow operator-only first slice; hint on
+candidate not `bound_vars`; explicit rollout). Equivalent rate is the keep/cut
+metric; measured in the M55 corpus follow-up. Plan/rationale in
+`docs/decisions/M56_variable_to_literal_PLAN.md`.
+
 ### M55 — broad OSS validation + combined decisions (2026-05-24)
 
 Validated the v1.17 catalogue on a representative subset of the OSS corpus

@@ -97,6 +97,15 @@ defmodule Mut.EnvWalker do
   # mutable bindings/references — the reserved nullary macros.
   @reserved_vars ~w(__MODULE__ __DIR__ __ENV__ __CALLER__ __STACKTRACE__ __block__ __aliases__)a
 
+  # M56: type-determining operators whose DIRECT operands carry a syntactic
+  # type hint for the VariableToLiteral mutator. Deliberately narrow (Codex
+  # review): unambiguous arithmetic / binary-concat / list operators only.
+  # Short-circuit boolean operators (`and`/`or`) are excluded — they have
+  # control-flow handling and are deferred.
+  @number_hint_ops ~w(+ - * /)a
+  @binary_hint_ops [:<>]
+  @list_hint_ops ~w(++ --)a
+
   @doc """
   Parses source with the literal-encoder option, returning an AST
   that wraps each literal in `{:__block__, meta, [value]}` so the
@@ -956,6 +965,27 @@ defmodule Mut.EnvWalker do
     not String.starts_with?(Atom.to_string(name), "_") and name not in @reserved_vars
   end
 
+  # Walk operator operands threading a one-shot type hint, restoring the prior
+  # hint afterward so it never leaks past this operator node.
+  defp walk_operands_hinted(args, hint, state) when is_list(args) do
+    prior = Map.get(state, :type_hint)
+
+    args
+    |> Enum.reduce(state, fn operand, acc -> walk_hinted(operand, acc, hint) end)
+    |> Map.put(:type_hint, prior)
+  end
+
+  defp walk_operands_hinted(arg, hint, state), do: walk_operands_hinted([arg], hint, state)
+
+  # A direct variable operand receives the hint; anything else is descended
+  # with NO hint, so the hint never reaches a nested call's arguments.
+  defp walk_hinted({name, _meta, ctx} = operand, state, hint)
+       when is_atom(name) and is_atom(ctx) do
+    walk(operand, Map.put(state, :type_hint, hint))
+  end
+
+  defp walk_hinted(operand, state, _hint), do: walk(operand, Map.put(state, :type_hint, nil))
+
   defp maybe_emit_variable_candidate(state, node, name, meta) do
     cond do
       not Map.get(state, :emit_variables, false) -> state
@@ -967,12 +997,16 @@ defmodule Mut.EnvWalker do
     end
   end
 
-  # Only mutate reads (`context == nil`) in a trusted function body, and only
-  # when another in-scope variable exists to swap to.
+  # Only mutate reads (`context == nil`) in a trusted function body. Emit a
+  # candidate when EITHER another in-scope variable exists to swap to
+  # (VariableReplace, M54) OR a syntactic type hint is present
+  # (VariableToLiteral, M56) -- a sole-binding read with a hint still gets a
+  # boundary-literal mutant.
   defp variable_read_eligible?(state, name) do
     bindable_var?(name) and state.context == nil and state.scope == :function_body and
       state.trust_level == :trusted and
-      MapSet.size(MapSet.delete(current_bound_vars(state), name)) > 0
+      (MapSet.size(MapSet.delete(current_bound_vars(state), name)) > 0 or
+         Map.get(state, :type_hint) != nil)
   end
 
   defp emit_variable_candidate(state, node, name, meta) do
@@ -983,12 +1017,21 @@ defmodule Mut.EnvWalker do
         state
 
       span ->
-        candidate = build_variable_candidate(state, node, meta, span, alternatives)
+        candidate =
+          build_variable_candidate(
+            state,
+            node,
+            meta,
+            span,
+            alternatives,
+            Map.get(state, :type_hint)
+          )
+
         %{state | candidates: [{candidate, state_snapshot(state)} | state.candidates]}
     end
   end
 
-  defp build_variable_candidate(state, node, meta, span, alternatives) do
+  defp build_variable_candidate(state, node, meta, span, alternatives, type_hint) do
     %AstCandidate{
       file: state.file,
       line: Keyword.get(meta, :line),
@@ -1001,7 +1044,8 @@ defmodule Mut.EnvWalker do
       ast_path: state.ast_path,
       ast_path_hash: path_hash(state.ast_path),
       node: node,
-      bound_vars: alternatives
+      bound_vars: alternatives,
+      type_hint: type_hint
     }
   end
 
@@ -1077,6 +1121,21 @@ defmodule Mut.EnvWalker do
     inner = descend_args(segments, Map.put(state, :in_bitstring, true))
     %{state | snapshots: inner.snapshots, candidates: inner.candidates}
   end
+
+  # M56: type-determining operators. Walk operands with a one-shot type hint
+  # so a direct variable operand (`a + 1`, `s <> x`, `xs ++ ys`) is offered to
+  # VariableToLiteral. The hint is SHALLOW: it applies only to a direct
+  # variable operand, never through a nested call (`f(x) + 1` does NOT hint
+  # `x`). Traversal is otherwise identical to `descend_args/2`, so existing
+  # candidate discovery (literals, inner variables) is unchanged.
+  defp classify_call(op, _meta, args, state) when op in @number_hint_ops,
+    do: walk_operands_hinted(args, :number, state)
+
+  defp classify_call(op, _meta, args, state) when op in @binary_hint_ops,
+    do: walk_operands_hinted(args, :binary, state)
+
+  defp classify_call(op, _meta, args, state) when op in @list_hint_ops,
+    do: walk_operands_hinted(args, :list, state)
 
   defp classify_call(name, meta, args, state) do
     cond do

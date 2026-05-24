@@ -25,7 +25,10 @@ defmodule Mut.Oracle.AstCandidate do
     # M54: in-scope variable names at this node (params + enclosing clause-head
     # bindings), for the VariableReplace mutator. `nil` for non-variable
     # candidates; never enters stable-id identity.
-    :bound_vars
+    :bound_vars,
+    # M56: syntactic use-site type hint (:number | :binary | :list | :boolean)
+    # for the VariableToLiteral mutator. `nil` when no operator context.
+    :type_hint
   ]
 
   @type t :: %__MODULE__{
@@ -40,6 +43,7 @@ defmodule Mut.Oracle.AstCandidate do
           ast_path: [term()],
           ast_path_hash: binary(),
           node: Macro.t(),
-          bound_vars: [atom()] | nil
+          bound_vars: [atom()] | nil,
+          type_hint: :number | :binary | :list | :boolean | nil
         }
 end

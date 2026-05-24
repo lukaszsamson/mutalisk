@@ -14,7 +14,9 @@ defmodule Mut.Context do
     :engine,
     # M54: in-scope variable names for the VariableReplace mutator (nil for
     # non-variable contexts).
-    :bound_vars
+    :bound_vars,
+    # M56: syntactic type hint for the VariableToLiteral mutator.
+    :type_hint
   ]
 
   @type t :: %__MODULE__{
@@ -27,6 +29,7 @@ defmodule Mut.Context do
           ast_path_hash: binary(),
           env_context: nil | :match | :guard,
           engine: :schema | :fallback,
-          bound_vars: [atom()] | nil
+          bound_vars: [atom()] | nil,
+          type_hint: :number | :binary | :list | :boolean | nil
         }
 end
