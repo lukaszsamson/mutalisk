@@ -90,6 +90,154 @@ defmodule Mut.AstWalk do
     end
   end
 
+  @doc """
+  M52: schema-routable scalar literal candidates with **plain-AST**
+  positional paths.
+
+  Discovers body-context scalar literals (integer / boolean / string /
+  float / atom / nil) over a `literal_encoder` parse, but assigns each an
+  `ast_path_hash` that equals the bare literal's position in the **plain**
+  AST — so `Mut.SchemaPlacer` (which traverses the plain AST and matches
+  by `ast_path_hash`) can place case-gates at them, exactly as it does for
+  dispatch mutants. This is what lets the literal catalogue bake into one
+  instrumented schema build instead of per-mutant fallback recompile.
+
+  Mechanism: parse with a *marked* literal_encoder, then a two-pass
+  normalization unwraps the marked blocks that distort the non-literal
+  spine — blocks wrapping collections (which add a level) and blocks in
+  2-tuple key position (keyword/struct keys, `{:ok, _}` tags — which
+  change a parent's `node_kind`). Marked scalar-value blocks remain as
+  leaves carrying their span; their path over the normalized AST equals
+  the bare literal's path over the plain AST. Verified byte-identical for
+  dispatch/guard/attribute across the corpus (no non-literal churn).
+
+  Collections (list / tuple / map) are NOT returned here — they stay on
+  the fallback engine (M50). Source is required for spans.
+  """
+  @spec schema_literal_candidates(opts :: keyword) :: [AstCandidate.t()]
+  def schema_literal_candidates(opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    case parse_marked(source, file) do
+      {:ok, ast} ->
+        normalized = normalize_marked(ast)
+        acc = body_literal_acc(file, source, line_offsets)
+        {_ast, acc} = Macro.traverse(normalized, acc, &schema_literal_pre/2, &post/2)
+
+        acc.candidates
+        |> Enum.reverse()
+        |> Enum.sort_by(&span_start_byte/1)
+
+      {:error, _reason} ->
+        []
+    end
+  end
+
+  defp parse_marked(source, file) do
+    Code.string_to_quoted(source,
+      file: file,
+      columns: true,
+      token_metadata: true,
+      emit_warnings: false,
+      literal_encoder: fn lit, meta -> {:ok, {:__block__, [__mut_lit__: true] ++ meta, [lit]}} end
+    )
+  end
+
+  # Restore the non-literal spine to plain-identical: unwrap marked blocks
+  # that wrap collections (extra path level) and marked blocks in 2-tuple
+  # key position (change a parent node_kind). Two passes because unwrapping
+  # a collection block exposes a 2-tuple whose key must then be unwrapped.
+  defp normalize_marked(ast) do
+    ast
+    |> Macro.prewalk(fn
+      {:__block__, meta, [value]} = node ->
+        if marked?(meta) and collection_value?(value), do: value, else: node
+
+      node ->
+        node
+    end)
+    |> Macro.prewalk(fn
+      {{:__block__, meta, [key]}, value} ->
+        if marked?(meta), do: {key, value}, else: {{:__block__, meta, [key]}, value}
+
+      node ->
+        node
+    end)
+  end
+
+  defp marked?(meta), do: is_list(meta) and Keyword.get(meta, :__mut_lit__, false)
+
+  defp collection_value?(value),
+    do: is_list(value) or (is_tuple(value) and tuple_size(value) == 2)
+
+  defp schema_literal_pre(node, acc) do
+    {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
+    acc = maybe_schema_literal_candidate(node, path, acc)
+
+    if no_descend?(node) or marked_scalar_block?(node) do
+      {prune_marked(node), push_frame(node, path, acc)}
+    else
+      {node, push_frame(node, path, acc)}
+    end
+  end
+
+  defp maybe_schema_literal_candidate({:__block__, meta, [value]} = node, path, acc) do
+    cond do
+      not marked?(meta) -> acc
+      not scalar_literal?(value) -> acc
+      not body_position?(path) -> acc
+      true -> add_schema_literal(acc, node, value, path, meta)
+    end
+  end
+
+  defp maybe_schema_literal_candidate(_node, _path, acc), do: acc
+
+  defp scalar_literal?(value) do
+    is_integer(value) or is_float(value) or is_binary(value) or is_atom(value)
+  end
+
+  defp marked_scalar_block?({:__block__, meta, [value]}),
+    do: marked?(meta) and scalar_literal?(value)
+
+  defp marked_scalar_block?(_node), do: false
+
+  defp prune_marked({:__block__, meta, [_value]}), do: {:__block__, meta, []}
+  defp prune_marked(node), do: prune(node)
+
+  defp add_schema_literal(acc, node, value, path, meta) do
+    case Keyword.fetch(meta, :line) do
+      {:ok, line} ->
+        candidate = %AstCandidate{
+          file: acc.file,
+          line: line,
+          column: Keyword.get(meta, :column),
+          syntactic_name: schema_literal_name(value),
+          syntactic_arity: 0,
+          source_span: literal_span(meta, value, acc),
+          env_context: nil,
+          enclosing_module: current_module(acc),
+          ast_path: path,
+          ast_path_hash: path_hash(path),
+          node: node
+        }
+
+        %{acc | candidates: [candidate | acc.candidates]}
+
+      :error ->
+        acc
+    end
+  end
+
+  defp schema_literal_name(value) when is_integer(value), do: :integer_literal
+  defp schema_literal_name(value) when is_boolean(value), do: :boolean_literal
+  defp schema_literal_name(value) when is_float(value), do: :float_literal
+  defp schema_literal_name(value) when is_binary(value), do: :string_literal
+  defp schema_literal_name(nil), do: :nil_literal
+  defp schema_literal_name(value) when is_atom(value), do: :atom_literal
+
   @spec guard_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
   def guard_candidates(ast, opts) do
     file = Keyword.fetch!(opts, :file)
