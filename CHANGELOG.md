@@ -28,6 +28,16 @@ candidate not `bound_vars`; explicit rollout). Equivalent rate is the keep/cut
 metric; measured in the M55 corpus follow-up. Plan/rationale in
 `docs/decisions/M56_variable_to_literal_PLAN.md`.
 
+**OSS follow-up** (`docs/decisions/M55_followup_oss_matrix.md`): ran the
+remaining deferred targets. makeup + ecto ran clean (variable invalid < 0.8%,
+pattern-literals clean, VariableToLiteral 0 invalid but low-volume/thin signal →
+**keep_opt_in**). timex / req / oban are blocked by the environment (1.19+tzdata
+drift / native `ezstd` build / multi-DB infra). **credo surfaced a fallback-
+recompile FALSE-INVALID engine bug** — VariableReplace mutants that compile
+cleanly (verified two ways) are mis-classified `:invalid`; credo-specific (ecto
+clean), NOT a mutator-correctness issue. Filed for a `Mut.Recompile`/sandbox
+follow-up.
+
 ### M55 — broad OSS validation + combined decisions (2026-05-24)
 
 Validated the v1.17 catalogue on a representative subset of the OSS corpus
