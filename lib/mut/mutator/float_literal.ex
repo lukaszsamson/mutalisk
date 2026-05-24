@@ -38,7 +38,7 @@ defmodule Mut.Mutator.FloatLiteral do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine == :fallback and float_literal?(node)
+    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and float_literal?(node)
   end
 
   @impl true

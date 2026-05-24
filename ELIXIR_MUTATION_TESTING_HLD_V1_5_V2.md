@@ -887,6 +887,35 @@ This is a default-policy and robustness release, not a broad catalog push. No ge
 - Schema routing for any env-walker mutator; the `--enable literal` preset (needs ≥2 default-on candidates; only AtomLiteral qualifies).
 - Coverage default flip; function-call deletion / return-value replacement; cross-run history; stable-id input changes (beyond M46's already-shipped one-time span migration).
 
+**v1.16 outcome (2026-05-23):** all five milestones shipped (`9bbd205..f3d709f`). M47 made `Mut.Reporter.StrykerJson` degrade gracefully (unformatted render → marker) instead of aborting the whole JSON write on one un-renderable diff — the plug run now writes valid JSON end-to-end. M48 added a mutator tier model (`Defaults.default_on/0` + `opt_in/0`) and made AtomLiteral default-on without leaking String/Float/Nil/Collection into the default plan (byte-identity verified on all four named targets; non-env IDs identical). M49 dropped the equivalent-heavy StringLiteral prepend-space row. M50 closed CollectionEmpty maps + n-tuples with strict struct-map exclusion (0% invalid on plug_crypto + Decimal). M51's spike returned **feasible, DEFER** for the consolidation (no perf payoff; dedup-only vs byte-identity risk). v1.16 is the first release to change the default plan (AtomLiteral default-on, additive).
+
+### v1.17 (4 milestones — literals first-class + v2 mutation surface)
+
+v1.13–v1.16 were env-walker plumbing plus incremental literal additions. v1.17 is the first genuinely ambitious surface-and-performance release since v1: it makes the literal catalogue **fast** (schema-routing) and **broader** (pattern-position + variable mutators — the v2 shapes promised since v1.5), then validates the whole thing on a real OSS corpus. This is v2-scale work delivered as a single large release.
+
+Two findings de-risk and reshape the v1.5-era plan:
+- The env walker **already classifies `:match` (pattern) context** (`EnvSnapshot.context :: nil | :match | :guard`); the current mutator gate just hard-requires `context == nil`. Pattern-position literals are largely a gate relaxation plus hazard rules, not new walker infrastructure.
+- The persistent worker is gone (v1.15), so the old "mix-only drift" OSS targets (ecto, gettext, phoenix) now simply run under the single `mix` worker — broad OSS validation is finally cheap. `../elixir_oss/projects` holds 33 pinned real projects.
+
+**Defaults: no new default-on flips beyond M46's AtomLiteral.** New surface mutators (pattern-position, variable) ship opt-in; M55 decides graduations from execution data. `--selection static` and coverage-opt-in unchanged. The literal schema-id migration (M52) is an explicit one-time stable-id change for the env-walker literals only — gated and documented.
+
+**Prelude (not a milestone):** README + BENCHMARKS v1.16 closure (README still claims atoms opt-in / collections list-only; BENCHMARKS has no v1.16 section). Ships as the first commit.
+
+**M52 — Schema-route the literal catalogue (reconcile + stable-id migration).** The performance workstream. Reconcile the `literal_encoder` AST (literals wrapped in `{:__block__, …}`, byte-span identity, `ast_path = []`) with `Mut.SchemaPlacer` (plain AST, `ast_path_hash`-keyed case-gate placement) so env-walker literals can bake into one instrumented schema build instead of per-mutant fallback recompile. Carries an explicit one-time literal stable-id migration (the env-literal identity changes; non-literal IDs MUST NOT). Literals that cannot be schema-placed fall back as today. Acceptance: literal mutants execute via the schema build; non-env stable IDs byte-identical on the corpus; documented before/after fallback-vs-schema wall-clock on Decimal + plug; invalid rate unchanged.
+
+**M53 — Pattern-position literal mutators.** Relax the mutator gate from `context == nil` to also admit `context == :match` for a conservative literal subset (integer / atom / boolean / nil / string), fallback-routed. Hazard rules: never mutate a pinned variable's matched literal into an overlapping/unreachable clause; skip positions where the swap would make two clauses collide; strict invalid + equivalent gating. Acceptance: zero stable-id churn for existing mutants; per-mutator invalid < 10% on the corpus; pattern mutants fire on real `:match` positions; opt-in.
+
+**M54 — Variable mutators (walker binding-scope extension + mutators).** The infra-heavy surface item, committed in full. Extend `Mut.EnvWalker` with local variable binding-scope tracking (which names are bound and in scope at a node — distinct from the alias/import/require maps it tracks today). Add conservative opt-in variable mutators (e.g. replace an in-scope variable reference with another in-scope variable; replace with a literal where types permit), heavily gated against the noise profile. Internal commit pacing: binding-scope tracking → snapshot wiring → mutators → gating + diagnostics. Acceptance: binding-scope tracking adds no stable-id churn for existing mutants; variable mutants are opt-in; invalid + equivalent rates tracked and reported; no-expansion grep gate holds on the extended walker.
+
+**M55 — Broad OSS validation matrix + combined decisions.** Run the full v1.17 catalogue across a curated ~10-project subset of `../elixir_oss/projects` (decimal, jason, plug, gettext, ecto, credo, req, timex, makeup, oban — spread across math/pure-lib, dispatch-heavy, macro-heavy, pattern/literal-rich) under the single `mix` worker. Pin SHAs. Per target × mutator: kill / survived / error / **invalid** / equivalent-ish counts, schema-vs-fallback wall-clock, stable-id diff (zero for existing), skip-reason histogram. Decisions in `docs/decisions/M55_*.md`: pattern-position and variable default policy (keep_opt_in / default_on / preset), and the schema-routing perf verdict (did M52 materially reduce literal wall-clock?). Acceptance: decision docs committed; BENCHMARKS v1.17 matrix; zero stable-id churn for existing mutants across the corpus; `bin/verify` green.
+
+**Explicitly NOT in v1.17:**
+- Schema routing for non-literal mutators (M52 is literals only; dispatch/guard/attribute stay as-is).
+- New literal *shapes* beyond the existing catalogue (the surface growth is pattern-position and variable, not new value types).
+- Function-call deletion / return-value replacement (deferred indefinitely).
+- Coverage default flip; cross-run history; wrapper guard schemata.
+- EnvWalker consolidation implementation (M51 deferred it; reopen only on a maintenance trigger).
+
 ### v2
 
 - Lean env walker.

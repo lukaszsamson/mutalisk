@@ -66,12 +66,20 @@ defmodule Mut.Orchestrator do
     attribute_candidates =
       Mut.AstWalk.attribute_candidates(ast, file: relative_file, source: source)
 
-    body_literal_candidates =
-      Mut.AstWalk.body_literal_candidates(file: relative_file, source: source)
-
     {matched, diagnostics} = Mut.Match.attach(dispatch_candidates, oracle, mutators)
 
-    {schema, dispatch_skips} = dispatch_results(matched, mutators, source)
+    {dispatch_schema, dispatch_skips} = dispatch_results(matched, mutators, source)
+
+    # M52: scalar body literals (integer/boolean/string/float/atom/nil)
+    # carry plain-AST positional paths and route through the SCHEMA engine
+    # (one instrumented build) instead of per-mutant fallback recompile.
+    {literal_schema, literal_skips} =
+      schema_literal_results(
+        Mut.AstWalk.schema_literal_candidates(file: relative_file, source: source),
+        enabled_targets,
+        mutators,
+        source
+      )
 
     {attribute_fallback, attribute_skips} =
       attribute_fallback_results(attribute_candidates, enabled_targets, mutators, source)
@@ -79,20 +87,9 @@ defmodule Mut.Orchestrator do
     {guard_fallback, guard_skips} =
       guard_fallback_results(guard_candidates, oracle, enabled_targets, mutators, source)
 
-    {body_literal_fallback, body_literal_skips} =
-      body_literal_fallback_results(
-        body_literal_candidates,
-        enabled_targets,
-        mutators,
-        source
-      )
-
-    # M40 commit 3: env-walker fifth candidate source. Disabled
-    # unless `:env_walker` is in enabled_targets. M40 commit 5 lands
-    # the StringLiteral mutator that consumes env_snapshots; in
-    # commit 3 the walker runs (when enabled) but produces no
-    # fallback entries — only contributing to the `Mut.EnvOracle`
-    # diagnostics histogram (commit 6).
+    # Env walker now contributes only COLLECTION literals (list/tuple/map);
+    # scalars moved to the schema path above. Collections stay fallback
+    # (M50) — they cannot be schema-placed cleanly yet.
     env_pairs =
       if :env_walker in enabled_targets do
         env_walker_candidates(path, relative_file, source, macro_index)
@@ -104,28 +101,87 @@ defmodule Mut.Orchestrator do
       env_walker_results(env_pairs, enabled_targets, mutators, source)
 
     %Plan{
-      schema: schema,
-      fallback: attribute_fallback ++ guard_fallback ++ body_literal_fallback ++ env_fallback,
+      schema: dispatch_schema ++ literal_schema,
+      fallback: attribute_fallback ++ guard_fallback ++ env_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
           dispatch_skips ++
+          literal_skips ++
           attribute_skips ++
           guard_skips ++
-          body_literal_skips ++
           env_skips,
       matched_pairs: matched
     }
   end
 
+  # M52: apply the active scalar-literal mutators to schema-literal
+  # candidates, producing :schema mutants (placed by Mut.SchemaPlacer via
+  # ast_path_hash). CollectionEmpty stays fallback; it is filtered out
+  # because its `applicable?/2` requires `engine == :fallback`.
+  defp schema_literal_results(candidates, enabled_targets, mutators, source) do
+    # Preserve enablement: integer/boolean require :body_literal, the
+    # env-walker literals require :env_walker. Engine moved to schema; the
+    # target gate is unchanged from the fallback era.
+    literal_mutators =
+      Enum.filter(mutators, fn mutator ->
+        (target?(mutator, :body_literal) and :body_literal in enabled_targets) or
+          (target?(mutator, :env_walker) and :env_walker in enabled_targets)
+      end)
+
+    if literal_mutators == [] do
+      {[], []}
+    else
+      candidates
+      |> Enum.map(&schema_literal_mutants(&1, literal_mutators, source))
+      |> Enum.reduce({[], []}, fn
+        {:mutants, mutants}, {all, skips} -> {all ++ mutants, skips}
+        {:skip, skip}, {all, skips} -> {all, skips ++ [skip]}
+      end)
+    end
+  end
+
+  defp schema_literal_mutants(%AstCandidate{} = candidate, literal_mutators, source) do
+    ctx = literal_schema_context(candidate)
+
+    literal_mutators
+    |> Enum.flat_map(&mutations(candidate, nil, &1, ctx, :schema, source))
+    |> case do
+      [] -> {:skip, skip(candidate, :no_applicable_mutator, nil)}
+      mutants -> {:mutants, mutants}
+    end
+  end
+
+  defp literal_schema_context(candidate) do
+    %Context{
+      oracle_site: nil,
+      enclosing_function: nil,
+      enclosing_module: candidate.enclosing_module,
+      file: candidate.file,
+      source_span: candidate.source_span,
+      ast_path: candidate.ast_path,
+      ast_path_hash: candidate.ast_path_hash,
+      env_context: nil,
+      engine: :schema
+    }
+  end
+
+  @collection_literal_names ~w(__list_literal__ __tuple_literal__ __map_literal__ __ntuple_literal__)a
+
   defp env_walker_candidates(_path, relative_file, source, macro_index) do
     case Mut.EnvWalker.parse_string(source, relative_file) do
       {:ok, encoded_ast} ->
-        Mut.EnvWalker.collect_literal_candidates(encoded_ast,
+        encoded_ast
+        |> Mut.EnvWalker.collect_literal_candidates(
           file: relative_file,
           source: source,
           macro_index: macro_index
         )
+        # M52: scalars now route through the schema path; keep only
+        # collection candidates here (CollectionEmpty, fallback-routed).
+        |> Enum.filter(fn {candidate, _snap} ->
+          candidate.syntactic_name in @collection_literal_names
+        end)
 
       _ ->
         []
@@ -147,14 +203,6 @@ defmodule Mut.Orchestrator do
       enabled_fallback_results(candidates, :env_walker, nil, mutators, source)
     else
       {[], []}
-    end
-  end
-
-  defp body_literal_fallback_results(candidates, enabled_targets, mutators, source) do
-    if :body_literal in enabled_targets do
-      enabled_fallback_results(candidates, :body_literal, nil, mutators, source)
-    else
-      {[], Enum.map(candidates, &skip(&1, :body_literal_engine_disabled, nil))}
     end
   end
 
@@ -343,7 +391,6 @@ defmodule Mut.Orchestrator do
     do: (site && site.env_context) || candidate.env_context
 
   defp fallback_env_context(_candidate, _site, :module_attribute), do: nil
-  defp fallback_env_context(_candidate, _site, :body_literal), do: nil
   defp fallback_env_context(_candidate, _site, :env_walker), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair

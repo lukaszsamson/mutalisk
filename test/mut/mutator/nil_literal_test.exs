@@ -29,10 +29,10 @@ defmodule Mut.Mutator.NilLiteralTest do
       assert NilLiteral.applicable?({:__block__, [], [nil]}, ctx([]))
     end
 
-    test "false for non-nil atoms, schema engine, and match/guard context" do
+    test "false for non-nil atoms and match/guard; true under schema engine (M52)" do
       refute NilLiteral.applicable?({:__block__, [], [:ok]}, ctx([]))
       refute NilLiteral.applicable?({:__block__, [], [true]}, ctx([]))
-      refute NilLiteral.applicable?({:__block__, [], [nil]}, ctx(engine: :schema))
+      assert NilLiteral.applicable?({:__block__, [], [nil]}, ctx(engine: :schema))
       refute NilLiteral.applicable?({:__block__, [], [nil]}, ctx(env_context: :match))
       refute NilLiteral.applicable?({:__block__, [], [nil]}, ctx(env_context: :guard))
     end

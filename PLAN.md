@@ -2876,6 +2876,217 @@ standalone walk pass).
 - Stable-id input changes beyond M46's already-shipped one-time
   span migration.
 
+# v1.17 milestones (literals first-class + v2 mutation surface)
+
+v1.16 (M47–M51) shipped on master (`9bbd205..f3d709f`). v1.17 is
+the first genuinely ambitious surface-and-performance release since
+v1: make the literal catalogue **fast** (schema-routing) and
+**broader** (pattern-position + variable mutators — the v2 shapes
+promised since v1.5), then validate on a real OSS corpus. This is
+v2-scale work delivered as one large release.
+
+Two grounding findings (verified in code, 2026-05-24):
+- `Mut.EnvSnapshot.context` is already `nil | :match | :guard`;
+  the mutator gate just hard-requires `context == nil`. So
+  pattern-position literals are largely a gate relaxation + hazard
+  rules, NOT new walker infrastructure.
+- The persistent worker is gone (v1.15), so the old mix-only-drift
+  OSS targets (ecto, gettext, phoenix) now just run under the
+  single `mix` worker. `../elixir_oss/projects` holds 33 pinned
+  real projects — broad validation is finally cheap.
+
+**Defaults: no new default-on flips beyond M46's AtomLiteral.**
+New surface mutators (pattern-position, variable) ship opt-in; M55
+decides graduations from execution data. `--selection static` and
+coverage-opt-in unchanged. Elixir floor stays `>= 1.19.0`. M52's
+literal schema-id migration is an explicit one-time stable-id
+change for env-walker literals only — gated and documented.
+
+Four milestones, all substantial. M52 (perf migration) and M54
+(new walker infra) are the two independent hard bets; M53 (surface
+add) reuses existing `:match` classification; M55 is the
+validation matrix. Per the scoping decision, **variable mutators
+are committed in full — no release valve.**
+
+**Prelude commit (not a milestone):** README + BENCHMARKS v1.16
+closure. README still claims atom literals are opt-in (M48 made
+AtomLiteral default-on) and collections list/2-tuple only (M50
+added maps + n-tuples opt-in); BENCHMARKS has no v1.16 section
+(needs the default-plan delta + AtomLiteral additions + M50
+invalid-rate evidence + M47 reporter-fix note). Ships first.
+
+## v1.17 scope (committed)
+
+**M52 — Schema-route the literal catalogue (reconcile + stable-id migration).**
+
+*Goal:* Move the env-walker literal catalogue from fallback
+(per-mutant recompile) to schema (one instrumented build), the way
+v1 dispatch mutators already work.
+
+*Inputs:* HLD v1.17 §M52; `lib/mut/schema_placer.ex`
+(`ast_path_hash`-keyed case-gate placement over plain AST);
+`lib/mut/env_walker.ex` + `collect_literal_candidates/2`
+(literal_encoder AST, `ast_path = []`, byte-span identity);
+`docs/decisions/M46_*` (the deferred "literal-encoding stable-id
+migration" note); [[byte-identity-gate-harness]].
+
+*Deliverables:*
+- Reconcile the two AST views: teach `Mut.SchemaPlacer` to place
+  case-gates at literal positions discovered over the
+  `literal_encoder` AST (literals wrapped in `{:__block__, …}`),
+  OR re-derive literal positions in plain AST — whichever
+  preserves a single, stable identity scheme.
+- One-time literal stable-id migration: the env-literal identity
+  changes from byte-span to the reconciled scheme. Document it as
+  an explicit migration (mirrors M46's span migration). Non-literal
+  stable IDs MUST NOT change.
+- Route schema-placeable literals through the schema engine; keep
+  fallback for literals that cannot be schema-placed (record which
+  and why).
+- Before/after wall-clock instrumentation: fallback-vs-schema for
+  the literal bucket.
+
+*Acceptance:*
+- Literal mutants execute via the schema build (verified by build
+  artifact + worker path).
+- Non-env stable IDs byte-identical on demo_app, plug_crypto,
+  Decimal, plug (stable-id diff harness).
+- Documented fallback→schema wall-clock delta on Decimal + plug.
+- Invalid rate for literals unchanged or lower; `bin/verify` green.
+
+*Out of scope:* Schema routing for non-literal mutators. New
+literal shapes. Pattern/variable surface (M53/M54).
+
+*Status (2026-05-24): DELIVERED.* Reconciliation via the marked
+`literal_encoder` + 2-pass normalization (not path re-derivation);
+unplaceable literals (bitstring segments, clause-head patterns)
+recognized in `SchemaPlacer.refused_context/1` and rerouted to
+fallback via `SchemaBuild.reroute_refused/2`. Non-literal IDs
+byte-identical on demo_app (golden) and plug_crypto (64 IDs);
+literal stable-id migration + reroute-safety documented in
+`docs/decisions/M52_literal_schema_routing.md`. `bin/verify` green;
+plug_crypto schema build clean with **0 invalid**. *Deviation:* the
+Decimal/plug byte-identity + fallback→schema wall-clock delta fold
+into **M55**'s broad matrix (those local checkouts are re-established
+there; `tmp/bench` is cleaned by `bin/verify`'s sandbox reset).
+
+**M53 — Pattern-position literal mutators.**
+
+*Goal:* Mutate literals in `:match` (pattern) positions,
+conservatively.
+
+*Inputs:* HLD v1.17 §M53; `Mut.EnvSnapshot` (`context == :match`
+already classified); the existing literal mutators
+(Integer/Atom/Boolean/Nil/String).
+
+*Deliverables:*
+- Relax the first-pass gate (`context == nil`) to also admit
+  `context == :match` for a conservative literal subset.
+- Hazard rules: never produce an overlapping/unreachable clause;
+  skip pinned-variable-adjacent literals where the swap changes
+  match semantics ambiguously; skip positions where two clauses
+  would collide post-mutation.
+- Fallback-routed (pattern schemata are not expression-position
+  safe). Per-mutator unit tests + fixture golden lists.
+
+*Acceptance:*
+- Zero stable-id churn for existing mutants on the corpus.
+- Per-mutator invalid rate < 10%; equivalent-ish rate tracked.
+- Pattern mutants fire on real `:match` positions in the fixture.
+- Opt-in (not in the default-on tier).
+
+*Out of scope:* Variable mutators (M54). Pattern *shape* mutations
+(tuple/list arity) — still skipped per M39.
+
+**M54 — Variable mutators (walker binding-scope extension + mutators).**
+
+*Goal:* Add variable-reference mutators, including the new local
+binding-scope tracking they require. Committed in full (no valve).
+
+*Inputs:* HLD v1.17 §M54; `lib/mut/env_walker.ex` (tracks
+alias/import/require maps today, NOT local bindings);
+`docs/spikes/M39_env_walker.md` (no-expansion contract).
+
+*Deliverables (internal commit pacing):*
+1. Local binding-scope tracking in `Mut.EnvWalker`: which variable
+   names are bound and in scope at each node. Surfaced on
+   `EnvSnapshot` (new field) without changing existing fields'
+   serialization.
+2. `Mut.Mutator.VariableReplace`: replace an in-scope variable
+   reference with another in-scope variable (same arity/usage
+   shape). Opt-in, fallback-routed.
+3. Optional `Mut.Mutator.VariableToLiteral` where the binding's
+   evident type permits (heavily gated; may defer if noise is
+   intractable).
+4. Gating + diagnostics + reporter integration; no-expansion grep
+   gate extended to the new walker paths.
+
+*Acceptance:*
+- Binding-scope tracking adds ZERO stable-id churn for existing
+  mutants (new snapshot field must not enter existing identities).
+- Variable mutants opt-in; invalid AND equivalent rates tracked
+  and reported.
+- No-expansion grep gate green on the extended walker.
+- `bin/verify` green.
+
+*Out of scope:* Cross-function / cross-module variable reasoning.
+Closure-capture analysis beyond syntactic scope.
+
+**M55 — Broad OSS validation matrix + combined decisions.**
+
+*Goal:* Validate the full v1.17 catalogue on a real OSS corpus and
+decide surface-mutator defaults + the schema-routing perf verdict.
+
+*Inputs:* HLD v1.17 §M55; `../elixir_oss/projects` (33 pinned
+projects); `bench/run.sh`; M25/M41 threshold conventions.
+
+*Deliverables:*
+- Curated ~10-project matrix, SHAs pinned: **decimal, jason, plug,
+  gettext, ecto, credo, req, timex, makeup, oban** (spread across
+  math/pure-lib, dispatch-heavy, macro-heavy, pattern/literal-rich).
+  All under the single `mix` worker.
+- Per target × mutator: kill / survived / error / **invalid** /
+  equivalent-ish counts, schema-vs-fallback wall-clock, stable-id
+  diff (zero for existing), skip-reason histogram.
+- `docs/decisions/M55_pattern_position.md`,
+  `M55_variable.md`, `M55_schema_routing_perf.md`: per-mutator
+  default policy (keep_opt_in / default_on / preset) via the
+  M25/M41 per-target-minimum rule, and the schema-routing verdict
+  (did M52 materially cut literal wall-clock?).
+- BENCHMARKS.md v1.17 matrix; CHANGELOG.
+
+*Acceptance:*
+- Decision docs committed.
+- Zero stable-id churn for existing mutants across the corpus.
+- env-walker parse+walk gate (≤10% oracle wall) holds on the
+  larger targets.
+- `bin/verify` green.
+
+*Out of scope:* Acting on default-flip decisions that need a
+follow-up migration (those scope into v1.18).
+
+## v1.17 horizon (not v1.17 scope)
+
+- **Schema routing for non-literal mutators** — only if M55's perf
+  data shows fallback dominates elsewhere.
+- **Pattern/variable default-on flips** — v1.18 if M55 says
+  graduate; the `--enable literal`/`--enable surface` presets ride
+  the same decision.
+- **EnvWalker consolidation implementation** — still gated on a
+  maintenance trigger (M51).
+- **Coverage default flip; cross-run history** — still deferred.
+
+## Explicitly NOT v1.17
+
+- Schema routing for non-literal mutators (M52 is literals only).
+- New literal *value shapes* beyond the existing catalogue.
+- Function-call deletion / return-value replacement (deferred
+  indefinitely).
+- Coverage default flip; cross-run history; wrapper guard schemata.
+- EnvWalker consolidation implementation (M51 deferred it).
+- New default-on flips beyond M46's AtomLiteral (M55 decides
+  graduations; flips themselves are v1.18).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

@@ -3,6 +3,42 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.17 unreleased
+
+### M52 — schema-route the literal catalogue (2026-05-24)
+
+Scalar literals (integer/boolean/string/float/nil/atom) now run through the
+**schema engine** (one instrumented build, runtime-selected mutant) instead
+of per-mutant fallback recompiles, matching dispatch/guard. Collection
+literals (list/2-tuple/map/n-tuple) stay on the env-walker fallback path.
+
+- **Discovery (1/2):** `Mut.AstWalk.schema_literal_candidates/1` parses with a
+  *marked* `literal_encoder` (`[__mut_lit__: true]` meta), then a two-pass
+  normalization unwraps marked blocks wrapping collections and in keyword-key
+  position. This restores the non-literal AST spine to plain-identical so a
+  scalar literal's `ast_path_hash` equals its bare-AST positional path — the
+  key that lets `Mut.SchemaPlacer` place it without churning dispatch IDs.
+- **Routing + reroute safety (2/2):** the orchestrator routes scalar-literal
+  candidates to `engine: :schema`. Literals in positions where a `case` gate
+  is structurally illegal — **bitstring segments** (`<<x::128>>` sizes/specs)
+  and **clause-head patterns** (`->`/`<-` head position: `case`/`fn`/`with`/
+  `try`-`catch`-`rescue`/`receive`) — are recognized by `SchemaPlacer`'s
+  refused-context check and **rerouted to the fallback engine** (the existing
+  `SchemaBuild.reroute_refused` mechanism), rather than hard-failing the
+  schema build. Validated on `plug_crypto` (crypto/bitstring-heavy): build
+  succeeds, **0 invalid**, scalar atoms execute via schema, the two
+  `catch :error, :notsup ->` heads route to fallback.
+
+**Stable-id migration (one-time):** scalar literals now carry a plain-AST
+`ast_path_hash` (previously `ast_path=[]` + byte-span identity), so their
+`stable_id`s change once. **Non-literal IDs (dispatch/guard/attribute) do
+NOT change** — verified by the demo_app stable-id golden and a 64-ID
+byte-identity check on plug_crypto.
+
+Also fixes a latent dialyzer dead-branch in `Mut.EnvWalker.literal_span/3`
+(the `is_integer/1` guards were always-true because `byte_offset/3` forced
+the arithmetic inference first; reordered via `with`).
+
 ## v1.16 unreleased
 
 ### M51 — EnvWalker consolidation design + proof (spike, 2026-05-23)

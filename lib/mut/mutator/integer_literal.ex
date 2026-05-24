@@ -33,7 +33,7 @@ defmodule Mut.Mutator.IntegerLiteral do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine == :fallback and integer_literal?(node)
+    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and integer_literal?(node)
   end
 
   @impl true

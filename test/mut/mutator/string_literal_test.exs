@@ -54,9 +54,9 @@ defmodule Mut.Mutator.StringLiteralTest do
       refute StringLiteral.applicable?(node, ctx(env_context: :guard))
     end
 
-    test "false under schema engine" do
+    test "applicable under schema engine (M52 schema-routed)" do
       node = {:__block__, [], ["hi"]}
-      refute StringLiteral.applicable?(node, ctx(engine: :schema))
+      assert StringLiteral.applicable?(node, ctx(engine: :schema))
     end
   end
 

@@ -56,7 +56,7 @@ defmodule Mut.Mutator.AtomLiteral do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine == :fallback and allowlisted_atom?(node)
+    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and allowlisted_atom?(node)
   end
 
   @impl true

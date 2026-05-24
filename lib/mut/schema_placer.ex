@@ -7,7 +7,6 @@ defmodule Mut.SchemaPlacer do
   @macro_defs ~w(defmacro defmacrop)a
   @definition_defs @function_defs ++ @macro_defs
   @no_descend ~w(quote unquote unquote_splicing)a
-  @clause_heads ~w(case with fn for)a
 
   defmodule PlacementMap do
     @moduledoc "Maps rendered schema locations to mutant IDs for rollback."
@@ -314,10 +313,17 @@ defmodule Mut.SchemaPlacer do
       macro_body_path?(path) -> "inside a defmacro/defmacrop body"
       Enum.any?(path, &match?({:elem, :@, _index}, &1)) -> "inside a module attribute value"
       lhs_match_path?(path) -> "inside the left-hand side of a match"
-      clause_head_pattern_path?(path) -> "inside a case/with/fn/for clause head pattern"
+      bitstring_segment_path?(path) -> "inside a bitstring segment"
+      clause_head_pattern_path?(path) -> "inside a clause head pattern"
       true -> nil
     end
   end
+
+  # A literal anywhere inside a `<<...>>` cannot be replaced by a `case` gate:
+  # segment size/unit/type specifiers (`<<x::128>>`) must be compile-time
+  # constants, and segment values are bound by binary-construction rules.
+  defp bitstring_segment_path?(path),
+    do: Enum.any?(path, &match?({:elem, :<<>>, _index}, &1))
 
   defp record_refused(acc, group, description) do
     refusals = Enum.map(group, &%{mutant: &1, reason: description})
@@ -341,16 +347,17 @@ defmodule Mut.SchemaPlacer do
 
   defp lhs_match_path?(path), do: Enum.any?(path, &match?({:elem, :=, 0}, &1))
 
+  # The head position of a clause arrow (`pattern -> body`) and of a
+  # `with`/`for` generator (`pattern <- enum`) is a match pattern, where a
+  # `case` gate is not allowed. Index 0 of `:->`/`:<-` is the head; index 1+
+  # is the body/enumerable, which stays placeable. We deliberately over-refuse
+  # `cond` arrow heads (boolean expressions, not patterns) -- they simply route
+  # to the fallback engine, which is always safe.
   defp clause_head_pattern_path?(path) do
-    path
-    |> Enum.chunk_every(3, 1, :discard)
-    |> Enum.any?(fn
-      [{:elem, clause_parent, _}, {:elem, :->, 0}, {:elem, :do_block, _}]
-      when clause_parent in @clause_heads ->
-        true
-
-      _other ->
-        false
+    Enum.any?(path, fn
+      {:elem, :->, 0} -> true
+      {:elem, :<-, 0} -> true
+      _other -> false
     end)
   end
 

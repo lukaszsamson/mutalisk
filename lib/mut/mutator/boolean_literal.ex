@@ -27,7 +27,7 @@ defmodule Mut.Mutator.BooleanLiteral do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine == :fallback and boolean_literal?(node)
+    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and boolean_literal?(node)
   end
 
   @impl true

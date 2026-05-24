@@ -366,9 +366,12 @@ defmodule Mut.EnvWalker do
   defp literal_span(state, meta, value) do
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
-    start_byte = byte_offset(state, line, column)
 
-    if is_integer(line) and is_integer(column) and is_integer(start_byte) do
+    # Compute `start_byte` only after `line`/`column` are confirmed integers:
+    # `byte_offset/3` does arithmetic on them, so calling it first would make
+    # dialyzer treat the `is_integer/1` guards below as always-true.
+    with true <- is_integer(line) and is_integer(column),
+         start_byte when is_integer(start_byte) <- byte_offset(state, line, column) do
       end_byte = literal_end_byte(state.source, start_byte, meta, value)
       {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
 
@@ -381,6 +384,8 @@ defmodule Mut.EnvWalker do
         start_byte: start_byte,
         end_byte: end_byte
       }
+    else
+      _ -> nil
     end
   end
 

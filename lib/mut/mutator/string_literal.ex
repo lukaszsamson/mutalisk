@@ -55,7 +55,8 @@ defmodule Mut.Mutator.StringLiteral do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine == :fallback and non_empty_string_literal?(node)
+    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and
+      non_empty_string_literal?(node)
   end
 
   @impl true

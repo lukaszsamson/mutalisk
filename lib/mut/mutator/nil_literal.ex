@@ -38,7 +38,7 @@ defmodule Mut.Mutator.NilLiteral do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine == :fallback and nil_literal?(node)
+    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and nil_literal?(node)
   end
 
   @impl true

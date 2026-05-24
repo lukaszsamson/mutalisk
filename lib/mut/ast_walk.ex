@@ -410,17 +410,34 @@ defmodule Mut.AstWalk do
 
   defp lhs_match_path_walk?(path), do: Enum.any?(path, &match?({:elem, :=, 0}, &1))
 
+  # A `{:elem, :->, 0}` step is the HEAD (left) of a clause. For
+  # case / fn / with-else / try-rescue|catch / receive that head is a
+  # PATTERN (match position) — a literal there cannot be schema-gated
+  # (`case` is not allowed in a match). `cond` is excluded: its clause
+  # heads are boolean expressions, so a literal there is a real body
+  # position (e.g. the `true` catch-all).
+  @pattern_clause_constructs [:case, :fn, :with, :try, :receive]
+  @clause_block_kinds [:do_block, :else_block, :rescue_block, :catch_block, :after_block]
+
   defp clause_head_pattern_path_walk?(path) do
     path
-    |> Enum.chunk_every(3, 1, :discard)
+    |> Enum.with_index()
     |> Enum.any?(fn
-      [{:elem, parent, _}, {:elem, :->, 0}, {:elem, :do_block, _}]
-      when parent in [:case, :with, :fn, :for] ->
-        true
-
-      _ ->
-        false
+      {{:elem, :->, 0}, idx} -> pattern_clause_head?(Enum.take(path, idx))
+      _ -> false
     end)
+  end
+
+  defp pattern_clause_head?(prefix_before_arrow) do
+    prefix_before_arrow
+    |> Enum.reverse()
+    |> Enum.drop_while(fn {:elem, kind, _idx} ->
+      kind == :list or kind in @clause_block_kinds
+    end)
+    |> case do
+      [{:elem, construct, _idx} | _rest] -> construct in @pattern_clause_constructs
+      _other -> false
+    end
   end
 
   defp function_head_walk?(path) do

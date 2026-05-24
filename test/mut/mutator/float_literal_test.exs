@@ -29,10 +29,10 @@ defmodule Mut.Mutator.FloatLiteralTest do
       assert FloatLiteral.applicable?({:__block__, [], [1.5]}, ctx([]))
     end
 
-    test "false for non-floats, schema engine, and match/guard context" do
+    test "false for non-floats and match/guard; true under schema engine (M52)" do
       refute FloatLiteral.applicable?({:__block__, [], [42]}, ctx([]))
       refute FloatLiteral.applicable?({:__block__, [], ["s"]}, ctx([]))
-      refute FloatLiteral.applicable?({:__block__, [], [1.5]}, ctx(engine: :schema))
+      assert FloatLiteral.applicable?({:__block__, [], [1.5]}, ctx(engine: :schema))
       refute FloatLiteral.applicable?({:__block__, [], [1.5]}, ctx(env_context: :match))
       refute FloatLiteral.applicable?({:__block__, [], [1.5]}, ctx(env_context: :guard))
     end

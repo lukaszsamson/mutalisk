@@ -16,6 +16,9 @@ defmodule Mut.MixManifestTest do
     assert manifest.sources["lib/guards.ex"].struct_deps ==
              manifest.sources["lib/guards.ex"].export_deps
 
+    # Orchestrator default enabled_targets is [:dispatch, :guard] (no
+    # :body_literal), so guards.ex's `true`/`false` body literals are not
+    # schema-gated here; runtime deps stay :erlang from the guard funcs.
     assert manifest.sources["lib/guards.ex"].runtime_deps == [:erlang]
   end
 

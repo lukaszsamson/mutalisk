@@ -15,9 +15,10 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert length(plan.fallback) == 4
     assert plan.invalid == []
 
+    # M52: scalar literals route through the schema engine, gated by the
+    # active mutator set — no more body_literal_engine_disabled skips.
     assert Enum.frequencies_by(plan.skipped, & &1.reason) == %{
              attribute_engine_disabled: 1,
-             body_literal_engine_disabled: 5,
              unsupported_dispatch: 3
            }
 
@@ -31,7 +32,6 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert opt_in_plan.invalid == []
 
     assert Enum.frequencies_by(opt_in_plan.skipped, & &1.reason) == %{
-             body_literal_engine_disabled: 5,
              unsupported_dispatch: 3
            }
 
