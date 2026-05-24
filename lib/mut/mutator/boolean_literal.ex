@@ -23,11 +23,12 @@ defmodule Mut.Mutator.BooleanLiteral do
   def description, do: "Replace boolean literal in function body."
 
   @impl true
-  def targets, do: [:body_literal]
+  def targets, do: [:body_literal, :pattern_literal]
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and boolean_literal?(node)
+    ctx.env_context in [nil, :match] and ctx.engine in [:fallback, :schema] and
+      boolean_literal?(node)
   end
 
   @impl true

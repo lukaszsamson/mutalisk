@@ -2998,6 +2998,20 @@ already classified); the existing literal mutators
 *Out of scope:* Variable mutators (M54). Pattern *shape* mutations
 (tuple/list arity) — still skipped per M39.
 
+*Status (2026-05-24): DELIVERED.* New opt-in `:pattern_literal` target;
+`EnvWalker` emits `:match` scalar candidates (int/atom/boolean/nil/string)
+for bare args / list / n-tuple elements (2-tuples + map pairs are never
+descended; bitstring segment sizes skipped via an `in_bitstring` flag).
+Fallback-routed via `Orchestrator.pattern_literal_results`. Hazard rules:
+bitstring skipped predictively; clause collisions handled reactively by
+`CompileRollback` (rationale in `docs/decisions/M53_pattern_position_literals.md`).
+Zero stable-id churn (demo_app base vs `+ :pattern_literal` identical);
+firing proven on an oracle-backed pattern-literal fixture; `bin/verify`
+green. *Deviation:* predictive cross-clause collision detection deferred
+(reactive rollback instead) — revisit from M55 corpus data if the
+pattern-literal invalid rate is high. Per-mutator invalid-rate
+measurement folds into M55.
+
 **M54 — Variable mutators (walker binding-scope extension + mutators).**
 
 *Goal:* Add variable-reference mutators, including the new local

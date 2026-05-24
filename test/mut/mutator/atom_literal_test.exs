@@ -20,7 +20,7 @@ defmodule Mut.Mutator.AtomLiteralTest do
   describe "metadata" do
     test "name and targets" do
       assert AtomLiteral.name() == "AtomLiteral"
-      assert AtomLiteral.targets() == [:env_walker]
+      assert AtomLiteral.targets() == [:env_walker, :pattern_literal]
     end
   end
 
@@ -30,12 +30,12 @@ defmodule Mut.Mutator.AtomLiteralTest do
       assert AtomLiteral.applicable?({:__block__, [], [:lt]}, ctx([]))
     end
 
-    test "false for non-allowlisted atoms/booleans/nil/match; true under schema engine (M52)" do
+    test "false for non-allowlisted atoms/booleans/nil; true under schema (M52) and match (M53)" do
       refute AtomLiteral.applicable?({:__block__, [], [:something_else]}, ctx([]))
       refute AtomLiteral.applicable?({:__block__, [], [true]}, ctx([]))
       refute AtomLiteral.applicable?({:__block__, [], [nil]}, ctx([]))
       assert AtomLiteral.applicable?({:__block__, [], [:ok]}, ctx(engine: :schema))
-      refute AtomLiteral.applicable?({:__block__, [], [:ok]}, ctx(env_context: :match))
+      assert AtomLiteral.applicable?({:__block__, [], [:ok]}, ctx(env_context: :match))
     end
   end
 

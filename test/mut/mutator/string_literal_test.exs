@@ -10,8 +10,8 @@ defmodule Mut.Mutator.StringLiteralTest do
       assert StringLiteral.name() == "StringLiteral"
     end
 
-    test "targets :env_walker only" do
-      assert StringLiteral.targets() == [:env_walker]
+    test "targets :env_walker and :pattern_literal (M53)" do
+      assert StringLiteral.targets() == [:env_walker, :pattern_literal]
     end
   end
 
@@ -44,9 +44,9 @@ defmodule Mut.Mutator.StringLiteralTest do
       refute StringLiteral.applicable?({:__block__, [], [true]}, ctx([]))
     end
 
-    test "false in match context" do
+    test "true in match context (M53 pattern-position literals)" do
       node = {:__block__, [], ["hi"]}
-      refute StringLiteral.applicable?(node, ctx(env_context: :match))
+      assert StringLiteral.applicable?(node, ctx(env_context: :match))
     end
 
     test "false in guard context" do
@@ -140,7 +140,7 @@ defmodule Mut.Mutator.StringLiteralTest do
       assert pairs == []
     end
 
-    test "does not collect literals in match context (function head)" do
+    test "collects match-context literals with env_context :match (M53)" do
       src = ~S'''
       defmodule Foo do
         def x("pattern-literal") do
@@ -151,7 +151,10 @@ defmodule Mut.Mutator.StringLiteralTest do
 
       {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
       pairs = EnvWalker.collect_string_literal_candidates(ast, file: "lib/foo.ex", source: src)
-      assert pairs == []
+      assert [{candidate, snap}] = pairs
+      assert {:__block__, _, ["pattern-literal"]} = candidate.node
+      assert candidate.env_context == :match
+      assert snap.context == :match
     end
 
     test "does not collect literals inside quote bodies (M40 acceptance)" do

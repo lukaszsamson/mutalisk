@@ -20,7 +20,7 @@ defmodule Mut.Mutator.NilLiteralTest do
   describe "metadata" do
     test "name and targets" do
       assert NilLiteral.name() == "NilLiteral"
-      assert NilLiteral.targets() == [:env_walker]
+      assert NilLiteral.targets() == [:env_walker, :pattern_literal]
     end
   end
 
@@ -29,11 +29,11 @@ defmodule Mut.Mutator.NilLiteralTest do
       assert NilLiteral.applicable?({:__block__, [], [nil]}, ctx([]))
     end
 
-    test "false for non-nil atoms and match/guard; true under schema engine (M52)" do
+    test "false for non-nil atoms/guard; true under schema engine (M52) and match (M53)" do
       refute NilLiteral.applicable?({:__block__, [], [:ok]}, ctx([]))
       refute NilLiteral.applicable?({:__block__, [], [true]}, ctx([]))
       assert NilLiteral.applicable?({:__block__, [], [nil]}, ctx(engine: :schema))
-      refute NilLiteral.applicable?({:__block__, [], [nil]}, ctx(env_context: :match))
+      assert NilLiteral.applicable?({:__block__, [], [nil]}, ctx(env_context: :match))
       refute NilLiteral.applicable?({:__block__, [], [nil]}, ctx(env_context: :guard))
     end
   end

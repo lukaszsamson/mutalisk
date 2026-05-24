@@ -265,19 +265,54 @@ defmodule Mut.EnvWalker do
   # (so `collect_literal_snapshots/2` emits none) AND the snapshot we
   # just emitted is body-literal-eligible.
   defp maybe_emit_literal_candidate(state, node, value, meta) do
-    case literal_candidate_name(value, state.literal_kinds) do
-      nil ->
-        state
+    [latest_snap | _] = state.snapshots
 
-      syntactic_name ->
-        [latest_snap | _] = state.snapshots
-
-        if EnvSnapshot.body_literal_eligible?(latest_snap) do
-          candidate = build_literal_candidate(state, node, meta, latest_snap, syntactic_name)
-          %{state | candidates: [{candidate, latest_snap} | state.candidates]}
-        else
-          state
+    cond do
+      EnvSnapshot.body_literal_eligible?(latest_snap) ->
+        case literal_candidate_name(value, state.literal_kinds) do
+          nil -> state
+          name -> emit_literal_candidate(state, node, meta, latest_snap, name, nil)
         end
+
+      # M53: literals in `:match` (pattern) positions, fallback-routed under
+      # the opt-in `:pattern_literal` target. `descend/2` never recurses into
+      # 2-tuples or map pairs and the walker tracks no positional path, so the
+      # discoverable surface is naturally conservative (bare args, list /
+      # n-tuple elements). The one structural hazard is a bitstring segment
+      # size (`<<x::16>>`), where a literal swap can produce an invalid match
+      # -- `match_literal_candidate?/2` skips those.
+      match_literal_candidate?(latest_snap, state) ->
+        case match_literal_name(value) do
+          nil -> state
+          name -> emit_literal_candidate(state, node, meta, latest_snap, name, :match)
+        end
+
+      true ->
+        state
+    end
+  end
+
+  defp emit_literal_candidate(state, node, meta, snap, syntactic_name, env_context) do
+    candidate = build_literal_candidate(state, node, meta, snap, syntactic_name, env_context)
+    %{state | candidates: [{candidate, snap} | state.candidates]}
+  end
+
+  defp match_literal_candidate?(snap, state) do
+    snap.context == :match and snap.trust_level == :trusted and
+      not Map.get(state, :in_bitstring, false)
+  end
+
+  # M53 pattern-position literal subset: integer / boolean / nil / atom /
+  # string (NOT float -- floats in patterns are rare and noisy). `is_boolean`
+  # and `is_nil` precede `is_atom`; `is_integer` excludes floats.
+  defp match_literal_name(value) do
+    cond do
+      is_boolean(value) -> :__boolean_literal__
+      is_nil(value) -> :__nil_literal__
+      is_integer(value) -> :__integer_literal__
+      is_binary(value) and value != "" -> :__string_literal__
+      is_atom(value) -> :__atom_literal__
+      true -> nil
     end
   end
 
@@ -339,7 +374,8 @@ defmodule Mut.EnvWalker do
          {:__block__, _m, [value]} = node,
          meta,
          _snap,
-         syntactic_name
+         syntactic_name,
+         env_context
        ) do
     %AstCandidate{
       file: state.file,
@@ -348,7 +384,7 @@ defmodule Mut.EnvWalker do
       syntactic_name: syntactic_name,
       syntactic_arity: 0,
       source_span: literal_span(state, meta, value),
-      env_context: nil,
+      env_context: env_context,
       enclosing_module: state.module,
       ast_path: state.ast_path,
       ast_path_hash: path_hash(state.ast_path),
@@ -835,6 +871,17 @@ defmodule Mut.EnvWalker do
     state
     |> maybe_emit_ntuple_candidate(meta, elems)
     |> then(&classify_user_call(:{}, meta, elems, &1))
+  end
+
+  # M53: descend bitstring segments with an `in_bitstring` flag set so
+  # `match_literal_candidate?/2` skips segment-size literals (`<<x::16>>`),
+  # where a pattern-position literal swap can produce an invalid match. The
+  # flag clears on return (we thread `snapshots`/`candidates` back onto the
+  # original, flag-free state). Body-position bitstring literals are
+  # unaffected (the flag only gates the `:match` branch).
+  defp classify_call(:<<>>, _meta, segments, state) when is_list(segments) do
+    inner = descend_args(segments, Map.put(state, :in_bitstring, true))
+    %{state | snapshots: inner.snapshots, candidates: inner.candidates}
   end
 
   defp classify_call(name, meta, args, state) do

@@ -34,11 +34,11 @@ defmodule Mut.Mutator.NilLiteral do
   def description, do: "Replace nil literal in function body."
 
   @impl true
-  def targets, do: [:env_walker]
+  def targets, do: [:env_walker, :pattern_literal]
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and ctx.engine in [:fallback, :schema] and nil_literal?(node)
+    ctx.env_context in [nil, :match] and ctx.engine in [:fallback, :schema] and nil_literal?(node)
   end
 
   @impl true

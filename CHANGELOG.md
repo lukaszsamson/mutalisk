@@ -5,6 +5,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.17 unreleased
 
+### M53 — pattern-position literal mutators (2026-05-24)
+
+Literal mutators now also fire in `:match` (pattern) positions — `def
+handle(:error)`, `def status(404)`, `def tag([1, "name"])` — for the
+**integer / atom / boolean / nil / string** subset (not float). New **opt-in
+`:pattern_literal` target**; nothing changes in the default plan.
+
+- `Mut.EnvWalker` emits pattern-position scalar candidates with
+  `env_context: :match`. The discoverable surface is naturally conservative:
+  `descend/2` never recurses into 2-tuples or map pairs and the walker tracks
+  no positional path, so only bare arguments, list elements, and n-tuple
+  (arity ≥ 3) elements are seen. **Bitstring segment-size literals**
+  (`<<x::16>>`) are skipped (a literal swap there can produce an invalid
+  match).
+- Routing: pattern candidates flow through `Orchestrator.pattern_literal_results`
+  → the fallback engine (pattern schemata are not expression-position safe).
+  The five literal mutators gained the `:pattern_literal` target and admit
+  `env_context == :match` in `applicable?/2`.
+- Clause-collision hazards (e.g. mutating `:error` → `:ok` next to an existing
+  `handle(:ok)` clause) are handled **reactively** by `Mut.CompileRollback`
+  (which removes any placement that fails to compile) rather than predicted —
+  the path-less env walker has no cheap cross-clause view. Most collisions
+  compile (an unreachable-clause warning) and yield valid, killable mutants;
+  warnings-as-errors builds fall to rollback. See
+  `docs/decisions/M53_pattern_position_literals.md`.
+
+Opt-in, zero stable-id churn for existing mutants (verified on demo_app:
+`[:dispatch, :guard, :env_walker]` vs `+ :pattern_literal` are identical).
+
 ### M52 — schema-route the literal catalogue (2026-05-24)
 
 Scalar literals (integer/boolean/string/float/nil/atom) now run through the

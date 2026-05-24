@@ -9,7 +9,8 @@ defmodule Mut.Orchestrator do
   alias Mut.Oracle.DispatchSite
   alias Mut.Plan
 
-  @type target :: :dispatch | :guard | :module_attribute | :body_literal | :env_walker
+  @type target ::
+          :dispatch | :guard | :module_attribute | :body_literal | :env_walker | :pattern_literal
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -87,22 +88,30 @@ defmodule Mut.Orchestrator do
     {guard_fallback, guard_skips} =
       guard_fallback_results(guard_candidates, oracle, enabled_targets, mutators, source)
 
-    # Env walker now contributes only COLLECTION literals (list/tuple/map);
-    # scalars moved to the schema path above. Collections stay fallback
-    # (M50) — they cannot be schema-placed cleanly yet.
+    # Env walker contributes COLLECTION literals (list/tuple/map, body
+    # position, M50) and — M53 — scalar literals in `:match` (pattern)
+    # positions. Body scalars moved to the schema path above; both env-walker
+    # streams stay fallback (collections and patterns cannot be schema-placed
+    # cleanly). Parse once if either target is on; split by env_context.
     env_pairs =
-      if :env_walker in enabled_targets do
+      if :env_walker in enabled_targets or :pattern_literal in enabled_targets do
         env_walker_candidates(path, relative_file, source, macro_index)
       else
         []
       end
 
+    {match_pairs, collection_pairs} =
+      Enum.split_with(env_pairs, fn {candidate, _snap} -> candidate.env_context == :match end)
+
     {env_fallback, env_skips} =
-      env_walker_results(env_pairs, enabled_targets, mutators, source)
+      env_walker_results(collection_pairs, enabled_targets, mutators, source)
+
+    {pattern_fallback, pattern_skips} =
+      pattern_literal_results(match_pairs, enabled_targets, mutators, source)
 
     %Plan{
       schema: dispatch_schema ++ literal_schema,
-      fallback: attribute_fallback ++ guard_fallback ++ env_fallback,
+      fallback: attribute_fallback ++ guard_fallback ++ env_fallback ++ pattern_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
@@ -110,7 +119,8 @@ defmodule Mut.Orchestrator do
           literal_skips ++
           attribute_skips ++
           guard_skips ++
-          env_skips,
+          env_skips ++
+          pattern_skips,
       matched_pairs: matched
     }
   end
@@ -177,10 +187,13 @@ defmodule Mut.Orchestrator do
           source: source,
           macro_index: macro_index
         )
-        # M52: scalars now route through the schema path; keep only
+        # M52: body-position scalars route through the schema path; keep
         # collection candidates here (CollectionEmpty, fallback-routed).
+        # M53: pattern-position scalars (`env_context == :match`) cannot be
+        # schema-placed, so they also stay on the env-walker fallback path.
         |> Enum.filter(fn {candidate, _snap} ->
-          candidate.syntactic_name in @collection_literal_names
+          candidate.syntactic_name in @collection_literal_names or
+            candidate.env_context == :match
         end)
 
       _ ->
@@ -203,6 +216,22 @@ defmodule Mut.Orchestrator do
       enabled_fallback_results(candidates, :env_walker, nil, mutators, source)
     else
       {[], []}
+    end
+  end
+
+  # M53: pattern-position scalar literals (`env_context == :match`), gated by
+  # the opt-in `:pattern_literal` target. Fallback-routed (pattern schemata
+  # are not expression-position safe); the literal mutators that carry the
+  # `:pattern_literal` target and admit `env_context == :match` mutate them.
+  defp pattern_literal_results([], _enabled_targets, _mutators, _source), do: {[], []}
+
+  defp pattern_literal_results(pairs, enabled_targets, mutators, source) do
+    candidates = Enum.map(pairs, fn {candidate, _snap} -> candidate end)
+
+    if :pattern_literal in enabled_targets do
+      enabled_fallback_results(candidates, :pattern_literal, nil, mutators, source)
+    else
+      {[], Enum.map(candidates, &skip(&1, :pattern_literal_engine_disabled, nil))}
     end
   end
 
@@ -392,6 +421,9 @@ defmodule Mut.Orchestrator do
 
   defp fallback_env_context(_candidate, _site, :module_attribute), do: nil
   defp fallback_env_context(_candidate, _site, :env_walker), do: nil
+  # M53: pattern-position scalars carry `:match`, which the literal mutators'
+  # `applicable?/2` admit.
+  defp fallback_env_context(candidate, _site, :pattern_literal), do: candidate.env_context
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}
