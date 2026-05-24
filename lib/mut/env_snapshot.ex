@@ -70,7 +70,8 @@ defmodule Mut.EnvSnapshot do
           trust_level: trust_level(),
           aliases: %{optional(module()) => module()},
           imports: %{optional(module()) => [{atom(), arity()}]},
-          requires: MapSet.t(module())
+          requires: MapSet.t(module()),
+          bound_vars: MapSet.t(atom())
         }
 
   defstruct file: nil,
@@ -86,7 +87,11 @@ defmodule Mut.EnvSnapshot do
             trust_level: :trusted,
             aliases: %{},
             imports: %{},
-            requires: MapSet.new()
+            requires: MapSet.new(),
+            # M54: local variable names bound and in scope at this node
+            # (function params + enclosing clause-head patterns). Does not
+            # enter stable-id identity.
+            bound_vars: MapSet.new()
 
   @doc """
   Returns `true` iff the snapshot is eligible for a first-pass

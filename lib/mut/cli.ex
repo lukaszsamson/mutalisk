@@ -47,7 +47,8 @@ defmodule Mut.Cli do
     :module_attribute,
     :body_literal,
     :env_walker,
-    :pattern_literal
+    :pattern_literal,
+    :variable
   ]
   @known_mutators [
     "arithmetic",
@@ -66,6 +67,7 @@ defmodule Mut.Cli do
     "nil_literal",
     "atom_literal",
     "collection_empty",
+    "variable_replace",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -451,6 +453,7 @@ defmodule Mut.Cli do
       "nil_literal" => Mut.Mutator.NilLiteral,
       "atom_literal" => Mut.Mutator.AtomLiteral,
       "collection_empty" => Mut.Mutator.CollectionEmpty,
+      "variable_replace" => Mut.Mutator.VariableReplace,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
     }
   end

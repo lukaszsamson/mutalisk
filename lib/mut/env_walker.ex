@@ -93,6 +93,10 @@ defmodule Mut.EnvWalker do
           macro_index: tracer_macro_index() | nil
         ]
 
+  # M54: variable-shaped AST nodes (`{name, meta, atom}`) that are NOT
+  # mutable bindings/references — the reserved nullary macros.
+  @reserved_vars ~w(__MODULE__ __DIR__ __ENV__ __CALLER__ __STACKTRACE__ __block__ __aliases__)a
+
   @doc """
   Parses source with the literal-encoder option, returning an AST
   that wraps each literal in `{:__block__, meta, [value]}` so the
@@ -197,6 +201,47 @@ defmodule Mut.EnvWalker do
   end
 
   @doc """
+  M54: walks the AST and returns `[{AstCandidate.t(), EnvSnapshot.t()}]`
+  pairs for every in-scope variable *reference* (read) in a trusted
+  function body, where at least one other in-scope variable exists to swap
+  to. Each candidate's `bound_vars` lists the alternatives (sorted).
+
+  In-scope is a deliberate under-approximation: function parameters plus
+  enclosing case/fn/receive/try clause-head bindings (NOT body `=` or
+  with/for generators), all of which are unconditionally in scope at the
+  reference, so a swap never introduces an undefined variable.
+  """
+  @spec collect_variable_candidates(Macro.t(), collect_opts()) ::
+          [{AstCandidate.t(), EnvSnapshot.t()}]
+  def collect_variable_candidates(ast, opts) when is_list(opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.get(opts, :source, "")
+    macro_index = Keyword.get(opts, :macro_index)
+    line_offsets = compute_line_offsets(source)
+
+    initial_state = %{
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      macro_index: macro_index,
+      ast_path: [],
+      module: nil,
+      function: nil,
+      context: nil,
+      scope: :top_level,
+      trust_level: :trusted,
+      snapshots: [],
+      candidates: [],
+      literal_kinds: [],
+      bound_vars: MapSet.new(),
+      emit_variables: true
+    }
+
+    state = walk(ast, initial_state)
+    Enum.reverse(state.candidates)
+  end
+
+  @doc """
   Walks the AST and returns a list of `Mut.EnvSnapshot` records
   for each `:__block__`-wrapped literal node.
   """
@@ -268,6 +313,11 @@ defmodule Mut.EnvWalker do
     [latest_snap | _] = state.snapshots
 
     cond do
+      # The variable walk (collect_variable_candidates/2) emits only variable
+      # candidates; literal candidates must not leak into it.
+      Map.get(state, :emit_variables, false) ->
+        state
+
       EnvSnapshot.body_literal_eligible?(latest_snap) ->
         case literal_candidate_name(value, state.literal_kinds) do
           nil -> state
@@ -365,7 +415,8 @@ defmodule Mut.EnvWalker do
       function: state.function,
       context: state.context,
       scope: state.scope,
-      trust_level: state.trust_level
+      trust_level: state.trust_level,
+      bound_vars: current_bound_vars(state)
     }
   end
 
@@ -702,6 +753,14 @@ defmodule Mut.EnvWalker do
     Enum.reduce(list, state, &walk(&1, &2))
   end
 
+  # M54: variable node. `{name, meta, ctx}` with an atom context is a
+  # variable (calls carry a list as the third element). Emitting is gated on
+  # `emit_variables` so literal/dispatch walks are unaffected (variables were
+  # already leaves for them).
+  defp descend({name, meta, ctx} = node, state) when is_atom(name) and is_atom(ctx) do
+    maybe_emit_variable_candidate(state, node, name, meta)
+  end
+
   # Leaves.
   defp descend(_other, state), do: state
 
@@ -734,7 +793,13 @@ defmodule Mut.EnvWalker do
         _ -> nil
       end
 
-    body_state = %{head_state | scope: body_scope, context: body_context}
+    # M54: function parameters are bound for the whole body. Clause-local
+    # bindings revert when this `def` returns (we thread only snapshots /
+    # candidates back onto the outer `state`).
+    body_state =
+      %{head_state | scope: body_scope, context: body_context}
+      |> add_bound_vars(head_args)
+
     body_state = walk(body, body_state)
 
     %{state | snapshots: body_state.snapshots, candidates: body_state.candidates}
@@ -772,7 +837,9 @@ defmodule Mut.EnvWalker do
     Enum.reduce(clauses, state, fn
       {:->, _meta, [head, body]}, acc ->
         head_state = walk_clause_head(head, %{acc | context: :match})
-        body_state = %{head_state | context: nil}
+        # M54: clause-head patterns are bound for this clause body only;
+        # restoring `acc`'s `bound_vars` on return keeps them clause-local.
+        body_state = add_bound_vars(%{head_state | context: nil}, clause_head_patterns(head))
         body_state = walk(body, body_state)
         %{acc | snapshots: body_state.snapshots, candidates: body_state.candidates}
 
@@ -833,6 +900,110 @@ defmodule Mut.EnvWalker do
   end
 
   defp walk_for_clause(other, state), do: walk(other, state)
+
+  ## --- M54 binding-scope tracking + variable candidates -----------------
+
+  defp add_bound_vars(state, ast) do
+    Map.put(state, :bound_vars, MapSet.union(current_bound_vars(state), pattern_vars(ast)))
+  end
+
+  defp current_bound_vars(state), do: Map.get(state, :bound_vars, MapSet.new())
+
+  # A clause head is `[patterns...]` or `[{:when, _, [pattern, guard]}]`.
+  defp clause_head_patterns([{:when, _meta, [pattern, _guard]}]), do: pattern
+  defp clause_head_patterns(patterns), do: patterns
+
+  # Variable names bound by a pattern (or list of patterns). Pins (`^x` reads
+  # an existing binding) and `_`-prefixed / reserved names are excluded.
+  defp pattern_vars(ast) do
+    {_ast, vars} =
+      Macro.prewalk(ast, MapSet.new(), fn
+        {:^, _meta, [_pinned]}, acc ->
+          # Replace the pin with a leaf so prewalk does not bind the pinned var.
+          {:__mut_pin__, acc}
+
+        {name, _meta, ctx} = node, acc when is_atom(name) and is_atom(ctx) ->
+          if bindable_var?(name), do: {node, MapSet.put(acc, name)}, else: {node, acc}
+
+        node, acc ->
+          {node, acc}
+      end)
+
+    vars
+  end
+
+  defp bindable_var?(name) do
+    not String.starts_with?(Atom.to_string(name), "_") and name not in @reserved_vars
+  end
+
+  defp maybe_emit_variable_candidate(state, node, name, meta) do
+    cond do
+      not Map.get(state, :emit_variables, false) -> state
+      not variable_read_eligible?(state, name) -> state
+      true -> emit_variable_candidate(state, node, name, meta)
+    end
+  end
+
+  # Only mutate reads (`context == nil`) in a trusted function body, and only
+  # when another in-scope variable exists to swap to.
+  defp variable_read_eligible?(state, name) do
+    bindable_var?(name) and state.context == nil and state.scope == :function_body and
+      state.trust_level == :trusted and
+      MapSet.size(MapSet.delete(current_bound_vars(state), name)) > 0
+  end
+
+  defp emit_variable_candidate(state, node, name, meta) do
+    alternatives = current_bound_vars(state) |> MapSet.delete(name) |> Enum.sort()
+
+    case variable_span(state, name, meta) do
+      nil ->
+        state
+
+      span ->
+        candidate = build_variable_candidate(state, node, meta, span, alternatives)
+        %{state | candidates: [{candidate, state_snapshot(state)} | state.candidates]}
+    end
+  end
+
+  defp build_variable_candidate(state, node, meta, span, alternatives) do
+    %AstCandidate{
+      file: state.file,
+      line: Keyword.get(meta, :line),
+      column: Keyword.get(meta, :column),
+      syntactic_name: :__variable__,
+      syntactic_arity: 0,
+      source_span: span,
+      env_context: nil,
+      enclosing_module: state.module,
+      ast_path: state.ast_path,
+      ast_path_hash: path_hash(state.ast_path),
+      node: node,
+      bound_vars: alternatives
+    }
+  end
+
+  defp variable_span(state, name, meta) do
+    line = Keyword.get(meta, :line)
+    column = Keyword.get(meta, :column)
+
+    with true <- is_integer(line) and is_integer(column),
+         start_byte when is_integer(start_byte) <- byte_offset(state, line, column) do
+      end_byte = start_byte + byte_size(Atom.to_string(name))
+      {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
+
+      %SourceSpan{
+        file: state.file,
+        start_line: line,
+        start_column: column,
+        end_line: end_line,
+        end_column: end_column,
+        start_byte: start_byte,
+        end_byte: end_byte
+      }
+    else
+      _ -> nil
+    end
+  end
 
   defp walk_try(opts, state) do
     state = if body = fetch_block(opts, :do), do: walk(body, state), else: state

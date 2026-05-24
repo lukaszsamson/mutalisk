@@ -37,7 +37,8 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.StringLiteral,
     Mut.Mutator.FloatLiteral,
     Mut.Mutator.NilLiteral,
-    Mut.Mutator.CollectionEmpty
+    Mut.Mutator.CollectionEmpty,
+    Mut.Mutator.VariableReplace
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

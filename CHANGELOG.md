@@ -5,6 +5,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.17 unreleased
 
+### M54 — variable mutators + walker binding-scope tracking (2026-05-24)
+
+New opt-in `:variable` target with `Mut.Mutator.VariableReplace`: replace an
+in-scope variable *reference* with another variable in scope at that point
+(e.g. `a + b` → `b + b`). Fallback-routed.
+
+- **Binding-scope tracking** added to `Mut.EnvWalker`: a `bound_vars` set
+  threaded through the walk and surfaced on `EnvSnapshot` (new field; does not
+  enter stable-id identity). Bindings are collected from function parameters
+  (`walk_def`) and clause-head patterns (`walk_clauses`); they revert when the
+  enclosing `def`/clause returns, so they stay correctly scoped. Pins (`^x`)
+  and `_`-prefixed / reserved (`__MODULE__`, …) names are excluded.
+- **`collect_variable_candidates/2`** emits variable reads in trusted function
+  bodies (`context == nil`) where ≥1 *other* in-scope variable exists. The
+  in-scope set is a deliberate **under-approximation** (params + clause-head
+  bindings, not body `=` or with/for generators), so a swap can never
+  introduce an undefined variable. At most 3 swaps per reference.
+- Residual hazards are runtime behaviour (killable) and the occasional
+  "unused variable" warning, which `Mut.CompileRollback` removes under
+  warnings-as-errors builds.
+- **`Mut.Mutator.VariableToLiteral` is deferred** (PLAN-sanctioned): replacing
+  a variable with a literal needs type evidence the path-less walker cannot
+  cheaply derive without an expansion pass (which the no-expansion contract
+  forbids). Revisit from M55 data if warranted.
+
+Opt-in (`--enable variable`), zero stable-id churn for existing mutants
+(verified on demo_app), `bin/verify` green. CLI gains `--mutators
+variable_replace`. See `docs/decisions/M54_variable_mutators.md`.
+
 ### M53 — pattern-position literal mutators (2026-05-24)
 
 Literal mutators now also fire in `:match` (pattern) positions — `def

@@ -10,7 +10,13 @@ defmodule Mut.Orchestrator do
   alias Mut.Plan
 
   @type target ::
-          :dispatch | :guard | :module_attribute | :body_literal | :env_walker | :pattern_literal
+          :dispatch
+          | :guard
+          | :module_attribute
+          | :body_literal
+          | :env_walker
+          | :pattern_literal
+          | :variable
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -109,9 +115,16 @@ defmodule Mut.Orchestrator do
     {pattern_fallback, pattern_skips} =
       pattern_literal_results(match_pairs, enabled_targets, mutators, source)
 
+    # M54: variable-reference mutators (opt-in `:variable` target), discovered
+    # by a separate binding-scope-aware walk. Fallback-routed.
+    {variable_fallback, variable_skips} =
+      variable_results(path, relative_file, source, macro_index, enabled_targets, mutators)
+
     %Plan{
       schema: dispatch_schema ++ literal_schema,
-      fallback: attribute_fallback ++ guard_fallback ++ env_fallback ++ pattern_fallback,
+      fallback:
+        attribute_fallback ++
+          guard_fallback ++ env_fallback ++ pattern_fallback ++ variable_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
@@ -120,7 +133,8 @@ defmodule Mut.Orchestrator do
           attribute_skips ++
           guard_skips ++
           env_skips ++
-          pattern_skips,
+          pattern_skips ++
+          variable_skips,
       matched_pairs: matched
     }
   end
@@ -232,6 +246,34 @@ defmodule Mut.Orchestrator do
       enabled_fallback_results(candidates, :pattern_literal, nil, mutators, source)
     else
       {[], Enum.map(candidates, &skip(&1, :pattern_literal_engine_disabled, nil))}
+    end
+  end
+
+  # M54: variable-reference candidates from a binding-scope-aware walk, gated
+  # by the opt-in `:variable` target. When the target is off, no walk happens
+  # (zero overhead, zero churn for existing plans).
+  defp variable_results(path, relative_file, source, macro_index, enabled_targets, mutators) do
+    if :variable in enabled_targets do
+      candidates = variable_candidates(path, relative_file, source, macro_index)
+      enabled_fallback_results(candidates, :variable, nil, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
+  defp variable_candidates(_path, relative_file, source, macro_index) do
+    case Mut.EnvWalker.parse_string(source, relative_file) do
+      {:ok, encoded_ast} ->
+        encoded_ast
+        |> Mut.EnvWalker.collect_variable_candidates(
+          file: relative_file,
+          source: source,
+          macro_index: macro_index
+        )
+        |> Enum.map(fn {candidate, _snap} -> candidate end)
+
+      _ ->
+        []
     end
   end
 
@@ -412,7 +454,8 @@ defmodule Mut.Orchestrator do
       ast_path: candidate.ast_path,
       ast_path_hash: candidate.ast_path_hash,
       env_context: fallback_env_context(candidate, site, target),
-      engine: :fallback
+      engine: :fallback,
+      bound_vars: candidate.bound_vars
     }
   end
 
@@ -424,6 +467,8 @@ defmodule Mut.Orchestrator do
   # M53: pattern-position scalars carry `:match`, which the literal mutators'
   # `applicable?/2` admit.
   defp fallback_env_context(candidate, _site, :pattern_literal), do: candidate.env_context
+  # M54: variable references are reads (normal expression context).
+  defp fallback_env_context(_candidate, _site, :variable), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

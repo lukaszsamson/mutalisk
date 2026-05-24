@@ -11,7 +11,10 @@ defmodule Mut.Context do
     :ast_path,
     :ast_path_hash,
     :env_context,
-    :engine
+    :engine,
+    # M54: in-scope variable names for the VariableReplace mutator (nil for
+    # non-variable contexts).
+    :bound_vars
   ]
 
   @type t :: %__MODULE__{
@@ -23,6 +26,7 @@ defmodule Mut.Context do
           ast_path: [term()],
           ast_path_hash: binary(),
           env_context: nil | :match | :guard,
-          engine: :schema | :fallback
+          engine: :schema | :fallback,
+          bound_vars: [atom()] | nil
         }
 end

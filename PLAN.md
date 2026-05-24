@@ -3046,6 +3046,20 @@ alias/import/require maps today, NOT local bindings);
 *Out of scope:* Cross-function / cross-module variable reasoning.
 Closure-capture analysis beyond syntactic scope.
 
+*Status (2026-05-24): DELIVERED (VariableReplace; VariableToLiteral deferred).*
+`EnvWalker` tracks a `bound_vars` set (params + clause-head patterns, reverting
+per def/clause; `=`/with/for generators intentionally excluded as an
+under-approximation so swaps never introduce undefined vars), surfaced on
+`EnvSnapshot` (zero stable-id churn). `collect_variable_candidates/2` emits
+in-scope variable reads; `Mut.Mutator.VariableReplace` (new opt-in `:variable`
+target, fallback-routed) swaps to ≤3 other in-scope vars. Unused-variable
+warnings handled reactively by `CompileRollback`. *Deviation:*
+`VariableToLiteral` deferred (needs type evidence the no-expansion walker
+cannot cheaply derive) — rationale in
+`docs/decisions/M54_variable_mutators.md`. Zero churn verified on demo_app;
+`bin/verify` green; no-expansion contract intact (pure AST traversal). Corpus
+invalid/equivalent rates fold into M55.
+
 **M55 — Broad OSS validation matrix + combined decisions.**
 
 *Goal:* Validate the full v1.17 catalogue on a real OSS corpus and
