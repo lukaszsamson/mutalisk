@@ -73,6 +73,22 @@ defmodule Mut.EnvWalkerVariableTest do
     assert vars(src) == []
   end
 
+  test "bitstring segment specifiers are not treated as bindings or swap targets" do
+    # `<<original::bits>>` — `bits` is a type specifier, AST-shaped as a
+    # variable, but must never be collected as a binding or offered as a swap
+    # target (doing so produces undefined-variable mutants). Reads *inside* a
+    # bitstring are also skipped.
+    src = ~S'''
+    defmodule Foo do
+      def parse(<<original::bits>>, len) do
+        decode(original, len)
+      end
+    end
+    '''
+
+    assert vars(src) == [{:original, [:len]}, {:len, [:original]}]
+  end
+
   test "variable candidates have env_context nil (reads)" do
     src = ~S'''
     defmodule Foo do

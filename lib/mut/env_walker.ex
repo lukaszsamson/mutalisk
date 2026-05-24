@@ -922,6 +922,13 @@ defmodule Mut.EnvWalker do
           # Replace the pin with a leaf so prewalk does not bind the pinned var.
           {:__mut_pin__, acc}
 
+        {:"::", meta, [left, _spec]}, acc ->
+          # Bitstring segment: only the left side binds a variable. The right
+          # side is a size/type specifier (`<<rest::bits>>` -> `bits`) which is
+          # AST-shaped as a variable but is NOT a binding; neutralize it so it
+          # is never collected or offered as a swap target.
+          {{:"::", meta, [left, :__mut_spec__]}, acc}
+
         {name, _meta, ctx} = node, acc when is_atom(name) and is_atom(ctx) ->
           if bindable_var?(name), do: {node, MapSet.put(acc, name)}, else: {node, acc}
 
@@ -939,6 +946,9 @@ defmodule Mut.EnvWalker do
   defp maybe_emit_variable_candidate(state, node, name, meta) do
     cond do
       not Map.get(state, :emit_variables, false) -> state
+      # Inside a `<<...>>`, a `{name, _, atom}` node may be a size/type
+      # specifier (`bits`, `binary`, ...), not a real read; skip the segment.
+      Map.get(state, :in_bitstring, false) -> state
       not variable_read_eligible?(state, name) -> state
       true -> emit_variable_candidate(state, node, name, meta)
     end
