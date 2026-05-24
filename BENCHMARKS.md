@@ -1,5 +1,48 @@
 # Mutalisk Benchmarks
 
+## v1.16 harvest + harden (M47–M51, 2026-05-23)
+
+### M48 — default-plan delta (AtomLiteral default-on)
+
+AtomLiteral became the first env-walker mutator in the default plan. The
+change is purely additive — every non-env-walker stable ID is unchanged;
+the default gains exactly the AtomLiteral mutants.
+
+| Target | v1.15 default | v1.16 default | AtomLiteral added | non-env IDs |
+|---|---:|---:|---:|---|
+| demo_app | 31 | 31 | +0 (no body atoms) | identical |
+| plug_crypto v2.1.1 | 64 | 70 | +6 | identical |
+| Decimal | 456 | 526 | +70 | identical |
+| plug v1.19.1 | 352 | 411 | +59 | identical |
+
+No String/Float/Nil/Collection leaked into any default plan (verified by
+plan diff). `--enable …,env_walker` / `--mutators` still produce the
+v1.15 plans.
+
+### M50 — CollectionEmpty maps + n-tuples (opt-in), invalid rate
+
+Execution with `--enable env_walker --mutators collection_empty` (now
+covering list / 2-tuple / map / n-tuple; struct maps never emptied):
+
+| Target | CollectionEmpty mutants | killed | survived | invalid | kill% | inv% |
+|---|---:|---:|---:|---:|---:|---:|
+| plug_crypto v2.1.1 | 20 | 17 | 2 | 0 | 89.5 | **0.0** |
+| Decimal | 39 | 28 | 11 | 0 | 71.8 | **0.0** |
+
+Invalid rate is 0% on both (well under the <10% gate) — the new map/
+n-tuple shapes always compile. Byte-identity held: plug_crypto added
+exactly 7 map/n-tuple mutants with every prior CollectionEmpty ID
+preserved.
+
+### M47 — reporter robustness
+
+The plug v1.19.1 full literal run (1,390 mutants, all literal mutators
+enabled) now writes valid Stryker JSON (schemaVersion 2) end-to-end. In
+M46 the same run executed all 1,390 mutants then crashed at the reporting
+step (`TokenMissingError` rendering one heredoc-literal diff), losing the
+results. Post-fix: zero mutants needed the marker fallback (heredoc cases
+degrade cleanly to the unformatted render).
+
 ## v1.15 literal execution validation + span fix (M46, 2026-05-23)
 
 First **execution-level** validation of the env-walker literal mutators
