@@ -21,12 +21,19 @@ defmodule Mut.TestSelection.Coverage do
     analysis = static_analysis(static_index)
     killer = Keyword.get(opts, :last_killer)
 
+    degraded = degraded_files(oracle)
+
     for mutant <- plan.schema ++ plan.fallback, into: %{} do
-      result = select(mutant, oracle, analysis, all_test_files)
+      result = select(mutant, oracle, analysis, all_test_files, degraded)
       ordered = order_tests(result.test_files, mutant, oracle, killer)
       {mutant.stable_id, %{result | test_files: ordered}}
     end
   end
+
+  defp degraded_files(%CoverageOracle{degraded_test_files: files}) when is_list(files),
+    do: Enum.map(files, fn {path, _reason} -> path end)
+
+  defp degraded_files(_oracle), do: []
 
   @spec order_tests([Path.t()], Mutant.t(), CoverageOracle.t(), GenServer.server() | nil) :: [
           Path.t()
@@ -45,19 +52,46 @@ defmodule Mut.TestSelection.Coverage do
     end)
   end
 
-  defp select(%Mutant{} = mutant, oracle, analysis, all_test_files) do
-    with [] <- oracle_tests(oracle.by_line, {mutant.file, mutant.line}),
-         [] <- function_tests(mutant, oracle),
-         [] <- static_tests(analysis, mutant, all_test_files) do
-      %{test_files: all_test_files, match_kind: :all_tests}
-    else
-      tests when is_list(tests) ->
-        %{
-          test_files: tests,
-          match_kind: match_kind(mutant, oracle, tests, analysis, all_test_files)
-        }
+  defp select(%Mutant{} = mutant, oracle, analysis, all_test_files, degraded) do
+    base =
+      with [] <- oracle_tests(oracle.by_line, {mutant.file, mutant.line}),
+           [] <- function_tests(mutant, oracle),
+           [] <- static_tests(analysis, mutant, all_test_files) do
+        %{test_files: all_test_files, match_kind: :all_tests}
+      else
+        tests when is_list(tests) ->
+          %{
+            test_files: tests,
+            match_kind: match_kind(mutant, oracle, tests, analysis, all_test_files)
+          }
+      end
+
+    # M64: a degraded (coverage-failed) test file still runs for the mutants it
+    # statically covers — union its static coverage so degradation never causes
+    # a false survivor.
+    case degraded_cover(mutant, analysis, degraded) do
+      [] -> base
+      extra -> %{base | test_files: Enum.uniq(base.test_files ++ extra)}
     end
   end
+
+  # Degraded files that have static evidence for this mutant (mirrors
+  # static_tests/3 but over the degraded set; [] when no real evidence so a
+  # mutant unrelated to the degraded file is unaffected).
+  defp degraded_cover(_mutant, _analysis, []), do: []
+
+  defp degraded_cover(%Mutant{module: module} = mutant, analysis, degraded)
+       when is_atom(module) do
+    selected = Static.covering_tests(analysis, module, degraded)
+
+    cond do
+      selected == [] -> []
+      selected == Enum.sort(degraded) and not static_evidence?(analysis, mutant, selected) -> []
+      true -> selected
+    end
+  end
+
+  defp degraded_cover(_mutant, _analysis, _degraded), do: []
 
   defp match_kind(mutant, oracle, tests, analysis, all_test_files) do
     cond do

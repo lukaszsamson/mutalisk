@@ -28,17 +28,26 @@ defmodule Mut.Coverage.Runner do
     end
   end
 
+  # M64: per-file crash-tolerant collection. A test file whose coverage
+  # collection fails (exception / timeout / BEAM crash) is RECORDED as degraded
+  # and the run CONTINUES, instead of aborting the whole run (the v1.18 M61
+  # failure: gettext/credo/timex). Degraded files fall back to static selection
+  # (Mut.TestSelection.Coverage unions their static coverage), so the mutants
+  # they cover still run their tests — no false survivors.
   defp collect_files(test_files, root, timeout_ms, mutalisk_path) do
-    Enum.reduce_while(test_files, {:ok, empty_oracle()}, fn test_file, {:ok, oracle} ->
-      case run_test_file(root, test_file, timeout_ms, mutalisk_path) do
-        {:ok, partial} -> {:cont, {:ok, merge_oracle(oracle, partial)}}
-        {:error, reason} -> {:halt, {:error, reason}}
-      end
-    end)
-  end
+    {oracle, degraded} =
+      Enum.reduce(test_files, {empty_oracle(), []}, fn test_file, {oracle, degraded} ->
+        case run_test_file(root, test_file, timeout_ms, mutalisk_path) do
+          {:ok, partial} ->
+            {merge_oracle(oracle, partial), degraded}
 
-  defp put_collection_metadata({:error, _reason} = error, _started, _fallback_static_tests),
-    do: error
+          {:error, reason} ->
+            {oracle, [{Path.relative_to(test_file, root), reason} | degraded]}
+        end
+      end)
+
+    {:ok, %{oracle | degraded_test_files: Enum.reverse(degraded)}}
+  end
 
   defp put_collection_metadata({:ok, oracle}, started, fallback_static_tests) do
     {:ok,

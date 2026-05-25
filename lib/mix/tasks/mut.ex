@@ -337,10 +337,34 @@ defmodule Mix.Tasks.Mut do
            test_paths: absolute_test_paths(work_copy, opts),
            mutalisk_path: @mutalisk_root
          ) do
-      {:ok, oracle} -> oracle
-      {:error, reason} -> Mix.raise("coverage collection failed: #{inspect(reason)}")
+      {:ok, oracle} ->
+        report_degraded_coverage(oracle)
+        oracle
+
+      {:error, reason} ->
+        Mix.raise("coverage collection failed: #{inspect(reason)}")
     end
   end
+
+  # M64: surface per-file coverage degradation (crash-tolerant fallback).
+  defp report_degraded_coverage(%{degraded_test_files: [_ | _] = degraded}) do
+    IO.puts(
+      "Coverage: #{length(degraded)} test file(s) degraded to static selection " <>
+        "(per-file collection failed; their tests still run for the mutants they " <>
+        "statically cover):"
+    )
+
+    for {path, reason} <- Enum.take(degraded, 10) do
+      IO.puts("  - #{path}: #{degraded_reason(reason)}")
+    end
+  end
+
+  defp report_degraded_coverage(_oracle), do: :ok
+
+  defp degraded_reason({tag, _file, _a, _b}), do: tag
+  defp degraded_reason({tag, _file, _x}), do: tag
+  defp degraded_reason(reason) when is_atom(reason), do: reason
+  defp degraded_reason(reason), do: inspect(reason, limit: 3)
 
   defp handle_pathological_coverage(
          :coverage_with_static_fallback,

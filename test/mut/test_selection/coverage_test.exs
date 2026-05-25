@@ -19,6 +19,33 @@ defmodule Mut.TestSelection.CoverageTest do
     assert result["exact"] == %{test_files: ["test/exact_test.exs"], match_kind: :exact_line}
   end
 
+  test "M64: a degraded test file's static coverage is unioned into the selection" do
+    plan = plan([mutant("deg", "lib/sample.ex", 10, Sample, {:run, 1})])
+
+    oracle = %CoverageOracle{
+      by_line: %{{"lib/sample.ex", 10} => MapSet.new([{:file, "test/exact_test.exs"}])},
+      degraded_test_files: [{"test/static_test.exs", :coverage_test_timeout}]
+    }
+
+    result = Coverage.for_plan(plan, oracle, %{Sample => MapSet.new(["test/static_test.exs"])})
+
+    # the degraded file runs alongside the coverage-selected file (no false survivor)
+    assert Enum.sort(result["deg"].test_files) == ["test/exact_test.exs", "test/static_test.exs"]
+  end
+
+  test "M64: a degraded file unrelated to the mutant's module is not unioned" do
+    plan = plan([mutant("unrel", "lib/sample.ex", 10, Sample, {:run, 1})])
+
+    oracle = %CoverageOracle{
+      by_line: %{{"lib/sample.ex", 10} => MapSet.new([{:file, "test/exact_test.exs"}])},
+      degraded_test_files: [{"test/other_test.exs", :coverage_test_failed}]
+    }
+
+    result = Coverage.for_plan(plan, oracle, %{Other => MapSet.new(["test/other_test.exs"])})
+
+    assert result["unrel"].test_files == ["test/exact_test.exs"]
+  end
+
   test "falls back to enclosing function coverage" do
     plan = plan([mutant("function", "lib/sample.ex", 10, Sample, {:run, 1})])
 

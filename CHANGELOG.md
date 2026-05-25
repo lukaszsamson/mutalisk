@@ -5,6 +5,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.19 unreleased — finish the stalled flips
 
+### M64 — per-file crash-tolerant coverage fallback (2026-05-25)
+
+`coverage_with_static_fallback` now degrades **per test file** instead of
+aborting the run, closing the three M61 failure modes. `Coverage.Runner.collect_files`
+records a file whose coverage collection fails (exception / timeout / BEAM
+crash — all `{:error}`) as degraded (`CoverageOracle.degraded_test_files`) and
+continues. To prevent false survivors, `TestSelection.Coverage` unions a
+degraded file's *static* coverage into the mutants it covers. The disposition
+is surfaced ("N test file(s) degraded to static …"). Validated: gettext, which
+**aborted** under coverage in M61, now degrades `backend_test.exs` and
+completes. `docs/decisions/M64_coverage_crash_tolerant_fallback.md`.
+
 ### M63 — graduate IntegerLiteral-in-pattern to default-on (2026-05-25)
 
 First default-on flip since M46. Under the M62 sharpened gate, only
