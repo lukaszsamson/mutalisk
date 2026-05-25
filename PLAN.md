@@ -3337,6 +3337,186 @@ explicit "ship only what the data clears" outcome).
 - Bare `--selection coverage` as default (only the
   static-fallback mode flips).
 
+# v1.19 milestones (finish the stalled flips)
+
+v1.18 (M57–M61, 8 commits) hardened the v1.17 surface but shipped
+**no flips** — M60 graduated nothing and M61 didn't flip coverage,
+both data-gated no-flips. v1.19 converts both stalls into real
+outcomes by fixing the two root causes that blocked the data, not
+by asserting readiness: (1) the equivalent-rate metric
+over-estimates, blocking graduation; (2) the coverage runner
+aborts instead of degrading, blocking the coverage default. Two
+independent tracks.
+
+**Defaults may change in v1.19, both still data-gated.** M63 ships
+only what the *sharpened* metric clears (same discipline as M60 —
+nothing if nothing clears). M65 flips coverage only after M64
+makes it crash-safe. No new mutation surface; no new subsystem;
+incremental history still held. Elixir floor stays `>= 1.19.0`.
+
+Four milestones, two tracks. Graduation: M62 → M63. Coverage:
+M64 → M65. The tracks are independent; M65 depends on M64, M63 on
+M62.
+
+## v1.19 scope (committed)
+
+**M62 — Sharper equivalent estimation + gate-rule revisit.**
+
+*Goal:* Replace the inflated equivalent metric (and/or the gate
+rule built on it) with something defensible enough to make a real
+graduation decision.
+
+*Inputs:* `docs/decisions/M60_surface_graduation.md` (the
+covered-survivor heuristic, explicitly an over-estimate; the
+per-target table); `docs/decisions/M59_oss_matrix_equivalent_rate.md`
+(the measurement tooling); the M25/M41 gate rule.
+
+*Deliverables:*
+- Tighten the estimate: exclude uncovered survivors from the
+  equivalent count (an uncovered survivor is "untested," not
+  equivalent); add cheap syntactic equivalence rules where they
+  exist. Produce a defensible **lower-bound** rather than an
+  inflated upper-bound (or report both bounds).
+- Revisit the graduation gate rule given the metric's known bias:
+  e.g. admit a single-target miss within a small margin (≤~2pp)
+  when the estimate is an acknowledged over-count. Document and
+  justify — this changes graduation outcomes.
+- Recompute the M59 matrix graduation table under the new
+  metric/rule.
+
+*Acceptance:*
+- Defensible equivalent estimate (or explicit lower-bound) +
+  documented gate rule, in a decision doc.
+- Recomputed per-surface × per-target graduation table.
+- No stable-id change (measurement/policy only); `bin/verify`
+  green.
+
+*Out of scope:* Exact equivalent detection (undecidable in
+general — sharpen the estimate, don't claim exactness). The flip
+itself (M63).
+
+**M63 — Graduate what clears.**
+
+*Goal:* Flip to default-on whatever clears M62's sharpened gate.
+
+*Inputs:* M62 metric/rule + recomputed table; M57's refined
+VariableReplace; `Mut.Mutator.Defaults` tiers.
+
+*Deliverables:*
+- Move clearing surfaces into `default_on/0`. IntegerLiteral-in-
+  pattern is the prime candidate (one margin-point from clearing
+  under the over-estimate); re-evaluate the other pattern literals
+  and refined VariableReplace.
+- `docs/decisions/M63_*.md` per surface with the recomputed
+  numbers and the graduate/keep call.
+
+*Acceptance:*
+- Data-gated: ships nothing if nothing clears (like M60).
+- Default-plan stable-id change is **additive only** (existing IDs
+  unchanged), verified by plan diff on demo_app + Decimal.
+- Decision docs committed; `bin/verify` green.
+
+*Out of scope:* Graduating surfaces the sharpened data still
+doesn't clear (stay opt-in).
+
+**M64 — Per-file crash-tolerant static fallback in the coverage runner.**
+
+*Goal:* Make `coverage_with_static_fallback` degrade per-file
+instead of aborting the run, closing the three M61 failure modes.
+
+*Inputs:* `docs/decisions/M61_coverage_default.md` (the three
+crashes: gettext compile-in-test, credo timeout, timex
+hot-codeload); `lib/mut/coverage/runner.ex` + `coverage/parser.ex`;
+`lib/mut/test_selection/coverage.ex`.
+
+*Deliverables:*
+- Per-test-file coverage collection where each unit's failure is
+  contained and that unit's tests fall back to static selection,
+  run continuing:
+  1. **exception** (gettext: `ParallelCompiler` under `:cover` on
+     compile-in-test) — caught, file → static.
+  2. **timeout** (credo: `:cover` overhead blows the per-file
+     deadline) — elastic/higher timeout under coverage, else file
+     → static.
+  3. **BEAM/JIT crash** (timex: `:cover` + hot code-load) — per-unit
+     isolation so a single file's crash is recoverable, file →
+     static. (Partly BEAM-out-of-control; the fix is isolation +
+     fallback, not preventing the crash.)
+- Per-file coverage/static disposition surfaced in metrics.
+
+*Acceptance:*
+- gettext/credo/timex: coverage no longer aborts the run; failing
+  units degrade to static; run completes.
+- The M59 clean targets still collect coverage as before.
+- `bin/verify` green.
+
+*Out of scope:* Bare `coverage` mode robustness (it is allowed to
+fail loudly by design). Coverage caching.
+
+**M65 — Flip `--selection` default to `coverage_with_static_fallback`.**
+
+*Goal:* Land the coverage-default flip the v1.5 HLD always planned,
+now that M64 makes it crash-safe.
+
+*Inputs:* HLD v1.5 §Selection Modes; M64's per-file fallback; the
+M59 matrix.
+
+*Deliverables:*
+- Re-validate coverage across the matrix (incl. the three former
+  failers, now degrading gracefully). Confirm kill counts match
+  `static` — selection narrows test work, not outcomes.
+- Flip the default to `coverage_with_static_fallback`. Keep
+  `--selection static` as the documented escape hatch and the only
+  fully-portable mode. Never bare `coverage`.
+- `docs/decisions/M65_coverage_default.md` + per-target
+  fanout/wall-clock delta in BENCHMARKS.
+
+*Acceptance:*
+- Coverage default validated; zero kill-count regression vs static.
+- `--selection static` still works; active mode reported per run.
+- Decision doc committed; `bin/verify` green.
+
+*Out of scope:* Bare `coverage` as default; cross-run history /
+coverage caching (v2).
+
+## v1.19 delivery status (2026-05-25: ALL DELIVERED — both flips landed)
+
+Unlike v1.18 (no flips), v1.19 converted both stalls into real outcomes by
+fixing the root causes the flips were blocked on.
+
+- **M62** (`7674d40`) — equivalent metric framed as upper bound; gate revised to
+  admit a single-target ≤2pp miss. Recomputed: IntegerLiteral-in-pattern clears.
+- **M63** (`88c51b9`) — **graduated IntegerLiteral-in-pattern to default-on**
+  (first flip since M46) via a per-mutator/per-position allowlist. Additive:
+  demo_app unchanged, Decimal +18 mutants, existing IDs untouched.
+- **M64** (`1467641`) — coverage runner degrades per-file instead of aborting
+  (records `degraded_test_files`, unions their static coverage to avoid false
+  survivors, surfaces the disposition). gettext (M61 abort) now completes.
+- **M65** (`8b52c98`) — **flipped `--selection` default to
+  coverage_with_static_fallback**; kill-count parity validated (decimal 385==385,
+  the 1-mutant diff was test flakiness); `static` stays the escape hatch.
+
+`bin/verify` green throughout; all commits local on `master` (unpushed).
+
+## v1.19 horizon (not v1.19 scope)
+
+- **Incremental cross-run history** — still the deferred ambitious
+  bet; scope once the flips are banked.
+- **Further surface graduation** — surfaces M63 leaves opt-in,
+  revisited with even-sharper equivalent data.
+- **Exact equivalent detection** — out of reach; only estimation
+  sharpening is in scope.
+
+## Explicitly NOT v1.19
+
+- Incremental cross-run history (held).
+- New mutation surface or new literal value shapes.
+- Schema routing for non-literal mutators; wrapper guard schemata.
+- Function-call deletion / return-value replacement.
+- EnvWalker consolidation implementation.
+- Bare `--selection coverage` as default.
+- Exact equivalent-mutant detection.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

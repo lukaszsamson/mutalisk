@@ -1,5 +1,30 @@
 # Mutalisk Benchmarks
 
+## v1.19 finish the stalled flips (M62–M65, 2026-05-25)
+
+### M63 — IntegerLiteral-in-pattern graduated (additive)
+
+Default plan, Decimal: gains **18 IntegerLiteral (pattern) mutants**; all other
+mutators unchanged (Arithmetic 202, AtomLiteral 75, …), existing IDs untouched.
+demo_app default plan byte-identical (no integer patterns). Clears the M62
+sharpened gate (decimal 5.6% / plug 15.6% / ecto 21.1% equivalent — single
+≤2pp miss).
+
+### M65 — coverage default: kill-count parity + wall-clock
+
+decimal, default plan, static vs coverage_with_static_fallback:
+
+| selection | killed | score | wall |
+|---|---:|---:|---:|
+| static | 385 | 80.9% | 240 s |
+| coverage (run 2) | 385 | 80.9% | 247 s |
+
+Kill counts match (a run-1 384 was `decimal.ex:432` test flakiness — killed on
+re-run). Coverage adds a ~6 s collection pass; on fast suites this offsets the
+per-mutant fanout savings (≈neutral), so the win is on slow suites. gettext now
+**completes** under coverage (M64 degrades `backend_test`) where it aborted in
+M61.
+
 ## v1.18 maturation (M57–M59, 2026-05-25)
 
 ### M59 — OSS matrix (8/10) + per-mutator equivalent-rate
