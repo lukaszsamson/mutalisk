@@ -69,6 +69,9 @@ defmodule Mut.Cli do
     "collection_empty",
     "variable_replace",
     "variable_to_literal",
+    "concat_operator",
+    "bitwise_operator",
+    "membership",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -463,6 +466,9 @@ defmodule Mut.Cli do
       "nil_literal" => Mut.Mutator.NilLiteral,
       "atom_literal" => Mut.Mutator.AtomLiteral,
       "collection_empty" => Mut.Mutator.CollectionEmpty,
+      "concat_operator" => Mut.Mutator.ConcatOperator,
+      "bitwise_operator" => Mut.Mutator.BitwiseOperator,
+      "membership" => Mut.Mutator.Membership,
       "variable_replace" => Mut.Mutator.VariableReplace,
       "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]

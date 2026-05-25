@@ -42,7 +42,11 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.FloatLiteral,
     Mut.Mutator.NilLiteral,
     Mut.Mutator.CollectionEmpty,
-    Mut.Mutator.VariableReplace
+    Mut.Mutator.VariableReplace,
+    # M69 operator-expansion (opt-in; M71 decides graduation)
+    Mut.Mutator.ConcatOperator,
+    Mut.Mutator.BitwiseOperator,
+    Mut.Mutator.Membership
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."
