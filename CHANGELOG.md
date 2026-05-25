@@ -3,6 +3,20 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.20 unreleased — umbrella support + catalogue growth
+
+### M66 — umbrella support design spike (2026-05-25)
+
+Design-only (spike-first). Throwaway proof on `~/unilink` (5 apps, 490 lib
+files): per-app `:mutalisk` injection + a shared `_build/mut_<role>` build root
+compiles the whole umbrella cleanly (73 s), with per-app ebins +
+`mutalisk/ebin` as siblings. Documents the umbrella work-copy/overlay model,
+the Build-Path Contract extension, the oracle/schema/fallback/sandbox phase
+changes, and — the crux — the **cross-app compile-dependency model** (unilink
+is the hub; 4 apps depend on it, so a mutant there must recompile dependents
+across app boundaries). **Verdict: GO**; M67/M68 implementation scope defined.
+No production code. `docs/spikes/M66_umbrella.md`.
+
 ## v1.19 unreleased — finish the stalled flips
 
 ### M65 — flip `--selection` default to coverage_with_static_fallback (2026-05-25)
