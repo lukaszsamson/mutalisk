@@ -1,0 +1,5 @@
+# Static-selection targets (coverage-incompatible; equiv-rate N/A).
+# M59 kill / invalid / error from the run logs:
+gettext  variable_replace 144/298  invalid 0  errors 48
+credo    variable_replace 594/1284 invalid 50 errors 0   timeouts 109
+timex    variable_replace 600/1268 invalid 0  errors 1

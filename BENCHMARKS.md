@@ -1,5 +1,43 @@
 # Mutalisk Benchmarks
 
+## v1.18 maturation (M57–M59, 2026-05-25)
+
+### M59 — OSS matrix (8/10) + per-mutator equivalent-rate
+
+8 of 10 targets ran (req/oban environment-blocked; timex needed 6 µs-drift
+tests excluded). Config: `--enable pattern_literal,variable` + the literal +
+variable mutators, capped 1500, coverage where the runner allows (else static).
+Per-mutator **equivalent-rate** = covered-survivors / (Killed+Survived), an
+over-estimate (conflates weak-assertion with true equivalence). Full data:
+`docs/decisions/M59_oss_matrix_equivalent_rate.md`, `bench/results/m59/`.
+
+**Equivalent-rate vs the M25/M41 graduation bar (< 20%):**
+
+| mutator | decimal | jason | ecto | plug | verdict |
+|---|---:|---:|---:|---:|---|
+| VariableReplace | 9.0% | 22.6% | 39.2% | 33.7% | fails 3/4 → no graduate |
+| pattern AtomLiteral | 16.7% | — | 25.0% | 20.6% | fails ecto/plug |
+| pattern IntegerLiteral | 5.6% | 0% | 21.1% | 15.6% | fails ecto |
+| pattern Nil/Boolean | — | — | 27–30% | 14–33% | fails ecto/plug |
+| VariableToLiteral | 1.6% | 39.7% | 37.5% | 48.2% | fails 3/4 |
+
+No surface clears < 20% on every meaningful target → **M60 graduates nothing**
+(stays opt-in; revisit later).
+
+**Coverage selection robustness:** failed outright on 3/8 targets — gettext
+(compile-in-test under `:cover`), credo (test timeout), timex (tzdata + BEAM JIT
+crash). → **M61 cannot make coverage the default**; static stays default.
+
+### M57 — variable error tail (refinement)
+
+| target | errors before (v1.17) | after (M57) |
+|---|---:|---:|
+| gettext | 211 (27%) | 45 (14.7%) |
+| plug | 202 (6%) | 24 (1.6%) |
+
+Codegen-function skip + other-uses gate. credo variable invalid: ~40% → 3.3%
+across the v1.17/M57/M58 fixes.
+
 ## v1.17 literals-first-class + v2 surface (M52–M55, 2026-05-24)
 
 ### M55 — new opt-in surfaces on the OSS subset

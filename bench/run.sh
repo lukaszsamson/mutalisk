@@ -385,12 +385,17 @@ case "$TARGET" in
     exit 65
     ;;
   timex)
-    # BLOCKED (environment): timex 3.7.9 tests assert exact DateTime equality
-    # and fail on Elixir 1.19's microsecond-precision representation drift
-    # (`14:27:52Z` vs `…52.000000Z`), ~5-6 failures across 3 files. A project
-    # test incompatibility, not a mutalisk defect.
-    printf 'timex is environment-blocked (Elixir 1.19 us-precision test drift); see M59 decision doc\n' >&2
-    exit 65
+    # timex 3.7.9 has 6 tests that assert exact DateTime equality and fail on
+    # Elixir 1.19's microsecond-precision drift (`14:27:52Z` vs `…52.000000Z`)
+    # — a project test incompatibility, not a mutalisk defect. Tag those 6
+    # specific tests :env_drift and exclude them so the baseline is green; the
+    # mutation surface (lib/) is unaffected. (Analogous to ecto's regex-drift
+    # exclusion.) Documented in docs/decisions/M59_oss_matrix_equivalent_rate.md.
+    perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if $. == 137' "$WORK_DIR/test/duration_test.exs"
+    perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if $. == 175' "$WORK_DIR/test/shift_test.exs"
+    perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if $. == 338' "$WORK_DIR/test/format_default_test.exs"
+    perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if ($. == 14 or $. == 28 or $. == 35)' "$WORK_DIR/test/timex_test.exs"
+    perl -pi -e 's/ExUnit\.start\(([^)]*)\)/ExUnit.start(exclude: [:env_drift], seed: 0)/' "$WORK_DIR/test/test_helper.exs"
     ;;
   oban)
     # BLOCKED (environment): oban's test_helper starts Postgres + MySQL

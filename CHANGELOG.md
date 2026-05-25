@@ -3,6 +3,37 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.18 unreleased — maturation (harden, then graduate)
+
+### M59 — OSS matrix (8/10) + equivalent-rate (2026-05-25)
+
+Wired the 6 OSS targets into `bench/run.sh` and ran the matrix to **8/10**
+(req/oban environment-blocked; timex needed 6 µs-drift tests excluded). Added
+per-mutator **equivalent-rate** measurement (`bench/equivalent_rate.exs`;
+heuristic: covered-survivors, an over-estimate). Findings feed M60/M61:
+- **No surface clears the < 20% equivalent bar on every meaningful target**
+  (VariableReplace 9–62%; pattern literals 0–33%) → M60 graduates nothing.
+- **Coverage selection failed on 3/8 targets** (gettext compile-in-test, credo
+  timeout, timex tzdata+JIT) → M61 cannot default coverage.
+Data: `docs/decisions/M59_oss_matrix_equivalent_rate.md`, BENCHMARKS v1.18,
+`bench/results/m59/`.
+
+### M58 — fallback-recompile engine hardening (2026-05-25)
+
+Root-caused + closed the credo invalid residual (compile-time `Mix.Project`
+crash, fixed by `Mix.start()` in the recompile eval; for/unquote candidates
+suppressed by M57; pipe/capture by v1.17). credo invalid ~40% → 3.3%. Added a
+`:integration` regression fixture for compile-time-Mix recompilation.
+`docs/decisions/M58_recompile_engine_hardening.md`.
+
+### M57 — variable-mutator noise refinement (2026-05-25)
+
+Codegen-function skip (quote/unquote bodies emit no variable candidates) +
+other-uses gate (VariableReplace only when the swapped-out var has ≥1 other
+read) + a single read-side classifier consolidating the four v1.17
+false-positive fixes. Variable error tail: gettext 211→45, plug 202→24.
+Opt-in, zero stable-id churn. `docs/decisions/M57_variable_noise_refinement.md`.
+
 ## v1.17 unreleased
 
 ### M55 full matrix + engine/mutator fixes (2026-05-25)
