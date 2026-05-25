@@ -27,12 +27,16 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.GuardComparisonBoundary,
     Mut.Mutator.GuardComparisonNegation,
     Mut.Mutator.GuardTypeTest,
-    Mut.Mutator.AtomLiteral
+    Mut.Mutator.AtomLiteral,
+    # M63: graduated for PATTERN positions only (see
+    # graduated_pattern_literal_mutators/0). Its body-literal firing still
+    # needs the opt-in :body_literal target, so adding it here only enables
+    # IntegerLiteral-in-pattern by default — additive.
+    Mut.Mutator.IntegerLiteral
   ]
 
   @opt_in [
     Mut.Mutator.AttributeLiteral,
-    Mut.Mutator.IntegerLiteral,
     Mut.Mutator.BooleanLiteral,
     Mut.Mutator.StringLiteral,
     Mut.Mutator.FloatLiteral,
@@ -48,6 +52,16 @@ defmodule Mut.Mutator.Defaults do
   @doc "Mutators reachable only via explicit --enable/--mutators."
   @spec opt_in() :: [module]
   def opt_in, do: @opt_in
+
+  # M63: the literal mutators that fire in PATTERN positions by default (i.e.
+  # without `--enable pattern_literal`). Only IntegerLiteral-in-pattern cleared
+  # the M62 sharpened gate; the others (Atom/Nil/Boolean/String) stay opt-in
+  # and fire in patterns only under explicit `--enable pattern_literal`.
+  @graduated_pattern_literal [Mut.Mutator.IntegerLiteral]
+
+  @doc "Literal mutators graduated to fire in pattern positions by default."
+  @spec graduated_pattern_literal_mutators() :: [module]
+  def graduated_pattern_literal_mutators, do: @graduated_pattern_literal
 
   @doc "Full mutator set (all tiers)."
   @spec list() :: [module]

@@ -99,8 +99,12 @@ defmodule Mut.Orchestrator do
     # positions. Body scalars moved to the schema path above; both env-walker
     # streams stay fallback (collections and patterns cannot be schema-placed
     # cleanly). Parse once if either target is on; split by env_context.
+    # Collect when env_walker/pattern_literal is on, OR when a graduated
+    # pattern-literal mutator is active (M63: IntegerLiteral-in-pattern fires by
+    # default, so its candidates must be discovered even without :env_walker).
     env_pairs =
-      if :env_walker in enabled_targets or :pattern_literal in enabled_targets do
+      if :env_walker in enabled_targets or :pattern_literal in enabled_targets or
+           graduated_pattern_active?(mutators) do
         env_walker_candidates(path, relative_file, source, macro_index)
       else
         []
@@ -242,10 +246,27 @@ defmodule Mut.Orchestrator do
   defp pattern_literal_results(pairs, enabled_targets, mutators, source) do
     candidates = Enum.map(pairs, fn {candidate, _snap} -> candidate end)
 
+    case pattern_literal_mutators(enabled_targets, mutators) do
+      [] ->
+        {[], Enum.map(candidates, &skip(&1, :pattern_literal_engine_disabled, nil))}
+
+      active ->
+        enabled_fallback_results(candidates, :pattern_literal, nil, active, source)
+    end
+  end
+
+  # M63: with `--enable pattern_literal`, the FULL pattern-literal surface fires.
+  # By default, only the graduated subset (IntegerLiteral-in-pattern) fires —
+  # the one surface that cleared the M62 sharpened gate.
+  defp graduated_pattern_active?(mutators) do
+    Enum.any?(mutators, &(&1 in Defaults.graduated_pattern_literal_mutators()))
+  end
+
+  defp pattern_literal_mutators(enabled_targets, mutators) do
     if :pattern_literal in enabled_targets do
-      enabled_fallback_results(candidates, :pattern_literal, nil, mutators, source)
+      Enum.filter(mutators, &target?(&1, :pattern_literal))
     else
-      {[], Enum.map(candidates, &skip(&1, :pattern_literal_engine_disabled, nil))}
+      Enum.filter(mutators, &(&1 in Defaults.graduated_pattern_literal_mutators()))
     end
   end
 

@@ -5,6 +5,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.19 unreleased — finish the stalled flips
 
+### M63 — graduate IntegerLiteral-in-pattern to default-on (2026-05-25)
+
+First default-on flip since M46. Under the M62 sharpened gate, only
+**IntegerLiteral-in-pattern** clears (decimal 5.6%, plug 15.6%, ecto 21.1% — a
+single +1.1pp ≤ 2pp miss); it graduates. All other surfaces (Atom/Nil/Boolean/
+String-in-pattern, VariableReplace, VariableToLiteral) stay opt-in.
+
+Per-mutator/per-position graduation via `Defaults.graduated_pattern_literal_mutators/0`
+(`[IntegerLiteral]`) + `IntegerLiteral` in `default_on/0` (body firing still needs
+the opt-in `:body_literal` target, so only the pattern position graduates).
+`--enable pattern_literal` still runs the full pattern surface (opt-in
+unchanged). **Additive only:** demo_app default plan byte-identical; Decimal
+gains 18 IntegerLiteral-pattern mutants, existing IDs untouched. `bin/verify`
+green. `docs/decisions/M63_surface_graduation.md`.
+
 ### M62 — sharper equivalent estimate + gate-rule revisit (2026-05-25)
 
 Frames the covered-survivor equivalent metric explicitly as an **upper bound**
