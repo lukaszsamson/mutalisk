@@ -26,7 +26,24 @@ Combined with the M55 subset (decimal, jason, gettext, plug), **6 targets ran
 to a usable result**. The blocked three are environment issues (toolchain
 drift, native build, multi-DB infra), not mutalisk defects.
 
-## Finding: fallback-recompile FALSE-INVALID on credo (engine bug)
+## UPDATE (2026-05-25): credo false-invalid root-caused + FIXED
+
+The credo false-invalid below was root-caused and fixed (commit `9818aeb`): the
+fallback recompile ran `ParallelCompiler` in a bare `elixir --eval` BEAM that
+did not start `:mix`, so credo's compile-time `Mix.ProjectStack` access crashed.
+`Mix.start()` in the recompile eval fixes it. After the fix, credo runs (capped
+1500): **variable invalid 155/1500 = 10.3%** (down from ~40% false), VariableToLiteral
+44/64 killed (broadened hints). The residual ~10% is genuine and credo-specific:
+- a `for`-comprehension generating `defp` clauses via `unquote(sigil_end)`
+  (~40) — mutating for-generator/unquote-injected vars in metaprogramming;
+- **pipe-rhs / named-capture function names** (`x |> to_string`, `&handle/1`) —
+  a *general* mutator false-positive, separately fixed (the env walker no longer
+  treats a bare identifier in pipe-rhs / `&f/n` position as a variable).
+
+So credo is an invalid-rate outlier purely because it is metaprogramming- and
+pipe-heavy; every other target stays < 1.5%. Decision unchanged (keep_opt_in).
+
+## (Historical) Finding: fallback-recompile FALSE-INVALID on credo (engine bug)
 
 credo reported a very high VariableReplace "invalid" rate (hundreds of invalids
 across many files). **This is a mis-classification, confirmed:** a sampled

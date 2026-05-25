@@ -732,8 +732,26 @@ defmodule Mut.EnvWalker do
     walk_in_context(child, state, nil)
   end
 
-  # `&function/arity` capture — body of capture stays in normal context.
+  # `&fun/arity` named capture: `fun` is a function reference (not a variable)
+  # and `arity` an integer that must not change. Don't descend — emitting `fun`
+  # as a variable read produced undefined-function mutants (`&check/1`).
+  defp descend({:&, _meta, [{:/, _, [_fun, _arity]}]}, state), do: state
+
+  # `&(...)` anonymous capture — body stays in normal context.
   defp descend({:&, _meta, args}, state), do: descend_args(args, state)
+
+  # Pipe: `lhs |> rhs`. A bare-identifier rhs (`x |> to_string`) is a FUNCTION
+  # call (`to_string(x)`), not a variable read — skip it (swapping it produced
+  # undefined-function mutants). A `rhs` with arguments (`x |> f(y)`) or a
+  # nested pipe is walked normally so inner candidates are still found.
+  defp descend({:|>, _meta, [lhs, rhs]}, state) do
+    state = walk(lhs, state)
+
+    case rhs do
+      {name, _meta, ctx} when is_atom(name) and is_atom(ctx) -> state
+      _other -> walk(rhs, state)
+    end
+  end
 
   # M50 struct exclusion: `%S{...}` is NEVER emptied. In a body-eligible
   # position, descend the alias and the field pairs directly so the inner

@@ -168,6 +168,34 @@ defmodule Mut.EnvWalkerVariableTest do
     assert {:other, :boolean} in hints
   end
 
+  test "function names in pipe-rhs / named-capture position are not variables" do
+    src = ~S'''
+    defmodule Foo do
+      def f(filename, items, mapper) do
+        a = filename |> to_string
+        b = Enum.map(items, &handle/1)
+        c = items |> Enum.map(mapper)
+        {a, b, c}
+      end
+      def handle(i), do: i
+    end
+    '''
+
+    {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+    names =
+      ast
+      |> EnvWalker.collect_variable_candidates(file: "lib/foo.ex", source: src)
+      |> Enum.map(fn {c, _} -> elem(c.node, 0) end)
+
+    # `to_string` (pipe-rhs fn) and `handle` (captured fn) must NOT appear;
+    # real piped variables must.
+    refute :to_string in names
+    refute :handle in names
+    assert :filename in names
+    assert :items in names
+  end
+
   test "variable candidates have env_context nil (reads)" do
     src = ~S'''
     defmodule Foo do
