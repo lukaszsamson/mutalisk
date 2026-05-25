@@ -48,7 +48,8 @@ defmodule Mut.Cli do
     :body_literal,
     :env_walker,
     :pattern_literal,
-    :variable
+    :variable,
+    :pattern_shape
   ]
   @known_mutators [
     "arithmetic",
@@ -72,6 +73,7 @@ defmodule Mut.Cli do
     "concat_operator",
     "bitwise_operator",
     "membership",
+    "pin",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -474,6 +476,7 @@ defmodule Mut.Cli do
       "concat_operator" => Mut.Mutator.ConcatOperator,
       "bitwise_operator" => Mut.Mutator.BitwiseOperator,
       "membership" => Mut.Mutator.Membership,
+      "pin" => Mut.Mutator.Pin,
       "variable_replace" => Mut.Mutator.VariableReplace,
       "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]

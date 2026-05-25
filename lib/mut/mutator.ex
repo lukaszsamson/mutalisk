@@ -11,6 +11,7 @@ defmodule Mut.Mutator do
               | :env_walker
               | :pattern_literal
               | :variable
+              | :pattern_shape
             ]
   @callback applicable?(Macro.t(), Mut.Context.t()) :: boolean()
   @callback mutate(Macro.t(), Mut.Context.t()) :: [Mut.Mutation.t()]

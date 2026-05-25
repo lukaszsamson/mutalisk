@@ -52,6 +52,74 @@ defmodule Mut.AstWalk do
   end
 
   @doc """
+  M73: pin candidates — `^var` pin operators in patterns. The pattern-shape
+  surface (the `_` ↔ named-var directions are non-viable by construction —
+  see `Mut.Mutator.Pin`). Each candidate carries the span of the whole `^var`
+  (so `Mut.Mutator.Pin` can replace it with the inner `var`, i.e. unpin).
+  Requires `:source`.
+  """
+  @spec pin_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def pin_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+    acc = acc(file, source, line_offsets, false)
+
+    {_ast, acc} = Macro.traverse(ast, acc, &pin_pre/2, &post/2)
+
+    acc.candidates
+    |> Enum.reverse()
+    |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp pin_pre(node, acc) do
+    {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
+    acc = maybe_pin_candidate(node, path, acc)
+    {node, push_frame(node, path, acc)}
+  end
+
+  defp maybe_pin_candidate({:^, caret_meta, [{name, var_meta, ctx}]} = node, path, acc)
+       when is_atom(name) and is_atom(ctx) do
+    with cl when is_integer(cl) <- Keyword.get(caret_meta, :line),
+         cc when is_integer(cc) <- Keyword.get(caret_meta, :column),
+         vl when is_integer(vl) <- Keyword.get(var_meta, :line),
+         vc when is_integer(vc) <- Keyword.get(var_meta, :column) do
+      end_column = vc + String.length(Atom.to_string(name))
+
+      span = %Mut.SourceSpan{
+        file: acc.file,
+        start_line: cl,
+        start_column: cc,
+        end_line: vl,
+        end_column: end_column,
+        start_byte: byte_offset(acc.source, acc.line_offsets, cl, cc),
+        end_byte: byte_offset(acc.source, acc.line_offsets, vl, end_column)
+      }
+
+      candidate = %AstCandidate{
+        file: acc.file,
+        line: cl,
+        column: cc,
+        syntactic_name: :^,
+        syntactic_arity: 1,
+        source_span: span,
+        env_context: :match,
+        enclosing_module: current_module(acc),
+        ast_path: path,
+        ast_path_hash: path_hash(path),
+        node: node
+      }
+
+      %{acc | candidates: [candidate | acc.candidates]}
+    else
+      _ -> acc
+    end
+  end
+
+  defp maybe_pin_candidate(_node, _path, acc), do: acc
+
+  @doc """
   M23: Body-context literal candidates.
 
   Re-parses the source with `literal_encoder` so integer / boolean

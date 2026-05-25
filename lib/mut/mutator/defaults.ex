@@ -46,7 +46,9 @@ defmodule Mut.Mutator.Defaults do
     # M69 operator-expansion (opt-in; M71 decides graduation)
     Mut.Mutator.ConcatOperator,
     Mut.Mutator.BitwiseOperator,
-    Mut.Mutator.Membership
+    Mut.Mutator.Membership,
+    # M73 pattern-shape (opt-in `:pattern_shape`; M75 decides graduation)
+    Mut.Mutator.Pin
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

@@ -17,6 +17,7 @@ defmodule Mut.Orchestrator do
           | :env_walker
           | :pattern_literal
           | :variable
+          | :pattern_shape
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -138,11 +139,17 @@ defmodule Mut.Orchestrator do
     {variable_fallback, variable_skips} =
       variable_results(path, relative_file, source, macro_index, enabled_targets, mutators)
 
+    # M73: pattern-shape mutators (opt-in `:pattern_shape` target) — pin removal
+    # on `^x` nodes. Fallback-routed.
+    {pattern_shape_fallback, pattern_shape_skips} =
+      pattern_shape_results(ast, relative_file, source, enabled_targets, mutators)
+
     %Plan{
       schema: dispatch_schema ++ literal_schema,
       fallback:
         attribute_fallback ++
-          guard_fallback ++ env_fallback ++ pattern_fallback ++ variable_fallback,
+          guard_fallback ++
+          env_fallback ++ pattern_fallback ++ variable_fallback ++ pattern_shape_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
@@ -152,9 +159,21 @@ defmodule Mut.Orchestrator do
           guard_skips ++
           env_skips ++
           pattern_skips ++
-          variable_skips,
+          variable_skips ++
+          pattern_shape_skips,
       matched_pairs: matched
     }
+  end
+
+  # M73: pin candidates discovered by a syntactic AST walk (the `^` operator
+  # only appears in patterns). When the target is off, no walk happens.
+  defp pattern_shape_results(ast, relative_file, source, enabled_targets, mutators) do
+    if :pattern_shape in enabled_targets do
+      candidates = Mut.AstWalk.pin_candidates(ast, file: relative_file, source: source)
+      enabled_fallback_results(candidates, :pattern_shape, nil, mutators, source)
+    else
+      {[], []}
+    end
   end
 
   # M52: apply the active scalar-literal mutators to schema-literal
@@ -506,6 +525,8 @@ defmodule Mut.Orchestrator do
   defp fallback_env_context(candidate, _site, :pattern_literal), do: candidate.env_context
   # M54: variable references are reads (normal expression context).
   defp fallback_env_context(_candidate, _site, :variable), do: nil
+  # M73: pin candidates carry `:match`, which Mut.Mutator.Pin requires.
+  defp fallback_env_context(candidate, _site, :pattern_shape), do: candidate.env_context
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}
