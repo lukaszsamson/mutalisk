@@ -9,7 +9,9 @@ defmodule Mut.CliTest do
   test "defaults come from config with built-in fallbacks" do
     assert {:ok, %Options{} = opts} = Cli.parse([], [])
 
-    assert opts.files == ["lib"]
+    # M71: default is nil so discovery falls to the orchestrator's
+    # umbrella-aware discover_files (single-app lib/, umbrella apps/*/lib/).
+    assert opts.files == nil
     # M48: pure-default tier — dispatch+guard mutators + AtomLiteral, env
     # walker source on so AtomLiteral runs, but only AtomLiteral among the
     # env-walker literals.

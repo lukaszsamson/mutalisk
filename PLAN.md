@@ -3517,6 +3517,218 @@ fixing the root causes the flips were blocked on.
 - Bare `--selection coverage` as default.
 - Exact equivalent-mutant detection.
 
+# v1.20 milestones (umbrella support + catalogue growth)
+
+v1.19 (M62–M65) landed both stalled flips. v1.20 takes on the
+engine's biggest untouched capability — **umbrella projects**,
+hard-refused since v1 (`assert_not_umbrella!`) — and grows the
+catalogue with two new mutator families. Real-world drivers:
+`~/unilink` (5-app umbrella) and `~/zorbito` (14-app crypto/
+clustering umbrella). See [[umbrella-validation-targets]].
+
+**Validation scope is unilink only this release.** zorbito's
+14-app suite likely needs DB/clustering infra (the oban/req
+blocker class) and defers to v1.21 — run informationally if
+budget allows, never gating.
+
+**Defaults:** the two new mutator families ship opt-in; M71
+decides graduation from data (no default-on flip pre-committed).
+Umbrella handling is automatic when the target is an umbrella.
+Elixir floor stays `>= 1.19.0`.
+
+Six milestones, two independent tracks. Umbrella: M66 → M67 →
+M68 (strict). Catalogue: M69, M70 (independent of umbrella). M71
+validates both. **M70 (pattern-shape, noisiest/newest) is the
+designated release valve** — cuts to v1.21 at zero downstream cost
+if umbrella runs long.
+
+## v1.20 scope (committed)
+
+**M66 — Umbrella support design spike.**
+
+*Goal:* Design the umbrella model before writing engine code
+(spike-first, per M18/M29/M36/M39/M51).
+
+*Inputs:* `lib/mut/bootstrap/overlay.ex` (`assert_not_umbrella!`,
+`umbrella_project?`); the Operational Contracts (Child-Process
+Bootstrap + Build-Path) near the top of this PLAN;
+`lib/mut/work_copy.ex`, `lib/mut/mix_manifest.ex`,
+`lib/mut/recompile.ex`; `~/unilink` (proof target).
+
+*Deliverables:*
+- Umbrella work-copy + overlay design for `apps_path` projects
+  (the overlay no longer raises; it must inject `:mutalisk` as a
+  dep visible to every child app, or at the umbrella root).
+- Build-Path Contract extension for umbrellas: per-app ebins
+  under a shared `_build/mut_*` root, `MIX_DEPS_PATH`, where each
+  app's artifacts land.
+- How oracle / schema / fallback / sandbox phases change.
+- **Cross-app compile-dependency model** — the manifest walk must
+  span app boundaries so a mutant in app A recompiles dependents
+  in app B. This is the crux; document the algorithm.
+- Throwaway proof on unilink measuring oracle/compile cost across
+  5 apps.
+- `docs/spikes/M66_umbrella.md`: design + explicit go/no-go + the
+  v1.20 implementation scope.
+
+*Acceptance:* design doc committed; cross-app dependency model
+concrete; go/no-go explicit; no production code beyond the
+throwaway proof; `bin/verify` green.
+
+*Out of scope:* Implementation (M67/M68).
+
+**M67 — Umbrella oracle + schema build.**
+
+*Goal:* Implement the spike's design through the schema build.
+
+*Inputs:* M66 design doc; `lib/mut/oracle_build.ex`,
+`lib/mut/schema_build.ex`, `lib/mut/work_copy.ex`,
+`lib/mut/bootstrap/overlay.ex`, `lib/mut/sandbox.ex`.
+
+*Deliverables:*
+- Materialize an umbrella work copy (root + `apps/`).
+- Umbrella overlay (replaces the raise); `apps_path` handled.
+- Oracle build compiles every app under the tracer; per-app
+  plans produced.
+- Schema placement across apps; instrumented umbrella built under
+  the umbrella build-path role.
+- Sandbox creation umbrella-aware.
+
+*Acceptance:*
+- unilink oracle + schema build succeed; per-app plans produced.
+- **Single-app (non-umbrella) path byte-identical** — the
+  umbrella branch must not regress the existing path (stable-id
+  diff on demo_app + Decimal).
+- `bin/verify` green.
+
+*Out of scope:* Fallback cross-app dependents (M68).
+
+**M68 — Umbrella fallback + cross-app dependents.**
+
+*Goal:* The hard correctness piece — fallback recompile across
+app boundaries.
+
+*Inputs:* M66 cross-app dependency model; `lib/mut/mix_manifest.ex`,
+`lib/mut/recompile.ex`, `lib/mut/sandbox.ex` (reset).
+
+*Deliverables:*
+- Per-app Mix manifest reading; a dependency walk spanning apps.
+- Fallback recompile rebuilds the mutated app + its cross-app
+  compile dependents in the sandbox before the targeted test run.
+- Sandbox reset restores all affected apps' artifacts + manifests.
+
+*Acceptance:*
+- A unilink fallback mutant in a depended-upon app recompiles its
+  dependents correctly (verified).
+- No false-invalids from stale cross-app state.
+- Sandbox reset returns every affected app to baseline.
+- `bin/verify` green.
+
+*Out of scope:* The new mutators (M69/M70).
+
+**M69 — Operator-expansion mutators.**
+
+*Goal:* Low-noise, schema-routed dispatch mutators extending the
+proven path.
+
+*Inputs:* HLD v1.20 §M69; existing dispatch mutators
+(`Mut.Mutator.Arithmetic`, `ComparisonBoundary`) as the template;
+`Mut.Match.Registry`.
+
+*Deliverables:*
+- `Mut.Mutator.ConcatOperator`: `++` ↔ `--`, `<>` mutations
+  (list/binary concat).
+- `Mut.Mutator.BitwiseOperator`: `band`/`bor`/`bxor`/`bsl`/`bsr`
+  swaps.
+- `Mut.Mutator.Membership`: `in` ↔ `not in`.
+- Each implements `applicable?/2`, `mutate/2`, `equivalent?/1`,
+  `targets/0`, `compatible?/2`. Opt-in.
+
+*Acceptance:* per-mutator unit tests + fixture golden lists; zero
+stable-id churn for existing mutants; `bin/verify` green.
+
+*Out of scope:* Default-on (M71 decides). Pattern shapes (M70).
+
+**M70 — Pattern-shape mutator framework (release valve).**
+
+*Goal:* The deferred v2 item — pattern SHAPE mutations, not just
+literals-in-patterns.
+
+*Inputs:* `docs/spikes/M39_env_walker.md` (pattern-mutator
+sketch + the high-noise warning); `Mut.EnvWalker` `:match`
+context; M53 pattern-literal infra.
+
+*Deliverables:*
+- Conservative framework + mutators: `_` ↔ named var, pin/unpin
+  (`^x`). Tuple/list arity stays skipped (M39: non-viable).
+- Strict invalid/equivalent gating (this surface is noisy by
+  nature). Opt-in, fallback-routed.
+
+*Acceptance:*
+- Per-mutator unit tests; invalid rate measured + gated.
+- Zero stable-id churn for existing mutants.
+- `bin/verify` green.
+
+*Release-valve note:* highest noise/invalid risk in v1.20; cut to
+v1.21 if umbrella runs long. M71 does not depend on it landing.
+
+**M71 — Umbrella (unilink) + new-mutator validation + decisions.**
+
+*Goal:* Validate umbrella support end-to-end and decide the new
+mutators' default policy.
+
+*Inputs:* M67/M68 (umbrella), M69/M70 (mutators); `bench/run.sh`;
+the M62 sharpened graduation gate; `~/unilink`.
+
+*Deliverables:*
+- Full `mix mut` run on unilink: oracle → schema → workers →
+  fallback → report, per-app + aggregate score.
+- M69/M70 mutators run on unilink + the OSS matrix; kill /
+  invalid / equivalent rates captured.
+- `docs/decisions/M71_*.md`: operator-expansion + pattern-shape
+  default policy (keep_opt_in / graduate per the M62 gate);
+  umbrella acceptance verdict.
+- BENCHMARKS v1.20 section.
+- zorbito informational only if budget allows; infra blockers
+  documented, not gating.
+
+*Acceptance:*
+- unilink umbrella run completes with a valid report.
+- New-mutator decisions committed.
+- Zero stable-id churn for existing single-app mutants.
+- `bin/verify` green.
+
+*Out of scope:* zorbito as gating; acting on graduation decisions
+that need a follow-up migration (v1.21).
+
+## v1.20 delivery status (2026-05-25: DELIVERED — M70 cut to v1.21 per the release valve)
+
+- **M66** ✓ — umbrella design spike (committed earlier). GO verdict; corrected in M67 (root must be wrapped).
+- **M67** ✓ — umbrella oracle + schema build. New `Mut.Umbrella`; per-app + root overlay; idempotent `:mut_oracle`; `MUTALISK_PROJECT_ROOT`-relative sites; umbrella-aware discovery/snapshot. Validated on unilink (89 518 sites, 1031-mutant per-app plan, schema build). Single-app byte-identical.
+- **M68** ✓ — umbrella fallback + cross-app dependents. `MixManifest.read_combined/1` (app-prefixed, cross-app `dependents/3`); single-pass `ParallelCompiler.compile` + `:each_module` per-app beam routing; umbrella-aware sandbox reset. Verified: unilink hub mutant → 93 deps across all 5 apps, beams routed + source reset.
+- **M69** ✓ — operator-expansion mutators (ConcatOperator / BitwiseOperator / Membership), opt-in. M71 → **keep_opt_in**.
+- **M70** ✗ **CUT to v1.21** — pattern-shape mutators (release valve). Umbrella ran long (6 distinct umbrella correctness bugs); M70 is the noisiest surface; M71 did not depend on it.
+- **M71** ✓ — umbrella validated end-to-end (engine on unilink; full worker+report on a self-contained 2-app umbrella: 8/9 killed, 0 invalid/error). M69 graduation data (jason ConcatOperator ~67% noise, plug_crypto BitwiseOperator pseudo-equivalents) → keep_opt_in. Decision: `docs/decisions/M71_operator_expansion_and_umbrella.md`; BENCHMARKS v1.20. Also fixed a single-/multi-app worker bug: umbrella `mix test` emits one `suite_finished` per app → results now aggregated. Found+fixed an entry-default file-discovery gap (`files` default `["lib"]` → `nil` → umbrella-aware `discover_files`).
+
+## v1.20 horizon (not v1.20 scope)
+
+- **zorbito validation** — the 14-app umbrella; v1.21, contingent
+  on its DB/clustering test infra running in the sandbox.
+- **New-mutator graduation** — surfaces M71 leaves opt-in.
+- **Incremental cross-run history** — still the deferred bet.
+- **Tuple/list pattern-arity mutations** — still skipped (M39).
+
+## Explicitly NOT v1.20
+
+- zorbito as a gating acceptance target (v1.21).
+- Incremental cross-run history (held).
+- New default-on flips pre-committed (M71 decides from data).
+- Tuple/list pattern-arity; function-call deletion / return-value
+  replacement.
+- Schema routing for non-literal mutators beyond M69's operators;
+  wrapper guard schemata.
+- EnvWalker consolidation implementation.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

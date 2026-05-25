@@ -43,8 +43,9 @@ defmodule Mut.Orchestrator do
   end
 
   defp files(root, opts) do
-    opts
-    |> Keyword.get_lazy(:files, fn -> discover_files(root) end)
+    # `:files` may be present-but-nil (the CLI default routes here), so fall to
+    # discovery on nil — not just when the key is absent.
+    (Keyword.get(opts, :files) || discover_files(root))
     |> Enum.reject(&filtered?(&1, Keyword.get(opts, :file_filter)))
     |> Enum.sort()
   end

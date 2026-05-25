@@ -1,5 +1,35 @@
 # Mutalisk Benchmarks
 
+## v1.20 umbrella support + catalogue growth (M66–M71, 2026-05-25)
+
+### Umbrella engine on `~/unilink` (5 apps)
+
+| phase | result |
+|---|---|
+| oracle | 89 518 dispatch sites, app-prefixed across 5 apps (no `lib/` collisions) |
+| plan (default) | 1031 mutants spanning all 5 apps (772 schema / 259 fallback) |
+| schema build | instruments `apps/<app>/lib`, compiles instrumented umbrella, per-app ebin snapshot |
+| cross-app fallback | hub mutant `Unilink.Model.PlatformClient` → 93 deps across all 5 apps; one-pass recompile, beams routed per-app (verified), source reset OK |
+
+Full `mix mut` worker+report validated on a self-contained 2-app umbrella:
+`8/9 killed, 0 invalid, 0 errors`, report spans both apps. (unilink's own
+worker run is gated on its Postgres/RabbitMQ test infra.) Single-app path
+byte-identical (golden_oracle + golden_instrument green).
+
+### M69 operator-expansion mutators (opt-in) — graduation data
+
+| target | mutator | killed | survived | invalid | error |
+|---|---|---:|---:|---:|---:|
+| plug_crypto | BitwiseOperator | 0 | 2 | 0 | 0 |
+| jason | ConcatOperator | 1 | 2 | 2 | 4 |
+| jason | Membership | 0 | 1 | 0 | 0 |
+
+ConcatOperator noisy on real list/binary code (`++`→`--` → compile errors
+in refused/macro positions + suite-aborting runtime crashes, ≈67% of 9);
+BitwiseOperator yields input-dependent pseudo-equivalents; Membership
+cleanest. **Decision: keep_opt_in** (see `docs/decisions/M71_*`); M70
+pattern-shape mutators **cut to v1.21**.
+
 ## v1.19 finish the stalled flips (M62–M65, 2026-05-25)
 
 ### M63 — IntegerLiteral-in-pattern graduated (additive)

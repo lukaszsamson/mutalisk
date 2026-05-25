@@ -244,7 +244,12 @@ defmodule Mut.Cli do
   end
 
   defp files(parsed, config) do
-    value = Keyword.get(parsed, :files, Keyword.get(config, :files, ["lib"]))
+    # Default `nil` (not `["lib"]`) so file discovery falls to the orchestrator's
+    # umbrella-aware `discover_files`: single-app globs `lib/`, umbrella globs
+    # every `apps/<app>/lib/`. An explicit `--files`/config value is honoured
+    # verbatim. (M71: a `["lib"]` default produced 0 mutants on umbrellas, whose
+    # root has no lib/.)
+    value = Keyword.get(parsed, :files, Keyword.get(config, :files, nil))
     {:ok, string_list(value)}
   end
 

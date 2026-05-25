@@ -60,13 +60,26 @@ defmodule Mut.Worker.Formatter do
       |> String.split("\n")
       |> Enum.flat_map(&decode_line/1)
 
-    summary = Enum.find(events, &(&1["event"] == "suite_finished"))
-
-    if summary do
-      %{tests: test_events(events), summary: drop_event(summary)}
-    else
-      :error
+    # Umbrella `mix test` runs each app's suite separately, emitting one
+    # `suite_finished` per app. Aggregate them (sum totals) so a mutant killed
+    # by a test in a *later* app isn't lost — using only the first suite would
+    # report `failed: 0` while `mix` still exits non-zero, mis-classifying the
+    # kill as an error. Single-app has exactly one suite, so this is a no-op.
+    case Enum.filter(events, &(&1["event"] == "suite_finished")) do
+      [] -> :error
+      summaries -> %{tests: test_events(events), summary: merge_summaries(summaries)}
     end
+  end
+
+  defp merge_summaries(summaries) do
+    summaries
+    |> Enum.map(&drop_event/1)
+    |> Enum.reduce(fn summary, acc ->
+      Map.merge(acc, summary, fn
+        _key, a, b when is_number(a) and is_number(b) -> a + b
+        _key, _a, b -> b
+      end)
+    end)
   end
 
   defp test_finished_event(test, status) do
