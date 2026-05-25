@@ -1,12 +1,21 @@
 defmodule Mut.Mutator.ConcatOperator do
   @moduledoc """
-  M69 operator-expansion mutator. Swaps list-concatenation operators:
+  M69 operator-expansion mutator. Replaces list concatenation:
 
-    * `++` ↔ `--`
+    * `++` → `--`
 
-  `<>` (binary concat) has no operator dual — there is no other binary operator
-  to swap it for, and a cross-type swap to `++`/`--` would be a guaranteed
-  compile/type error — so it is intentionally not mutated here. Opt-in,
+  **M72 hazard rule — the `--` → `++` direction is dropped.** M71 OSS data
+  (jason) showed `--` → `++` is ~all noise: `--` (list subtraction) marks
+  element-*removal* contexts (`fields -- [:__struct__]`, `only -- fields`),
+  and replacing removal with concatenation produces invariant-breaking
+  *larger* lists that crash downstream (suite-aborting `RuntimeError`) or
+  compile-error in refused positions — not the subtly-wrong, test-catchable
+  mutant we want. The reverse, `++` → `--`, turns concatenation into a
+  smaller/empty list (the codegen.ex sites: one killed, two survived, zero
+  noise), which is a productive, testable mutation. So only `++` is mutated.
+
+  `<>` (binary concat) has no operator dual — a cross-type swap to `++`/`--`
+  would be a guaranteed compile/type error — so it is not mutated. Opt-in,
   schema-routed (dispatch), mirroring `Mut.Mutator.Arithmetic`.
   """
   @behaviour Mut.Mutator
@@ -16,10 +25,10 @@ defmodule Mut.Mutator.ConcatOperator do
   alias Mut.Oracle.DispatchSite
 
   @accepted_modules [Kernel, :erlang]
-  @accepted_names ~w(++ --)a
+  @accepted_names ~w(++)a
   @arity 2
   @kind :concat_op
-  @replacements %{:++ => [:--], :-- => [:++]}
+  @replacements %{:++ => [:--]}
 
   @impl true
   def name, do: "ConcatOperator"

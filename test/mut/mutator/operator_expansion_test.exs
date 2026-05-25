@@ -14,11 +14,13 @@ defmodule Mut.Mutator.OperatorExpansionTest do
       assert ConcatOperator.name() == "ConcatOperator"
       assert ConcatOperator.targets() == [:dispatch]
       assert replacements(ConcatOperator, :++) == [:--]
-      assert replacements(ConcatOperator, :--) == [:++]
+      # M72 hazard rule: the crash-prone `--` -> `++` direction is dropped.
+      assert replacements(ConcatOperator, :--) == []
     end
 
-    test "applicable only for ++/-- body dispatch with matching oracle" do
+    test "applicable only for ++ body dispatch with matching oracle (M72: not --)" do
       assert ConcatOperator.applicable?(ast_node(:++), context_for(:++))
+      refute ConcatOperator.applicable?(ast_node(:--), context_for(:--))
       refute ConcatOperator.applicable?(ast_node(:+), context_for(:+))
       refute ConcatOperator.applicable?(ast_node(:++), context_for(:++, env_context: :guard))
 
@@ -31,7 +33,8 @@ defmodule Mut.Mutator.OperatorExpansionTest do
     test "oracle compatibility + guard-safe non-equivalent" do
       assert ConcatOperator.compatible?(candidate(:++), site(:++, resolved_module: Kernel))
       refute ConcatOperator.compatible?(candidate(:++), site(:++, resolved_arity: 1))
-      ms = ConcatOperator.mutate(ast_node(:--), context_for(:--))
+      refute ConcatOperator.compatible?(candidate(:--), site(:--, resolved_module: Kernel))
+      ms = ConcatOperator.mutate(ast_node(:++), context_for(:++))
       assert Enum.all?(ms, &(&1.guard_safe? and ConcatOperator.equivalent?(&1) == false))
     end
   end
@@ -48,8 +51,9 @@ defmodule Mut.Mutator.OperatorExpansionTest do
       end
 
       assert bw.(:band) == [:bor, :bxor]
-      assert bw.(:bor) == [:band, :bxor]
-      assert bw.(:bxor) == [:band, :bor]
+      # M72: bor <-> bxor dropped (input-dependent pseudo-equivalents).
+      assert bw.(:bor) == [:band]
+      assert bw.(:bxor) == [:band]
       assert bw.(:bsl) == [:bsr]
       assert bw.(:bsr) == [:bsl]
     end

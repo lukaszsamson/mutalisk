@@ -20,8 +20,11 @@
 
 defmodule EquivRate do
   def run(paths) do
-    IO.puts("target               mutator                  killed surv  cov-surv  equiv-rate")
-    IO.puts(String.duplicate("-", 78))
+    IO.puts(
+      "target               mutator                  killed surv  cov-surv  equiv-rate  inv  err  tmo  nonprod%"
+    )
+
+    IO.puts(String.duplicate("-", 104))
     Enum.each(paths, &report/1)
   end
 
@@ -45,13 +48,27 @@ defmodule EquivRate do
     denom = killed + survived
     rate = if denom > 0, do: Float.round(cov_surv / denom * 100, 1), else: 0.0
 
-    :io.format("~-20s ~-24s ~6w ~5w ~9w ~9.1f%~n", [
+    # M72: per-mutator non-productive instrumentation. invalid = the mutation
+    # could not compile (CompileError); err = it crashed/aborted at runtime
+    # (RuntimeError); tmo = Timeout. nonprod% = these over ALL mutants — the
+    # noise an operator's hazard rules must drive down.
+    invalid = Enum.count(ms, &(&1["status"] == "CompileError"))
+    err = Enum.count(ms, &(&1["status"] == "RuntimeError"))
+    tmo = Enum.count(ms, &(&1["status"] == "Timeout"))
+    total = length(ms)
+    nonprod = if total > 0, do: Float.round((invalid + err + tmo) / total * 100, 1), else: 0.0
+
+    :io.format("~-20s ~-24s ~6w ~5w ~9w ~9.1f% ~4w ~4w ~4w ~7.1f%~n", [
       target,
       mutator,
       killed,
       survived,
       cov_surv,
-      rate
+      rate,
+      invalid,
+      err,
+      tmo,
+      nonprod
     ])
   end
 end

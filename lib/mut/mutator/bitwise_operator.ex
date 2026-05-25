@@ -2,12 +2,21 @@ defmodule Mut.Mutator.BitwiseOperator do
   @moduledoc """
   M69 operator-expansion mutator. Swaps bitwise operations:
 
-    * `band` ↔ `bor` ↔ `bxor` (bitwise logical)
+    * `band` ↔ `bor` (bitwise logical)
+    * `band` → `bxor`, `bxor` → `band`
     * `bsl` ↔ `bsr` (bit shifts)
 
   Matches the `Bitwise` (imported) / `:erlang` function-name forms
   (`band(a, b)` etc.). Opt-in, schema-routed (dispatch), mirroring
   `Mut.Mutator.Arithmetic`.
+
+  **M72 hazard rule — the `bor` ↔ `bxor` swaps are dropped.** `bor(a, b)`
+  and `bxor(a, b)` differ only on bits set in *both* operands, so they
+  coincide for any inputs with no common bits — the dominant input-dependent
+  pseudo-equivalent (M71: both plug_crypto BitwiseOperator survivors were
+  this pair). This coincidence is input-dependent, not syntactically
+  detectable, so the swaps are removed rather than filtered. `band` swaps and
+  the shift pair stay (they rarely coincide).
   """
   @behaviour Mut.Mutator
 
@@ -21,8 +30,8 @@ defmodule Mut.Mutator.BitwiseOperator do
   @kind :bitwise_op
   @replacements %{
     band: [:bor, :bxor],
-    bor: [:band, :bxor],
-    bxor: [:band, :bor],
+    bor: [:band],
+    bxor: [:band],
     bsl: [:bsr],
     bsr: [:bsl]
   }
