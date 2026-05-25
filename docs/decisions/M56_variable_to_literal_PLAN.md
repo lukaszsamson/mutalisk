@@ -1,11 +1,25 @@
 # M56 — VariableToLiteral, the deferred M54 mutator
 
-**Status: IMPLEMENTED (2026-05-24).** Shipped the operator-only first slice
-(`:number`/`:binary`/`:list` hints; boolean deferred), hint carried on the
-candidate/`Context`, opt-in via explicit `--mutators variable_to_literal`
-(absent from `Defaults.list/0`). `bin/verify` green. The keep/cut equivalent-
-rate measurement is the remaining open item (M55 corpus follow-up). Picks up the
-`VariableToLiteral` deferral recorded in `docs/decisions/M54_variable_mutators.md`.
+**Status: IMPLEMENTED (2026-05-24); hint surface BROADENED (2026-05-25).**
+Hint carried on the candidate/`Context`, opt-in via explicit
+`--mutators variable_to_literal` (absent from `Defaults.list/0`). `bin/verify`
+green. Picks up the `VariableToLiteral` deferral recorded in
+`docs/decisions/M54_variable_mutators.md`.
+
+**Broadened hint surface (2026-05-25):**
+- `:number` — `+ - * /` **and** `abs`/`round`/`trunc`/`ceil`/`floor`
+- `:binary` — `<>` **and** `byte_size`/`bit_size`
+- `:list`   — `++`/`--` **and** `length`/`hd`/`tl`
+- `:boolean` — `and`/`or`/`not` (strict-boolean operands; `&&`/`||`/`!`
+  excluded as truthy-any) → `false`
+
+**Known descent gap (follow-up, not fixed here):** the env walker does NOT
+descend into **remote-call arguments** (`String.length(s)`, `Enum.map(xs, f)`)
+— those argument variables/literals are not discovered at all. This limits both
+VariableToLiteral's reach (no `String.*`/`Enum.*` hints) and VariableReplace's
+coverage. Fixing it would also change default-on **AtomLiteral** discovery
+(atoms passed to remote calls), i.e. a stable-id-churn-bearing change that needs
+its own milestone + re-validation — deliberately deferred.
 
 ## Why it was deferred
 

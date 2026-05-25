@@ -97,14 +97,15 @@ defmodule Mut.EnvWalker do
   # mutable bindings/references — the reserved nullary macros.
   @reserved_vars ~w(__MODULE__ __DIR__ __ENV__ __CALLER__ __STACKTRACE__ __block__ __aliases__)a
 
-  # M56: type-determining operators whose DIRECT operands carry a syntactic
-  # type hint for the VariableToLiteral mutator. Deliberately narrow (Codex
-  # review): unambiguous arithmetic / binary-concat / list operators only.
-  # Short-circuit boolean operators (`and`/`or`) are excluded — they have
-  # control-flow handling and are deferred.
-  @number_hint_ops ~w(+ - * /)a
-  @binary_hint_ops [:<>]
-  @list_hint_ops ~w(++ --)a
+  # M56: type-determining operators/functions whose DIRECT operands carry a
+  # syntactic type hint for the VariableToLiteral mutator. Unambiguous LOCAL
+  # forms only (remote calls like `String.length/1` are not walked yet — see
+  # the descent-gap note in docs/decisions/M56). Strict boolean `and`/`or`/`not`
+  # require boolean operands; `&&`/`||`/`!` (truthy-any) are excluded.
+  @number_hint_ops ~w(+ - * / abs round trunc ceil floor)a
+  @binary_hint_ops ~w(<> byte_size bit_size)a
+  @list_hint_ops ~w(++ -- length hd tl)a
+  @boolean_hint_ops ~w(and or not)a
 
   @doc """
   Parses source with the literal-encoder option, returning an AST
@@ -1136,6 +1137,9 @@ defmodule Mut.EnvWalker do
 
   defp classify_call(op, _meta, args, state) when op in @list_hint_ops,
     do: walk_operands_hinted(args, :list, state)
+
+  defp classify_call(op, _meta, args, state) when op in @boolean_hint_ops,
+    do: walk_operands_hinted(args, :boolean, state)
 
   defp classify_call(name, meta, args, state) do
     cond do

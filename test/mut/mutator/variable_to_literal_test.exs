@@ -26,14 +26,14 @@ defmodule Mut.Mutator.VariableToLiteralTest do
 
   describe "applicable?/2" do
     test "true for a variable read with a supported type hint" do
-      for hint <- [:number, :binary, :list] do
+      for hint <- [:number, :binary, :list, :boolean] do
         assert VariableToLiteral.applicable?({:a, [], nil}, ctx(type_hint: hint))
       end
     end
 
     test "false without a hint, with an unsupported hint, or in match/guard/schema" do
       refute VariableToLiteral.applicable?({:a, [], nil}, ctx(type_hint: nil))
-      refute VariableToLiteral.applicable?({:a, [], nil}, ctx(type_hint: :boolean))
+      refute VariableToLiteral.applicable?({:a, [], nil}, ctx(type_hint: :map))
       refute VariableToLiteral.applicable?({:a, [], nil}, ctx(env_context: :match))
       refute VariableToLiteral.applicable?({:a, [], nil}, ctx(env_context: :guard))
       refute VariableToLiteral.applicable?({:a, [], nil}, ctx(engine: :schema))
@@ -55,6 +55,9 @@ defmodule Mut.Mutator.VariableToLiteralTest do
 
       assert [%{mutated_ast: []}] =
                VariableToLiteral.mutate({:a, [], nil}, ctx(type_hint: :list))
+
+      assert [%{mutated_ast: false}] =
+               VariableToLiteral.mutate({:a, [], nil}, ctx(type_hint: :boolean))
     end
 
     test "mutation_kind and no mutations when inapplicable" do

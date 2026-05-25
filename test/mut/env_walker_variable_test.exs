@@ -145,6 +145,29 @@ defmodule Mut.EnvWalkerVariableTest do
     assert {:q, :number} in hints
   end
 
+  test "local type-functions and boolean operators hint their variable args (M56)" do
+    src = ~S'''
+    defmodule Foo do
+      def f(a, s, xs, flag, other) do
+        {abs(a), byte_size(s), length(xs), flag and other}
+      end
+    end
+    '''
+
+    {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+    hints =
+      ast
+      |> EnvWalker.collect_variable_candidates(file: "lib/foo.ex", source: src)
+      |> Enum.map(fn {c, _} -> {elem(c.node, 0), c.type_hint} end)
+
+    assert {:a, :number} in hints
+    assert {:s, :binary} in hints
+    assert {:xs, :list} in hints
+    assert {:flag, :boolean} in hints
+    assert {:other, :boolean} in hints
+  end
+
   test "variable candidates have env_context nil (reads)" do
     src = ~S'''
     defmodule Foo do

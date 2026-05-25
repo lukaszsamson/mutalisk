@@ -7,11 +7,14 @@ defmodule Mut.Mutator.VariableToLiteral do
   M39 contract): `Mut.EnvWalker` threads a `type_hint` to a variable that is a
   DIRECT operand of a type-determining operator. The hint is shallow —
   `a + 1` hints `a` numeric, but `f(x) + 1` does NOT hint `x` (that would infer
-  through `f/1`). Current hint coverage (deliberately narrow per review):
+  through `f/1`). Hint coverage (LOCAL forms only — remote calls like
+  `String.length/1` are not walked yet; see the descent-gap note in
+  `docs/decisions/M56_variable_to_literal_PLAN.md`):
 
-    * `:number`  (`+ - * /`)        -> `0`
-    * `:binary`  (`<>`)             -> `""`
-    * `:list`    (`++` / `--`)      -> `[]`
+    * `:number`  (`+ - * /`, `abs`/`round`/`trunc`/`ceil`/`floor`) -> `0`
+    * `:binary`  (`<>`, `byte_size`/`bit_size`)                    -> `""`
+    * `:list`    (`++`/`--`, `length`/`hd`/`tl`)                   -> `[]`
+    * `:boolean` (`and`/`or`/`not`)                                -> `false`
 
   Fallback-routed. **Opt-in via explicit `--mutators variable_to_literal`** — it
   is intentionally absent from `Mut.Mutator.Defaults.list/0`, so `--enable
@@ -28,7 +31,7 @@ defmodule Mut.Mutator.VariableToLiteral do
   alias Mut.Oracle.AstCandidate
   alias Mut.Oracle.DispatchSite
 
-  @boundaries %{number: 0, binary: "", list: []}
+  @boundaries %{number: 0, binary: "", list: [], boolean: false}
 
   @impl true
   def name, do: "VariableToLiteral"
