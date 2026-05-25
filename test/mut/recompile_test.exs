@@ -27,6 +27,38 @@ defmodule Mut.RecompileTest do
     assert :binary.match(eval, "Mix.start()") < :binary.match(eval, "compile_to_path")
   end
 
+  @tag :integration
+  test "M58: compile-time Mix.Project access recompiles WITH the eval's Mix bootstrap" do
+    # Mirrors the credo `use Credo.Check` -> `Mix.ProjectStack` crash class:
+    # a module reaching `Mix.Project` at COMPILE time fails in a bare
+    # `elixir --eval` BEAM unless Mix is started. Proves `Mix.start()` (in the
+    # recompile eval) is what makes such projects recompile instead of
+    # false-invalid.
+    dir = Path.join(System.tmp_dir!(), "mut_m58_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join(dir, "ebin"))
+
+    File.write!(Path.join(dir, "uses_mix.ex"), """
+    defmodule UsesMix do
+      @cfg Mix.Project.config()
+      def cfg, do: @cfg
+    end
+    """)
+
+    # Match `{:ok, _, _}` so a failed compile (ParallelCompiler returns
+    # `{:error, ...}`) becomes a non-zero exit.
+    compile = ~s|{:ok, _, _} = Kernel.ParallelCompiler.compile_to_path(["uses_mix.ex"], "ebin")|
+
+    on_exit(fn -> File.rm_rf!(dir) end)
+
+    # With Mix.start (as the recompile eval does) -> compiles cleanly.
+    assert {:exit, 0, _} =
+             Mut.ChildProcess.run("elixir", ["--eval", "Mix.start(); #{compile}"], cd: dir)
+
+    # Without it -> the compile-time Mix.Project access fails (negative control).
+    assert {:exit, code, _out} = Mut.ChildProcess.run("elixir", ["--eval", compile], cd: dir)
+    assert code != 0
+  end
+
   test "recompile patches one fixture file in a real sandbox and reset restores it" do
     {:ok, schema_result} = schema_result()
 
