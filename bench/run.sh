@@ -9,7 +9,7 @@ WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -168,6 +168,34 @@ case "$TARGET" in
     REPO="https://github.com/lau/tzdata.git"
     REF="${BENCH_REF:-v1.1.3}"
     SHA="${BENCH_SHA:-61fb7ecf68fb9a3dbf7aeb7669adc3d0f7360b33}"
+    ;;
+  # M59 v1.18 matrix completion. credo + makeup run clean; req / timex / oban
+  # are environment-blocked (documented in docs/decisions/M59_*; the prep
+  # section below records the blocker for each).
+  credo)
+    REPO="https://github.com/rrrene/credo.git"
+    REF="${BENCH_REF:-v1.7.13}"
+    SHA="${BENCH_SHA:-a006b49aa56b9bfce0e1e74ef7ea3c445827c681}"
+    ;;
+  makeup)
+    REPO="https://github.com/elixir-makeup/makeup.git"
+    REF="${BENCH_REF:-v1.2.1}"
+    SHA="${BENCH_SHA:-3e0c0379cd1c062bea64e6ce6c8ea217e3f1ce06}"
+    ;;
+  req)
+    REPO="https://github.com/wojtekmach/req.git"
+    REF="${BENCH_REF:-v0.5.16}"
+    SHA="${BENCH_SHA:-c6e8ab1f9d1c8e1aef935a6319faa40487bb6f42}"
+    ;;
+  timex)
+    REPO="https://github.com/bitwalker/timex.git"
+    REF="${BENCH_REF:-3.7.9}"
+    SHA="${BENCH_SHA:-5ad1b8206977ebffb3bf72f88c18d490c36151c8}"
+    ;;
+  oban)
+    REPO="https://github.com/sorentwo/oban.git"
+    REF="${BENCH_REF:-v2.20.1}"
+    SHA="${BENCH_SHA:-23fa8176b3586ca84f5859793739fad798e69d2b}"
     ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
@@ -334,6 +362,42 @@ case "$TARGET" in
     # unrunnable on Elixir 1.19+. Pin remains for future operators on
     # 1.18 or with patched credo.
     printf 'ex_machina is unrunnable on Elixir 1.19+ (credo dep); see BENCHMARKS.md\n' >&2
+    exit 65
+    ;;
+  credo)
+    # credo ships a `.tool-versions` pinning an asdf Elixir/Erlang not
+    # installed here; remove it so the session toolchain is used. Baseline
+    # is green at the pinned SHA. (Mutation surface unaffected.)
+    rm -f "$WORK_DIR/.tool-versions"
+    ;;
+  makeup)
+    # Clean target, no prep. (Weak test suite -> low kill rate across the
+    # board; documented in BENCHMARKS.)
+    :
+    ;;
+  req)
+    # BLOCKED (environment): the optional native dep :ezstd fails to build
+    # (zstd toolchain). Removing it (it is `optional: true`) cascades to ~13
+    # accept-encoding/zstd baseline failures because req's default
+    # accept-encoding header changes. Not a mutalisk defect; see
+    # docs/decisions/M59_oss_matrix_equivalent_rate.md.
+    printf 'req is environment-blocked (ezstd native build); see M59 decision doc\n' >&2
+    exit 65
+    ;;
+  timex)
+    # BLOCKED (environment): timex 3.7.9 tests assert exact DateTime equality
+    # and fail on Elixir 1.19's microsecond-precision representation drift
+    # (`14:27:52Z` vs `…52.000000Z`), ~5-6 failures across 3 files. A project
+    # test incompatibility, not a mutalisk defect.
+    printf 'timex is environment-blocked (Elixir 1.19 us-precision test drift); see M59 decision doc\n' >&2
+    exit 65
+    ;;
+  oban)
+    # BLOCKED (environment): oban's test_helper starts Postgres + MySQL
+    # (Dolphin) + SQLite repos and runs migrations before ExUnit; MySQL is
+    # absent here, so the suite cannot start. Heavy multi-DB infra, not a
+    # mutalisk defect.
+    printf 'oban is environment-blocked (Postgres+MySQL+SQLite infra; MySQL absent); see M59 decision doc\n' >&2
     exit 65
     ;;
 esac
