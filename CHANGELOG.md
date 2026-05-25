@@ -5,6 +5,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.17 unreleased
 
+### M55 full matrix + engine/mutator fixes (2026-05-25)
+
+Completed the OSS matrix and addressed the issues the validation surfaced.
+
+- **credo false-invalid ENGINE BUG fixed** (`9818aeb`): the fallback recompile
+  ran `ParallelCompiler` in a bare `elixir --eval` BEAM without `:mix` started;
+  projects with compile-time `Mix.Project` access (credo) crashed, mis-marking
+  valid mutants `:invalid`. `Mix.start()` in the recompile eval fixes it (no
+  project load / lock-check). credo now runs: invalid 10.3% (was ~40% false).
+- **Three mutator AST-shape false-positives fixed** (all produced invalid
+  mutants from non-variables): bitstring specifiers (`da89799`), `\\`
+  default-arg / multi-arg `when` guard expressions (`e3480cd`), and pipe-rhs /
+  named-capture function names (`06a1280`).
+- **VariableToLiteral hint surface broadened** (`a2b58af`): `:boolean`
+  (`and`/`or`/`not`) + local type-functions (`byte_size`/`length`/`abs`/…).
+- **Full matrix: 7 of 10 targets ran** (decimal, jason, gettext, plug, makeup,
+  ecto, credo). timex / req / oban remain blocked by environment/version issues
+  (Elixir-1.19 µs-precision drift in timex's tests; `ezstd` native build; multi-
+  DB infra incl. absent MySQL) — confirmed not fixable by pulling latest, not
+  mutalisk defects. Details in `docs/decisions/M55_followup_oss_matrix.md`.
+
+Net: every cleanly-runnable target has variable invalid < 1.5% except credo (an
+outlier purely from its for/unquote metaprogramming). Decisions unchanged
+(pattern-position + variable mutators keep_opt_in).
+
 ### M56 — VariableToLiteral mutator (2026-05-24)
 
 Implements the M54-deferred `VariableToLiteral`: replaces an in-scope variable

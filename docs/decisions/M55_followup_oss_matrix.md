@@ -17,14 +17,29 @@ corpus SHAs.
 |---|---|---:|---:|---:|---:|---|
 | makeup | ✅ | 503 | 2 (0.44%) | clean | 0/8 | weak test suite (36.7% overall kill — low everywhere) |
 | ecto | ✅ (cap 1500) | 1500 | 11 (0.76%) | clean | 5/8 | macro-heavy; 188 codegen "errors" (detections) |
-| credo | ⚠ partial | 7671 | **FALSE-high** | — | — | **engine false-invalid bug (below)**; too large for full run |
-| timex | ❌ blocked | — | — | — | — | baseline: 5 Elixir-1.19/tzdata failures across 3 files |
-| req | ❌ blocked | — | — | — | — | native dep `:ezstd` (zstd) fails to compile in this env |
-| oban | ❌ blocked | — | — | — | — | needs Postgres + MySQL + SQLite repos + migrations; MySQL absent |
+| credo | ✅ (cap 1500) | 1500 | 155 (10.3%) | clean | 44/64 | **was the false-invalid engine bug — now FIXED** (`Mix.start`, `9818aeb`). Residual 10.3% is genuine + credo-specific (for/unquote metaprogramming); outlier vs all others < 1.5%. |
+| timex | ❌ blocked | — | — | — | — | Elixir-1.19 DateTime µs-precision drift in timex's own tests (`14:27:52Z` vs `…52.000000Z`); not TZ-fixable; latest pull = no change |
+| req | ❌ blocked | — | — | — | — | native dep `:ezstd` (zstd) fails to build (toolchain); removing it (optional) cascades to 13 accept-encoding baseline failures; latest pull = no change |
+| oban | ❌ blocked | — | — | — | — | `test_helper` starts Postgres + MySQL + SQLite repos + migrations; MySQL absent; latest pull = no change |
 
-Combined with the M55 subset (decimal, jason, gettext, plug), **6 targets ran
-to a usable result**. The blocked three are environment issues (toolchain
-drift, native build, multi-DB infra), not mutalisk defects.
+**Full matrix: 7 of 10 targets ran** (decimal, jason, gettext, plug from M55;
+makeup, ecto, **credo** here). credo was unblocked by fixing the engine
+false-invalid bug. The remaining three are genuine **environment/version**
+issues (a project-test Elixir-1.19 incompatibility; a native-build toolchain
+gap; multi-DB infra) — confirmed not upstream-fixable by pulling latest, and
+not mutalisk defects.
+
+### Mutator false-positives found & fixed during this matrix
+
+Broad validation (its purpose) surfaced three AST-shape false-positives where a
+non-variable was offered to VariableReplace/VariableToLiteral, producing
+invalid mutants — all fixed:
+
+1. bitstring type specifiers `<<x::bits>>` (`da89799`)
+2. `\\` default-arg expressions + multi-arg `when` guards (`e3480cd`)
+3. pipe-rhs / named-capture function names `x |> to_string`, `&f/n` (`06a1280`)
+
+Plus the engine fix: `Mix.start()` in the fallback recompile (`9818aeb`).
 
 ## UPDATE (2026-05-25): credo false-invalid root-caused + FIXED
 
