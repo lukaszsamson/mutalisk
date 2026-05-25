@@ -5,6 +5,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.18 unreleased — maturation (harden, then graduate)
 
+### M61 — coverage-as-default: DO NOT flip (data-gated, 2026-05-25)
+
+`--selection` default stays `static`. Coverage selection failed on 3/8 M59
+targets (gettext compile-in-test under `:cover`; credo timeout; timex
+tzdata+JIT crash), so it is not robust enough to default. Coverage modes remain
+opt-in via `--selection`. The 3 coverage-runner robustness gaps are documented
+as prerequisites for a future flip. No code change.
+`docs/decisions/M61_coverage_default.md`.
+
+### M60 — surface graduation: graduate NOTHING (data-gated, 2026-05-25)
+
+No v1.17 surface graduates to default-on. Per the M59 matrix, no surface clears
+the M25/M41 per-target equivalent-rate bar (< 20%) on every meaningful target —
+VariableReplace 22–39% (jason/ecto/plug), pattern literals 21–33% (ecto/plug).
+`Mut.Mutator.Defaults.default_on/0` is unchanged; the default plan is
+byte-identical (zero stable-id change). IntegerLiteral-in-pattern is the
+closest future candidate (fails only ecto, marginally). Both surfaces
+**stay opt-in**. `docs/decisions/M60_surface_graduation.md`.
+
 ### M59 — OSS matrix (8/10) + equivalent-rate (2026-05-25)
 
 Wired the 6 OSS targets into `bench/run.sh` and ran the matrix to **8/10**
