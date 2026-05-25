@@ -60,11 +60,10 @@ defmodule Mut.Recompile do
   @spec recompile(Sandbox.t(), [Path.t()], [Path.t()], keyword) :: result
   def recompile(%Sandbox{} = sandbox, mutated_files, dependent_files, opts \\ [])
       when is_list(mutated_files) and is_list(dependent_files) and is_list(opts) do
-    app = Keyword.fetch!(opts, :app)
+    default_app = Keyword.fetch!(opts, :app)
     files = Enum.uniq(mutated_files ++ dependent_files)
-    ebin = Path.join(["_build", "mut_schema", "lib", app, "ebin"])
 
-    case Mut.ChildProcess.run("elixir", elixir_args(sandbox.path, files, ebin),
+    case Mut.ChildProcess.run("elixir", elixir_args(sandbox.path, files, default_app),
            cd: sandbox.path,
            env: env()
          ) do
@@ -120,7 +119,17 @@ defmodule Mut.Recompile do
 
   @doc false
   # Exposed for testing (asserts the eval bootstraps Mix; see recompile_test).
-  def elixir_args(sandbox_path, files, ebin) do
+  #
+  # All affected files compile in ONE Kernel.ParallelCompiler.compile pass so
+  # the full compile-dependency DAG (across files AND across umbrella apps) is
+  # ordered correctly in-process — compiling per-app groups separately loses
+  # that ordering and breaks macro/import resolution between dependents (M68).
+  # The `:each_module` callback then routes every module's beam to its own
+  # app's ebin (`_build/mut_schema/lib/<app>/ebin`), derived from the source
+  # path: `apps/<app>/...` for umbrella children, else `default_app`. Without
+  # this, cross-app dependents' beams would land in the mutated app's ebin and
+  # shadow the real ones at test time.
+  def elixir_args(sandbox_path, files, default_app) do
     pa_flags =
       sandbox_path
       |> Path.join("_build/mut_schema/lib/*/ebin")
@@ -138,14 +147,37 @@ defmodule Mut.Recompile do
     # (false-invalids). `Mix.start/0` only boots Mix's agents — it does NOT
     # load the project or run the deps lock-check (the thing this module
     # avoids by skipping `mix`), so it is safe and side-effect-free here.
-    eval =
-      "Mix.start(); " <>
-        "case Kernel.ParallelCompiler.compile_to_path(#{inspect(files)}, #{inspect(ebin)}) " <>
-        "do {:ok, _modules, _warnings} -> :ok; " <>
-        "{:error, errors, warnings} -> " <>
-        "IO.puts(:stderr, \"mut.recompile errors: \#{inspect(errors, limit: :infinity)}\"); " <>
-        "IO.puts(:stderr, \"mut.recompile warnings: \#{inspect(warnings, limit: :infinity)}\"); " <>
-        "System.halt(1) end"
+    # `file` may arrive absolute, so locate the `apps/<app>` segment anywhere
+    # in the path (umbrella child); fall back to default_app (single-app).
+    # `\#{...}` stays literal so it is interpolated in the child BEAM.
+    eval = ~s"""
+    Mix.start()
+    ebin_of = fn file ->
+      app =
+        case Enum.drop_while(String.split(file, "/"), &(&1 != "apps")) do
+          ["apps", a | _] -> a
+          _ -> #{inspect(default_app)}
+        end
+
+      Path.join(["_build/mut_schema/lib", app, "ebin"])
+    end
+
+    case Kernel.ParallelCompiler.compile(#{inspect(files)},
+           each_module: fn file, module, binary ->
+             ebin = ebin_of.(file)
+             File.mkdir_p!(ebin)
+             File.write!(Path.join(ebin, Atom.to_string(module) <> ".beam"), binary)
+           end
+         ) do
+      {:ok, _modules, _warnings} ->
+        :ok
+
+      {:error, errors, warnings} ->
+        IO.puts(:stderr, "mut.recompile errors: \#{inspect(errors, limit: :infinity)}")
+        IO.puts(:stderr, "mut.recompile warnings: \#{inspect(warnings, limit: :infinity)}")
+        System.halt(1)
+    end
+    """
 
     pa_flags ++ ["--eval", eval]
   end

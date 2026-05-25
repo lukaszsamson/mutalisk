@@ -79,6 +79,50 @@ defmodule Mut.MixManifestTest do
     assert MixManifest.dependents(manifest, [A], [:compile]) == MapSet.new()
   end
 
+  test "read_combined merges per-app manifests and walks dependents across apps" do
+    # core app defines CoreMod; web app's WebMod compile-depends on CoreMod.
+    core = write_manifest("core", %{CoreMod => "lib/core.ex"}, %{"lib/core.ex" => deps()})
+
+    web =
+      write_manifest(
+        "web",
+        %{WebMod => "lib/web.ex"},
+        %{"lib/web.ex" => deps(compile_deps: [CoreMod])}
+      )
+
+    assert {:ok, %MixManifest{} = combined} =
+             MixManifest.read_combined([{"core", core}, {"web", web}])
+
+    # Sources are app-prefixed and unique; module refs stay global.
+    assert combined.modules[CoreMod] == "apps/core/lib/core.ex"
+    assert combined.modules[WebMod] == "apps/web/lib/web.ex"
+
+    # A module mutated in `core` yields a dependent source file in `web`.
+    assert MixManifest.dependents(combined, [CoreMod], [:compile]) ==
+             MapSet.new(["apps/web/lib/web.ex"])
+  end
+
+  defp write_manifest(app, modules, sources) do
+    module_records =
+      Map.new(modules, fn {mod, src} -> {mod, {:module, :module, [src], nil, false, 0}} end)
+
+    source_records =
+      Map.new(sources, fn {src, d} ->
+        {src,
+         {:source, 0, 0, nil, d.compile_deps, d.export_deps, d.runtime_deps, [], [], [], [], []}}
+      end)
+
+    term =
+      {34, module_records, source_records, %{}, %{}, nil, ".", [], 0, 0, []}
+
+    root = Path.expand("tmp/tests/mix_manifest/#{app}")
+    File.rm_rf!(root)
+    File.mkdir_p!(root)
+    path = Path.join(root, "compile.elixir")
+    File.write!(path, :erlang.term_to_binary(term))
+    path
+  end
+
   defp real_manifest_path do
     {:ok, oracle} =
       Mut.OracleBuild.run(fixture_root(), run_id: "m10-manifest-oracle", force: true)

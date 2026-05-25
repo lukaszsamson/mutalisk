@@ -19,12 +19,12 @@ defmodule Mut.RecompileTest do
 
   test "eval bootstraps Mix so compile-time Mix.Project code (credo-class) does not false-invalid" do
     ["--eval", eval] =
-      Recompile.elixir_args("/tmp/sandbox", ["lib/foo.ex"], "_build/mut_schema/lib/foo/ebin")
+      Recompile.elixir_args("/tmp/sandbox", ["lib/foo.ex"], "demo_app")
       |> Enum.take(-2)
 
     assert eval =~ "Mix.start()"
     # Mix.start must precede the compile so Mix.ProjectStack is alive during it.
-    assert :binary.match(eval, "Mix.start()") < :binary.match(eval, "compile_to_path")
+    assert :binary.match(eval, "Mix.start()") < :binary.match(eval, "ParallelCompiler.compile")
   end
 
   @tag :integration

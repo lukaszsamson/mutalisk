@@ -251,6 +251,9 @@ defmodule Mut.Sandbox do
   defp path_root(relative) do
     case Path.split(relative) do
       ["_build" | _] = parts -> parts |> Enum.take(4) |> Path.join()
+      # Umbrella source: confine stray-sweeping to apps/<app>/lib (not all of
+      # apps/, which holds each app's mix.exs/test/priv that aren't tracked).
+      ["apps", _app, "lib" | _] = parts -> parts |> Enum.take(3) |> Path.join()
       [first | _] -> first
     end
   end
@@ -263,13 +266,26 @@ defmodule Mut.Sandbox do
 
   defp source_baseline(baseline_source) do
     baseline_source
-    |> Path.join("lib/**/*")
-    |> Path.wildcard(match_dot: true)
+    |> source_globs()
+    |> Enum.flat_map(&Path.wildcard(&1, match_dot: true))
     |> Enum.filter(&File.regular?/1)
     |> Map.new(fn file ->
       relative = Path.relative_to(file, baseline_source)
       {relative, sha256(file)}
     end)
+  end
+
+  # Single-app: the project's own lib/. Umbrella: every child app's lib/, so a
+  # fallback-patched source file under apps/<app>/lib resets between mutants
+  # (the umbrella root has no lib/ of its own). M68.
+  defp source_globs(baseline_source) do
+    if Mut.Umbrella.umbrella?(baseline_source) do
+      baseline_source
+      |> Mut.Umbrella.app_dirs()
+      |> Enum.map(&Path.join(&1, "lib/**/*"))
+    else
+      [Path.join(baseline_source, "lib/**/*")]
+    end
   end
 
   defp sha256(path) do

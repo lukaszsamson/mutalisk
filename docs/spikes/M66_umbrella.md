@@ -98,6 +98,21 @@ crux.
    live in app B). Recompile = mutated file + all dependent files, across apps.
 3. Test selection: union the tests of all apps whose recompiled files changed.
 
+> **M68 implementation notes.** The cross-app dependency walk lands as
+> `Mut.MixManifest.read_combined/1`: each app's manifest is read and its source
+> paths prefixed with `apps/<app>/` (module refs are global and stay
+> unprefixed), then merged into one manifest so the existing `dependents/3`
+> closure spans apps. Verified on unilink: a fallback mutant in the hub
+> (`Unilink.Model.PlatformClient`) fans out to 93 dependents across all 5 apps.
+> The recompile must compile **all** affected files in a single
+> `Kernel.ParallelCompiler.compile` pass (not per-app `compile_to_path` passes —
+> separate passes lose the cross-file/cross-app compile-dependency ordering and
+> break macro/import resolution); the `:each_module` callback then routes every
+> beam to its own app's ebin, with the app derived by finding the `apps/<app>`
+> segment anywhere in the (possibly absolute) source path. Sandbox reset gains
+> umbrella-aware `source_baseline` (globs `apps/*/lib`) and a `path_root` that
+> confines stray-sweeping to `apps/<app>/lib`.
+
 ## v1.20 implementation scope
 
 - **M67:** umbrella work copy + overlay (per-app), build-path extension, oracle

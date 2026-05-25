@@ -203,9 +203,22 @@ defmodule Mut.Worker do
   end
 
   defp read_manifest(sandbox, opts) do
-    [sandbox.path, "_build/mut_schema/lib", app(opts), ".mix/compile.elixir"]
-    |> Path.join()
-    |> Mut.MixManifest.read()
+    if Mut.Umbrella.umbrella?(sandbox.path) do
+      # Union every app's manifest so the dependent walk crosses app
+      # boundaries (a module mutated in app A yields dependent files in B). M68.
+      sandbox.path
+      |> Mut.Umbrella.app_names()
+      |> Enum.map(&{&1, manifest_path(sandbox, &1)})
+      |> Mut.MixManifest.read_combined()
+    else
+      sandbox
+      |> manifest_path(app(opts))
+      |> Mut.MixManifest.read()
+    end
+  end
+
+  defp manifest_path(sandbox, app) do
+    Path.join([sandbox.path, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
   end
 
   defp app(opts), do: Keyword.get(opts, :app, "demo_app")

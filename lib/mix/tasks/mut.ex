@@ -457,7 +457,7 @@ defmodule Mix.Tasks.Mut do
 
     result =
       Worker.run_fallback(sandbox, mutant, worker_tests,
-        app: app_name(sandbox.path),
+        app: fallback_app(sandbox.path, mutant),
         timeout_ms: ctx.host_deadline_ms,
         test_timeout_ms: ctx.test_timeout_ms
       )
@@ -739,6 +739,16 @@ defmodule Mix.Tasks.Mut do
 
   defp source_loader(root) do
     fn file -> File.read!(Path.join(root, file)) end
+  end
+
+  # The OTP app a fallback mutant belongs to. For umbrellas it is the second
+  # segment of the mutant's `apps/<app>/lib/...` path (umbrella app dir names
+  # must equal their app names); single-app reads the project's :app. M68.
+  defp fallback_app(work_copy, mutant) do
+    case Path.split(mutant.file) do
+      ["apps", app | _] -> app
+      _ -> app_name(work_copy)
+    end
   end
 
   defp app_name(work_copy) do
