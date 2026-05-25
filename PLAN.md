@@ -3128,6 +3128,215 @@ executed targets cover the decision-relevant shapes. `bin/verify` green.
 - New default-on flips beyond M46's AtomLiteral (M55 decides
   graduations; flips themselves are v1.18).
 
+# v1.18 milestones (defaults grow up: harden, then graduate)
+
+v1.17 (M52–M56, `bf14d68..f6fb850`) shipped a large new mutation
+surface but left it noisy, opt-in, and undecided. v1.18's theme is
+**maturation**: pay down the v1.17 surface debt (the hardening
+spine M57–M59), then flip the two long-deferred defaults the
+spine's data unlocks (M60 clean-surface graduation, M61
+coverage-as-default). No new mutation surface; no new big
+subsystem. Incremental cross-run history is explicitly held for a
+later release (the user chose maturation over the new perf
+subsystem this cycle).
+
+**Two defaults change in v1.18, both data-gated.** Neither flips on
+assertion — both depend on the M59 matrix + equivalent-rate data.
+`--selection static` remains available as the escape hatch after
+M61. Elixir floor stays `>= 1.19.0`.
+
+Five milestones, all substantial. Dependency order is strict:
+M57 (refined variables) and M58 (engine) precede M59 (matrix; M58
+removes false-invalids that would pollute the data); M60 needs
+M57 + M59; M61 needs M59. The spine (M57–M59) ships regardless;
+the graduations (M60–M61) ship only what the data clears.
+
+## v1.18 scope (committed)
+
+**M57 — Variable-mutator noise refinement + identifier-classification hardening.**
+
+*Goal:* Make variable mutants graduation-eligible by cutting the
+v1.17 error tail, and stop the false-positive whack-a-mole.
+
+*Inputs:* `docs/decisions/M55_corpus_validation.md` (gettext 27% /
+plug 6% error tail; the "skip codegen/macro modules + gate on
+other-uses" refinement); the four v1.17 false-positive fix commits
+(`da89799`, `e3480cd`, `06a1280`, and the bitstring fix);
+`lib/mut/env_walker.ex` variable candidate collection.
+
+*Deliverables:*
+- `VariableReplace` skips codegen / macro-definition modules
+  (functions whose body builds quoted code) — these surface as
+  compile errors in dependents, poor UX for a default mutator.
+- Gate swaps on the swapped-out variable having ≥1 other use
+  (avoid unused-variable churn / warnings-as-errors rollback).
+- A single principled "is this identifier a real variable
+  read/binding" classifier in `Mut.EnvWalker`, consolidating the
+  four reactive fixes (bitstring type specs in `<<>>`, `\\`
+  default-arg expressions, pipe-rhs function names, `&`-capture
+  function names). New AST shapes route through one place.
+
+*Acceptance:*
+- Variable error rate materially down on gettext + plug (measured).
+- Regression tests for all four known false-positive shapes; green.
+- Zero stable-id churn for existing mutants.
+- `bin/verify` green.
+
+*Out of scope:* Broadening the variable mutator surface; the
+default-on flip itself (M60).
+
+**M58 — Fallback-recompile engine hardening.**
+
+*Goal:* Confirm/close the credo invalid residual and harden the
+fallback recompile for compile-time-dependent projects.
+
+*Inputs:* `docs/decisions/M55_followup_oss_matrix.md` (the credo
+10.3% residual + the unconfirmed engine hypotheses); `9818aeb`
+(the `Mix.start` fix); `lib/mut/recompile.ex` + sandbox.
+
+*Deliverables:*
+- Root-cause the credo residual: genuine for/unquote
+  metaprogramming vs still-engine (single-file recompile leaving
+  compile-time dependents stale; parallel-worker sandbox
+  contention on the shared build dir; slow-compile/timeout
+  interaction). Document the finding.
+- Harden `Mut.Recompile`/sandbox for `use Macro`-shaped
+  compile-time-registration projects per the finding.
+- A `use`-macro-registration fixture exercising the recompile path.
+
+*Acceptance:*
+- credo invalid rate explained (genuine vs reduced by a fix).
+- Fixture recompiles correctly under the fallback engine.
+- No regression on the M55 clean targets (decimal/jason/ecto/…).
+- `bin/verify` green.
+
+*Out of scope:* Schema-routing more mutators (the other way to
+avoid recompile; not v1.18).
+
+**M59 — Complete the OSS matrix + equivalent-rate characterization.**
+
+*Goal:* Produce the data both M60 and M61 depend on.
+
+*Inputs:* [[elixir-oss-corpus]] (`../elixir_oss/projects`, 33
+pinned); `bench/run.sh` (4 targets wired, 6 not);
+`docs/decisions/M55_*` (blocked-target notes).
+
+*Deliverables:*
+- Wire ecto, credo, req, timex, makeup, oban into `bench/run.sh`.
+- Unblock what is fixable; document the genuinely env-blocked
+  (timex µs-precision test drift, req ezstd native build, oban
+  multi-DB infra) as environment, not mutalisk defects.
+- Per-mutator **equivalent-rate** measurement — the graduation
+  metric M55 lacked. Define how equivalent-ish survivors are
+  estimated (documented heuristic; this is not exact).
+- BENCHMARKS v1.18 matrix: per target × mutator, kill / survived /
+  error / invalid / equivalent-rate / wall-clock.
+
+*Acceptance:*
+- Matrix runs to ≥ 8/10 targets with documented blockers.
+- Equivalent-rate reported per mutator per target.
+- Zero stable-id churn; `bin/verify` green.
+
+*Out of scope:* Acting on the data (M60/M61).
+
+**M60 — Surface graduation (first default-on flips since M46).**
+
+*Goal:* Flip the clean opt-in surfaces to default-on, gated on M59
+data.
+
+*Inputs:* M59 matrix + equivalent-rate data; M57 refined
+variables; the M25/M41 per-target-minimum rule (kill ≥ 60%,
+equivalent < 20%, invalid < 10%); `Mut.Mutator.Defaults`
+(`default_on/0` / `opt_in/0` tiers from M48).
+
+*Deliverables:*
+- Move surfaces clearing the per-target bar into the default-on
+  tier: pattern-position literals first (M55's clean candidate),
+  refined `VariableReplace` only if M57 brought it over the bar.
+- `docs/decisions/M60_*.md` per surface, recording the per-target
+  numbers and the keep/graduate call.
+
+*Acceptance:*
+- Graduated surfaces in `default_on/0`; non-graduated stay opt-in.
+- Default-plan stable-id change is **additive only** (existing IDs
+  unchanged; new mutants added) — verified by plan diff on
+  demo_app + Decimal.
+- Decision docs committed; `bin/verify` green.
+
+*Out of scope:* Graduating surfaces the data does not clear (stay
+opt-in; revisit later).
+
+**M61 — Coverage-as-default + selection sharpening.**
+
+*Goal:* Flip `--selection` default from `static` to
+`coverage_with_static_fallback` — the post-validation follow-up
+the v1.5 HLD always planned.
+
+*Inputs:* HLD v1.5 §Selection Modes (the staged flip);
+`lib/mut/test_selection/coverage.ex`; the M59 matrix; the
+v1.15 persistent-worker removal (simplifies coverage interaction).
+
+*Deliverables:*
+- Validate coverage selection across the M59 matrix, including
+  interaction with the now-default-on surface (M60). Confirm no
+  kill-count regression vs `static`.
+- Flip the `--selection` default to `coverage_with_static_fallback`
+  (never bare `coverage`). Keep `--selection static` as the
+  documented escape hatch.
+- Sharpen per-mutant test ordering/selection only where the data
+  shows a real fanout win.
+- `docs/decisions/M61_coverage_default.md` + BENCHMARKS perf delta.
+
+*Acceptance:*
+- Coverage default validated on the matrix; kill counts match
+  `static` (selection narrows test work, not outcomes).
+- `--selection static` still works; active mode reported per run.
+- Decision doc committed; `bin/verify` green.
+
+*Out of scope:* Bare `coverage` as default; coverage caching /
+cross-run history (v2).
+
+## v1.18 delivery status (2026-05-25: ALL DELIVERED)
+
+The spine shipped; both graduations are **data-gated no-flips** (the plan's
+explicit "ship only what the data clears" outcome).
+
+- **M57** (`7d694db`) — variable noise refinement: codegen-skip + other-uses
+  gate + single read-side classifier. Error tail gettext 211→45, plug 202→24.
+- **M58** (`11be05c`) — recompile hardening: credo residual root-caused +
+  closed (invalid ~40%→3.3% over the fix chain); `Mix.start` regression fixture.
+- **M59** (`c99eed0`, `531de06`) — matrix to 8/10 (req/oban env-blocked) +
+  per-mutator equivalent-rate; surfaced that coverage selection fails on 3/8
+  targets.
+- **M60** (`c6909f8`) — surface graduation: **nothing graduates** (no surface
+  clears equivalent < 20% on every meaningful target; default plan unchanged).
+- **M61** (`b49a39c`) — coverage-as-default: **not flipped** (coverage not
+  robust — 3/8 failures); static stays default; robustness gaps documented for
+  a future milestone.
+
+`bin/verify` green throughout; all commits local on `master` (unpushed).
+
+## v1.18 horizon (not v1.18 scope)
+
+- **Incremental cross-run history** — the deferred ambitious bet;
+  scope when maturation is banked.
+- **Further surface graduation** — surfaces M60 left opt-in,
+  revisited with more data.
+- **Schema routing for non-literal mutators** — only if M58/M59
+  show fallback dominates wall-clock for guards/variables.
+- **EnvWalker consolidation implementation** — maintenance-trigger
+  gated (M51).
+
+## Explicitly NOT v1.18
+
+- Incremental cross-run history (held for later).
+- New mutation surface or new literal value shapes.
+- Schema routing for non-literal mutators; wrapper guard schemata.
+- Function-call deletion / return-value replacement.
+- EnvWalker consolidation implementation.
+- Bare `--selection coverage` as default (only the
+  static-fallback mode flips).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
