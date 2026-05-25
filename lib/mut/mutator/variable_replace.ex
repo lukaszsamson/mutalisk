@@ -12,6 +12,13 @@ defmodule Mut.Mutator.VariableReplace do
   "unused variable" warning, which `Mut.CompileRollback` removes under
   warnings-as-errors builds.
 
+  **M57 noise refinement:** only fires when the swapped-out variable has ≥1
+  OTHER read in the same function (`ctx.other_uses?`), so the swap leaves the
+  name still used — no unused-variable churn. (`VariableToLiteral` does not
+  require this; a sole-read boundary mutant is still useful.) Codegen functions
+  (quote/unquote bodies) emit no variable candidates at all — see
+  `Mut.EnvWalker`.
+
   Fallback-routed and opt-in (`--enable variable`). At most `@max_alternatives`
   swaps per reference (sorted) to bound mutant count.
   """
@@ -36,7 +43,7 @@ defmodule Mut.Mutator.VariableReplace do
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
     ctx.env_context == nil and ctx.engine == :fallback and variable?(node) and
-      alternatives(ctx) != []
+      alternatives(ctx) != [] and ctx.other_uses? == true
   end
 
   @impl true

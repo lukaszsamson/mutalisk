@@ -16,7 +16,9 @@ defmodule Mut.Context do
     # non-variable contexts).
     :bound_vars,
     # M56: syntactic type hint for the VariableToLiteral mutator.
-    :type_hint
+    :type_hint,
+    # M57: variable has >=1 other read in its function (gates VariableReplace).
+    :other_uses?
   ]
 
   @type t :: %__MODULE__{
@@ -30,6 +32,7 @@ defmodule Mut.Context do
           env_context: nil | :match | :guard,
           engine: :schema | :fallback,
           bound_vars: [atom()] | nil,
-          type_hint: :number | :binary | :list | :boolean | nil
+          type_hint: :number | :binary | :list | :boolean | nil,
+          other_uses?: boolean() | nil
         }
 end

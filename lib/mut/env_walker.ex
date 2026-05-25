@@ -248,8 +248,26 @@ defmodule Mut.EnvWalker do
     }
 
     state = walk(ast, initial_state)
-    Enum.reverse(state.candidates)
+    state.candidates |> Enum.reverse() |> mark_other_uses()
   end
+
+  # M57: a variable's swap is "safe" from unused-variable churn iff the name has
+  # >=1 OTHER read in the same function. Count read-candidates per
+  # {module, function, name}; mark `other_uses?` true when the name appears >=2
+  # times. Gates VariableReplace (VariableToLiteral ignores it).
+  defp mark_other_uses(pairs) do
+    counts =
+      Enum.reduce(pairs, %{}, fn {candidate, snap}, acc ->
+        Map.update(acc, use_key(candidate, snap), 1, &(&1 + 1))
+      end)
+
+    Enum.map(pairs, fn {candidate, snap} ->
+      {%{candidate | other_uses?: Map.fetch!(counts, use_key(candidate, snap)) >= 2}, snap}
+    end)
+  end
+
+  defp use_key(%AstCandidate{node: {name, _meta, _ctx}}, snap),
+    do: {snap.module, snap.function, name}
 
   @doc """
   Walks the AST and returns a list of `Mut.EnvSnapshot` records
@@ -824,13 +842,29 @@ defmodule Mut.EnvWalker do
     # M54: function parameters are bound for the whole body. Clause-local
     # bindings revert when this `def` returns (we thread only snapshots /
     # candidates back onto the outer `state`).
+    # M57: a function whose body builds quoted code (`quote`/`unquote`) is a
+    # codegen function — mutating its variables tends to break the generated
+    # code in dependents (gettext/plug error tail, credo for/unquote). Suppress
+    # variable candidates inside it; the flag reverts with the body walk.
     body_state =
       %{head_state | scope: body_scope, context: body_context}
       |> add_bound_vars(head_args)
+      |> Map.put(:in_codegen, codegen_body?(body))
 
     body_state = walk(body, body_state)
 
     %{state | snapshots: body_state.snapshots, candidates: body_state.candidates}
+  end
+
+  @codegen_forms ~w(quote unquote unquote_splicing)a
+  defp codegen_body?(body) do
+    {_ast, found?} =
+      Macro.prewalk(body, false, fn
+        {form, _meta, _args} = node, _acc when form in @codegen_forms -> {node, true}
+        node, acc -> {node, acc}
+      end)
+
+    found?
   end
 
   defp body_scope_for(:defmacro), do: :macro_definition
@@ -1008,24 +1042,40 @@ defmodule Mut.EnvWalker do
   defp maybe_emit_variable_candidate(state, node, name, meta) do
     cond do
       not Map.get(state, :emit_variables, false) -> state
-      # Inside a `<<...>>`, a `{name, _, atom}` node may be a size/type
-      # specifier (`bits`, `binary`, ...), not a real read; skip the segment.
-      Map.get(state, :in_bitstring, false) -> state
-      not variable_read_eligible?(state, name) -> state
+      not variable_read?(state, name) -> state
+      not mutable_target?(state, name) -> state
       true -> emit_variable_candidate(state, node, name, meta)
     end
   end
 
-  # Only mutate reads (`context == nil`) in a trusted function body. Emit a
-  # candidate when EITHER another in-scope variable exists to swap to
-  # (VariableReplace, M54) OR a syntactic type hint is present
-  # (VariableToLiteral, M56) -- a sole-binding read with a hint still gets a
-  # boundary-literal mutant.
-  defp variable_read_eligible?(state, name) do
+  # M57 — THE single classifier for "is this `{name, meta, atom}` node a mutable
+  # variable READ?" All read-side non-variable exclusions route through here.
+  # Taxonomy of identifiers that look like variables but are not mutable reads:
+  #
+  #   * name-level — `_`-prefixed / reserved nullary macros (`bindable_var?/1`).
+  #   * env-level — not a `context: nil` read in a trusted `:function_body`
+  #     (patterns/guards/module bodies/opaque-macro descendants).
+  #   * bitstring specifier — `<<x::bits>>` -> `bits` (`:in_bitstring` flag, set
+  #     while descending `<<>>` segments).
+  #   * codegen function — body builds quoted code (`:in_codegen`, M57).
+  #   * pipe-rhs / `&`-capture function names (`x |> to_string`, `&f/n`) —
+  #     handled STRUCTURALLY in `descend/2`, which never visits those nodes.
+  #
+  # Binding-side exclusions (which names a PATTERN binds) live in
+  # `pattern_vars/1` (pins, bitstring `::` specifiers, `\\` default exprs).
+  defp variable_read?(state, name) do
     bindable_var?(name) and state.context == nil and state.scope == :function_body and
       state.trust_level == :trusted and
-      (MapSet.size(MapSet.delete(current_bound_vars(state), name)) > 0 or
-         Map.get(state, :type_hint) != nil)
+      not Map.get(state, :in_bitstring, false) and
+      not Map.get(state, :in_codegen, false)
+  end
+
+  # A read is worth a candidate only when some mutator can act on it: another
+  # in-scope variable to swap to (VariableReplace, M54) OR a type hint
+  # (VariableToLiteral, M56).
+  defp mutable_target?(state, name) do
+    MapSet.size(MapSet.delete(current_bound_vars(state), name)) > 0 or
+      Map.get(state, :type_hint) != nil
   end
 
   defp emit_variable_candidate(state, node, name, meta) do

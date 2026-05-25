@@ -11,7 +11,8 @@ defmodule Mut.Mutator.VariableReplaceTest do
       file: "lib/foo.ex",
       ast_path: [],
       ast_path_hash: <<0>>,
-      bound_vars: [:b, :c]
+      bound_vars: [:b, :c],
+      other_uses?: true
     }
 
     struct(base, overrides)
@@ -43,6 +44,12 @@ defmodule Mut.Mutator.VariableReplaceTest do
     test "false for non-variable nodes (calls, literals)" do
       refute VariableReplace.applicable?({:foo, [], []}, ctx([]))
       refute VariableReplace.applicable?({:__block__, [], [1]}, ctx([]))
+    end
+
+    test "M57: false when the variable has no other use (avoid unused-var churn)" do
+      refute VariableReplace.applicable?({:a, [], nil}, ctx(other_uses?: false))
+      refute VariableReplace.applicable?({:a, [], nil}, ctx(other_uses?: nil))
+      assert VariableReplace.applicable?({:a, [], nil}, ctx(other_uses?: true))
     end
   end
 

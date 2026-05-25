@@ -28,7 +28,11 @@ defmodule Mut.Oracle.AstCandidate do
     :bound_vars,
     # M56: syntactic use-site type hint (:number | :binary | :list | :boolean)
     # for the VariableToLiteral mutator. `nil` when no operator context.
-    :type_hint
+    :type_hint,
+    # M57: true iff this variable's name has >=1 OTHER read in the same
+    # function (so swapping this occurrence leaves it still used -> no unused-
+    # variable churn). Gates VariableReplace; `nil` for non-variable candidates.
+    :other_uses?
   ]
 
   @type t :: %__MODULE__{
@@ -44,6 +48,7 @@ defmodule Mut.Oracle.AstCandidate do
           ast_path_hash: binary(),
           node: Macro.t(),
           bound_vars: [atom()] | nil,
-          type_hint: :number | :binary | :list | :boolean | nil
+          type_hint: :number | :binary | :list | :boolean | nil,
+          other_uses?: boolean() | nil
         }
 end

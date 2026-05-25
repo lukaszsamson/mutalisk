@@ -196,6 +196,51 @@ defmodule Mut.EnvWalkerVariableTest do
     assert :items in names
   end
 
+  test "M57: codegen functions (quote/unquote bodies) emit no variable candidates" do
+    src = ~S'''
+    defmodule Foo do
+      def gen(x, y) do
+        quote do
+          unquote(x) + unquote(y)
+        end
+      end
+      def plain(a, b), do: a + b + a
+    end
+    '''
+
+    {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+    fns =
+      ast
+      |> EnvWalker.collect_variable_candidates(file: "lib/foo.ex", source: src)
+      |> Enum.map(fn {_c, snap} -> elem(snap.function, 0) end)
+      |> Enum.uniq()
+
+    assert fns == [:plain]
+  end
+
+  test "M57: other_uses? marks names with >=1 other read in the same function" do
+    src = ~S'''
+    defmodule Foo do
+      def f(a, b) do
+        a + b + a
+      end
+    end
+    '''
+
+    {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+    marks =
+      ast
+      |> EnvWalker.collect_variable_candidates(file: "lib/foo.ex", source: src)
+      |> Enum.map(fn {c, _} -> {elem(c.node, 0), c.other_uses?} end)
+
+    # `a` read twice -> true (both occurrences); `b` read once -> false.
+    assert {:a, true} in marks
+    assert {:b, false} in marks
+    refute {:a, false} in marks
+  end
+
   test "variable candidates have env_context nil (reads)" do
     src = ~S'''
     defmodule Foo do

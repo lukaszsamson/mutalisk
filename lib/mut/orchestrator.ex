@@ -456,7 +456,8 @@ defmodule Mut.Orchestrator do
       env_context: fallback_env_context(candidate, site, target),
       engine: :fallback,
       bound_vars: candidate.bound_vars,
-      type_hint: candidate.type_hint
+      type_hint: candidate.type_hint,
+      other_uses?: candidate.other_uses?
     }
   end
 
