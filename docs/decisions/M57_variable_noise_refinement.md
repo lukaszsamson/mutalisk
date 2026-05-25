@@ -41,8 +41,10 @@ fixes into one principled classifier.
 | errors | 211 (27%) | **45 (14.7%)** |
 | invalid | nonzero | **0** |
 
-Errors cut ~78%; the residual 45 are genuine runtime-crash detections, not
-codegen/unused-var noise. plug confirmation pending (was 6% in M55).
+plug (variable-only, capped 1500): errors **202 (6%) → 24 (1.6%)**, invalid 3.
+
+Both targets: error tail cut ~78–88%; residuals are genuine runtime-crash
+detections, not codegen/unused-var noise.
 
 ## Acceptance
 
