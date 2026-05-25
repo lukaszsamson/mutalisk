@@ -118,7 +118,9 @@ defmodule Mut.Recompile do
     ]
   end
 
-  defp elixir_args(sandbox_path, files, ebin) do
+  @doc false
+  # Exposed for testing (asserts the eval bootstraps Mix; see recompile_test).
+  def elixir_args(sandbox_path, files, ebin) do
     pa_flags =
       sandbox_path
       |> Path.join("_build/mut_schema/lib/*/ebin")
@@ -128,8 +130,17 @@ defmodule Mut.Recompile do
         ["-pa", relative]
       end)
 
+    # Start the Mix application before compiling. Some projects (e.g. credo)
+    # run `Mix.Project`-dependent code at COMPILE time (`use Credo.Check`
+    # reaches `Mix.ProjectStack`), which exits with `(exit) ... no process`
+    # in this bare `elixir --eval` BEAM unless the Mix server is alive. This
+    # caused valid mutants to be mis-reported as compile failures
+    # (false-invalids). `Mix.start/0` only boots Mix's agents — it does NOT
+    # load the project or run the deps lock-check (the thing this module
+    # avoids by skipping `mix`), so it is safe and side-effect-free here.
     eval =
-      "case Kernel.ParallelCompiler.compile_to_path(#{inspect(files)}, #{inspect(ebin)}) " <>
+      "Mix.start(); " <>
+        "case Kernel.ParallelCompiler.compile_to_path(#{inspect(files)}, #{inspect(ebin)}) " <>
         "do {:ok, _modules, _warnings} -> :ok; " <>
         "{:error, errors, warnings} -> " <>
         "IO.puts(:stderr, \"mut.recompile errors: \#{inspect(errors, limit: :infinity)}\"); " <>
