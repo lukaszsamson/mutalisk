@@ -332,7 +332,16 @@ defmodule Mut.Cli do
   end
 
   defp selection(parsed, config) do
-    value = Keyword.get(parsed, :selection, Keyword.get(config, :selection, :static))
+    # M65: default flipped static -> coverage_with_static_fallback (v1.5's
+    # planned default), now that M64 makes coverage crash-safe (per-file
+    # degrade). `--selection static` remains the fully-portable escape hatch.
+    value =
+      Keyword.get(
+        parsed,
+        :selection,
+        Keyword.get(config, :selection, :coverage_with_static_fallback)
+      )
+
     mode = target_atom(value)
 
     if mode in @known_selection_modes do

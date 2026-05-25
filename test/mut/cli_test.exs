@@ -27,7 +27,8 @@ defmodule Mut.CliTest do
     assert opts.concurrency == min(System.schedulers_online(), 4)
     assert opts.max_mutants == nil
     assert opts.debug_plan == false
-    assert opts.selection == :static
+    # M65: default selection flipped to coverage_with_static_fallback.
+    assert opts.selection == :coverage_with_static_fallback
     assert opts.test_paths == ["test"]
   end
 

@@ -5,6 +5,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## v1.19 unreleased — finish the stalled flips
 
+### M65 — flip `--selection` default to coverage_with_static_fallback (2026-05-25)
+
+The v1.5-planned default flip, unblocked by M64's crash-safety. Default
+`--selection` is now `coverage_with_static_fallback`; `--selection static`
+remains the fully-portable escape hatch (bare `coverage` never default).
+Validated kill-count parity: decimal static 385 vs coverage 385 (a run-1
+single-mutant difference was test flakiness — `decimal.ex:432`, killed on
+re-run, matching static); gettext completes under coverage via M64 degrade.
+Wall-clock is ~neutral on fast suites (collection overhead offsets per-mutant
+fanout savings) and a win on slow suites. `bin/verify` green (e2e now runs
+demo_app under coverage by default). `docs/decisions/M65_coverage_default.md`.
+
 ### M64 — per-file crash-tolerant coverage fallback (2026-05-25)
 
 `coverage_with_static_fallback` now degrades **per test file** instead of
