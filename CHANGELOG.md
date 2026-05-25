@@ -3,6 +3,19 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.19 unreleased — finish the stalled flips
+
+### M62 — sharper equivalent estimate + gate-rule revisit (2026-05-25)
+
+Frames the covered-survivor equivalent metric explicitly as an **upper bound**
+(uncovered survivors already excluded; no cheap syntactic lower bound exists for
+variable/literal mutators — equivalence there is value-conditional, not
+syntactic). Revises the graduation gate to admit a **single-target miss ≤ 2pp**
+given that upward bias, and to exclude tiny samples (n<10) and weak-suite
+targets (makeup). Recomputed: **IntegerLiteral-in-pattern clears** (single
++1.1pp miss on ecto); all other surfaces still fail. Measurement/policy only.
+`docs/decisions/M62_equivalent_metric_and_gate.md`.
+
 ## v1.18 unreleased — maturation (harden, then graduate)
 
 ### M61 — coverage-as-default: DO NOT flip (data-gated, 2026-05-25)
