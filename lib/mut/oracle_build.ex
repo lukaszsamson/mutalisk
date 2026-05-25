@@ -40,20 +40,24 @@ defmodule Mut.OracleBuild do
   end
 
   defp run_child_mix(work_copy, args) do
-    case Mut.ChildProcess.run("mix", args, cd: work_copy, env: child_env()) do
+    case Mut.ChildProcess.run("mix", args, cd: work_copy, env: child_env(work_copy)) do
       {:exit, 0, _output} -> :ok
       {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
       {:error, reason} -> {:error, reason}
     end
   end
 
-  defp child_env do
+  defp child_env(work_copy) do
     [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_oracle"},
       {"MIX_DEPS_PATH", "_build/mut_oracle/deps"},
       {"MUTALISK_ROLE", "oracle"},
-      {"MUTALISK_PATH", File.cwd!()}
+      {"MUTALISK_PATH", File.cwd!()},
+      # Oracle sites are keyed relative to this root. For single-app builds it
+      # equals the compiler cwd (byte-identical paths); for umbrellas it pins
+      # the root so child apps yield `apps/<app>/lib/...` keys (see Mut.Trace).
+      {"MUTALISK_PROJECT_ROOT", Path.expand(work_copy)}
     ]
   end
 

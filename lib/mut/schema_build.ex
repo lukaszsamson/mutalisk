@@ -193,17 +193,36 @@ defmodule Mut.SchemaBuild do
 
   defp result(work_copy, final) do
     build_path = Path.join(work_copy, "_build/mut_schema")
-    app = target_app(work_copy)
 
     %Result{
       work_copy_root: work_copy,
       build_path: build_path,
       plan: final.plan,
       placement_maps: final.placement_maps,
-      snapshot: snapshot(build_path, app: app),
+      snapshot: snapshot_for(work_copy, build_path),
       rollback_iterations: final.rollback_iterations,
       invalid_mutants: final.invalid_mutants
     }
+  end
+
+  # Single-app: snapshot only the user app's ebins (as before). Umbrella:
+  # union every child app's ebins so the sandbox baseline spans all apps.
+  defp snapshot_for(work_copy, build_path) do
+    case snapshot_apps(work_copy) do
+      [] -> snapshot(build_path)
+      apps -> Enum.reduce(apps, %{}, &Map.merge(&2, snapshot(build_path, app: &1)))
+    end
+  end
+
+  defp snapshot_apps(work_copy) do
+    if Mut.Umbrella.umbrella?(work_copy) do
+      Mut.Umbrella.app_names(work_copy)
+    else
+      case Mut.Umbrella.app_name(work_copy) do
+        nil -> []
+        app -> [app]
+      end
+    end
   end
 
   defp run_child_mix(work_copy, args) do
@@ -235,30 +254,6 @@ defmodule Mut.SchemaBuild do
 
   defp snapshot_glob(build_path, nil), do: Path.join(build_path, "**/*")
   defp snapshot_glob(build_path, app), do: Path.join([build_path, "lib", app, "**/*"])
-
-  defp target_app(work_copy) do
-    work_copy
-    |> Path.join("mix_user.exs")
-    |> File.read!()
-    |> Code.string_to_quoted!()
-    |> app_from_ast()
-  end
-
-  defp app_from_ast(ast) do
-    {_ast, app} =
-      Macro.prewalk(ast, nil, fn
-        {:app, _meta, value}, nil when is_atom(value) ->
-          {{:app, [], value}, Atom.to_string(value)}
-
-        {:app, value}, nil when is_atom(value) ->
-          {{:app, value}, Atom.to_string(value)}
-
-        node, app ->
-          {node, app}
-      end)
-
-    app
-  end
 
   defp sha256(file) do
     :sha256

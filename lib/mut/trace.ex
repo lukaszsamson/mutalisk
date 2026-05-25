@@ -114,6 +114,15 @@ defmodule Mut.Trace do
   defp relative_file(file) do
     file
     |> Path.expand()
-    |> Path.relative_to(File.cwd!())
+    |> Path.relative_to(project_root())
   end
+
+  # Sites are keyed relative to the project root, not the compiler's cwd.
+  # For single-app builds the root *is* the cwd, so paths are byte-identical
+  # to the pre-M67 behaviour. For umbrella builds Mix changes cwd into each
+  # child app dir during its compile, so without a fixed root every app's
+  # files would collide as bare `lib/...`; MUTALISK_PROJECT_ROOT (set by the
+  # oracle build to the umbrella root) yields the `apps/<app>/lib/...` keys
+  # the schema/fallback engines expect.
+  defp project_root, do: System.get_env("MUTALISK_PROJECT_ROOT") || File.cwd!()
 end

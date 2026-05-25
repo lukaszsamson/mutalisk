@@ -48,10 +48,22 @@ crux.
   `apps/<app>/mix.exs`, `apps/<app>/lib`, `config/`).
 - `Mut.Bootstrap.Overlay`: replace `assert_not_umbrella!` (the v1 raise) with an
   **umbrella branch**. Detect `apps_path`; for each `apps/<app>/mix.exs`, apply
-  the existing wrap (inject `:mutalisk` dep + role compiler). The root project
-  stays an `apps_path` umbrella project (untouched except, if needed,
-  `:mutalisk` at the root for visibility — the proof shows per-app injection
-  suffices).
+  the existing wrap (inject `:mutalisk` dep + role compiler).
+
+> **M67 correction.** The spike assumed the root could stay untouched ("per-app
+> injection suffices"). The proof only exercised a plain `mix compile`, not the
+> `:mut_oracle` compiler. In practice Mix runs `deps.loadpaths` **once at the
+> umbrella root** and then `compile.all` **per child** (no per-child
+> loadpaths). So if `:mutalisk` is not on the *root's* deps, its ebin never
+> joins the code path and `compile.mut_oracle` is undiscoverable in every
+> child. M67 therefore wraps the **root too** (injecting the `:mutalisk` dep;
+> the root never runs the prepended compiler since umbrella roots delegate
+> compilation). Two further umbrella-only hazards the spike missed, both fixed
+> in M67: the per-app wrappers must use **distinct module names** (else they
+> redefine `Mutalisk.WrappedMixProject` in one BEAM, corrupting
+> `Mix.Project.get!()`), and the `:mut_oracle` compiler must be **idempotent**
+> (it runs once per child app in the same BEAM — the tracer must be registered
+> once and the JSONL Writer started once, not truncated per app).
 
 ### Build-Path Contract extension (M67)
 

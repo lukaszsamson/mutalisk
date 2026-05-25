@@ -51,9 +51,22 @@ defmodule Mut.Orchestrator do
 
   defp discover_files(root) do
     root
-    |> Path.join("lib/**/*.ex")
-    |> Path.wildcard()
+    |> source_globs()
+    |> Enum.flat_map(&Path.wildcard/1)
     |> Enum.map(&Path.relative_to(&1, root))
+    |> Enum.uniq()
+  end
+
+  # Single-app: the project's own `lib/`. Umbrella: every child app's
+  # `apps/<app>/lib/` (the root has no `lib/` of its own). M67.
+  defp source_globs(root) do
+    if Mut.Umbrella.umbrella?(root) do
+      root
+      |> Mut.Umbrella.app_dirs()
+      |> Enum.map(&Path.join(&1, "lib/**/*.ex"))
+    else
+      [Path.join(root, "lib/**/*.ex")]
+    end
   end
 
   defp filtered?(_file, nil), do: false

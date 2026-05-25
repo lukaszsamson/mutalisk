@@ -8,16 +8,30 @@ defmodule Mix.Tasks.Compile.MutOracle do
   @impl true
   @spec run([String.t()]) :: {:noop, [Mix.Task.Compiler.Diagnostic.t()]}
   def run(_argv) do
+    # Umbrella builds invoke this compiler once per child app in the *same*
+    # BEAM, so both side effects must be idempotent: otherwise the Trace
+    # tracer would be prepended once per app (duplicate sites) and the named
+    # Writer would be re-started (crash) and its JSONL truncated mid-run.
     existing = Code.get_compiler_option(:tracers) || []
-    Code.put_compiler_option(:tracers, [Trace | existing])
 
-    {:ok, _pid} = Writer.start_link(jsonl_path: jsonl_path())
+    unless Trace in existing do
+      Code.put_compiler_option(:tracers, [Trace | existing])
+    end
+
+    ensure_writer_started()
 
     System.at_exit(fn _exit_code ->
       Writer.close_with_count()
     end)
 
     {:noop, []}
+  end
+
+  defp ensure_writer_started do
+    case Writer.start_link(jsonl_path: jsonl_path()) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
   end
 
   @impl true

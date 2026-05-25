@@ -23,9 +23,7 @@ defmodule Mut.Bootstrap.Overlay.EdgeCasesTest do
       assert {:ok, work_copy} = Mut.WorkCopy.materialize(source, run_id, force: true)
 
       if case_name == "umbrella" do
-        assert_raise RuntimeError, ~r/^umbrella not supported in v1/, fn ->
-          Mut.WorkCopy.install_overlay(work_copy, :oracle)
-        end
+        assert_umbrella_overlay(work_copy)
       else
         original = File.read!(Path.join(work_copy, "mix.exs"))
         assert :ok = Mut.WorkCopy.install_overlay(work_copy, :oracle)
@@ -56,13 +54,67 @@ defmodule Mut.Bootstrap.Overlay.EdgeCasesTest do
     end
   end
 
-  defp assert_mix(work_copy, args) do
-    {output, exit_code} = mix(work_copy, args)
+  # M67: umbrella support. The overlay is installed per child app (root stays
+  # an untouched apps_path project); the umbrella compiles under the shared mut
+  # build root; the oracle tracer fires once per app and keys sites by
+  # `apps/<app>/...` (project-root-relative), not the per-app compiler cwd.
+  defp assert_umbrella_overlay(work_copy) do
+    root_before = File.read!(Path.join(work_copy, "mix.exs"))
+    assert :ok = Mut.WorkCopy.install_overlay(work_copy, :oracle)
+
+    # Root is wrapped too (so its deps.loadpaths puts mutalisk on the path,
+    # making compile.mut_oracle discoverable in children); the apps_path
+    # project moves to mix_user.exs and the rendered wrapper takes mix.exs.
+    assert File.read!(Path.join(work_copy, "mix_user.exs")) == root_before
+    assert File.read!(Path.join(work_copy, "mix.exs")) =~ "@user_mod mutalisk_user_mod"
+
+    for app <- ~w(app_a app_b) do
+      app_dir = Path.join([work_copy, "apps", app])
+      assert File.exists?(Path.join(app_dir, "mix_user.exs"))
+      assert File.read!(Path.join(app_dir, "mix.exs")) =~ "@user_mod mutalisk_user_mod"
+    end
+
+    assert_mix(work_copy, [
+      "do",
+      "deps.get",
+      "+",
+      "deps.compile",
+      "--include-children",
+      "mutalisk"
+    ])
+
+    assert_mix(work_copy, ["compile", "--force"], [
+      {"MUTALISK_PROJECT_ROOT", Path.expand(work_copy)}
+    ])
+
+    files =
+      [work_copy, "_build", "mut_oracle", ".mut_oracle.jsonl"]
+      |> Path.join()
+      |> oracle_site_files()
+
+    # Sites from both apps, keyed relative to the umbrella root (no bare
+    # `lib/...` collisions), and no duplicates from a re-prepended tracer.
+    assert Enum.any?(files, &(&1 =~ "apps/app_a/lib/app_a.ex"))
+    assert Enum.any?(files, &(&1 =~ "apps/app_b/lib/app_b.ex"))
+    refute Enum.any?(files, &(&1 == "lib/app_a.ex"))
+  end
+
+  defp oracle_site_files(jsonl_path) do
+    jsonl_path
+    |> File.read!()
+    |> String.split("\n", trim: true)
+    |> Enum.map(&Mut.JSON.decode!/1)
+    |> Enum.filter(&Map.has_key?(&1, "file"))
+    |> Enum.map(& &1["file"])
+  end
+
+  defp assert_mix(work_copy, args, extra_env \\ []) do
+    {output, exit_code} = mix(work_copy, args, extra_env)
     assert exit_code == 0, output
   end
 
-  defp mix(work_copy, args) do
-    System.cmd("mix", args, cd: work_copy, env: env(), stderr_to_stdout: true)
+  defp mix(work_copy, args, extra_env \\ []) do
+    System.cmd("mix", args, cd: work_copy, env: env() ++ extra_env, stderr_to_stdout: true)
   end
 
   defp env do
