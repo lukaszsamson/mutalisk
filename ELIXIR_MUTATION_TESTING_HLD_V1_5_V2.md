@@ -1005,6 +1005,35 @@ Six milestones, two independent tracks. Umbrella: M66 → M67 → M68 (strict). 
 - Schema routing for non-literal mutators beyond M69's operators; wrapper guard schemata.
 - EnvWalker consolidation implementation (maintenance-trigger gated).
 
+**v1.20 outcome (2026-05-25):** five of six milestones shipped; M70 (pattern-shape) cut via its release valve. M66's spike returned GO but its "root untouched" model proved wrong — M67/M68 surfaced and fixed **six umbrella-only correctness bugs** (root must be wrapped for compiler-task discovery; distinct per-app wrapper module names; idempotent `:mut_oracle`; root-relative site keys; single-pass cross-app `ParallelCompiler.compile` with per-app beam routing; multi-suite result aggregation). Umbrella support is automatic on `apps_path` projects, validated end-to-end on `~/unilink` (5 apps): 89,518 oracle sites → 1031-mutant plan → schema build → a hub mutant fanning out to 93 cross-app dependents recompiled in one pass with beams routed to each app's ebin. Worker+report was validated on a synthetic 2-app umbrella. M69 operators (Concat/Bitwise/Membership) shipped opt-in; M71 kept them opt-in (ConcatOperator ~67% non-productive — needs hazard rules). Single-app path byte-identical throughout.
+
+### v1.21 (4 milestones — close the v1.20 deferrals)
+
+v1.20 landed the umbrella engine but deferred its noisiest catalogue work and its harder validation target. v1.21 closes those threads: mature the operator mutators to graduation-readiness, ship the cut pattern-shape mutators, and push umbrella validation to a real full run (unilink) and the 14-app target (zorbito). No new big subsystem; incremental cross-run history stays held one more cycle.
+
+**Validation correction:** unilink is *not* infra-gated — it runs with local Postgres and its tests pass. So v1.21 gets the real full `mix mut` worker/report run on a 5-app umbrella, closing the v1.20 caveat (that phase was only proven on a synthetic 2-app umbrella). zorbito (14 apps; multi-DB + clustering) is a full-run target where its services can be stood up, with engine-path proof + documented blockers as the floor — not gating.
+
+**Defaults:** the two surfaces (operators, pattern-shape) ship/stay opt-in; M75 decides graduation from the full OSS matrix + equivalent-rate, under the M62 sharpened gate. No default-on flip pre-committed. Elixir floor stays `>= 1.19.0`.
+
+Four milestones. M72 (operator hazard rules) and M73 (pattern-shape) are independent implementation tracks; M74 (umbrella validation) is independent; M75 is the data-gated graduation decision covering both new surfaces. The established impl → validate → decide shape.
+
+**M72 — Operator hazard rules + graduation-readiness.** Give the M69 operators the hazard rules the literal mutators have, targeting ConcatOperator's ~67% non-productive rate first: refuse/skip `++`→`--` in positions that crash or don't type-check (the jason encoder cases), and filter BitwiseOperator's input-dependent pseudo-equivalents where detectable. Membership is already clean. Acceptance: ConcatOperator non-productive rate materially down on jason/real list-binary code; per-mutator invalid + error rates measured; zero stable-id churn for existing mutants; operators remain opt-in pending M75.
+
+**M73 — Pattern-shape mutators (carried M70).** The deferred v2 surface: `_` ↔ named var, pin/unpin (`^x`), built on binding-scope-aware pattern walking (extends the M54 binding tracker into `:match` context). Tuple/list arity stays skipped (M39: non-viable). Strict invalid/equivalent gating — this is the highest-noise surface in the catalogue. Opt-in, fallback-routed. Acceptance: per-mutator unit tests; invalid rate measured + gated; zero stable-id churn for existing mutants.
+
+**M74 — Umbrella validation: unilink full run + zorbito.** Run a real full `mix mut` on unilink (5 apps, local Postgres) — oracle → schema → workers → fallback → per-app + aggregate report — closing the v1.20 synthetic-umbrella caveat. Then zorbito (14 apps): attempt the full run where its services (Postgres/MySQL/SQLite/RabbitMQ/clustering) can be stood up; where a service cannot, prove the engine path (oracle/schema/cross-app fallback across 14 apps — the scale proof) and document the blocker. zorbito is not a gating acceptance target. Acceptance: unilink full run completes with a valid multi-app report; zorbito engine path proven across 14 apps (full run where infra permits); blockers documented; no umbrella regression on the single-app path.
+
+**M75 — Graduation matrix + decisions + BENCHMARKS.** Run the M72 operators and M73 pattern-shape mutators across the full OSS matrix with per-mutator equivalent-rate; apply the M62 sharpened gate (kill ≥60%, equivalent <20% with the ≤2pp single-target tolerance, invalid <10%). Decisions in `docs/decisions/M75_*.md`: per-surface keep_opt_in / graduate. BENCHMARKS v1.21 section (operator + pattern-shape rates; umbrella run results). Acceptance: decisions committed; any graduation is additive-only (existing stable IDs unchanged); `bin/verify` green.
+
+**v1.21 outcome (2026-05-26):** all four milestones shipped; all opt-in surfaces stay `keep_opt_in` (data-gated). M72 hardened the operators (ConcatOperator drops the crash-prone `--`→`++`: jason non-productive 67%→0%; BitwiseOperator drops the `bor`↔`bxor` pseudo-equivalent pair) and added per-mutator invalid/err/nonprod instrumentation. M73 shipped the deferred pattern-SHAPE surface as `Mut.Mutator.Pin` (`^x`→`x` unpin), with the `_`↔var directions documented non-viable by construction (compile-error-if-used / equivalent-if-unused), joining tuple/list arity in the skipped set. M74 closed the v1.20 synthetic-umbrella caveat — a real full `mix mut` on unilink (5 apps, live Postgres+RabbitMQ) produced a valid multi-app report with **0 errors** and live cross-app fallback — and scale-proved the engine on zorbito (14 apps; oracle 150,083 sites, schema build 0 invalid; full worker run infra-blocked, documented). M75's coverage matrix found every surface now runs at **0% invalid** (the hardening worked) but none clears the M62 gate on every target: ConcatOperator fails jason (codegen-context survivors, 67% equivalent), Bitwise/Membership are thin + pseudo-equivalent, and **Pin is flawless on plug (14/14 killed, 0% equivalent/invalid) yet has pins on only one matrix target** — the leading graduation candidate, deferred for multi-target data. M75 also fixed a real Pin hazard (map-key pins `%{^k => v}` are unpinnable → compile error; ~30%→0% invalid). Single-app byte-identity held throughout.
+
+**Explicitly NOT in v1.21:**
+- Incremental cross-run history (held one more cycle).
+- New mutator families beyond pattern-shape (operators + pattern-shape are the v1.21 surface).
+- Tuple/list pattern-arity mutations; function-call deletion / return-value replacement.
+- zorbito as a gating acceptance target (full run is best-effort; engine-path is the floor).
+- EnvWalker consolidation implementation; wrapper guard schemata.
+
 ### v2
 
 - Lean env walker.

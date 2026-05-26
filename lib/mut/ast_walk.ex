@@ -63,7 +63,7 @@ defmodule Mut.AstWalk do
     file = Keyword.fetch!(opts, :file)
     source = Keyword.fetch!(opts, :source)
     line_offsets = Compute.line_offsets(source)
-    acc = acc(file, source, line_offsets, false)
+    acc = acc(file, source, line_offsets, false) |> Map.put(:skip_pins, MapSet.new())
 
     {_ast, acc} = Macro.traverse(ast, acc, &pin_pre/2, &post/2)
 
@@ -75,14 +75,44 @@ defmodule Mut.AstWalk do
   defp pin_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
     acc = enter_module(node, acc)
+    acc = note_map_key_pins(node, acc)
     acc = maybe_pin_candidate(node, path, acc)
     {node, push_frame(node, path, acc)}
+  end
+
+  # M75 hazard rule: a pin used as a map-pattern KEY (`%{^k => v}`) cannot be
+  # unpinned — `%{k => v}` is a compile error (map keys in patterns must be
+  # literals or pinned). Record those pins (by `^` line/column) so
+  # maybe_pin_candidate skips them. Traversal is pre-order, so the enclosing
+  # `%{}` is seen before its key pins.
+  defp note_map_key_pins({:%{}, _meta, pairs}, acc) when is_list(pairs) do
+    locs =
+      for {{:^, caret_meta, [{n, _vm, c}]}, _value} <- pairs,
+          is_atom(n) and is_atom(c),
+          loc = pin_loc(caret_meta),
+          loc != nil,
+          into: acc.skip_pins,
+          do: loc
+
+    %{acc | skip_pins: locs}
+  end
+
+  defp note_map_key_pins(_node, acc), do: acc
+
+  defp pin_loc(caret_meta) do
+    with l when is_integer(l) <- Keyword.get(caret_meta, :line),
+         c when is_integer(c) <- Keyword.get(caret_meta, :column) do
+      {l, c}
+    else
+      _ -> nil
+    end
   end
 
   defp maybe_pin_candidate({:^, caret_meta, [{name, var_meta, ctx}]} = node, path, acc)
        when is_atom(name) and is_atom(ctx) do
     with cl when is_integer(cl) <- Keyword.get(caret_meta, :line),
          cc when is_integer(cc) <- Keyword.get(caret_meta, :column),
+         false <- MapSet.member?(acc.skip_pins, {cl, cc}),
          vl when is_integer(vl) <- Keyword.get(var_meta, :line),
          vc when is_integer(vc) <- Keyword.get(var_meta, :column) do
       end_column = vc + String.length(Atom.to_string(name))

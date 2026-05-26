@@ -43,6 +43,35 @@ defmodule Mut.Mutator.PinTest do
       ast = Code.string_to_quoted!(src, columns: true, token_metadata: true)
       assert AstWalk.pin_candidates(ast, file: "n.ex", source: src) == []
     end
+
+    test "M75: skips pins in map-key position (unpinning is a compile error there)" do
+      # `%{^k => v}` -> `%{k => v}` is a compile error (map keys must be
+      # literals or pinned). The map VALUE pin `^v` IS still a candidate.
+      src = """
+      defmodule MK do
+        def f(k, v, map) do
+          case map do
+            %{^k => ^v} -> :both
+            _ -> :no
+          end
+        end
+      end
+      """
+
+      ast = Code.string_to_quoted!(src, columns: true, token_metadata: true)
+      cands = AstWalk.pin_candidates(ast, file: "mk.ex", source: src)
+
+      slices =
+        Enum.map(cands, fn c ->
+          binary_part(
+            src,
+            c.source_span.start_byte,
+            c.source_span.end_byte - c.source_span.start_byte
+          )
+        end)
+
+      assert slices == ["^v"]
+    end
   end
 
   describe "Pin.mutate" do

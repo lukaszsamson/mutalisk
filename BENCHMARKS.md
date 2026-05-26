@@ -1,5 +1,43 @@
 # Mutalisk Benchmarks
 
+## v1.21 close the v1.20 deferrals (M72–M75, 2026-05-26)
+
+### M72 operator hazard rules (before → after, non-productive rate)
+
+| mutator | change | result |
+|---|---|---|
+| ConcatOperator | drop `--`→`++` (crash-prone) | jason non-productive **67% → 0%** (9 mutants → 3) |
+| BitwiseOperator | drop `bor`↔`bxor` (pseudo-equiv) | plug_crypto pseudo-equiv survivors 2 → 1 |
+
+### M73 Pin (pattern-shape, opt-in) + M75 map-key hazard
+
+`^x` → `x` unpin. M75 found map-key pins (`%{^k => v}`) are unpinnable
+(compile error) → excluded; Pin invalid **~30% → 0%** on real code (plug/jason).
+
+### M74 umbrella validation
+
+- unilink: real full `mix mut` (5 apps, live Postgres+RabbitMQ) — valid multi-app
+  report across all 5 apps, 5/24 killed, fallback 2/10 killed, **0 errors**, 1 invalid.
+- zorbito: engine path across **14 apps** — oracle 150,083 sites, plan 1882 mutants,
+  schema build 0 invalid. Full worker run blocked on crypto-chain infra (not gating).
+
+### M75 graduation matrix (coverage; equivalent = covered-survivors) — all keep_opt_in
+
+| target | mutator | n | kill% | equiv% | invalid% |
+|---|---|--:|--:|--:|--:|
+| jason | ConcatOperator | 3 | 33.3 | 66.7 | 0 |
+| plug | ConcatOperator | 13 | 100 | 0 | 0 |
+| decimal | ConcatOperator | 10 | 90 | 10 | 0 |
+| plug | Membership | 8 | 100 | 0 | 0 |
+| plug_crypto | BitwiseOperator | 1 | 0 | 100 | 0 |
+| plug | Pin | 14 | 100 | 0 | 0 |
+
+0% invalid everywhere (hardening worked). None clears the M62 gate on *every*
+target: ConcatOperator fails jason (codegen survivors); Bitwise/Membership thin
++ pseudo-equivalent on jason; **Pin is flawless on plug but only one target has
+unpinnable pins** → leading graduation candidate, deferred for multi-target data.
+See `docs/decisions/M75_graduation_matrix.md`.
+
 ## v1.20 umbrella support + catalogue growth (M66–M71, 2026-05-25)
 
 ### Umbrella engine on `~/unilink` (5 apps)

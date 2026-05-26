@@ -5,10 +5,16 @@ defmodule Mut.Mutator.Pin do
     * `^x` → `x` (unpin)
 
   Unpinning turns a *constrained* match (must equal the already-bound value of
-  `x`) into a plain rebind that always succeeds and shadows `x`. That is a real
-  behavioural change a test can observe, and it **always compiles** — the
-  cleanest, lowest-noise pattern-*shape* mutation. Opt-in (`:pattern_shape`),
+  `x`) into a plain rebind that always succeeds and shadows `x` — a real
+  behavioural change a test can observe. Opt-in (`:pattern_shape`),
   fallback-routed (a source-span splice dropping the `^`).
+
+  **M75 hazard rule (in `Mut.AstWalk.pin_candidates`): map-key pins are
+  excluded.** `%{^k => v}` cannot be unpinned — `%{k => v}` is a compile error
+  (pattern map keys must be literals or pinned). Without this, real code with
+  `%{^key => …}` lookups (plug, jason) produced a ~30% invalid rate. Every
+  other pin position (case/with/fn clause heads, map *values*, `=` matches)
+  unpins cleanly.
 
   **Why this is the only pattern-shape mutator.** The other shapes the M39/M70
   sketch listed are non-viable by construction, joining tuple/list arity in the
