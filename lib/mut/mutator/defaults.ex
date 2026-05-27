@@ -32,7 +32,13 @@ defmodule Mut.Mutator.Defaults do
     # graduated_pattern_literal_mutators/0). Its body-literal firing still
     # needs the opt-in :body_literal target, so adding it here only enables
     # IntegerLiteral-in-pattern by default — additive.
-    Mut.Mutator.IntegerLiteral
+    Mut.Mutator.IntegerLiteral,
+    # M79: GRADUATED. `++` -> `--` cleared the M62 gate on every matrix target
+    # (jason 100%/0%, plug 100%/0%, decimal 90%/10% kill/equiv, 0% invalid) once
+    # M72 dropped the crash-prone `--`->`++` and M78 excluded codegen contexts.
+    # :dispatch is default-enabled, so this fires by default; additive (new
+    # `++` mutants only; demo_app has no `++`, so its default plan is unchanged).
+    Mut.Mutator.ConcatOperator
   ]
 
   @opt_in [
@@ -43,8 +49,8 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.NilLiteral,
     Mut.Mutator.CollectionEmpty,
     Mut.Mutator.VariableReplace,
-    # M69 operator-expansion (opt-in; M71 decides graduation)
-    Mut.Mutator.ConcatOperator,
+    # M69 operator-expansion (BitwiseOperator/Membership stay opt-in; M79).
+    # ConcatOperator graduated to default-on (above).
     Mut.Mutator.BitwiseOperator,
     Mut.Mutator.Membership,
     # M73 pattern-shape (opt-in `:pattern_shape`; M75 decides graduation)

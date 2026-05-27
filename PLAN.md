@@ -3889,6 +3889,151 @@ later).
 - zorbito as a gating acceptance target.
 - EnvWalker consolidation implementation; wrapper guard schemata.
 
+# v1.22 milestones (catalogue growth: the two missing classics)
+
+v1.21 (M72–M75) closed the v1.20 deferrals. v1.22 adds the two
+highest-yield mutators mutalisk never had — conditional negation
+and function replacement (both confirmed absent from the
+catalogue) — plus two small v1.21 carries. Focused catalogue
+growth: no umbrella work, no new subsystem; zorbito full-run and
+incremental history stay held.
+
+**Defaults:** both new families ship opt-in; M79 decides
+graduation from the OSS matrix + equivalent-rate under the M62
+gate. No default-on flip pre-committed. Elixir floor stays
+`>= 1.19.0`.
+
+Four milestones. M76 (function-swaps) + M77 (conditionals) are
+independent implementation tracks; M78 is small carried hardening
+(foldable alongside); M79 is the data-gated decision over the new
+surfaces + Pin re-eval.
+
+## v1.22 scope (committed)
+
+**M76 — Function-replacement swap mutator.**
+
+*Goal:* A new dispatch-shaped mutator swapping semantically-paired
+functions from a curated closed allowlist.
+
+*Inputs:* the dispatch tracer oracle (records these call sites);
+`Mut.Mutator.Arithmetic` as the schema-routed template;
+`Mut.Mutator.AtomLiteral` as the closed-allowlist discipline;
+`Mut.Match.Registry`.
+
+*Deliverables:*
+- `Mut.Mutator.FunctionReplace` with a documented swap table,
+  justified per pair: `Enum.min`↔`max`, `List.first`↔`last`,
+  `Enum.all?`↔`any?`, `Enum.filter`↔`reject`, `Enum.take`↔`drop`,
+  `String.starts_with?`↔`ends_with?`, and similar. Never invent a
+  target function (closed allowlist).
+- `compatible?/2` predicate; swap only when the oracle confirms the
+  dispatch resolves to the listed function/arity (no swap on a
+  shadowing local or a different module).
+- `targets/0 == [:dispatch]`; schema-routed. Opt-in.
+
+*Acceptance:*
+- Per-pair unit tests + fixture golden lists.
+- Swap respects arity/module from the oracle (no false swap).
+- Zero stable-id churn for existing mutants; `bin/verify` green.
+
+*Out of scope:* Graduation (M79). Functions outside the allowlist.
+
+**M77 — Negate/force conditionals mutator.**
+
+*Goal:* Mutate `if`/`unless` conditions — the classic top-yield
+branch mutator.
+
+*Inputs:* `Mut.EnvWalker` `if`/`unless` handling (M40 tracer-proof
+logic); the schema placer (`if`/`unless` routing).
+
+*Deliverables:*
+- `Mut.Mutator.NegateConditional`: condition → `not(condition)`,
+  force `true`, force `false` (for `if`; `unless` symmetric).
+- **Dead-branch equivalence gate:** forcing a branch the code does
+  not rely on (e.g. an `if` with no meaningful `else`) is
+  equivalent — detect/measure and gate to keep the equivalent
+  rate down.
+- Routing per the env-walker/dispatch handling of `if`/`unless`;
+  fallback if not schema-safe. Opt-in.
+
+*Acceptance:*
+- Unit tests for negate + both force directions.
+- Equivalence gate measured (M79 supplies the rate).
+- Zero stable-id churn for existing mutants; `bin/verify` green.
+
+*Out of scope:* `cond`/`case`-clause mutation (later); graduation
+(M79).
+
+**M78 — Carried hardening: ConcatOperator codegen-context exclusion.**
+
+*Goal:* Lift jason's residual ConcatOperator equivalence.
+
+*Inputs:* `docs/decisions/M71_*` + M72 hazard rules;
+`Mut.Mutator.ConcatOperator`; the M57 codegen/quoted-builder
+context-skip.
+
+*Deliverables:*
+- Exclude codegen / quoted-builder contexts from ConcatOperator
+  (mirrors the M57 variable-mutator context-skip).
+
+*Acceptance:*
+- jason ConcatOperator equivalence rate down (measured).
+- No regression on other targets; zero stable-id churn.
+- `bin/verify` green. (Small — may land alongside M76/M77.)
+
+*Out of scope:* New ConcatOperator behavior beyond the exclusion.
+
+**M79 — Validation matrix + graduation decisions + BENCHMARKS.**
+
+*Goal:* Decide the new mutators' default policy and re-evaluate
+Pin.
+
+*Inputs:* M76/M77/M78; `bench/run.sh` + the OSS matrix;
+per-mutator equivalent-rate (M59 tooling); the M62 gate;
+`docs/decisions/M75_*` (Pin leading-candidate note).
+
+*Deliverables:*
+- OSS-matrix run of FunctionReplace + NegateConditional with
+  per-mutator equivalent-rate.
+- **Pin graduation re-eval** now that more pin-bearing targets are
+  in the matrix (flawless on plug in M75; was single-target).
+- `docs/decisions/M79_*.md`: per-surface keep_opt_in / graduate.
+- BENCHMARKS v1.22 section.
+
+*Acceptance:*
+- Decisions committed; data-gated (graduate only what clears).
+- Any graduation additive-only (existing stable IDs unchanged),
+  verified by plan diff on demo_app + Decimal.
+- `bin/verify` green.
+
+*Out of scope:* Surfaces that don't clear (stay opt-in).
+
+## v1.22 delivery status (2026-05-27: DELIVERED — ConcatOperator graduated)
+
+- **M76** ✓ — `Mut.Mutator.FunctionReplace` (closed-allowlist function swaps: Enum.min<->max, filter<->reject, take<->drop, List/String pairs…), dispatch/schema-routed, opt-in. Swaps only on oracle-confirmed {module,name,arity}.
+- **M77** ✓ — `Mut.Mutator.NegateConditional` (if/unless: negate / force true / force false), opt-in `:conditional`, fallback-routed via whole-node `:end` span. AstWalk.conditional_candidates.
+- **M78** ✓ — ConcatOperator codegen-context exclusion (dispatch walk tracks def codegen-body stack → AstCandidate.in_codegen?; ConcatOperator skips it). jason ConcatOperator equiv 67%→0%.
+- **M79** ✓ — graduation matrix. **ConcatOperator GRADUATED to default-on** (clears jason/plug/decimal: kill ≥90%, equiv ≤10%, 0% invalid; additive — Decimal +10, 0 existing IDs changed, demo_app byte-identical). FunctionReplace + Pin keep_opt_in (flawless on plug but single-target). NegateConditional keep_opt_in (dead-branch equiv 25–52% + 15% invalid on plug). `docs/decisions/M79_graduation_matrix.md` + BENCHMARKS v1.22.
+
+## v1.22 horizon (not v1.22 scope)
+
+- **Statement-deletion mutator** — the high-noise classic; revisit
+  if v1.22's surfaces land cleanly and there's appetite for the
+  invalid-rate work.
+- **`cond`/`case`-clause conditional mutation** — extends M77.
+- **Incremental cross-run history** — still the deferred bet.
+- **zorbito full worker run** — engine proven; full run
+  infra-deferred.
+
+## Explicitly NOT v1.22
+
+- Statement-deletion mutator (deferred).
+- Incremental cross-run history (held).
+- zorbito full worker run; umbrella work of any kind.
+- Tuple/list pattern-arity; function-call deletion / return-value
+  replacement.
+- EnvWalker consolidation implementation; wrapper guard schemata.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

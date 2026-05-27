@@ -1,5 +1,35 @@
 # Mutalisk Benchmarks
 
+## v1.22 catalogue growth: the two missing classics (M76–M79, 2026-05-27)
+
+Two new mutators (FunctionReplace, NegateConditional) + two carries
+(ConcatOperator codegen exclusion, Pin re-eval). M79 coverage matrix
+(equivalent = covered-survivors), M62 gate:
+
+| target | mutator | n | kill% | equiv% | invalid% |
+|---|---|--:|--:|--:|--:|
+| jason | ConcatOperator | 1 | 100 | 0 | 0 |
+| plug | ConcatOperator | 13 | 100 | 0 | 0 |
+| decimal | ConcatOperator | 10 | 90 | 10 | 0 |
+| plug | FunctionReplace | 13 | 100 | 0 | 0 |
+| plug | Pin | 14 | 100 | 0 | 0 |
+| plug | NegateConditional | 189 | 99.3 | 0.7 | 15.3 |
+| decimal | NegateConditional | 69 | 74.6 | 25.4 | 0 |
+| jason | NegateConditional | 27 | 48 | 52 | 0 |
+| plug_crypto | NegateConditional | 12 | 50 | 50 | 0 |
+
+- **ConcatOperator → GRADUATED default-on** (first since M63): clears every
+  target (kill ≥90%, equiv ≤10%, 0% invalid) after M72's direction-drop + M78's
+  codegen exclusion (jason 67%→0% equiv). Additive: Decimal +10, 0 existing IDs
+  changed; demo_app byte-identical.
+- **FunctionReplace / Pin → keep_opt_in**: flawless on plug (100% kill, 0%
+  equiv/invalid) but single-target — leading candidates, need breadth.
+- **NegateConditional → keep_opt_in**: high dead-branch equivalence (jason 52%,
+  decimal 25%, plug_crypto 50%) + 15.3% invalid on plug. High-yield, too noisy
+  to default-on yet.
+
+See `docs/decisions/M79_graduation_matrix.md`.
+
 ## v1.21 close the v1.20 deferrals (M72–M75, 2026-05-26)
 
 ### M72 operator hazard rules (before → after, non-productive rate)

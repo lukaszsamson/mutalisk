@@ -92,7 +92,7 @@ defmodule Mut.Cli do
   @default_on_mutators ~w(
     arithmetic comparison_boundary comparison_negation boolean unary_not
     guard_comparison_boundary guard_comparison_negation guard_type_test
-    atom_literal integer_literal
+    atom_literal integer_literal concat_operator
   )
   @default_enabled_targets [:dispatch, :guard, :env_walker]
 

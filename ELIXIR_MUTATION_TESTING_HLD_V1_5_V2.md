@@ -1034,6 +1034,33 @@ Four milestones. M72 (operator hazard rules) and M73 (pattern-shape) are indepen
 - zorbito as a gating acceptance target (full run is best-effort; engine-path is the floor).
 - EnvWalker consolidation implementation; wrapper guard schemata.
 
+**v1.21 outcome (2026-05-27):** all four milestones shipped. M72 added operator hazard rules (ConcatOperator drops crash-prone `--`→`++`: jason non-productive 67%→0%; BitwiseOperator drops `bor`↔`bxor` pseudo-equivalents). M73 shipped `Mut.Mutator.Pin` (`^x`→`x` unpin) — the sole productive pattern-shape mutator; `_`↔var documented non-viable. M74 closed the v1.20 caveat: a real full `mix mut` on unilink (5 apps, live Postgres + RabbitMQ — it was never infra-gated) produced a valid multi-app report with 0 errors and working cross-app fallback, plus a 14-app engine proof on zorbito (150k sites, schema 0 invalid). M75 ran the graduation matrix and decided **all surfaces keep_opt_in** (now 0% invalid everywhere after a Pin map-key hazard fix, but none clears the M62 gate on every target); Pin is the leading future candidate (flawless on plug) pending more pin-bearing targets. The unilink full run was bounded with `--max-mutants 25` (representative sample, every phase exercised).
+
+### v1.22 (4 milestones — catalogue growth: the two missing classics)
+
+mutalisk has never had the two highest-yield mutators in the PIT/Stryker literature — conditional negation and function replacement. v1.22 adds both, plus closes two small v1.21 carries. A focused catalogue-growth release: no umbrella work, no new subsystem, deferrables (zorbito full run, incremental history) stay held.
+
+**Defaults:** both new families ship opt-in; M79 decides graduation from the OSS matrix + equivalent-rate under the M62 gate. No default-on flip pre-committed. Elixir floor stays `>= 1.19.0`.
+
+Four milestones. M76 (function-swaps) and M77 (conditionals) are independent implementation tracks; M78 is small carried hardening; M79 is the data-gated decision over the new surfaces + Pin re-eval.
+
+**M76 — Function-replacement swap mutator.** A curated, **closed allowlist** of semantic-pair swaps — `Enum.min`↔`max`, `List.first`↔`last`, `Enum.all?`↔`any?`, `Enum.filter`↔`reject`, `Enum.take`↔`drop`, `String.starts_with?`↔`ends_with?`, and similar (the table is the deliverable, justified per pair). Dispatch-shaped: the tracer oracle already records these call sites, so the mutator is **schema-routable** like Arithmetic, with a `compatible?/2` predicate for the matcher. Closed allowlist (never invent a target function) keeps it low-noise — the AtomLiteral discipline. Opt-in. Acceptance: per-pair unit tests + fixture golden lists; the swap respects arity/module resolution from the oracle (no swap when the oracle shows a different dispatch); zero stable-id churn for existing mutants.
+
+**M77 — Negate/force conditionals mutator.** `if`/`unless` condition → `not(condition)`, force `true`, force `false`. The env walker already classifies `if`/`unless` (M40 tracer-proof logic). Needs a dead-branch equivalence gate: forcing a branch that the code never relies on (e.g. an `if` with no meaningful `else`) yields equivalents — measure and gate. Routing per the env-walker/dispatch handling of `if`/`unless`; fallback if not schema-safe. Opt-in. Acceptance: unit tests for negate + both force directions; equivalence gate measured on the matrix; zero stable-id churn for existing mutants.
+
+**M78 — Carried hardening: ConcatOperator codegen-context exclusion.** Small: lift jason's residual ConcatOperator equivalence by excluding codegen/quoted-builder contexts (the same context-skip the variable mutators got in M57). Acceptance: jason ConcatOperator equivalence rate down; no regression on other targets; zero stable-id churn. (Small enough to land alongside M76/M77.)
+
+**M79 — Validation matrix + graduation decisions + BENCHMARKS.** Run M76/M77 across the OSS matrix with per-mutator equivalent-rate; apply the M62 gate. Re-evaluate **Pin graduation** now that more pin-bearing targets are in the matrix (it was flawless on plug but single-target in M75). Decisions in `docs/decisions/M79_*.md`: per-surface keep_opt_in / graduate. BENCHMARKS v1.22 section. Acceptance: decisions committed; any graduation additive-only (existing stable IDs unchanged); `bin/verify` green.
+
+**v1.22 outcome (2026-05-27):** all four milestones shipped; **ConcatOperator graduated to default-on** — the first new default-on graduation since M63. M76 added `Mut.Mutator.FunctionReplace` (closed-allowlist stdlib swaps — Enum.min↔max, filter↔reject, take↔drop, List/String pairs — swapping only on oracle-confirmed {module,name,arity}); M77 added `Mut.Mutator.NegateConditional` (if/unless negate / force-true / force-false, fallback-routed via the whole-node `:end` span). M78 gave ConcatOperator a codegen-context exclusion (the dispatch walk tags candidates `in_codegen?` when inside a quote/unquote-bearing def body), cutting jason's residual equivalence 67%→0%. M79's coverage matrix then cleared ConcatOperator on every target (jason 100%/0%, plug 100%/0%, decimal 90%/10%, 0% invalid throughout) and graduated it — additive (Decimal +10 mutants, 0 existing stable IDs changed; demo_app byte-identical as it has no `++`). FunctionReplace and Pin stayed opt-in (each flawless on plug — 100% kill, 0% equiv/invalid — but exercised on only one matrix target, the recurring "needs breadth" gate miss). NegateConditional stayed opt-in: high-yield (plug 99.3% kill) but with substantial dead-branch equivalence (jason 52%, decimal 25%, plug_crypto 50%) and a 15.3% invalid rate on plug — too noisy to default without a dead-branch/force-invalid gate.
+
+**Explicitly NOT in v1.22:**
+- Statement-deletion mutator (the high-noise classic — deferred; revisit if function-swap/conditionals land cleanly and there's appetite for the invalid-rate work).
+- Incremental cross-run history (still held).
+- zorbito full worker run (engine already proven; full run still infra-deferred).
+- Tuple/list pattern-arity; function-call deletion / return-value replacement.
+- EnvWalker consolidation implementation; wrapper guard schemata.
+
 ### v2
 
 - Lean env walker.
