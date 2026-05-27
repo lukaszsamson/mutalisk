@@ -48,7 +48,9 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.BitwiseOperator,
     Mut.Mutator.Membership,
     # M73 pattern-shape (opt-in `:pattern_shape`; M75 decides graduation)
-    Mut.Mutator.Pin
+    Mut.Mutator.Pin,
+    # M76 function-replacement (opt-in dispatch; M79 decides graduation)
+    Mut.Mutator.FunctionReplace
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

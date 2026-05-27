@@ -74,6 +74,7 @@ defmodule Mut.Cli do
     "bitwise_operator",
     "membership",
     "pin",
+    "function_replace",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -477,6 +478,7 @@ defmodule Mut.Cli do
       "bitwise_operator" => Mut.Mutator.BitwiseOperator,
       "membership" => Mut.Mutator.Membership,
       "pin" => Mut.Mutator.Pin,
+      "function_replace" => Mut.Mutator.FunctionReplace,
       "variable_replace" => Mut.Mutator.VariableReplace,
       "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
