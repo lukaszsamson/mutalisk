@@ -54,10 +54,14 @@ defmodule Mut.Mutator.ConcatOperator do
 
   @spec compatible?(AstCandidate.t(), DispatchSite.t()) :: boolean
   def compatible?(%AstCandidate{} = candidate, %DispatchSite{} = site) do
+    # M78: skip `++` inside codegen/quoted-builder function bodies, where the
+    # swap is noisy/equivalent (jason codegen.ex). `in_codegen?` is only set
+    # on real dispatch candidates; nil (self-built candidates) does not block.
     candidate.syntactic_name == site.resolved_name and
       candidate.syntactic_arity == site.resolved_arity and
       site.resolved_module in @accepted_modules and
-      site.resolved_name in @accepted_names
+      site.resolved_name in @accepted_names and
+      candidate.in_codegen? != true
   end
 
   defp shape_matches?({op, _meta, args}) when op in @accepted_names and length(args) == @arity,

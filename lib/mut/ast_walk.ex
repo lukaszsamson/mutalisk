@@ -645,13 +645,16 @@ defmodule Mut.AstWalk do
       source: source,
       line_offsets: line_offsets,
       module_stack: [],
-      span_fallback?: span_fallback?
+      span_fallback?: span_fallback?,
+      # M78: stack of enclosing def/defp codegen flags (body has quote/unquote).
+      codegen_defs: []
     }
   end
 
   defp pre(node, acc) do
     {path, acc} = enter_path(node, acc)
     acc = enter_module(node, acc)
+    acc = enter_codegen(node, acc)
     acc = maybe_candidate(node, path, acc, nil)
 
     if no_descend?(node) do
@@ -664,8 +667,39 @@ defmodule Mut.AstWalk do
   defp post(node, acc) do
     acc = pop_frame(node, acc)
     acc = exit_module(node, acc)
+    acc = exit_codegen(node, acc)
     {node, acc}
   end
+
+  # M78: track def/defp bodies that build quoted code (quote/unquote present).
+  # Only pushed in the dispatch `pre`; `exit_codegen` is in the shared `post`
+  # but only pops when the acc actually carries a codegen stack (other walks'
+  # accs without `:codegen_defs` fall through untouched).
+  defp enter_codegen({kind, _meta, [_head, body]}, %{codegen_defs: stack} = acc)
+       when kind in [:def, :defp],
+       do: %{acc | codegen_defs: [codegen_body?(body) | stack]}
+
+  defp enter_codegen(_node, acc), do: acc
+
+  defp exit_codegen({kind, _meta, [_head, _body]}, %{codegen_defs: [_top | rest]} = acc)
+       when kind in [:def, :defp],
+       do: %{acc | codegen_defs: rest}
+
+  defp exit_codegen(_node, acc), do: acc
+
+  @codegen_forms ~w(quote unquote unquote_splicing)a
+  defp codegen_body?(body) do
+    {_ast, found?} =
+      Macro.prewalk(body, false, fn
+        {form, _meta, _args} = node, _acc when form in @codegen_forms -> {node, true}
+        node, acc -> {node, acc}
+      end)
+
+    found?
+  end
+
+  defp in_codegen?(%{codegen_defs: stack}), do: Enum.any?(stack)
+  defp in_codegen?(_acc), do: false
 
   defp attribute_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
@@ -784,7 +818,8 @@ defmodule Mut.AstWalk do
           enclosing_module: current_module(acc),
           ast_path: path,
           ast_path_hash: path_hash(path),
-          node: node
+          node: node,
+          in_codegen?: in_codegen?(acc)
         }
 
         %{acc | candidates: [candidate | acc.candidates]}

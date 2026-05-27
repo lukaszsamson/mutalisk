@@ -37,6 +37,16 @@ defmodule Mut.Mutator.OperatorExpansionTest do
       ms = ConcatOperator.mutate(ast_node(:++), context_for(:++))
       assert Enum.all?(ms, &(&1.guard_safe? and ConcatOperator.equivalent?(&1) == false))
     end
+
+    test "M78: skips ++ inside codegen function bodies (in_codegen?)" do
+      codegen_cand = %{candidate(:++) | in_codegen?: true}
+      refute ConcatOperator.compatible?(codegen_cand, site(:++, resolved_module: Kernel))
+      # nil / false (normal candidates) are not blocked.
+      assert ConcatOperator.compatible?(
+               %{candidate(:++) | in_codegen?: false},
+               site(:++, resolved_module: Kernel)
+             )
+    end
   end
 
   describe "BitwiseOperator" do

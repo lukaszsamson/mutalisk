@@ -32,7 +32,12 @@ defmodule Mut.Oracle.AstCandidate do
     # M57: true iff this variable's name has >=1 OTHER read in the same
     # function (so swapping this occurrence leaves it still used -> no unused-
     # variable churn). Gates VariableReplace; `nil` for non-variable candidates.
-    :other_uses?
+    :other_uses?,
+    # M78: true iff this dispatch candidate sits inside a codegen function body
+    # (one containing quote/unquote). Gates ConcatOperator (`++`/`--` in
+    # quoted-builder code is noisy/equivalent); ignored by other mutators.
+    # Never enters stable-id identity.
+    :in_codegen?
   ]
 
   @type t :: %__MODULE__{
@@ -49,6 +54,7 @@ defmodule Mut.Oracle.AstCandidate do
           node: Macro.t(),
           bound_vars: [atom()] | nil,
           type_hint: :number | :binary | :list | :boolean | nil,
-          other_uses?: boolean() | nil
+          other_uses?: boolean() | nil,
+          in_codegen?: boolean() | nil
         }
 end
