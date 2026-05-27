@@ -72,6 +72,90 @@ defmodule Mut.AstWalk do
     |> Enum.sort_by(&span_start_byte/1)
   end
 
+  @doc """
+  M77: `if`/`unless` candidates for conditional mutation (negate / force).
+  Block form only (`do … end`, which carries `:end` metadata so the whole node
+  can be span-replaced); the candidate's node is the full `if`/`unless` so
+  `Mut.Mutator.NegateConditional` can re-emit it with the condition mutated.
+  `quote`/codegen subtrees are pruned (not mutated). Requires `:source`.
+  """
+  @spec conditional_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def conditional_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+    acc = acc(file, source, line_offsets, false)
+
+    {_ast, acc} = Macro.traverse(ast, acc, &conditional_pre/2, &post/2)
+
+    acc.candidates
+    |> Enum.reverse()
+    |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp conditional_pre(node, acc) do
+    {path, acc} = enter_path(node, acc)
+    acc = enter_module(node, acc)
+    acc = maybe_conditional_candidate(node, path, acc)
+
+    if no_descend?(node) do
+      {prune(node), push_frame(node, path, acc)}
+    else
+      {node, push_frame(node, path, acc)}
+    end
+  end
+
+  defp maybe_conditional_candidate({name, meta, [_cond, kw]} = node, path, acc)
+       when name in [:if, :unless] and is_list(kw) do
+    with true <- Keyword.keyword?(kw) and Keyword.has_key?(kw, :do),
+         span when not is_nil(span) <- block_node_span(meta, acc) do
+      candidate = %AstCandidate{
+        file: acc.file,
+        line: Keyword.get(meta, :line),
+        column: Keyword.get(meta, :column),
+        syntactic_name: name,
+        syntactic_arity: 2,
+        source_span: span,
+        env_context: nil,
+        enclosing_module: current_module(acc),
+        ast_path: path,
+        ast_path_hash: path_hash(path),
+        node: node
+      }
+
+      %{acc | candidates: [candidate | acc.candidates]}
+    else
+      _ -> acc
+    end
+  end
+
+  defp maybe_conditional_candidate(_node, _path, acc), do: acc
+
+  # Span of a do/end block node, from its `:line`/`:column` to just past the
+  # `end` keyword (`:end` metadata). nil for keyword-form `if c, do: v` (no
+  # `:end`), which is skipped.
+  defp block_node_span(meta, acc) do
+    with start_line when is_integer(start_line) <- Keyword.get(meta, :line),
+         start_col when is_integer(start_col) <- Keyword.get(meta, :column),
+         end_kw when is_list(end_kw) <- Keyword.get(meta, :end),
+         end_line when is_integer(end_line) <- Keyword.get(end_kw, :line),
+         end_col when is_integer(end_col) <- Keyword.get(end_kw, :column) do
+      end_column = end_col + 3
+
+      %Mut.SourceSpan{
+        file: acc.file,
+        start_line: start_line,
+        start_column: start_col,
+        end_line: end_line,
+        end_column: end_column,
+        start_byte: byte_offset(acc.source, acc.line_offsets, start_line, start_col),
+        end_byte: byte_offset(acc.source, acc.line_offsets, end_line, end_column)
+      }
+    else
+      _ -> nil
+    end
+  end
+
   defp pin_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
     acc = enter_module(node, acc)

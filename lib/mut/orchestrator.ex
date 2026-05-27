@@ -18,6 +18,7 @@ defmodule Mut.Orchestrator do
           | :pattern_literal
           | :variable
           | :pattern_shape
+          | :conditional
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -144,12 +145,19 @@ defmodule Mut.Orchestrator do
     {pattern_shape_fallback, pattern_shape_skips} =
       pattern_shape_results(ast, relative_file, source, enabled_targets, mutators)
 
+    # M77: conditional mutators (opt-in `:conditional` target) — negate / force
+    # if/unless conditions. Fallback-routed (whole-node span replace).
+    {conditional_fallback, conditional_skips} =
+      conditional_results(ast, relative_file, source, enabled_targets, mutators)
+
     %Plan{
       schema: dispatch_schema ++ literal_schema,
       fallback:
         attribute_fallback ++
           guard_fallback ++
-          env_fallback ++ pattern_fallback ++ variable_fallback ++ pattern_shape_fallback,
+          env_fallback ++
+          pattern_fallback ++
+          variable_fallback ++ pattern_shape_fallback ++ conditional_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
@@ -160,9 +168,21 @@ defmodule Mut.Orchestrator do
           env_skips ++
           pattern_skips ++
           variable_skips ++
-          pattern_shape_skips,
+          pattern_shape_skips ++
+          conditional_skips,
       matched_pairs: matched
     }
+  end
+
+  # M77: conditional candidates via a syntactic AST walk. When the target is
+  # off, no walk happens.
+  defp conditional_results(ast, relative_file, source, enabled_targets, mutators) do
+    if :conditional in enabled_targets do
+      candidates = Mut.AstWalk.conditional_candidates(ast, file: relative_file, source: source)
+      enabled_fallback_results(candidates, :conditional, nil, mutators, source)
+    else
+      {[], []}
+    end
   end
 
   # M73: pin candidates discovered by a syntactic AST walk (the `^` operator
@@ -527,6 +547,8 @@ defmodule Mut.Orchestrator do
   defp fallback_env_context(_candidate, _site, :variable), do: nil
   # M73: pin candidates carry `:match`, which Mut.Mutator.Pin requires.
   defp fallback_env_context(candidate, _site, :pattern_shape), do: candidate.env_context
+  # M77: conditionals mutate the whole if/unless node; no env context needed.
+  defp fallback_env_context(_candidate, _site, :conditional), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

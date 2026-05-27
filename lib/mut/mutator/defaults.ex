@@ -50,7 +50,9 @@ defmodule Mut.Mutator.Defaults do
     # M73 pattern-shape (opt-in `:pattern_shape`; M75 decides graduation)
     Mut.Mutator.Pin,
     # M76 function-replacement (opt-in dispatch; M79 decides graduation)
-    Mut.Mutator.FunctionReplace
+    Mut.Mutator.FunctionReplace,
+    # M77 conditional negate/force (opt-in `:conditional`; M79 decides graduation)
+    Mut.Mutator.NegateConditional
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

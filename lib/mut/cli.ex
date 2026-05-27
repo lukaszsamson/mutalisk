@@ -49,7 +49,8 @@ defmodule Mut.Cli do
     :env_walker,
     :pattern_literal,
     :variable,
-    :pattern_shape
+    :pattern_shape,
+    :conditional
   ]
   @known_mutators [
     "arithmetic",
@@ -75,6 +76,7 @@ defmodule Mut.Cli do
     "membership",
     "pin",
     "function_replace",
+    "negate_conditional",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -479,6 +481,7 @@ defmodule Mut.Cli do
       "membership" => Mut.Mutator.Membership,
       "pin" => Mut.Mutator.Pin,
       "function_replace" => Mut.Mutator.FunctionReplace,
+      "negate_conditional" => Mut.Mutator.NegateConditional,
       "variable_replace" => Mut.Mutator.VariableReplace,
       "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
