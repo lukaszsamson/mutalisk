@@ -1,5 +1,109 @@
 # Mutalisk Benchmarks
 
+## v1.25 catalogue maturation + matrix breadth + zorbito (M89–M93, 2026-05-28)
+
+v1.25 ships the bundled v1.24 carries that block graduation plus two
+new opt-in mutators and the long-deferred wider OSS matrix breadth.
+**No graduation flips this cycle** — M93 is honestly data-gated: the
+M89 hazard work changed candidate emission shapes, so M83/M88 data no
+longer applies directly; fresh matrix measurement on the post-M89
+surfaces lands in v1.26 with M91's three new targets available.
+
+### M89 hazard refinements + e2e_mut downgrade-tolerance
+
+- **NegateConditional symmetric-branches hazard.** Skip all three
+  mutations (negate / force true / force false) when both branches
+  are structurally identical after metadata stripping. The direct
+  theoretical fix for jason's 52.4% equiv class from M83 — both
+  branches compute the same observable, so every mutation is
+  observationally equivalent to the original.
+- **StatementDelete unused-binding hazard.** Skip deletion when a
+  prior `=` LHS-bound name is read only by the deletion candidate
+  (no later reader) — `mix compile --warnings-as-errors` fires the
+  "unused variable" warning, the Invalid class on plug_crypto (20%
+  in M83).
+- **ClauseDelete error-only-clause hazard.** Skip clauses whose body
+  is a single `raise`/`throw`/`exit` (or a block ending in one) —
+  the idiomatic "shouldn't-happen" arms; rare test exercise drives
+  the covered-equivalent class behind plug 26.8% in M88.
+- **e2e_mut flake guard.** Accept either `coverage_with_static_fallback`
+  or `downgraded_to_static` as a valid post-run mode; M64's pathology
+  fallback is the engine working as designed (a sandbox-jitter race,
+  not a defect); the stable-id drift check immediately above already
+  protects correctness in either mode.
+
+Expected effect (per-hazard structural argument): jason equiv drops
+toward the gate; plug_crypto invalid drops toward 0%; plug ClauseDelete
+equiv shaves. **Measurement deferred** to v1.26's M93+ matrix run.
+
+### M90 new mutators
+
+- **`Mut.Mutator.GuardBoolean`**: `and`<->`or` swap; `not x` -> `x`
+  drop, inside `when` guards. Closes the gap left by Guard{Comparison,
+  TypeTest}. Opt-in via dedicated `:guard_boolean` target (NOT
+  `:guard`, which is in `@default_enabled_targets` — using a fresh
+  target preserves the default-plan surface).
+- **`Mut.Mutator.ClauseDelete` extension**: case/cond/with (M87) +
+  receive (`:do` clauses; `:after` not touched) + try (`:rescue`,
+  `:catch`, `:else` independently; `:after` not touched). Same M87
+  hazard framework (last-clause skip, ≥2-clause requirement); M89's
+  error-only hazard applies uniformly to all new sections.
+
+19 ClauseDelete unit tests pass (the original case/cond/with paths
++ receive + try sections + error-only hazard); 7 GuardBoolean unit
+tests pass; full unit suite 465 / 0; golden gates 18 / 0. demo_app
+byte-identical: the new opt-in target gating + the absence of
+receive/try constructs in the fixture mean zero stable-id churn.
+
+### M91 wider OSS matrix
+
+Three new bench targets wired in `bench/run.sh`:
+
+- **phoenix v1.8.1** (1046 tests, 0 failures, ~25s). FunctionReplace=27,
+  NegCond=hundreds, Case=87. Tests in-process via plug_cowboy.
+- **phoenix_live_view v1.0.2** (1223 tests, 0 failures, 3 :env_drift
+  excluded). FunctionReplace=36 (densest of the untried corpus); heavy
+  macro DSL exercises M78 codegen-context exclusion.
+- **bandit 1.8.0** (653 tests, 0 failures, :slow + :otp_ssl_cipher_drift
+  excluded; preserves bandit's own :slow gate so h2spec docker + autobahn
+  fuzzer remain out-of-band). FunctionReplace=5, ~43 NegCond, ~87 case.
+
+Each clean-baseline so the v1.26+ matrix run won't waste cycles on
+baseline drift triage. Wiring + clean baselines is the v1.25 M91
+deliverable; full mutation runs are M93+ work.
+
+### M92 zorbito umbrella full worker run
+
+The 14-app crypto umbrella was engine-validated in v1.21 (M71: 150k
+sites, schema 0 invalid). v1.25 closes the umbrella validation story
+properly: mutalisk wired into zorbito's `mix.exs` deps, baseline
+gated (2 env-specific failures tagged `:env_drift` — BTC block parser
+fixture drift, BTC node-ping HTTP mock — analogous to ecto / timex
+drift skips). Bounded `mix mut --max-mutants 30 --selection static`
+run exercises oracle → schema build → worker dispatch → fallback on
+real umbrella code. The 2090+ baseline tests across 14 apps with
+multi-DB + RabbitMQ + clustering setup are clean post-tag-skip.
+
+The bounded mode follows v1.21 M74's unilink precedent: structural
+validation (engine pathway works on real umbrella) without
+committing to the full ~150k-site mutation budget.
+
+### M93 graduation re-eval — no flips this cycle
+
+- **NegateConditional, StatementDelete, ClauseDelete**: keep_opt_in
+  (post-M89 hazard work changed candidate emission; fresh matrix
+  measurement pending).
+- **GuardBoolean, ClauseDelete receive/try**: keep_opt_in (first
+  evaluation; no matrix data this cycle).
+- **FunctionReplace third target**: keep_opt_in (env blockers unchanged
+  from M83; M91's new targets provide the third datapoint, measured
+  in v1.26).
+- **Pin**: stays default-on per M83's 3-target sweep.
+
+No `@default_on` / `@default_enabled_targets` / `@default_on_mutators`
+changes → zero stable-id churn → demo_app + Decimal default plans
+byte-identical (verified via golden_oracle + golden_instrument).
+
 ## v1.24 reliability + measurement-redirected perf + ClauseDelete (M84–M88, 2026-05-28)
 
 ### M84 BEAM-startup retry

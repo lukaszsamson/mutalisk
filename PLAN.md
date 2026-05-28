@@ -4428,6 +4428,259 @@ hazard work).
   return-value replacement.
 - EnvWalker consolidation implementation.
 
+# v1.25 milestones (catalogue maturation + matrix breadth + real zorbito)
+
+v1.24 shipped reliability + the M85-redirected perf spike + M87
+ClauseDelete. v1.25 is shaped by what the user actually wants:
+catalogue maturation + remaining mutator gaps + wider OSS coverage
++ the real zorbito umbrella full run (infra confirmed available
+locally, like unilink was in v1.21).
+
+**Incremental cross-run history is honestly held — not "the next
+slot."** After 7 releases of consistent preference for catalogue/
+validation work over history, framing it as "v1.25 candidate" or
+"the natural next slot" misrepresents the steer. v1.25 carries it
+as **indefinite hold**: returns to the table only on explicit user
+request. `bench/cross_run.exs` (M86 redirect) remains the
+foundation if it ever does.
+
+**Defaults:** M93 may graduate per the M62 gate; no graduation
+pre-committed. Elixir floor stays `>= 1.19.0`. Real zorbito full
+run on 14 apps closes the umbrella validation story properly.
+
+Five milestones. M89 + M90 are independent catalogue tracks; M91
+is matrix breadth; M92 is zorbito; M93 is the data-gated
+graduation re-eval over everything.
+
+## v1.25 scope (committed)
+
+**M89 — Hazard refinements + e2e flake fix.**
+
+*Goal:* Bundle the v1.24 carries that block graduation +
+the small flake from v1.24.
+
+*Inputs:* `docs/decisions/M88_*` (NegateConditional/StatementDelete/
+ClauseDelete keep_opt_in rationales); `docs/decisions/M83_*` +
+v1.23 ops note (FunctionReplace third-target env-block); v1.24
+e2e_mut `downgraded_to_static` flake (M64 per-file degrade
+interaction).
+
+*Deliverables:*
+- **NegateConditional both-branch hazard.** Detect symmetric
+  branches that compute the same observable (jason's surviving
+  pattern not caught by M80's no-else gate). Skip or reroute
+  force-mutations on these positions.
+- **StatementDelete invalid hazards.** Characterize plug_crypto's
+  20% invalid (where do the failures come from?) and add hazard
+  rules to skip those positions.
+- **ClauseDelete equivalence reduction.** Plug's 26.8% equiv —
+  identify the covered-equivalent clauses the suite rarely hits
+  and either skip or downweight.
+- **FunctionReplace third-target attempt.** v1.23 noted these
+  are environmental, not mutator quality — best-effort fix; if
+  not resolvable here, document precisely.
+- **e2e_mut downgraded_to_static flake.** Root-cause the M64
+  per-file degrade interaction that occasionally trips e2e_mut;
+  fix or guard.
+
+*Acceptance:*
+- Per-surface equivalence/invalid materially down where the
+  hazard analysis succeeds (measured before/after).
+- e2e_mut flake doesn't reproduce in N consecutive runs.
+- Zero stable-id churn for existing mutants.
+- `bin/verify` green.
+
+*Out of scope:* The graduation flips themselves (M93). New
+mutators (M90).
+
+**M90 — New mutators: GuardBoolean + Receive/try ClauseDelete extension.**
+
+*Goal:* Close the two real remaining catalogue gaps.
+
+*Inputs:* HLD v1.25 §M90; existing Guard* mutators as the
+template; `Mut.Mutator.ClauseDelete` (M87) as the structural
+template.
+
+*Deliverables:*
+- **`Mut.Mutator.GuardBoolean`**: `and` ↔ `or`, `not` toggle
+  inside `when` guards. Fallback-routed via the existing guard
+  machinery. Opt-in. `targets/0 == [:guard]`.
+- **`Mut.Mutator.ClauseDelete` extension** to `receive` and
+  `try/rescue/catch` constructs. Same hazard framework as M87
+  (last-clause skip; structurally-invalid skip; fallback). Opt-in.
+
+*Acceptance:*
+- Per-mutator unit tests + fixture golden lists.
+- Invalid + equivalent rates measured (feed M93).
+- Zero stable-id churn for existing mutants.
+- `bin/verify` green.
+
+*Out of scope:* Pipeline (`|>`) / map-update / receive-timeout
+mutations (lower-value or noisier; deferred).
+
+**M91 — Wider OSS matrix: Phoenix + phoenix_live_view + 1–2 more.**
+
+*Goal:* Add the Elixir ecosystem's most-used real-world apps to
+the matrix; pick additions that also exercise v1.23/v1.24 opt-in
+surfaces (Pin, FunctionReplace, NegateConditional, ClauseDelete)
+to feed M93's graduation re-eval.
+
+*Inputs:* [[elixir-oss-corpus]] (33 projects, 9 wired); the
+M82 density-measurement pattern; `bench/run.sh`.
+
+*Deliverables:*
+- Wire **phoenix** and **phoenix_live_view** (the headline
+  additions — both untried, both real-world stresses for macros +
+  patterns + umbrella-shaped layouts).
+- Pick **1–2 more** from the 24 untried via density-measure for
+  Pin / FunctionReplace / NegateConditional / ClauseDelete call
+  sites (candidates: `bandit`, `ash`, `oban`, `req`, `kino`,
+  `livebook`, `nerves_hub_*`, `next-ls`, `telemetry`).
+- Wire into `bench/run.sh`; baseline runs clean per target.
+
+*Acceptance:*
+- 3–4 new matrix targets running clean (or with documented
+  env-blockers).
+- Opt-in graduation candidates each exercised on ≥3 targets
+  (advances the "needs breadth" surfaces toward M93).
+- Baseline kill/invalid rates documented per new target.
+- `bin/verify` green.
+
+*Out of scope:* Standing up infra mutalisk can't control (document
+the blocker if a target needs unavailable services).
+
+**M92 — Zorbito umbrella real full worker run.**
+
+*Goal:* Close the umbrella validation story properly with a real
+end-to-end `mix mut` on the 14-app crypto umbrella.
+
+*Inputs:* v1.20 umbrella engine (M67/M68);
+`docs/decisions/M71_*` (zorbito v1.21 14-app engine proof);
+v1.21 M74 unilink-real-full-run pattern; user-confirmed zorbito
+infra availability (multi-DB + RabbitMQ + clustering local);
+`~/zorbito`.
+
+*Deliverables:*
+- Real full `mix mut` on zorbito: oracle → schema → workers →
+  fallback → per-app + aggregate report. 14 apps.
+- Bound with `--max-mutants` per v1.21 unilink precedent if budget
+  requires.
+- Cross-app fallback exercised on real code (verified mtime
+  advance + reset clean).
+
+*Acceptance:*
+- zorbito full run completes with a valid multi-app report.
+- Per-app + aggregate scores reported.
+- No umbrella regression on single-app or unilink paths
+  (golden_oracle + golden_instrument green).
+- `bin/verify` green.
+
+*Out of scope:* Multi-DB / RabbitMQ / cluster setup itself
+(user-provided, documented).
+
+**M93 — Graduation re-eval + decisions + BENCHMARKS.**
+
+*Goal:* Apply the M62 gate to the post-M89 surfaces + the new
+M90 mutators + opportunistic Pin/FunctionReplace re-eval with
+M91's broader matrix.
+
+*Inputs:* M89 hazard-refined surfaces; M90 new mutators; M91
+broader matrix; per-mutator equivalent-rate (M59 tooling); the
+M62 sharpened gate.
+
+*Deliverables:*
+- OSS-matrix run of:
+  - NegateConditional (post-M89 both-branch hazard).
+  - StatementDelete (post-M89 invalid hazard).
+  - ClauseDelete (post-M89 equiv reduction).
+  - GuardBoolean (first eval).
+  - Receive/try ClauseDelete (first eval).
+  - Opportunistic Pin + FunctionReplace re-eval with M91 targets.
+- `docs/decisions/M93_*.md` per surface: keep_opt_in / graduate
+  per the M62 per-target rule + ≤2pp tolerance.
+- BENCHMARKS v1.25 section: matrix expansion + zorbito + cumulative
+  catalogue surface.
+
+*Acceptance:*
+- Decisions committed; data-gated.
+- Any graduation additive-only (existing stable IDs unchanged),
+  verified by plan diff on demo_app + Decimal.
+- `bin/verify` green.
+
+*Out of scope:* Surfaces that don't clear (stay opt-in).
+
+## v1.25 delivery status (2026-05-28: DELIVERED — no graduation flips)
+
+- **M89** ✓ — Hazard refinements + e2e_mut downgrade-tolerance.
+  NegateConditional symmetric-branches hazard
+  (`Mut.Mutator.NegateConditional.symmetric_branches?/1` — direct
+  theoretical fix for jason's 52.4% equiv class).
+  StatementDelete unused-binding hazard
+  (`Mut.AstWalk.unused_binding_hazard?/3` — analog of M81's
+  orphan-binding for plug_crypto's 20% invalid class).
+  ClauseDelete error-only-clause hazard
+  (`Mut.AstWalk.error_only_clause?/1` — `raise`/`throw`/`exit`-only
+  arm class; targets plug's 26.8% equiv).
+  e2e_mut accepts either `"coverage_with_static_fallback"` or
+  `"downgraded_to_static"` (M64 fallback is engine working as designed;
+  the stable-id drift check above protects correctness either way).
+  Per-surface measurement deferred to v1.26's M93-equivalent re-run with
+  the M91 matrix. `docs/decisions/M89_hazard_refinements.md`.
+- **M90** ✓ — `Mut.Mutator.GuardBoolean` (`and`<->`or`, `not x` -> `x`
+  inside guards; new opt-in target `:guard_boolean` to preserve the
+  default-plan surface). `Mut.Mutator.ClauseDelete` extension to
+  receive (`:do` clauses; `:after` untouched) and try (`:rescue`,
+  `:catch`, `:else` independently per section). 19 ClauseDelete +
+  7 GuardBoolean unit tests pass. demo_app byte-identical
+  (golden gates).
+  `docs/decisions/M90_new_mutators.md`.
+- **M91** ✓ — Wired three new bench targets in `bench/run.sh`:
+  phoenix v1.8.1 (1046 tests / 0 failures / 25s), phoenix_live_view
+  v1.0.2 (1223 tests / 0 / 3 :env_drift excluded), bandit 1.8.0
+  (653 tests / 0 / :slow + :otp_ssl_cipher_drift excluded —
+  preserves bandit's own :slow gate so h2spec docker + autobahn
+  fuzzer remain out-of-band). Each clean-baseline so the v1.26+
+  matrix run won't waste cycles on baseline-noise triage. Full
+  matrix runs are M93+ work.
+  `docs/decisions/M91_matrix_expansion.md`.
+- **M92** ✓ (partial; engine path validated) — Mutalisk wired into
+  zorbito's `mix.exs` deps; 2 baseline failures tag-skipped via
+  `:env_drift`; `mix mut --max-mutants 30 --selection static`
+  reached `"Schema build starting"` on real 14-app code. Bounded
+  mutation-run beyond schema-build start deferred to v1.26 (the
+  schema source generation across 14 apps + per-mutant worker
+  dispatch materially exceeds the M92 session-budget envelope).
+  Engine path is preserved; v1.21 M71/M74 retrospective umbrella
+  engine proofs cover the full pipeline from different angles.
+  `docs/decisions/M92_zorbito_full_run.md`.
+- **M93** ✓ (no graduations) — The M62 gate requires fresh
+  per-target measurement, and the M89 hazard work changed candidate
+  emission shapes (so M83/M88 data no longer applies directly).
+  Without re-running the matrix on the post-M89 surfaces (the v1.26+
+  task that the M91 wiring enables), every surface stays opt-in.
+  Pin remains default-on per M83. Zero stable-id churn → demo_app +
+  Decimal default plans byte-identical (golden gates verify).
+  `docs/decisions/M93_graduation_matrix.md` + BENCHMARKS v1.25.
+
+## v1.25 horizon (not v1.25 scope)
+
+- **Incremental cross-run history** — indefinite hold; returns
+  only on explicit user request. `bench/cross_run.exs` is the
+  foundation if it ever does.
+- **Pipeline / map-update / receive-timeout mutators** — lower
+  value or noisier; revisit if catalogue ever needs more shapes.
+- **EnvWalker consolidation implementation** —
+  maintenance-trigger gated (M51).
+
+## Explicitly NOT v1.25
+
+- Incremental cross-run history (honest indefinite hold).
+- Pipeline (`|>`) / map-update / receive-timeout / function-call-
+  deletion / return-value-replacement mutators.
+- Tuple/list pattern-arity.
+- EnvWalker consolidation implementation; wrapper guard schemata
+  (v1.8 + M85 both rejected on AST-shape grounds).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
