@@ -94,9 +94,11 @@ defmodule Mut.Cli do
   @default_on_mutators ~w(
     arithmetic comparison_boundary comparison_negation boolean unary_not
     guard_comparison_boundary guard_comparison_negation guard_type_test
-    atom_literal integer_literal concat_operator
+    atom_literal integer_literal concat_operator pin
   )
-  @default_enabled_targets [:dispatch, :guard, :env_walker]
+  # M83: :pattern_shape moves into the default enabled targets so Pin (the only
+  # graduated :pattern_shape mutator) fires without `--enable pattern_shape`.
+  @default_enabled_targets [:dispatch, :guard, :env_walker, :pattern_shape]
 
   @spec parse([String.t()], keyword) :: {:ok, Options.t()} | {:error, String.t()}
   def parse(argv, config \\ []) when is_list(argv) and is_list(config) do

@@ -1,5 +1,72 @@
 # Mutalisk Benchmarks
 
+## v1.23 close the queue (M80–M83, 2026-05-28)
+
+NegateConditional hazards, statement-deletion (M81), matrix breadth (M82),
+and the data-gated re-eval (M83). **Pin graduated to default-on** (3rd
+graduation since M46; second this year after M79's ConcatOperator).
+
+### M80 NegateConditional hazards (before → after)
+
+| target | invalid before | invalid after |
+|---|---:|---:|
+| plug | 15.3% | **0.7%** |
+| decimal | 0% | 0% |
+
+Binding hazard (`if x = lookup(), …`) caught plug's dominant invalid class.
+Dead-branch hazard (no-else `if`/`unless`) helped decimal modestly
+(equiv 25.4%→23.1%); jason's equiv stayed at 52% (its surviving mutants
+are both-branch-equivalent, not no-else).
+
+### M81 StatementDelete (new)
+
+`Mut.Mutator.StatementDelete` — delete a non-last `def` body statement;
+fallback-routed (whole-def span re-render). Hazard-gated up front: body
+position only (collector visits defmodule → def directly); last statement
+excluded; orphan-binding hazard skips deletions whose bound name is read
+later. Smoke: `_ = log(); x+1` mutant killed by `assert_received`;
+`sum = x+y; sum*2` skipped (orphan).
+
+### M82 matrix breadth
+
+Wired **absinthe** (pinned v1.7.10) into `bench/run.sh`: pins=17, allowlisted
+calls=54, standalone (deps = nimble_parsec + telemetry). Pin now exercised
+on **3 targets** (plug, absinthe, phoenix_html). FunctionReplace stayed at
+2; every other candidate hit an env blocker (credo's regex incompatibility
+on Elixir 1.19; ecto's 9 baseline failures; req's ezstd; small targets had
+no allowlisted call sites). See `bench/results/m82/summary.txt`.
+
+### M83 graduation matrix
+
+| target | mutator | n | kill% | equiv% | invalid% |
+|---|---|--:|--:|--:|--:|
+| plug | Pin | 14 | 100 | 0 | 0 |
+| absinthe | Pin | 13 | 100 | 0 | 0 |
+| phoenix_html | Pin | 1 | 100 | 0 | 0 |
+| plug | FunctionReplace | 13 | 100 | 0 | 0 |
+| absinthe | FunctionReplace | 27 | 83.3 | 16.7 | 0 |
+| plug | NegateConditional | 138 | 77.2 | 22.8 | 0.7 |
+| decimal | NegateConditional | 67 | 76.9 | 23.1 | 0 |
+| jason | NegateConditional | 23 | 47.6 | 52.4 | 0 |
+| jason | StatementDelete | 6 | 100 | 0 | 0 |
+| plug_crypto | StatementDelete | 5 | 75 | 25 | 20 |
+
+- **Pin → GRADUATED default-on.** Three matrix targets, **100% kill / 0%
+  equiv / 0% invalid everywhere**. Additive: Decimal default plan unchanged
+  at 559 mutants (no pins to add); demo_app byte-identical. Wiring: Pin
+  moves to `@default_on` (+ `@default_on_mutators` mirror); `:pattern_shape`
+  joins `@default_enabled_targets`.
+- **FunctionReplace → keep_opt_in.** Clean on both targets it exercises, but
+  M82 could only reach two — the gate's "≥3 targets each clear" misses
+  on target-availability, not mutator quality.
+- **NegateConditional → keep_opt_in.** M80's binding hazard cut plug
+  invalid 15.3%→0.7%, but equiv >20% on 3 of 4 targets.
+- **StatementDelete → keep_opt_in.** plug_crypto 20% invalid + 25% equiv;
+  intrinsically the catalogue's noisiest, the M81 hazards are necessary but
+  not yet sufficient.
+
+See `docs/decisions/M83_graduation_matrix.md`.
+
 ## v1.22 catalogue growth: the two missing classics (M76–M79, 2026-05-27)
 
 Two new mutators (FunctionReplace, NegateConditional) + two carries

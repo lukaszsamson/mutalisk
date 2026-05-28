@@ -38,7 +38,13 @@ defmodule Mut.Mutator.Defaults do
     # M72 dropped the crash-prone `--`->`++` and M78 excluded codegen contexts.
     # :dispatch is default-enabled, so this fires by default; additive (new
     # `++` mutants only; demo_app has no `++`, so its default plan is unchanged).
-    Mut.Mutator.ConcatOperator
+    Mut.Mutator.ConcatOperator,
+    # M83: GRADUATED. `^x` -> `x` (unpin) cleared the M62 gate on 3 targets
+    # (plug 14/14, absinthe 13/13, phoenix_html 1/1 — kill 100%, equiv 0%,
+    # invalid 0% everywhere) after the M75 map-key hazard fixed the only invalid
+    # class. :pattern_shape moves into default enabled targets to make this
+    # fire by default; additive (new ^x pin mutants only).
+    Mut.Mutator.Pin
   ]
 
   @opt_in [
@@ -53,8 +59,7 @@ defmodule Mut.Mutator.Defaults do
     # ConcatOperator graduated to default-on (above).
     Mut.Mutator.BitwiseOperator,
     Mut.Mutator.Membership,
-    # M73 pattern-shape (opt-in `:pattern_shape`; M75 decides graduation)
-    Mut.Mutator.Pin,
+    # M83: Pin graduated to default-on (above).
     # M76 function-replacement (opt-in dispatch; M79 decides graduation)
     Mut.Mutator.FunctionReplace,
     # M77 conditional negate/force (opt-in `:conditional`; M79 decides graduation)

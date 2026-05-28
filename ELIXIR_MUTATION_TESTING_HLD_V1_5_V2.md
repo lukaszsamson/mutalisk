@@ -1061,6 +1061,33 @@ Four milestones. M76 (function-swaps) and M77 (conditionals) are independent imp
 - Tuple/list pattern-arity; function-call deletion / return-value replacement.
 - EnvWalker consolidation implementation; wrapper guard schemata.
 
+### v1.23 (4 milestones — close the queue)
+
+v1.22 graduated ConcatOperator but left a full queue: FunctionReplace and Pin both flawless on plug yet stuck behind "one matrix target isn't enough breadth," NegateConditional needing the same hazard refinement ConcatOperator got in M72/M78, and statement-deletion still deferred. v1.23 clears that queue so a future release can pivot cleanly to incremental cross-run history (now held 5 releases — long enough that closing the queue is itself a precondition for tackling it without spreading thin).
+
+Two of the queued items are *unblocked by data, not new mutator work*: Pin and FunctionReplace just need matrix targets that exercise them. That's meta-leverage — one small matrix-additions push unblocks two graduation paths simultaneously.
+
+**Defaults:** any graduation is data-gated by the M62 sharpened gate; M83 decides. No flips pre-committed. Elixir floor stays `>= 1.19.0`.
+
+Four milestones. M80 (NegateConditional hazard) and M81 (statement-deletion) are independent implementation tracks; M82 is the matrix-breadth push; M83 the data-gated decision over all four queued surfaces.
+
+**M80 — NegateConditional dead-branch gate + invalid reduction.** Refine the M77 mutator with the hazard discipline M72/M78 used for operators. Dead-branch equivalence detection: an `if cond do body end` with no `else` (or with side-effect-free body) forced to one branch is often equivalent — skip or reroute those force-mutations. Invalid reduction: characterize plug's 15.3% invalid rate (where do the compile/runtime failures come from?) and add hazard rules to skip those positions. Per-mutator instrumentation. Acceptance: jason/decimal/plug_crypto equivalence rate materially down; plug invalid rate materially down; zero stable-id churn for existing mutants.
+
+**M81 — Statement-deletion mutator.** The classic high-yield mutator finally lands, with aggressive hazard gating up front (v1.22 deferred it precisely because it's the noisiest). `Mut.Mutator.StatementDelete`: in a `__block__` of statements, delete one. Hazards (skip): orphan-binding (the deleted statement binds a name used later), expression-position only (don't break a `case` scrutinee chain), pattern/guard contexts excluded. Fallback-routed. Opt-in. Acceptance: invalid rate measured and gated to a reasonable floor; per-mutator unit tests; zero stable-id churn for existing mutants.
+
+**M82 — Matrix breadth: targets exercising Pin + FunctionReplace.** Add 2–3 OSS targets from the existing 33-project corpus that exercise the queued surfaces: codebases with heavy pattern matching with `^` pins (Pin) and many `Enum`/`List`/`String` allowlisted calls (FunctionReplace). Candidates from `../elixir_oss/projects`: ecto (heavy patterns/queries), absinthe (resolver patterns), broadway/oban (Enum-heavy data flow), phoenix_html (pattern-heavy templates). Final selection driven by call-site density measurement, not assertion. Wire into `bench/run.sh`. Acceptance: 2–3 new matrix targets running clean; Pin and FunctionReplace each exercised on ≥3 targets total; baseline kill/invalid rates documented.
+
+**M83 — Graduation re-eval + BENCHMARKS.** With M80's hazard work and M82's breadth, re-run the M62-gated graduation over: NegateConditional (post-hazard), Statement-deletion (first eval), Pin (post-breadth), FunctionReplace (post-breadth). Decisions in `docs/decisions/M83_*.md`: per-surface keep_opt_in / graduate. BENCHMARKS v1.23 section. Acceptance: decisions committed; data-gated (graduate only what clears); any graduation additive-only (existing stable IDs unchanged); `bin/verify` green.
+
+**v1.23 outcome (2026-05-28):** all four milestones shipped; **Pin graduated to default-on** — the third new graduation since M46 (after M63 IntegerLiteral-in-pattern and M79 ConcatOperator). M80's binding hazard cut plug NegateConditional invalid 15.3%→0.7% and the dead-branch no-else skip nudged decimal equiv 25.4%→23.1% (jason's surviving mutants are both-branch-equivalent and stay 52%). M81 shipped `Mut.Mutator.StatementDelete` (delete a non-last `def` body statement; fallback-routed via whole-def re-render) with three hazards up front — body-position only (collector visits `defmodule` → `def` directly so patterns/guards/case-scrutinee blocks are never reached), last-statement excluded, orphan-binding skip when a deleted statement binds a name a later statement reads. M82 added breadth by wiring `absinthe` (v1.7.10) into `bench/run.sh`, giving Pin its third clean target (plug/absinthe/phoenix_html: 100% kill, 0% equiv, 0% invalid everywhere); FunctionReplace stayed at two because every third-target candidate hit an environmental blocker (credo's regex incompat on Elixir 1.19, ecto's 9 baseline failures, req's ezstd build, small targets with zero allowlisted call sites — all documented). M83 graduated Pin (additive: Decimal default plan unchanged at 559 mutants because Decimal has no pins; demo_app byte-identical via the golden gates) and kept the rest opt-in — FunctionReplace blocked on target-availability not quality; NegateConditional with equiv >20% on three of four targets; StatementDelete with plug_crypto 20% invalid + 25% equiv (the catalogue's intrinsically noisiest, M81's hazards necessary but not yet sufficient). `:pattern_shape` moved into the default enabled targets so graduated Pin fires by default.
+
+**Explicitly NOT in v1.23:**
+- Incremental cross-run history — held; v1.24 is the natural slot once the queue is cleared (this is the last release that defers it without explicit rationale).
+- zorbito full worker run (engine proven; full run still infra-deferred).
+- New mutator families beyond statement-deletion.
+- Tuple/list pattern-arity; function-call deletion / return-value replacement.
+- EnvWalker consolidation implementation; wrapper guard schemata.
+
 ### v2
 
 - Lean env walker.

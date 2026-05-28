@@ -4034,6 +4034,177 @@ per-mutator equivalent-rate (M59 tooling); the M62 gate;
   replacement.
 - EnvWalker consolidation implementation; wrapper guard schemata.
 
+# v1.23 milestones (close the queue)
+
+v1.22 (M76–M79) graduated ConcatOperator but left a full queue:
+FunctionReplace + Pin both flawless on plug yet stuck on
+single-target breadth, NegateConditional too noisy without a
+M72-style hazard pass, and statement-deletion still deferred.
+v1.23 clears all four queued surfaces so v1.24 can pivot cleanly
+to incremental cross-run history (now held 5 releases — closing
+the queue is itself a precondition for tackling it without
+spreading thin).
+
+Two of the four are unblocked by **data**, not new mutator work:
+Pin and FunctionReplace need matrix targets that exercise them.
+One small matrix-additions push unblocks both graduations. That's
+the meta-leverage v1.23 is built around.
+
+**Defaults:** graduations are data-gated by the M62 sharpened
+gate; M83 decides. No flips pre-committed. Elixir floor stays
+`>= 1.19.0`.
+
+Four milestones. M80 + M81 are independent implementation tracks;
+M82 is the matrix-breadth push; M83 is the data-gated decision
+over all four queued surfaces.
+
+## v1.23 scope (committed)
+
+**M80 — NegateConditional dead-branch gate + invalid reduction.**
+
+*Goal:* Make NegateConditional graduation-eligible by cutting its
+dead-branch equivalence and invalid rates — the same hazard
+discipline M72/M78 used for operators.
+
+*Inputs:* `docs/decisions/M79_*` (the NegateConditional
+keep_opt_in rationale: 25–52% dead-branch equivalence, 15.3%
+plug invalid); `Mut.Mutator.NegateConditional`; M77 routing.
+
+*Deliverables:*
+- Dead-branch detection: skip or reroute force-true / force-false
+  on `if cond do body end` shapes that are equivalent by
+  construction (no `else`, or side-effect-free body where the
+  branch's value isn't consumed).
+- Invalid-rate root-causing on plug: characterize the 15.3% (where
+  do the compile/runtime failures come from?), add hazard rules
+  to skip those positions.
+- Per-mutator instrumentation (invalid / equivalent / non-prod
+  rates).
+
+*Acceptance:*
+- jason / decimal / plug_crypto equivalence rate materially down
+  (measured before/after).
+- plug invalid rate materially down.
+- Zero stable-id churn for existing mutants; `bin/verify` green.
+
+*Out of scope:* The graduation flip itself (M83). New
+NegateConditional behavior beyond hazard gating.
+
+**M81 — Statement-deletion mutator.**
+
+*Goal:* Ship the deferred high-yield classic with aggressive
+hazard gating up front.
+
+*Inputs:* HLD v1.23 §M81; `Mut.EnvWalker` binding-scope tracking
+(M54 — needed for orphan-binding detection); fallback engine.
+
+*Deliverables:*
+- `Mut.Mutator.StatementDelete`: in a `__block__` of statements,
+  delete one. Routing fallback (structural). Opt-in.
+- Hazard gates (skip):
+  - **orphan-binding** — the deleted statement binds a name used
+    later in the block.
+  - **expression-position only** — don't break `case`/`with`
+    scrutinee chains.
+  - **pattern / guard contexts** — excluded entirely.
+  - **last-statement-only-when-non-return-only** rule —
+    documented (last statement determines return value; deleting
+    it is interesting but extremely noisy — opt-in within opt-in
+    or excluded by default).
+- Per-mutator unit tests; invalid-rate instrumentation.
+
+*Acceptance:*
+- Invalid rate measured + gated to a documented floor (statement-
+  deletion is intrinsically the catalogue's noisiest, but gating
+  must keep it under a defensible bar).
+- Per-mutator unit tests; zero stable-id churn for existing
+  mutants; `bin/verify` green.
+
+*Out of scope:* The graduation flip (M83). `case`-clause
+deletion (separate surface).
+
+**M82 — Matrix breadth: targets exercising Pin + FunctionReplace.**
+
+*Goal:* Unblock Pin and FunctionReplace graduation by adding
+matrix targets that exercise them.
+
+*Inputs:* [[elixir-oss-corpus]] (`../elixir_oss/projects`, 33
+projects, only ~8 wired); `bench/run.sh`; `docs/decisions/M79_*`
+(the "needs breadth" gate misses).
+
+*Deliverables:*
+- Call-site density measurement across the 33 OSS projects:
+  count `^`-pin occurrences (Pin exercise) and
+  Enum/List/String allowlisted call occurrences (FunctionReplace
+  exercise) per project.
+- Wire 2–3 high-exercise targets into `bench/run.sh` (candidates:
+  ecto for patterns, absinthe for resolver patterns, broadway /
+  oban for Enum-heavy data flow, phoenix_html for templates —
+  density-driven, not pre-asserted).
+- Run baseline + Pin/FunctionReplace runs to confirm clean.
+
+*Acceptance:*
+- 2–3 new matrix targets wired and running clean.
+- Pin and FunctionReplace each exercised on **≥3 matrix targets**.
+- Baseline kill/invalid rates documented per new target.
+- `bin/verify` green.
+
+*Out of scope:* zorbito (still infra-deferred); wiring more than
+density justifies.
+
+**M83 — Graduation re-eval + BENCHMARKS.**
+
+*Goal:* Apply the M62 gate to the four queued surfaces with the
+new hazard data and matrix breadth.
+
+*Inputs:* M80 hazard rules; M81 new mutator; M82 broader matrix;
+per-mutator equivalent-rate (M59 tooling); the M62 sharpened gate.
+
+*Deliverables:*
+- OSS-matrix run covering:
+  - NegateConditional (post-M80 hazard)
+  - Statement-deletion (first eval)
+  - Pin (post-M82 breadth)
+  - FunctionReplace (post-M82 breadth)
+- `docs/decisions/M83_*.md`: per-surface keep_opt_in / graduate
+  per the M62 per-target rule + ≤2pp tolerance.
+- BENCHMARKS v1.23 section.
+
+*Acceptance:*
+- Decisions committed; data-gated (graduate only what clears).
+- Any graduation additive-only (existing stable IDs unchanged),
+  verified by plan diff on demo_app + Decimal.
+- `bin/verify` green.
+
+*Out of scope:* Surfaces that don't clear (stay opt-in).
+
+## v1.23 delivery status (2026-05-28: DELIVERED — Pin graduated)
+
+- **M80** ✓ — NegateConditional dead-branch + invalid hazards (binding hazard for `=`/`<-` in conditions; no-else direction-specific skip). Measured: plug invalid 15.3%→0.7%; decimal equiv 25.4%→23.1%; jason unchanged (both-branch-equivalent pattern, not no-else).
+- **M81** ✓ — `Mut.Mutator.StatementDelete`. Body-position-only (collector visits defmodule→def directly); last-statement excluded; orphan-binding hazard. Opt-in `:statement_delete`, fallback (whole-def re-render).
+- **M82** ✓ — Matrix breadth: wired **absinthe** (v1.7.10) into `bench/run.sh`; Pin exercised on 3 targets (plug/absinthe/phoenix_html). FunctionReplace gate miss documented (credo Regex-incompat on 1.19, ecto baseline 9 failures, req ezstd, small targets have 0 allowlisted calls).
+- **M83** ✓ — Graduation re-eval. **Pin GRADUATED to default-on** (3 targets all 100%/0%/0%; additive — Decimal 559→559, demo_app byte-identical, golden gates green). FunctionReplace/NegateConditional/StatementDelete keep_opt_in (target breadth / equiv / invalid respectively). `docs/decisions/M83_graduation_matrix.md` + BENCHMARKS v1.23.
+
+## v1.23 horizon (not v1.23 scope)
+
+- **Incremental cross-run history** — v1.24 is the natural slot
+  once the queue is cleared (this is the last release that
+  defers it without explicit rationale).
+- **Statement-deletion graduation** (if M83 doesn't clear it,
+  revisit with hazard refinements).
+- **zorbito full worker run** — still infra-deferred.
+- **case/cond-clause mutators** — extends M77 and M81 surfaces;
+  later release.
+
+## Explicitly NOT v1.23
+
+- Incremental cross-run history (held; v1.24 candidate).
+- zorbito full worker run; umbrella work of any kind.
+- New mutator families beyond statement-deletion.
+- Tuple/list pattern-arity; function-call deletion / return-value
+  replacement; case-clause deletion.
+- EnvWalker consolidation implementation; wrapper guard schemata.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

@@ -15,7 +15,8 @@ defmodule Mut.CliTest do
     # M48: pure-default tier — dispatch+guard mutators + AtomLiteral, env
     # walker source on so AtomLiteral runs, but only AtomLiteral among the
     # env-walker literals.
-    assert opts.enabled_targets == [:dispatch, :guard, :env_walker]
+    # M83: :pattern_shape joined the default enabled targets (Pin graduated).
+    assert opts.enabled_targets == [:dispatch, :guard, :env_walker, :pattern_shape]
     assert "atom_literal" in opts.mutators
 
     refute Enum.any?(
