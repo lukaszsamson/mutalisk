@@ -67,7 +67,11 @@ defmodule Mut.Mutator.Defaults do
     # M81 statement-delete (opt-in `:statement_delete`; M83 decides graduation)
     Mut.Mutator.StatementDelete,
     # M87 clause-delete (opt-in `:clause_delete`; M88 decides graduation)
-    Mut.Mutator.ClauseDelete
+    Mut.Mutator.ClauseDelete,
+    # M90 guard boolean (and<->or; not-drop). opt-in `:guard` target —
+    # default-enabled, but only fires under explicit --enable guard +
+    # --mutators guard_boolean until M93 decides graduation.
+    Mut.Mutator.GuardBoolean
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

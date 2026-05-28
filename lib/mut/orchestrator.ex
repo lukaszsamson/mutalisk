@@ -21,6 +21,7 @@ defmodule Mut.Orchestrator do
           | :conditional
           | :statement_delete
           | :clause_delete
+          | :guard_boolean
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -427,7 +428,17 @@ defmodule Mut.Orchestrator do
 
   defp guard_fallback_results(candidates, oracle, enabled_targets, mutators, source) do
     if :guard in enabled_targets do
-      guard_mutators = Enum.filter(mutators, &target?(&1, :guard))
+      # M90: `:guard_boolean` is an opt-in companion target to `:guard` — it
+      # shares the guard walk + env_context but is gated separately so
+      # adding `GuardBoolean` to `@opt_in` doesn't fire on the default
+      # plan (`:guard` is in `@default_enabled_targets`, `:guard_boolean`
+      # is not). When enabled, its mutators join `guard_mutators`.
+      extra =
+        if :guard_boolean in enabled_targets,
+          do: Enum.filter(mutators, &target?(&1, :guard_boolean)),
+          else: []
+
+      guard_mutators = Enum.filter(mutators, &target?(&1, :guard)) ++ extra
       guard_enabled_results(candidates, oracle, guard_mutators, source)
     else
       {[], Enum.map(candidates, &skip(&1, :guard_engine_disabled, nil))}

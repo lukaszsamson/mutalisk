@@ -15,6 +15,7 @@ defmodule Mut.Mutator do
               | :conditional
               | :statement_delete
               | :clause_delete
+              | :guard_boolean
             ]
   @callback applicable?(Macro.t(), Mut.Context.t()) :: boolean()
   @callback mutate(Macro.t(), Mut.Context.t()) :: [Mut.Mutation.t()]

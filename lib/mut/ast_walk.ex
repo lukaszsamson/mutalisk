@@ -351,6 +351,13 @@ defmodule Mut.AstWalk do
     * M89: clauses whose body is a single `raise`/`throw`/`exit` call (or a
       block whose last statement is one) are skipped — the idiomatic
       "shouldn't-happen" arms drive the dominant equivalent class on plug.
+    * M90 `receive`: the `:do` clauses are mutated; **last** clause and
+      single-clause receives skipped (same conservative discipline as case).
+      The `after:` timeout clause is not touched (single-statement, not a
+      clause list).
+    * M90 `try`: the `:rescue`, `:catch`, and `:else` sections are each
+      mutated independently; per-section last-clause and single-clause
+      exclusion. `:after` is a single body, not touched.
   """
   @spec clause_delete_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
   def clause_delete_candidates(ast, opts) do
@@ -385,6 +392,26 @@ defmodule Mut.AstWalk do
 
   defp cd_visit({:with, meta, args} = node, acc) when is_list(args) do
     {node, emit_with_else_candidates(node, args, meta, acc)}
+  end
+
+  # M90 receive: same shape as cond ({:receive, meta, [[do: clauses, ...]]}).
+  defp cd_visit({:receive, meta, [args]} = node, acc) when is_list(args) do
+    case Keyword.get(args, :do) do
+      clauses when is_list(clauses) ->
+        {node, emit_clause_candidates(node, clauses, :receive, meta, acc)}
+
+      _ ->
+        {node, acc}
+    end
+  end
+
+  # M90 try: {:try, meta, [[do: body, rescue: clauses, catch: clauses, ...]]}.
+  defp cd_visit({:try, meta, [args]} = node, acc) when is_list(args) do
+    {node,
+     acc
+     |> emit_try_section(node, args, :rescue, meta)
+     |> emit_try_section(node, args, :catch, meta)
+     |> emit_try_section(node, args, :else, meta)}
   end
 
   defp cd_visit(node, acc), do: {node, acc}
@@ -431,6 +458,31 @@ defmodule Mut.AstWalk do
   defp cond_true_clause?({:->, _meta, [[cond_expr], _body]}), do: cond_expr == true
   defp cond_true_clause?(_node), do: false
 
+  # M90 try-section emitter. Each section's clauses are filtered independently:
+  # need ≥2 clauses (so deletion of non-last is meaningful and the section
+  # remains structurally valid); last clause excluded (catch-all preserved);
+  # error-only clauses skipped (M89 equiv-reduction hazard).
+  defp emit_try_section(acc, node, args, section, meta) do
+    with clauses when is_list(clauses) <- Keyword.get(args, section),
+         true <- length(clauses) >= 2,
+         span when not is_nil(span) <- block_node_span(meta, acc) do
+      indexed = Enum.with_index(clauses)
+      non_last = Enum.drop(indexed, -1)
+      deletable = Enum.reject(non_last, fn {clause, _i} -> error_only_clause?(clause) end)
+
+      Enum.reduce(deletable, acc, fn {_clause, i}, acc ->
+        cand = build_clause_candidate(node, i, span, try_section_tag(section), acc)
+        %{acc | candidates: [cand | acc.candidates]}
+      end)
+    else
+      _ -> acc
+    end
+  end
+
+  defp try_section_tag(:rescue), do: :try_rescue
+  defp try_section_tag(:catch), do: :try_catch
+  defp try_section_tag(:else), do: :try_else
+
   # M89 equiv-reduction hazard: a clause whose body is a single `raise`/
   # `throw`/`exit` call (the idiomatic error-path arm — "this shouldn't
   # happen", "fall through to crash"). When the test suite does not
@@ -456,6 +508,7 @@ defmodule Mut.AstWalk do
 
   defp section_for(:case), do: :case_do
   defp section_for(:cond), do: :cond_do
+  defp section_for(:receive), do: :receive_do
 
   defp build_clause_candidate(construct_node, index, span, section, acc) do
     {kind_atom, meta, _args} = construct_node

@@ -1,10 +1,10 @@
 defmodule Mut.Mutator.ClauseDelete do
   @moduledoc """
   M87 clause-deletion mutator — extends M81's structural framing to
-  `case` / `cond` / `with` constructs. In each block-form construct, delete one
-  clause; opt-in, fallback-routed (the candidate's whole-node span is
-  re-rendered with the clause removed). Aggressive hazards up front, mirroring
-  M81's discipline:
+  `case` / `cond` / `with` constructs, and (M90) `receive` / `try`. In each
+  block-form construct, delete one clause; opt-in, fallback-routed (the
+  candidate's whole-node span is re-rendered with the clause removed).
+  Aggressive hazards up front, mirroring M81's discipline:
 
     * **`case` / `cond` last clause excluded** — it's the catch-all; deletion
       crashes on no-match.
@@ -20,13 +20,16 @@ defmodule Mut.Mutator.ClauseDelete do
       them, so deletion is observationally equivalent — the dominant
       equivalent class behind plug 26.8% in M88. Excluding them shaves the
       surface's noise without losing real kills.
+    * **M90 `receive` `:do` clauses** — mutated like `case`'s `:do`: skip
+      last clause; skip if only one clause. `after:` timeout is single-
+      statement, not touched.
+    * **M90 `try` sections** — `:rescue`, `:catch`, `:else` each mutated
+      independently with the same per-section last-clause-and-single-clause
+      exclusion. `:after` is a single body, not touched.
 
   Hazards are filtered by the collector
   (`Mut.AstWalk.clause_delete_candidates`); the mutator simply rebuilds the
   construct without the indexed clause, in the section the collector identified.
-
-  *Out of scope:* `receive` / `try` clause deletion (later); graduation flip
-  (M88 decides).
   """
   @behaviour Mut.Mutator
 
@@ -67,7 +70,9 @@ defmodule Mut.Mutator.ClauseDelete do
   def compatible?(%AstCandidate{syntactic_name: :clause_delete}, _site), do: true
   def compatible?(_candidate, _site), do: false
 
-  defp construct_node?({kind, _meta, _args}) when kind in [:case, :cond, :with], do: true
+  defp construct_node?({kind, _meta, _args}) when kind in [:case, :cond, :with, :receive, :try],
+    do: true
+
   defp construct_node?(_node), do: false
 
   # The candidate's ast_path is
@@ -85,8 +90,20 @@ defmodule Mut.Mutator.ClauseDelete do
 
   defp section(%Mut.Context{ast_path: path}) when is_list(path) do
     case Enum.reverse(path) do
-      [_i, section | _rest] when section in [:case_do, :cond_do, :with_else] -> section
-      _ -> nil
+      [_i, section | _rest]
+      when section in [
+             :case_do,
+             :cond_do,
+             :with_else,
+             :receive_do,
+             :try_rescue,
+             :try_catch,
+             :try_else
+           ] ->
+        section
+
+      _ ->
+        nil
     end
   end
 
@@ -123,7 +140,38 @@ defmodule Mut.Mutator.ClauseDelete do
     end
   end
 
+  # M90 receive `do` clauses: shape `{:receive, meta, [[do: clauses, ...]]}`.
+  defp build_mutation({:receive, meta, [kw]} = node, :receive_do, i) when is_list(kw) do
+    case Keyword.get(kw, :do) do
+      clauses when is_list(clauses) and length(clauses) > i ->
+        new_kw = Keyword.put(kw, :do, List.delete_at(clauses, i))
+        mutation(node, {:receive, meta, [new_kw]}, "receive clause #{i}")
+
+      _ ->
+        []
+    end
+  end
+
+  # M90 try sections: shape `{:try, meta, [[do: body, rescue: cls, ...]]}`.
+  defp build_mutation({:try, meta, [kw]} = node, section, i)
+       when section in [:try_rescue, :try_catch, :try_else] and is_list(kw) do
+    section_key = try_section_key(section)
+
+    case Keyword.get(kw, section_key) do
+      clauses when is_list(clauses) and length(clauses) > i ->
+        new_kw = Keyword.put(kw, section_key, List.delete_at(clauses, i))
+        mutation(node, {:try, meta, [new_kw]}, "try #{section_key} clause #{i}")
+
+      _ ->
+        []
+    end
+  end
+
   defp build_mutation(_node, _section, _i), do: []
+
+  defp try_section_key(:try_rescue), do: :rescue
+  defp try_section_key(:try_catch), do: :catch
+  defp try_section_key(:try_else), do: :else
 
   defp mutation(original, mutated, label) do
     [

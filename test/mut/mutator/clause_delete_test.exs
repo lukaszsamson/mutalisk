@@ -165,6 +165,140 @@ defmodule Mut.Mutator.ClauseDeleteTest do
     end
   end
 
+  describe "M90 receive clauses" do
+    @receive_src """
+    defmodule M do
+      def f do
+        receive do
+          :a -> :one
+          :b -> :two
+          msg -> {:other, msg}
+        end
+      end
+    end
+    """
+
+    test "emits one candidate per non-last receive clause" do
+      cands = candidates(@receive_src)
+      assert length(cands) == 2
+
+      sections =
+        Enum.map(cands, fn c -> Enum.take(Enum.reverse(c.ast_path), 2) end)
+
+      assert Enum.all?(sections, fn [_i, section] -> section == :receive_do end)
+      assert Enum.sort(Enum.map(sections, fn [i, _s] -> i end)) == [0, 1]
+    end
+
+    test "skips receive with a single clause" do
+      src = """
+      defmodule M do
+        def f do
+          receive do
+            msg -> msg
+          end
+        end
+      end
+      """
+
+      assert candidates(src) == []
+    end
+
+    test "deletes the indexed receive clause" do
+      [c0, _c1] = candidates(@receive_src)
+      [m] = ClauseDelete.mutate(c0.node, ctx(c0.ast_path))
+      assert {:receive, _, [kw]} = m.mutated_ast
+      clauses = Keyword.get(kw, :do)
+      assert length(clauses) == 2
+      # First remaining clause is the old index-1 (`:b -> :two`).
+      assert [{:->, _, [[:b], :two]} | _] = clauses
+    end
+  end
+
+  describe "M90 try sections" do
+    @try_src """
+    defmodule M do
+      def f do
+        try do
+          do_thing()
+        rescue
+          ArgumentError -> :ae
+          RuntimeError -> :re
+          _ -> :other
+        catch
+          :throw, v -> {:caught, v}
+          :exit, v -> {:exited, v}
+        end
+      end
+    end
+    """
+
+    test "emits per-section candidates with last-clause exclusion" do
+      cands = candidates(@try_src)
+      # rescue: 3 clauses, last excluded -> 2 candidates (indexes 0, 1)
+      # catch: 2 clauses, last excluded -> 1 candidate (index 0)
+      # else: not present -> 0
+      assert length(cands) == 3
+
+      sections =
+        Enum.map(cands, fn c -> Enum.take(Enum.reverse(c.ast_path), 2) end)
+
+      tags = Enum.map(sections, fn [_i, tag] -> tag end) |> Enum.sort()
+      assert tags == [:try_catch, :try_rescue, :try_rescue]
+    end
+
+    test "deletes the indexed rescue clause" do
+      cands = candidates(@try_src)
+
+      rescue_cand =
+        Enum.find(cands, fn c ->
+          [_i, section | _] = Enum.reverse(c.ast_path)
+          section == :try_rescue
+        end)
+
+      [m] = ClauseDelete.mutate(rescue_cand.node, ctx(rescue_cand.ast_path))
+      assert {:try, _, [kw]} = m.mutated_ast
+      rescue_clauses = Keyword.get(kw, :rescue)
+      assert length(rescue_clauses) == 2
+    end
+
+    test "skips try with single-clause rescue" do
+      src = """
+      defmodule M do
+        def f do
+          try do
+            do_thing()
+          rescue
+            _ -> :err
+          end
+        end
+      end
+      """
+
+      assert candidates(src) == []
+    end
+
+    test "covers `try ... else ...` section" do
+      src = """
+      defmodule M do
+        def f(x) do
+          try do
+            x + 1
+          else
+            n when is_integer(n) -> n
+            other -> other
+          end
+        end
+      end
+      """
+
+      cands = candidates(src)
+      # 2 else clauses, last excluded -> 1 candidate
+      assert length(cands) == 1
+      [_i, section | _] = Enum.reverse(hd(cands).ast_path)
+      assert section == :try_else
+    end
+  end
+
   describe "M89 error-only clause hazard" do
     test "skips a case clause whose body is just `raise`" do
       src = """
