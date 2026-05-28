@@ -9,7 +9,7 @@ WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban|absinthe] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -196,6 +196,14 @@ case "$TARGET" in
     REPO="https://github.com/sorentwo/oban.git"
     REF="${BENCH_REF:-v2.20.1}"
     SHA="${BENCH_SHA:-23fa8176b3586ca84f5859793739fad798e69d2b}"
+    ;;
+  absinthe)
+    # M82: wired for Pin + FunctionReplace exercise (density: pins=17,
+    # fnrepl=54). Standalone — tests use plain ExUnit, deps = nimble_parsec,
+    # telemetry, dataloader/decimal optional. Pinned at v1.7.10.
+    REPO="https://github.com/absinthe-graphql/absinthe.git"
+    REF="${BENCH_REF:-v1.7.10}"
+    SHA="${BENCH_SHA:-28aa30673a60a30cece982099f03e4d458a873ac}"
     ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
