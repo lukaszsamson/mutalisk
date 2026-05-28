@@ -9,7 +9,7 @@ WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban|absinthe] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban|absinthe|phoenix|phoenix_live_view|bandit] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -204,6 +204,34 @@ case "$TARGET" in
     REPO="https://github.com/absinthe-graphql/absinthe.git"
     REF="${BENCH_REF:-v1.7.10}"
     SHA="${BENCH_SHA:-28aa30673a60a30cece982099f03e4d458a873ac}"
+    ;;
+  phoenix)
+    # M91: headline matrix addition — the framework. Density check on the
+    # corpus mirror: FunctionReplace=27, NegateConditional≈hundreds-of
+    # if/unless branches, Case≈87 case sites — broad exercise of the
+    # v1.23/v1.24 opt-in surfaces. Tests start plug_cowboy + endpoints
+    # locally, no DB or external network required.
+    REPO="https://github.com/phoenixframework/phoenix.git"
+    REF="${BENCH_REF:-v1.8.1}"
+    SHA="${BENCH_SHA:-c86dd55d242f2f9e49054d28af9745a58748c6b0}"
+    ;;
+  phoenix_live_view)
+    # M91: second headline addition. Densest by FunctionReplace measure
+    # (36 sites) of the untried set; large NegateConditional + Case
+    # surface; macro-heavy DSL exercises codegen-context exclusion.
+    # Tests spin up a local Phoenix.Endpoint, no DB.
+    REPO="https://github.com/phoenixframework/phoenix_live_view.git"
+    REF="${BENCH_REF:-v1.0.2}"
+    SHA="${BENCH_SHA:-f73eac3e388eda4677025f0cb374c7d804f53f74}"
+    ;;
+  bandit)
+    # M91: third addition picked from the corpus by clean-test-suite
+    # heuristic (bandit's tests stay in-process, no DB / no external
+    # services; ExUnit-native). Lighter mutation surface than Phoenix/LV
+    # but adds independent breadth.
+    REPO="https://github.com/mtrudel/bandit.git"
+    REF="${BENCH_REF:-1.8.0}"
+    SHA="${BENCH_SHA:-d15dd87082a0cc48530b5ad71f5e270fd94c69c9}"
     ;;
   *)
     printf 'unsupported target: %s\n' "$TARGET" >&2
@@ -412,6 +440,38 @@ case "$TARGET" in
     # mutalisk defect.
     printf 'oban is environment-blocked (Postgres+MySQL+SQLite infra; MySQL absent); see M59 decision doc\n' >&2
     exit 65
+    ;;
+  phoenix)
+    # M91: phoenix ships a `.tool-versions` (like credo) — strip so the
+    # session toolchain runs. test_helper starts plug_cowboy (a dep, OK).
+    # Pin seed for repro across runs.
+    rm -f "$WORK_DIR/.tool-versions"
+    perl -pi -e 's/ExUnit\.start\(([^)]*)\)/ExUnit.start($1, seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  phoenix_live_view)
+    # M91: LV pins its own toolchain; strip. Tests start a local Endpoint.
+    # Three baseline-failing tests are env-drift on Elixir 1.19 (HTML
+    # formatter output drift; struct-update typing violations in
+    # LiveView setup helpers; calendar form serialisation drift). Tag
+    # :env_drift and exclude — mutation surface (lib/) is unaffected,
+    # analogous to ecto's regex drift and timex's microsecond drift.
+    rm -f "$WORK_DIR/.tool-versions"
+    perl -i -pe 's/^(\s*)(test "does not format when empty")/$1\@tag :env_drift\n$1$2/' "$WORK_DIR/test/phoenix_live_view/html_formatter_test.exs"
+    perl -i -pe 's/^(\s*)(test "live render with socket.assigns")/$1\@tag :env_drift\n$1$2/' "$WORK_DIR/test/phoenix_live_view/integrations/live_view_test.exs"
+    perl -i -pe 's/^(\s*)(test "fill in calendar types")/$1\@tag :env_drift\n$1$2/' "$WORK_DIR/test/phoenix_live_view/integrations/elements_test.exs"
+    perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(exclude: [:env_drift], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
+    ;;
+  bandit)
+    # M91: bandit's in-process tests run cleanly; the `:slow` exclusion
+    # bandit ships with (h2spec via docker, websocket autobahn) MUST be
+    # preserved — those need infra we don't host. Keep :slow, add
+    # :otp_ssl_cipher_drift for the one TLS cipher-reporting test that
+    # asserts on Erlang/OTP's `ssl:connection_information` keys (the
+    # `:ciphers` key isn't in session-cached connections on OTP 27/28).
+    # Mutation surface unaffected.
+    rm -f "$WORK_DIR/.tool-versions"
+    perl -i -pe 's/^(\s*)(test "reading ssl data")/$1\@tag :otp_ssl_cipher_drift\n$1$2/' "$WORK_DIR/test/bandit/http2/plug_test.exs"
+    perl -pi -e 's/ExUnit\.start\(exclude: :slow\)/ExUnit.start(exclude: [:slow, :otp_ssl_cipher_drift], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
 esac
 
