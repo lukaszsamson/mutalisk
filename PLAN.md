@@ -4205,6 +4205,229 @@ per-mutator equivalent-rate (M59 tooling); the M62 sharpened gate.
   replacement; case-clause deletion.
 - EnvWalker consolidation implementation; wrapper guard schemata.
 
+# v1.24 milestones (reliability, schema-routed perf, the next mutator)
+
+v1.23 closed the catalogue queue and graduated Pin (third new
+default-on graduation since M46). The user chose v1.24 = reliability
+fix + the *other* big perf bet (schema-route fallback,
+measurement-gated) + the next textbook mutator (case-clause
+deletion). Incremental cross-run history is explicitly held one
+more cycle as the **v1.25 candidate** — the bet that warrants its
+own focused release rather than competing with three other tracks.
+
+Two of the three workstreams hang on measurements not yet run:
+- The fallback-share number that gates M86's scope (v1.8's
+  "non-dominant" verdict is 16 releases old; the catalogue has
+  grown from ~6 to ~24 mutators).
+- The concurrency-flake reproduction needed to fix it at root.
+
+v1.24's spike-first discipline (M84 reliability diagnosis, M85
+fallback measurement) is the gate against committing
+implementation on assumption.
+
+**Defaults:** any mutator that moves from fallback to schema in
+M86 carries an explicit one-time stable-id migration for *that
+mutator's* IDs (mirrors M52's literal migration). Non-moved
+mutator IDs MUST stay byte-identical across the corpus. M88 may
+graduate M87's ClauseDelete per the M62 gate; no graduation
+pre-committed.
+
+Five milestones. M84 is reliability; M85 a measurement spike
+scoping M86; M86 the schema-routing implementation; M87 the new
+mutator (independent of M84–M86); M88 the data-gated validation
++ decisions.
+
+## v1.24 scope (committed)
+
+**M84 — Concurrency reliability: BEAM-spawn flake fix + worker pool tightening.**
+
+*Goal:* Eliminate the v1.23-surfaced `--concurrency 4` startup
+flake at root and tighten worker-pool contention points.
+
+*Inputs:* the v1.23 ops note ("Failed to load module 'elixir'"
+at `--concurrency 4`); `lib/mut/sandbox.ex`,
+`lib/mut/sandbox_queue.ex`, `lib/mut/worker.ex` (port spawn),
+`bin/verify`.
+
+*Deliverables:*
+- Reproduce the flake deterministically (e.g. concurrent
+  spawn-storm against a fresh sandbox build). Likely a
+  code-path-loading race or shared-ebin/build-dir contention on
+  concurrent BEAM startup.
+- Fix at root (serialize/sequence the contended init step;
+  prefer correctness over speculation about cause).
+- Tighten worker pool: review sandbox startup ordering, port
+  spawn pacing, ebin-load synchronization for the contention
+  points the reproduction surfaces.
+
+*Acceptance:*
+- The flake reproduces pre-fix and not at all post-fix across
+  N runs (document N).
+- `--concurrency 4` outcomes match `--concurrency 1` on the
+  matrix (kill counts identical).
+- `bin/verify` green; no kill-count regression.
+
+*Out of scope:* New concurrency features; scheduler tuning
+beyond the contention points the reproduction surfaces.
+
+**M85 — Fallback-share measurement spike.**
+
+*Goal:* Cheap measurement that gates M86's scope — answer
+"which mutators dominate fallback wall-clock today?"
+
+*Inputs:* `bench/run.sh` + the OSS matrix (post-M84);
+`docs/decisions/M52_literal_schema_routing.md` (M52 schema-routed
+literals, perf delta documented there); v1.8's wrapper-guard
+rejection (16 releases old; the catalogue context has changed).
+
+*Deliverables:*
+- Per-target at `--concurrency 1` (post-M84): fallback wall-clock
+  %, schema wall-clock %, per-mutator fallback wall-clock
+  contribution.
+- Identify the dominant fallback mutators (guards? variables?
+  NegateConditional? StatementDelete? attribute literals?).
+- `docs/spikes/M85_fallback_share.md`: data + explicit M86 scope
+  recommendation (which to schema-route, in what order).
+- If fallback is still non-dominant overall (v1.8's verdict
+  holds), the recommendation is to redirect M86 rather than
+  commit on assumption — a real spike outcome, not a failure.
+
+*Acceptance:*
+- Spike doc committed with measurement + recommendation.
+- No production code beyond measurement instrumentation that
+  ships with the spike.
+- `bin/verify` green.
+
+**M86 — Schema-route the dominant fallback mutators.**
+
+*Goal:* Move the M85-identified dominant fallback mutators onto
+the schema path; eliminate their per-mutant recompile cost.
+
+*Inputs:* M85 scope recommendation; `Mut.SchemaPlacer`,
+`Mut.SchemaBuild`; `docs/decisions/M52_*` (the literal migration
+as the migration template); the v1.8 wrapper-guard-schemata
+rejection design notes.
+
+*Deliverables:*
+- Implementation scoped by M85. **Likely shape** (final scope is
+  M85-driven):
+  - **Wrapper-guard schemata** if guards dominate (the v1.8
+    design, re-evaluated against current data).
+  - Schema routing for body-level structural mutators
+    (NegateConditional, StatementDelete) where their AST shape
+    permits expression-position case-gating.
+  - Other dominant mutators per M85.
+- Per-moved-mutator **one-time stable-id migration** (documented;
+  mirrors M52's literal migration). Non-moved mutator IDs must
+  stay byte-identical.
+- Hard byte-identity gate harness applied: moved mutators are
+  the only IDs that change; everything else verified unchanged
+  on demo_app + Decimal + the matrix.
+
+*Acceptance:*
+- Moved mutators execute via the schema build (verified by
+  build-artifact + worker-path inspection).
+- Non-moved IDs byte-identical across the corpus.
+- Documented wall-clock delta on Decimal + plug
+  (fallback → schema).
+- `bin/verify` green.
+
+*Out of scope:* Mutators M85 says don't dominate; new mutator
+behavior.
+
+**M87 — `Mut.Mutator.ClauseDelete` — case / cond / with clause deletion.**
+
+*Goal:* The next textbook high-yield mutator family, direct
+extension of M81's structural framing.
+
+*Inputs:* HLD v1.24 §M87; `Mut.EnvWalker` (case/cond/with handling
+— verify the walker covers all three); `Mut.Mutator.StatementDelete`
+as the structural-mutator template; the M81 hazard discipline.
+
+*Deliverables:*
+- `Mut.Mutator.ClauseDelete`: in a `case`/`cond`/`with`, delete
+  one clause.
+- Hazards (skip):
+  - **last clause** of a `case`/`cond` (no-match crash).
+  - **`true ->` cond fallback** (guaranteed crash).
+  - **structurally invalid** outcomes (e.g. removing the only
+    `else` of a `with`).
+- Routing per M85/M86 findings — likely fallback initially;
+  schema if AST shape permits within M86's scope.
+- Opt-in. Aggressive hazard gating up front (matches StatementDelete's
+  noise discipline).
+
+*Acceptance:*
+- Per-construct unit tests (`case`, `cond`, `with`).
+- Invalid rate measured and gated to a documented floor.
+- Zero stable-id churn for existing (non-moved-by-M86) mutants.
+- `bin/verify` green.
+
+*Out of scope:* Graduation flip (M88). `receive`/`try` clauses
+(extension; later).
+
+**M88 — Validation matrix + graduation decisions + BENCHMARKS.**
+
+*Goal:* Validate the post-M86 catalogue + M87 surface and decide
+defaults.
+
+*Inputs:* M86 routing changes; M87 ClauseDelete; per-mutator
+equivalent-rate (M59 tooling); the M62 sharpened gate; the v1.24
+flake fix.
+
+*Deliverables:*
+- OSS-matrix run of the post-M86 catalogue + ClauseDelete.
+- `docs/decisions/M88_clause_delete.md`: keep_opt_in / graduate
+  per M62.
+- Opportunistic re-eval of NegateConditional / StatementDelete
+  (post-M86 routing may shift wall-clock characteristics, but
+  equivalence/invalid hazards themselves are v1.25 work — M88
+  only graduates them if they happen to clear).
+- FunctionReplace third-target only if M82's env blockers turn
+  out to be resolvable (opportunistic, not gating).
+- BENCHMARKS v1.24 section with the M85 measurement + M86 perf
+  delta + the flake-fix outcome.
+
+*Acceptance:*
+- Decisions committed; data-gated (graduate only what clears).
+- Non-moved mutator stable IDs byte-identical (the M86 invariant
+  re-asserted here).
+- `bin/verify` green.
+
+*Out of scope:* Surfaces that don't clear (stay opt-in; v1.25
+hazard work).
+
+## v1.24 delivery status (2026-05-28: DELIVERED — M86 redirected per the M85 spike)
+
+- **M84** ✓ — BEAM-startup retry. `Mut.ChildProcess.run` gains `:retry_on` + `:max_retries`; `Mut.Recompile` wires the three v1.23-observed transient signatures with max_retries=2. Never retries on success or arbitrary failure. Flake did not deterministically reproduce in isolation, so the fix is the defensive retry layer.
+- **M85** ✓ — Fallback-share spike. Default-plan runs on plug (43.0% fallback share) + decimal (35.5%) showed dominant fallback contributors (guards, pattern literals) are intrinsically not schema-routable by AST shape. Verdict: **redirect M86**. `docs/spikes/M85_fallback_share.md` + `bench/results/m85/per_mutator_wall.txt`.
+- **M86** ✓ (redirected) — `bench/cross_run.exs` cross-run delta tool. Foundation for v1.25's incremental cross-run history; smoke-verified on existing castore reports (6/6 ids unchanged, real per-mutator wall delta). No engine change, no IDs migrated → "non-moved IDs byte-identical" invariant trivially preserved.
+- **M87** ✓ — `Mut.Mutator.ClauseDelete` for case / cond / with(`else`). Opt-in `:clause_delete`, fallback-routed. Hazards filtered in the collector (last-clause + cond `true ->` + with `<-` chain + single-`else` with). Smoke: 4 mutants on case+cond all killed, 0 invalid.
+- **M88** ✓ — Matrix: jason 80.0%/20.0%/0%, plug 73.2%/26.8%/0%, decimal 82.5%/17.5%/0%. **ClauseDelete → keep_opt_in** (0% invalid everywhere — hazards clean; plug equiv 26.8% fails the gate even with ≤2pp tolerance). NegateConditional/StatementDelete/FunctionReplace opportunistic re-eval not triggered (M86 redirected; M82 blockers unchanged). `docs/decisions/M88_clause_delete.md` + BENCHMARKS v1.24.
+
+## v1.24 horizon (not v1.24 scope)
+
+- **Incremental cross-run history** — the v1.25 candidate;
+  closing the catalogue queue + landing schema-routing creates
+  the clean slot for it.
+- **NegateConditional both-branch equivalence hazard,
+  StatementDelete invalid-hazard refinement, FunctionReplace
+  third target** — v1.25 maturation work (M88 only opportunistic).
+- **`receive` / `try` clause mutators** — extends M87.
+- **zorbito full worker run** — still infra-deferred.
+
+## Explicitly NOT v1.24
+
+- Incremental cross-run history (held; v1.25 candidate).
+- v1.23-carried mutator-hazard refinements (NegateConditional
+  both-branch, StatementDelete invalid hazards, FunctionReplace
+  third target) — v1.25.
+- zorbito full worker run; umbrella work of any kind.
+- New mutator families beyond ClauseDelete.
+- Tuple/list pattern-arity; function-call deletion /
+  return-value replacement.
+- EnvWalker consolidation implementation.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

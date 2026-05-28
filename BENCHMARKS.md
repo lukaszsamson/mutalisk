@@ -1,5 +1,66 @@
 # Mutalisk Benchmarks
 
+## v1.24 reliability + measurement-redirected perf + ClauseDelete (M84–M88, 2026-05-28)
+
+### M84 BEAM-startup retry
+
+Defensive retry-on-transient in `Mut.ChildProcess.run` (new `:retry_on` +
+`:max_retries`), wired from `Mut.Recompile.recompile` for the three v1.23-
+observed BEAM-startup signatures (`"Failed to load module 'elixir'"` /
+`"Runtime terminating during boot"` / `"Crash dump"`). Never retries on
+success or on arbitrary failure (would mask real bugs). The flake did not
+reproduce in isolation (parallel `elixir --eval` storms at c=8 / c=32 ran
+clean over 80-storm iterations), so the fix is the defensive layer rather
+than a root-cause repro.
+
+### M85 fallback-share spike
+
+Default plan, `--selection static --concurrency 1 --max-mutants 60`:
+
+| target | schema_workers_ms | fallback_workers_ms | total_ms | fallback share |
+|---|--:|--:|--:|--:|
+| plug | 59 105 | 44 644 | 113 551 | **43.0%** |
+| decimal | 61 101 | 33 678 | 102 378 | 35.5% |
+
+Dominant fallback contributors are intrinsically not schema-routable
+(guard `when` clauses don't admit a runtime `case` wrap — v1.8's verdict
+holds; pattern literals are compile-time matches with no runtime wrap).
+Verdict: **redirect M86**. See `docs/spikes/M85_fallback_share.md` +
+`bench/results/m85/per_mutator_wall.txt`.
+
+### M86 redirected → cross-run delta tool
+
+Per the M85 spike, schema-routing-as-scoped would have ≈ zero default-plan
+benefit. M86 redirects to `bench/cross_run.exs` — a pure analysis tool
+that takes two Stryker JSON reports and emits score delta + status
+transitions + stable-id sets + per-mutator wall delta. Foundation for
+v1.25's incremental cross-run history candidate.
+
+### M87 ClauseDelete (new opt-in)
+
+`Mut.Mutator.ClauseDelete` — case / cond / with(`else`) clause removal.
+Opt-in `:clause_delete`, fallback-routed. Hazards filtered in the
+collector: last-clause excluded (case/cond catch-all), `true ->`
+excluded (cond fallback), with `<-` chain skipped, with single-`else`
+skipped.
+
+### M88 graduation re-eval
+
+| target | n | kill% | equiv% | invalid% |
+|---|--:|--:|--:|--:|
+| jason | 45 | 80.0 | 20.0 | 0.0 |
+| plug | 175 | 73.2 | 26.8 | 0.0 |
+| decimal | 58 | 82.5 | 17.5 | 0.0 |
+
+**ClauseDelete → keep_opt_in.** 0% invalid everywhere (M87 hazards work
+cleanly); kill 73–83% comfortably clears the ≥60% bar; **plug equiv 26.8%
+fails** even with the ≤2pp single-target tolerance (admits ≤22%). The
+miss is structural (covered-but-suite-equivalent — deletion of a clause
+the tests rarely hit), not a quality defect. See
+`docs/decisions/M88_clause_delete.md`. NegateConditional / StatementDelete
+re-eval not triggered (M86 redirected; their routing characteristics
+unchanged). FunctionReplace third-target blockers from M82 still in place.
+
 ## v1.23 close the queue (M80–M83, 2026-05-28)
 
 NegateConditional hazards, statement-deletion (M81), matrix breadth (M82),
