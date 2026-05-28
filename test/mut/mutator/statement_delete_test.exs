@@ -82,6 +82,44 @@ defmodule Mut.Mutator.StatementDeleteTest do
       [c] = candidates(src)
       assert List.last(c.ast_path) == 0
     end
+
+    test "M89 unused-binding hazard: skips deletion when stmt is the only reader of a prior binding" do
+      src = """
+      defmodule Q do
+        def h(a) do
+          x = compute(a)
+          IO.puts(x)
+          a + 1
+        end
+      end
+      """
+
+      # `x = compute(a)` (index 0): later stmts don't read `x` directly — but
+      # IO.puts(x) reads it. Deleting IO.puts(x) (index 1) would orphan the
+      # `x` binding -> unused variable warning (warnings-as-errors).
+      # Index 0 itself: deleting `x = compute(a)` orphans `IO.puts(x)`'s read
+      # (existing orphan-binding hazard).
+      # Both non-last stmts gated -> no candidates.
+      assert candidates(src) == []
+    end
+
+    test "M89 unused-binding hazard allows when later stmt also reads the binding" do
+      src = """
+      defmodule R do
+        def h(a) do
+          x = compute(a)
+          _ = log(x)
+          x + 1
+        end
+      end
+      """
+
+      # `x = compute(a)` (index 0): later `x + 1` reads x -> orphan hazard.
+      # `_ = log(x)` (index 1): not a binding; reads x; later `x + 1` also
+      # reads x -> NOT a unused-binding hazard. Should be emitted.
+      [c] = candidates(src)
+      assert List.last(c.ast_path) == 1
+    end
   end
 
   describe "StatementDelete.mutate" do

@@ -138,4 +138,54 @@ defmodule Mut.Mutator.NegateConditionalTest do
       assert mutate_src(src) == ["negate", "force true", "force false"]
     end
   end
+
+  describe "M89 symmetric-branches hazard" do
+    test "structurally identical branches emit no mutations" do
+      src = """
+      defmodule M do
+        def f(x) do
+          if x > 0 do
+            do_thing(x)
+          else
+            do_thing(x)
+          end
+        end
+      end
+      """
+
+      assert mutate_src(src) == []
+    end
+
+    test "trivially symmetric (same literal) emits no mutations" do
+      src = """
+      defmodule M do
+        def f(x) do
+          if x do
+            :ok
+          else
+            :ok
+          end
+        end
+      end
+      """
+
+      assert mutate_src(src) == []
+    end
+
+    test "different branches still emit all three" do
+      src = """
+      defmodule M do
+        def f(x) do
+          if x do
+            do_thing(x)
+          else
+            do_other(x)
+          end
+        end
+      end
+      """
+
+      assert mutate_src(src) == ["negate", "force true", "force false"]
+    end
+  end
 end

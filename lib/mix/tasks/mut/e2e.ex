@@ -146,10 +146,32 @@ defmodule Mix.Tasks.Mut.E2e do
     selection = coverage.report["mutalisk"]["selection"]
     phases = coverage.report["mutalisk"]["phase_timings"]
 
-    if selection["mode"] != "coverage_with_static_fallback" do
-      raise "coverage selection mode mismatch: #{inspect(selection["mode"])}"
-    end
+    assert_coverage_selection_mode!(selection["mode"])
+    assert_coverage_phase_timings!(selection, phases)
+  end
 
+  # M89: accept either "coverage_with_static_fallback" (the requested mode) or
+  # "downgraded_to_static" (M64's pathological-coverage fallback when wall_ms
+  # exceeds the 10s floor on a small but jittery suite). The downgrade is the
+  # M64 mechanism working as designed — coverage did run (it just took too
+  # long, hence the wall_ms/phase_timing assertions still apply); the
+  # stable-id set drift check in the caller is what protects correctness in
+  # either mode. Strict equality would oscillate with sandbox jitter; this
+  # passed for many releases by luck, the v1.24 flake surfaced it.
+  defp assert_coverage_selection_mode!("coverage_with_static_fallback"), do: :ok
+
+  defp assert_coverage_selection_mode!("downgraded_to_static") do
+    IO.puts(
+      "mut.e2e coverage: M64 fallback engaged (coverage downgraded_to_static; " <>
+        "stable-id sets verified identical above)"
+    )
+  end
+
+  defp assert_coverage_selection_mode!(other) do
+    raise "coverage selection mode mismatch: #{inspect(other)}"
+  end
+
+  defp assert_coverage_phase_timings!(selection, phases) do
     unless selection["coverage_collection_wall_ms"] > 0 do
       raise "coverage collection wall time missing from selection metrics"
     end

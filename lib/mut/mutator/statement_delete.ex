@@ -16,6 +16,10 @@ defmodule Mut.Mutator.StatementDelete do
     * **Orphan-binding hazard.** If the deleted statement binds a name (via
       `=`) that any later statement reads, the body would no longer compile
       (undefined variable). Skip.
+    * **Unused-binding hazard (M89).** If a prior statement binds a name and
+      the candidate statement is its only reader (no later reader), deletion
+      makes the prior binding unused — under `--warnings-as-errors` this is
+      the Invalid class. Skip.
 
   Fallback-routed: the candidate's `source_span` is the whole `def` node
   (block-form, `:end` metadata); the mutation re-emits the def with the

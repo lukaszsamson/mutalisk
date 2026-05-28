@@ -209,11 +209,19 @@ defmodule Mut.AstWalk do
     non_last = Enum.drop(indexed, -1)
 
     Enum.reduce(non_last, acc, fn {stmt, i}, acc ->
-      if orphan_binding_hazard?(stmt, Enum.drop(stmts, i + 1)) do
-        acc
-      else
-        cand = build_sd_candidate(def_node, i, span, acc)
-        %{acc | candidates: [cand | acc.candidates]}
+      before = Enum.take(stmts, i)
+      later = Enum.drop(stmts, i + 1)
+
+      cond do
+        orphan_binding_hazard?(stmt, later) ->
+          acc
+
+        unused_binding_hazard?(stmt, before, later) ->
+          acc
+
+        true ->
+          cand = build_sd_candidate(def_node, i, span, acc)
+          %{acc | candidates: [cand | acc.candidates]}
       end
     end)
   end
@@ -300,6 +308,31 @@ defmodule Mut.AstWalk do
     Enum.uniq(names)
   end
 
+  # M89 unused-binding hazard: deleting `stmt` would leave one of the
+  # preceding `=`-bound names with no readers — Elixir emits an
+  # "unused variable" warning, which under `--warnings-as-errors` (the
+  # default `bin/verify` lint posture plus most prod compile flags) is
+  # a compile error, surfacing as the Invalid class on plug_crypto.
+  # The analog of the orphan-binding hazard, in the other direction:
+  # orphan = "stmt binds X, later reads it"; unused = "earlier bound X,
+  # stmt reads it, no other reader".
+  #
+  # Conservative shape: gather all `=`-LHS-bound names from `before` (the
+  # existing collect_lhs_bindings already walks a list-of-stmts via
+  # Macro.prewalk); gather reads from `stmt` and `later`. If any binding's
+  # only reader is in `stmt` (the candidate for deletion), gate.
+  defp unused_binding_hazard?(stmt, before, later) do
+    bound = collect_lhs_bindings(before)
+
+    if bound == [] do
+      false
+    else
+      stmt_reads = collect_var_reads([stmt])
+      later_reads = collect_var_reads(later)
+      Enum.any?(bound, fn name -> name in stmt_reads and name not in later_reads end)
+    end
+  end
+
   @doc """
   M87: clause-delete candidates for `case`/`cond`/`with`. Emits one candidate per
   deletable clause; the candidate's node is the whole construct (block-form,
@@ -315,6 +348,9 @@ defmodule Mut.AstWalk do
       noise (M81-territory) plus structurally invalid when the binding is read
       in `do`. Single-else-clause withs are excluded (would remove the only
       `else`).
+    * M89: clauses whose body is a single `raise`/`throw`/`exit` call (or a
+      block whose last statement is one) are skipped — the idiomatic
+      "shouldn't-happen" arms drive the dominant equivalent class on plug.
   """
   @spec clause_delete_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
   def clause_delete_candidates(ast, opts) do
@@ -358,6 +394,7 @@ defmodule Mut.AstWalk do
          indexed = Enum.with_index(clauses),
          non_last = Enum.drop(indexed, -1),
          deletable = filter_deletable(non_last, kind),
+         deletable = Enum.reject(deletable, fn {clause, _i} -> error_only_clause?(clause) end),
          true <- deletable != [] do
       Enum.reduce(deletable, acc, fn {_clause, i}, acc ->
         cand = build_clause_candidate(node, i, span, section_for(kind), acc)
@@ -374,7 +411,10 @@ defmodule Mut.AstWalk do
          true <- Keyword.keyword?(last),
          else_clauses when is_list(else_clauses) <- Keyword.get(last, :else),
          true <- length(else_clauses) >= 2 do
-      Enum.reduce(Enum.with_index(else_clauses), acc, fn {_clause, i}, acc ->
+      indexed = Enum.with_index(else_clauses)
+      deletable = Enum.reject(indexed, fn {clause, _i} -> error_only_clause?(clause) end)
+
+      Enum.reduce(deletable, acc, fn {_clause, i}, acc ->
         cand = build_clause_candidate(node, i, span, :with_else, acc)
         %{acc | candidates: [cand | acc.candidates]}
       end)
@@ -390,6 +430,29 @@ defmodule Mut.AstWalk do
 
   defp cond_true_clause?({:->, _meta, [[cond_expr], _body]}), do: cond_expr == true
   defp cond_true_clause?(_node), do: false
+
+  # M89 equiv-reduction hazard: a clause whose body is a single `raise`/
+  # `throw`/`exit` call (the idiomatic error-path arm — "this shouldn't
+  # happen", "fall through to crash"). When the test suite does not
+  # exercise this pattern, deletion produces no observable behaviour
+  # change — the dominant equivalent class behind plug 26.8% in M88.
+  # Skip these. A clause whose body actually computes a value is kept;
+  # only the pure-raise form is filtered.
+  defp error_only_clause?({:->, _meta, [_patterns, body]}) do
+    raises_only?(body)
+  end
+
+  defp error_only_clause?(_node), do: false
+
+  defp raises_only?({:__block__, _, stmts}) when is_list(stmts) do
+    case List.last(stmts) do
+      nil -> false
+      last -> raises_only?(last)
+    end
+  end
+
+  defp raises_only?({name, _meta, _args}) when name in [:raise, :throw, :exit], do: true
+  defp raises_only?(_node), do: false
 
   defp section_for(:case), do: :case_do
   defp section_for(:cond), do: :cond_do

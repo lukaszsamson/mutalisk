@@ -164,4 +164,70 @@ defmodule Mut.Mutator.ClauseDeleteTest do
       refute ClauseDelete.applicable?({:+, [], [1, 2]}, ctx([0]))
     end
   end
+
+  describe "M89 error-only clause hazard" do
+    test "skips a case clause whose body is just `raise`" do
+      src = """
+      defmodule M do
+        def f(x) do
+          case x do
+            :ok -> handle()
+            :err -> raise "bad"
+            _ -> :fallback
+          end
+        end
+      end
+      """
+
+      # 3 clauses; last excluded (the `_ -> :fallback`); the `raise`-only
+      # arm at index 1 is the M89 hazard. Only index 0 (`:ok -> handle()`)
+      # remains deletable.
+      cands = candidates(src)
+      assert length(cands) == 1
+      [idx, section | _] = Enum.reverse(hd(cands).ast_path)
+      assert section == :case_do and idx == 0
+    end
+
+    test "skips a with-else clause whose body is just `throw`" do
+      src = """
+      defmodule M do
+        def f(x) do
+          with {:ok, v} <- find(x),
+               {:ok, w} <- check(v) do
+            {v, w}
+          else
+            {:error, :not_found} -> throw(:not_found)
+            other -> {:err, other}
+          end
+        end
+      end
+      """
+
+      # 2 else-clauses; index 0 is `throw(...)`-only (skipped); index 1 stays.
+      cands = candidates(src)
+      assert length(cands) == 1
+      [idx, section | _] = Enum.reverse(hd(cands).ast_path)
+      assert section == :with_else and idx == 1
+    end
+
+    test "non-error clauses with a block body still emitted" do
+      src = """
+      defmodule M do
+        def f(x) do
+          case x do
+            :ok ->
+              log_it()
+              :handled
+            _ -> :other
+          end
+        end
+      end
+      """
+
+      # 2 clauses; last excluded; index 0 body is a block ending in `:handled`
+      # — NOT a raise/throw/exit, so NOT skipped.
+      cands = candidates(src)
+      assert length(cands) == 1
+    end
+  end
 end

@@ -27,7 +27,18 @@ defmodule Mut.Mutator.NegateConditional do
       dead-branch equivalence on jason/decimal/plug_crypto in M79.
       Symmetric on `unless`: `force true` is the no-else equivalent.
 
-  `negate` is always emitted. The two `force` directions are gated.
+  **M89 hazard rule (added on the v1.24 carry):**
+
+    * **Symmetric-branches hazard.** When both branches are structurally
+      identical (`if cond do A else A end` after stripping metadata),
+      every mutation is observationally equivalent to the original:
+      `negate` still picks A; `force true`/`false` both pick A. The
+      surface generates pure noise. Skip all three. This caught the
+      jason survivors that the M80 no-else gate did not — symmetric
+      branches that compute the same observable.
+
+  `negate` is always emitted (subject to symmetric-branches gate).
+  The two `force` directions are gated.
   """
   @behaviour Mut.Mutator
 
@@ -80,14 +91,22 @@ defmodule Mut.Mutator.NegateConditional do
     #     skips the body and yields nil; happy-path tests rarely exercise
     #     the body, so this becomes the dominant equivalent class
     #     (25–52% on jason/decimal/plug_crypto). Symmetric on `unless`.
-    candidates = [
-      {"negate", {:not, [], [cond]}, true},
-      {"force true", true, not binds and not unless_no_else?(name, has_else)},
-      {"force false", false, not binds and not if_no_else?(name, has_else)}
-    ]
+    #
+    # M89 hazard (symmetric-branches): if both branches are structurally
+    # identical after metadata stripping, all three mutations are
+    # equivalent to the original — surface generates pure noise. Skip all.
+    if symmetric_branches?(kw) do
+      []
+    else
+      candidates = [
+        {"negate", {:not, [], [cond]}, true},
+        {"force true", true, not binds and not unless_no_else?(name, has_else)},
+        {"force false", false, not binds and not if_no_else?(name, has_else)}
+      ]
 
-    for {label, replacement, emit?} <- candidates, emit? do
-      mutation(node, name, replacement, label)
+      for {label, replacement, emit?} <- candidates, emit? do
+        mutation(node, name, replacement, label)
+      end
     end
   end
 
@@ -123,4 +142,30 @@ defmodule Mut.Mutator.NegateConditional do
 
     found?
   end
+
+  # M89 symmetric-branches hazard: branches structurally identical after
+  # metadata stripping. Conservative on shape: needs an `:else` branch to be
+  # comparable at all (no-else handled by the dead-branch gate). Compares
+  # the do-branch's body to the else-branch's body via Macro.escape of an
+  # untyped AST round-trip — but the cheap form is just structural equality
+  # on the `:do` and `:else` values after pruning metadata leaves.
+  defp symmetric_branches?(kw) do
+    with do_branch when not is_nil(do_branch) <- Keyword.get(kw, :do),
+         else_branch when not is_nil(else_branch) <- Keyword.get(kw, :else) do
+      strip_meta(do_branch) == strip_meta(else_branch)
+    else
+      _ -> false
+    end
+  end
+
+  # Recursively normalize AST by clearing metadata on every {atom, meta, args}
+  # tuple, so structurally-identical-but-positionally-different branches
+  # compare equal. Leaves (literals, vars-with-context atoms) pass through.
+  defp strip_meta({form, _meta, args}) when is_atom(form) or is_tuple(form) do
+    {strip_meta(form), [], strip_meta(args)}
+  end
+
+  defp strip_meta(list) when is_list(list), do: Enum.map(list, &strip_meta/1)
+  defp strip_meta({a, b}), do: {strip_meta(a), strip_meta(b)}
+  defp strip_meta(other), do: other
 end

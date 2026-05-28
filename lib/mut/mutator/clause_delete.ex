@@ -14,6 +14,12 @@ defmodule Mut.Mutator.ClauseDelete do
       step's name would be read in `do`); only the `else` clauses are mutated.
     * **`with` single-`else`-clause skipped** — deletion would remove the only
       `else` (structurally invalid).
+    * **M89 error-only clauses skipped** — clauses whose body is a single
+      `raise`/`throw`/`exit` (or a block whose last statement is one) are
+      the idiomatic "shouldn't-happen" arms. The test suite rarely exercises
+      them, so deletion is observationally equivalent — the dominant
+      equivalent class behind plug 26.8% in M88. Excluding them shaves the
+      surface's noise without losing real kills.
 
   Hazards are filtered by the collector
   (`Mut.AstWalk.clause_delete_candidates`); the mutator simply rebuilds the
