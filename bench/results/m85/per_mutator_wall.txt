@@ -1,0 +1,27 @@
+=== plug ===
+phase_timings: schema_workers_ms=59105 fallback_workers_ms=44644 schema_build_ms=4233 oracle_build_ms=4140 total_ms=113551
+  Boolean                  n=12 wall_ms= 17729 engines={'schema': 12}
+  AtomLiteral              n= 9 wall_ms= 17415 engines={'schema': 8, 'fallback': 1}
+  IntegerLiteral           n= 9 wall_ms= 15838 engines={'fallback': 9}
+  Arithmetic               n=10 wall_ms= 14739 engines={'schema': 10}
+  GuardTypeTest            n= 6 wall_ms= 12407 engines={'fallback': 6}
+  GuardComparisonBoundary  n= 3 wall_ms=  5385 engines={'fallback': 3}
+  Pin                      n= 2 wall_ms=  3535 engines={'fallback': 2}
+  ComparisonNegation       n= 4 wall_ms=  3388 engines={'schema': 3, 'fallback': 1}
+  ConcatOperator           n= 1 wall_ms=  1639 engines={'schema': 1}
+  GuardComparisonNegation  n= 2 wall_ms=  1492 engines={'fallback': 2}
+  UnaryNot                 n= 2 wall_ms=  1118 engines={'fallback': 1, 'schema': 1}
+
+=== decimal ===
+phase_timings: schema_workers_ms=61101 fallback_workers_ms=33678 schema_build_ms=3291 oracle_build_ms=3148 total_ms=102378
+  Arithmetic               n=19 wall_ms= 37744 engines={'fallback': 2, 'schema': 17}
+  AtomLiteral              n=11 wall_ms= 15614 engines={'schema': 7, 'fallback': 4}
+  ComparisonNegation       n=15 wall_ms= 10695 engines={'schema': 10, 'fallback': 5}
+  GuardComparisonBoundary  n= 4 wall_ms= 10215 engines={'fallback': 4}
+  GuardTypeTest            n= 3 wall_ms=  6675 engines={'fallback': 3}
+  GuardComparisonNegation  n= 3 wall_ms=  4983 engines={'fallback': 3}
+  IntegerLiteral           n= 2 wall_ms=  3286 engines={'fallback': 2}
+  Boolean                  n= 1 wall_ms=  1139 engines={'schema': 1}
+  ConcatOperator           n= 1 wall_ms=  1040 engines={'schema': 1}
+  ComparisonBoundary       n= 1 wall_ms=   988 engines={'schema': 1}
+
