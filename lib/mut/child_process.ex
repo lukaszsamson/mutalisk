@@ -9,6 +9,13 @@ defmodule Mut.ChildProcess do
       file as it arrives. The in-memory buffer is still maintained (bounded by
       `:max_output_bytes`) so callers using the return value's `output` keep
       working — this is observability layered on top of the existing API.
+    * `:retry_on` - list of binary substrings; if the child exits non-zero AND
+      its output contains any substring, retry up to `:max_retries` times
+      (default 0). Designed for transient BEAM-startup races at high
+      concurrency ("Failed to load module 'elixir'", crash-dump signatures),
+      not for retrying real failures. M84.
+    * `:max_retries` - integer, default 0 (no retry); only consulted when
+      `:retry_on` would match.
     * `:timeout_ms`, `:cd`, `:env` - as before.
   """
 
@@ -25,16 +32,35 @@ defmodule Mut.ChildProcess do
         {:error, {:executable_not_found, executable}}
 
       path ->
-        log_io = open_log(Keyword.get(opts, :log_path))
-
-        try do
-          port = open_port(path, args, opts)
-          collect(port, init_state(opts, log_io), Keyword.get(opts, :timeout_ms, :infinity))
-        after
-          close_log(log_io)
-        end
+        run_with_retries(path, args, opts, Keyword.get(opts, :max_retries, 0))
     end
   end
+
+  defp run_with_retries(path, args, opts, attempts_left) do
+    log_io = open_log(Keyword.get(opts, :log_path))
+
+    result =
+      try do
+        port = open_port(path, args, opts)
+        collect(port, init_state(opts, log_io), Keyword.get(opts, :timeout_ms, :infinity))
+      after
+        close_log(log_io)
+      end
+
+    if attempts_left > 0 and retryable?(result, Keyword.get(opts, :retry_on, [])) do
+      run_with_retries(path, args, opts, attempts_left - 1)
+    else
+      result
+    end
+  end
+
+  # Retry only on transient signatures the caller explicitly opted into; never
+  # on success, timeout, or arbitrary failures (would mask real bugs).
+  defp retryable?({:exit, code, output}, patterns) when code != 0 and is_list(patterns) do
+    Enum.any?(patterns, &(is_binary(&1) and String.contains?(output, &1)))
+  end
+
+  defp retryable?(_result, _patterns), do: false
 
   @spec output_tail(String.t(), pos_integer()) :: String.t()
   def output_tail(output, lines \\ 80)

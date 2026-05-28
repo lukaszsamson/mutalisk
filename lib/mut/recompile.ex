@@ -57,6 +57,15 @@ defmodule Mut.Recompile do
           | {:error, {:recompile_failed, error_category(), non_neg_integer(), String.t()}}
           | {:error, term()}
 
+  # M84: transient BEAM-startup signatures observed at `--concurrency 4` (the
+  # v1.23 ops note); recover via retry rather than mis-classify as a real
+  # compile failure. Never matches on real CompileError/syntax/dep-path output.
+  @beam_startup_transients [
+    "Failed to load module 'elixir'",
+    "Runtime terminating during boot",
+    "Crash dump is being written"
+  ]
+
   @spec recompile(Sandbox.t(), [Path.t()], [Path.t()], keyword) :: result
   def recompile(%Sandbox{} = sandbox, mutated_files, dependent_files, opts \\ [])
       when is_list(mutated_files) and is_list(dependent_files) and is_list(opts) do
@@ -65,7 +74,9 @@ defmodule Mut.Recompile do
 
     case Mut.ChildProcess.run("elixir", elixir_args(sandbox.path, files, default_app),
            cd: sandbox.path,
-           env: env()
+           env: env(),
+           retry_on: @beam_startup_transients,
+           max_retries: 2
          ) do
       {:exit, 0, _output} -> :ok
       {:exit, code, output} -> {:error, {:recompile_failed, categorize(output), code, output}}
