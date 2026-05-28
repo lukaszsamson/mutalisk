@@ -16,6 +16,9 @@ defmodule Mut.Mutator do
               | :statement_delete
               | :clause_delete
               | :guard_boolean
+              | :pipeline_drop
+              | :map_update_drop
+              | :receive_timeout
             ]
   @callback applicable?(Macro.t(), Mut.Context.t()) :: boolean()
   @callback mutate(Macro.t(), Mut.Context.t()) :: [Mut.Mutation.t()]

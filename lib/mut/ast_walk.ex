@@ -483,6 +483,284 @@ defmodule Mut.AstWalk do
   defp try_section_tag(:catch), do: :try_catch
   defp try_section_tag(:else), do: :try_else
 
+  @doc """
+  M94: pipeline-drop candidates. Finds the **top** of each `|>` chain (a
+  `|>` node whose enclosing position is not another `|>`), flattens the
+  chain into `[input, stage1, ..., stageN]`, and emits one candidate per
+  middle stage (0-indexed positions `2..N-2` inclusive in the flat list).
+  Skips chains shorter than 4 elements (need ≥3 stages so at least one
+  middle exists). The first stage (index 1) is skipped — dropping it
+  feeds the raw input to the next stage, semantically "destroying" the
+  input. The last stage (index N-1, where N = `length(stages)`) is
+  skipped — dropping it makes the upstream chain's result the return,
+  often refactoring-equivalent under the test suite.
+
+  Span is custom — pipelines don't have an `:end` keyword token. The
+  collector computes start = leftmost leaf's `:line`/`:column`,
+  end = rightmost call's `:closing` (or fallback `:end_line`/`:end_column`).
+  Skip candidate if either position is unrecoverable.
+
+  Requires `:source`.
+  """
+  @spec pipeline_drop_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def pipeline_drop_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    acc = %{
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      module_stack: []
+    }
+
+    # Use Macro.traverse with a pre-fn that processes pipeline tops and prunes
+    # nested pipes (so the same chain isn't enumerated multiple times).
+    {_ast, acc} = Macro.traverse(ast, acc, &pipe_pre/2, &pipe_post/2)
+    acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp pipe_pre({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
+    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
+  end
+
+  defp pipe_pre({:|>, _meta, _args} = node, acc) do
+    # This is the TOP of a pipeline chain (we prune the LHS so sub-pipes
+    # never reach this clause). Process and replace with a leaf so the
+    # post-walk + sub-tree traversal doesn't re-process.
+    acc = emit_pipeline_candidates(node, acc)
+    {:__pipeline_pruned__, acc}
+  end
+
+  defp pipe_pre(node, acc), do: {node, acc}
+
+  defp pipe_post({:defmodule, _meta, _args} = node, acc) do
+    {node, %{acc | module_stack: tl(acc.module_stack)}}
+  end
+
+  defp pipe_post(node, acc), do: {node, acc}
+
+  defp emit_pipeline_candidates(top_node, acc) do
+    stages = flatten_pipeline(top_node)
+    n = length(stages)
+
+    with true <- n >= 4,
+         span when not is_nil(span) <- pipeline_span(top_node, acc) do
+      # Middle stages: 0-indexed positions 2..n-2 (skip input=0, first stage=1,
+      # last stage=n-1).
+      indexes = Enum.to_list(2..(n - 2))
+
+      Enum.reduce(indexes, acc, fn i, acc ->
+        cand = build_pipeline_candidate(top_node, i, span, acc)
+        %{acc | candidates: [cand | acc.candidates]}
+      end)
+    else
+      _ -> acc
+    end
+  end
+
+  defp build_pipeline_candidate(top_node, stage_index, span, acc) do
+    {:|>, meta, _} = top_node
+    line = Keyword.get(meta, :line)
+    col = Keyword.get(meta, :column)
+    ast_path = [:pipeline_drop_stage, acc.file, line, col, stage_index]
+
+    %AstCandidate{
+      file: acc.file,
+      line: span.start_line,
+      column: span.start_column,
+      syntactic_name: :pipeline_drop_stage,
+      syntactic_arity: 0,
+      source_span: span,
+      env_context: nil,
+      enclosing_module: List.first(acc.module_stack),
+      ast_path: ast_path,
+      ast_path_hash: path_hash(ast_path),
+      node: top_node
+    }
+  end
+
+  defp flatten_pipeline({:|>, _meta, [lhs, rhs]}), do: flatten_pipeline(lhs) ++ [rhs]
+  defp flatten_pipeline(other), do: [other]
+
+  # Span of a whole pipeline expression. start = leftmost leaf's
+  # `:line`/`:column`; end = rightmost call's `:closing` (or fallback
+  # `:end_line`/`:end_column`). nil if either is unrecoverable.
+  defp pipeline_span(top_node, acc) do
+    with {start_line, start_col} <- leftmost_position(top_node),
+         {end_line, end_col} <- rightmost_end_position(top_node) do
+      %Mut.SourceSpan{
+        file: acc.file,
+        start_line: start_line,
+        start_column: start_col,
+        end_line: end_line,
+        end_column: end_col,
+        start_byte: byte_offset(acc.source, acc.line_offsets, start_line, start_col),
+        end_byte: byte_offset(acc.source, acc.line_offsets, end_line, end_col)
+      }
+    else
+      _ -> nil
+    end
+  end
+
+  defp leftmost_position({:|>, _meta, [lhs, _rhs]}), do: leftmost_position(lhs)
+
+  defp leftmost_position({_form, meta, _args}) do
+    with l when is_integer(l) <- Keyword.get(meta, :line),
+         c when is_integer(c) <- Keyword.get(meta, :column) do
+      {l, c}
+    else
+      _ -> nil
+    end
+  end
+
+  defp leftmost_position(_), do: nil
+
+  defp rightmost_end_position({:|>, _meta, [_lhs, rhs]}), do: rightmost_end_position(rhs)
+
+  defp rightmost_end_position({_form, meta, _args}) do
+    cond do
+      is_integer(meta[:end_line]) ->
+        {meta[:end_line], meta[:end_column]}
+
+      is_list(meta[:closing]) ->
+        {Keyword.fetch!(meta[:closing], :line), Keyword.fetch!(meta[:closing], :column) + 1}
+
+      true ->
+        nil
+    end
+  end
+
+  defp rightmost_end_position(_), do: nil
+
+  @doc """
+  M94: map-update candidates. Finds `%{base | updates}` nodes and emits
+  one candidate per occurrence; the candidate's source span is the whole
+  `%{...}` literal (its `:closing` meta yields the end). Plain map
+  literals `%{a: 1}` without an update pipe are skipped.
+  """
+  @spec map_update_drop_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def map_update_drop_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    acc = %{
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      module_stack: []
+    }
+
+    {_ast, acc} = Macro.prewalk(ast, acc, &mu_visit/2)
+    acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp mu_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
+    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
+  end
+
+  defp mu_visit({:%{}, meta, [{:|, _pipe_meta, [_base, updates]}]} = node, acc)
+       when is_list(updates) do
+    case Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) do
+      nil ->
+        {node, acc}
+
+      %Mut.SourceSpan{} = span ->
+        cand = build_map_update_candidate(node, meta, span, acc)
+        {node, %{acc | candidates: [cand | acc.candidates]}}
+    end
+  end
+
+  defp mu_visit(node, acc), do: {node, acc}
+
+  defp build_map_update_candidate(node, meta, span, acc) do
+    line = Keyword.get(meta, :line)
+    col = Keyword.get(meta, :column)
+    ast_path = [:map_update_drop, acc.file, line, col]
+
+    %AstCandidate{
+      file: acc.file,
+      line: line,
+      column: col,
+      syntactic_name: :map_update_drop,
+      syntactic_arity: 0,
+      source_span: span,
+      env_context: nil,
+      enclosing_module: List.first(acc.module_stack),
+      ast_path: ast_path,
+      ast_path_hash: path_hash(ast_path),
+      node: node
+    }
+  end
+
+  @doc """
+  M94: receive-timeout candidates. Finds `receive` blocks that have an
+  `after` clause and emits one candidate per occurrence; the mutator
+  generates three variants per candidate (timeout `0`, `:infinity`, and
+  drop-after). Receives without `after` are skipped (nothing to mutate;
+  ClauseDelete M87/M90 covers the `:do` message-handler clauses).
+
+  Source span is the whole `receive` block (uses `block_node_span` since
+  receive has `:end` meta).
+  """
+  @spec receive_timeout_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def receive_timeout_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    acc = %{
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      module_stack: []
+    }
+
+    {_ast, acc} = Macro.prewalk(ast, acc, &rt_visit/2)
+    acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp rt_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
+    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
+  end
+
+  defp rt_visit({:receive, meta, [args]} = node, acc) when is_list(args) do
+    with [{:->, _, [[_t], _body]} | _] <- Keyword.get(args, :after, nil),
+         span when not is_nil(span) <- block_node_span(meta, acc) do
+      cand = build_receive_timeout_candidate(node, meta, span, acc)
+      {node, %{acc | candidates: [cand | acc.candidates]}}
+    else
+      _ -> {node, acc}
+    end
+  end
+
+  defp rt_visit(node, acc), do: {node, acc}
+
+  defp build_receive_timeout_candidate(node, meta, span, acc) do
+    line = Keyword.get(meta, :line)
+    col = Keyword.get(meta, :column)
+    ast_path = [:receive_timeout, acc.file, line, col]
+
+    %AstCandidate{
+      file: acc.file,
+      line: line,
+      column: col,
+      syntactic_name: :receive_timeout,
+      syntactic_arity: 0,
+      source_span: span,
+      env_context: nil,
+      enclosing_module: List.first(acc.module_stack),
+      ast_path: ast_path,
+      ast_path_hash: path_hash(ast_path),
+      node: node
+    }
+  end
+
   # M89 equiv-reduction hazard: a clause whose body is a single `raise`/
   # `throw`/`exit` call (the idiomatic error-path arm — "this shouldn't
   # happen", "fall through to crash"). When the test suite does not

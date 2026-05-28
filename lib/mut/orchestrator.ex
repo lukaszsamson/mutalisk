@@ -22,6 +22,9 @@ defmodule Mut.Orchestrator do
           | :statement_delete
           | :clause_delete
           | :guard_boolean
+          | :pipeline_drop
+          | :map_update_drop
+          | :receive_timeout
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -164,6 +167,21 @@ defmodule Mut.Orchestrator do
     {clause_delete_fallback, clause_delete_skips} =
       clause_delete_results(ast, relative_file, source, enabled_targets, mutators)
 
+    # M94: pipeline-stage-drop mutators (opt-in `:pipeline_drop`). Drop a
+    # middle stage from a `|>` chain. Fallback-routed (whole-pipeline span).
+    {pipeline_fallback, pipeline_skips} =
+      pipeline_drop_results(ast, relative_file, source, enabled_targets, mutators)
+
+    # M94: map-update-drop mutators (opt-in `:map_update_drop`). Drop
+    # `%{m | k: v}` → `m`. Fallback-routed (whole-`%{}` literal span).
+    {map_update_fallback, map_update_skips} =
+      map_update_drop_results(ast, relative_file, source, enabled_targets, mutators)
+
+    # M94: receive-timeout mutators (opt-in `:receive_timeout`). Mutate
+    # the `after` timeout (0 / :infinity / drop). Fallback-routed.
+    {receive_timeout_fallback, receive_timeout_skips} =
+      receive_timeout_results(ast, relative_file, source, enabled_targets, mutators)
+
     %Plan{
       schema: dispatch_schema ++ literal_schema,
       fallback:
@@ -173,7 +191,10 @@ defmodule Mut.Orchestrator do
           pattern_fallback ++
           variable_fallback ++
           pattern_shape_fallback ++
-          conditional_fallback ++ stmt_delete_fallback ++ clause_delete_fallback,
+          conditional_fallback ++
+          stmt_delete_fallback ++
+          clause_delete_fallback ++
+          pipeline_fallback ++ map_update_fallback ++ receive_timeout_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
@@ -187,7 +208,10 @@ defmodule Mut.Orchestrator do
           pattern_shape_skips ++
           conditional_skips ++
           stmt_delete_skips ++
-          clause_delete_skips,
+          clause_delete_skips ++
+          pipeline_skips ++
+          map_update_skips ++
+          receive_timeout_skips,
       matched_pairs: matched
     }
   end
@@ -222,6 +246,42 @@ defmodule Mut.Orchestrator do
         Mut.AstWalk.clause_delete_candidates(ast, file: relative_file, source: source)
 
       enabled_fallback_results(candidates, :clause_delete, nil, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
+  # M94: pipeline-stage-drop candidates. Off-target -> no walk.
+  defp pipeline_drop_results(ast, relative_file, source, enabled_targets, mutators) do
+    if :pipeline_drop in enabled_targets do
+      candidates =
+        Mut.AstWalk.pipeline_drop_candidates(ast, file: relative_file, source: source)
+
+      enabled_fallback_results(candidates, :pipeline_drop, nil, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
+  # M94: map-update-drop candidates. Off-target -> no walk.
+  defp map_update_drop_results(ast, relative_file, source, enabled_targets, mutators) do
+    if :map_update_drop in enabled_targets do
+      candidates =
+        Mut.AstWalk.map_update_drop_candidates(ast, file: relative_file, source: source)
+
+      enabled_fallback_results(candidates, :map_update_drop, nil, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
+  # M94: receive-timeout candidates. Off-target -> no walk.
+  defp receive_timeout_results(ast, relative_file, source, enabled_targets, mutators) do
+    if :receive_timeout in enabled_targets do
+      candidates =
+        Mut.AstWalk.receive_timeout_candidates(ast, file: relative_file, source: source)
+
+      enabled_fallback_results(candidates, :receive_timeout, nil, mutators, source)
     else
       {[], []}
     end
@@ -605,6 +665,12 @@ defmodule Mut.Orchestrator do
   defp fallback_env_context(_candidate, _site, :statement_delete), do: nil
   # M87: clause deletion mutates the whole construct; no env context required.
   defp fallback_env_context(_candidate, _site, :clause_delete), do: nil
+  # M94: pipeline drop mutates the whole `|>` chain; no env context required.
+  defp fallback_env_context(_candidate, _site, :pipeline_drop), do: nil
+  # M94: map-update drop mutates the whole `%{m | ...}` literal; no context.
+  defp fallback_env_context(_candidate, _site, :map_update_drop), do: nil
+  # M94: receive-timeout mutates the `after` clause within receive; no context.
+  defp fallback_env_context(_candidate, _site, :receive_timeout), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

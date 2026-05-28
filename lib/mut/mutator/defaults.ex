@@ -71,7 +71,12 @@ defmodule Mut.Mutator.Defaults do
     # M90 guard boolean (and<->or; not-drop). opt-in `:guard` target —
     # default-enabled, but only fires under explicit --enable guard +
     # --mutators guard_boolean until M93 decides graduation.
-    Mut.Mutator.GuardBoolean
+    Mut.Mutator.GuardBoolean,
+    # M94 niche mutators (pipeline-drop / map-update-drop / receive-timeout);
+    # each gated by its own opt-in target.
+    Mut.Mutator.PipelineDropStage,
+    Mut.Mutator.MapUpdateDrop,
+    Mut.Mutator.ReceiveTimeout
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

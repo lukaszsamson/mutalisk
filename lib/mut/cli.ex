@@ -53,7 +53,10 @@ defmodule Mut.Cli do
     :conditional,
     :statement_delete,
     :clause_delete,
-    :guard_boolean
+    :guard_boolean,
+    :pipeline_drop,
+    :map_update_drop,
+    :receive_timeout
   ]
   @known_mutators [
     "arithmetic",
@@ -83,6 +86,9 @@ defmodule Mut.Cli do
     "statement_delete",
     "clause_delete",
     "guard_boolean",
+    "pipeline_drop_stage",
+    "map_update_drop",
+    "receive_timeout",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -493,6 +499,9 @@ defmodule Mut.Cli do
       "statement_delete" => Mut.Mutator.StatementDelete,
       "clause_delete" => Mut.Mutator.ClauseDelete,
       "guard_boolean" => Mut.Mutator.GuardBoolean,
+      "pipeline_drop_stage" => Mut.Mutator.PipelineDropStage,
+      "map_update_drop" => Mut.Mutator.MapUpdateDrop,
+      "receive_timeout" => Mut.Mutator.ReceiveTimeout,
       "variable_replace" => Mut.Mutator.VariableReplace,
       "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]
