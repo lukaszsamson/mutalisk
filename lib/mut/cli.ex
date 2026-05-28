@@ -51,7 +51,8 @@ defmodule Mut.Cli do
     :variable,
     :pattern_shape,
     :conditional,
-    :statement_delete
+    :statement_delete,
+    :clause_delete
   ]
   @known_mutators [
     "arithmetic",
@@ -79,6 +80,7 @@ defmodule Mut.Cli do
     "function_replace",
     "negate_conditional",
     "statement_delete",
+    "clause_delete",
     "comparison",
     "guard_comparison",
     "body_literal"
@@ -487,6 +489,7 @@ defmodule Mut.Cli do
       "function_replace" => Mut.Mutator.FunctionReplace,
       "negate_conditional" => Mut.Mutator.NegateConditional,
       "statement_delete" => Mut.Mutator.StatementDelete,
+      "clause_delete" => Mut.Mutator.ClauseDelete,
       "variable_replace" => Mut.Mutator.VariableReplace,
       "variable_to_literal" => Mut.Mutator.VariableToLiteral,
       "body_literal" => [Mut.Mutator.IntegerLiteral, Mut.Mutator.BooleanLiteral]

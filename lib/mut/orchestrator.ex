@@ -20,6 +20,7 @@ defmodule Mut.Orchestrator do
           | :pattern_shape
           | :conditional
           | :statement_delete
+          | :clause_delete
 
   @spec plan(work_copy_root :: Path.t(), Oracle.t(), opts :: keyword) :: Plan.t()
   def plan(work_copy_root, %Oracle{} = oracle, opts \\ []) do
@@ -157,6 +158,11 @@ defmodule Mut.Orchestrator do
     {stmt_delete_fallback, stmt_delete_skips} =
       statement_delete_results(ast, relative_file, source, enabled_targets, mutators)
 
+    # M87: clause-delete mutators (opt-in `:clause_delete` target) — case/cond
+    # /with(`else`) clause removal. Fallback-routed (whole-construct span).
+    {clause_delete_fallback, clause_delete_skips} =
+      clause_delete_results(ast, relative_file, source, enabled_targets, mutators)
+
     %Plan{
       schema: dispatch_schema ++ literal_schema,
       fallback:
@@ -165,7 +171,8 @@ defmodule Mut.Orchestrator do
           env_fallback ++
           pattern_fallback ++
           variable_fallback ++
-          pattern_shape_fallback ++ conditional_fallback ++ stmt_delete_fallback,
+          pattern_shape_fallback ++
+          conditional_fallback ++ stmt_delete_fallback ++ clause_delete_fallback,
       invalid: [],
       skipped:
         diagnostic_skips(diagnostics, oracle) ++
@@ -178,7 +185,8 @@ defmodule Mut.Orchestrator do
           variable_skips ++
           pattern_shape_skips ++
           conditional_skips ++
-          stmt_delete_skips,
+          stmt_delete_skips ++
+          clause_delete_skips,
       matched_pairs: matched
     }
   end
@@ -201,6 +209,18 @@ defmodule Mut.Orchestrator do
         Mut.AstWalk.statement_delete_candidates(ast, file: relative_file, source: source)
 
       enabled_fallback_results(candidates, :statement_delete, nil, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
+  # M87: clause-delete candidates. Off-target -> no walk.
+  defp clause_delete_results(ast, relative_file, source, enabled_targets, mutators) do
+    if :clause_delete in enabled_targets do
+      candidates =
+        Mut.AstWalk.clause_delete_candidates(ast, file: relative_file, source: source)
+
+      enabled_fallback_results(candidates, :clause_delete, nil, mutators, source)
     else
       {[], []}
     end
@@ -572,6 +592,8 @@ defmodule Mut.Orchestrator do
   defp fallback_env_context(_candidate, _site, :conditional), do: nil
   # M81: statement deletion runs in body position by construction (collector).
   defp fallback_env_context(_candidate, _site, :statement_delete), do: nil
+  # M87: clause deletion mutates the whole construct; no env context required.
+  defp fallback_env_context(_candidate, _site, :clause_delete), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

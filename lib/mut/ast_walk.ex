@@ -300,6 +300,121 @@ defmodule Mut.AstWalk do
     Enum.uniq(names)
   end
 
+  @doc """
+  M87: clause-delete candidates for `case`/`cond`/`with`. Emits one candidate per
+  deletable clause; the candidate's node is the whole construct (block-form,
+  spanned via `:end`), and the mutation re-emits it with that clause removed.
+
+  Hazards (skipped in the collector, not at mutate time):
+    * `case` / `cond`: the **last** clause is the catch-all — deleting it can
+      crash on no-match. Excluded.
+    * `cond`: any `true ->` clause is the explicit fallback; deletion crashes
+      on no-match. Excluded.
+    * `with`: only the `else` clauses are mutated (deleting one of ≥ 2). The
+      `<-` chain is skipped — deleting a binding step is orphan-binding-shaped
+      noise (M81-territory) plus structurally invalid when the binding is read
+      in `do`. Single-else-clause withs are excluded (would remove the only
+      `else`).
+  """
+  @spec clause_delete_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def clause_delete_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    acc = %{
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      module_stack: []
+    }
+
+    {_ast, acc} = Macro.prewalk(ast, acc, &cd_visit/2)
+    acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp cd_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
+    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
+  end
+
+  defp cd_visit({:case, meta, [_scrutinee, [{:do, clauses}]]} = node, acc)
+       when is_list(clauses) do
+    {node, emit_clause_candidates(node, clauses, :case, meta, acc)}
+  end
+
+  defp cd_visit({:cond, meta, [[{:do, clauses}]]} = node, acc) when is_list(clauses) do
+    {node, emit_clause_candidates(node, clauses, :cond, meta, acc)}
+  end
+
+  defp cd_visit({:with, meta, args} = node, acc) when is_list(args) do
+    {node, emit_with_else_candidates(node, args, meta, acc)}
+  end
+
+  defp cd_visit(node, acc), do: {node, acc}
+
+  defp emit_clause_candidates(node, clauses, kind, meta, acc) do
+    with span when not is_nil(span) <- block_node_span(meta, acc),
+         indexed = Enum.with_index(clauses),
+         non_last = Enum.drop(indexed, -1),
+         deletable = filter_deletable(non_last, kind),
+         true <- deletable != [] do
+      Enum.reduce(deletable, acc, fn {_clause, i}, acc ->
+        cand = build_clause_candidate(node, i, span, section_for(kind), acc)
+        %{acc | candidates: [cand | acc.candidates]}
+      end)
+    else
+      _ -> acc
+    end
+  end
+
+  defp emit_with_else_candidates(node, args, meta, acc) do
+    with span when not is_nil(span) <- block_node_span(meta, acc),
+         last when is_list(last) <- List.last(args),
+         true <- Keyword.keyword?(last),
+         else_clauses when is_list(else_clauses) <- Keyword.get(last, :else),
+         true <- length(else_clauses) >= 2 do
+      Enum.reduce(Enum.with_index(else_clauses), acc, fn {_clause, i}, acc ->
+        cand = build_clause_candidate(node, i, span, :with_else, acc)
+        %{acc | candidates: [cand | acc.candidates]}
+      end)
+    else
+      _ -> acc
+    end
+  end
+
+  defp filter_deletable(indexed, :cond),
+    do: Enum.reject(indexed, fn {clause, _i} -> cond_true_clause?(clause) end)
+
+  defp filter_deletable(indexed, _kind), do: indexed
+
+  defp cond_true_clause?({:->, _meta, [[cond_expr], _body]}), do: cond_expr == true
+  defp cond_true_clause?(_node), do: false
+
+  defp section_for(:case), do: :case_do
+  defp section_for(:cond), do: :cond_do
+
+  defp build_clause_candidate(construct_node, index, span, section, acc) do
+    {kind_atom, meta, _args} = construct_node
+    line = Keyword.get(meta, :line)
+    col = Keyword.get(meta, :column)
+    ast_path = [:clause_delete, acc.file, line, col, section, index]
+
+    %AstCandidate{
+      file: acc.file,
+      line: line,
+      column: col,
+      syntactic_name: :clause_delete,
+      syntactic_arity: 0,
+      source_span: span,
+      env_context: nil,
+      enclosing_module: List.first(acc.module_stack),
+      ast_path: ast_path,
+      ast_path_hash: path_hash(ast_path),
+      node: {kind_atom, meta, elem(construct_node, 2)}
+    }
+  end
+
   defp pin_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
     acc = enter_module(node, acc)
