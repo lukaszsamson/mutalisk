@@ -58,7 +58,9 @@ defmodule Mut.Mutator.Defaults do
     # M76 function-replacement (opt-in dispatch; M79 decides graduation)
     Mut.Mutator.FunctionReplace,
     # M77 conditional negate/force (opt-in `:conditional`; M79 decides graduation)
-    Mut.Mutator.NegateConditional
+    Mut.Mutator.NegateConditional,
+    # M81 statement-delete (opt-in `:statement_delete`; M83 decides graduation)
+    Mut.Mutator.StatementDelete
   ]
 
   @doc "Mutators active with no --enable/--mutators flags (default plan)."

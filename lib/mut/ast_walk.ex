@@ -156,6 +156,150 @@ defmodule Mut.AstWalk do
     end
   end
 
+  @doc """
+  M81: statement-delete candidates. Finds top-level `def`/`defp` whose body is a
+  multi-statement `__block__`, and emits one candidate per non-last statement
+  that passes the orphan-binding hazard (a deleted statement that binds a name
+  later statements read would yield an undefined-variable compile error).
+  Candidate's source_span is the def's whole-node span (via `:end` meta); the
+  mutation re-renders the def with the statement removed. Body-position only:
+  the walk visits the file's `defmodule` -> def/defp nodes directly, so
+  pattern/guard contexts and `case`/`with` scrutinee blocks are never reached.
+  Requires `:source`.
+  """
+  @spec statement_delete_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
+  def statement_delete_candidates(ast, opts) do
+    file = Keyword.fetch!(opts, :file)
+    source = Keyword.fetch!(opts, :source)
+    line_offsets = Compute.line_offsets(source)
+
+    acc = %{
+      candidates: [],
+      file: file,
+      source: source,
+      line_offsets: line_offsets,
+      module_stack: []
+    }
+
+    {_ast, acc} = Macro.prewalk(ast, acc, &sd_visit/2)
+    acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
+  end
+
+  defp sd_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
+    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
+  end
+
+  defp sd_visit({name, meta, [_head, body_kw]} = node, acc) when name in [:def, :defp] do
+    with true <- Keyword.keyword?(body_kw),
+         {:__block__, _bm, stmts} <- Keyword.get(body_kw, :do),
+         true <- length(stmts) >= 2,
+         span when not is_nil(span) <- block_node_span(meta, acc) do
+      {node, emit_statement_delete_candidates(node, stmts, span, acc)}
+    else
+      _ -> {node, acc}
+    end
+  end
+
+  defp sd_visit(node, acc), do: {node, acc}
+
+  defp emit_statement_delete_candidates(def_node, stmts, span, acc) do
+    indexed = Enum.with_index(stmts)
+    # Exclude the LAST statement (its value is the def's return; deletion is the
+    # noisiest sub-class per M39/M81 — opt-in within opt-in, excluded here).
+    non_last = Enum.drop(indexed, -1)
+
+    Enum.reduce(non_last, acc, fn {stmt, i}, acc ->
+      if orphan_binding_hazard?(stmt, Enum.drop(stmts, i + 1)) do
+        acc
+      else
+        cand = build_sd_candidate(def_node, i, span, acc)
+        %{acc | candidates: [cand | acc.candidates]}
+      end
+    end)
+  end
+
+  defp build_sd_candidate(def_node, stmt_index, span, acc) do
+    # Synthesized ast_path ending in the statement index, so the mutator can
+    # recover it via ctx.ast_path; the hash makes the stable id unique per
+    # {def, index}, even though candidates share the def's span.
+    {_def_name, def_meta, _args} = def_node
+    line = Keyword.get(def_meta, :line)
+    col = Keyword.get(def_meta, :column)
+    ast_path = [:statement_delete, acc.file, line, col, stmt_index]
+
+    %AstCandidate{
+      file: acc.file,
+      line: line,
+      column: col,
+      syntactic_name: :statement_delete,
+      syntactic_arity: 0,
+      source_span: span,
+      env_context: nil,
+      enclosing_module: List.first(acc.module_stack),
+      ast_path: ast_path,
+      ast_path_hash: path_hash(ast_path),
+      node: def_node
+    }
+  end
+
+  # Orphan-binding hazard: any name bound by an `=` LHS in `stmt` that is
+  # read by any `later` statement -> deleting `stmt` makes it undefined.
+  # Bindings via `with`/`for` `<-`, function-head args, etc. are not the
+  # block-statement case (those clauses introduce bindings into THEIR own
+  # do-blocks, not into the enclosing function body).
+  defp orphan_binding_hazard?(stmt, later) when is_list(later) do
+    bound = collect_lhs_bindings(stmt)
+
+    if bound == [] do
+      false
+    else
+      reads = collect_var_reads(later)
+      Enum.any?(bound, &(&1 in reads))
+    end
+  end
+
+  defp collect_lhs_bindings(stmt) do
+    {_ast, names} =
+      Macro.prewalk(stmt, [], fn
+        {:=, _, [lhs, _rhs]} = node, acc -> {node, pattern_vars(lhs) ++ acc}
+        node, acc -> {node, acc}
+      end)
+
+    Enum.uniq(names)
+  end
+
+  defp pattern_vars(pattern) do
+    {_ast, names} =
+      Macro.prewalk(pattern, [], fn
+        # `^x` pinned vars are READS, not new bindings — replace with a leaf
+        # sentinel so prewalk doesn't descend into the inner var.
+        {:^, _meta, _args}, acc ->
+          {{:__pinned__, [], []}, acc}
+
+        {name, _meta, ctx} = node, acc
+        when is_atom(name) and is_atom(ctx) and name != :_ ->
+          {node, [name | acc]}
+
+        node, acc ->
+          {node, acc}
+      end)
+
+    Enum.uniq(names)
+  end
+
+  defp collect_var_reads(asts) when is_list(asts) do
+    {_ast, names} =
+      Macro.prewalk(asts, [], fn
+        {name, _meta, ctx} = node, acc when is_atom(name) and is_atom(ctx) ->
+          {node, [name | acc]}
+
+        node, acc ->
+          {node, acc}
+      end)
+
+    Enum.uniq(names)
+  end
+
   defp pin_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
     acc = enter_module(node, acc)

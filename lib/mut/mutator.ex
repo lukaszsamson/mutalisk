@@ -13,6 +13,7 @@ defmodule Mut.Mutator do
               | :variable
               | :pattern_shape
               | :conditional
+              | :statement_delete
             ]
   @callback applicable?(Macro.t(), Mut.Context.t()) :: boolean()
   @callback mutate(Macro.t(), Mut.Context.t()) :: [Mut.Mutation.t()]
