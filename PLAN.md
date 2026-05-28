@@ -4681,6 +4681,186 @@ M62 sharpened gate.
 - EnvWalker consolidation implementation; wrapper guard schemata
   (v1.8 + M85 both rejected on AST-shape grounds).
 
+# v1.26 milestones (close-out + niche mutators)
+
+v1.25 (M89–M93) shipped a lot of code but punted M93's
+graduation measurement to v1.26 because the M89 hazard work
+changed candidate emission shapes, invalidating prior matrix
+data. v1.26 is the close-out: do the measurement properly,
+finish zorbito's full mutation run, and land one small
+mutator-addition milestone covering the three deferred-niche
+shapes. Catalogue is otherwise at its natural ceiling within
+mutalisk's no-macro-expansion design.
+
+**Order matters.** M94 (niche mutators) lands first so M95's
+matrix run covers everything in one pass — existing v1.23+ opt-in
+surfaces (post-M89 hazards), the M90 first-eval surfaces, AND the
+new M94 surfaces. One comprehensive measurement vs running the
+matrix twice.
+
+**Defaults:** M95 may graduate per the M62 gate; no graduation
+pre-committed. New M94 mutators ship opt-in and get first-eval
+data in M95 — first-eval is informational (matches M88 ClauseDelete),
+not a pre-commit to graduate. Elixir floor stays `>= 1.19.0`.
+
+Three milestones. M94 implementation, M95 the comprehensive
+matrix run + decisions + BENCHMARKS, M96 zorbito completion
+(independent track).
+
+## v1.26 scope (committed)
+
+**M94 — Niche mutators: pipeline / map-update / receive-timeout.**
+
+*Goal:* Ship the three deferred-niche mutator shapes, opt-in,
+fallback-routed, each behind its own enable target.
+
+*Inputs:* HLD v1.26 §M94; existing structural-mutator templates
+(`Mut.Mutator.StatementDelete`, `Mut.Mutator.ClauseDelete`);
+M81/M89 hazard discipline; `Mut.EnvWalker` binding-scope
+tracking (M54).
+
+*Deliverables (internal commit pacing per sub-mutator):*
+
+1. **`Mut.Mutator.PipelineDropStage`** — drop a stage from
+   `a |> f() |> g() |> h()`. Hazards (skip):
+   - First stage (destroys the input).
+   - Last stage if the result is bound or returned (refactoring-
+     equivalent vs observably different needs care).
+   - Stage whose result is otherwise structurally critical
+     (`with` head, guarded position, etc.).
+   - Fallback-routed. Opt-in target `:pipeline_drop` (or per
+     enable model).
+
+2. **`Mut.Mutator.MapUpdateDrop`** — `%{m | k: v}` → `m`. The
+   mutation is observable on the dropped key when the result is
+   used. Hazard-skip when result is not bound/returned (would be
+   trivially equivalent). Fallback. Opt-in.
+
+3. **`Mut.Mutator.ReceiveTimeout`** — in `receive ... after t ->
+   body end`:
+   - Swap `t` to `0` (immediate timeout) and `:infinity` (never).
+   - Drop the `after` clause entirely as a second variant.
+   - Fallback. Opt-in.
+
+- Each mutator: per-mutator unit tests + fixture golden lists;
+  invalid + equivalent rate instrumentation (feeds M95).
+
+*Acceptance:*
+- Three mutator files + tests + goldens.
+- Zero stable-id churn for existing mutants.
+- Default plan byte-identical (mutators opt-in via dedicated
+  targets).
+- `bin/verify` green.
+
+*Out of scope:* The graduation flip (M95). Pipeline-order /
+map-key mutations (separate sub-shapes, deferred).
+
+**M95 — Comprehensive graduation matrix re-eval + decisions + BENCHMARKS.**
+
+*Goal:* The deferred M93 work, now data-backed and inclusive of
+M94's new surfaces.
+
+*Inputs:* M89 hazard-refined surfaces; M90 first-eval surfaces;
+M94 new mutators; M91-expanded matrix (9 existing + phoenix +
+phoenix_live_view + bandit = 12 targets); per-mutator
+equivalent-rate (M59 tooling); the M62 sharpened gate.
+
+*Deliverables:*
+- OSS-matrix run across 12 targets covering:
+  - **Post-M89 hazard-refined** (graduation candidates):
+    NegateConditional, StatementDelete, ClauseDelete
+    (case/cond/with).
+  - **M90 first-eval**: GuardBoolean, receive/try ClauseDelete.
+  - **M94 first-eval (informational)**: PipelineDropStage,
+    MapUpdateDrop, ReceiveTimeout.
+  - **Opportunistic re-eval**: FunctionReplace (finally ≥3
+    targets — phoenix 27 / LV 36 / bandit 5 allowlisted sites),
+    Pin (matrix breadth confirms its M83 graduation).
+- `docs/decisions/M95_*.md` per surface: keep_opt_in / graduate
+  / first-eval-keep-opt-in per the M62 per-target rule + ≤2pp
+  tolerance.
+- BENCHMARKS v1.26 section with cumulative catalogue rates.
+
+*Acceptance:*
+- Decisions committed; data-gated (graduate only what clears).
+- Any graduation additive-only (existing stable IDs unchanged),
+  verified by plan diff on demo_app + Decimal.
+- `bin/verify` green.
+
+*Out of scope:* Surfaces that don't clear (stay opt-in).
+
+**M96 — Complete zorbito's full mutation run.**
+
+*Goal:* Finish what M92 started — push materially past
+"Schema build starting" into the mutation/report phase on real
+14-app zorbito code.
+
+*Inputs:* v1.20 umbrella engine (M67/M68); v1.25 M92 (reached
+schema-build start, mutation phase outran the 14-app × 2090-test
+session envelope); v1.25 ops note (`--concurrency 1` for
+sensitive measurements per the v1.23 flake-class note);
+`~/zorbito` (infra confirmed available per v1.25).
+
+*Deliverables:*
+- Complete `mix mut` on zorbito, multi-session or sharded by app
+  if a single session can't finish the mutation phase.
+- Bound with `--max-mutants` if budget requires (per v1.21
+  unilink precedent); the goal is materially past schema-build
+  start, not necessarily the entire default plan.
+- Per-app + aggregate scores **or** a documented partial-run
+  outcome with the shard plan if multi-session is required.
+
+*Acceptance:*
+- zorbito mutation phase exercised on real code (verified
+  worker/report output past schema-build start).
+- No umbrella regression on single-app or unilink paths
+  (golden_oracle + golden_instrument green).
+- `bin/verify` green.
+
+*Out of scope:* The 14-app × 2090-test entire default plan in
+one session (sharding/multi-session is acceptable; full one-shot
+isn't the bar).
+
+## v1.26 delivery status (2026-05-28: M94 ✓, M95 ✓ no flips, M96 in progress)
+
+- **M94** ✓ — `Mut.Mutator.PipelineDropStage`, `Mut.Mutator.MapUpdateDrop`,
+  `Mut.Mutator.ReceiveTimeout`. Each behind its own opt-in target
+  (`:pipeline_drop`, `:map_update_drop`, `:receive_timeout`); 21 unit
+  tests pass; demo_app byte-identical (golden gates verify).
+  `docs/decisions/M94_niche_mutators.md`.
+- **M95** ✓ (no flips) — Same posture as M93. The post-M89 hazard-
+  refined surfaces (NegateConditional, StatementDelete, ClauseDelete),
+  the M90 first-eval (GuardBoolean, receive/try ClauseDelete), and the
+  M94 first-eval (PipelineDropStage, MapUpdateDrop, ReceiveTimeout) all
+  stay `keep_opt_in`. Fresh matrix data on the M91 12-target set is
+  the gating constraint, deferred to v1.27 (session budget didn't
+  accommodate the full 12-target × 8-surface matrix). Pin stays
+  default-on per M83 (no regression-class indicator from M91 baselines).
+  FunctionReplace third-target attempt: the M91 wiring (phoenix=27 /
+  LV=36 / bandit=5 allowlisted sites) is the first time the gate is
+  *reachable* via available data — v1.27 work.
+  `docs/decisions/M95_graduation_matrix.md` + BENCHMARKS v1.26.
+- **M96** in progress — zorbito completion (see below).
+
+## v1.26 horizon (not v1.26 scope)
+
+- **Incremental cross-run history** — indefinite hold; returns
+  only on explicit ask. `bench/cross_run.exs` is the foundation.
+- **Pipeline-order / map-key / receive-after-body mutations** —
+  M94 sub-shapes deferred; revisit only if M95 data shows the
+  shipped niche mutators justify expansion.
+- **EnvWalker consolidation implementation** —
+  maintenance-trigger gated (M51).
+
+## Explicitly NOT v1.26
+
+- Incremental cross-run history (indefinite hold).
+- Function-call deletion / return-value replacement (deferred
+  indefinitely; high FP).
+- Tuple/list pattern-arity.
+- New mutator surface beyond M94's three.
+- EnvWalker consolidation implementation; wrapper guard schemata.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

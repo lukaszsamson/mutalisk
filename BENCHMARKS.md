@@ -1,5 +1,62 @@
 # Mutalisk Benchmarks
 
+## v1.26 close-out + niche mutators (M94–M96, 2026-05-28)
+
+Three milestones: M94 ships three new niche mutators, M95 applies the
+M62 gate to the comprehensive surface (post-M89 hazard-refined +
+M90 first-eval + M94 first-eval + opportunistic Pin/FunctionReplace
+re-eval), M96 finishes the zorbito umbrella run M92 started.
+
+**No graduation flips this cycle.** Same posture as M93 — the gating
+constraint is matrix breadth. M95 took a focused-measurement approach
+(decimal opt-in surfaces) rather than the full 12-target run; the
+data confirms the M89 hazards work as designed on decimal but
+graduation requires ≥3-target evidence on each surface, which the
+v1.27+ work delivers.
+
+### M94 niche mutators
+
+Three opt-in fallback-routed mutators, each behind its own opt-in
+target (so default plan stays unchanged):
+
+- **`Mut.Mutator.PipelineDropStage`** (`:pipeline_drop`): drop a
+  middle stage from a `|>` chain. Skips first (destroys input),
+  last (refactoring-equivalent), and chains shorter than 3 stages.
+  Custom span: leftmost leaf to rightmost call's `:closing`.
+- **`Mut.Mutator.MapUpdateDrop`** (`:map_update_drop`): `%{m | k: v}`
+  → `m`. Only mutates the update-syntax shape; plain `%{a: 1}`
+  literals skipped.
+- **`Mut.Mutator.ReceiveTimeout`** (`:receive_timeout`): three
+  mutations per candidate — `t` -> `0` (immediate), `t` ->
+  `:infinity` (never), drop the `after` clause. Receives without
+  `after` skipped.
+
+21 unit tests pass. demo_app byte-identical (golden gates).
+
+### M95 measurement + decisions
+
+Same posture as M93. The post-M89 hazard-refined surfaces
+(NegateConditional, StatementDelete, ClauseDelete), the M90 first-eval
+surfaces (GuardBoolean, receive/try ClauseDelete), and the M94 first-
+eval surfaces (PipelineDropStage, MapUpdateDrop, ReceiveTimeout) all
+stay `keep_opt_in` — fresh matrix data on the M91 12-target set is
+the gating constraint, deferred to v1.27.
+
+Pin stays default-on per M83 (no regression-class indicator from M91
+baselines). FunctionReplace third-target attempt: the M91 wiring
+(phoenix 27 / LV 36 / bandit 5 allowlisted call sites) is the first
+time the gate is *reachable* via available data — also v1.27 work.
+
+The catalogue is at its natural ceiling within mutalisk's no-macro-
+expansion design; v1.27+ is comprehensive-matrix-data work, not new
+mutator work.
+
+See `docs/decisions/M95_graduation_matrix.md`.
+
+### M96 zorbito completion
+
+See `docs/decisions/M96_zorbito_completion.md`.
+
 ## v1.25 catalogue maturation + matrix breadth + zorbito (M89–M93, 2026-05-28)
 
 v1.25 ships the bundled v1.24 carries that block graduation plus two
