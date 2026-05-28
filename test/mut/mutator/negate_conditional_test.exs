@@ -69,4 +69,73 @@ defmodule Mut.Mutator.NegateConditionalTest do
       refute NegateConditional.applicable?({:+, [], [1, 2]}, ctx())
     end
   end
+
+  describe "M80 hazards" do
+    defp mutate_src(src) do
+      ast = Code.string_to_quoted!(src, columns: true, token_metadata: true)
+      [c] = AstWalk.conditional_candidates(ast, file: "m.ex", source: src)
+      Enum.map(NegateConditional.mutate(c.node, ctx()), & &1.metadata.change)
+    end
+
+    test "binding hazard: condition with `=` match drops force-true/force-false" do
+      src = """
+      defmodule M do
+        def f(id) do
+          if user = lookup(id) do
+            f(user)
+          else
+            :none
+          end
+        end
+      end
+      """
+
+      # Only negate (force-* would lose the `user` binding and break the body).
+      assert mutate_src(src) == ["negate"]
+    end
+
+    test "dead-branch hazard on `if` with no else drops force-false" do
+      src = """
+      defmodule M do
+        def f(x) do
+          if x > 0 do
+            :pos
+          end
+        end
+      end
+      """
+
+      assert mutate_src(src) == ["negate", "force true"]
+    end
+
+    test "dead-branch hazard on `unless` with no else drops force-true" do
+      src = """
+      defmodule M do
+        def f(x) do
+          unless x == 0 do
+            :nonzero
+          end
+        end
+      end
+      """
+
+      assert mutate_src(src) == ["negate", "force false"]
+    end
+
+    test "if with else and no binding emits all three (unchanged from M77)" do
+      src = """
+      defmodule M do
+        def f(x) do
+          if x > 0 do
+            :pos
+          else
+            :neg
+          end
+        end
+      end
+      """
+
+      assert mutate_src(src) == ["negate", "force true", "force false"]
+    end
+  end
 end
