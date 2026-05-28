@@ -4840,7 +4840,15 @@ isn't the bar).
   LV=36 / bandit=5 allowlisted sites) is the first time the gate is
   *reachable* via available data — v1.27 work.
   `docs/decisions/M95_graduation_matrix.md` + BENCHMARKS v1.26.
-- **M96** in progress — zorbito completion (see below).
+- **M96** ✓ (carry-forward — upstream-blocked) — Sharded run blocked
+  by zorbito-local btc_scanner WIP compile state, *not* by mutalisk's
+  engine. `mix compile` itself fails on the umbrella's local source
+  (`unknown key :previous_hash for struct BtcScanner.BlockData` — an
+  in-flight refactor in `apps/btc_scanner/lib/btc_scanner/parser.ex`).
+  The mutalisk injection + tag-skip pattern remains correct; v1.25
+  M92's "Schema build starting" milestone carries forward as the
+  validation marker. Re-attempt is a v1.27 carry pending the upstream
+  btc_scanner refactor landing. `docs/decisions/M96_zorbito_completion.md`.
 
 ## v1.26 horizon (not v1.26 scope)
 
