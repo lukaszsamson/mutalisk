@@ -67,7 +67,7 @@ See [BENCHMARKS.md](BENCHMARKS.md) for the v1 real-project smoke run. The refere
 
 ## Limitations
 
-Mutalisk does not mutate DSL-emitted code, user macro bodies, patterns, or generated code. Test selection is static by default with coverage-based selection available opt-in (`--selection coverage` / `coverage_with_static_fallback`). Mutants run in parallel (`--concurrency N`, default `min(schedulers_online, 4)`).
+Mutalisk does not mutate DSL-emitted code, user macro bodies, patterns, or generated code. Test selection defaults to `coverage_with_static_fallback` (since v1.19); `--selection static` is the fully-portable escape hatch, and `--selection coverage` is the strict (no-fallback) coverage mode. Mutants run in parallel (`--concurrency N`, default `min(schedulers_online, 4)`).
 
 Body-context literal mutators run via the env walker. The allowlisted-atom mutator (`:ok ↔ :error`, `:lt`/`:gt`/`:eq` rotations) is **on by default** as of v1.16. The remaining literal mutators are **opt-in** — enable them all with `--enable env_walker`, or pick specific ones with `--mutators`: integer, boolean, string (`""` / `"x"`), float, nil, and collection emptying (list, 2-tuple, map, and n-tuple → empty; struct literals are never emptied). Incremental history and wrapper-schemata are candidates for later versions.
 

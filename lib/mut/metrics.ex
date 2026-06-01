@@ -310,9 +310,16 @@ defmodule Mut.Metrics do
   def handle_cast({:set_concurrency, configured}, state) do
     schedulers = System.schedulers_online()
 
+    # `effective` is the actual maximum worker concurrency the pool runs at,
+    # which is the configured value: `run_with_concurrency/4` passes it
+    # straight to `Task.async_stream(max_concurrency: ...)`, and the sandbox
+    # pool is sized to it — neither caps at scheduler count. Reporting
+    # `min(configured, schedulers)` understated the real max concurrency
+    # whenever a user oversubscribed (`--concurrency` above core count).
+    # `schedulers_online` is the separate signal for "true CPU parallelism".
     concurrency = %{
       configured: configured,
-      effective: min(configured, schedulers),
+      effective: configured,
       schedulers_online: schedulers
     }
 

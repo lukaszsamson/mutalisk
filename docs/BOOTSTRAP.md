@@ -1,5 +1,9 @@
 # Mutalisk Bootstrap & Overlay Design
 
+> **Status (current as of v1.27): this is the original M0 design contract; two things have since evolved.**
+> 1. **Umbrella projects are supported** (v1.20, M67/M68). The "umbrella out of scope" / `assert_not_umbrella!`-raises statements below are **historical** — `Mut.Bootstrap.Overlay` now wraps umbrella roots and each child app (`apps/<app>/lib`), with cross-app compile-dependency handling. See `lib/mut/bootstrap/overlay.ex`, `lib/mut/umbrella.ex`, and `docs/decisions/M71_operator_expansion_and_umbrella.md`. The single-app contract below is otherwise unchanged.
+> 2. **Production fallback recompile uses direct `elixir --eval` via `Mut.Recompile`**, not a child `mix compile` + `mix test --no-compile`. The fallback role table below describes the original M10 Mix-driven shape; the engine was hardened to a direct-recompile path in the v1.7/M21 + M58 line (see `lib/mut/recompile.ex` and `docs/decisions/M58_recompile_engine_hardening.md`). The overlay/role contract for oracle/schema/worker is unchanged.
+
 This document is the design contract for how mutalisk loads itself into a target Mix project's child processes (oracle compile, schema compile, fallback recompile, worker `mix test`). It is the M0 starter for milestones M2, M7, M8, and M10.
 
 It implements the **Child-Process Bootstrap Contract** from `PLAN.md` §"Operational Contracts".
@@ -31,7 +35,7 @@ tmp/mut_work/<run_id>/                 # one per host invocation
 
 For workers, `Mut.Sandbox.create_pool/2` clones the working copy into per-worker dirs at `tmp/mut_sandboxes/<run_id>/<n>/`. Workers reuse the same `mix.exs`, `lib/`, `test/`, `_build/mut_schema` as the schema build.
 
-**Umbrella projects are out of scope for v1.** Detect via `apps_path` in the user's `project/0` and fail loudly with a clear "umbrella not supported in v1" error.
+**Umbrella projects are out of scope for v1.** Detect via `apps_path` in the user's `project/0` and fail loudly with a clear "umbrella not supported in v1" error. *(Superseded in v1.20 — umbrellas are now supported; see the status banner at the top of this file.)*
 
 ## Roles
 

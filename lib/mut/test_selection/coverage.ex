@@ -17,16 +17,35 @@ defmodule Mut.TestSelection.Coverage do
         ) :: %{Mutant.stable_id() => selection_result()}
   def for_plan(%Plan{} = plan, %CoverageOracle{} = oracle, static_index, opts \\ [])
       when is_map(static_index) and is_list(opts) do
+    killer = Keyword.get(opts, :last_killer)
+    base = base_for_plan(plan, oracle, static_index, opts)
+
+    for mutant <- plan.schema ++ plan.fallback, into: %{} do
+      result = Map.fetch!(base, mutant.stable_id)
+      ordered = order_tests(result.test_files, mutant, oracle, killer)
+      {mutant.stable_id, %{result | test_files: ordered}}
+    end
+  end
+
+  @doc """
+  Per-mutant base test selection WITHOUT last-killer ordering. The base
+  membership (which tests cover/statically-match each mutant) is independent
+  of `last_killer`; only `order_tests/4` reads the live last-killer state.
+  Callers that run many mutants precompute this once and apply `order_tests/4`
+  per mutant, turning an O(N^2) whole-plan recompute into O(N) base + O(1)
+  lookup. `for_plan/4` is `base_for_plan/4` + per-mutant ordering.
+  """
+  @spec base_for_plan(Plan.t(), CoverageOracle.t(), map(), keyword()) :: %{
+          optional(String.t()) => map()
+        }
+  def base_for_plan(%Plan{} = plan, %CoverageOracle{} = oracle, static_index, opts \\ [])
+      when is_map(static_index) and is_list(opts) do
     all_test_files = Keyword.get(opts, :all_test_files, all_test_files(oracle, static_index))
     analysis = static_analysis(static_index)
-    killer = Keyword.get(opts, :last_killer)
-
     degraded = degraded_files(oracle)
 
     for mutant <- plan.schema ++ plan.fallback, into: %{} do
-      result = select(mutant, oracle, analysis, all_test_files, degraded)
-      ordered = order_tests(result.test_files, mutant, oracle, killer)
-      {mutant.stable_id, %{result | test_files: ordered}}
+      {mutant.stable_id, select(mutant, oracle, analysis, all_test_files, degraded)}
     end
   end
 

@@ -28,8 +28,10 @@ defmodule Mix.Tasks.Mut do
                               exceeded)
     --debug-plan             Dump plan JSON to plan.debug.json and exit before
                                any mutant runs
-    --selection MODE         Test selection mode: static (default), coverage,
-                               coverage_with_static_fallback
+    --selection MODE         Test selection mode: static, coverage,
+                               coverage_with_static_fallback (default, since
+                               v1.19/M65). `static` is the fully-portable
+                               escape hatch.
     --keep-work-copy         Skip cleanup of tmp/mut_work/<run_id>/ on exit
                                (debug aid; default: false)
     --test-timeout-ms N      Per-test ExUnit timeout in milliseconds.
@@ -404,17 +406,38 @@ defmodule Mix.Tasks.Mut do
        ) do
     test_paths = absolute_test_paths(source_root, opts)
     static_analysis = Static.analyze(test_paths)
+    oracle = coverage_oracle || %CoverageOracle{}
+
+    # Precompute the base (per-mutant) test selection ONCE per plan. The base
+    # membership — which tests cover/statically-match each mutant — is
+    # independent of `last_killer`; only the per-mutant *ordering*
+    # (`CoverageSelection.order_tests/4`) reads the live last-killer state.
+    # Computing the whole-plan selection map per mutant (as the prior code did)
+    # was O(N^2) on the hot path; this makes it O(N) base + O(1) lookup +
+    # per-mutant ordering. `selected_tests/2` applies the ordering.
+    base_selection =
+      base_selection(selection_mode, plan, test_paths, oracle, static_analysis, all_test_files)
 
     %{
       plan: plan,
       source_root: source_root,
       test_paths: test_paths,
       static_analysis: static_analysis,
-      coverage_oracle: coverage_oracle || %CoverageOracle{},
+      coverage_oracle: oracle,
       selection_mode: selection_mode,
       last_killer: last_killer,
-      all_test_files: all_test_files
+      all_test_files: all_test_files,
+      base_selection: base_selection
     }
+  end
+
+  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files)
+       when mode in [:static, :downgraded_to_static] do
+    Mut.TestSelection.for_plan(plan, test_paths)
+  end
+
+  defp base_selection(_mode, plan, _test_paths, oracle, static_analysis, all_test_files) do
+    CoverageSelection.base_for_plan(plan, oracle, static_analysis, all_test_files: all_test_files)
   end
 
   defp static_match_kind(tests, all_test_files) do
@@ -648,8 +671,7 @@ defmodule Mix.Tasks.Mut do
   defp selected_tests(%{selection_mode: mode} = context, mutant)
        when mode in [:static, :downgraded_to_static] do
     tests =
-      context.plan
-      |> Mut.TestSelection.for_plan(context.test_paths)
+      context.base_selection
       |> Map.get(mutant.stable_id, [])
       |> CoverageSelection.order_tests(
         mutant,
@@ -661,12 +683,17 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp selected_tests(context, mutant) do
-    context.plan
-    |> CoverageSelection.for_plan(context.coverage_oracle, context.static_analysis,
-      all_test_files: context.all_test_files,
-      last_killer: context.last_killer
-    )
-    |> Map.fetch!(mutant.stable_id)
+    base = Map.fetch!(context.base_selection, mutant.stable_id)
+
+    ordered =
+      CoverageSelection.order_tests(
+        base.test_files,
+        mutant,
+        context.coverage_oracle,
+        context.last_killer
+      )
+
+    %{base | test_files: ordered}
   end
 
   defp worker_test_files(selected, all_test_files, work_copy) do

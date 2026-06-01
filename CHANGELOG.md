@@ -3,6 +3,84 @@
 All notable changes to Mutalisk are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.27 unreleased — close the catalogue-validation arc (2026-06-02)
+
+- **M97 — FunctionReplace GRADUATES to default-on** (4th new graduation since
+  M46, after IntegerLiteral-in-pattern M63, ConcatOperator M79, Pin M83). Built
+  `bench/shard_matrix.sh` (shard = one target, clone/compile once, loop surfaces
+  as focused `--enable X --mutators Y --max-mutants N` runs) so the matrix
+  M93/M95 deferred actually ran. FunctionReplace cleared the M62 gate on three
+  coverage targets: plug 100/0/0 (M79), absinthe 83.3/16.7/0 (M82), bandit
+  88.9/11.1/0 (fresh — the third runnable target M91's wiring unblocked).
+  Additive + byte-identical (demo_app/Decimal have no allowlisted call sites).
+  All other surfaces stay opt-in, now data-backed (e.g. the M89 NegateConditional
+  symmetric-branches hazard was measured *not* to move jason — its 52.4% equiv
+  is observational, not structural). `docs/decisions/M97_graduation_matrix.md`.
+- **M98 — zorbito retry**: the M96 compile block resolved (btc_scanner refactor
+  landed; `mix compile` succeeds on all 14 apps), but the run was blocked at
+  baseline by the user's live zorbito instance occupying ports/DB pool
+  (environment-occupancy, not a mutalisk/compile defect). Umbrella validation
+  closes at the engine-proven state. `docs/decisions/M98_zorbito_completion.md`.
+
+## v1.26 unreleased — close-out + niche mutators (2026-05-28)
+
+- **M94** — three opt-in fallback-routed niche mutators, each gated by its own
+  target: `PipelineDropStage` (drop a middle `|>` stage), `MapUpdateDrop`
+  (`%{m | k: v}` → `m`), `ReceiveTimeout` (mutate `receive ... after` timeout).
+- **M95** — comprehensive graduation re-eval deferred on session-envelope
+  grounds; all surfaces stay opt-in (no flips).
+- **M96** — zorbito sharded retry upstream-blocked by an in-flight btc_scanner
+  WIP compile failure (resolved by M98).
+
+## v1.25 unreleased — catalogue maturation + matrix breadth + zorbito (2026-05-28)
+
+- **M89** — hazard refinements: NegateConditional symmetric-branches,
+  StatementDelete unused-binding, ClauseDelete error-only-clause; plus the
+  e2e_mut `downgraded_to_static` flake fix (accept the M64 fallback mode).
+- **M90** — new mutators: `GuardBoolean` (and/or/not in guards) +
+  `ClauseDelete` extension to `receive` / `try`.
+- **M91** — wider OSS matrix: wired phoenix, phoenix_live_view, bandit.
+- **M92** — zorbito 14-app run reached the "Schema build starting" marker.
+- **M93** — graduation re-eval; no flips (matrix measurement deferred).
+
+## v1.24 unreleased — reliability + measurement-redirected perf + ClauseDelete (2026-05-28)
+
+- **M84** — BEAM-startup retry layer (`Mut.ChildProcess` `:retry_on` /
+  `:max_retries`; `Mut.Recompile` wires the three observed transient signatures).
+- **M85** — fallback-share spike; **redirected M86** (dominant fallback
+  constituents — guards, pattern literals — are intrinsically not schema-routable).
+- **M86** (redirected) — `bench/cross_run.exs` cross-run delta tool.
+- **M87** — `Mut.Mutator.ClauseDelete` for case / cond / with(else); opt-in.
+- **M88** — ClauseDelete graduation re-eval → keep_opt_in (plug equiv 26.8%).
+
+## v1.23 unreleased — close the queue (2026-05-28)
+
+- **M80** — NegateConditional binding + dead-branch hazards (plug invalid
+  15.3% → 0.7%).
+- **M81** — `Mut.Mutator.StatementDelete` (delete a non-last def body
+  statement; opt-in, hazard-gated).
+- **M82** — matrix breadth: wired absinthe; Pin exercised on 3 targets.
+- **M83 — Pin GRADUATES to default-on** (3rd new graduation since M46).
+
+## v1.22 unreleased — the two missing classics (2026-05-27)
+
+- **M76** — `Mut.Mutator.FunctionReplace` (closed-allowlist stdlib swaps).
+- **M77** — `Mut.Mutator.NegateConditional` (if/unless negate / force).
+- **M78** — ConcatOperator codegen-context exclusion (jason equiv 67% → 0%).
+- **M79 — ConcatOperator GRADUATES to default-on** (first new graduation
+  since M63).
+
+## v1.21 unreleased — close the v1.20 deferrals (2026-05-26)
+
+- **M72** — operator hazard rules (ConcatOperator drops crash-prone `--`→`++`;
+  BitwiseOperator drops pseudo-equivalent swaps).
+- **M73** — `Mut.Mutator.Pin` (`^x` → `x` unpin; the sole productive
+  pattern-shape mutator).
+- **M74** — unilink umbrella real full `mix mut` (5 apps, live Postgres +
+  RabbitMQ, valid multi-app report).
+- **M75** — graduation matrix → all surfaces keep_opt_in (Pin flawless on
+  plug but single-target).
+
 ## v1.20 unreleased — umbrella support + catalogue growth
 
 ### M66 — umbrella support design spike (2026-05-25)

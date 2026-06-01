@@ -35,3 +35,8 @@ M*_PROMPT.txt
 
 # Real-project benchmark working copies.
 /tmp/bench/
+
+# M97 sharding-harness per-cell artifacts (reproducible via bench/shard_matrix.sh;
+# the committed bench/results/matrix/summary.txt is the data record).
+/bench/results/matrix/*.stryker.json
+/bench/results/matrix/*.terminal.txt

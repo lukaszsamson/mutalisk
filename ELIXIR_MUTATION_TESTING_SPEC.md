@@ -22,10 +22,10 @@ Draft HLD/SPEC for a modern Elixir mutation testing library using source-level m
 
 ## Version Targets
 
-- Elixir `>= 1.18` (raised from `>= 1.17` at v1.7).
+- Elixir `>= 1.19.0` (see `mix.exs`; raised 1.17 → 1.18 at v1.7, then 1.18 → 1.19 in the v1.20+ line).
 - OTP `>= 26`.
 
-Rationale: modern parser metadata, reliable column metadata, good JIT behavior, and no backwards-compatibility burden for a new tool. v1.7 raised the minimum from 1.17 to 1.18 because the persistent worker (M19) depends on `ExUnit.OnExitHandler`, `ExUnit.Server.modules_loaded/1`, and `ExUnit.configure(only_test_ids: ...)` which are stable from 1.18 onward. Users on Elixir 1.17 stay on mutalisk 1.6.x.
+Rationale: modern parser metadata, reliable column metadata, good JIT behavior, and no backwards-compatibility burden for a new tool. The 1.18 floor was originally adopted at v1.7 for the persistent worker (M19), but **the persistent worker was removed in v1.15** (the single fresh-process-per-mutant model proved simpler and no slower on real targets — see README), so that rationale is now historical. The current `>= 1.19.0` floor is the v1.20+ baseline; the catalogue/engine work since then targets 1.19's parser and stdlib (e.g. `:json`). `--worker-type persistent` is rejected; `--worker-type mix` is accepted as a deprecated no-op.
 
 ## High-Level Architecture
 
