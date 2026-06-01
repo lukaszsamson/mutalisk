@@ -4987,6 +4987,38 @@ umbrella engine (M67/M68); `~/zorbito`.
 *Out of scope:* Driving the user-side btc_scanner refactor;
 inventing zorbito infrastructure mutalisk doesn't control.
 
+## v1.27 delivery status (2026-06-02: DELIVERED — FunctionReplace graduated)
+
+- **M97** ✓ — **Sharded matrix run; FunctionReplace GRADUATES to
+  default-on** (4th new graduation since M46). Built `bench/shard_matrix.sh`
+  (shard = one target, clone/compile once into a persistent work_copy,
+  loop surfaces as focused `--enable X --mutators Y --max-mutants N`
+  runs) — the harness the prior two cycles needed, breaking the
+  "data-gated, no flips" pattern with real measurement. FunctionReplace
+  clears the M62 gate on 3 coverage targets: plug 100/0/0 (M79),
+  absinthe 83.3/16.7/0 (M82), bandit 88.9/11.1/0 (M97, the unblocking
+  3rd target M91 wired). Additive + byte-identical (demo_app no
+  allowlisted calls; Decimal `fr` n=0; golden gates green). All other
+  surfaces stay keep_opt_in, now data-backed: NegateConditional
+  (jason 52.4% unchanged — M89 symmetric-branches addresses a different
+  shape than jason's observational-equivalence); ClauseDelete (decimal
+  improved 17.5→12.5 but jason 22.2% + plug 26.8% fail); GuardBoolean
+  (n=0 on all 3 targets — practically-empty surface); PipelineDropStage
+  (jason 66.7% invalid — output-type hazard carry); MapUpdateDrop
+  (decimal 50% equiv — ungated noise confirmed); ReceiveTimeout (bandit
+  18/27 RuntimeErrors — intrinsic noise on concurrent code).
+  `docs/decisions/M97_graduation_matrix.md` + BENCHMARKS v1.27.
+- **M98** ✓ — **Zorbito compile block resolved; env-occupancy block
+  documented.** The M96 btc_scanner WIP refactor landed — `mix compile`
+  now succeeds across all 14 apps. The bounded mut run failed at
+  baseline due to the user's **live zorbito instance** occupying the
+  umbrella's metrics/ranch ports (`:eaddrinuse`) + DB pool, not a
+  mutalisk/compile/infra defect (Postgres is up, code compiles). Didn't
+  disrupt the user's live services. Umbrella validation closes at the
+  engine-proven state (per M98's 2nd outcome); the only remaining step
+  is operational (run when the dev instance is down).
+  `docs/decisions/M98_zorbito_completion.md`. zorbito tree reverted clean.
+
 ## v1.27 horizon (not v1.27 scope)
 
 After v1.27 closes the catalogue-validation arc, the honest
