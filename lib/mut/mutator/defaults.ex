@@ -44,7 +44,16 @@ defmodule Mut.Mutator.Defaults do
     # invalid 0% everywhere) after the M75 map-key hazard fixed the only invalid
     # class. :pattern_shape moves into default enabled targets to make this
     # fire by default; additive (new ^x pin mutants only).
-    Mut.Mutator.Pin
+    Mut.Mutator.Pin,
+    # M97: GRADUATED. Closed-allowlist stdlib swaps (Enum.min↔max, filter↔reject,
+    # …) cleared the M62 gate on 3 coverage targets — plug 100%/0%/0% (M79),
+    # absinthe 83.3%/16.7%/0% (M82), bandit 88.9%/11.1%/0% (M97). The M91
+    # phoenix/LV/bandit wiring finally unblocked the recurring "needs a third
+    # runnable target" graduation gap (M79/M83/M88/M95 all kept it opt-in for
+    # lack of breadth). :dispatch is default-enabled, so this fires by default;
+    # additive (new swap mutants only; demo_app + Decimal have no allowlisted
+    # call sites, so their default plans are byte-identical).
+    Mut.Mutator.FunctionReplace
   ]
 
   @opt_in [
@@ -60,8 +69,7 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.BitwiseOperator,
     Mut.Mutator.Membership,
     # M83: Pin graduated to default-on (above).
-    # M76 function-replacement (opt-in dispatch; M79 decides graduation)
-    Mut.Mutator.FunctionReplace,
+    # M97: FunctionReplace graduated to default-on (above).
     # M77 conditional negate/force (opt-in `:conditional`; M79 decides graduation)
     Mut.Mutator.NegateConditional,
     # M81 statement-delete (opt-in `:statement_delete`; M83 decides graduation)

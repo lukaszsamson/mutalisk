@@ -1,5 +1,59 @@
 # Mutalisk Benchmarks
 
+## v1.27 close the catalogue-validation arc (M97–M98, 2026-06-02)
+
+The arc-closer. After two releases of "data-gated, no flips" deferred on
+session-envelope grounds, M97 **built the sharding harness** and actually
+ran the matrix — producing the headline graduation the breadth-blocked
+prior cycles couldn't reach.
+
+### M97 sharded matrix — FunctionReplace GRADUATES
+
+**The sharding strategy.** `bench/shard_matrix.sh`: shard = one target,
+clone + deps + compile **once** into a persistent `tmp/bench/shard/<target>`
+(`.shard_ready` flag → re-runs skip to mutation), then loop each surface
+as a focused `mix mut --enable <flag> --mutators <name> --max-mutants N`
+against the compiled work_copy. The expensive clone/compile is paid once
+per target instead of once per cell. Remaining bottleneck: per-surface
+coverage re-collection on large suites (bandit's 653-test `:cover` pass
+~8 min/surface) — handled with `timeout 900` + a `--selection static`
+escape where the covered-survivor metric isn't the gating question.
+
+**FunctionReplace → default-on** (4th new graduation since M46, after
+IntegerLiteral-in-pattern M63, ConcatOperator M79, Pin M83):
+
+| target | n | kill% | equiv% | invalid% | source |
+|---|--:|--:|--:|--:|---|
+| plug | 13 | 100 | 0 | 0 | M79 |
+| absinthe | 27 | 83.3 | 16.7 | 0 | M82 |
+| bandit | 9 | 88.9 | 11.1 | 0 | **M97 (fresh, the unblocking 3rd target)** |
+
+All clear the M62 gate. The recurring "needs a third runnable target"
+blocker (kept it opt-in M79/M83/M88/M95 *for lack of breadth*, never
+quality) is gone — M91's bandit wiring supplied it. Additive +
+byte-identical: demo_app has zero allowlisted call sites, Decimal `fr`
+is n=0 (golden gates green).
+
+**Everything else stays keep_opt_in — now with real measured data:**
+
+| surface | decimal | jason | bandit | verdict |
+|---|---|---|---|---|
+| NegateConditional | 76.9/23.1/0 | 47.6/52.4/0 | — | jason **unchanged** vs M83 — M89 symmetric-branches hazard addresses a different shape than jason's observational-equivalence class |
+| StatementDelete | 100/0/0 (n=1) | 100/0/0 (n=6) | — | clean but tiny-n; the M83 20%-invalid target (plug_crypto) unmeasured (coverage-slow) — keep_opt_in |
+| ClauseDelete | 87.5/12.5/0 | 77.8/22.2/0 | — | M89 error-only helped decimal (17.5→12.5) but jason 22.2% + plug 26.8% (M88) fail |
+| GuardBoolean | n=0 | n=0 | n=0 | **practically-empty surface** — boolean-op guards are rare (comparison/type-test dominate, already covered) |
+| PipelineDropStage | 100/0/0 (n=2) | 100/0/**66.7** (n=3) | — | jason **66.7% invalid** — dropping a stage breaks downstream output-type expectations (invalid-hazard carry) |
+| MapUpdateDrop | 50/**50**/0 | 100/0/0 (n=2) | — | decimal 50% equiv confirms the ungated "result-unused" noise from M94 |
+| ReceiveTimeout | n=0 | n=0 | 55.6/44.4/0 (**18 err**) | noisy on real concurrent code (timeout mutations → crashes/hangs, not clean kills) |
+| Pin | n=0 | n=0 | — | stays default-on (M83); no regression |
+
+(Format kill%/equiv%/invalid%; `n=0` = no candidates on that target.)
+Full per-surface rationale in `docs/decisions/M97_graduation_matrix.md`.
+
+### M98 zorbito retry
+
+(See `docs/decisions/M98_zorbito_completion.md`.)
+
 ## v1.26 close-out + niche mutators (M94–M96, 2026-05-28)
 
 Three milestones: M94 ships three new niche mutators, M95 applies the
