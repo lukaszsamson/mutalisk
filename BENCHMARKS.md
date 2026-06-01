@@ -52,7 +52,19 @@ Full per-surface rationale in `docs/decisions/M97_graduation_matrix.md`.
 
 ### M98 zorbito retry
 
-(See `docs/decisions/M98_zorbito_completion.md`.)
+**The M96 compile block is resolved** — the user's btc_scanner refactor
+landed; `mix compile` now succeeds across all 14 apps. The bounded
+mutation run was blocked at the baseline by **live-instance resource
+occupancy**: the user's running zorbito dev instance (`iex -S mix
+phx.server`) holds the umbrella's metrics/ranch ports (`:eaddrinuse`
+on `:prometheus_metrics`) and DB connection pool, so mutalisk's baseline
+can't start the apps. This is an environment-occupancy block (Postgres
+is up, the code compiles) — not a mutalisk defect, and I didn't disrupt
+the user's live services to force it. Umbrella validation closes at the
+engine-proven state (v1.20 M67/M68 + v1.21 M74 unilink real full run +
+M71/M92 zorbito oracle+schema); the only remaining step is operational —
+run when the dev instance is stopped. See
+`docs/decisions/M98_zorbito_completion.md`.
 
 ## v1.26 close-out + niche mutators (M94–M96, 2026-05-28)
 
