@@ -4869,6 +4869,158 @@ isn't the bar).
 - New mutator surface beyond M94's three.
 - EnvWalker consolidation implementation; wrapper guard schemata.
 
+# v1.27 milestones (close the catalogue-validation arc)
+
+v1.27 is the **arc-closer.** After 13 releases of catalogue +
+validation work (v1.15→v1.26), the catalogue is at its natural
+ceiling within mutalisk's no-macro-expansion design. The only
+meaningful unfinished business is the matrix measurement
+v1.25/M93 and v1.26/M95 both deferred, and the contingent
+zorbito retry. v1.27 lands both, accepting partial outcomes
+where partial is what's available, and explicitly names this as
+the close of the catalogue-validation arc rather than another
+increment.
+
+Two releases of "data-gated, no flips" looks less like discipline
+than inability to actually measure. v1.27 breaks the pattern by
+**designing the sharding strategy** into M97 so the matrix run
+actually completes — not by punting the realism a third time.
+
+**Defaults:** M97 may graduate per the M62 gate; **FunctionReplace
+is the lead candidate** (the M91 wiring of phoenix 27 / LV 36 /
+bandit 5 allowlisted call sites is the first time the gate is
+reachable via available data — the recurring "needs breadth"
+blocker is gone). No graduation pre-committed beyond that
+framing. Elixir floor stays `>= 1.19.0`.
+
+Two milestones. M97 is the matrix + decisions; M98 is the
+contingent zorbito retry. Neither requires the other.
+
+## v1.27 scope (committed)
+
+**M97 — Sharded matrix run + graduation decisions + BENCHMARKS.**
+
+*Goal:* Actually run the matrix the prior two releases deferred,
+by designing the sharding strategy into the milestone.
+
+*Inputs:* `docs/decisions/M93_*` and `docs/decisions/M95_*`
+(the prior two deferral rationales — session envelope is the
+binding constraint); the M91-expanded matrix (12 targets:
+decimal, jason, plug, gettext, ecto, credo, makeup, timex,
+absinthe, phoenix, phoenix_live_view, bandit); the post-M89
+hazard-refined catalogue + M90 + M94 surfaces (8 surfaces total);
+per-mutator equivalent-rate (M59 tooling); the M62 sharpened
+gate; `bench/run.sh`.
+
+*Deliverables:*
+- **Sharding strategy** designed up front (e.g. one shard per
+  surface, or per surface × target-chunk, or one shard per
+  target with all surfaces — whichever fits the focused-window
+  envelope that defeated M95). Document the strategy in the
+  milestone before running.
+- Run each shard; accumulate per-mutator equivalent-rate +
+  kill/invalid/error counts per (surface, target).
+- 8 surfaces measured:
+  - **Post-M89 hazard-refined**: NegateConditional,
+    StatementDelete, ClauseDelete (case/cond/with).
+  - **M90 first-eval**: GuardBoolean, receive/try ClauseDelete.
+  - **M94 first-eval (informational)**: PipelineDropStage,
+    MapUpdateDrop, ReceiveTimeout.
+  - **Opportunistic re-eval with breadth**: FunctionReplace
+    (lead candidate; phoenix/LV/bandit unblock its third
+    target), Pin (matrix breadth confirms M83 graduation).
+- Apply M62 gate per surface; flip what clears into
+  `Mut.Mutator.Defaults.default_on/0`.
+- `docs/decisions/M97_*.md` per surface: keep_opt_in / graduate /
+  first-eval-keep-opt-in, with the data table.
+- BENCHMARKS v1.27 section: cumulative catalogue rates + the
+  sharding-run methodology.
+
+*Acceptance (deliberately allows partial):*
+- **Matrix data exists for all 8 surfaces × ≥3 targets**, OR
+  documented why a specific (surface, target) couldn't be
+  measured (e.g. env-blocked, run timeout). The bar is "we
+  actually have data this time," not "we have data on
+  everything."
+- Decisions committed; data-gated.
+- Any graduation additive-only (existing stable IDs unchanged),
+  verified by plan diff on demo_app + Decimal.
+- `bin/verify` green.
+
+*Out of scope:* Exact-equivalent detection (undecidable; M62
+sharpens the estimate, not exactness). Surfaces that don't
+clear stay opt-in (revisit if/when a future release does).
+
+**M98 — Zorbito retry (contingent).**
+
+*Goal:* Either push past M92's "Schema build starting" marker
+into the mutation phase, or close umbrella validation at the
+v1.25/v1.26 state with documented upstream blocker.
+
+*Inputs:* M92 (reached "Schema build starting" on real 14-app
+zorbito); M96 (upstream-class blocker — `mix compile` failing
+on `unknown key :previous_hash for struct BtcScanner.BlockData`
+from the user's in-flight btc_scanner WIP refactor); the v1.20
+umbrella engine (M67/M68); `~/zorbito`.
+
+*Deliverables (two acceptable outcomes, pick whichever applies):*
+
+- **If the btc_scanner refactor lands during the cycle:** shard
+  the run by app or by `--max-mutants` (per v1.21 unilink
+  precedent), push past schema-build start into the mutation
+  phase. Per-app + aggregate scores **or** documented partial-run
+  outcome with the shard plan.
+
+- **If it doesn't land:** document the upstream block precisely
+  (which struct, which fields, which apps affected), close
+  umbrella validation at the v1.25/v1.26 state (engine path
+  proven, full real-world run not achievable without the
+  refactor). Update `docs/decisions/M98_*.md` with the close-out
+  rationale.
+
+*Acceptance:*
+- One of the two outcomes lands (not both, not neither).
+- No umbrella regression on single-app or unilink paths
+  (golden_oracle + golden_instrument green).
+- `bin/verify` green.
+
+*Out of scope:* Driving the user-side btc_scanner refactor;
+inventing zorbito infrastructure mutalisk doesn't control.
+
+## v1.27 horizon (not v1.27 scope)
+
+After v1.27 closes the catalogue-validation arc, the honest
+inventory is:
+
+- **Catalogue:** function-call deletion + return-value
+  replacement, both deferred indefinitely on high-FP grounds.
+  Within the no-macro-expansion design, nothing else to add.
+- **Engine:** EnvWalker consolidation (M51 deferred,
+  maintenance-trigger gated — trigger has never fired);
+  wrapper-guard schemata (M85 confirmed AST-shape-unviable).
+- **Standing big bet:** incremental cross-run history,
+  indefinite hold per v1.25's explicit reposture.
+- **Operational reality:** ~80+ unpushed commits across
+  v1.15→v1.26, never pushed/tagged/released; user has held this
+  every release.
+
+**v1.28+ needs a different *kind* of release:** pivot
+(reverse the history hold, or genuinely something new outside
+the no-macro-expansion design), release management (push/tag/
+maybe Hex), or steady-state maintenance mode. The conversation
+about which belongs at the start of v1.28 scoping, not folded
+into v1.27.
+
+## Explicitly NOT v1.27
+
+- New mutators of any kind — catalogue at design ceiling.
+- Function-call deletion / return-value replacement.
+- Incremental cross-run history (indefinite hold).
+- Tuple/list pattern-arity; wrapper-guard schemata; EnvWalker
+  consolidation implementation.
+- Pushing or tagging a release; Hex publish (held every release
+  by explicit user constraint; v1.28+ conversation).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).

@@ -1181,6 +1181,39 @@ Apply the M62 gate per surface. Decisions in `docs/decisions/M95_*.md`: keep_opt
 
 **v1.26 outcome (2026-05-28):** all three milestones shipped; **no graduation flips**. M94 shipped three new opt-in fallback-routed niche mutators: `Mut.Mutator.PipelineDropStage` (drop a middle stage from a `|>` chain, with hazards skipping first/last stage and chains shorter than 3 stages, custom span via leftmost leaf to rightmost call's `:closing`), `Mut.Mutator.MapUpdateDrop` (`%{m | k: v}` → `m`, plain map literals skipped), and `Mut.Mutator.ReceiveTimeout` (three variants per candidate: t→0, t→:infinity, drop-after; receives without `after` skipped). Each gated by its own opt-in target so the default plan stays unchanged; 21 unit tests across the three new mutators; demo_app byte-identical (golden gates verify). M95 applied the M62 gate honestly: comprehensive matrix data on the M91 12-target set is the gating constraint, deferred to v1.27 (session budget didn't accommodate the full matrix run; each surface × target combination materially exceeds the focused-window envelope). Every surface stays `keep_opt_in`; structural arguments from M89's hazards + M83/M88's documented failure modes carry the per-surface decisions. Pin stays default-on per M83. FunctionReplace third-target attempt: the M91 wiring (phoenix 27 / LV 36 / bandit 5 allowlisted call sites) is the first time the gate is *reachable* via available data — most likely v1.27 graduation candidate. M96 sharded zorbito retry blocked by zorbito-local btc_scanner WIP compile state (the user's in-flight refactor; `mix compile` on the umbrella root fails on `unknown key :previous_hash for struct BtcScanner.BlockData`); not a mutalisk-engine issue. M92's "Schema build starting" milestone carries forward as the umbrella validation marker; retry is a v1.27 carry pending the upstream btc_scanner refactor landing. Zero stable-id churn: demo_app + Decimal default plans byte-identical (golden_oracle + golden_instrument verify).
 
+### v1.27 (2 milestones — close the catalogue-validation arc)
+
+v1.27 is the **arc-closer**. After 13 releases of catalogue + validation work (v1.15→v1.26), the catalogue has reached its natural ceiling within mutalisk's no-macro-expansion design (per the v1.26 outcome). The only meaningful unfinished business is the matrix measurement v1.25/M93 and v1.26/M95 both deferred — and the contingent zorbito retry. v1.27 lands both, accepting partial outcomes where partial is what's available, and explicitly names this as the close of the catalogue-validation arc rather than another increment.
+
+Two releases of "data-gated, no flips" looks less like discipline than inability to actually measure. v1.27 breaks the pattern by *designing the sharding strategy* into M97 so the matrix run actually completes — not by punting the realism a third time.
+
+**Defaults:** M97 may graduate per the M62 gate; **FunctionReplace is the lead candidate** (the M91 wiring of phoenix 27 / LV 36 / bandit 5 allowlisted call sites is the first time the gate is reachable via available data — the recurring "needs breadth" blocker is gone). No graduation pre-committed beyond that framing. Elixir floor stays `>= 1.19.0`.
+
+**Two milestones.** M97 is the matrix + decisions; M98 is the contingent zorbito retry. Neither requires the other.
+
+**M97 — Sharded matrix run + graduation decisions + BENCHMARKS.** Design the sharding strategy (one shard per surface, or per surface × target-chunk — whatever fits the focused-window envelope that defeated M95). Run each shard, accumulate per-mutator equivalent-rate data. Apply the M62 gate per surface. Flip what clears. **Acceptance accepts partial:** matrix data exists for all 8 surfaces × ≥3 targets, *or* documented why a specific surface couldn't be measured. The bar is "we actually have data this time," not "we have data on everything." If FunctionReplace clears, it's the fourth new default-on graduation since M46; any graduation is additive-only (existing stable IDs unchanged). BENCHMARKS v1.27 section with cumulative catalogue rates.
+
+**M98 — Zorbito retry (contingent).** Contingent on the user-side btc_scanner WIP refactor landing during the cycle. If it lands: shard the run by app or by `--max-mutants`, push past M92's "Schema build starting" marker into the mutation phase. If it doesn't land: document the upstream block and **close umbrella validation at the v1.25/v1.26 state** — engine path proven, full real-world run not achievable without the refactor. Either outcome is acceptable; the milestone has to land *one* of them, not both.
+
+**Explicitly NOT in v1.27:**
+- New mutators of any kind — catalogue is at design ceiling.
+- Function-call deletion / return-value replacement (deferred indefinitely on high-FP grounds).
+- Incremental cross-run history (indefinite hold; explicit reposture from v1.25).
+- Tuple/list pattern-arity; wrapper-guard schemata (M85 rejected); EnvWalker consolidation implementation.
+- Pushing or tagging a release; Hex publish (operational reality the user has held every release).
+
+### After v1.27 — what's honestly left
+
+v1.27 closes the catalogue-validation arc. The honest inventory of what remains:
+
+- **Catalogue:** function-call deletion + return-value replacement, both deferred indefinitely on high-FP grounds. Within the no-macro-expansion design, there is nothing else to add.
+- **Engine:** EnvWalker consolidation (M51 deferred, maintenance-trigger gated; the trigger has never fired). Wrapper-guard schemata (M85 confirmed AST-shape-unviable). Nothing forced.
+- **Validation:** the matrix is broad enough for graduation decisions; zorbito is the only outstanding real-world target and it's contingent.
+- **Standing big bet:** incremental cross-run history, indefinite hold per v1.25's explicit reposture.
+- **Operational reality:** ~80+ unpushed commits across v1.15→v1.26, never pushed, never tagged, never released. Held every release by explicit user constraint.
+
+v1.28+ honestly requires a different *kind* of release: pivot (reverse the history hold, or genuinely something new outside the no-macro-expansion design), release management (push/tag/maybe Hex), or steady-state maintenance mode. That's a conversation for after v1.27 lands, not now — but the v1.27 docs name this honestly so the next scoping conversation can start from where the project actually is rather than from "what's the next milestone."
+
 ### v2
 
 - Lean env walker.
