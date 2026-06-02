@@ -26,6 +26,58 @@ defmodule Mut.FallbackPatchTest do
     assert patch.end_column == 46
   end
 
+  test "M99 #2: EnvWalker span feeds the patcher byte-correctly on non-ASCII source" do
+    # End-to-end span→patch chain on a line with a multi-byte char before the
+    # literal: EnvWalker must compute a codepoint-correct byte span, and the
+    # patcher must splice exactly that literal (no off-by-UTF-8-bytes drift).
+    source = ~S'''
+    defmodule M do
+      def slogan, do: "café" <> "bar"
+    end
+    '''
+
+    {:ok, ast} = Mut.EnvWalker.parse_string(source, "lib/m.ex")
+
+    candidate =
+      ast
+      |> Mut.EnvWalker.collect_string_literal_candidates(file: "lib/m.ex", source: source)
+      |> Enum.find(fn {c, _snap} ->
+        span = c.source_span
+        binary_part(source, span.start_byte, span.end_byte - span.start_byte) == ~s("bar")
+      end)
+
+    refute is_nil(candidate), "expected to find the \"bar\" literal after café"
+    {c, _snap} = candidate
+    span = c.source_span
+
+    mutant =
+      mutant(
+        start_byte: span.start_byte,
+        end_byte: span.end_byte,
+        line: span.start_line,
+        column: span.start_column,
+        span: {span.start_line, span.start_column, span.end_line, span.end_column},
+        original_ast: "bar",
+        mutated_ast: ""
+      )
+
+    assert {:ok, %SourcePatch{} = patch} = FallbackPatch.render(mutant, source)
+    # The spliced original is exactly the literal, not a byte-shifted slice.
+    assert patch.original == ~s("bar")
+
+    # Applying the patch produces correct mutated source (café preserved).
+    root = Path.expand("tmp/tests/fallback_patch/m99_utf8")
+    file = Path.join(root, "lib/m.ex")
+    File.rm_rf!(root)
+    File.mkdir_p!(Path.dirname(file))
+    File.write!(file, source)
+    patch = %{patch | file: "lib/m.ex"}
+    :ok = FallbackPatch.apply(patch, root)
+
+    assert File.read!(file) =~ ~s(def slogan, do: "café" <> "")
+    File.rm_rf!(root)
+  end
+
   test "render refuses mutants without precise byte spans" do
     assert FallbackPatch.render(mutant(start_byte: nil), "x > 0") ==
              {:error, :missing_source_span}

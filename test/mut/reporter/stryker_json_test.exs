@@ -32,6 +32,33 @@ defmodule Mut.Reporter.StrykerJsonTest do
     assert rendered["mutalisk"]["selection"]["mode"] == "coverage_with_static_fallback"
   end
 
+  test "M99: terminal score (snapshot.score) and Stryker-viewer-derived score agree" do
+    # killed=1, timeout=1 (both detected), survived=1; error excluded.
+    {snapshot, plan} = fixture_snapshot_and_plan([:killed, :timeout, :survived, :error])
+
+    rendered = StrykerJson.render(snapshot, plan, source_loader(), [])
+    decoded = rendered |> Mut.JSON.encode!() |> Mut.JSON.decode!()
+
+    status_counts =
+      decoded["files"]
+      |> Map.values()
+      |> Enum.flat_map(& &1["mutants"])
+      |> Enum.frequencies_by(& &1["status"])
+
+    # Stryker HTML viewer: detected = Killed + Timeout; undetected = Survived +
+    # NoCoverage; score = detected / (detected + undetected). CompileError /
+    # RuntimeError / Ignored are excluded from both.
+    detected = Map.get(status_counts, "Killed", 0) + Map.get(status_counts, "Timeout", 0)
+    undetected = Map.get(status_counts, "Survived", 0) + Map.get(status_counts, "NoCoverage", 0)
+    stryker_score = detected / (detected + undetected) * 100.0
+
+    # The terminal reporter prints snapshot.score. Both must agree, and both
+    # must count the timeout as a detection: (1 killed + 1 timeout) / (2 + 1
+    # survived) = 66.7%. The pre-fix bug excluded timeout → terminal 50%.
+    assert_in_delta snapshot.score, stryker_score, 0.001
+    assert_in_delta snapshot.score, 66.7, 0.05
+  end
+
   test "M47: a heredoc-delimited mutant diff degrades instead of aborting the report" do
     # `Macro.to_string/1` renders this as a heredoc fragment that
     # `Code.format_string!/1` cannot re-parse (TokenMissingError) — the
@@ -130,9 +157,16 @@ defmodule Mut.Reporter.StrykerJsonTest do
      %Plan{schema: mutants, fallback: [], skipped: []}}
   end
 
-  defp score(%{killed: killed, survived: survived}), do: killed / (killed + survived) * 100.0
-  defp score(%{killed: _killed}), do: 100.0
-  defp score(_counts), do: 100.0
+  # Mirror Mut.Metrics.score/3: timeout is a detection, counted with killed in
+  # both numerator and denominator; error/invalid/skipped excluded.
+  defp score(counts) do
+    killed = Map.get(counts, :killed, 0)
+    timeout = Map.get(counts, :timeout, 0)
+    survived = Map.get(counts, :survived, 0)
+    detected = killed + timeout
+    total = detected + survived
+    if total == 0, do: 100.0, else: detected / total * 100.0
+  end
 
   defp entry(mutant) do
     %{
