@@ -120,11 +120,17 @@ alpha_stable = d1["def alpha/1"] == d2["def alpha/1"]
 beta_changed = d1["def beta/1"] != d2["def beta/1"]
 
 IO.puts("")
-IO.puts("file-level digest changed on the same edit?  #{M104Proof.file_digest(v1) != M104Proof.file_digest(v2)}")
+
+IO.puts(
+  "file-level digest changed on the same edit?  #{M104Proof.file_digest(v1) != M104Proof.file_digest(v2)}"
+)
+
 IO.puts("")
 
-IO.puts("CLAIM 1 (function-level isolates): " <>
-          if(alpha_stable and beta_changed, do: "PASS", else: "FAIL"))
+IO.puts(
+  "CLAIM 1 (function-level isolates): " <>
+    if(alpha_stable and beta_changed, do: "PASS", else: "FAIL")
+)
 
 # selected_tests_digest: order-insensitive, content-sensitive.
 t_a = [{"test/a_test.exs", "assert foo() == 1"}, {"test/b_test.exs", "assert bar() == 2"}]
@@ -135,8 +141,10 @@ dig = &M104Proof.selected_tests_digest/1
 order_stable = dig.(t_a) == dig.(t_a_reordered)
 content_sensitive = dig.(t_a) != dig.(t_b)
 
-IO.puts("CLAIM 2 (selected_tests_digest order-insensitive + content-sensitive): " <>
-          if(order_stable and content_sensitive, do: "PASS", else: "FAIL"))
+IO.puts(
+  "CLAIM 2 (selected_tests_digest order-insensitive + content-sensitive): " <>
+    if(order_stable and content_sensitive, do: "PASS", else: "FAIL")
+)
 
 if alpha_stable and beta_changed and order_stable and content_sensitive do
   IO.puts("\nALL PROOFS PASS")
