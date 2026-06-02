@@ -95,6 +95,20 @@ defmodule Mut.Mutator.ReceiveTimeoutTest do
       assert Keyword.has_key?(args, :do)
     end
 
+    test "no drop-after when the receive has no :do clauses (only timeout swaps)" do
+      # A receive whose args carry `:after` but no `:do` message-handler
+      # clauses: dropping `:after` would leave an empty/invalid receive, so
+      # only the timeout-swap variants are emitted (the drop-after gate).
+      node = {:receive, [line: 1], [[after: [{:->, [line: 1], [[100], :timeout]}]]]}
+
+      changes =
+        node
+        |> ReceiveTimeout.mutate(ctx([]))
+        |> Enum.map(& &1.metadata.change)
+
+      assert changes == [{:set_timeout, 0}, {:set_timeout, :infinity}]
+    end
+
     test "not applicable in schema engine or on non-receive nodes" do
       [c] = candidates(@src)
       schema_ctx = %{ctx(c.ast_path) | engine: :schema}
