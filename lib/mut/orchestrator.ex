@@ -182,7 +182,7 @@ defmodule Mut.Orchestrator do
     {receive_timeout_fallback, receive_timeout_skips} =
       receive_timeout_results(ast, relative_file, source, enabled_targets, mutators)
 
-    %Plan{
+    plan = %Plan{
       schema: dispatch_schema ++ literal_schema,
       fallback:
         attribute_fallback ++
@@ -213,6 +213,44 @@ defmodule Mut.Orchestrator do
           map_update_skips ++
           receive_timeout_skips,
       matched_pairs: matched
+    }
+
+    # M100: `@mutalisk_ignore true` excludes every mutant in the marked module.
+    apply_module_ignores(plan, Mut.AstWalk.ignored_modules(ast))
+  end
+
+  # Drop mutants whose enclosing module is `@mutalisk_ignore true`, recording
+  # them as skipped (reason `:mutalisk_ignore`) so the metric is visible rather
+  # than a silent disappearance. No ignored modules -> plan unchanged.
+  defp apply_module_ignores(plan, ignored) do
+    if MapSet.size(ignored) == 0 do
+      plan
+    else
+      {kept_schema, dropped_schema} =
+        Enum.split_with(plan.schema, &(not MapSet.member?(ignored, &1.module)))
+
+      {kept_fallback, dropped_fallback} =
+        Enum.split_with(plan.fallback, &(not MapSet.member?(ignored, &1.module)))
+
+      ignore_skips = Enum.map(dropped_schema ++ dropped_fallback, &mutant_ignore_skip/1)
+
+      %{
+        plan
+        | schema: kept_schema,
+          fallback: kept_fallback,
+          skipped: plan.skipped ++ ignore_skips
+      }
+    end
+  end
+
+  defp mutant_ignore_skip(%Mutant{} = mutant) do
+    %{
+      file: mutant.file,
+      line: mutant.line,
+      column: mutant.column,
+      syntactic_name: mutant.mutation_kind,
+      reason: :mutalisk_ignore,
+      detail: nil
     }
   end
 

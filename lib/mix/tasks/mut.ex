@@ -37,22 +37,47 @@ defmodule Mix.Tasks.Mut do
     --test-timeout-ms N      Per-test ExUnit timeout in milliseconds.
                                Default 10000. Range 1000..600000.
 
-  Configuration via `config :mut`:
+  ## Configuration
+
+  Settings can come from three layers, lowest to highest precedence:
+
+      .mutalisk.exs project file  <  config :mut  <  CLI flags
+
+  A CLI flag always wins; `config :mut` overrides the file; the file is the
+  base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
+  `enabled_targets`, `selection`, `fail_at`, `concurrency`, `test_timeout_ms`,
+  `reporters`, `output_path`, `exclude`.
+
+  `.mutalisk.exs` (in the project root, loaded if present) is a plain
+  keyword-list term — no `Config` runtime needed:
+
+      # .mutalisk.exs
+      [
+        selection: :coverage_with_static_fallback,
+        fail_at: 75.0,
+        concurrency: 8,
+        enabled_targets: [:dispatch, :guard],
+        exclude: [~r"lib/my_app_web/router.ex"]
+      ]
+
+  Or via application config:
 
       config :mut,
-        files: ["lib"],
-        test_paths: ["test"],
-        mutators: [:arithmetic, :comparison, :boolean,
-                   :guard_comparison],
         enabled_targets: [:dispatch, :guard],
         exclude: [~r/lib\\/my_app_web\\/router.ex/],
         fail_at: 80.0,
-        concurrency: System.schedulers_online(),
-        timeout_factor: 2.0,
-        timeout_const: 1000,
-        reporters: [:terminal, :stryker_json]
+        selection: :coverage_with_static_fallback,
+        concurrency: System.schedulers_online()
 
-  CLI flags override config.
+  ## Source-level ignores
+
+  Add `@mutalisk_ignore true` to a module to exclude every mutant in that
+  module (generated/DSL modules, intentionally-untested code):
+
+      defmodule MyApp.Generated do
+        @mutalisk_ignore true
+        # ... no mutants are produced for this module ...
+      end
 
   Run as `MIX_ENV=test mix mut`.
   """
@@ -83,7 +108,9 @@ defmodule Mix.Tasks.Mut do
   def run(argv) do
     enforce_test_env!()
 
-    case Cli.parse(argv, Application.get_all_env(:mut)) do
+    # Effective config: `.mutalisk.exs` (project file) < `config :mut` < CLI
+    # flags. Mut.Config merges the first two; Cli.parse layers CLI flags on top.
+    case Cli.parse(argv, Mut.Config.load(File.cwd!())) do
       {:ok, opts} -> run_pipeline(opts)
       {:error, message} -> Mix.raise(message)
     end
@@ -261,7 +288,7 @@ defmodule Mix.Tasks.Mut do
       files: expand_file_patterns(work_copy, opts.files),
       mutators: Cli.resolve_mutators(opts.mutators),
       enabled_targets: opts.enabled_targets,
-      file_filter: file_filter()
+      file_filter: opts.exclude
     )
   end
 
@@ -767,25 +794,6 @@ defmodule Mix.Tasks.Mut do
         path
         |> Path.wildcard()
         |> Enum.map(&Path.relative_to(&1, work_copy))
-    end
-  end
-
-  defp file_filter do
-    case Application.get_env(:mut, :exclude) do
-      nil ->
-        nil
-
-      [] ->
-        nil
-
-      [%Regex{} = regex] ->
-        regex
-
-      %Regex{} = regex ->
-        regex
-
-      regexes when is_list(regexes) ->
-        Regex.compile!(Enum.map_join(regexes, "|", &Regex.source/1))
     end
   end
 

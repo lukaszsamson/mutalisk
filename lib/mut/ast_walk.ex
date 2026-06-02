@@ -23,6 +23,69 @@ defmodule Mut.AstWalk do
 
   @type path_elem :: {:elem, atom(), non_neg_integer()}
 
+  @doc """
+  M100: modules a source file marks for exclusion via `@mutalisk_ignore true`.
+
+  A module-level `@mutalisk_ignore true` attribute (anywhere in the module's
+  direct body) excludes every candidate in that module from mutation —
+  intended for generated/DSL modules or code that is intentionally untested.
+  Returns a `MapSet` of fully-qualified module names. Nested modules are
+  evaluated independently (an inner module's attribute does not ignore the
+  outer, and vice-versa).
+  """
+  @spec ignored_modules(Macro.t()) :: MapSet.t(module())
+  def ignored_modules(ast) do
+    # Track the nesting stack so nested `defmodule`s resolve to their
+    # fully-qualified name (raw-AST aliases are relative: `defmodule Inner`
+    # inside `Outer` has parts `[:Inner]`, but the module is `Outer.Inner` —
+    # which is what `mutant.module` carries, so the filter must match it).
+    {_ast, {ignored, _stack}} =
+      Macro.traverse(
+        ast,
+        {MapSet.new(), []},
+        fn
+          {:defmodule, _meta, [{:__aliases__, _am, parts}, body]} = node, {acc, stack}
+          when is_list(parts) ->
+            full = stack ++ parts
+
+            acc =
+              if module_self_ignored?(body), do: MapSet.put(acc, Module.concat(full)), else: acc
+
+            {node, {acc, full}}
+
+          node, state ->
+            {node, state}
+        end,
+        fn
+          {:defmodule, _meta, [{:__aliases__, _am, parts}, _body]} = node, {acc, stack}
+          when is_list(parts) ->
+            {node, {acc, Enum.drop(stack, -length(parts))}}
+
+          node, state ->
+            {node, state}
+        end
+      )
+
+    ignored
+  end
+
+  # True iff the module's OWN direct body statements contain `@mutalisk_ignore
+  # true` (does not descend into nested `defmodule` bodies — those are single
+  # statements here and are matched on their own prewalk visit).
+  defp module_self_ignored?([{:do, block} | _]) do
+    block
+    |> module_body_statements()
+    |> Enum.any?(&mutalisk_ignore_attribute?/1)
+  end
+
+  defp module_self_ignored?(_body), do: false
+
+  defp module_body_statements({:__block__, _meta, stmts}) when is_list(stmts), do: stmts
+  defp module_body_statements(single), do: [single]
+
+  defp mutalisk_ignore_attribute?({:@, _meta, [{:mutalisk_ignore, _am, [true]}]}), do: true
+  defp mutalisk_ignore_attribute?(_node), do: false
+
   @spec dispatch_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
   def dispatch_candidates(ast, opts) do
     file = Keyword.fetch!(opts, :file)

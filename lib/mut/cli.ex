@@ -19,7 +19,8 @@ defmodule Mut.Cli do
             selection: atom,
             test_paths: [String.t()],
             keep_work_copy: boolean,
-            test_timeout_ms: pos_integer
+            test_timeout_ms: pos_integer,
+            exclude: Regex.t() | nil
           }
 
     defstruct [
@@ -35,7 +36,8 @@ defmodule Mut.Cli do
       :selection,
       :test_paths,
       :keep_work_copy,
-      :test_timeout_ms
+      :test_timeout_ms,
+      :exclude
     ]
   end
 
@@ -188,7 +190,8 @@ defmodule Mut.Cli do
          {:ok, selection} <- selection(parsed, config),
          {:ok, test_paths} <- test_paths(config),
          :ok <- worker_type(parsed, config),
-         {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config) do
+         {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
+         {:ok, exclude} <- exclude(config) do
       {:ok,
        %Options{
          files: files,
@@ -203,8 +206,31 @@ defmodule Mut.Cli do
          selection: selection,
          test_paths: test_paths,
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
-         test_timeout_ms: test_timeout_ms
+         test_timeout_ms: test_timeout_ms,
+         exclude: exclude
        }}
+    end
+  end
+
+  # `exclude` is config-only (no CLI flag): a single Regex, a list of Regex, or
+  # nil/[]. Compiled to one combined Regex (or nil) for file filtering. Comes
+  # from the merged `.mutalisk.exs` + `config :mut` map (file < app).
+  defp exclude(config) do
+    case Keyword.get(config, :exclude) do
+      nil -> {:ok, nil}
+      [] -> {:ok, nil}
+      %Regex{} = regex -> {:ok, regex}
+      [%Regex{} = regex] -> {:ok, regex}
+      regexes when is_list(regexes) -> compile_exclude(regexes)
+      other -> {:error, "config :exclude must be a Regex or list of Regex; got #{inspect(other)}"}
+    end
+  end
+
+  defp compile_exclude(regexes) do
+    if Enum.all?(regexes, &match?(%Regex{}, &1)) do
+      {:ok, Regex.compile!(Enum.map_join(regexes, "|", &Regex.source/1))}
+    else
+      {:error, "config :exclude list must contain only Regex values"}
     end
   end
 
