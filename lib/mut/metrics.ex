@@ -119,7 +119,12 @@ defmodule Mut.Metrics do
   @spec record_mutant(pid :: GenServer.server(), mutant :: Mutant.t(), result :: Result.t()) ::
           :ok
   def record_mutant(pid, %Mutant{} = mutant, %Result{} = result) do
-    GenServer.cast(pid, {:record_mutant, mutant, result})
+    # Synchronous: a mutant result must be recorded before the worker task
+    # returns, so the post-run report snapshot (taken from the parent after the
+    # task stream drains) can never miss a late result. The round-trip is
+    # microseconds against seconds-long mutant runs. (cast would be safe on a
+    # local node given mailbox FIFO, but call makes the invariant robust.)
+    GenServer.call(pid, {:record_mutant, mutant, result})
   end
 
   @spec set_planned_total(pid :: GenServer.server(), non_neg_integer) :: :ok
@@ -188,7 +193,9 @@ defmodule Mut.Metrics do
   def record_selection(pid, %Mutant{} = mutant, match_kind, fallback_reason, selected_count)
       when is_atom(match_kind) and (is_atom(fallback_reason) or is_nil(fallback_reason)) and
              is_integer(selected_count) and selected_count >= 0 do
-    GenServer.cast(pid, {:record_selection, mutant, match_kind, fallback_reason, selected_count})
+    # Synchronous for the same reason as record_mutant/3: selection metrics
+    # feed the report, so they must land before the parent's report snapshot.
+    GenServer.call(pid, {:record_selection, mutant, match_kind, fallback_reason, selected_count})
   end
 
   @spec snapshot(pid :: GenServer.server()) :: Snapshot.t()
@@ -228,12 +235,12 @@ defmodule Mut.Metrics do
   end
 
   @impl GenServer
-  def handle_cast({:record_mutant, mutant, result}, state) do
+  def handle_call({:record_mutant, mutant, result}, _from, state) do
     status = result.status
     duration_ms = result.duration_ms || 0
     entry = ledger_entry(mutant, result, status)
 
-    {:noreply,
+    {:reply, :ok,
      state
      |> increment_status(status)
      |> increment_engine_status(mutant.engine, status)
@@ -243,6 +250,25 @@ defmodule Mut.Metrics do
      |> prepend_ledger(entry)}
   end
 
+  def handle_call(
+        {:record_selection, _mutant, match_kind, fallback_reason, selected_count},
+        _from,
+        state
+      ) do
+    state =
+      state
+      |> increment_map(:coverage_match_distribution, match_kind, 1)
+      |> maybe_increment_fallback_reason(fallback_reason)
+      |> update_in([:selected_test_counts], &[selected_count | &1])
+
+    {:reply, :ok, state}
+  end
+
+  def handle_call(:snapshot, _from, state) do
+    {:reply, build_snapshot(state), state}
+  end
+
+  @impl GenServer
   def handle_cast({:set_planned_total, total}, state) do
     {:noreply, %{state | planned_total: total}}
   end
@@ -330,24 +356,6 @@ defmodule Mut.Metrics do
     {:noreply, %{state | test_timeout_ms: ms}}
   end
 
-  def handle_cast(
-        {:record_selection, _mutant, match_kind, fallback_reason, selected_count},
-        state
-      ) do
-    state =
-      state
-      |> increment_map(:coverage_match_distribution, match_kind, 1)
-      |> maybe_increment_fallback_reason(fallback_reason)
-      |> update_in([:selected_test_counts], &[selected_count | &1])
-
-    {:noreply, state}
-  end
-
-  @impl GenServer
-  def handle_call(:snapshot, _from, state) do
-    {:reply, build_snapshot(state), state}
-  end
-
   defp increment_recompile_category(state, :invalid, %Mut.Worker.Result{recompile_category: cat})
        when not is_nil(cat) do
     update_in(state.recompile_categories[cat], &((&1 || 0) + 1))
@@ -387,12 +395,13 @@ defmodule Mut.Metrics do
     by_status = state.by_status
     killed = Map.get(by_status, :killed, 0)
     survived = Map.get(by_status, :survived, 0)
+    timeout = Map.get(by_status, :timeout, 0)
 
     executed_ledger = Enum.reject(ledger, &(&1.status in [:skipped, :invalid]))
 
     %Snapshot{
       total: length(executed_ledger),
-      score: score(killed, survived),
+      score: score(killed, timeout, survived),
       planned_total: state.planned_total,
       by_status: by_status,
       by_engine_status: state.by_engine_status,
@@ -450,8 +459,18 @@ defmodule Mut.Metrics do
     %{exact_line: 0, enclosing_function: 0, static_fallback: 0, all_tests: 0}
   end
 
-  defp score(0, 0), do: 100.0
-  defp score(killed, survived), do: killed / (killed + survived) * 100.0
+  # `:timeout` is a DETECTION (the mutation drove a test past its time budget —
+  # typically an infinite loop the mutant introduced), not a non-detection. Per
+  # the SPEC's Result Classification only `:error`/`:invalid` (and
+  # `:skipped`/`:no_coverage`) are excluded from the denominator; `:timeout`
+  # joins `:killed` in the numerator. This matches the Stryker HTML viewer's
+  # (killed + timeout) / (killed + timeout + survived) so mix mut's terminal
+  # score agrees with the HTML score derived from the same report.
+  defp score(killed, timeout, survived) do
+    detected = killed + timeout
+    total = detected + survived
+    if total == 0, do: 100.0, else: detected / total * 100.0
+  end
 
   defp fallback_count_pct(by_engine_status) do
     schema = engine_count(by_engine_status, :schema)

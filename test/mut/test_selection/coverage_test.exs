@@ -33,6 +33,35 @@ defmodule Mut.TestSelection.CoverageTest do
     assert Enum.sort(result["deg"].test_files) == ["test/exact_test.exs", "test/static_test.exs"]
   end
 
+  test "M64: degraded union works across the abs-analysis / rel-degraded namespace split" do
+    # The real orchestrator scenario: static analysis + all_test_files are
+    # ABSOLUTE (work-copy-rooted), but the oracle records degraded files
+    # RELATIVE-to-root. Without `:root` normalization the degraded union
+    # silently contributed nothing (the bug). With it, the degraded file that
+    # statically covers the mutant is unioned in.
+    root = "/work/copy"
+    abs_static = "/work/copy/test/static_test.exs"
+    abs_exact = "/work/copy/test/exact_test.exs"
+
+    plan = plan([mutant("deg", "lib/sample.ex", 10, Sample, {:run, 1})])
+
+    oracle = %CoverageOracle{
+      by_line: %{{"lib/sample.ex", 10} => MapSet.new([{:file, "test/exact_test.exs"}])},
+      # oracle records degraded files relative-to-root
+      degraded_test_files: [{"test/static_test.exs", :coverage_test_timeout}]
+    }
+
+    # analysis + all_test_files are absolute (as the orchestrator builds them)
+    result =
+      Coverage.for_plan(plan, oracle, %{Sample => MapSet.new([abs_static])},
+        all_test_files: [abs_static, abs_exact],
+        root: root
+      )
+
+    assert abs_static in result["deg"].test_files,
+           "degraded file that statically covers the mutant must be unioned despite the namespace split"
+  end
+
   test "M64: a degraded file unrelated to the mutant's module is not unioned" do
     plan = plan([mutant("unrel", "lib/sample.ex", 10, Sample, {:run, 1})])
 

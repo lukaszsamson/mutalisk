@@ -306,7 +306,19 @@ defmodule Mut.Worker do
       %{summary: %{"failed" => failed}, tests: tests} when code != 0 and failed >= 1 ->
         %Result{status: :killed, duration_ms: duration_ms, killing_test: killing_test(tests)}
 
-      _invalid ->
+      # Nonzero exit with no parsed ExUnit failure (the suite crashed before/at
+      # startup, test-helper load, or after the run) is classified :error and
+      # excluded from the score denominator. This is DELIBERATELY conservative:
+      # some such crashes are mutant-caused (a detection that should count as a
+      # kill), but others are genuine infrastructure failures (the SPEC's
+      # OOM / sandbox-corruption / port-crash class). Reclassifying the
+      # ambiguous bucket as :killed would inflate the headline mutation score
+      # with FALSE kills — strictly worse for a mutation-testing tool than the
+      # current under-count, since it gives false confidence in test quality.
+      # Reliably separating the two needs real-world crash-signature
+      # calibration (and the retry-on-error pass already filters transient
+      # infra); until then, ambiguous → :error. See review P2.
+      _crash ->
         %Result{status: :error, duration_ms: duration_ms, raw_output: output}
     end
   end
@@ -320,17 +332,11 @@ defmodule Mut.Worker do
     end
   end
 
-  defp kill_port(port) do
-    os_pid = Port.info(port, :os_pid)
-    Port.close(port)
-
-    case os_pid do
-      {:os_pid, pid} when is_integer(pid) -> System.cmd("kill", ["-9", Integer.to_string(pid)])
-      _unknown -> :ok
-    end
-  catch
-    _kind, _reason -> :ok
-  end
+  # Tree-kill the spawned process (not just the immediate os_pid): under a
+  # version manager / wrapper `mix`, the immediate child forks the real BEAM,
+  # so `kill -9 <immediate>` orphans the (often infinite-looping) mutant VM on
+  # the timeout path. Shared with Mut.ChildProcess via Mut.ProcessTree.
+  defp kill_port(port), do: Mut.ProcessTree.kill_port(port)
 
   defp elapsed(started), do: System.monotonic_time(:millisecond) - started
 end

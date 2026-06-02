@@ -416,7 +416,15 @@ defmodule Mix.Tasks.Mut do
     # was O(N^2) on the hot path; this makes it O(N) base + O(1) lookup +
     # per-mutant ordering. `selected_tests/2` applies the ordering.
     base_selection =
-      base_selection(selection_mode, plan, test_paths, oracle, static_analysis, all_test_files)
+      base_selection(
+        selection_mode,
+        plan,
+        test_paths,
+        oracle,
+        static_analysis,
+        all_test_files,
+        source_root
+      )
 
     %{
       plan: plan,
@@ -431,13 +439,16 @@ defmodule Mix.Tasks.Mut do
     }
   end
 
-  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files)
+  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files, _root)
        when mode in [:static, :downgraded_to_static] do
     Mut.TestSelection.for_plan(plan, test_paths)
   end
 
-  defp base_selection(_mode, plan, _test_paths, oracle, static_analysis, all_test_files) do
-    CoverageSelection.base_for_plan(plan, oracle, static_analysis, all_test_files: all_test_files)
+  defp base_selection(_mode, plan, _test_paths, oracle, static_analysis, all_test_files, root) do
+    CoverageSelection.base_for_plan(plan, oracle, static_analysis,
+      all_test_files: all_test_files,
+      root: root
+    )
   end
 
   defp static_match_kind(tests, all_test_files) do
@@ -616,12 +627,17 @@ defmodule Mix.Tasks.Mut do
     Metrics.start_phase(metrics_pid, :report_writing)
     snapshot = Metrics.snapshot(metrics_pid)
 
+    # Render (and validate) inside the timed phase to capture the report-build
+    # cost, but DON'T write the file yet: the file is written exactly once,
+    # after the phase closes, from the snapshot that includes this phase's
+    # timing. Previously the JSON was written here AND again below — a wasted
+    # write plus an independent failure point on the discarded first write.
     if :terminal in opts.reporters do
       _iodata = Terminal.render_summary(snapshot)
     end
 
     if :stryker_json in opts.reporters do
-      write_stryker_report(snapshot, plan, work_copy, host_root, opts)
+      _rendered = render_stryker_report(snapshot, plan, work_copy, opts)
     end
 
     Metrics.end_phase(metrics_pid, :report_writing)
@@ -630,16 +646,23 @@ defmodule Mix.Tasks.Mut do
     snapshot
   end
 
-  defp write_stryker_report(snapshot, plan, work_copy, host_root, opts) do
+  # Render + validate the Stryker JSON without writing it (used to time the
+  # report build inside the :report_writing phase). Raises on invalid output.
+  defp render_stryker_report(snapshot, plan, work_copy, opts) do
     rendered =
       StrykerJson.render(snapshot, plan, source_loader(work_copy),
         thresholds: thresholds(opts.fail_at)
       )
 
     case StrykerJson.validate(rendered) do
-      :ok -> StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
+      :ok -> rendered
       {:error, violations} -> Mix.raise("invalid Stryker JSON: #{inspect(violations)}")
     end
+  end
+
+  defp write_stryker_report(snapshot, plan, work_copy, host_root, opts) do
+    rendered = render_stryker_report(snapshot, plan, work_copy, opts)
+    StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
   end
 
   defp maybe_limit_plan(plan, nil), do: plan
@@ -676,7 +699,8 @@ defmodule Mix.Tasks.Mut do
       |> CoverageSelection.order_tests(
         mutant,
         context.coverage_oracle,
-        context.last_killer
+        context.last_killer,
+        context.source_root
       )
 
     %{test_files: tests, match_kind: static_match_kind(tests, context.all_test_files)}
@@ -690,7 +714,8 @@ defmodule Mix.Tasks.Mut do
         base.test_files,
         mutant,
         context.coverage_oracle,
-        context.last_killer
+        context.last_killer,
+        context.source_root
       )
 
     %{base | test_files: ordered}

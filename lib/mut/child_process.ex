@@ -164,55 +164,7 @@ defmodule Mut.ChildProcess do
     marker <> binary_part(output, byte_size(output), -keep_bytes)
   end
 
-  defp kill_port(port) do
-    os_pid = Port.info(port, :os_pid)
-    Port.close(port)
-
-    case os_pid do
-      {:os_pid, pid} when is_integer(pid) -> kill_process_tree(pid)
-      _unknown -> :ok
-    end
-  catch
-    _kind, _reason -> :ok
-  end
-
-  defp kill_process_tree(pid) do
-    descendants = descendant_pids(pid)
-
-    Enum.each(descendants, &kill_pid(&1, "-TERM"))
-    kill_pid(pid, "-TERM")
-    Process.sleep(100)
-    Enum.each(descendants, &kill_pid(&1, "-KILL"))
-    kill_pid(pid, "-KILL")
-    :ok
-  end
-
-  defp descendant_pids(pid) do
-    pid
-    |> child_pids()
-    |> Enum.flat_map(fn child_pid -> [child_pid | descendant_pids(child_pid)] end)
-  end
-
-  defp child_pids(pid) do
-    case System.cmd("pgrep", ["-P", Integer.to_string(pid)], stderr_to_stdout: true) do
-      {output, 0} ->
-        output
-        |> String.split("\n", trim: true)
-        |> Enum.flat_map(&parse_pid/1)
-
-      _no_children ->
-        []
-    end
-  end
-
-  defp parse_pid(value) do
-    case Integer.parse(value) do
-      {child_pid, ""} -> [child_pid]
-      _invalid -> []
-    end
-  end
-
-  defp kill_pid(pid, signal) do
-    System.cmd("kill", [signal, Integer.to_string(pid)], stderr_to_stdout: true)
-  end
+  # Tree-kill (TERM then KILL across the descendant tree) lives in
+  # Mut.ProcessTree, shared with Mut.Worker so the two paths can't drift.
+  defp kill_port(port), do: Mut.ProcessTree.kill_port(port)
 end

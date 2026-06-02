@@ -100,13 +100,15 @@ defmodule Mut.Reporter.TerminalTest do
           selected_tests_median: 1,
           coverage_collection_wall_ms: 5832
         },
-        score: 50.0
+        score: 60.0
       )
       |> Terminal.render_summary()
       |> IO.iodata_to_binary()
 
+    # 2 killed + 1 timeout (both detections) over 2+1+2 behavioral verdicts:
+    # detected/total = 3/5 = 60.0%.
     assert summary == """
-           Mutation score: 2/4 = 50.0%
+           Mutation score: 3/5 = 60.0%
 
            Surviving mutants:
              lib/arith.ex:5 Arithmetic               replace + with -

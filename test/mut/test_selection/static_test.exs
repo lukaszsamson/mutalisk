@@ -47,6 +47,34 @@ defmodule Mut.TestSelection.StaticTest do
     end
   end
 
+  test "analyze captures grouped alias/import/require forms (Foo.{Bar, Baz})" do
+    path =
+      write_test("grouped", """
+      defmodule GroupedAliasTest do
+        use ExUnit.Case, async: true
+        alias Sample.{GroupedA, GroupedB}
+        import Sample.{GroupedImport}
+        require Sample.{GroupedRequire}
+
+        test "grouped" do
+          assert GroupedA.value() == GroupedB.value()
+        end
+      end
+      """)
+
+    analysis = Static.analyze([Path.dirname(path)])
+
+    for module <- [
+          Sample.GroupedA,
+          Sample.GroupedB,
+          Sample.GroupedImport,
+          Sample.GroupedRequire
+        ] do
+      assert Map.fetch!(analysis.index, module) == MapSet.new([path]),
+             "expected #{inspect(module)} to be indexed from the grouped form"
+    end
+  end
+
   test "analyze identifies dynamic dispatch files" do
     apply_path =
       write_test("dynamic_apply", """

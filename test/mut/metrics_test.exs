@@ -95,6 +95,22 @@ defmodule Mut.MetricsTest do
     assert snapshot.skipped_by_reason == %{unsupported_dispatch: 1}
   end
 
+  test "timeout counts as a detection in the mutation score (numerator + denominator)" do
+    {:ok, metrics} = Metrics.start_link([])
+
+    # 1 killed, 2 timeout, 1 survived. Per the SPEC / Stryker HTML viewer,
+    # timeout is a detection: score = (1 + 2) / (1 + 2 + 1) = 75.0.
+    Metrics.record_mutant(metrics, mutant(:schema, "k", 1), result(:killed, 10))
+    Metrics.record_mutant(metrics, mutant(:schema, "t1", 2), result(:timeout, 11_000))
+    Metrics.record_mutant(metrics, mutant(:fallback, "t2", 3), result(:timeout, 11_000))
+    Metrics.record_mutant(metrics, mutant(:fallback, "s", 4), result(:survived, 30))
+
+    snapshot = Metrics.snapshot(metrics)
+
+    assert snapshot.score == 75.0
+    assert snapshot.by_status == %{killed: 1, timeout: 2, survived: 1}
+  end
+
   test "snapshot is referentially transparent" do
     {:ok, metrics} = Metrics.start_link([])
 

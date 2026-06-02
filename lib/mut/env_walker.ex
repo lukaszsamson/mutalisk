@@ -602,9 +602,30 @@ defmodule Mut.EnvWalker do
 
   defp byte_offset(state, line, column) do
     case Enum.at(state.line_offsets, line - 1) do
-      nil -> nil
-      base -> base + column - 1
+      nil ->
+        nil
+
+      base ->
+        # The parser emits CODEPOINT columns, but `base` is a BYTE offset.
+        # Adding `column - 1` directly is only correct for ASCII; on a line
+        # with a multi-byte char before the target, every byte offset would
+        # shift left, corrupting fallback patches and drifting stable IDs.
+        # Slice the first `column - 1` codepoints of the line and count their
+        # bytes — mirrors `Mut.SourceSpan.Compute.first_codepoints_bytes/2`.
+        line_text =
+          state.source
+          |> binary_part(base, byte_size(state.source) - base)
+          |> String.split("\n", parts: 2)
+          |> hd()
+
+        base + first_codepoints_bytes(line_text, column - 1)
     end
+  end
+
+  defp first_codepoints_bytes(_line, count) when count <= 0, do: 0
+
+  defp first_codepoints_bytes(line, count) do
+    line |> String.slice(0, count) |> byte_size()
   end
 
   defp path_hash(path) do

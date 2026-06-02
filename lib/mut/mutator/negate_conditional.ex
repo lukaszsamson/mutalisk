@@ -3,9 +3,16 @@ defmodule Mut.Mutator.NegateConditional do
   M77 conditional mutator — the classic top-yield branch mutator. Mutates the
   condition of an `if`/`unless`:
 
-    * **negate**: `cond` → `not(cond)`
+    * **negate**: `cond` → `!(cond)`
     * **force true**: `cond` → `true`
     * **force false**: `cond` → `false`
+
+  Negate uses the truthy `!` (not the strict-boolean `not`): an `if`/`unless`
+  condition is evaluated for truthiness, and `!` negates any term safely,
+  whereas `not` raises `ArgumentError` on a non-boolean. This matters for a
+  binding condition like `if {:ok, v} = fetch()` — `not({:ok, v} = fetch())`
+  would crash on the tuple, but `!({:ok, v} = fetch())` negates the match's
+  truthiness while still binding `v`, yielding a productive mutant.
 
   These three are the same for `if` and `unless` (the condition is a boolean
   expression; the `if`/`unless` wrapper is preserved). Opt-in (`:conditional`),
@@ -19,7 +26,9 @@ defmodule Mut.Mutator.NegateConditional do
       (`if user = lookup(), do: f(user)`), `force true` / `force false`
       drop the binding and the body's `user` becomes undefined → compile
       error. Drove the ≈15% invalid rate on plug in M79. `negate` keeps the
-      condition inside `not(...)`, so the binding survives — safe.
+      condition inside `!(...)`, so the binding survives *and* (using the
+      truthy `!`, not the strict-boolean `not`) it does not crash on a
+      non-boolean match result — safe and productive.
     * **Dead-branch hazard.** `if cond do body end` (no `else`) with
       `force false` skips the body and yields `nil`; the body is typically
       error-handling or a side-effect path that happy-path tests do not
@@ -99,7 +108,7 @@ defmodule Mut.Mutator.NegateConditional do
       []
     else
       candidates = [
-        {"negate", {:not, [], [cond]}, true},
+        {"negate", {:!, [], [cond]}, true},
         {"force true", true, not binds and not unless_no_else?(name, has_else)},
         {"force false", false, not binds and not if_no_else?(name, has_else)}
       ]

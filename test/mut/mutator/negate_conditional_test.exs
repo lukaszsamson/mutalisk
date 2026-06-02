@@ -51,7 +51,9 @@ defmodule Mut.Mutator.NegateConditionalTest do
       assert changes == ["negate", "force true", "force false"]
 
       [neg, ft, ff] = mutations
-      assert {:if, _, [{:not, _, [_cond]}, kw]} = neg.mutated_ast
+      # negate uses the truthy `!` (safe on any term, incl. match conditions),
+      # not the strict-boolean `not` which crashes on non-booleans.
+      assert {:if, _, [{:!, _, [_cond]}, kw]} = neg.mutated_ast
       assert Keyword.has_key?(kw, :do) and Keyword.has_key?(kw, :else)
       assert {:if, _, [true, _kw]} = ft.mutated_ast
       assert {:if, _, [false, _kw]} = ff.mutated_ast
@@ -92,6 +94,29 @@ defmodule Mut.Mutator.NegateConditionalTest do
 
       # Only negate (force-* would lose the `user` binding and break the body).
       assert mutate_src(src) == ["negate"]
+    end
+
+    test "negate on a binding condition uses `!` (safe truthy negation), not `not`" do
+      src = """
+      defmodule M do
+        def f(id) do
+          if {:ok, v} = lookup(id) do
+            use(v)
+          else
+            :none
+          end
+        end
+      end
+      """
+
+      ast = Code.string_to_quoted!(src, columns: true, token_metadata: true)
+      [c] = AstWalk.conditional_candidates(ast, file: "m.ex", source: src)
+      [neg] = NegateConditional.mutate(c.node, ctx())
+
+      # `!({:ok, v} = lookup(id))` — truthy negation that binds `v` and never
+      # raises (`not(...)` would crash with ArgumentError on the tuple).
+      assert {:if, _, [{:!, _, [{:=, _, _}]}, _kw]} = neg.mutated_ast
+      assert neg.metadata.change == "negate"
     end
 
     test "dead-branch hazard on `if` with no else drops force-false" do

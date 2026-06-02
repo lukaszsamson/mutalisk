@@ -139,6 +139,54 @@ defmodule Mut.SchemaPlacerTest do
     assert start_line <= end_line
   end
 
+  test "scalar-literal schema arm gets the arm's real line (not {1,1}) in the placement map" do
+    # M52 body-literal class: the schema arm body is a BARE scalar, which after
+    # the placement-map's literal_encoder-free re-parse carries no metadata.
+    # The placement entry must still report the arm's real line so
+    # CompileRollback can isolate a single failing scalar mutant instead of
+    # aborting the whole schema build.
+    source = "defmodule Sample do\n  def f do\n    side()\n    42\n  end\nend\n"
+    path = Path.expand("tmp/schema_placer_scalar.ex")
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, source)
+    on_exit(fn -> File.rm(path) end)
+
+    candidate =
+      Mut.AstWalk.schema_literal_candidates(file: "tmp/schema_placer_scalar.ex", source: source)
+      |> Enum.find(&(&1.syntactic_name == :integer_literal))
+
+    refute is_nil(candidate), "expected a body integer-literal candidate"
+    # The literal `42` is on line 4.
+    assert candidate.line == 4
+
+    literal_mutant = %Mutant{
+      id: 11,
+      stable_id: "stable-11",
+      engine: :schema,
+      mutator: Mut.Mutator.IntegerLiteral,
+      mutator_name: "IntegerLiteral",
+      mutation_kind: :integer_literal,
+      original_dispatch: "@integer",
+      ast_path_hash: candidate.ast_path_hash,
+      file: "tmp/schema_placer_scalar.ex",
+      line: candidate.line,
+      original_ast: 42,
+      mutated_ast: 0,
+      description: "replace integer literal 42 with 0"
+    }
+
+    assert {:ok, _rendered, %SchemaPlacer.PlacementMap{entries: entries}, []} =
+             SchemaPlacer.instrument_file(path, [literal_mutant])
+
+    assert [%{start_line: start_line, mut_ids: [11]}] = entries
+    # The bug collapsed bare-scalar arms to the {1, 1} fallback; the fix
+    # reports the arm's real line in the rendered (instrumented) source — the
+    # coordinate space CompileRollback matches compile diagnostics against.
+    # The def is well below line 1, so the only thing that matters is that the
+    # arm no longer pins to line 1.
+    assert start_line > 1
+  end
+
   test "instrument_file tolerates target source with case arms inside unquote/macro bodies" do
     # M25 follow-up: gettext (and jason post-deps-fix) crashed mid-instrumentation
     # because the rendered AST contains `case x do unquote(arms) end` shapes where

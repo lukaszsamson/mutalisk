@@ -456,8 +456,8 @@ defmodule Mut.SchemaPlacer do
 
   defp schema_arm_entries(arms) when is_list(arms) do
     Enum.flat_map(arms, fn
-      {:->, _meta, [[id], body]} when is_integer(id) and id > 0 ->
-        {start_line, end_line, column} = line_range(body)
+      {:->, arm_meta, [[id], body]} when is_integer(id) and id > 0 ->
+        {start_line, end_line, column} = line_range(body, arm_meta)
         [%{start_line: start_line, end_line: end_line, column: column, mut_ids: [id]}]
 
       _arm ->
@@ -467,13 +467,25 @@ defmodule Mut.SchemaPlacer do
 
   defp schema_arm_entries(_arms), do: []
 
-  defp line_range({_name, meta, _args}) when is_list(meta) do
+  defp line_range({_name, meta, _args}, _arm_meta) when is_list(meta) do
     start_line = Keyword.fetch!(meta, :line)
     end_line = meta |> Keyword.get(:end_of_expression, []) |> Keyword.get(:line, start_line)
     {start_line, end_line, Keyword.get(meta, :column)}
   end
 
-  defp line_range(_node), do: {1, 1, nil}
+  # Bare-scalar arm body (the M52 integer/float/string/atom/nil class):
+  # after the literal_encoder-free re-parse it's a raw literal with no
+  # metadata, so fall back to the arm's `->` line/column. Previously this
+  # fell to {1, 1, nil}, which made CompileRollback.locate_mutants/2 unable
+  # to match a compile diagnostic (on the real line) to the mutant — so a
+  # single scalar-literal arm that failed to compile aborted the whole
+  # schema build instead of being invalidated alone.
+  defp line_range(_node, arm_meta) when is_list(arm_meta) do
+    start_line = Keyword.get(arm_meta, :line, 1)
+    {start_line, start_line, Keyword.get(arm_meta, :column)}
+  end
+
+  defp line_range(_node, _arm_meta), do: {1, 1, nil}
 
   defp original_and_wildcard_arms?([{:->, _meta, [[0], _body]} | rest]) do
     match?({:->, _meta, [[{:_, _wild_meta, nil}], _body]}, List.last(rest))

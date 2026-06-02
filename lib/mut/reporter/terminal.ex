@@ -39,11 +39,16 @@ defmodule Mut.Reporter.Terminal do
   def render_summary(%Snapshot{} = snapshot) do
     killed = status_count(snapshot, :killed)
     survived = status_count(snapshot, :survived)
-    denominator = killed + survived
+    timeout = status_count(snapshot, :timeout)
+    # Timeouts are detections (see Mut.Metrics score/3), so the displayed
+    # fraction is detected/total = (killed + timeout) / (killed + timeout +
+    # survived) — consistent with snapshot.score and the Stryker HTML viewer.
+    detected = killed + timeout
+    denominator = detected + survived
     denominator = if denominator == 0, do: 0, else: denominator
 
     [
-      "Mutation score: #{killed}/#{denominator} = #{format_pct(snapshot.score)}\n\n",
+      "Mutation score: #{detected}/#{denominator} = #{format_pct(snapshot.score)}\n\n",
       surviving_block(snapshot),
       "\n",
       engine_line(snapshot, :schema, "Schema:   "),

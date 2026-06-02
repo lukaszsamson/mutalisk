@@ -38,6 +38,30 @@ defmodule Mut.EnvWalkerTest do
       assert Enum.any?(head_snaps, fn s -> s.context == :match end)
     end
 
+    test "byte spans are codepoint-correct after a multi-byte char on the same line" do
+      # "bar" sits after the literal "café" (é is 2 bytes) on the same line.
+      # If byte_offset/3 added codepoint columns as bytes, "bar"'s span would
+      # shift left by é's extra byte and slice to the wrong text.
+      src = ~S'''
+      defmodule Foo do
+        def slogan, do: "café" <> "bar"
+      end
+      '''
+
+      {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+      sliced =
+        ast
+        |> EnvWalker.collect_string_literal_candidates(file: "lib/foo.ex", source: src)
+        |> Enum.map(fn {candidate, _snap} ->
+          span = candidate.source_span
+          binary_part(src, span.start_byte, span.end_byte - span.start_byte)
+        end)
+        |> Enum.sort()
+
+      assert sliced == [~s("bar"), ~s("café")]
+    end
+
     test "literals in guards are :guard context" do
       src = ~S'''
       defmodule Foo do

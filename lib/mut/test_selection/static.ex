@@ -76,11 +76,43 @@ defmodule Mut.TestSelection.Static do
 
   defp record_node(node, analysis, file) do
     cond do
-      dynamic_dispatch?(node) -> put_dynamic(analysis, file)
-      module = referenced_module(node) -> put_reference(analysis, module, file)
-      true -> analysis
+      dynamic_dispatch?(node) ->
+        put_dynamic(analysis, file)
+
+      modules = grouped_alias_modules(node) ->
+        Enum.reduce(modules, analysis, &put_reference(&2, &1, file))
+
+      module = referenced_module(node) ->
+        put_reference(analysis, module, file)
+
+      true ->
+        analysis
     end
   end
+
+  # Grouped alias/import/require/use: `alias Foo.{Bar, Baz}` parses as a dotted
+  # `Foo.{...}` node, NOT a plain `{:__aliases__, _, parts}`, so the
+  # single-module `referenced_module/1` clauses miss it entirely — a test that
+  # only references `Foo.Bar` via the grouped form would be dropped from the
+  # mutant's selection and the mutant wrongly reported `:survived`. Expand each
+  # branch (`Foo.Bar`, `Foo.Baz`) to a fully-qualified module.
+  defp grouped_alias_modules(
+         {op, _meta, [{{:., _dot, [{:__aliases__, _bm, base_parts}, :{}]}, _bmeta, branches}]}
+       )
+       when op in [:alias, :import, :require, :use] and is_list(branches) do
+    modules =
+      for {:__aliases__, _meta, suffix_parts} <- branches,
+          module = safe_module_concat(base_parts ++ suffix_parts),
+          not is_nil(module),
+          do: module
+
+    case modules do
+      [] -> nil
+      mods -> mods
+    end
+  end
+
+  defp grouped_alias_modules(_node), do: nil
 
   defp referenced_module({:alias, _meta, [{:__aliases__, _alias_meta, parts} | _]}),
     do: safe_module_concat(parts)
