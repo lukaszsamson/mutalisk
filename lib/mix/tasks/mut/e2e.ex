@@ -33,12 +33,15 @@ defmodule Mix.Tasks.Mut.E2e do
         ["--enable", "dispatch,guard,module_attribute"]
       )
 
+    incremental = run_incremental_scenario!()
+
     assert_default!(default)
     assert_coverage_non_regression!(default, coverage)
     assert_attribute!(attribute)
     assert_stable_ids!(attribute, repeated)
     assert_golden_ids!(attribute)
     assert_dsl_filtered!(attribute)
+    assert_incremental!(incremental)
     assert_fixture_clean!()
     assert_baseline_failure_aborts!()
 
@@ -46,8 +49,46 @@ defmodule Mix.Tasks.Mut.E2e do
     IO.puts("mut.e2e coverage=#{summary_line(coverage)}")
     IO.puts("mut.e2e attribute=#{summary_line(attribute)}")
     IO.puts("mut.e2e stable_ids=#{length(stable_ids(attribute.report))}")
+    IO.puts("mut.e2e incremental=#{incremental_summary(incremental)}")
     IO.puts("mut.e2e stryker_json=:ok")
     IO.puts("mut.e2e fixture_status=clean")
+  end
+
+  # M106: cold run writes history; warm `--incremental` run on the UNCHANGED
+  # tree must reuse every verdict (execute none) and reproduce the same answer.
+  defp run_incremental_scenario! do
+    File.rm_rf!(Path.join(@fixture_root, "_build/mut_history"))
+    cold = run_fixture!("inc_cold", [])
+    warm = run_fixture!("inc_warm", ["--incremental"])
+    %{cold: cold, warm: warm}
+  end
+
+  defp assert_incremental!(%{cold: cold, warm: warm}) do
+    if stable_ids(cold.report) != stable_ids(warm.report) do
+      raise "incremental: stable ids drift between cold and warm runs"
+    end
+
+    if cold.counts.statuses != warm.counts.statuses do
+      raise "incremental: status drift cold=#{inspect(cold.counts.statuses)} " <>
+              "warm=#{inspect(warm.counts.statuses)}"
+    end
+
+    inc = warm.report["mutalisk"]["incremental"] || %{}
+    reused = Map.get(inc, "reused", 0)
+    executed = Map.get(inc, "executed", -1)
+    total = Enum.sum(Map.values(warm.counts.statuses))
+
+    unless reused == total and executed == 0 do
+      raise "incremental: expected full reuse on unchanged tree, got " <>
+              "reused=#{reused} executed=#{executed} total=#{total}"
+    end
+
+    assert_contains!(warm.output, "Incremental: #{reused} reused from history")
+  end
+
+  defp incremental_summary(%{warm: warm}) do
+    inc = warm.report["mutalisk"]["incremental"] || %{}
+    "reused=#{Map.get(inc, "reused", 0)} executed=#{Map.get(inc, "executed", 0)}"
   end
 
   defp run_fixture!(label, flags) do

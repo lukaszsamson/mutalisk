@@ -26,7 +26,8 @@ defmodule Mut.Metrics do
       :concurrency,
       :recompile_categories,
       :test_timeout_ms,
-      :ledger
+      :ledger,
+      reused: 0
     ]
 
     @type ledger_entry :: %{
@@ -75,7 +76,8 @@ defmodule Mut.Metrics do
             },
             recompile_categories: %{atom() => non_neg_integer()},
             test_timeout_ms: pos_integer() | nil,
-            ledger: [ledger_entry()]
+            ledger: [ledger_entry()],
+            reused: non_neg_integer()
           }
   end
 
@@ -110,7 +112,8 @@ defmodule Mut.Metrics do
           selected_test_counts: [non_neg_integer()],
           concurrency: %{atom() => pos_integer()} | nil,
           started_ms: integer(),
-          ledger: [Snapshot.ledger_entry()]
+          ledger: [Snapshot.ledger_entry()],
+          reused: non_neg_integer()
         }
 
   @spec start_link(opts :: keyword) :: GenServer.on_start()
@@ -201,6 +204,10 @@ defmodule Mut.Metrics do
   @spec snapshot(pid :: GenServer.server()) :: Snapshot.t()
   def snapshot(pid), do: GenServer.call(pid, :snapshot)
 
+  @doc "M106: count `n` mutants whose verdict was reused from incremental history."
+  @spec add_reused(GenServer.server(), non_neg_integer()) :: :ok
+  def add_reused(pid, n) when is_integer(n) and n >= 0, do: GenServer.cast(pid, {:add_reused, n})
+
   @spec set_test_timeout_ms(GenServer.server(), pos_integer()) :: :ok
   def set_test_timeout_ms(pid, ms) when is_integer(ms) and ms > 0 do
     GenServer.cast(pid, {:set_test_timeout_ms, ms})
@@ -230,7 +237,8 @@ defmodule Mut.Metrics do
        recompile_categories: %{compile_error: 0, dep_path_error: 0, unknown: 0},
        test_timeout_ms: nil,
        started_ms: monotonic_ms(),
-       ledger: []
+       ledger: [],
+       reused: 0
      }}
   end
 
@@ -271,6 +279,10 @@ defmodule Mut.Metrics do
   @impl GenServer
   def handle_cast({:set_planned_total, total}, state) do
     {:noreply, %{state | planned_total: total}}
+  end
+
+  def handle_cast({:add_reused, n}, state) do
+    {:noreply, %{state | reused: state.reused + n}}
   end
 
   def handle_cast({:record_skipped, skipped_entry}, state) do
@@ -416,7 +428,8 @@ defmodule Mut.Metrics do
       concurrency: concurrency_snapshot(state.concurrency),
       recompile_categories: state.recompile_categories,
       test_timeout_ms: state.test_timeout_ms,
-      ledger: ledger
+      ledger: ledger,
+      reused: state.reused
     }
   end
 

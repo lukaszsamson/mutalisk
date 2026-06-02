@@ -95,7 +95,7 @@ defmodule Mut.Reporter.StrykerJson do
     planned = plan.schema ++ plan.fallback ++ plan.invalid
     by_stable_id = Map.new(planned, &{&1.stable_id, &1})
 
-    %{
+    base = %{
       "stable_id_to_integer" => Map.new(mutants, &{&1.stable_id, &1.id}),
       "engine" => Map.new(mutants, &{&1.stable_id, Atom.to_string(&1.engine)}),
       "mutation_kind" =>
@@ -110,7 +110,22 @@ defmodule Mut.Reporter.StrykerJson do
       "recompile_categories" => recompile_categories_extension(snapshot.recompile_categories),
       "test_timeout_ms" => snapshot.test_timeout_ms || 10_000
     }
+
+    # M106: only emit the reused-vs-executed split when `--incremental` actually
+    # reused a verdict — so a non-incremental report stays byte-identical to
+    # v1.28 (no new key).
+    put_incremental(base, snapshot)
   end
+
+  defp put_incremental(base, %{reused: reused, total: total})
+       when is_integer(reused) and reused > 0,
+       do:
+         Map.put(base, "incremental", %{
+           "reused" => reused,
+           "executed" => max((total || 0) - reused, 0)
+         })
+
+  defp put_incremental(base, _snapshot), do: base
 
   defp recompile_categories_extension(nil), do: %{}
   defp recompile_categories_extension(%{} = cats), do: atom_keyed_counts(cats)

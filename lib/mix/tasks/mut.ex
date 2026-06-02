@@ -250,14 +250,24 @@ defmodule Mix.Tasks.Mut do
           host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
         }
 
+        # M106: `--incremental` reuse pre-pass — adopt stored verdicts for
+        # mutants whose source + selected tests are unchanged (per the M104
+        # decision table); only the remaining `exec_plan` reaches the workers.
+        # Without `--incremental` this is a no-op (`exec_plan == schema plan`).
+        {exec_plan, reused} =
+          apply_incremental_reuse(schema_result.plan, ctx, opts, source_root, target_root)
+
+        record_reused(reused, ctx)
+        Metrics.set_planned_total(metrics_pid, executable_count(exec_plan))
+
         pool =
           Metrics.with_phase(metrics_pid, :schema_workers, fn ->
-            run_schema_mutants(pool, schema_result.plan, ctx)
+            run_schema_mutants(pool, exec_plan, ctx)
           end)
 
         final_pool =
           Metrics.with_phase(metrics_pid, :fallback_workers, fn ->
-            run_fallback_mutants(pool, schema_result.plan, ctx)
+            run_fallback_mutants(pool, exec_plan, ctx)
           end)
 
         snapshot =
@@ -358,6 +368,122 @@ defmodule Mix.Tasks.Mut do
     case File.read(Path.join(root, rel)) do
       {:ok, content} -> content
       {:error, _} -> nil
+    end
+  end
+
+  # M106: partition the plan into mutants whose verdict is reused from history
+  # (stored digests match the current run) and the executable remainder. No
+  # `--incremental` -> identity (exec plan == full plan, nothing reused).
+  defp apply_incremental_reuse(plan, _ctx, %{incremental: false}, _source_root, _target_root),
+    do: {plan, []}
+
+  defp apply_incremental_reuse(plan, ctx, opts, source_root, target_root) do
+    verdicts = load_verdicts(target_root, opts)
+
+    if map_size(verdicts) == 0 do
+      {plan, []}
+    else
+      changed = changed_files_since(opts.since, target_root)
+      indexes = mutant_file_indexes(plan, source_root)
+
+      {schema_exec, schema_reused} =
+        partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed)
+
+      {fallback_exec, fallback_reused} =
+        partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed)
+
+      exec_plan = %{plan | schema: schema_exec, fallback: fallback_exec}
+      {exec_plan, schema_reused ++ fallback_reused}
+    end
+  end
+
+  defp partition_reuse(mutants, ctx, opts, verdicts, indexes, changed) do
+    {exec, reused} =
+      Enum.reduce(mutants, {[], []}, fn mutant, {exec, reused} ->
+        current = current_digests(mutant, indexes, ctx, opts)
+        file_changed? = changed != nil and MapSet.member?(changed, mutant.file)
+
+        case History.Reuse.decide(mutant, verdicts, current, file_changed?) do
+          {:reuse, stored} -> {exec, [{mutant, stored} | reused]}
+          :execute -> {[mutant | exec], reused}
+        end
+      end)
+
+    {Enum.reverse(exec), reused}
+  end
+
+  # Digests for one planned mutant, computed exactly as M105 stored them: the
+  # function-level source digest at the mutant's line + the order-insensitive
+  # digest over its selected tests' content. `selected_tests/2` returns the same
+  # set M105 recorded as `covering_tests` (ordering differs but the digest sorts).
+  defp current_digests(mutant, indexes, ctx, opts) do
+    index = Map.fetch!(indexes, mutant.file)
+    rel = relative_tests(selected_tests(ctx.selection_context, mutant), ctx.work_copy)
+    entries = for path <- rel, content = read_relative(ctx.work_copy, path), do: {path, content}
+
+    %{
+      source_digest: History.Digest.source_digest(index, mutant.line),
+      selected_tests_digest: History.Digest.selected_tests_digest(entries),
+      test_timeout_ms: opts.test_timeout_ms
+    }
+  end
+
+  defp mutant_file_indexes(plan, source_root) do
+    (plan.schema ++ plan.fallback)
+    |> Enum.map(& &1.file)
+    |> Enum.uniq()
+    |> Map.new(fn file ->
+      source = read_relative(source_root, file) || ""
+      {file, History.Digest.function_index(source)}
+    end)
+  end
+
+  # Record reused verdicts into metrics as if executed (status from history,
+  # zero duration), so they appear in the report + score identically.
+  defp record_reused(reused, ctx) do
+    Enum.each(reused, fn {mutant, stored} ->
+      rel = relative_tests(selected_tests(ctx.selection_context, mutant), ctx.work_copy)
+      status = String.to_existing_atom(stored["status"])
+
+      result = %Worker.Result{
+        status: status,
+        duration_ms: 0,
+        # JSON null decodes to the atom `:null`; the reporter expects a binary
+        # or nil killing test, so coerce anything non-binary to nil.
+        killing_test: binary_or_nil(stored["killing_test"])
+      }
+
+      record_result(ctx.metrics_pid, %{mutant | covering_tests: rel}, result)
+    end)
+
+    Metrics.add_reused(ctx.metrics_pid, length(reused))
+  end
+
+  defp binary_or_nil(value) when is_binary(value), do: value
+  defp binary_or_nil(_value), do: nil
+
+  defp load_verdicts(target_root, opts) do
+    case History.Store.load(History.Store.path(target_root, history_path: opts.history_path)) do
+      {:ok, store} -> store.verdicts
+      {:cold, _reason} -> %{}
+    end
+  end
+
+  defp changed_files_since(nil, _root), do: nil
+
+  defp changed_files_since(ref, root) do
+    case System.cmd("git", ["-C", root, "diff", "--name-only", ref], stderr_to_stdout: true) do
+      {output, 0} ->
+        output |> String.split("\n", trim: true) |> MapSet.new()
+
+      {output, _code} ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] --since #{ref}: git diff failed; reuse falls back to digest checks only\n" <>
+            String.trim(output)
+        )
+
+        nil
     end
   end
 

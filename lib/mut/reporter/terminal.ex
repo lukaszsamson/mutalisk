@@ -79,9 +79,16 @@ defmodule Mut.Reporter.Terminal do
       phase_block(snapshot),
       selection_block(snapshot),
       concurrency_block(snapshot),
-      test_timeout_block(snapshot)
+      test_timeout_block(snapshot),
+      incremental_block(snapshot)
     ]
   end
+
+  # M106: only shown for `--incremental` runs that actually reused something.
+  defp incremental_block(%Snapshot{reused: reused}) when is_integer(reused) and reused > 0,
+    do: "Incremental: #{reused} reused from history\n"
+
+  defp incremental_block(_snapshot), do: ""
 
   defp test_timeout_block(%Snapshot{test_timeout_ms: nil}), do: ""
 

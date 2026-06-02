@@ -20,7 +20,10 @@ defmodule Mut.Cli do
             test_paths: [String.t()],
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
-            exclude: Regex.t() | nil
+            exclude: Regex.t() | nil,
+            incremental: boolean,
+            since: String.t() | nil,
+            history_path: String.t() | nil
           }
 
     defstruct [
@@ -37,7 +40,10 @@ defmodule Mut.Cli do
       :test_paths,
       :keep_work_copy,
       :test_timeout_ms,
-      :exclude
+      :exclude,
+      :since,
+      :history_path,
+      incremental: false
     ]
   end
 
@@ -160,7 +166,9 @@ defmodule Mut.Cli do
           debug_plan: :boolean,
           keep_work_copy: :boolean,
           worker_type: :string,
-          test_timeout_ms: :integer
+          test_timeout_ms: :integer,
+          incremental: :boolean,
+          since: :string
         ],
         aliases: []
       )
@@ -210,7 +218,10 @@ defmodule Mut.Cli do
          test_paths: test_paths,
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          test_timeout_ms: test_timeout_ms,
-         exclude: exclude
+         exclude: exclude,
+         incremental: Keyword.get(parsed, :incremental, Keyword.get(config, :incremental, false)),
+         since: Keyword.get(parsed, :since),
+         history_path: Keyword.get(config, :history_path)
        }}
     end
   end
