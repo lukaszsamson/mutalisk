@@ -88,6 +88,8 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Coverage.Runner, as: CoverageRunner
   alias Mut.CoverageOracle
   alias Mut.Metrics
+  alias Mut.Reporter.GitHubActions
+  alias Mut.Reporter.Html
   alias Mut.Reporter.StrykerJson
   alias Mut.Reporter.Terminal
   alias Mut.Sandbox
@@ -645,9 +647,29 @@ defmodule Mix.Tasks.Mut do
       IO.puts(Terminal.render_summary(snapshot))
     end
 
-    if :stryker_json in opts.reporters do
-      write_stryker_report(snapshot, plan, work_copy, host_root, opts)
+    # The Stryker JSON map is the shared data source for the JSON, HTML, and
+    # GitHub-Actions reporters — render it once if any of them is enabled.
+    if Enum.any?([:stryker_json, :html, :github_actions], &(&1 in opts.reporters)) do
+      rendered = render_stryker_report(snapshot, plan, work_copy, opts)
+
+      if :stryker_json in opts.reporters do
+        StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
+      end
+
+      if :html in opts.reporters do
+        Html.write(rendered, Path.join(host_root, html_output_path(opts)))
+      end
+
+      if :github_actions in opts.reporters do
+        GitHubActions.emit(rendered)
+      end
     end
+  end
+
+  # HTML report path: the Stryker JSON output path with a `.html` extension
+  # (e.g. stryker.report.json -> stryker.report.html).
+  defp html_output_path(opts) do
+    Path.rootname(opts.output_path) <> ".html"
   end
 
   defp render_reports_with_timing(metrics_pid, plan, work_copy, host_root, opts) do
@@ -685,11 +707,6 @@ defmodule Mix.Tasks.Mut do
       :ok -> rendered
       {:error, violations} -> Mix.raise("invalid Stryker JSON: #{inspect(violations)}")
     end
-  end
-
-  defp write_stryker_report(snapshot, plan, work_copy, host_root, opts) do
-    rendered = render_stryker_report(snapshot, plan, work_copy, opts)
-    StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
   end
 
   defp maybe_limit_plan(plan, nil), do: plan

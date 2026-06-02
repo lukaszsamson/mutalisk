@@ -41,7 +41,10 @@ defmodule Mut.Cli do
     ]
   end
 
-  @known_reporters [:terminal, :stryker_json]
+  # Default reporters (when neither --reporters nor config sets them). HTML and
+  # GitHub Actions are opt-in only — valid but never default.
+  @default_reporters [:terminal, :stryker_json]
+  @known_reporters [:terminal, :stryker_json, :html, :github_actions]
   @known_selection_modes [:static, :coverage, :coverage_with_static_fallback]
   @known_targets [
     :dispatch,
@@ -347,7 +350,7 @@ defmodule Mut.Cli do
   end
 
   defp reporters(parsed, config) do
-    value = Keyword.get(parsed, :reporters, Keyword.get(config, :reporters, @known_reporters))
+    value = Keyword.get(parsed, :reporters, Keyword.get(config, :reporters, @default_reporters))
 
     with {:ok, reporters} <- atom_list(value, &reporter_atom/1),
          :ok <- validate_reporters(reporters) do
