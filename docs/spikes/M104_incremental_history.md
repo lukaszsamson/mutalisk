@@ -93,9 +93,8 @@ direction (coarser → more invalidation → never stale).
         "status": "killed|survived|timeout",
         "source_digest": "<hex16>",
         "selected_tests_digest": "<hex16>",
-        "killing_test": "test/foo_test.exs",
-        "killing_test_digest": "<hex16>",
-        "timeout_config": { "test_timeout_ms": 10000 },
+        "killing_test": "FooTest does the thing",
+        "test_timeout_ms": 10000,
         "generation": 42
       }
     }
@@ -119,17 +118,26 @@ execute.
 
 | stored status | reuse iff … | rationale |
 |---|---|---|
-| **killed** | `source_digest` unchanged **AND** `killing_test` still in the plan's selected set **AND** `killing_test_digest` unchanged | a kill is proven by *one* test; if the mutated function and that test are both unchanged, the kill still holds. We do **not** require all selected tests unchanged — an unrelated test changing cannot un-kill a mutant a specific test still kills. |
+| **killed** | `source_digest` unchanged **AND** `selected_tests_digest` unchanged | the mutated function and the tests that exercise it are both unchanged → the kill still holds. (See the killing-test note below.) |
 | **survived** | `source_digest` unchanged **AND** `selected_tests_digest` unchanged | a survival means *no* selected test killed it; if any selected test changed/was added/removed, a new test might now kill it → must re-execute. Requires the **full** selected set unchanged. |
-| **timeout** | `source_digest` unchanged **AND** `selected_tests_digest` unchanged **AND** `timeout_config` (`test_timeout_ms`) unchanged | timeouts are timing-sensitive; reuse only when source, tests, and the timeout budget are all identical. Cautious by HLD mandate. |
+| **timeout** | `source_digest` unchanged **AND** `selected_tests_digest` unchanged **AND** `test_timeout_ms` unchanged | timeouts are timing-sensitive; reuse only when source, tests, and the timeout budget are all identical. Cautious by HLD mandate. |
 | **error** | **never reuse** | errors are transient/environmental (compile flake, sandbox crash, OOM); re-execute to get a real verdict. |
 | **invalid** | **never reuse** | invalid is a planning/compile artifact that can change as surrounding code changes; cheap to re-derive; never carried. |
 | **skipped / no-coverage** | **not stored** | these are re-derived from the plan + coverage every run; they are not verdicts to cache. |
 
-**Killed vs survived asymmetry is the crux.** Killed reuse keys on the *killing
-test's* identity+content (narrow, sound). Survived reuse keys on the *whole
-selected set's* identity+content (broad, sound) — because a survivor's status is
-a statement about all selected tests, any of which changing could overturn it.
+**Killing-test note (implementation refinement, M105).** The HLD sketch tied
+killed reuse to the *killing test* alone (narrower than the whole selected set).
+In practice the engine records the killing test only as an **ExUnit identifier**
+(`"Module test name"`), not a file path — so it cannot be digested independently
+to prove it is unchanged. The sound, simple resolution: gate killed reuse on
+`selected_tests_digest`, exactly like survived. Under the default **coverage**
+selection a mutant's selected set *is* its covering tests (a small set), so this
+already captures the killing test's content — changing an unrelated test that
+does not cover the mutant leaves `selected_tests_digest` unchanged and the kill
+is reused. The only case where this is stricter than the HLD sketch is a mutant
+with several covering tests where a *non-killing* covering test changes — there
+we re-execute, which is safe (the conservative direction). `killing_test` is
+still stored, for diagnostics and cross-run traceability.
 
 ---
 
@@ -160,8 +168,9 @@ selected_tests_digest =
   name. This is why selection mode is **not** a separate config-digest input
   (see §5).
 
-`killing_test_digest` (for killed rows) is the single selected test's
-`content_digest`, stored separately so killed reuse can check just it.
+(See §3's killing-test note: the killing test is recorded only as an ExUnit
+identifier, not a file, so there is no separate per-killing-test digest — killed
+reuse gates on `selected_tests_digest` like survived.)
 
 ---
 

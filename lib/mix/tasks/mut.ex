@@ -87,6 +87,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Cli
   alias Mut.Coverage.Runner, as: CoverageRunner
   alias Mut.CoverageOracle
+  alias Mut.History
   alias Mut.Metrics
   alias Mut.Reporter.GitHubActions
   alias Mut.Reporter.Html
@@ -268,6 +269,13 @@ defmodule Mix.Tasks.Mut do
             opts
           )
 
+        # M105: record the per-mutant verdict store for incremental history.
+        # Runs before the `after` clause destroys the work copy (digests are
+        # computed against the exact source the verdicts came from). Always
+        # writes (history accrues for the next run) but changes nothing
+        # observable; never aborts the run on failure.
+        write_history(snapshot, source_root, target_root, opts)
+
         {snapshot, final_pool}
       after
         if opts.keep_work_copy do
@@ -283,6 +291,74 @@ defmodule Mix.Tasks.Mut do
     Sandbox.destroy_pool(final_pool)
     set_exit_code(snapshot, opts.fail_at)
     IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
+  end
+
+  # M105: write the incremental-history verdict store from the run ledger.
+  # Function-level source digests are computed against the work-copy source
+  # (`source_root`, still present); the store persists in the user project's
+  # `_build` (`target_root`). Wrapped so a history failure never aborts a run —
+  # history is an optimization, not a correctness input.
+  defp write_history(snapshot, source_root, target_root, opts) do
+    records = history_records(snapshot.ledger, source_root, opts.test_timeout_ms)
+    store_path = History.Store.path(target_root)
+
+    prev =
+      case History.Store.load(store_path) do
+        {:ok, store} -> store
+        {:cold, _reason} -> :cold
+      end
+
+    History.Store.write(store_path, History.Store.build(prev, records))
+  rescue
+    error ->
+      IO.puts(:stderr, "[mutalisk] history write skipped: #{Exception.message(error)}")
+      :ok
+  end
+
+  # Reusable verdicts (killed/survived/timeout) from the ledger, digested per
+  # file (function index built once per file).
+  defp history_records(ledger, source_root, test_timeout_ms) do
+    reusable =
+      Enum.filter(ledger, fn entry ->
+        Map.has_key?(entry, :mutant) and History.Store.reusable_status?(entry.status)
+      end)
+
+    indexes = build_file_indexes(reusable, source_root)
+    read_test = fn rel -> read_relative(source_root, rel) end
+
+    reusable
+    |> Enum.map(fn entry ->
+      mutant = final_mutant(entry)
+      index = Map.fetch!(indexes, mutant.file)
+      History.Store.record_for(mutant, index, read_test, test_timeout_ms)
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp final_mutant(entry) do
+    %{
+      entry.mutant
+      | status: entry.status,
+        killing_test: entry.killing_test,
+        covering_tests: entry.covering_tests
+    }
+  end
+
+  defp build_file_indexes(entries, source_root) do
+    entries
+    |> Enum.map(& &1.mutant.file)
+    |> Enum.uniq()
+    |> Map.new(fn file ->
+      source = read_relative(source_root, file) || ""
+      {file, History.Digest.function_index(source)}
+    end)
+  end
+
+  defp read_relative(root, rel) do
+    case File.read(Path.join(root, rel)) do
+      {:ok, content} -> content
+      {:error, _} -> nil
+    end
   end
 
   defp build_plan(work_copy, oracle, opts) do
