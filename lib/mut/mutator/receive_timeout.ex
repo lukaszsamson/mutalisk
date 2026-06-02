@@ -94,15 +94,21 @@ defmodule Mut.Mutator.ReceiveTimeout do
       }
     end
 
-    drop = %Mutation{
-      original_ast: node,
-      mutated_ast: {:receive, meta, [base_clauses]},
-      description: "drop receive `after` clause",
-      mutation_kind: @kind,
-      guard_safe?: true,
-      metadata: %{change: :drop_after}
-    }
+    mutations = [swap.(0), swap.(:infinity)]
 
-    [swap.(0), swap.(:infinity), drop]
+    if Keyword.has_key?(args, :do) do
+      drop = %Mutation{
+        original_ast: node,
+        mutated_ast: {:receive, meta, [base_clauses]},
+        description: "drop receive `after` clause",
+        mutation_kind: @kind,
+        guard_safe?: true,
+        metadata: %{change: :drop_after}
+      }
+
+      mutations ++ [drop]
+    else
+      mutations
+    end
   end
 end
