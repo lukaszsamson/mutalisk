@@ -19,3 +19,4 @@ jason pin n=0 killed=0 surv=0 cov-surv=0 kill%=0.0 equiv%=0.0 inv%=0.0 err=0 tmo
 bandit fr n=9 killed=8 surv=1 cov-surv=1 kill%=88.9 equiv%=11.1 inv%=0.0 err=0 tmo=0
 bandit gb n=0 killed=0 surv=0 cov-surv=0 kill%=0.0 equiv%=0.0 inv%=0.0 err=0 tmo=0
 bandit rt n=27 killed=5 surv=4 cov-surv=4 kill%=55.6 equiv%=44.4 inv%=0.0 err=18 tmo=0
+jason fr n=2 killed=0 surv=2 cov-surv=2 kill%=0.0 equiv%=100.0 inv%=0.0 err=0 tmo=0

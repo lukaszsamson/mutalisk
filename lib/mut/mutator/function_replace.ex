@@ -60,6 +60,15 @@ defmodule Mut.Mutator.FunctionReplace do
     {String, :trim_trailing, 2} => :trim_leading
   }
 
+  # M103 measured but did NOT add: `Enum.sort`↔`reverse`,
+  # `Enum.take_while`↔`drop_while`, `String.upcase`↔`downcase`,
+  # `Map.put`↔`put_new`. All invalid-safe (same module/arity), but the matrix
+  # measurement found no kill-signal on the available targets (jason added 2
+  # candidates, both equivalent; bandit added 0) — insufficient evidence to
+  # ship into a default-on surface, where equivalent mutants would depress
+  # users' scores. Held as candidates for a future cycle with richer targets.
+  # See docs/decisions/M103_catalogue_additions.md.
+
   @impl true
   def name, do: "FunctionReplace"
 
