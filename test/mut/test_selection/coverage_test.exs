@@ -58,9 +58,17 @@ defmodule Mut.TestSelection.CoverageTest do
         root: root
       )
 
-    assert abs_static in result["deg"].test_files,
+    # The degraded file is unioned in, and the selection is canonicalized to
+    # the oracle's relative-to-root namespace (so ordering/metrics compare
+    # like with like; the worker relativizes either form anyway).
+    assert "test/static_test.exs" in result["deg"].test_files,
            "degraded file that statically covers the mutant must be unioned despite the namespace split"
+
+    assert Enum.all?(result["deg"].test_files, &(not absolute?(&1))),
+           "selection should be normalized to relative-to-root: #{inspect(result["deg"].test_files)}"
   end
+
+  defp absolute?(path), do: String.starts_with?(path, "/")
 
   test "M64: a degraded file unrelated to the mutant's module is not unioned" do
     plan = plan([mutant("unrel", "lib/sample.ex", 10, Sample, {:run, 1})])

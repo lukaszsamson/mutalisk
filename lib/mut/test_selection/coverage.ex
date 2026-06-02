@@ -103,10 +103,27 @@ defmodule Mut.TestSelection.Coverage do
     # M64: a degraded (coverage-failed) test file still runs for the mutants it
     # statically covers — union its static coverage so degradation never causes
     # a false survivor.
-    case degraded_cover(mutant, analysis, all_test_files, degraded, root) do
-      [] -> base
-      extra -> %{base | test_files: Enum.uniq(base.test_files ++ extra)}
-    end
+    unioned =
+      case degraded_cover(mutant, analysis, all_test_files, degraded, root) do
+        [] -> base
+        extra -> %{base | test_files: Enum.uniq(base.test_files ++ extra)}
+      end
+
+    # `base` may mix namespaces: oracle by_line/by_function tests are
+    # relative-to-root, while static/all_tests selections are absolute. The
+    # worker relativizes either form so verdicts are unchanged, but mixed
+    # paths weaken the last-killer / runtime ordering heuristics and muddy the
+    # selection metrics. Canonicalize the final selection to the oracle's
+    # relative-to-root namespace so ordering and metrics compare like with
+    # like. (`match_kind` is already computed above in the original namespaces,
+    # so this does not affect classification.)
+    %{unioned | test_files: normalize_test_files(unioned.test_files, root)}
+  end
+
+  defp normalize_test_files(files, nil), do: files
+
+  defp normalize_test_files(files, root) do
+    files |> Enum.map(&Path.relative_to(&1, root)) |> Enum.uniq()
   end
 
   # Degraded files that have static evidence for this mutant — unioned into the

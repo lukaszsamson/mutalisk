@@ -40,7 +40,16 @@ defmodule Mut.ProcessTree do
     Enum.each(descendants, &kill_pid(&1, "-TERM"))
     kill_pid(pid, "-TERM")
     Process.sleep(100)
-    Enum.each(descendants, &kill_pid(&1, "-KILL"))
+
+    # Re-scan before KILL and signal the union: a wrapper can fork a child
+    # (e.g. the real `beam.smp`) AFTER the first snapshot, so a single
+    # pre-TERM snapshot would orphan a late fork on the timeout path. The
+    # union of the original snapshot and a fresh scan covers both the
+    # already-known descendants and any that appeared during the grace window.
+    (descendants ++ descendant_pids(pid))
+    |> Enum.uniq()
+    |> Enum.each(&kill_pid(&1, "-KILL"))
+
     kill_pid(pid, "-KILL")
     :ok
   end
