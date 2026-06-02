@@ -5053,6 +5053,204 @@ into v1.27.
 - Pushing or tagging a release; Hex publish (held every release
   by explicit user constraint; v1.28+ conversation).
 
+# v1.28 milestones (maturation mode-shift: trust, DX, data-gated catalogue)
+
+v1.27 closed the catalogue-validation arc. Three independent
+reviews (Gemini / Claude / GPT) + the user's instinct converged:
+**mutator-complete, not product-complete** — value has moved from
+"what can it mutate" to "can a stranger trust the number." v1.28
+is the first maturation-arc release.
+
+Hard boundaries the reviews agreed on, encoded here:
+- **No engine optimization.** Persistent worker removed (v1.15),
+  M86 redirected away from schema-routing-everything. The
+  port-driven sandbox is the trust anchor — reopening it trades
+  correctness for wall-clock, backwards for a tool whose value is
+  a trusted number.
+- **No incremental history.** CI-only value; stays held pending an
+  explicit CI-adoption decision (not made this cycle).
+- **Catalogue grows only via small, allowlisted, data-gated
+  additions** (GPT's framing), anchored to FunctionReplace — the
+  one graduated env-surface (v1.27/M97).
+- **Release constraint holds** — local on master, no push/tag/Hex.
+
+**Defaults:** catalogue graduations are M62-gated from fresh
+matrix data; no flip pre-committed. New config/reporter surfaces
+are opt-in and never change the default plan or score. Elixir
+floor stays `>= 1.19.0`.
+
+Five milestones. M99 (correctness) first — it's a trust release
+blocker. M100–M102 are the DX/reporting/docs track. M103 is the
+data-gated catalogue track (independent; can interleave).
+
+## v1.28 scope (committed)
+
+**M99 — Correctness-fix audit + signal-hardening confirmation.**
+
+*Goal:* Confirm-or-fix the three trust-critical correctness issues
+the bug review surfaced (user believes already fixed); lock them
+with regression tests.
+
+*Inputs:* the bug review (#1 timeout-in-score + reporter
+divergence, #2 UTF-8 byte_offset, #3 kill-leak under asdf/mise);
+`Mut.Reporter.Terminal`, `Mut.Reporter.StrykerJson`, `Mut.Metrics`
+(score calc); `Mut.SourceSpan` / span byte-offset code;
+`Mut.ChildProcess` (tree-kill); `Mut.Worker` timeout path.
+
+*Deliverables:*
+- **#1 timeout in score.** Verify timeout mutants count as
+  detected in the headline score; verify Terminal and StrykerJson
+  compute the *same* score on the default path. If they diverge,
+  reconcile to one score source.
+- **#2 UTF-8 byte-offset.** Non-ASCII source must not corrupt
+  spans/diffs. Add a non-ASCII fixture; verify report rendering.
+- **#3 process-tree kill.** No leaked BEAMs on the timeout hot
+  path under asdf/mise shims; reuse `Mut.ChildProcess`'s tree-kill
+  if the worker timeout path doesn't already.
+- Regression test per issue.
+
+*Acceptance:*
+- Two reporters produce identical scores across the matrix.
+- Non-ASCII fixture renders correctly (span + diff).
+- No BEAM leak under a shimmed install (tested).
+- Each issue has a regression test; `bin/verify` green.
+
+*Out of scope:* New reporters (M101); broader score-model changes.
+
+**M100 — Configuration + source-level ignores.**
+
+*Goal:* Make adoption ergonomic — config file + complete config
+surface + source-level mutation ignores.
+
+*Inputs:* existing `config :mut` (already has `exclude` —
+`lib/mix/tasks/mut.ex:774`); `Mut.Cli.parse/2` (CLI/config
+layering); `Mut.Orchestrator` (candidate emission for ignores).
+
+*Deliverables:*
+- Documented, complete config surface: `default_enabled_targets`,
+  `fail_at`/`min_score`, `exclude`, `selection`, `concurrency`,
+  timeout. Audit which already exist; fill gaps.
+- `.mutalisk.exs` project-config file (loaded if present).
+  Precedence: file < `config :mut` < CLI flags (documented +
+  tested).
+- **Source-level ignores**: `@mutalisk_ignore true` module
+  attribute and/or a comment pragma; excludes a function/line/
+  module from mutation (Logger calls, untestable rescue blocks).
+
+*Acceptance:*
+- Config precedence documented + tested.
+- `@mutalisk_ignore` provably removes candidates (golden).
+- Default plan byte-identical when no config/ignores present.
+- `bin/verify` green.
+
+*Out of scope:* GUI/interactive config; per-mutator config beyond
+enable/disable.
+
+**M101 — HTML reporter + GitHub Actions annotations.**
+
+*Goal:* Make surviving mutants actionable for teams.
+
+*Inputs:* `Mut.Reporter.StrykerJson` (data source — already
+emitted); the `--reporter` CLI surface; surviving-mutant
+metadata (file/line/diff/mutation).
+
+*Deliverables:*
+- `Mut.Reporter.Html`: self-contained HTML highlighting each
+  surviving mutant's source line + the specific AST mutation
+  (Stryker JSON as the data source). Opt-in via `--reporter html`
+  / config.
+- `Mut.Reporter.GitHubActions`: emit `::warning file=…,line=…::`
+  workflow commands so survivors show as inline PR annotations.
+  Opt-in.
+- Neither changes the score or the default reporters.
+
+*Acceptance:*
+- HTML renders the fixture run with correct line highlighting +
+  diffs.
+- GitHub annotations match the workflow-command format (tested).
+- Terminal + Stryker reporters unchanged.
+- `bin/verify` green.
+
+*Out of scope:* Hosted/served report; coverage overlay in HTML
+(later).
+
+**M102 — User-facing documentation + dead-code prune.**
+
+*Goal:* Docs for users (not implementers); shrink surface area.
+
+*Inputs:* `README.md`; `Mix.Tasks.Mut` `@moduledoc`; the catalogue
+(`Mut.Mutator.Defaults`); dead code from the removed persistent
+worker + M86-redirected optimization passes.
+
+*Deliverables:*
+- `README.md` user-facing: install, run, interpret the score,
+  handle surviving mutants.
+- `@moduledoc` on `Mix.Tasks.Mut` (drives `mix help mut`).
+- "Handling surviving mutants" guide.
+- Mutator catalogue doc (default-on vs opt-in; what each does).
+- Dead-code prune: orphaned persistent-worker / abandoned-
+  optimization symbols, flags, modules.
+
+*Acceptance:*
+- `mix help mut` is useful; README walks a new user end-to-end.
+- grep confirms no orphaned persistent-worker / dead-optimization
+  symbols remain.
+- `bin/verify` green.
+
+*Out of scope:* Hosted docs site; HexDocs publish (release
+constraint).
+
+**M103 — Data-gated catalogue additions (allowlisted, measured).**
+
+*Goal:* GPT's "small, allowlisted additions," anchored to the
+graduated FunctionReplace surface; measured before any default-on.
+
+*Inputs:* `Mut.Mutator.FunctionReplace` (graduated v1.27/M97);
+the dispatch tracer oracle; M97's sharding harness
+(`bench/shard_matrix.sh`); the M91 12-target matrix; the M62 gate.
+
+*Deliverables:*
+- Expand FunctionReplace's allowlist with more strong-semantic
+  pairs, each justified per pair, oracle-confirmed dispatch,
+  never inventing a target. Candidates: `Map.put`↔`Map.delete`
+  (where safe), `Enum.sort`↔`Enum.reverse`, `Enum.count`/`length`
+  family, etc. — final list density/semantics-driven.
+- Optionally: small guard/operator/collection variants where a
+  clear low-noise shape exists.
+- Matrix-measure every addition on the 12-target set **before**
+  any default-on decision.
+- `docs/decisions/M103_*.md`: per-addition keep_opt_in / graduate
+  per the M62 gate.
+
+*Acceptance:*
+- New pairs/variants have unit tests + matrix data.
+- Graduations (if any) additive-only (existing stable IDs
+  unchanged), verified by plan diff on demo_app + Decimal.
+- No new uncharacterized invalid/equiv class shipped default-on.
+- `bin/verify` green.
+
+*Out of scope:* New broad semantic surface; return-value
+replacement / call deletion; inventing target functions.
+
+## v1.28 horizon (not v1.28 scope)
+
+- **Incremental cross-run history** — reopens only on an explicit
+  CI-adoption decision; `bench/cross_run.exs` is the foundation.
+- **Release management** (push/tag/Hex) — when the constraint
+  lifts; M102's docs are the prerequisite groundwork.
+- **Further catalogue additions** — only data-gated/allowlisted,
+  per M103's pattern.
+
+## Explicitly NOT v1.28
+
+- Engine optimization (persistent worker, in-process re-run,
+  schema-route-everything) — trust anchor stays.
+- Incremental cross-run history (held; CI-adoption-gated).
+- Function-call deletion / return-value replacement (high-FP).
+- Pushing / tagging / Hex publish (release constraint holds).
+- New broad mutation surface (M103 is allowlisted/measured only).
+- EnvWalker consolidation; wrapper-guard schemata.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
