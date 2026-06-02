@@ -5232,6 +5232,43 @@ the dispatch tracer oracle; M97's sharding harness
 *Out of scope:* New broad semantic surface; return-value
 replacement / call deletion; inventing target functions.
 
+## v1.28 delivery status (2026-06-02: DELIVERED)
+
+- **M99** ✓ — Confirmed + regression-locked the three trust-critical fixes
+  (all landed in the prior bug-fix pass): #1 timeout-in-score with a
+  reporter-agreement test (terminal `snapshot.score` == Stryker-viewer-derived
+  score, timeout counted as detected → 66.7% for 1k+1t+1s); #2 UTF-8
+  byte-offset with an end-to-end EnvWalker-span → FallbackPatch test on
+  non-ASCII source; #3 process-tree kill with a test spawning a wrapper that
+  forks a child, asserting both are reaped. `docs/decisions/` n/a (confirmation
+  milestone).
+- **M100** ✓ — `Mut.Config` loads `.mutalisk.exs` (file < `config :mut` < CLI);
+  `exclude` threaded through `Cli.Options` (replacing the app-env side-channel);
+  `@mutalisk_ignore true` excludes a module's mutants (nesting-aware
+  fully-qualified detection; recorded as `:mutalisk_ignore` skips). demo_app
+  byte-identical when absent. `mix help mut` documents both.
+- **M101** ✓ — `Mut.Reporter.Html` (self-contained survivor report) +
+  `Mut.Reporter.GitHubActions` (`::warning` PR annotations), both opt-in
+  (`@default_reporters` split from `@known_reporters`), both consuming the
+  Stryker JSON map (rendered once, fanned out). Score + default reporters
+  unchanged.
+- **M102** ✓ — README rewritten user-facing (interpret the score / handle
+  survivors / config / reporters); `docs/MUTATORS.md` catalogue (13 default-on
+  vs 16 opt-in). Dead-code prune: grep-confirmed clean (persistent-worker is
+  only the deprecation shim; no orphaned modules; timeout_factor/const gone).
+- **M103** ✓ (data-gated no-add) — Measured four strong-semantic FunctionReplace
+  pair candidates (Enum.sort↔reverse, take_while↔drop_while, String.upcase↔
+  downcase, Map.put↔put_new). Invalid-safe (0%) but no kill-signal on the
+  available targets (jason +2, both equiv; bandit +0). Held out of the
+  default-on allowlist per the project's data-gated discipline.
+  `docs/decisions/M103_catalogue_additions.md`. FunctionReplace unchanged from
+  M97; demo_app + Decimal byte-identical.
+
+The maturation mode-shift landed: correctness locked, config/ignores +
+HTML/GHA reporters + user docs added (all opt-in, default plan + score
+unchanged), and the catalogue track held the line on insufficient data. Trust
+> growth, as the arc intended.
+
 ## v1.28 horizon (not v1.28 scope)
 
 - **Incremental cross-run history** — reopens only on an explicit
