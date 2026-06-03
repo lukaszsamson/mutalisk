@@ -143,7 +143,7 @@ global default.
 ## Project documents
 
 - [docs/MUTATORS.md](docs/MUTATORS.md) — the mutator catalogue
-- [ELIXIR_MUTATION_TESTING_SPEC.md](ELIXIR_MUTATION_TESTING_SPEC.md) — the spec
-- [PLAN.md](PLAN.md) — milestone history
-- [BENCHMARKS.md](BENCHMARKS.md) — OSS validation runs
-- [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md) — the child-process bootstrap design
+- [HLD](https://github.com/lukaszsamson/mutalisk/blob/main/ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md) — the design / spec
+- [PLAN.md](https://github.com/lukaszsamson/mutalisk/blob/main/PLAN.md) — milestone history
+- [BENCHMARKS.md](https://github.com/lukaszsamson/mutalisk/blob/main/BENCHMARKS.md) — OSS validation runs
+- [docs/BOOTSTRAP.md](https://github.com/lukaszsamson/mutalisk/blob/main/docs/BOOTSTRAP.md) — the child-process bootstrap design

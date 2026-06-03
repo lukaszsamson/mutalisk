@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Compile.MutOracle do
-  @moduledoc "Mix compiler that registers Mut.Trace before :elixir runs."
+  @moduledoc false
   use Mix.Task.Compiler
 
   alias Mut.Trace

@@ -110,7 +110,7 @@ defmodule Mut.EnvOracle do
   end
 
   @doc """
-  Constructs a `Mut.EnvWalker.tracer_macro_index/0` from the
+  Constructs a `t:Mut.EnvWalker.tracer_macro_index/0` from the
   project's `Mut.Oracle.DispatchSite` records, filtered to the
   macro dispatch kinds. M39 section "Data Model": the walker
   queries this index on every call node that is not a known

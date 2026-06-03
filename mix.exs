@@ -22,6 +22,7 @@ defmodule Mutalisk.MixProject do
       description: @description,
       source_url: @source_url,
       package: package(),
+      docs: docs(),
       start_permanent: Mix.env() == :prod,
       test_load_filters: [
         fn file ->
@@ -75,6 +76,30 @@ defmodule Mutalisk.MixProject do
       # dependency is required at runtime, which avoids the previous
       # mutalisk -> jason -> target start-graph cycle observed when target
       # apps shared names with `:jason`'s `optional_applications`.
+    ]
+  end
+
+  # ex_doc / HexDocs config. README is the landing page; the mutator catalogue
+  # and changelog ship as extras. Modules are grouped by role; engine internals
+  # fall under the default ungrouped list. `source_ref` is "main" until a
+  # tagged remote exists (M112/RELEASE.md) — source links resolve once it does.
+  @spec docs() :: keyword
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md", "docs/MUTATORS.md", "CHANGELOG.md"],
+      source_ref: "main",
+      groups_for_modules: [
+        Command: [Mix.Tasks.Mut],
+        Reporters: [
+          Mut.Reporter.StrykerJson,
+          Mut.Reporter.Terminal,
+          Mut.Reporter.Html,
+          Mut.Reporter.GitHubActions
+        ],
+        "Incremental history": [Mut.History.Store, Mut.History.Digest, Mut.History.Reuse],
+        Configuration: [Mut.Config]
+      ]
     ]
   end
 

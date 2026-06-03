@@ -95,7 +95,7 @@ defmodule Mut.OpaquePolicy do
       tracer proof, classify as an opaque macro boundary.
 
   `macro_index` is a map keyed by `{file, line, column, name,
-  arity}` (see `Mut.EnvSnapshot.t/0` doc and the `tracer_macro_index`
+  arity}` (see `Mut.EnvSnapshot` and the `tracer_macro_index`
   alias in `Mut.EnvWalker`). When `nil` or empty, NO call is
   trusted — the walker conservatively treats `if` / `unless`
   outside tracer scope as opaque.

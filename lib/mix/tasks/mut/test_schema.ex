@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Mut.TestSchema do
-  @moduledoc "Integration: run M8 worker against the demo_app fixture."
+  @moduledoc false
   use Mix.Task
 
   @dialyzer {:no_opaque, run: 1}

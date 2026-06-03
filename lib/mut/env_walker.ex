@@ -25,7 +25,7 @@ defmodule Mut.EnvWalker do
   ## Output shape
 
   `collect_literal_snapshots/2` returns a list of
-  `Mut.EnvSnapshot.t/0` records, one per `:__block__`-wrapped
+  `t:Mut.EnvSnapshot.t/0` records, one per `:__block__`-wrapped
   literal (the AST shape produced by the parser's
   `:literal_encoder` option). Each snapshot has `scope`,
   `context`, and `trust_level` populated according to the
@@ -58,11 +58,10 @@ defmodule Mut.EnvWalker do
   The walker MUST NOT call any of: `Macro.expand`,
   `Macro.expand_once`, `Code.eval_*`, `Code.compile_*`,
   `Kernel.ParallelCompiler`, `:elixir_expand`, `:elixir_module`,
-  `:elixir_def`, `Macro.Env.expand_import/5`,
-  `Macro.Env.expand_require/6`, `Macro.Env.define_import/4`,
-  `Macro.Env.fetch_alias/2`, `Macro.Env.fetch_macro_alias/2`,
-  or direct reads of `%Macro.Env{}` private fields. This is
-  enforced by a verify-layer grep gate added in M40 commit 7.
+  `:elixir_def`, the `Macro.Env` expand/define/fetch internals
+  (`expand_import`, `expand_require`, `define_import`, `fetch_alias`,
+  `fetch_macro_alias`), or direct reads of `%Macro.Env{}` private
+  fields. This is enforced by a verify-layer grep gate added in M40.
   """
 
   alias Mut.EnvSnapshot

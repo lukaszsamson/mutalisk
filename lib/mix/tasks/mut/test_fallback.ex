@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Mut.TestFallback do
-  @moduledoc "Integration: run fallback worker against the demo_app fixture."
+  @moduledoc false
   use Mix.Task
 
   alias Mut.Plan

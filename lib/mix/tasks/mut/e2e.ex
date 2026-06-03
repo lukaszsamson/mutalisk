@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Mut.E2e do
-  @moduledoc "End-to-end verification for mix mut against demo_app."
+  @moduledoc false
 
   use Mix.Task
 

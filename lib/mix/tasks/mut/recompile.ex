@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Mut.Recompile do
-  @moduledoc "Mix task for targeted fallback recompilation."
+  @moduledoc false
   use Mix.Task
 
   @impl Mix.Task
