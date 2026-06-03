@@ -1316,6 +1316,22 @@ Two tracks. Floor: M109 (independent). Release-prep: M110 (license + package) �
 - New mutators / mutation surface (catalogue closed at M103).
 - Function-call deletion / return-value replacement.
 
+**v1.30 OUTCOME (SHIPPED 2026-06-03).** All four milestones landed
+(`8f84f88..06bc3ce`, unpushed). The repo is **release-ready** — one
+`mix hex.publish` away (`docs/RELEASE.md`); the push stays the user's manual
+call. Published version stays `0.1.0` (pre-1.0). **M109** moved the
+`--incremental` reuse partition before schema build so reused mutants aren't
+instrumented (verdicts provably unchanged via the M107 harness) — but the
+measured wall-clock win is modest: instrumentation *placement* is a ~60 ms
+sliver of a compile-dominated schema build, so the residual floor is the
+work-copy `mix compile` + fixed phases, not placement (next lever:
+work-copy caching, future). **M110** added the verbatim Apache-2.0 `LICENSE` +
+Hex package metadata (`mix hex.build` clean). **M111** wired ex_doc (`mix docs`
+zero-warning) + reshaped the CHANGELOG to a user-facing `0.1.0` entry.
+**M112** dropped the `--worker-type` shim (a never-public deprecation → no one
+to deprecate-for) and confirmed every gate green. Non-incremental remains
+v1.29-byte-identical.
+
 ### v2
 
 - Lean env walker.

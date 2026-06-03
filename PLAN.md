@@ -5683,6 +5683,42 @@ steps when ready).
 - New mutators / mutation surface (catalogue closed at M103).
 - Function-call deletion / return-value replacement.
 
+## v1.30 delivery status — SHIPPED 2026-06-03
+
+All four milestones landed (commits `8f84f88..06bc3ce` on master, unpushed).
+Theme: close the last optimization + make the repo release-ready. The repo is
+now one `mix hex.publish` away; the push stays the user's manual call (constraint
+respected). Published version stays **`0.1.0`** (pre-1.0). Defaults unchanged
+(non-incremental byte-identical: demo_app 67.7, 27 schema / 4 fallback, 33
+stable_ids).
+
+- **M109** ✓ — incremental floor. Reuse partition + reused-verdict recording
+  moved *before* schema build (`prune_reused_for_incremental/7`), so reused
+  mutants are pruned from instrumentation (decimal ~90→~11, demo_app 31→0).
+  Verdicts provably unchanged (M107 harness + decimal 80.0==80.0). **Honest
+  finding**: the wall-clock win is modest — instrumentation *placement* is a
+  ~60ms sliver of a compile-dominated schema build (decimal 2974→2913ms); the
+  residual floor is the work-copy `mix compile` + fixed phases, not placement.
+  Next lever (future): work-copy caching / schema-build skip.
+  `docs/decisions/M109_incremental_floor.md`.
+- **M110** ✓ — Apache-2.0 `LICENSE` (verbatim) + `mix.exs` package metadata
+  (name, description, source_url placeholder, licenses, maintainers, links,
+  explicit `files` — priv/ + implementer docs excluded). `mix hex.build`
+  dry-run packages clean.
+- **M111** ✓ — ex_doc `docs/0` config (main=README, extras, module groups);
+  `mix docs` builds **zero-warning** (5 internal mix tasks → `@moduledoc false`;
+  `t:` type-link fixes; README implementer-doc links → repo-absolute). CHANGELOG
+  reshaped to a user-facing `0.1.0` first-release entry. Version stays 0.1.0.
+- **M112** ✓ — dropped the `--worker-type` deprecation shim (decision: it
+  deprecated a never-public flag → no one to deprecate-for on a clean 0.1.0
+  surface). `docs/RELEASE.md` (readiness checklist + manual publish steps). All
+  gates confirmed green: bin/verify, format, credo --strict, dialyzer, mix docs
+  (0 warnings), hex.build dry-run.
+
+Horizon (not v1.30): execute the release (push/tag/`mix hex.publish` per
+`docs/RELEASE.md`); default `--incremental` after real CI adoption; the
+work-copy-compile floor optimization (M109's next lever).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
