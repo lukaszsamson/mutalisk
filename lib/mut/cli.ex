@@ -165,7 +165,6 @@ defmodule Mut.Cli do
           selection: :string,
           debug_plan: :boolean,
           keep_work_copy: :boolean,
-          worker_type: :string,
           test_timeout_ms: :integer,
           incremental: :boolean,
           since: :string
@@ -200,7 +199,6 @@ defmodule Mut.Cli do
          {:ok, max_mutants} <- max_mutants(parsed),
          {:ok, selection} <- selection(parsed, config),
          {:ok, test_paths} <- test_paths(config),
-         :ok <- worker_type(parsed, config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
          {:ok, exclude} <- exclude(config) do
       {:ok,
@@ -272,33 +270,6 @@ defmodule Mut.Cli do
       _other ->
         {:error,
          "--test-timeout-ms must be an integer between #{@test_timeout_min_ms} and #{@test_timeout_max_ms}; run `mix help mut`"}
-    end
-  end
-
-  # v1.15 (M42) removed the persistent worker. `mix` is the only
-  # worker. `--worker-type mix` (or `config :mut, worker_type: :mix`)
-  # is accepted as a deprecated no-op that warns once; any other value
-  # — notably `persistent` — is rejected.
-  defp worker_type(parsed, config) do
-    case Keyword.get(parsed, :worker_type, Keyword.get(config, :worker_type)) do
-      nil ->
-        :ok
-
-      value ->
-        type = if is_atom(value), do: value, else: target_atom(value)
-
-        case type do
-          :mix ->
-            IO.warn(
-              "--worker-type is deprecated and ignored; `mix` is the only worker as of v1.15"
-            )
-
-            :ok
-
-          _other ->
-            {:error,
-             "--worker-type #{inspect(type)} is no longer supported; the persistent worker was removed in v1.15 (see CHANGELOG). `mix` is the only worker."}
-        end
     end
   end
 

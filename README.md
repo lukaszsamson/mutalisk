@@ -136,9 +136,8 @@ global default.
 - Test selection defaults to `coverage_with_static_fallback`; `--selection
   static` is the fully-portable escape hatch and `--selection coverage` is the
   strict (no-fallback) coverage mode.
-- Mutants run via a fresh `mix test` worker each (one mutant per VM). The
-  opt-in persistent worker was removed in v1.15; `--worker-type mix` is a
-  deprecated no-op and `--worker-type persistent` is rejected.
+- Mutants run via a fresh `mix test` worker each (one mutant per VM), in an
+  isolated sandbox subprocess.
 
 ## Project documents
 

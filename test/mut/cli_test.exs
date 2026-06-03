@@ -179,20 +179,6 @@ defmodule Mut.CliTest do
     assert message =~ "--test-timeout-ms must be an integer between"
   end
 
-  test "--worker-type mix is a deprecated warn-once no-op" do
-    warning =
-      ExUnit.CaptureIO.capture_io(:stderr, fn ->
-        assert {:ok, %Options{}} = Cli.parse(["--worker-type", "mix"])
-      end)
-
-    assert warning =~ "--worker-type is deprecated"
-  end
-
-  test "--worker-type persistent is rejected" do
-    assert {:error, message} = Cli.parse(["--worker-type", "persistent"])
-    assert message =~ "no longer supported"
-  end
-
   test "resolves mutators and aliases" do
     assert Cli.resolve_mutators(["arithmetic"]) == [Mut.Mutator.Arithmetic]
 
