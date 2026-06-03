@@ -5528,6 +5528,161 @@ Two horizon items deferred per scope: **default `--incremental`** (needs real
 CI adoption beyond M107's matrix) and **skipping schema-build for reused
 mutants** (the residual wall-clock floor — a future optimization).
 
+Post-v1.29 follow-up (user): re-ran the CRAP report with the real `crap_ex`
+tool at `claude_fun/crap_ex` (M108's first pass used the wrong name and fell
+back to a coverage proxy), then **refactored + unit-tested the worst live
+offenders** (`fallback_env_context/3` 127.4, `EnvWalker.descend/2` CC 30).
+
+# v1.30 milestones (incremental floor + release preparation)
+
+The project is **feature-complete** at v1.29 (every arc closed: engine,
+catalogue [closed M103], umbrella, trust/DX [v1.28], incremental history
+[v1.29]). v1.30 does two things: close the one genuine optimization left
+(the incremental wall-clock floor), and **prepare the repo for a real public
+release** — Apache-2.0, Hex metadata, HexDocs, CHANGELOG reshape, cleanup.
+
+This is release **preparation**, not release: v1.30 makes `mix hex.publish`
+one command away; the actual push/tag/publish stays the user's manual call
+(the standing local-on-master constraint is respected). "v1.30" is the
+internal milestone-arc label; the *published version* is an M111 decision
+(recommended `1.0.0`).
+
+**Defaults:** the floor optimization activates only under `--incremental`;
+non-incremental `mix mut` stays v1.29-byte-identical. Release-prep is
+metadata/docs/license — zero runtime change. Elixir floor `>= 1.19.0`.
+
+Two tracks. Floor: M109 (independent). Release-prep: M110 → M111 → M112.
+
+## v1.30 scope (committed)
+
+**M109 — Incremental-floor: skip schema-build for reused mutants.**
+
+*Goal:* Stop paying instrumentation cost for mutants `--incremental` will
+reuse — the residual wall-clock floor v1.29 deferred.
+
+*Inputs:* `Mut.History.Reuse` (M106 — the reuse pre-pass, currently *after*
+schema build); `Mut.SchemaBuild.instrument_files/1` (instruments the whole
+plan); `Mut.Orchestrator` (phase ordering); the M107 trust-gate harness.
+
+*Deliverables:*
+- Move the history-reuse determination *before* schema instrumentation under
+  `--incremental`: prune mutants whose stored verdict will be reused (exact
+  digest match) from the plan that drives `instrument_files/1`, so only
+  to-be-executed mutants get schema gates placed.
+- Pruned mutants' verdicts still come from history and still appear in the
+  final report + score — the optimization changes *what gets instrumented*,
+  never *what the answer is*.
+- Guard: only under `--incremental`; non-incremental instruments the full
+  plan exactly as v1.29.
+
+*Acceptance:*
+- Instrumentation count drops to executed-mutants-only under `--incremental`
+  (measured).
+- Per-mutant report + score **identical** to a v1.29 incremental run that
+  instrumented everything (M107 harness; the floor must not change the
+  answer).
+- Non-incremental run byte-identical to v1.29.
+- Documented additional speedup on a small-diff re-run.
+- `bin/verify` green.
+
+*Out of scope:* Reopening the sandbox model (this prunes instrumentation,
+not execution). Default `--incremental`.
+
+**M110 — Apache-2.0 license + Hex package metadata.**
+
+*Goal:* License the project and make `mix.exs` Hex-publishable.
+
+*Inputs:* current `mix.exs` (`version: "0.1.0"`, no `package` key, ex_doc
+dep present); no `LICENSE` file today; no git remote today.
+
+*Deliverables:*
+- Top-level `LICENSE` = verbatim Apache License 2.0 text; `NOTICE` if
+  attribution is needed.
+- `package` key in `mix.exs`: `description`, `licenses: ["Apache-2.0"]`,
+  `links` (source/docs — `source_url` user-provided once a remote exists;
+  placeholder + `# TODO` until then), `files`, `maintainers`.
+- `name` + `source_url` for ex_doc.
+
+*Acceptance:*
+- `LICENSE` is verbatim Apache-2.0.
+- `mix hex.build` (dry-run, no publish) packages successfully; valid
+  metadata; no license-mismatch warnings.
+- `bin/verify` green.
+
+*Out of scope:* Actually publishing; creating the git remote (user step).
+
+**M111 — HexDocs + CHANGELOG reshape.**
+
+*Goal:* User-facing docs site + release-note CHANGELOG. Version stays
+`0.1.0`.
+
+*Inputs:* ex_doc dep; `README.md` + `docs/MUTATORS.md` (M102 user docs);
+the public module surface (`Mix.Tasks.Mut`, reporters, `Mut.History.*`,
+config); `CHANGELOG.md` (currently milestone-log shaped).
+
+*Deliverables:*
+- ex_doc `docs:` config (main page, module groups, extras: user guide +
+  MUTATORS.md).
+- User-facing `@moduledoc`/`@doc` on the public surface suitable for
+  HexDocs (implementer docs stay in PLAN/HLD).
+- **Keep `version: "0.1.0"`** — too early for SemVer 1.0 stability; `0.x`
+  is the honest signal that the public API may still change. `1.0.0` is a
+  future decision after real-world adoption.
+- Reshape `CHANGELOG.md` into user-facing release notes (a `0.1.0`
+  first-release entry: capabilities; milestone detail stays in PLAN).
+
+*Acceptance:*
+- `mix docs` builds clean (no broken refs); HexDocs renders the public
+  surface.
+- Version is `0.1.0`; CHANGELOG has a user-facing `0.1.0` entry.
+- `bin/verify` green.
+
+*Out of scope:* Bumping to `1.0.0` (deferred until API-stable). Publishing
+HexDocs (`mix hex.publish docs` is the manual step).
+
+**M112 — Final cleanup + release-readiness validation.**
+
+*Goal:* Last-mile sweep; prove the repo is release-ready; document the
+manual publish steps.
+
+*Inputs:* the stray `test_receive.exs` at repo root; the `--worker-type`
+deprecation shim; all `bin/verify` gates; `mix hex.build` / `mix docs` /
+dialyzer.
+
+*Deliverables:*
+- Remove `test_receive.exs` + any non-source cruft.
+- Decide the `--worker-type` shim's fate for a clean public surface (keep
+  as documented deprecation, or drop — record the decision).
+- Confirm all gates: `bin/verify` green, `mix hex.build` dry-run clean,
+  `mix docs` clean, dialyzer clean, no warnings, formatter clean.
+- `docs/RELEASE.md`: release-readiness checklist + the manual publish steps
+  (set git remote, `git push`, `git tag v<version>`, `mix hex.publish`,
+  `mix hex.publish docs`).
+
+*Acceptance:*
+- Repo release-ready (every gate green).
+- `docs/RELEASE.md` enumerates the manual publish steps.
+- No cruft; `bin/verify` green.
+
+*Out of scope:* Executing the publish (the user runs `docs/RELEASE.md`'s
+steps when ready).
+
+## v1.30 horizon (not v1.30 scope)
+
+- **Execute the release** — push/tag/`mix hex.publish` per `docs/RELEASE.md`;
+  user's manual call once the constraint lifts.
+- **Default `--incremental`** — after real CI adoption surfaces beyond the
+  matrix (which a release enables).
+- **Real-CI dogfood** on unilink/zorbito — highest signal once published.
+
+## Explicitly NOT v1.30
+
+- Actually pushing / tagging / publishing (one command away; user's call).
+- Default `--incremental`.
+- Reopening the sandbox execution model (M109 prunes instrumentation only).
+- New mutators / mutation surface (catalogue closed at M103).
+- Function-call deletion / return-value replacement.
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
