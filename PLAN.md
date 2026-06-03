@@ -5514,11 +5514,15 @@ v1.28-byte-identical: demo_app 67.7, 27 schema / 4 fallback, 33 stable_ids).
   89/90 reused). Diff-scoped proven (only the edited function re-executes;
   warm == full-run ground truth). Wall-clock: decimal 156s → 16s ≈ 9.75×.
   `docs/decisions/M107_incremental_history.md` + BENCHMARKS v1.29.
-- **M108** ✓ — dead-code/CRAP report (`docs/decisions/M108_dead_code_cleanup.md`).
-  ex_crap absent → coverage-driven + orphan-scan + warnings-as-errors +
-  marker sweep. **No provably-dead code** (clean by construction); the
-  `--worker-type` deprecation shim retained (reachable, behavior-bearing);
-  high-CRAP-but-live modules flagged as future test candidates only.
+- **M108** ✓ — dead-code/CRAP report (`docs/decisions/M108_dead_code_cleanup.md`
+  + `bench/results/m108_crap_report.txt`). Ran the user's **`crap_ex`** tool
+  (`mix crap`, dep-free via `--beams` against mutalisk's compiled beams) +
+  orphan-scan + warnings-as-errors + marker sweep. **No provably-dead code**
+  (clean by construction); the `--worker-type` deprecation shim retained
+  (reachable, behavior-bearing). CRAP: 1338 functions, **8 over 30** (worst
+  `Orchestrator.fallback_env_context/3` 127.4 — niche-target clauses unit-untested;
+  `EnvWalker.descend/2` CC 30), all live → flagged as future test/refactor
+  candidates only (M108 scopes out touching live high-CRAP code).
 
 Two horizon items deferred per scope: **default `--incremental`** (needs real
 CI adoption beyond M107's matrix) and **skipping schema-build for reused

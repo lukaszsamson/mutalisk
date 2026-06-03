@@ -3,21 +3,36 @@
 **Date:** 2026-06-03
 
 **Outcome: no provably-dead code removed — the codebase is clean by
-construction.** Four independent analyses agree. The one flagged remnant (the
-`--worker-type` deprecation shim) is reachable, intentional UX whose removal is
-a behavior change + a release-management decision (out of v1.29 scope), so it is
-documented and retained. High-CRAP-but-live modules are flagged informationally
-(M108 explicitly scopes out refactoring them). This is a data-gated outcome in
-the project's established discipline (M60/M88/M93/M95/M103: measure, and don't
-act on a hunch).
+construction.** Four independent analyses agree (a real per-function CRAP run +
+three structural checks). The one flagged remnant (the `--worker-type` shim) is
+reachable, intentional UX whose removal is a behavior change + a
+release-management decision (out of v1.29 scope), so it is documented and
+retained. High-CRAP-but-live functions are flagged informationally (M108
+explicitly scopes out refactoring them). This is a data-gated outcome in the
+project's established discipline (M60/M88/M93/M95/M103: measure, and don't act
+on a hunch).
 
 ## Method
 
-`ex_crap` (the user's CRAP tool) is **not present in this environment**, so per
-the PLAN's fallback this used coverage-report-driven dead-code detection, plus
-three corroborating structural checks:
+The user's CRAP tool is **`crap_ex`** (`/Users/lukaszsamson/claude_fun/crap_ex`,
+`mix crap` — `CRAP(f) = CC(f)² · (1 − cov(f))³ + CC(f)`, BEAM-native from
+`debug_info` + `:cover` clause analysis). It was run **dep-free** against
+mutalisk's compiled beams (no change to mutalisk's `mix.exs`):
 
-1. **Coverage** — `mix test --cover` (unit suite), per-module line coverage.
+```sh
+# in mutalisk:
+MIX_ENV=test mix test --cover --export-coverage crap
+# in crap_ex:
+mix crap --beams "<mutalisk>/_build/test/lib/mutalisk/ebin/*.beam" \
+         --coverdata "<mutalisk>/cover/crap.coverdata" \
+         --paths "<mutalisk>/lib" --min-score 30
+```
+
+Full report: `bench/results/m108_crap_report.txt`. Four structural checks
+corroborate the dead-code conclusion:
+
+1. **CRAP** — `crap_ex`, per-function complexity × (1 − coverage). High CRAP
+   flags *risky-to-change* code, not dead code.
 2. **Orphan-module scan** — every `lib/` module's last segment grepped across
    `lib/` + `test/`; modules referenced only in their own file are candidates.
 3. **Compiler** — the build runs `--warnings-as-errors` (bin/verify lint
@@ -26,6 +41,13 @@ three corroborating structural checks:
 4. **Marker + cruft sweep** — grep for `deprecated|legacy|no longer|abandon|
    TODO|FIXME|obsolete`, commented-out code blocks, and single-use module
    attributes.
+
+**Coverage caveat:** `--export-coverage` captures only the **unit** suite (the
+e2e / integration_schema / integration_fallback layers run as out-of-band mix
+tasks and are not in `:cover`). So mix-task / e2e / worker-port functions show
+0% coverage here and their CRAP is **inflated** — their real coverage comes from
+those other layers. CRAP is most meaningful for the pure-logic modules the unit
+suite *does* cover.
 
 ## Findings
 
@@ -85,27 +107,36 @@ reuse feature, but `cross_run.exs` remains a **functionally distinct, working**
 standalone tool (it diffs two Stryker reports for human inspection — a different
 capability from reuse). Not dead; kept.
 
-## High-CRAP-but-live (informational — NOT changed this cycle)
+## CRAP results — 8 functions over threshold (informational, NOT changed)
 
-CRAP ≈ complexity × (1 − coverage)². The modules with the most
-complexity-under-low-unit-coverage are **test/refactor candidates**, not dead
-code; M108 explicitly scopes out touching live high-CRAP code. Flagged for a
-future cycle:
+`crap_ex` analyzed **1338 functions; 8 exceed CRAP 30** (worst 127.4). All are
+**live** — high CRAP means *risky to change* (complex + under-tested), never
+dead. M108 explicitly scopes out refactoring live high-CRAP code, so these are
+flags for a future cycle, not work items.
 
-| module | unit cov | note |
-|---|--:|---|
-| `Mut.CompileRollback` | 8% | exercised mainly via fallback-recompile integration; thin unit coverage |
-| `Mut.Worker` | 55% | core execution/classification; integration-covered, unit-light |
-| `Mut.Mutator.IntegerLiteral` | 19% | graduated mutator; add unit cases for its pattern paths |
-| `Mut.Oracle` | 52% | dispatch resolution; integration-covered |
+| function | CC | cov% | CRAP | note |
+|---|--:|--:|--:|---|
+| `Mut.Orchestrator.fallback_env_context/3` | 14 | 16.7 | **127.4** | 14-clause per-target dispatch; the niche-target clauses (`:map_update_drop`, `:receive_timeout`, …) aren't hit by unit tests → genuine **test-gap** signal |
+| `Mut.EnvWalker.descend/2` | 30 | 65.1 | 68.2 | genuinely **high CC (30)** — the strongest *refactor* candidate |
+| `Mut.AstWalk.literal?/1` | 9 | 33.3 | 33.0 | branchy literal classifier, unit-light |
+| `Mut.Trace.normalize_meta_value/1` | 8 | 25.0 | 35.0 | meta-normalization branches, unit-light |
+| `Mix.Tasks.Mut.render_reports/5` | 6 | 0.0 | 42.0 | mix-task layer; 0% is the coverage caveat (run under e2e) |
+| `Mix.Tasks.Mut.E2e.assert_incremental!/1` | 6 | 0.0 | 42.0 | the M106 e2e assertion (this release); branchy by construction, e2e-layer |
+| `Mut.EnvWalker.walk_try/2` | 6 | 0.0 | 42.0 | try/rescue/catch walk; unit-light |
+| `Mut.Worker.Formatter.handle_cast/2` | 6 | 0.0 | 42.0 | worker-port event handler; integration-covered |
 
-These are flags, not work items — adding targeted unit tests (not rewrites) is
-the right future follow-up.
+The right follow-up is **targeted unit tests** (especially
+`fallback_env_context/3`'s per-target clauses) and possibly **splitting
+`EnvWalker.descend/2`** (CC 30) — not removal, and not this cycle. `crap_ex`
+also dampened 2 generated dispatch tables (`Mut.JSON.pretty/2`,
+`Static.referenced_module/1`) — correctly not gated.
 
 ## Acceptance
 
-- [x] Dead-code/CRAP report produced (this document).
+- [x] Dead-code/CRAP report produced — real `crap_ex` run
+      (`bench/results/m108_crap_report.txt`) + this document.
 - [x] Provably-dead code removed: **none exists** (clean by construction —
-      each potential removal examined and justified as reachable/live).
+      each potential removal examined and justified as reachable/live; the 8
+      CRAP violations are all live, flagged not removed).
 - [x] No behavior change (no code changed; golden gates + full suite green).
 - [x] `bin/verify` green.
