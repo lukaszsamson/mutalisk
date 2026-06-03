@@ -5288,6 +5288,242 @@ unchanged), and the catalogue track held the line on insufficient data. Trust
 - New broad mutation surface (M103 is allowlisted/measured only).
 - EnvWalker consolidation; wrapper-guard schemata.
 
+# v1.29 milestones (incremental cross-run history + dead-code cleanup)
+
+v1.29 **reverses the incremental-history hold** — the user made
+the CI-adoption decision the prior releases gated on. This is the
+long-deferred v2 perf bet, implementing the design the HLD already
+specifies (`### Incremental History`): history key
+`stable_mutant_id + source_digest + selected_tests_digest +
+config_digest`, conservative reuse, "incorrect reuse is worse than
+a slow run." Plus a dead-code/failed-experiment cleanup track using
+the user's `ex_crap` CRAP tool (coverage-driven fallback).
+
+The foundation exists: `bench/cross_run.exs` (M86 redirect) proved
+the Stryker report carries enough per-mutant state to compute
+cross-run deltas with **no engine change**. v1.29 turns that
+read-only prelude into a persistent, reuse-driving feature.
+
+**The correctness bar is the whole game.** A stale-reuse bug
+produces a wrong number that looks right — strictly worse than a
+slow run. History is **opt-in** (`--incremental`), conservative
+(reuse only on exact digest match), validated against full-run
+ground truth (M107) before it can be trusted. Defaults unchanged:
+no-`--incremental` `mix mut` is byte-identical to v1.28. Sandbox
+execution model untouched (the trust anchor). Elixir floor
+`>= 1.19.0`; release constraint holds.
+
+Two tracks. History: M104 → M105 → M106 → M107 (strict — store
+before reuse, reuse before validation). Cleanup: M108
+(independent; can interleave).
+
+## v1.29 scope (committed)
+
+**M104 — Incremental history design spike.**
+
+*Goal:* Decide the consequential design choices before writing
+the feature (spike-first; high correctness bar).
+
+*Inputs:* HLD `### Incremental History` (key + reuse policy);
+`bench/cross_run.exs` (the prelude — per-mutant report state);
+`Mut.StableId`; `Mut.TestSelection.{Coverage,Static}` (selector
+output for `selected_tests_digest`); `lib/mut/reporter/stryker_json.ex`
+(the `mutalisk` extension already carries engine/stable_id maps).
+
+*Deliverables (`docs/spikes/M104_incremental_history.md`):*
+- **Digest granularity** — `source_digest` at function-level vs
+  span-level vs file-level. Function-level is the likely sweet
+  spot (verdict invalidates when the enclosing function's source
+  changes, not on any file byte). Decide with rationale.
+- **Store format + location** — JSON / ETS-dump under
+  `_build/mut_history/` or a configured path; never the user
+  source tree.
+- **Reuse decision table** — concrete per status (killed /
+  survived / timeout / error / invalid) against the four key
+  components. Killed reuses on source+killing-test unchanged;
+  survived on source+all-selected-tests unchanged; timeout
+  cautiously on source+tests+timeout-config unchanged; error/
+  invalid never reuse (re-execute).
+- **selected_tests_digest** derivation from selector output.
+- **config_digest** inputs (enabled targets, timeout, selection
+  mode — which config changes must invalidate).
+- **Invalidation + GC** — stale entries pruned; bounded store.
+
+*Acceptance:* design doc committed; reuse table concrete per
+status; granularity decided; no production code beyond a
+throwaway proof; `bin/verify` green.
+
+*Out of scope:* Implementation (M105+).
+
+**M105 — Persistent verdict store + digest computation.**
+
+*Goal:* Record history at end of run + prove round-trip; no reuse
+yet.
+
+*Inputs:* M104 design doc; `Mut.StableId`; the selector + config
+surfaces; `Mut.Metrics` (run lifecycle).
+
+*Deliverables:*
+- `Mut.History.Store`: read/write the per-mutant verdict store,
+  keyed by stable_id, carrying status + the four digests +
+  killing-test identity (for killed mutants).
+- `Mut.History.Digest`: compute `source_digest` (chosen
+  granularity), `selected_tests_digest`, `config_digest`.
+- Writes to the isolated history path (configurable), never the
+  user tree. Records at end of run.
+
+*Acceptance:*
+- A run writes a complete valid store; re-read reproduces every
+  verdict + digest.
+- Store location isolated + configurable.
+- Default run (no `--incremental`) writes history but changes
+  nothing observable (plan + score byte-identical).
+- `bin/verify` green.
+
+*Out of scope:* Reuse (M106).
+
+**M106 — Reuse policy + `--incremental` flag.**
+
+*Goal:* The feature — skip execution and adopt stored verdicts on
+exact digest match.
+
+*Inputs:* M105 store + digests; M104 decision table;
+`Mut.Orchestrator` / the worker dispatch loop; `Mut.Cli`.
+
+*Deliverables:*
+- `Mut.History.Reuse`: per planned mutant, if a stored verdict
+  matches digests per its status's reuse rule, skip execution and
+  adopt it; else execute. Conservative — any mismatch / missing /
+  ambiguous → execute.
+- `--incremental` (+ config) opts in. `--since <ref>` optionally
+  diff-scopes to mutants in changed files.
+- Reused-vs-executed counts in metrics + terminal + Stryker JSON.
+
+*Acceptance:*
+- No-change re-run reuses ~all verdicts (executes ~none).
+- Changing one function re-executes only that function's mutants.
+- Killed reuse requires killing-test unchanged; survivor reuse
+  requires all selected tests unchanged.
+- `--incremental` absent ⇒ v1.28 behavior byte-identical.
+- `bin/verify` green.
+
+*Out of scope:* Making `--incremental` default (future decision).
+
+**M107 — Incremental validation on the OSS matrix.**
+
+*Goal:* The trust gate — prove reuse never changes the answer.
+
+*Inputs:* M106 feature; the M91 12-target matrix; M97 sharding
+harness; `bench/cross_run.exs` (delta verification).
+
+*Deliverables:*
+- **Ground-truth correctness**: full run vs incremental run on the
+  same unchanged tree ⇒ identical per-mutant verdicts + identical
+  score (reuse must never change the answer).
+- **Diff-scoped correctness**: mutate a file, run incremental,
+  confirm only affected mutants re-execute and the result matches
+  a full run.
+- **Wall-clock win**: document speedup on a small-diff re-run (the
+  CI scenario).
+- **Invalidation correctness**: changing config/timeout/selection
+  invalidates the right entries.
+- `docs/decisions/M107_incremental_history.md`: correctness
+  evidence + CI-usage guide. BENCHMARKS v1.29 section.
+
+*Acceptance:*
+- Zero verdict divergence (full vs incremental, unchanged tree)
+  across the matrix.
+- Diff-scoped runs match full-run ground truth.
+- Speedup documented; `bin/verify` green.
+
+*Out of scope:* Flipping `--incremental` default.
+
+**M108 — Dead-code + failed-experiment cleanup (ex_crap / coverage).**
+
+*Goal:* Prune dead code + failed-experiment remnants, surfaced by
+CRAP/coverage analysis (deeper than M102's grep-prune).
+
+*Inputs:* `../ex_crap` (user's CRAP tool — **NOTE: not present in
+the current environment; user must point at it / clone it, else
+fall back to coverage-report-driven dead-code detection**); the
+test suite's coverage output; v1.28/M102 (grep-prune baseline —
+persistent-worker removal clean except the `--worker-type` shim);
+spike/redirect leftovers (M86 redirect, abandoned-optimization
+paths).
+
+*Deliverables:*
+- Run `ex_crap` (or `mix test --cover` analysis) to surface
+  high-CRAP + unreachable/never-called code.
+- Prune provably-dead code: unreachable branches, never-called
+  private helpers, failed-experiment remnants. Each removal
+  justified (analysis + grep for call sites).
+- Document the high-CRAP report (informational — high CRAP isn't
+  always dead, but flags refactor/test candidates).
+
+*Acceptance:*
+- Dead-code/CRAP report produced.
+- Provably-dead code removed (each removal justified).
+- No behavior change (golden gates + full suite green).
+- `bin/verify` green.
+
+*Out of scope:* Refactoring merely-high-CRAP-but-live code
+(flag it, don't rewrite it this cycle); removing anything not
+provably dead.
+
+## v1.29 horizon (not v1.29 scope)
+
+- **Default `--incremental`** — only after real CI validation
+  beyond M107's matrix; flipping a reuse default is a future call.
+- **CRAP-driven refactors** — M108 only *removes* dead code;
+  refactoring live-but-high-CRAP code is separate.
+- **Release management** (push/tag/Hex) — constraint still holds;
+  M102 docs + a clean tree (M108) are the groundwork.
+
+## Explicitly NOT v1.29
+
+- Default `--incremental` (stays opt-in this cycle).
+- Engine optimization / reopening the sandbox model.
+- New mutators / mutation surface (catalogue closed at M103).
+- Function-call deletion / return-value replacement.
+- Pushing / tagging / Hex publish (release constraint holds).
+
+## v1.29 delivery status — SHIPPED 2026-06-03
+
+All five milestones landed (commits `b0ac349..9cbe7bf` on master, unpushed).
+Theme: the long-deferred v2 incremental-history perf bet, shipped opt-in with a
+correctness-first discipline. Defaults unchanged (no-`--incremental` is
+v1.28-byte-identical: demo_app 67.7, 27 schema / 4 fallback, 33 stable_ids).
+
+- **M104** ✓ — design spike. `docs/spikes/M104_incremental_history.md`:
+  function-level `source_digest` (tightest *safe* unit — proven in
+  `bench/spike/m104_history_proof.exs`), JSON store under the user
+  `_build/mut_history/`, concrete per-status reuse table, generation-windowed
+  GC. No production code beyond the throwaway proof.
+- **M105** ✓ — `Mut.History.{Store,Digest}`. Records the verdict store at end
+  of run (keyed by stable_id + digests), round-trips, isolated + configurable.
+  Implementation refined the M104 sketch: killing_test is an ExUnit *identifier*
+  (not a file), so killed reuse gates on `selected_tests_digest` like survived
+  (under coverage selection the selected set IS the covering tests).
+- **M106** ✓ — `Mut.History.Reuse` + `--incremental` (+ `--since`). Reuse
+  pre-pass adopts stored verdicts on exact digest match; only the remainder
+  executes. Reused-vs-executed in metrics + terminal + Stryker JSON (emitted
+  only when reused > 0 → non-incremental byte-identical). e2e regression:
+  warm run reuses 31, executes 0, identical score.
+- **M107** ✓ — the trust gate. **Zero verdict divergence**, full vs
+  incremental, on demo_app (CI-locked) + decimal (real OSS: 80.0 == 80.0,
+  89/90 reused). Diff-scoped proven (only the edited function re-executes;
+  warm == full-run ground truth). Wall-clock: decimal 156s → 16s ≈ 9.75×.
+  `docs/decisions/M107_incremental_history.md` + BENCHMARKS v1.29.
+- **M108** ✓ — dead-code/CRAP report (`docs/decisions/M108_dead_code_cleanup.md`).
+  ex_crap absent → coverage-driven + orphan-scan + warnings-as-errors +
+  marker sweep. **No provably-dead code** (clean by construction); the
+  `--worker-type` deprecation shim retained (reachable, behavior-bearing);
+  high-CRAP-but-live modules flagged as future test candidates only.
+
+Two horizon items deferred per scope: **default `--incremental`** (needs real
+CI adoption beyond M107's matrix) and **skipping schema-build for reused
+mutants** (the residual wall-clock floor — a future optimization).
+
 # Out of scope for v1.10 (do not let it sneak in)
 
 - New mutators (body-literal table TUNING is in scope; new mutator types are not).
