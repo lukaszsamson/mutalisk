@@ -4,9 +4,11 @@ defmodule Mut.History.Reuse do
   verdict can be adopted (skip execution) or the mutant must execute.
 
   Conservative by mandate ("incorrect reuse is worse than a slow run"): reuse
-  only on an **exact** digest match per the mutant's stored status (M104 §3).
-  Any missing entry, digest mismatch, status mismatch, or — under `--since` — a
-  changed source file → `:execute`.
+  only when **every** input that can affect the verdict is unchanged — the
+  mutant's function source, its selected tests, the coarse project fingerprint
+  (all source + config + deps), and the timeout budget (see `reusable?/2`). Any
+  missing entry, any digest mismatch, or — under `--since` — a changed source
+  file → `:execute`.
   """
 
   alias Mut.Mutant
@@ -15,6 +17,7 @@ defmodule Mut.History.Reuse do
   @type current :: %{
           source_digest: String.t(),
           selected_tests_digest: String.t(),
+          project_digest: String.t(),
           test_timeout_ms: pos_integer() | nil
         }
 
@@ -38,16 +41,21 @@ defmodule Mut.History.Reuse do
     end
   end
 
+  # Reuse only when EVERY input that can affect the verdict is unchanged:
+  #   * `source_digest` — the mutant's enclosing function (M104).
+  #   * `selected_tests_digest` — the mutant's selected test files (M104).
+  #   * `project_digest` — the coarse project fingerprint (M-review P1a): all
+  #     `lib` source + test support/fixtures + config + `mix.lock`/`mix.exs`, so
+  #     a change to a dependency of the mutated code or its tests invalidates
+  #     reuse even though the per-mutant digests still match.
+  #   * `test_timeout_ms` — the timeout budget, required for ALL statuses
+  #     (M-review P1b): lowering it can turn a previously `survived` mutant into
+  #     a `timeout` detection, so a budget change must invalidate every verdict,
+  #     not only stored `"timeout"` ones.
   defp reusable?(stored, current) do
     stored["source_digest"] == current.source_digest and
       stored["selected_tests_digest"] == current.selected_tests_digest and
-      timeout_ok?(stored, current)
+      stored["project_digest"] == current.project_digest and
+      stored["test_timeout_ms"] == current.test_timeout_ms
   end
-
-  # Timeout verdicts additionally require the timeout budget unchanged; other
-  # statuses are timeout-budget-independent.
-  defp timeout_ok?(%{"status" => "timeout"} = stored, current),
-    do: stored["test_timeout_ms"] == current.test_timeout_ms
-
-  defp timeout_ok?(_stored, _current), do: true
 end

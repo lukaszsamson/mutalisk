@@ -34,8 +34,8 @@ defmodule Mut.History.StoreTest do
       status: to_string(status),
       source_digest: Keyword.get(opts, :source_digest, "src#{stable_id}"),
       selected_tests_digest: Keyword.get(opts, :selected_tests_digest, "sel#{stable_id}"),
+      project_digest: Keyword.get(opts, :project_digest, "proj"),
       killing_test: Keyword.get(opts, :killing_test),
-      killing_test_digest: Keyword.get(opts, :killing_test_digest),
       test_timeout_ms: Keyword.get(opts, :test_timeout_ms, 10_000)
     }
   end
@@ -170,9 +170,10 @@ defmodule Mut.History.StoreTest do
           covering_tests: ["test/f_test.exs"]
         )
 
-      rec = Store.record_for(killed, index, read, 10_000)
+      rec = Store.record_for(killed, index, read, 10_000, "proj-digest")
       assert rec.status == "killed"
       assert rec.killing_test == "MTest verifies f"
+      assert rec.project_digest == "proj-digest"
       assert rec.source_digest == Digest.source_digest(index, 2)
 
       assert rec.selected_tests_digest ==
@@ -182,7 +183,7 @@ defmodule Mut.History.StoreTest do
     test "record_for returns nil for non-reusable status" do
       index = Digest.function_index("defmodule M do\n  def f(x), do: x\nend\n")
       m = mutant(stable_id: "e", file: "lib/m.ex", line: 2, status: :error, covering_tests: [])
-      assert Store.record_for(m, index, fn _ -> nil end, 10_000) == nil
+      assert Store.record_for(m, index, fn _ -> nil end, 10_000, "proj") == nil
     end
   end
 end

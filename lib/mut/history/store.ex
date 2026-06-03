@@ -28,6 +28,7 @@ defmodule Mut.History.Store do
           status: String.t(),
           source_digest: String.t(),
           selected_tests_digest: String.t(),
+          project_digest: String.t(),
           killing_test: String.t() | nil,
           test_timeout_ms: pos_integer() | nil
         }
@@ -126,9 +127,10 @@ defmodule Mut.History.Store do
           Mut.Mutant.t(),
           Digest.index(),
           (Path.t() -> String.t() | nil),
-          pos_integer() | nil
+          pos_integer() | nil,
+          String.t()
         ) :: record() | nil
-  def record_for(%Mut.Mutant{} = mutant, source_index, read_test, test_timeout_ms) do
+  def record_for(%Mut.Mutant{} = mutant, source_index, read_test, test_timeout_ms, project_digest) do
     if reusable_status?(mutant.status) do
       selected = mutant.covering_tests || []
 
@@ -140,6 +142,7 @@ defmodule Mut.History.Store do
         status: to_string(mutant.status),
         source_digest: Digest.source_digest(source_index, mutant.line),
         selected_tests_digest: Digest.selected_tests_digest(selected_entries),
+        project_digest: project_digest,
         killing_test: mutant.killing_test,
         test_timeout_ms: test_timeout_ms
       }
@@ -167,6 +170,7 @@ defmodule Mut.History.Store do
       "status" => record.status,
       "source_digest" => record.source_digest,
       "selected_tests_digest" => record.selected_tests_digest,
+      "project_digest" => record.project_digest,
       "killing_test" => record.killing_test,
       "test_timeout_ms" => record.test_timeout_ms
     }

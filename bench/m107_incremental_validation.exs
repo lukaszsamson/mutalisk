@@ -9,13 +9,15 @@
 #       `--incremental` (warm) run produce IDENTICAL per-mutant verdicts and an
 #       identical score. Reuse must never change the answer.
 #
-#   (B) DIFF-SCOPED — edit ONE function (an equal-length, semantics-preserving
-#       `a + b` -> `b + a` edit in Arith.score: no byte offsets shift, so other
-#       mutants keep their stable_ids, and the baseline stays green), run warm
-#       `--incremental`, and confirm (1) the warm verdicts equal a fresh FULL run
-#       on the edited tree (ground truth), and (2) only the edited function's
-#       mutants re-executed (everything else, including the same file's other
-#       function, reused).
+#   (B) SOURCE-CHANGE INVALIDATION — edit ONE source file (a semantics-preserving
+#       `a + b` -> `b + a` in Arith.score: baseline stays green), run warm
+#       `--incremental`, and confirm reuse is FULLY invalidated (executed = all,
+#       reused = 0) and the warm verdicts still equal a fresh FULL run on the
+#       edited tree. The reuse key includes a coarse project fingerprint (review
+#       P1a), so ANY source/test-support/config/dep change invalidates every
+#       verdict — Mutalisk does not track per-mutant cross-file dependencies, so
+#       per-function diff-scoping would be unsound. (Dependency-aware reuse that
+#       restores diff-scoping is future work.)
 #
 # Run from the mutalisk root: elixir bench/m107_incremental_validation.exs
 #
@@ -27,11 +29,11 @@ defmodule M107 do
 
   def main do
     a = ground_truth()
-    b = diff_scoped()
+    b = source_change_invalidation()
 
     IO.puts("\n==== M107 SUMMARY ====")
-    IO.puts("A ground-truth (unchanged tree): #{verdict(a.ok)}")
-    IO.puts("B diff-scoped (one function):    #{verdict(b.ok)}")
+    IO.puts("A ground-truth (unchanged tree):    #{verdict(a.ok)}")
+    IO.puts("B source-change invalidation:        #{verdict(b.ok)}")
 
     IO.puts(
       "\nwall-clock: cold=#{a.cold_ms}ms  warm=#{a.warm_ms}ms  " <>
@@ -40,8 +42,8 @@ defmodule M107 do
     )
 
     IO.puts(
-      "diff-scoped: warm executed #{b.executed}/#{b.total} (the edited function), " <>
-        "reused #{b.reused}; warm verdicts == full-run verdicts: #{b.matches_full}"
+      "invalidation: a source edit invalidated reuse (executed #{b.executed}/#{b.total}, " <>
+        "reused #{b.reused}); warm verdicts == full-run verdicts: #{b.matches_full}"
     )
 
     if a.ok and b.ok, do: System.halt(0), else: System.halt(1)
@@ -76,24 +78,24 @@ defmodule M107 do
     }
   end
 
-  # ---- Property B: diff-scoped to one edited function ----
-  defp diff_scoped do
-    dir = fresh_copy("diff_scoped")
+  # ---- Property B: a source change invalidates ALL reuse (sound, coarse) ----
+  defp source_change_invalidation do
+    dir = fresh_copy("source_change")
     clear_history(dir)
 
     # Cold run on the ORIGINAL tree -> history.
     {_cold, _} = run(dir, [])
 
-    # Equal-length, SEMANTICS-PRESERVING edit to Arith.score: `a + b` -> `b + a`
-    # (addition commutes, so the baseline stays green and verdicts are unchanged;
-    # mutalisk refuses to run on a red baseline). Same byte length, so
-    # Arith.integer_parts and every later byte keep their offsets/stable_ids.
-    # Only score's function-level source_digest changes -> only its mutants
-    # invalidate; integer_parts' mutants must still be reused.
+    # Semantics-PRESERVING edit to Arith.score: `a + b` -> `b + a` (addition
+    # commutes, so the baseline stays green — mutalisk refuses to run on a red
+    # baseline — and the full-run verdicts are unchanged). This changes the
+    # project fingerprint, which must invalidate EVERY reused verdict (review
+    # P1a): a mutant elsewhere could call into arith.ex, so per-function reuse
+    # would be unsound.
     arith = Path.join(dir, "lib/arith.ex")
     original = File.read!(arith)
     edited = String.replace(original, "(a + b) * (a - b)", "(b + a) * (a - b)")
-    if edited == original, do: raise("diff-scoped edit did not apply")
+    if edited == original, do: raise("source-change edit did not apply")
     File.write!(arith, edited)
 
     # Warm incremental on the EDITED tree (uses pre-edit history).
@@ -104,28 +106,21 @@ defmodule M107 do
     {full, _} = run(dir, [])
 
     matches_full = warm.verdicts == full.verdicts
-    executed = warm.incremental["executed"] || 0
+    total = map_size(warm.verdicts)
+    # When nothing is reused the report omits the incremental block entirely
+    # (M106), so derive from the absence: reused 0 -> everything executed.
     reused = warm.incremental["reused"] || 0
-    reused_set = MapSet.new(warm.incremental["reused_ids"] || [])
+    executed = total - reused
 
-    # The re-executed set = all mutants minus reused. Every re-executed mutant
-    # must live in arith.ex (the only edited file); some arith.ex mutants
-    # (Arith.integer_parts — the function NOT edited) must still be reused,
-    # proving the scope is function-level, not whole-file.
-    file_of = Map.new(warm.executed_ids, &{&1.id, &1.file})
-    executed_ids = warm.verdicts |> Map.keys() |> Enum.reject(&MapSet.member?(reused_set, &1))
-
-    off_target =
-      Enum.reject(executed_ids, &String.contains?(Map.get(file_of, &1, ""), "arith.ex"))
-
-    arith_reused? = Enum.any?(reused_set, &String.contains?(Map.get(file_of, &1, ""), "arith.ex"))
-
-    scoped = off_target == [] and arith_reused?
-    ok = matches_full and scoped and reused > 0
+    # A source change must invalidate ALL reuse (project fingerprint changed):
+    # nothing reused, everything executed, and the answer still matches a full
+    # run (no stale verdicts slipped through).
+    fully_invalidated = reused == 0
+    ok = matches_full and fully_invalidated
 
     IO.puts(
       "[B] warm executed=#{executed} reused=#{reused} matches_full=#{matches_full} " <>
-        "off-target_executed=#{length(off_target)} arith_partially_reused=#{arith_reused?}"
+        "fully_invalidated=#{fully_invalidated}"
     )
 
     %{

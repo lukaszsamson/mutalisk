@@ -24,6 +24,7 @@ defmodule Mut.History.ReuseTest do
       "status" => status,
       "source_digest" => Keyword.get(opts, :source_digest, "S"),
       "selected_tests_digest" => Keyword.get(opts, :selected_tests_digest, "T"),
+      "project_digest" => Keyword.get(opts, :project_digest, "P"),
       "test_timeout_ms" => Keyword.get(opts, :test_timeout_ms, 10_000)
     }
   end
@@ -32,6 +33,7 @@ defmodule Mut.History.ReuseTest do
     %{
       source_digest: Keyword.get(opts, :source_digest, "S"),
       selected_tests_digest: Keyword.get(opts, :selected_tests_digest, "T"),
+      project_digest: Keyword.get(opts, :project_digest, "P"),
       test_timeout_ms: Keyword.get(opts, :test_timeout_ms, 10_000)
     }
   end
@@ -63,16 +65,22 @@ defmodule Mut.History.ReuseTest do
                :execute
     end
 
-    test "timeout reuse requires timeout budget unchanged" do
-      verdicts = %{"a" => stored("timeout", test_timeout_ms: 10_000)}
-      assert {:reuse, _} = Reuse.decide(mutant("a"), verdicts, current(test_timeout_ms: 10_000))
-      assert Reuse.decide(mutant("a"), verdicts, current(test_timeout_ms: 20_000)) == :execute
+    # P1a: a change to any project source/test-support/config/dep changes the
+    # project fingerprint and invalidates reuse, even when the per-mutant
+    # function + selected-test digests still match.
+    test "project fingerprint changed -> execute" do
+      verdicts = %{"a" => stored("survived", project_digest: "OLD")}
+      assert Reuse.decide(mutant("a"), verdicts, current(project_digest: "NEW")) == :execute
     end
 
-    test "non-timeout status ignores timeout budget" do
-      verdicts = %{"a" => stored("killed", test_timeout_ms: 10_000)}
-      # Budget differs, but killed reuse doesn't gate on it.
-      assert {:reuse, _} = Reuse.decide(mutant("a"), verdicts, current(test_timeout_ms: 99_999))
+    # P1b: the timeout budget gates ALL statuses, not just stored "timeout" —
+    # lowering it can turn a survived mutant into a timeout detection.
+    test "timeout budget change -> execute for every status" do
+      for status <- ["killed", "survived", "timeout"] do
+        verdicts = %{"a" => stored(status, test_timeout_ms: 10_000)}
+        assert {:reuse, _} = Reuse.decide(mutant("a"), verdicts, current(test_timeout_ms: 10_000))
+        assert Reuse.decide(mutant("a"), verdicts, current(test_timeout_ms: 20_000)) == :execute
+      end
     end
 
     test "--since changed file -> execute even on a digest match" do

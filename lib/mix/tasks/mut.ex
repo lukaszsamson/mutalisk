@@ -321,8 +321,12 @@ defmodule Mix.Tasks.Mut do
   # `_build` (`target_root`). Wrapped so a history failure never aborts a run —
   # history is an optimization, not a correctness input.
   defp write_history(snapshot, source_root, target_root, opts) do
-    records = history_records(snapshot.ledger, source_root, opts.test_timeout_ms)
-    store_path = History.Store.path(target_root)
+    project_digest = History.Digest.project_digest(source_root)
+    records = history_records(snapshot.ledger, source_root, opts.test_timeout_ms, project_digest)
+    # P2: honor a configured :history_path on WRITE too (load_verdicts already
+    # reads it) — otherwise a custom-path user writes the default store while
+    # reading the custom one, and never warms either.
+    store_path = History.Store.path(target_root, history_path: opts.history_path)
 
     prev =
       case History.Store.load(store_path) do
@@ -338,8 +342,9 @@ defmodule Mix.Tasks.Mut do
   end
 
   # Reusable verdicts (killed/survived/timeout) from the ledger, digested per
-  # file (function index built once per file).
-  defp history_records(ledger, source_root, test_timeout_ms) do
+  # file (function index built once per file). `project_digest` is the coarse
+  # whole-project fingerprint, identical for every verdict in this run.
+  defp history_records(ledger, source_root, test_timeout_ms, project_digest) do
     reusable =
       Enum.filter(ledger, fn entry ->
         Map.has_key?(entry, :mutant) and History.Store.reusable_status?(entry.status)
@@ -352,7 +357,7 @@ defmodule Mix.Tasks.Mut do
     |> Enum.map(fn entry ->
       mutant = final_mutant(entry)
       index = Map.fetch!(indexes, mutant.file)
-      History.Store.record_for(mutant, index, read_test, test_timeout_ms)
+      History.Store.record_for(mutant, index, read_test, test_timeout_ms, project_digest)
     end)
     |> Enum.reject(&is_nil/1)
   end
@@ -453,22 +458,26 @@ defmodule Mix.Tasks.Mut do
     else
       changed = changed_files_since(opts.since, target_root)
       indexes = mutant_file_indexes(plan, source_root)
+      # Coarse project fingerprint, computed ONCE (same for every mutant). A
+      # change to any project source/test-support/config/dep invalidates all
+      # reuse (review P1a).
+      project_digest = History.Digest.project_digest(source_root)
 
       {schema_exec, schema_reused} =
-        partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed)
+        partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed, project_digest)
 
       {fallback_exec, fallback_reused} =
-        partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed)
+        partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed, project_digest)
 
       exec_plan = %{plan | schema: schema_exec, fallback: fallback_exec}
       {exec_plan, schema_reused ++ fallback_reused}
     end
   end
 
-  defp partition_reuse(mutants, ctx, opts, verdicts, indexes, changed) do
+  defp partition_reuse(mutants, ctx, opts, verdicts, indexes, changed, project_digest) do
     {exec, reused} =
       Enum.reduce(mutants, {[], []}, fn mutant, {exec, reused} ->
-        current = current_digests(mutant, indexes, ctx, opts)
+        current = current_digests(mutant, indexes, ctx, opts, project_digest)
         file_changed? = changed != nil and MapSet.member?(changed, mutant.file)
 
         case History.Reuse.decide(mutant, verdicts, current, file_changed?) do
@@ -480,11 +489,12 @@ defmodule Mix.Tasks.Mut do
     {Enum.reverse(exec), reused}
   end
 
-  # Digests for one planned mutant, computed exactly as M105 stored them: the
-  # function-level source digest at the mutant's line + the order-insensitive
-  # digest over its selected tests' content. `selected_tests/2` returns the same
-  # set M105 recorded as `covering_tests` (ordering differs but the digest sorts).
-  defp current_digests(mutant, indexes, ctx, opts) do
+  # Digests for one planned mutant, computed exactly as `write_history` stored
+  # them: the function-level source digest at the mutant's line, the
+  # order-insensitive digest over its selected tests' content, and the shared
+  # project fingerprint. `selected_tests/2` returns the same set recorded as
+  # `covering_tests` (ordering differs but the digest sorts).
+  defp current_digests(mutant, indexes, ctx, opts, project_digest) do
     index = Map.fetch!(indexes, mutant.file)
     rel = relative_tests(selected_tests(ctx.selection_context, mutant), ctx.work_copy)
     entries = for path <- rel, content = read_relative(ctx.work_copy, path), do: {path, content}
@@ -492,6 +502,7 @@ defmodule Mix.Tasks.Mut do
     %{
       source_digest: History.Digest.source_digest(index, mutant.line),
       selected_tests_digest: History.Digest.selected_tests_digest(entries),
+      project_digest: project_digest,
       test_timeout_ms: opts.test_timeout_ms
     }
   end

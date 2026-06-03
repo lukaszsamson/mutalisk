@@ -4,6 +4,16 @@
 **Status:** design decided; implementation is M105+ (no production code in this
 milestone beyond the throwaway proof `bench/spike/m104_history_proof.exs`).
 
+> **Amended (2026-06-03 review).** The reuse key in §3/§5 below
+> (`source_digest` + `selected_tests_digest` + minimal config) proved
+> **unsound**: it ignored cross-file dependencies, test support/config/`mix.lock`
+> changes, and timeout-budget changes for non-timeout verdicts. The shipped key
+> adds a coarse **`project_digest`** (all `lib` + test-support + config + deps)
+> and requires `test_timeout_ms` equality for **all** statuses. Function-level
+> `source_digest` is retained but no longer the precise reuse gate (it can't be,
+> without dependency tracking). See
+> `docs/decisions/incremental_reuse_soundness.md`.
+
 v1.29 reverses the standing incremental-history hold — the user made the
 CI-adoption decision prior releases gated on. This spike fixes the consequential
 design choices before any feature code, because the correctness bar is the whole

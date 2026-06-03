@@ -97,6 +97,42 @@ defmodule Mut.History.Digest do
     |> sha()
   end
 
+  # Globs (relative to the project root) whose contents form the project
+  # fingerprint. `_test.exs` files are excluded — each mutant's *selected* tests
+  # are digested per-mutant by `selected_tests_digest/1`, and non-selected test
+  # files cannot affect that mutant's verdict.
+  @project_globs ["lib/**/*.ex", "test/**/*.ex", "test/**/*.exs", "config/**/*.exs"]
+  @project_files ["mix.exs", "mix.lock"]
+
+  @doc """
+  Coarse project fingerprint: a digest over every project input that can change
+  a mutant's verdict but is **not** captured by the per-mutant function-source
+  or selected-test digests — all `lib` source (a mutant's function may call
+  helpers in other files), test support/helpers/fixtures (non-`_test.exs`),
+  config, and the dependency lock (`mix.lock`/`mix.exs`).
+
+  A change to any of these invalidates **all** reuse. This is the
+  conservative-correct first version: "incorrect reuse is worse than a slow
+  run." It deliberately over-invalidates — a one-file edit invalidates the whole
+  store — because Mutalisk does not (yet) track per-mutant call-graph
+  dependencies. Dependency-aware fingerprints that restore per-function
+  diff-scoped reuse are future work.
+  """
+  @spec project_digest(Path.t()) :: String.t()
+  def project_digest(root) when is_binary(root) do
+    globbed = Enum.flat_map(@project_globs, &Path.wildcard(Path.join(root, &1)))
+    extra = Enum.map(@project_files, &Path.join(root, &1))
+
+    (globbed ++ extra)
+    |> Enum.reject(&String.ends_with?(&1, "_test.exs"))
+    |> Enum.filter(&File.regular?/1)
+    |> Enum.uniq()
+    |> Enum.sort()
+    |> Enum.map(fn path -> {Path.relative_to(path, root), content_digest(File.read!(path))} end)
+    |> :erlang.term_to_binary()
+    |> sha()
+  end
+
   # ---- internals ----
 
   # Each `def`/`defp` clause -> {function-key, {lo_line, hi_line}, normalized_src}.

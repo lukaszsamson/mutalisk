@@ -2,6 +2,16 @@
 
 **Date:** 2026-06-03
 
+> **Superseded in part (2026-06-03 review).** The "diff-scoped correctness"
+> result below — *editing one function re-executes only that function's
+> mutants* — was **unsound** (Mutalisk doesn't track cross-file dependencies, so
+> a mutant calling a changed helper would reuse a stale verdict). The reuse key
+> now includes a coarse **project fingerprint**: any source/test-support/config/
+> dependency change invalidates **all** reuse. The ground-truth and
+> wall-clock results below still hold; the diff-scoped property is replaced by
+> "a source change invalidates all reuse" (`bench/m107_incremental_validation.exs`
+> property B). See `docs/decisions/incremental_reuse_soundness.md`.
+
 Incremental reuse is only worth shipping if it **never changes the answer**. A
 stale-reuse bug produces a wrong score that looks right — strictly worse than a
 slow run. This milestone is the trust gate: prove, against real code, that a

@@ -99,4 +99,44 @@ defmodule Mut.History.DigestTest do
       assert Digest.content_digest("a  b\n\tc") == Digest.content_digest("a b c")
     end
   end
+
+  describe "project_digest" do
+    setup do
+      root = Path.join(System.tmp_dir!(), "mut_proj_digest_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(Path.join(root, "lib"))
+      File.mkdir_p!(Path.join(root, "test/support"))
+      File.mkdir_p!(Path.join(root, "config"))
+      File.write!(Path.join(root, "lib/a.ex"), "defmodule A do\n  def f, do: 1\nend\n")
+      File.write!(Path.join(root, "test/support/helper.ex"), "defmodule H do\nend\n")
+      File.write!(Path.join(root, "test/a_test.exs"), "assert A.f() == 1")
+      File.write!(Path.join(root, "config/test.exs"), "import Config\n")
+      File.write!(Path.join(root, "mix.lock"), "%{}\n")
+      on_exit(fn -> File.rm_rf!(root) end)
+      {:ok, root: root}
+    end
+
+    test "stable when nothing changes", %{root: root} do
+      assert Digest.project_digest(root) == Digest.project_digest(root)
+    end
+
+    test "changes when a non-mutant lib file changes (cross-file dependency)", %{root: root} do
+      before = Digest.project_digest(root)
+      File.write!(Path.join(root, "lib/a.ex"), "defmodule A do\n  def f, do: 2\nend\n")
+      refute Digest.project_digest(root) == before
+    end
+
+    test "changes when test support / config / mix.lock change", %{root: root} do
+      for rel <- ["test/support/helper.ex", "config/test.exs", "mix.lock"] do
+        before = Digest.project_digest(root)
+        File.write!(Path.join(root, rel), "# changed #{rel}\n")
+        refute Digest.project_digest(root) == before, "expected #{rel} to change the fingerprint"
+      end
+    end
+
+    test "ignores _test.exs files (handled per-mutant by selected_tests_digest)", %{root: root} do
+      before = Digest.project_digest(root)
+      File.write!(Path.join(root, "test/a_test.exs"), "assert A.f() == 999")
+      assert Digest.project_digest(root) == before
+    end
+  end
 end

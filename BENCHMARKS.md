@@ -49,11 +49,19 @@ execution-bound, so reuse collapses 156 s → 16 s. The 16 s floor is the
 fixed-phase cost (the schema build still instruments all mutants — reused ones
 aren't skipped there yet; future optimization).
 
-**Diff-scoped (`bench/m107_incremental_validation.exs`, both properties PASS):**
-an equal-length semantics-preserving edit to `Arith.score` re-executes exactly
-its 7 mutants, reuses the other 24 (including `Arith.integer_parts` in the same
-file — function-level scope, not whole-file), off-target executed = 0, and warm
-verdicts equal a fresh full run on the edited tree.
+**Source-change invalidation (`bench/m107_incremental_validation.exs`,
+properties PASS):** a semantics-preserving edit to one source file invalidates
+**all** reuse (executed 31/31, reused 0) and warm verdicts still equal a fresh
+full run — no stale verdict slips through.
+
+> **Correction (2026-06-03 review).** An earlier version of this section claimed
+> *diff-scoped* reuse (edit one function → re-execute only its 7 mutants). That
+> was **unsound** — Mutalisk doesn't track cross-file dependencies, so a mutant
+> calling a changed helper would reuse a stale verdict. The reuse key now
+> carries a coarse **project fingerprint** (all source + test-support + config +
+> deps), so any source change invalidates everything. Reuse benefits the
+> unchanged-tree re-run; dependency-aware diff-scoping is future work. See
+> `docs/decisions/incremental_reuse_soundness.md`.
 
 Decision + CI-usage guide: `docs/decisions/M107_incremental_history.md`.
 Evidence reports: `bench/results/decimal.incremental.{cold,warm}.json`.

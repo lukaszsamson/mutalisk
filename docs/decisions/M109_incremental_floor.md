@@ -2,6 +2,14 @@
 
 **Date:** 2026-06-03
 
+> **Superseded in part (2026-06-03 review).** M109's pruning still applies, but
+> a soundness fix added a coarse **project fingerprint** to the reuse key, so a
+> source change now invalidates **all** reuse — the small-diff scenario this doc
+> describes (instrument only the changed function's mutants) no longer happens;
+> a source change re-instruments and re-executes everything. Pruning still
+> benefits the **unchanged-tree** re-run (all reused → instrument nothing).
+> See `docs/decisions/incremental_reuse_soundness.md`.
+
 v1.29 ran the `--incremental` reuse partition *after* schema build, so the
 schema engine instrumented every planned mutant — including the ones reuse
 would never execute. M109 moves the reuse determination **before**
