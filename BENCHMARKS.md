@@ -1,5 +1,26 @@
 # Mutalisk Benchmarks
 
+## v1.30 incremental floor — skip instrumentation for reused mutants (M109, 2026-06-03)
+
+Under `--incremental`, the reuse partition now runs *before* schema build, so
+reused mutants are pruned from instrumentation (only to-be-executed mutants get
+schema gates). Verdicts + score are provably unchanged (M107 harness passes;
+decimal 80.0 == 80.0, 89/90 reused; demo_app 67.7, 31 reused / 0 executed).
+
+| decimal (cap 100) | instruments | schema build | total |
+|---|--:|--:|--:|
+| cold (full) | ~90 | 2974 ms | 148.0 s |
+| warm `--incremental` (M109) | ~11 | 2913 ms | 15.3 s |
+
+**Finding:** instrumentation count drops to executed-only as designed, but the
+schema-build time barely moves (2974 → 2913 ms) — SchemaPlacer *placement* is a
+~60 ms sliver of a compile-dominated phase. The 148 s → 15.3 s total is the
+M106 *execution* savings; M109's additional contribution is small. The residual
+incremental floor is the work-copy **`mix compile`** + fixed phases (oracle
+build, baseline, coverage), not instrumentation. Next lever (future): caching
+the compiled work copy / skipping schema build for reused-only runs.
+`docs/decisions/M109_incremental_floor.md`.
+
 ## v1.29 incremental cross-run history (M104–M107, 2026-06-03)
 
 The long-deferred v2 perf bet, shipped opt-in (`--incremental`). A warm run

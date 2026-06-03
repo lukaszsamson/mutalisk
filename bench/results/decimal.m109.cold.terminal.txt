@@ -1,0 +1,168 @@
+Schema build starting
+Schema build complete
+[1/100] killed    lib/decimal.ex:1852  Arithmetic  replace * with +
+[2/100] killed    lib/decimal.ex:483  Arithmetic  replace * with -
+[3/100] killed    lib/decimal.ex:1842  Arithmetic  replace + with *
+[4/100] killed    lib/decimal.ex:721  Arithmetic  replace - with *
+[5/100] killed    lib/decimal.ex:1588  Arithmetic  replace - with +
+[6/100] killed    lib/decimal.ex:2066  ComparisonNegation  replace == with !=
+[7/100] killed    lib/decimal.ex:462  AtomLiteral  replace atom literal :gt with :lt
+[8/100] killed    lib/decimal.ex:1867  ComparisonNegation  replace > with <=
+[9/100] killed    lib/decimal.ex:1770  Arithmetic  replace + with *
+[10/100] survived  lib/decimal.ex:896  ComparisonNegation  replace == with !=
+[11/100] killed    lib/decimal.ex:1758  Arithmetic  replace * with +
+[12/100] killed    lib/decimal.ex:1331  Arithmetic  replace + with *
+[13/100] survived  lib/decimal.ex:715  Arithmetic  replace - with +
+[14/100] killed    lib/decimal.ex:1582  Arithmetic  replace + with *
+[15/100] killed    lib/decimal.ex:1821  Arithmetic  replace * with -
+[16/100] survived  lib/decimal.ex:1965  ComparisonBoundary  replace > with >=
+[17/100] killed    lib/decimal.ex:435  AtomLiteral  replace atom literal :lt with :gt
+[18/100] killed    lib/decimal.ex:1151  ComparisonNegation  replace == with !=
+[19/100] killed    lib/decimal.ex:982  ComparisonNegation  replace == with !=
+[20/100] killed    lib/decimal.ex:1166  Arithmetic  replace + with *
+[21/100] killed    lib/decimal.ex:1881  Arithmetic  replace + with *
+[22/100] killed    lib/decimal.ex:1585  ConcatOperator  replace ++ with --
+[23/100] killed    lib/decimal.ex:1769  Arithmetic  replace - with *
+[24/100] killed    lib/decimal.ex:988  ComparisonNegation  replace < with >=
+[25/100] killed    lib/decimal.ex:1842  Arithmetic  replace + with -
+[26/100] killed    lib/decimal.ex:409  AtomLiteral  replace atom literal :lt with :eq
+[27/100] killed    lib/decimal.ex:553  AtomLiteral  replace atom literal :eq with :gt
+[28/100] killed    lib/decimal.ex:1821  Arithmetic  replace * with /
+[29/100] survived  lib/decimal.ex:1380  ComparisonBoundary  replace < with <=
+[30/100] killed    lib/decimal.ex:1283  Arithmetic  replace * with /
+[31/100] killed    lib/decimal.ex:1997  ComparisonNegation  replace >= with <
+[32/100] killed    lib/decimal.ex:1887  Arithmetic  replace * with /
+[33/100] killed    lib/decimal.ex:1276  Arithmetic  replace - with *
+[34/100] survived  lib/decimal.ex:1867  ComparisonBoundary  replace > with >=
+[35/100] killed    lib/decimal.ex:573  AtomLiteral  replace atom literal :gt with :lt
+[36/100] killed    lib/decimal.ex:778  ComparisonNegation  replace == with !=
+[37/100] killed    lib/decimal.ex:1758  Arithmetic  replace - with +
+[38/100] killed    lib/decimal.ex:416  AtomLiteral  replace atom literal :lt with :gt
+[39/100] killed    lib/decimal.ex:1993  Boolean  replace and with or
+[40/100] killed    lib/decimal.ex:1744  Arithmetic  replace - with +
+[41/100] killed    lib/decimal.ex:380  AtomLiteral  replace atom literal :gt with :lt
+[42/100] killed    lib/decimal.ex:1320  Arithmetic  replace - with +
+[43/100] survived  lib/decimal.ex:929  Arithmetic  replace - with +
+[44/100] killed    lib/decimal.ex:1981  Arithmetic  replace + with *
+[45/100] survived  lib/decimal.ex:1153  Arithmetic  replace + with *
+[46/100] killed    lib/decimal.ex:1654  Arithmetic  replace * with -
+[47/100] survived  lib/decimal.ex:764  Arithmetic  replace - with +
+[48/100] killed    lib/decimal.ex:1944  ConcatOperator  replace ++ with --
+[49/100] killed    lib/decimal.ex:1554  ComparisonNegation  replace >= with <
+[50/100] killed    lib/decimal.ex:2015  Arithmetic  replace + with *
+[51/100] killed    lib/decimal.ex:573  ComparisonNegation  replace == with !=
+[52/100] survived  lib/decimal.ex:1749  ComparisonBoundary  replace < with <=
+[53/100] killed    lib/decimal.ex:1821  Arithmetic  replace * with +
+[54/100] killed    lib/decimal.ex:1547  ComparisonNegation  replace == with !=
+[55/100] survived  lib/decimal.ex:764  Arithmetic  replace - with *
+[56/100] killed    lib/decimal.ex:1770  ComparisonNegation  replace < with >=
+[57/100] killed    lib/decimal.ex:380  AtomLiteral  replace atom literal :gt with :eq
+[58/100] killed    lib/decimal.ex:427  AtomLiteral  replace atom literal :eq with :lt
+[59/100] killed    lib/decimal.ex:1557  Arithmetic  replace + with *
+[60/100] killed    lib/decimal.ex:2007  Boolean  replace and with or
+[61/100] killed    lib/decimal.ex:1770  Arithmetic  replace + with -
+[62/100] killed    lib/decimal.ex:2007  ComparisonBoundary  replace > with >=
+[63/100] killed    lib/decimal.ex:445  Arithmetic  replace - with *
+[64/100] killed    lib/decimal.ex:712  ComparisonNegation  replace == with !=
+[65/100] killed    lib/decimal.ex:756  ComparisonNegation  replace == with !=
+[66/100] killed    lib/decimal.ex:418  AtomLiteral  replace atom literal :lt with :gt
+[67/100] killed    lib/decimal.ex:413  AtomLiteral  replace atom literal :gt with :lt
+[68/100] killed    lib/decimal.ex:1294  Arithmetic  replace * with -
+[69/100] survived  lib/decimal.ex:721  Arithmetic  replace - with +
+[70/100] survived  lib/decimal.ex:698  Arithmetic  replace - with +
+[71/100] survived  lib/decimal.ex:1312  ComparisonBoundary  replace >= with >
+[72/100] killed    lib/decimal.ex:1805  Arithmetic  replace - with *
+[73/100] survived  lib/decimal.ex:1435  GuardTypeTest  replace guard is_float with is_number
+[74/100] killed    lib/decimal.ex:1794  GuardComparisonBoundary  replace guard >= with >
+[75/100] survived  lib/decimal.ex:1375  GuardComparisonBoundary  replace guard >= with >
+[76/100] killed    lib/decimal.ex:1463  GuardTypeTest  replace guard is_float with is_integer
+[77/100] killed    lib/decimal.ex:2140  IntegerLiteral  replace integer literal 48 with 0
+[77/100] invalid   lib/decimal.ex:1815  ComparisonNegation  replace == with !=
+[78/100] killed    lib/decimal.ex:1794  GuardComparisonNegation  replace guard < with >=
+[78/100] invalid   lib/decimal.ex:781  ComparisonNegation  replace == with !=
+[78/100] invalid   lib/decimal.ex:1919  ComparisonNegation  replace < with >=
+[78/100] invalid   lib/decimal.ex:1836  ComparisonNegation  replace >= with <
+[78/100] invalid   lib/decimal.ex:443  ComparisonNegation  replace == with !=
+[79/100] killed    lib/decimal.ex:845  AtomLiteral  replace atom literal :lt with :gt
+[80/100] killed    lib/decimal.ex:379  AtomLiteral  replace atom literal :lt with :gt
+[80/100] invalid   lib/decimal.ex:1706  ComparisonNegation  replace >= with <
+[81/100] killed    lib/decimal.ex:781  AtomLiteral  replace atom literal :lt with :gt
+[82/100] killed    lib/decimal.ex:1743  GuardComparisonNegation  replace guard >= with <
+[83/100] survived  lib/decimal.ex:1620  GuardComparisonBoundary  replace guard > with >=
+[84/100] killed    lib/decimal.ex:381  AtomLiteral  replace atom literal :lt with :eq
+[84/100] invalid   lib/decimal.ex:379  ComparisonNegation  replace == with !=
+[85/100] killed    lib/decimal.ex:1624  GuardComparisonNegation  replace guard != with ==
+[85/100] invalid   lib/decimal.ex:379  ComparisonNegation  replace == with !=
+[86/100] survived  lib/decimal.ex:408  GuardComparisonBoundary  replace guard < with <=
+[87/100] killed    lib/decimal.ex:1899  GuardComparisonBoundary  replace guard >= with >
+[87/100] invalid   lib/decimal.ex:2170  Boolean  replace and with or
+[88/100] killed    lib/decimal.ex:379  AtomLiteral  replace atom literal :eq with :gt
+[88/100] invalid   lib/decimal.ex:1932  ComparisonNegation  replace < with >=
+[89/100] survived  lib/decimal.ex:1823  GuardComparisonBoundary  replace guard >= with >
+[90/100] killed    lib/decimal.ex:1807  GuardComparisonNegation  replace guard < with >=
+Mutation score: 72/90 = 80.0%
+
+Surviving mutants:
+  lib/decimal.ex:896 ComparisonNegation       replace == with !=
+  lib/decimal.ex:715 Arithmetic               replace - with +
+  lib/decimal.ex:1965 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1380 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1867 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:929 Arithmetic               replace - with +
+  lib/decimal.ex:1153 Arithmetic               replace + with *
+  lib/decimal.ex:764 Arithmetic               replace - with +
+  lib/decimal.ex:1749 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:764 Arithmetic               replace - with *
+  lib/decimal.ex:721 Arithmetic               replace - with +
+  lib/decimal.ex:698 Arithmetic               replace - with +
+  lib/decimal.ex:1312 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:1435 GuardTypeTest            replace guard is_float with is_number
+  lib/decimal.ex:1375 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1620 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:408 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1823 GuardComparisonBoundary  replace guard >= with >
+
+Schema:    59/72 killed (81.9%)   wall: 88.0s
+Fallback:  13/28 killed (46.4%)   wall: 44.5s
+  atom_literal:                 5/5 killed
+  boolean_op:                   0/1 killed
+  comparison_negation:          0/9 killed
+  guard_comparison_boundary:    2/6 killed
+  guard_comparison_negation:    4/4 killed
+  guard_type_test:              1/2 killed
+  integer_literal_replace:      1/1 killed
+Skipped:   1640 (attribute_engine_disabled: 3, missing_oracle_site: 76, no_applicable_mutator: 457, unsupported_dispatch: 1104)
+Invalid:   10
+Errors:    0
+Timeouts:  0
+
+Run time: 132.5s
+Fallback wall-clock: 33.6% of total
+Fallback mutants: 28.0% of executed
+
+Phases:
+  oracle build:          3235 ms
+  baseline tests:         812 ms
+  plan generation:        122 ms
+  coverage collection:   6112 ms
+  schema build:          2974 ms
+  schema workers:       88062 ms
+  fallback workers:     46298 ms
+  report writing:           9 ms
+  total:               147733 ms
+
+Selection:
+  mode: coverage_with_static_fallback
+  match distribution:
+    exact line:         79
+    enclosing function: 16
+    static fallback:    5
+    all tests:          0
+  avg tests/mutant: 1.4
+  median tests/mutant: 1
+  coverage collection: 6111 ms
+
+Concurrency: 1 workers (sequential)
+Test timeout: 10000 ms
+
+Mutalisk run complete in 148024ms

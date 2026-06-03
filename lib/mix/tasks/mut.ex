@@ -160,9 +160,25 @@ defmodule Mix.Tasks.Mut do
       if opts.debug_plan do
         Mut.Plan.dump_json(plan, Path.join(target_root, "plan.debug.json"))
       else
+        # M109: under `--incremental`, partition + record reused verdicts BEFORE
+        # schema build so reused mutants are pruned from instrumentation. The
+        # plan handed to `execute_plan` is the to-execute subset; reused verdicts
+        # are already recorded in the ledger and appear in the report/score.
+        # Non-incremental: no-op (full plan, nothing recorded) → v1.29-identical.
+        exec_plan =
+          prune_reused_for_incremental(
+            plan,
+            work_copy,
+            opts,
+            coverage_oracle,
+            selection_mode,
+            metrics_pid,
+            target_root
+          )
+
         File.cd!(mutalisk_root, fn ->
           execute_plan(
-            plan,
+            exec_plan,
             target_root,
             run_id,
             opts,
@@ -250,24 +266,20 @@ defmodule Mix.Tasks.Mut do
           host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
         }
 
-        # M106: `--incremental` reuse pre-pass — adopt stored verdicts for
-        # mutants whose source + selected tests are unchanged (per the M104
-        # decision table); only the remaining `exec_plan` reaches the workers.
-        # Without `--incremental` this is a no-op (`exec_plan == schema plan`).
-        {exec_plan, reused} =
-          apply_incremental_reuse(schema_result.plan, ctx, opts, source_root, target_root)
-
-        record_reused(reused, ctx)
-        Metrics.set_planned_total(metrics_pid, executable_count(exec_plan))
-
+        # M109: the `--incremental` reuse partition + reused-verdict recording
+        # now happen *before* schema build (in `run_pipeline`), so reused
+        # mutants are pruned from the plan that drives instrumentation. By here
+        # `schema_result.plan` is already the to-execute subset — run and render
+        # it directly (the reused verdicts are in the ledger). Non-incremental
+        # runs prune nothing, so this is the full plan, byte-identical to v1.29.
         pool =
           Metrics.with_phase(metrics_pid, :schema_workers, fn ->
-            run_schema_mutants(pool, exec_plan, ctx)
+            run_schema_mutants(pool, schema_result.plan, ctx)
           end)
 
         final_pool =
           Metrics.with_phase(metrics_pid, :fallback_workers, fn ->
-            run_fallback_mutants(pool, exec_plan, ctx)
+            run_fallback_mutants(pool, schema_result.plan, ctx)
           end)
 
         snapshot =
@@ -371,12 +383,68 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  # M106: partition the plan into mutants whose verdict is reused from history
-  # (stored digests match the current run) and the executable remainder. No
-  # `--incremental` -> identity (exec plan == full plan, nothing reused).
-  defp apply_incremental_reuse(plan, _ctx, %{incremental: false}, _source_root, _target_root),
-    do: {plan, []}
+  # M109: pre-schema-build incremental partition. Builds a selection context
+  # against the oracle work copy (byte-identical source to the schema copy, so
+  # digests match), partitions the plan, RECORDS the reused verdicts into the
+  # ledger, and returns the to-execute subset — which then drives schema
+  # instrumentation, so reused mutants are never instrumented. Non-incremental
+  # is a no-op: the full plan is returned untouched, nothing recorded.
+  defp prune_reused_for_incremental(
+         plan,
+         _work_copy,
+         %{incremental: false},
+         _coverage_oracle,
+         _selection_mode,
+         _metrics_pid,
+         _target_root
+       ),
+       do: plan
 
+  defp prune_reused_for_incremental(
+         plan,
+         work_copy,
+         opts,
+         coverage_oracle,
+         selection_mode,
+         metrics_pid,
+         target_root
+       ) do
+    all_test_files =
+      Mut.TestSelection.discover_test_files(absolute_test_paths(work_copy, opts))
+
+    {:ok, last_killer} = Mut.LastKiller.start_link([])
+
+    try do
+      selection_context =
+        build_selection_context(
+          plan,
+          work_copy,
+          opts,
+          coverage_oracle,
+          selection_mode,
+          last_killer,
+          all_test_files
+        )
+
+      ctx = %{
+        selection_context: selection_context,
+        all_test_files: all_test_files,
+        work_copy: work_copy,
+        metrics_pid: metrics_pid
+      }
+
+      {exec_plan, reused} = apply_incremental_reuse(plan, ctx, opts, work_copy, target_root)
+      record_reused(reused, ctx)
+      exec_plan
+    after
+      Agent.stop(last_killer)
+    end
+  end
+
+  # M106/M109: partition the plan into mutants whose verdict is reused from
+  # history (stored digests match the current run) and the executable
+  # remainder. Only called under `--incremental` (the non-incremental
+  # short-circuit lives in `prune_reused_for_incremental/7`).
   defp apply_incremental_reuse(plan, ctx, opts, source_root, target_root) do
     verdicts = load_verdicts(target_root, opts)
 
