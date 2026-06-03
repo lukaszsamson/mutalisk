@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: bin/verify (Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Mutalisk's supported floor is Elixir >= 1.19. Widen this matrix to vet
+      # newer toolchains.
+      matrix:
+        include:
+          - elixir: "1.19"
+            otp: "28"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # bin/verify's fixture check inspects the fixture's git state.
+          fetch-depth: 0
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+
+      - name: Cache deps + _build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ matrix.otp }}-${{ matrix.elixir }}-
+
+      - name: Cache Dialyzer PLT
+        uses: actions/cache@v4
+        with:
+          path: priv/plts
+          key: ${{ runner.os }}-plt-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-plt-${{ matrix.otp }}-${{ matrix.elixir }}-
+
+      - run: mix deps.get
+
+      # The full layered gate: lint (format + warnings-as-errors + credo
+      # --strict) -> unit -> dialyzer -> golden -> integration -> e2e mutation
+      # runs. Runs bash explicitly (set -euo pipefail + arrays).
+      - name: bin/verify
+        run: bash bin/verify
