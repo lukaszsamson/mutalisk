@@ -1,0 +1,80 @@
+Schema build starting
+Schema build complete
+[90/11] killed    lib/decimal.ex:427  AtomLiteral  replace atom literal :eq with :lt
+[90/11] invalid   lib/decimal.ex:1815  ComparisonNegation  replace == with !=
+[90/11] invalid   lib/decimal.ex:781  ComparisonNegation  replace == with !=
+[90/11] invalid   lib/decimal.ex:1919  ComparisonNegation  replace < with >=
+[90/11] invalid   lib/decimal.ex:1836  ComparisonNegation  replace >= with <
+[90/11] invalid   lib/decimal.ex:443  ComparisonNegation  replace == with !=
+[90/11] invalid   lib/decimal.ex:1706  ComparisonNegation  replace >= with <
+[90/11] invalid   lib/decimal.ex:379  ComparisonNegation  replace == with !=
+[90/11] invalid   lib/decimal.ex:379  ComparisonNegation  replace == with !=
+[90/11] invalid   lib/decimal.ex:2170  Boolean  replace and with or
+[90/11] invalid   lib/decimal.ex:1932  ComparisonNegation  replace < with >=
+Mutation score: 72/90 = 80.0%
+
+Surviving mutants:
+  lib/decimal.ex:1312 ComparisonBoundary       replace >= with >
+  lib/decimal.ex:698 Arithmetic               replace - with +
+  lib/decimal.ex:721 Arithmetic               replace - with +
+  lib/decimal.ex:764 Arithmetic               replace - with *
+  lib/decimal.ex:1749 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:764 Arithmetic               replace - with +
+  lib/decimal.ex:1153 Arithmetic               replace + with *
+  lib/decimal.ex:929 Arithmetic               replace - with +
+  lib/decimal.ex:1867 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:1380 ComparisonBoundary       replace < with <=
+  lib/decimal.ex:1965 ComparisonBoundary       replace > with >=
+  lib/decimal.ex:715 Arithmetic               replace - with +
+  lib/decimal.ex:896 ComparisonNegation       replace == with !=
+  lib/decimal.ex:1823 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:408 GuardComparisonBoundary  replace guard < with <=
+  lib/decimal.ex:1620 GuardComparisonBoundary  replace guard > with >=
+  lib/decimal.ex:1375 GuardComparisonBoundary  replace guard >= with >
+  lib/decimal.ex:1435 GuardTypeTest            replace guard is_float with is_number
+
+Schema:    59/72 killed (81.9%)   wall: 0.9s
+Fallback:  13/28 killed (46.4%)   wall: 0.0s
+  atom_literal:                 5/5 killed
+  boolean_op:                   0/1 killed
+  comparison_negation:          0/9 killed
+  guard_comparison_boundary:    2/6 killed
+  guard_comparison_negation:    4/4 killed
+  guard_type_test:              1/2 killed
+  integer_literal_replace:      1/1 killed
+Skipped:   1640 (attribute_engine_disabled: 3, missing_oracle_site: 76, no_applicable_mutator: 457, unsupported_dispatch: 1104)
+Invalid:   10
+Errors:    0
+Timeouts:  0
+
+Run time: 0.9s
+Fallback wall-clock: 0.2% of total
+Fallback mutants: 28.0% of executed
+
+Phases:
+  oracle build:         3025 ms
+  baseline tests:        851 ms
+  plan generation:       134 ms
+  coverage collection:  6394 ms
+  schema build:         2863 ms
+  schema workers:        939 ms
+  fallback workers:      441 ms
+  report writing:          8 ms
+  total:               14953 ms
+
+Selection:
+  mode: coverage_with_static_fallback
+  match distribution:
+    exact line:         9
+    enclosing function: 2
+    static fallback:    0
+    all tests:          0
+  avg tests/mutant: 1.3
+  median tests/mutant: 1
+  coverage collection: 6393 ms
+
+Concurrency: 1 workers (sequential)
+Test timeout: 10000 ms
+Incremental: 89 reused from history
+
+Mutalisk run complete in 15229ms

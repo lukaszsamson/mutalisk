@@ -456,7 +456,10 @@ defmodule Mix.Tasks.Mut do
       record_result(ctx.metrics_pid, %{mutant | covering_tests: rel}, result)
     end)
 
-    Metrics.add_reused(ctx.metrics_pid, length(reused))
+    Metrics.add_reused(
+      ctx.metrics_pid,
+      Enum.map(reused, fn {mutant, _stored} -> mutant.stable_id end)
+    )
   end
 
   defp binary_or_nil(value) when is_binary(value), do: value

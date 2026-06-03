@@ -1,0 +1,2868 @@
+{
+  "files": {
+    "lib/decimal.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 851,
+          "id": "001d84a5ebc2485ef0ca9dbe32ddc840",
+          "killedBy": [
+            "DecimalTest:rem/2"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 1852
+            },
+            "start": {
+              "column": 28,
+              "line": 1852
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef1 + 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 824,
+          "id": "0112a69704c039c3754c2b3fe9142cb8",
+          "killedBy": [
+            "Decimal.PropertyTest:compare/2 float equality"
+          ],
+          "location": {
+            "end": {
+              "column": 10,
+              "line": 483
+            },
+            "start": {
+              "column": 10,
+              "line": 483
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef - pow10(Kernel.max(n, 0) + 1)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 805,
+          "id": "024cd1a55622fe4203e7d7614f842a16",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.div/2 (42)"
+          ],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 1842
+            },
+            "start": {
+              "column": 55,
+              "line": 1842
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "adjust * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 845,
+          "id": "025150cf8b7cb4622e48cd206714a0d9",
+          "killedBy": [
+            "DecimalTest:div/2"
+          ],
+          "location": {
+            "end": {
+              "column": 65,
+              "line": 721
+            },
+            "start": {
+              "column": 65,
+              "line": 721
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "(exp1 - exp2) * adjust",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace guard is_float with is_number",
+          "duration": 1403,
+          "id": "02c7837fcea6187ec0a705b9ae117338",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 1435
+            },
+            "start": {
+              "column": 30,
+              "line": 1435
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(float)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 892,
+          "id": "02eff8c6e38e5c9d6c7a63bb131c84ac",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_string/2 (85)"
+          ],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 1588
+            },
+            "start": {
+              "column": 38,
+              "line": 1588
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp + 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 884,
+          "id": "03900f8ead7aca3033d6dea90173ac89",
+          "killedBy": [
+            "DecimalTest:cast/1"
+          ],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 2066
+            },
+            "start": {
+              "column": 28,
+              "line": 2066
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "float != []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace atom literal :gt with :lt",
+          "duration": 868,
+          "id": "03b0f984a2fa7da4f3e4bff64254bb45",
+          "killedBy": [
+            "Decimal.PropertyTest:compare/2 integer equality"
+          ],
+          "location": {
+            "end": {
+              "column": 14,
+              "line": 462
+            },
+            "start": {
+              "column": 12,
+              "line": 462
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":lt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace > with <=",
+          "duration": 906,
+          "id": "03b5abccdd1dd736731cfb40d0c16398",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.div_int/2 (44)"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 1867
+            },
+            "start": {
+              "column": 13,
+              "line": 1867
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "coef <= prec10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 839,
+          "id": "043ba566e9315f8229ef67e149f793b6",
+          "killedBy": [
+            "DecimalTest:issue #82"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 1770
+            },
+            "start": {
+              "column": 58,
+              "line": 1770
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 857,
+          "id": "04a8f16dbd4cae68671e7c3fadb417cd",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 896
+            },
+            "start": {
+              "column": 21,
+              "line": 896
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign1 != sign2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 891,
+          "id": "04e57e89c255327c7e5b068d44812ebe",
+          "killedBy": [
+            "DecimalTest:to_float/1"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 1758
+            },
+            "start": {
+              "column": 21,
+              "line": 1758
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "quo + den",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 10856,
+          "id": "04e7f33075025ebceb0cbea748d00e88",
+          "killedBy": [
+            "DecimalTest:sqrt/1"
+          ],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 1331
+            },
+            "start": {
+              "column": 30,
+              "line": 1331
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "guess * quotient",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 928,
+          "id": "04ef9dbc45f96f2a2fa708cf3436d136",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 715
+            },
+            "start": {
+              "column": 55,
+              "line": 715
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 + exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1431,
+          "id": "04ff087b52908d16e02073252f345ca8",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.integer?/1 (103)"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 1794
+            },
+            "start": {
+              "column": 40,
+              "line": 1794
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "coef > 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 880,
+          "id": "052a993af8c4026b0c5f987de59fe309",
+          "killedBy": [
+            "DecimalTest:to_string/2 scientific"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 1582
+            },
+            "start": {
+              "column": 36,
+              "line": 1582
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "(-length + abs_exp) * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 10866,
+          "id": "05ba016fae4e8711a6dfac553c502e35",
+          "killedBy": [
+            "DecimalTest:rem/2"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 1821
+            },
+            "start": {
+              "column": 26,
+              "line": 1821
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef1 - 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 973,
+          "id": "0606679207e96d65106fd5ba43ef9607",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 19,
+              "line": 1965
+            },
+            "start": {
+              "column": 19,
+              "line": 1965
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "num_digits >= precision",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace atom literal :lt with :gt",
+          "duration": 879,
+          "id": "069222def497f58ee72f50a001ada72d",
+          "killedBy": [
+            "Decimal.PropertyTest:compare/2 float equality"
+          ],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 435
+            },
+            "start": {
+              "column": 59,
+              "line": 435
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1506,
+          "id": "08a27859bcc054ac56a5242ea14bfdf1",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 64,
+              "line": 1375
+            },
+            "start": {
+              "column": 55,
+              "line": 1375
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "coef > 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 920,
+          "id": "0957329259b6e94e8b3ae9e990f972a1",
+          "killedBy": [
+            "DecimalTest:mult/2"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 1151
+            },
+            "start": {
+              "column": 21,
+              "line": 1151
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign1 != sign2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 872,
+          "id": "0984c6da445c6c4276f8350ce291ff6d",
+          "killedBy": [
+            "DecimalTest:max/2"
+          ],
+          "location": {
+            "end": {
+              "column": 22,
+              "line": 982
+            },
+            "start": {
+              "column": 22,
+              "line": 982
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign1 != 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace guard is_float with is_integer",
+          "duration": 1420,
+          "id": "09b3974c4f9b91d363eb3dbf181acf96",
+          "killedBy": [
+            "DecimalTest:cast/1"
+          ],
+          "location": {
+            "end": {
+              "column": 39,
+              "line": 1463
+            },
+            "start": {
+              "column": 24,
+              "line": 1463
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_integer(float)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 869,
+          "id": "09ba2536709a415fe1a93ed190eaba6d",
+          "killedBy": [
+            "DecimalTest:mult/2"
+          ],
+          "location": {
+            "end": {
+              "column": 57,
+              "line": 1166
+            },
+            "start": {
+              "column": 57,
+              "line": 1166
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 * exp2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 848,
+          "id": "0b8a38962b2899d8579d317ccef3773e",
+          "killedBy": [
+            "DecimalTest:issue #63"
+          ],
+          "location": {
+            "end": {
+              "column": 46,
+              "line": 1881
+            },
+            "start": {
+              "column": 46,
+              "line": 1881
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 880,
+          "id": "0c41637ee67b8c6f720f6f652d8cc6c8",
+          "killedBy": [
+            "DecimalTest:to_string/2 scientific"
+          ],
+          "location": {
+            "end": {
+              "column": 47,
+              "line": 1585
+            },
+            "start": {
+              "column": 47,
+              "line": 1585
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": ":lists.duplicate(diff, 48) -- list",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace integer literal 48 with 0",
+          "duration": 1408,
+          "id": "0cb2461e6bade1b150282ce9256de889",
+          "killedBy": [
+            "DecimalTest:issue #62"
+          ],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 2140
+            },
+            "start": {
+              "column": 36,
+              "line": 2140
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 1,
+          "id": "0ce8bb19b400a6f53bf70edf54c9d83e",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 49,
+              "line": 1815
+            },
+            "start": {
+              "column": 49,
+              "line": 1815
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "Context.get().rounding != :floor",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 851,
+          "id": "0d37609aa58fad13b2fdff3ffda4c2a7",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_float/1 (93)"
+          ],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 1769
+            },
+            "start": {
+              "column": 15,
+              "line": 1769
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "tmp * @power_of_2_to_52",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 858,
+          "id": "0dcadb0f976b423361bfd077970a574f",
+          "killedBy": [
+            "DecimalTest:max/2"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 988
+            },
+            "start": {
+              "column": 21,
+              "line": 988
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "exp1 >= exp2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 843,
+          "id": "0e420d4b6655db41e6bce7ad536c861a",
+          "killedBy": [
+            "DecimalTest:div/2"
+          ],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 1842
+            },
+            "start": {
+              "column": 55,
+              "line": 1842
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "adjust - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace atom literal :lt with :eq",
+          "duration": 965,
+          "id": "0ebe46141244bf0bff8fceef91b05c93",
+          "killedBy": [
+            "DecimalTest:compare/2"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 409
+            },
+            "start": {
+              "column": 11,
+              "line": 409
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":eq",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :eq with :gt",
+          "duration": 966,
+          "id": "0f7478d05ac2403929a38216ecc51961",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.eq?/3 (30)"
+          ],
+          "location": {
+            "end": {
+              "column": 75,
+              "line": 553
+            },
+            "start": {
+              "column": 73,
+              "line": 553
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace guard < with >=",
+          "duration": 1386,
+          "id": "0ff7ede2fcaddaafba3bc51757db2104",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.integer?/1 (103)"
+          ],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 1794
+            },
+            "start": {
+              "column": 55,
+              "line": 1794
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "exp >= 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 10892,
+          "id": "122182fa5f9a04a3666c41b26ce7446c",
+          "killedBy": [
+            "DecimalTest:div/2"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 1821
+            },
+            "start": {
+              "column": 26,
+              "line": 1821
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef1 / 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace < with <=",
+          "duration": 949,
+          "id": "12721923c85f1d63e4358eeded2d827a",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 31,
+              "line": 1380
+            },
+            "start": {
+              "column": 31,
+              "line": 1380
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "int <= 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 914,
+          "id": "12862ef568325841aa7aab781a33bda4",
+          "killedBy": [
+            "DecimalTest:sqrt/1"
+          ],
+          "location": {
+            "end": {
+              "column": 19,
+              "line": 1283
+            },
+            "start": {
+              "column": 19,
+              "line": 1283
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef / 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 944,
+          "id": "128b94c6523ee1516faf68b4f1f794f6",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2: half up"
+          ],
+          "location": {
+            "end": {
+              "column": 59,
+              "line": 1997
+            },
+            "start": {
+              "column": 59,
+              "line": 1997
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "digit < 53",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 0,
+          "id": "1290ae5591e785f19905e452cebb7ccc",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 781
+            },
+            "start": {
+              "column": 53,
+              "line": 781
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "compare(%{num1 | sign: 1}, %{num2 | sign: 1}) != :lt",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 0,
+          "id": "12af952ddae0ac4b784ca2c2ae7485a5",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 1919
+            },
+            "start": {
+              "column": 38,
+              "line": 1919
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "precision >= 0",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 0,
+          "id": "13b2a3ac8a34450a11f7ede886a83e14",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 1836
+            },
+            "start": {
+              "column": 12,
+              "line": 1836
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "coef < prec10",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 0,
+          "id": "13bb42b27de6c0ec58753dab8a4c5ed7",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 23,
+              "line": 443
+            },
+            "start": {
+              "column": 23,
+              "line": 443
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "adjusted_exp1 != adjusted_exp2",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with /",
+          "duration": 879,
+          "id": "14f86f643af056d5db3be75a53817283",
+          "killedBy": [
+            "DecimalTest:max_min_dbl in to_float"
+          ],
+          "location": {
+            "end": {
+              "column": 50,
+              "line": 1887
+            },
+            "start": {
+              "column": 50,
+              "line": 1887
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef / pow10(exp)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 874,
+          "id": "1640039bf6ed1f12d5812e96ea377de9",
+          "killedBy": [
+            "DecimalTest:sqrt/1"
+          ],
+          "location": {
+            "end": {
+              "column": 27,
+              "line": 1276
+            },
+            "start": {
+              "column": 27,
+              "line": 1276
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "precision * ((num_digits + 1) >>> 1)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 864,
+          "id": "16503a826f36c9412fb8ea4da3b6ec56",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 1867
+            },
+            "start": {
+              "column": 13,
+              "line": 1867
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "coef >= prec10",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace atom literal :lt with :gt",
+          "duration": 11584,
+          "id": "1680a278dbb171347145e54b341a885f",
+          "killedBy": [
+            "DecimalTest:rem/2"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 845
+            },
+            "start": {
+              "column": 56,
+              "line": 845
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :gt with :lt",
+          "duration": 909,
+          "id": "169a5db2ade83b41b678635c359cd6f5",
+          "killedBy": [
+            "DecimalTest:max_min_dbl in to_float"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 573
+            },
+            "start": {
+              "column": 51,
+              "line": 573
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":lt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 836,
+          "id": "16cee77fed2732da16b87fe9a600f00a",
+          "killedBy": [
+            "DecimalTest:div_int/2"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 778
+            },
+            "start": {
+              "column": 25,
+              "line": 778
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign1 != sign2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 849,
+          "id": "17a90b40b8f54be4b6f148a9e8cd90bb",
+          "killedBy": [
+            "DecimalTest:max_min_dbl in to_float"
+          ],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 1758
+            },
+            "start": {
+              "column": 15,
+              "line": 1758
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "num + quo * den",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :lt with :gt",
+          "duration": 1431,
+          "id": "17bb4d7e61c061ccda67d0dec7e6f490",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.compare/3 (19)"
+          ],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 379
+            },
+            "start": {
+              "column": 52,
+              "line": 379
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :lt with :gt",
+          "duration": 877,
+          "id": "17de2a674595bf3bebd7d58e0dcbebd9",
+          "killedBy": [
+            "DecimalTest:max/2"
+          ],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 416
+            },
+            "start": {
+              "column": 59,
+              "line": 416
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 861,
+          "id": "18206ecec06333da78140d37f97f68cb",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2: ceiling"
+          ],
+          "location": {
+            "end": {
+              "column": 61,
+              "line": 1993
+            },
+            "start": {
+              "column": 61,
+              "line": 1993
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "sign == 1 or any_nonzero(remain)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 991,
+          "id": "189d18b35f0fce4ce86943876d1a6434",
+          "killedBy": [
+            "DecimalTest:issue #82"
+          ],
+          "location": {
+            "end": {
+              "column": 66,
+              "line": 1744
+            },
+            "start": {
+              "column": 66,
+              "line": 1744
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp + 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 0,
+          "id": "191f384ce8cf0027428199644e6ead59",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 1706
+            },
+            "start": {
+              "column": 11,
+              "line": 1706
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "num < boundary",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :gt with :lt",
+          "duration": 1044,
+          "id": "19719dbe8f44f6fe936578a8a4bce632",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.compare/3 (20)"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 380
+            },
+            "start": {
+              "column": 23,
+              "line": 380
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":lt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 919,
+          "id": "19ed7e404418b1ef33c62242d8bc2629",
+          "killedBy": [
+            "DecimalTest:sqrt/1"
+          ],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 1320
+            },
+            "start": {
+              "column": 54,
+              "line": 1320
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp + shift",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace atom literal :lt with :gt",
+          "duration": 11382,
+          "id": "1a11872d3187f8dbaf613e03489606ba",
+          "killedBy": [
+            "DecimalTest:div_int/2"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 781
+            },
+            "start": {
+              "column": 56,
+              "line": 781
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 861,
+          "id": "1a448866f2a23f073cdbf399ffe43e44",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 929
+            },
+            "start": {
+              "column": 54,
+              "line": 929
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 + exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 848,
+          "id": "1b754c000de6758b77d9c66c867cbc55",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2: half down"
+          ],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 1981
+            },
+            "start": {
+              "column": 15,
+              "line": 1981
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp * length(remain)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace guard >= with <",
+          "duration": 1495,
+          "id": "1d169cce3c735ce2dfa9e36f6cabc406",
+          "killedBy": [
+            "DecimalTest:to_float/1"
+          ],
+          "location": {
+            "end": {
+              "column": 47,
+              "line": 1743
+            },
+            "start": {
+              "column": 37,
+              "line": 1743
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "num < den",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 876,
+          "id": "1d519f15a36d20a585ef4b1e89b4f9d1",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 1153
+            },
+            "start": {
+              "column": 48,
+              "line": 1153
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 * exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 873,
+          "id": "1d842aee8aaf1d31278bdae38ce178e6",
+          "killedBy": [
+            "DecimalTest:to_integer/1"
+          ],
+          "location": {
+            "end": {
+              "column": 54,
+              "line": 1654
+            },
+            "start": {
+              "column": 54,
+              "line": 1654
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef - 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace guard > with >=",
+          "duration": 1496,
+          "id": "1d84dd97ce0be816108575cda7378e1b",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 20,
+              "line": 1620
+            },
+            "start": {
+              "column": 13,
+              "line": 1620
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "exp >= 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 880,
+          "id": "1df56a42cd1d78d571b299b0c4445b75",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 764
+            },
+            "start": {
+              "column": 45,
+              "line": 764
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 + exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 851,
+          "id": "1e7e2b19fc00ed43b153e8bd5daf4bc9",
+          "killedBy": [
+            "DecimalTest:round/3: down"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 1944
+            },
+            "start": {
+              "column": 25,
+              "line": 1944
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "digits -- Enum.map(1..(exp - target_exp), fn _ -> 48 end)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace >= with <",
+          "duration": 844,
+          "id": "1e9b1ad11406611e54d20d2b22d61c08",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_string/2 (88)"
+          ],
+          "location": {
+            "end": {
+              "column": 14,
+              "line": 1554
+            },
+            "start": {
+              "column": 14,
+              "line": 1554
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "exp < 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 863,
+          "id": "1fa8d39c342265628a5d7a255168b17b",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2: floor"
+          ],
+          "location": {
+            "end": {
+              "column": 77,
+              "line": 2015
+            },
+            "start": {
+              "column": 77,
+              "line": 2015
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "head * 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 878,
+          "id": "1fddfd881e0bea4cee5baed5d3ea05dc",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_float/1 (93)"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 573
+            },
+            "start": {
+              "column": 48,
+              "line": 573
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "compare(num1, num2) != :gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace < with <=",
+          "duration": 878,
+          "id": "21068e90215f5d01145ad3a16dc70354",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 12,
+              "line": 1749
+            },
+            "start": {
+              "column": 12,
+              "line": 1749
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "num <= new_den",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with +",
+          "duration": 881,
+          "id": "220e0521326903ad259e219d23203535",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.div/2 (42)"
+          ],
+          "location": {
+            "end": {
+              "column": 26,
+              "line": 1821
+            },
+            "start": {
+              "column": 26,
+              "line": 1821
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef1 + 10",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :lt with :eq",
+          "duration": 1419,
+          "id": "222c93c2a6b344e182bd3df39a35c52b",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.compare/3 (21)"
+          ],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 381
+            },
+            "start": {
+              "column": 16,
+              "line": 381
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":eq",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 853,
+          "id": "2302588ee5173782406b03bd7aedb7dc",
+          "killedBy": [
+            "DecimalTest:to_string/2 normal"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 1547
+            },
+            "start": {
+              "column": 13,
+              "line": 1547
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign != 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 849,
+          "id": "233e9029e0c6d72cdcb66340b12d25e9",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 764
+            },
+            "start": {
+              "column": 45,
+              "line": 764
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 * exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 1,
+          "id": "2356db17d475e0468f7c5c86ea8ce411",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 30,
+              "line": 379
+            },
+            "start": {
+              "column": 30,
+              "line": 379
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "case1 != :eq",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace guard != with ==",
+          "duration": 1404,
+          "id": "237c37792a1a9e22933ce737c0366ccc",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_string/2 (88)"
+          ],
+          "location": {
+            "end": {
+              "column": 38,
+              "line": 1624
+            },
+            "start": {
+              "column": 13,
+              "line": 1624
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "Kernel.rem(coef, 10) == 0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 0,
+          "id": "2387cce4d1eabc78b3a5e6047e6e6644",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 65,
+              "line": 379
+            },
+            "start": {
+              "column": 65,
+              "line": 379
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "case2 != :eq",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace guard < with <=",
+          "duration": 1380,
+          "id": "25ad405a414d92bce582dad3392c4e1d",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 408
+            },
+            "start": {
+              "column": 12,
+              "line": 408
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "sign1 <= sign2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 929,
+          "id": "2645db87e9c579e5e397547ca2783645",
+          "killedBy": [
+            "DecimalTest:issue #82"
+          ],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 1770
+            },
+            "start": {
+              "column": 18,
+              "line": 1770
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "tmp >= @power_of_2_to_52",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :gt with :eq",
+          "duration": 854,
+          "id": "26469478c2145536186c581b3b60f95f",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.eq?/3 (29)"
+          ],
+          "location": {
+            "end": {
+              "column": 25,
+              "line": 380
+            },
+            "start": {
+              "column": 23,
+              "line": 380
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":eq",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :eq with :lt",
+          "duration": 872,
+          "id": "2814259096f3a6af2986de768df1e9e6",
+          "killedBy": [
+            "DecimalTest:lt?/2"
+          ],
+          "location": {
+            "end": {
+              "column": 60,
+              "line": 427
+            },
+            "start": {
+              "column": 58,
+              "line": 427
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":lt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with *",
+          "duration": 913,
+          "id": "28262b44c4473d03e09033463135c5d6",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.to_string/2 (87)"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 1557
+            },
+            "start": {
+              "column": 29,
+              "line": 1557
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "length(list) * exp",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1392,
+          "id": "284b41cea27f0505043d8f89f0f03dd7",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2 set flags"
+          ],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 1899
+            },
+            "start": {
+              "column": 26,
+              "line": 1899
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "num > unquote(pow10_max)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 866,
+          "id": "28722fa828031b373c2f9e9e366906c6",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2: half down"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 2007
+            },
+            "start": {
+              "column": 36,
+              "line": 2007
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "digit == 53 or any_nonzero(rest)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 0,
+          "id": "289aea6af2c8ecf69efeebc49b9fba45",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 34,
+              "line": 2170
+            },
+            "start": {
+              "column": 34,
+              "line": 2170
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "Decimal.lt?(num, zero(-1)) or Decimal.gt?(num, dbl_min(-1))",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :eq with :gt",
+          "duration": 1721,
+          "id": "28a2592a2df2326b697dfce00b353ddd",
+          "killedBy": [
+            "DecimalTest:eq/3?"
+          ],
+          "location": {
+            "end": {
+              "column": 35,
+              "line": 379
+            },
+            "start": {
+              "column": 33,
+              "line": 379
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace + with -",
+          "duration": 888,
+          "id": "2921768c5ca808f8797fae0c21f6cc1e",
+          "killedBy": [
+            "DecimalTest:issue #82"
+          ],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 1770
+            },
+            "start": {
+              "column": 58,
+              "line": 1770
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp - 1",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace < with >=",
+          "duration": 0,
+          "id": "295ef7414ccaab3d362c1f52937a9b4a",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 11,
+              "line": 1932
+            },
+            "start": {
+              "column": 11,
+              "line": 1932
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "exp >= target_exp",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 860,
+          "id": "2a0bdc08a6b8d4ec5a6784d5af08f941",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2: half down"
+          ],
+          "location": {
+            "end": {
+              "column": 15,
+              "line": 2007
+            },
+            "start": {
+              "column": 15,
+              "line": 2007
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "digit >= 53",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 907,
+          "id": "2a66f348782e3693beceae4615cee967",
+          "killedBy": [
+            "Decimal.PropertyTest:compare/2 float equality"
+          ],
+          "location": {
+            "end": {
+              "column": 48,
+              "line": 445
+            },
+            "start": {
+              "column": 48,
+              "line": 445
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "num2.exp * num1.exp",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 857,
+          "id": "2addd7d82b31aa3aba377005bd2bf9d7",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.div/2 (42)"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 712
+            },
+            "start": {
+              "column": 21,
+              "line": 712
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign1 != sign2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 931,
+          "id": "2ae7f626bb728fe265671e2d6d056d60",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.div_int/2 (45)"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 756
+            },
+            "start": {
+              "column": 21,
+              "line": 756
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "sign1 != sign2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace atom literal :lt with :gt",
+          "duration": 890,
+          "id": "2b4e5b1aaf045ace42222d3cb2d7a3f8",
+          "killedBy": [
+            "DecimalTest:compare/3"
+          ],
+          "location": {
+            "end": {
+              "column": 60,
+              "line": 418
+            },
+            "start": {
+              "column": 58,
+              "line": 418
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":gt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs",
+            "test/decimal/property_test.exs"
+          ],
+          "description": "replace atom literal :gt with :lt",
+          "duration": 839,
+          "id": "2bd83fb582a790906c8d630e81f9e699",
+          "killedBy": [
+            "DecimalTest:compare/3"
+          ],
+          "location": {
+            "end": {
+              "column": 13,
+              "line": 413
+            },
+            "start": {
+              "column": 11,
+              "line": 413
+            }
+          },
+          "mutatorName": "AtomLiteral",
+          "replacement": ":lt",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace * with -",
+          "duration": 931,
+          "id": "2c96f41f6a878f4acdada3e689b08e98",
+          "killedBy": [
+            "DecimalTest:doctest Decimal.sqrt/1 (70)"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 1294
+            },
+            "start": {
+              "column": 17,
+              "line": 1294
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "coef - pow10(shift <<< 1)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1444,
+          "id": "2c9d79b8344649ac52387be54c6e4eac",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 65,
+              "line": 1823
+            },
+            "start": {
+              "column": 46,
+              "line": 1823
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "coef1 > coef2 * 10",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 860,
+          "id": "2d60778fbd8018214209fc526f9f9bdc",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 58,
+              "line": 721
+            },
+            "start": {
+              "column": 58,
+              "line": 721
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 + exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace guard < with >=",
+          "duration": 1565,
+          "id": "2ddb38dbf97dbb4a3498885d4df1eaa7",
+          "killedBy": [
+            "Decimal.ContextTest:with_context/2 set flags"
+          ],
+          "location": {
+            "end": {
+              "column": 60,
+              "line": 1807
+            },
+            "start": {
+              "column": 49,
+              "line": 1807
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "exp1 >= exp2",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace - with +",
+          "duration": 870,
+          "id": "2dee4be7dd6f4f7de10d0e86e52d91be",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 45,
+              "line": 698
+            },
+            "start": {
+              "column": 45,
+              "line": 698
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 + exp2",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs"
+          ],
+          "description": "replace >= with >",
+          "duration": 897,
+          "id": "2e5a711f7ee6befae01bc0975c290354",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 18,
+              "line": 1312
+            },
+            "start": {
+              "column": 18,
+              "line": 1312
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "shift > 0",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/decimal_test.exs",
+            "test/decimal/context_test.exs"
+          ],
+          "description": "replace - with *",
+          "duration": 857,
+          "id": "302b21de6f1e79bedf40f19f75d4c337",
+          "killedBy": [
+            "DecimalTest:rem/2"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 1805
+            },
+            "start": {
+              "column": 29,
+              "line": 1805
+            }
+          },
+          "mutatorName": "Arithmetic",
+          "replacement": "exp1 * exp2",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Decimal do\n  @moduledoc \"\"\"\n  Decimal arithmetic on arbitrary precision floating-point numbers.\n\n  A number is represented by a signed coefficient and exponent such that: `sign\n  * coefficient * 10 ^ exponent`. All numbers are represented and calculated\n  exactly, but the result of an operation may be rounded depending on the\n  context the operation is performed with, see: `Decimal.Context`. Trailing\n  zeros in the coefficient are never truncated to preserve the number of\n  significant digits unless explicitly done so.\n\n  There are also special values such as NaN (not a number) and ±Infinity.\n  -0 and +0 are two distinct values.\n  Some operation results are not defined and will return NaN.\n  This kind of NaN is quiet, any operation returning a number will return\n  NaN when given a quiet NaN (the NaN value will flow through all operations).\n\n  Exceptional conditions are grouped into signals, each signal has a flag and a\n  trap enabler in the context. Whenever a signal is triggered it's flag is set\n  in the context and will be set until explicitly cleared. If the signal is trap\n  enabled `Decimal.Error` will be raised.\n\n  ## Specifications\n\n    * [IBM's General Decimal Arithmetic Specification](http://speleotrove.com/decimal/decarith.html)\n    * [IEEE standard 854-1987](http://web.archive.org/web/20150908012941/http://754r.ucbtest.org/standards/854.pdf)\n\n  This library follows the above specifications for reference of arithmetic\n  operation implementations, but the public APIs may differ to provide a\n  more idiomatic Elixir interface.\n\n  The specification models the sign of the number as 1, for a negative number,\n  and 0 for a positive number. Internally this implementation models the sign as\n  1 or -1 such that the complete number will be `sign * coefficient *\n  10 ^ exponent` and will refer to the sign in documentation as either *positive*\n  or *negative*.\n\n  There is currently no maximum or minimum values for the exponent. Because of\n  that all numbers are \"normal\". This means that when an operation should,\n  according to the specification, return a number that \"underflows\" 0 is returned\n  instead of Etiny. This may happen when dividing a number with infinity.\n  Additionally, overflow, underflow and clamped may never be signalled.\n\n  ## Protocol Implementations\n\n  `Decimal` implements the following protocols:\n\n  ### `Inspect`\n\n      iex> inspect(Decimal.new(\"1.00\"))\n      \"Decimal.new(\\\\\"1.00\\\\\")\"\n\n  ### `String.Chars`\n\n      iex> to_string(Decimal.new(\"1.00\"))\n      \"1.00\"\n\n  ### `JSON.Encoder`\n\n  _(If running Elixir 1.18+.)_\n\n  By default, decimals are encoded as strings to preserve precision:\n\n      iex> JSON.encode!(Decimal.new(\"1.00\"))\n      \"\\\\\"1.00\\\\\"\"\n\n  To change that, pass a custom encoder to `JSON.encode!/2`. The following encodes\n  decimals as floats:\n\n      iex> encoder = fn\n      ...>   %Decimal{} = decimal, _encoder ->\n      ...>     if Decimal.inf?(decimal) or Decimal.nan?(decimal) do\n      ...>       raise ArgumentError, \"\\#{inspect(decimal)} cannot be encoded to JSON\"\n      ...>     end\n      ...>\n      ...>     Decimal.to_string(decimal)\n      ...>\n      ...>   other, encoder ->\n      ...>     JSON.protocol_encode(other, encoder)\n      ...> end\n      ...>\n      iex> JSON.encode!(%{x: Decimal.new(\"1.00\")}, encoder)\n      \"{\\\\\"x\\\\\":1.00}\"\n\n  \"\"\"\n\n  import Bitwise\n  import Kernel, except: [abs: 1, div: 2, max: 2, min: 2, rem: 2, round: 1]\n  import Decimal.Macros\n  alias Decimal.Context\n  alias Decimal.Error\n\n  @power_of_2_to_52 4_503_599_627_370_496\n\n  @typedoc \"\"\"\n  The coefficient of the power of `10`. Non-negative because the sign is stored separately in `sign`.\n\n    * `non_neg_integer` - when the `t` represents a number, instead of one of the special values below.\n    * `:NaN` - Not a Number.\n    * `:inf` - Infinity.\n\n  \"\"\"\n  @type coefficient :: non_neg_integer | :NaN | :inf\n\n  @typedoc \"\"\"\n  The exponent to which `10` is raised.\n  \"\"\"\n  @type exponent :: integer\n\n  @typedoc \"\"\"\n\n    * `1` for positive\n    * `-1` for negative\n\n  \"\"\"\n  @type sign :: 1 | -1\n\n  @type signal ::\n          :invalid_operation\n          | :division_by_zero\n          | :rounded\n          | :inexact\n\n  @type compare_result ::\n          :lt | :gt | :eq\n\n  @typedoc \"\"\"\n  Rounding algorithm.\n\n  See `Decimal.Context` for more information.\n  \"\"\"\n  @type rounding ::\n          :down\n          | :half_up\n          | :half_even\n          | :ceiling\n          | :floor\n          | :half_down\n          | :up\n\n  @typedoc \"\"\"\n  This implementation models the `sign` as `1` or `-1` such that the complete number will be: `sign * coef * 10 ^ exp`.\n\n    * `coef` - the coefficient of the power of `10`.\n    * `exp` - the exponent of the power of `10`.\n    * `sign` - `1` for positive, `-1` for negative.\n\n  \"\"\"\n  @type t :: %__MODULE__{\n          sign: sign,\n          coef: coefficient,\n          exp: exponent\n        }\n\n  @type decimal :: t | integer | String.t()\n\n  defstruct sign: 1, coef: 0, exp: 0\n\n  defmacrop error(flags, reason, result, context \\\\ nil) do\n    quote bind_quoted: binding() do\n      case handle_error(flags, reason, result, context) do\n        {:ok, result} -> result\n        {:error, error} -> raise Error, error\n      end\n    end\n  end\n\n  @doc \"\"\"\n  Returns `true` if number is NaN, otherwise `false`.\n\n  ## Examples\n\n      iex> Decimal.nan?(Decimal.new(\"NaN\"))\n      true\n\n      iex> Decimal.nan?(Decimal.new(42))\n      false\n\n  \"\"\"\n  @spec nan?(t) :: boolean\n  def nan?(%Decimal{coef: :NaN}), do: true\n  def nan?(%Decimal{}), do: false\n\n  @doc \"\"\"\n  Returns `true` if number is ±Infinity, otherwise `false`.\n\n  ## Examples\n\n      iex> Decimal.inf?(Decimal.new(\"+Infinity\"))\n      true\n\n      iex> Decimal.inf?(Decimal.new(\"-Infinity\"))\n      true\n\n      iex> Decimal.inf?(Decimal.new(\"1.5\"))\n      false\n\n  \"\"\"\n  @spec inf?(t) :: boolean\n  def inf?(%Decimal{coef: :inf}), do: true\n  def inf?(%Decimal{}), do: false\n\n  @doc \"\"\"\n  Returns `true` if argument is a decimal number, otherwise `false`.\n\n  ## Examples\n\n      iex> Decimal.is_decimal(Decimal.new(42))\n      true\n\n      iex> Decimal.is_decimal(42)\n      false\n\n  Allowed in guard tests on OTP 21+.\n  \"\"\"\n  doc_since(\"1.9.0\")\n  defmacro is_decimal(term)\n\n  if function_exported?(:erlang, :is_map_key, 2) do\n    defmacro is_decimal(term) do\n      case __CALLER__.context do\n        nil ->\n          quote do\n            case unquote(term) do\n              %Decimal{} -> true\n              _ -> false\n            end\n          end\n\n        :match ->\n          raise ArgumentError,\n                \"invalid expression in match, is_decimal is not allowed in patterns \" <>\n                  \"such as function clauses, case clauses or on the left side of the = operator\"\n\n        :guard ->\n          quote do\n            is_map(unquote(term)) and :erlang.is_map_key(:__struct__, unquote(term)) and\n              :erlang.map_get(:__struct__, unquote(term)) == Decimal\n          end\n      end\n    end\n  else\n    # TODO: remove when we require Elixir v1.10\n    defmacro is_decimal(term) do\n      quote do\n        case unquote(term) do\n          %Decimal{} -> true\n          _ -> false\n        end\n      end\n    end\n  end\n\n  @doc \"\"\"\n  The absolute value of given number. Sets the number's sign to positive.\n\n  ## Examples\n\n      iex> Decimal.abs(Decimal.new(\"1\"))\n      Decimal.new(\"1\")\n\n      iex> Decimal.abs(Decimal.new(\"-1\"))\n      Decimal.new(\"1\")\n\n      iex> Decimal.abs(Decimal.new(\"NaN\"))\n      Decimal.new(\"NaN\")\n\n  \"\"\"\n  @spec abs(t) :: t\n  def abs(%Decimal{coef: :NaN} = num), do: %{num | sign: 1}\n  def abs(%Decimal{} = num), do: context(%{num | sign: 1})\n\n  @doc \"\"\"\n  Adds two numbers together.\n\n  ## Exceptional conditions\n\n    * If one number is -Infinity and the other +Infinity, `:invalid_operation` will\n      be signalled.\n\n  ## Examples\n\n      iex> Decimal.add(1, \"1.1\")\n      Decimal.new(\"2.1\")\n\n      iex> Decimal.add(1, \"Inf\")\n      Decimal.new(\"Infinity\")\n\n  \"\"\"\n  @spec add(decimal, decimal) :: t\n  def add(%Decimal{coef: :NaN} = num1, %Decimal{}), do: num1\n\n  def add(%Decimal{}, %Decimal{coef: :NaN} = num2), do: num2\n\n  def add(%Decimal{coef: :inf, sign: sign} = num1, %Decimal{coef: :inf, sign: sign} = num2) do\n    if num1.exp > num2.exp do\n      num1\n    else\n      num2\n    end\n  end\n\n  def add(%Decimal{coef: :inf}, %Decimal{coef: :inf}),\n    do: error(:invalid_operation, \"adding +Infinity and -Infinity\", %Decimal{coef: :NaN})\n\n  def add(%Decimal{coef: :inf} = num1, %Decimal{}), do: num1\n\n  def add(%Decimal{}, %Decimal{coef: :inf} = num2), do: num2\n\n  def add(%Decimal{} = num1, %Decimal{} = num2) do\n    %Decimal{sign: sign1, coef: coef1, exp: exp1} = num1\n    %Decimal{sign: sign2, coef: coef2, exp: exp2} = num2\n\n    {coef1, coef2} = add_align(coef1, exp1, coef2, exp2)\n    coef = sign1 * coef1 + sign2 * coef2\n    exp = Kernel.min(exp1, exp2)\n    sign = add_sign(sign1, sign2, coef)\n    context(%Decimal{sign: sign, coef: Kernel.abs(coef), exp: exp})\n  end\n\n  def add(num1, num2), do: add(decimal(num1), decimal(num2))\n\n  @doc \"\"\"\n  Subtracts second number from the first. Equivalent to `Decimal.add/2` when the\n  second number's sign is negated.\n\n  ## Exceptional conditions\n\n    * If one number is -Infinity and the other +Infinity `:invalid_operation` will\n      be signalled.\n\n  ## Examples\n\n      iex> Decimal.sub(1, \"0.1\")\n      Decimal.new(\"0.9\")\n\n      iex> Decimal.sub(1, \"Inf\")\n      Decimal.new(\"-Infinity\")\n\n  \"\"\"\n  @spec sub(decimal, decimal) :: t\n  def sub(%Decimal{} = num1, %Decimal{sign: sign} = num2) do\n    add(num1, %{num2 | sign: -sign})\n  end\n\n  def sub(num1, num2) do\n    sub(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Compares two numbers numerically using a threshold. If the first number added\n  to the threshold is greater than the second number, and the first number\n  subtracted by the threshold is smaller than the second number, then the two\n  numbers are considered equal.\n\n  ## Examples\n\n      iex> Decimal.compare(\"1.1\", 1, \"0.2\")\n      :eq\n\n      iex> Decimal.compare(\"1.2\", 1, \"0.1\")\n      :gt\n\n      iex> Decimal.compare(\"1.0\", \"1.2\", \"0.1\")\n      :lt\n  \"\"\"\n  @spec compare(decimal :: decimal(), decimal :: decimal(), threshold :: decimal()) ::\n          compare_result()\n\n  def compare(_, _, %Decimal{sign: -1}), do: raise(Error, reason: \"threshold cannot be negative\")\n\n  def compare(%Decimal{} = n1, %Decimal{} = n2, %Decimal{} = threshold) do\n    add_threshold = n1 |> Decimal.add(threshold)\n    sub_threshold = n1 |> Decimal.sub(threshold)\n    case1 = compare(add_threshold, n2)\n    case2 = compare(sub_threshold, n2)\n\n    cond do\n      (case1 == :gt or case1 == :eq) and (case2 == :lt or case2 == :eq) -> :eq\n      case1 == :gt -> :gt\n      case2 == :lt -> :lt\n    end\n  end\n\n  def compare(n1, n2, threshold), do: compare(decimal(n1), decimal(n2), decimal(threshold))\n\n  @doc \"\"\"\n  Compares two numbers numerically. If the first number is greater than the second\n  `:gt` is returned, if less than `:lt` is returned, if both numbers are equal\n  `:eq` is returned.\n\n  Neither number can be a NaN.\n\n  ## Examples\n\n      iex> Decimal.compare(\"1.0\", 1)\n      :eq\n\n      iex> Decimal.compare(\"Inf\", -1)\n      :gt\n\n  \"\"\"\n  @spec compare(decimal, decimal) :: compare_result()\n  def compare(%Decimal{coef: :inf, sign: sign}, %Decimal{coef: :inf, sign: sign}),\n    do: :eq\n\n  def compare(%Decimal{coef: :inf, sign: sign1}, %Decimal{coef: :inf, sign: sign2})\n      when sign1 < sign2,\n      do: :lt\n\n  def compare(%Decimal{coef: :inf, sign: sign1}, %Decimal{coef: :inf, sign: sign2})\n      when sign1 > sign2,\n      do: :gt\n\n  def compare(%Decimal{coef: :inf, sign: 1}, _num2), do: :gt\n  def compare(%Decimal{coef: :inf, sign: -1}, _num2), do: :lt\n\n  def compare(_num1, %Decimal{coef: :inf, sign: 1}), do: :lt\n  def compare(_num1, %Decimal{coef: :inf, sign: -1}), do: :gt\n\n  def compare(%Decimal{coef: :NaN} = num1, _num2),\n    do: error(:invalid_operation, \"operation on NaN\", num1)\n\n  def compare(_num1, %Decimal{coef: :NaN} = num2),\n    do: error(:invalid_operation, \"operation on NaN\", num2)\n\n  def compare(%Decimal{coef: 0}, %Decimal{coef: 0}), do: :eq\n\n  def compare(%Decimal{sign: 1}, %Decimal{coef: 0}), do: :gt\n  def compare(%Decimal{coef: 0}, %Decimal{sign: 1}), do: :lt\n  def compare(%Decimal{sign: -1}, %Decimal{coef: 0}), do: :lt\n  def compare(%Decimal{coef: 0}, %Decimal{sign: -1}), do: :gt\n\n  def compare(%Decimal{sign: 1}, %Decimal{sign: -1}), do: :gt\n  def compare(%Decimal{sign: -1}, %Decimal{sign: 1}), do: :lt\n\n  def compare(%Decimal{} = num1, %Decimal{} = num2) do\n    adjusted_exp1 = adjust_exp(num1)\n    adjusted_exp2 = adjust_exp(num2)\n\n    sign =\n      cond do\n        adjusted_exp1 == adjusted_exp2 ->\n          padded_num1 = pad_num(num1, num1.exp - num2.exp)\n          padded_num2 = pad_num(num2, num2.exp - num1.exp)\n\n          cond do\n            padded_num1 == padded_num2 -> 0\n            padded_num1 < padded_num2 -> -num1.sign\n            true -> num1.sign\n          end\n\n        adjusted_exp1 < adjusted_exp2 ->\n          -num1.sign\n\n        true ->\n          num1.sign\n      end\n\n    case sign do\n      0 -> :eq\n      1 -> :gt\n      -1 -> :lt\n    end\n  end\n\n  def compare(num1, num2) do\n    compare(decimal(num1), decimal(num2))\n  end\n\n  defp adjust_exp(%Decimal{coef: coef, exp: exp}) do\n    coef_adjustment = coef_length(coef)\n    exp + coef_adjustment - 1\n  end\n\n  defp coef_length(0), do: 1\n  defp coef_length(coef), do: coef_length(coef, 0)\n\n  defp coef_length(0, length), do: length\n  defp coef_length(coef, length), do: coef_length(Kernel.div(coef, 10), length + 1)\n\n  defp pad_num(%Decimal{coef: coef}, n) do\n    coef * pow10(Kernel.max(n, 0) + 1)\n  end\n\n  @deprecated \"Use compare/2 instead\"\n  @spec cmp(decimal, decimal) :: :lt | :eq | :gt\n  def cmp(num1, num2) do\n    compare(num1, num2)\n  end\n\n  @doc \"\"\"\n  Compares two numbers numerically and returns `true` if they are equal,\n  otherwise `false`. If one of the operands is a quiet NaN this operation\n  will always return `false`.\n\n  ## Examples\n\n      iex> Decimal.equal?(\"1.0\", 1)\n      true\n\n      iex> Decimal.equal?(1, -1)\n      false\n\n  \"\"\"\n  @spec equal?(decimal, decimal) :: boolean\n  def equal?(num1, num2) do\n    eq?(num1, num2)\n  end\n\n  @doc \"\"\"\n  Compares two numbers numerically and returns `true` if they are equal,\n  otherwise `false`. If one of the operands is a quiet NaN this operation\n  will always return `false`.\n\n  ## Examples\n\n      iex> Decimal.eq?(\"1.0\", 1)\n      true\n\n      iex> Decimal.eq?(1, -1)\n      false\n\n  \"\"\"\n  doc_since(\"1.8.0\")\n  @spec eq?(decimal, decimal) :: boolean\n  def eq?(%Decimal{coef: :NaN}, _num2), do: false\n  def eq?(_num1, %Decimal{coef: :NaN}), do: false\n  def eq?(num1, num2), do: compare(num1, num2) == :eq\n\n  @doc \"\"\"\n  It compares the equality of two numbers. If the second number is within\n  the range of first - threshold and first + threshold, it returns true;\n  otherwise, it returns false.\n\n  ## Examples\n\n      iex> Decimal.eq?(\"1.0\", 1, \"0\")\n      true\n\n      iex> Decimal.eq?(\"1.2\", 1, \"0.1\")\n      false\n\n      iex> Decimal.eq?(\"1.2\", 1, \"0.2\")\n      true\n\n      iex> Decimal.eq?(1, -1, \"0.0\")\n      false\n\n  \"\"\"\n  doc_since(\"2.2.0\")\n  @spec eq?(decimal :: decimal(), decimal :: decimal(), threshold :: decimal()) :: boolean()\n  def eq?(num1, num2, threshold), do: compare(num1, num2, threshold) == :eq\n\n  @doc \"\"\"\n  Compares two numbers numerically and returns `true` if the first argument\n  is greater than the second, otherwise `false`. If one the operands is a\n  quiet NaN this operation will always return `false`.\n\n  ## Examples\n\n      iex> Decimal.gt?(\"1.3\", \"1.2\")\n      true\n\n      iex> Decimal.gt?(\"1.2\", \"1.3\")\n      false\n\n  \"\"\"\n  doc_since(\"1.8.0\")\n  @spec gt?(decimal, decimal) :: boolean\n  def gt?(%Decimal{coef: :NaN}, _num2), do: false\n  def gt?(_num1, %Decimal{coef: :NaN}), do: false\n  def gt?(num1, num2), do: compare(num1, num2) == :gt\n\n  @doc \"\"\"\n  Compares two numbers numerically and returns `true` if the first number is\n  less than the second number, otherwise `false`. If one of the operands is a\n  quiet NaN this operation will always return `false`.\n\n  ## Examples\n\n      iex> Decimal.lt?(\"1.1\", \"1.2\")\n      true\n\n      iex> Decimal.lt?(\"1.4\", \"1.2\")\n      false\n\n  \"\"\"\n  doc_since(\"1.8.0\")\n  @spec lt?(decimal, decimal) :: boolean\n  def lt?(%Decimal{coef: :NaN}, _num2), do: false\n  def lt?(_num1, %Decimal{coef: :NaN}), do: false\n  def lt?(num1, num2), do: compare(num1, num2) == :lt\n\n  @doc \"\"\"\n  Compares two numbers numerically and returns `true` if\n  the first argument is greater than or equal the second,\n  otherwise `false`.\n\n  If one the operands is a quiet NaN this operation\n  will always return `false`.\n\n  ## Examples\n\n      iex> Decimal.gte?(\"1.3\", \"1.3\")\n      true\n\n      iex> Decimal.gte?(\"1.3\", \"1.2\")\n      true\n\n      iex> Decimal.gte?(\"1.2\", \"1.3\")\n      false\n\n  \"\"\"\n  doc_since(\"2.2.0\")\n  @spec gte?(decimal, decimal) :: boolean\n\n  def gte?(%Decimal{coef: :NaN}, _num2), do: false\n  def gte?(_num1, %Decimal{coef: :NaN}), do: false\n\n  def gte?(num1, num2) do\n    case compare(num1, num2) do\n      :gt -> true\n      :eq -> true\n      _ -> false\n    end\n  end\n\n  @doc \"\"\"\n  Compares two numbers numerically and returns `true` if\n  the first number is less than or equal the second number,\n  otherwise `false`.\n\n  If one of the operands is a quiet NaN this operation\n  will always return `false`.\n\n  ## Examples\n\n      iex> Decimal.lte?(\"1.1\", \"1.1\")\n      true\n\n      iex> Decimal.lte?(\"1.1\", \"1.2\")\n      true\n\n      iex> Decimal.lte?(\"1.4\", \"1.2\")\n      false\n\n  \"\"\"\n  doc_since(\"2.2.0\")\n  @spec lte?(decimal, decimal) :: boolean\n\n  def lte?(%Decimal{coef: :NaN}, _num2), do: false\n  def lte?(_num1, %Decimal{coef: :NaN}), do: false\n\n  def lte?(num1, num2) do\n    case compare(num1, num2) do\n      :lt -> true\n      :eq -> true\n      _ -> false\n    end\n  end\n\n  @doc \"\"\"\n  Divides two numbers.\n\n  ## Exceptional conditions\n\n    * If both numbers are ±Infinity `:invalid_operation` is signalled.\n    * If both numbers are ±0 `:invalid_operation` is signalled.\n    * If second number (denominator) is ±0 `:division_by_zero` is signalled.\n\n  ## Examples\n\n      iex> Decimal.div(3, 4)\n      Decimal.new(\"0.75\")\n\n      iex> Decimal.div(\"Inf\", -1)\n      Decimal.new(\"-Infinity\")\n\n  \"\"\"\n  @spec div(decimal, decimal) :: t\n  def div(%Decimal{coef: :NaN} = num1, %Decimal{}), do: num1\n\n  def div(%Decimal{}, %Decimal{coef: :NaN} = num2), do: num2\n\n  def div(%Decimal{coef: :inf}, %Decimal{coef: :inf}),\n    do: error(:invalid_operation, \"±Infinity / ±Infinity\", %Decimal{coef: :NaN})\n\n  def div(%Decimal{sign: sign1, coef: :inf} = num1, %Decimal{sign: sign2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    %{num1 | sign: sign}\n  end\n\n  def div(%Decimal{sign: sign1, exp: exp1}, %Decimal{sign: sign2, coef: :inf, exp: exp2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    # TODO: Subnormal\n    # exponent?\n    %Decimal{sign: sign, coef: 0, exp: exp1 - exp2}\n  end\n\n  def div(%Decimal{coef: 0}, %Decimal{coef: 0}),\n    do: error(:invalid_operation, \"0 / 0\", %Decimal{coef: :NaN})\n\n  def div(%Decimal{sign: sign1}, %Decimal{sign: sign2, coef: 0}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    error(:division_by_zero, nil, %Decimal{sign: sign, coef: :inf})\n  end\n\n  def div(%Decimal{} = num1, %Decimal{} = num2) do\n    %Decimal{sign: sign1, coef: coef1, exp: exp1} = num1\n    %Decimal{sign: sign2, coef: coef2, exp: exp2} = num2\n    sign = if sign1 == sign2, do: 1, else: -1\n\n    if coef1 == 0 do\n      context(%Decimal{sign: sign, coef: 0, exp: exp1 - exp2}, [])\n    else\n      prec10 = pow10(Context.get().precision)\n      {coef1, coef2, adjust} = div_adjust(coef1, coef2, 0)\n      {coef, adjust, _rem, signals} = div_calc(coef1, coef2, 0, adjust, prec10)\n\n      context(%Decimal{sign: sign, coef: coef, exp: exp1 - exp2 - adjust}, signals)\n    end\n  end\n\n  def div(num1, num2) do\n    div(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Divides two numbers and returns the integer part.\n\n  ## Exceptional conditions\n\n    * If both numbers are ±Infinity `:invalid_operation` is signalled.\n    * If both numbers are ±0 `:invalid_operation` is signalled.\n    * If second number (denominator) is ±0 `:division_by_zero` is signalled.\n\n  ## Examples\n\n      iex> Decimal.div_int(5, 2)\n      Decimal.new(\"2\")\n\n      iex> Decimal.div_int(\"Inf\", -1)\n      Decimal.new(\"-Infinity\")\n\n  \"\"\"\n  @spec div_int(decimal, decimal) :: t\n  def div_int(%Decimal{coef: :NaN} = num1, %Decimal{}), do: num1\n\n  def div_int(%Decimal{}, %Decimal{coef: :NaN} = num2), do: num2\n\n  def div_int(%Decimal{coef: :inf}, %Decimal{coef: :inf}),\n    do: error(:invalid_operation, \"±Infinity / ±Infinity\", %Decimal{coef: :NaN})\n\n  def div_int(%Decimal{sign: sign1, coef: :inf} = num1, %Decimal{sign: sign2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    %{num1 | sign: sign}\n  end\n\n  def div_int(%Decimal{sign: sign1, exp: exp1}, %Decimal{sign: sign2, coef: :inf, exp: exp2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    # TODO: Subnormal\n    # exponent?\n    %Decimal{sign: sign, coef: 0, exp: exp1 - exp2}\n  end\n\n  def div_int(%Decimal{coef: 0}, %Decimal{coef: 0}),\n    do: error(:invalid_operation, \"0 / 0\", %Decimal{coef: :NaN})\n\n  def div_int(%Decimal{sign: sign1}, %Decimal{sign: sign2, coef: 0}) do\n    div_sign = if sign1 == sign2, do: 1, else: -1\n    error(:division_by_zero, nil, %Decimal{sign: div_sign, coef: :inf})\n  end\n\n  def div_int(%Decimal{} = num1, %Decimal{} = num2) do\n    %Decimal{sign: sign1, coef: coef1, exp: exp1} = num1\n    %Decimal{sign: sign2, coef: coef2, exp: exp2} = num2\n    div_sign = if sign1 == sign2, do: 1, else: -1\n\n    cond do\n      compare(%{num1 | sign: 1}, %{num2 | sign: 1}) == :lt ->\n        %Decimal{sign: div_sign, coef: 0, exp: exp1 - exp2}\n\n      coef1 == 0 ->\n        context(%{num1 | sign: div_sign})\n\n      true ->\n        case integer_division(div_sign, coef1, exp1, coef2, exp2) do\n          {:ok, result} ->\n            result\n\n          {:error, error, reason, num} ->\n            error(error, reason, num)\n        end\n    end\n  end\n\n  def div_int(num1, num2) do\n    div_int(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Remainder of integer division of two numbers. The result will have the sign of\n  the first number.\n\n  ## Exceptional conditions\n\n    * If both numbers are ±Infinity `:invalid_operation` is signalled.\n    * If both numbers are ±0 `:invalid_operation` is signalled.\n    * If second number (denominator) is ±0 `:division_by_zero` is signalled.\n\n  ## Examples\n\n      iex> Decimal.rem(5, 2)\n      Decimal.new(\"1\")\n\n  \"\"\"\n  @spec rem(decimal, decimal) :: t\n  def rem(%Decimal{coef: :NaN} = num1, %Decimal{}), do: num1\n\n  def rem(%Decimal{}, %Decimal{coef: :NaN} = num2), do: num2\n\n  def rem(%Decimal{coef: :inf}, %Decimal{coef: :inf}),\n    do: error(:invalid_operation, \"±Infinity / ±Infinity\", %Decimal{coef: :NaN})\n\n  def rem(%Decimal{sign: sign1, coef: :inf}, %Decimal{}), do: %Decimal{sign: sign1, coef: 0}\n\n  def rem(%Decimal{sign: sign1}, %Decimal{coef: :inf} = num2) do\n    # TODO: Subnormal\n    # exponent?\n    %{num2 | sign: sign1}\n  end\n\n  def rem(%Decimal{coef: 0}, %Decimal{coef: 0}),\n    do: error(:invalid_operation, \"0 / 0\", %Decimal{coef: :NaN})\n\n  def rem(%Decimal{sign: sign1}, %Decimal{coef: 0}),\n    do: error(:division_by_zero, nil, %Decimal{sign: sign1, coef: 0})\n\n  def rem(%Decimal{} = num1, %Decimal{} = num2) do\n    %Decimal{sign: sign1, coef: coef1, exp: exp1} = num1\n    %Decimal{sign: sign2, coef: coef2, exp: exp2} = num2\n\n    cond do\n      compare(%{num1 | sign: 1}, %{num2 | sign: 1}) == :lt ->\n        %{num1 | sign: sign1}\n\n      coef1 == 0 ->\n        context(%{num2 | sign: sign1})\n\n      true ->\n        div_sign = if sign1 == sign2, do: 1, else: -1\n\n        case integer_division(div_sign, coef1, exp1, coef2, exp2) do\n          {:ok, result} ->\n            sub(num1, mult(num2, result))\n\n          {:error, error, reason, num} ->\n            error(error, reason, num)\n        end\n    end\n  end\n\n  def rem(num1, num2) do\n    rem(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Integer division of two numbers and the remainder. Should be used when both\n  `div_int/2` and `rem/2` is needed. Equivalent to: `{Decimal.div_int(x, y),\n  Decimal.rem(x, y)}`.\n\n  ## Exceptional conditions\n\n    * If both numbers are ±Infinity `:invalid_operation` is signalled.\n    * If both numbers are ±0 `:invalid_operation` is signalled.\n    * If second number (denominator) is ±0 `:division_by_zero` is signalled.\n\n  ## Examples\n\n      iex> Decimal.div_rem(5, 2)\n      {Decimal.new(2), Decimal.new(1)}\n\n  \"\"\"\n  @spec div_rem(decimal, decimal) :: {t, t}\n  def div_rem(%Decimal{coef: :NaN} = num1, %Decimal{}), do: {num1, num1}\n\n  def div_rem(%Decimal{}, %Decimal{coef: :NaN} = num2), do: {num2, num2}\n\n  def div_rem(%Decimal{coef: :inf}, %Decimal{coef: :inf}) do\n    numbers = {%Decimal{coef: :NaN}, %Decimal{coef: :NaN}}\n    error(:invalid_operation, \"±Infinity / ±Infinity\", numbers)\n  end\n\n  def div_rem(%Decimal{sign: sign1, coef: :inf} = num1, %Decimal{sign: sign2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    {%{num1 | sign: sign}, %Decimal{sign: sign1, coef: 0}}\n  end\n\n  def div_rem(%Decimal{} = num1, %Decimal{coef: :inf} = num2) do\n    %Decimal{sign: sign1, exp: exp1} = num1\n    %Decimal{sign: sign2, exp: exp2} = num2\n\n    sign = if sign1 == sign2, do: 1, else: -1\n    # TODO: Subnormal\n    # exponent?\n    {%Decimal{sign: sign, coef: 0, exp: exp1 - exp2}, %{num2 | sign: sign1}}\n  end\n\n  def div_rem(%Decimal{coef: 0}, %Decimal{coef: 0}) do\n    error = error(:invalid_operation, \"0 / 0\", %Decimal{coef: :NaN})\n    {error, error}\n  end\n\n  def div_rem(%Decimal{sign: sign1}, %Decimal{sign: sign2, coef: 0}) do\n    div_sign = if sign1 == sign2, do: 1, else: -1\n    div_error = error(:division_by_zero, nil, %Decimal{sign: div_sign, coef: :inf})\n    rem_error = error(:division_by_zero, nil, %Decimal{sign: sign1, coef: 0})\n    {div_error, rem_error}\n  end\n\n  def div_rem(%Decimal{} = num1, %Decimal{} = num2) do\n    %Decimal{sign: sign1, coef: coef1, exp: exp1} = num1\n    %Decimal{sign: sign2, coef: coef2, exp: exp2} = num2\n    div_sign = if sign1 == sign2, do: 1, else: -1\n\n    cond do\n      compare(%{num1 | sign: 1}, %{num2 | sign: 1}) == :lt ->\n        {%Decimal{sign: div_sign, coef: 0, exp: exp1 - exp2}, %{num1 | sign: sign1}}\n\n      coef1 == 0 ->\n        {context(%{num1 | sign: div_sign}), context(%{num2 | sign: sign1})}\n\n      true ->\n        case integer_division(div_sign, coef1, exp1, coef2, exp2) do\n          {:ok, result} ->\n            {result, sub(num1, mult(num2, result))}\n\n          {:error, error, reason, num} ->\n            error(error, reason, {num, num})\n        end\n    end\n  end\n\n  def div_rem(num1, num2) do\n    div_rem(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Compares two values numerically and returns the maximum. Unlike most other\n  functions in `Decimal` if a number is NaN the result will be the other number.\n  Only if both numbers are NaN will NaN be returned.\n\n  ## Examples\n\n      iex> Decimal.max(1, \"2.0\")\n      Decimal.new(\"2.0\")\n\n      iex> Decimal.max(1, \"NaN\")\n      Decimal.new(\"1\")\n\n      iex> Decimal.max(\"NaN\", \"NaN\")\n      Decimal.new(\"NaN\")\n\n  \"\"\"\n  @spec max(decimal, decimal) :: t\n  def max(%Decimal{coef: :NaN}, %Decimal{} = num2), do: num2\n\n  def max(%Decimal{} = num1, %Decimal{coef: :NaN}), do: num1\n\n  def max(%Decimal{sign: sign1, exp: exp1} = num1, %Decimal{sign: sign2, exp: exp2} = num2) do\n    case compare(num1, num2) do\n      :lt ->\n        num2\n\n      :gt ->\n        num1\n\n      :eq ->\n        cond do\n          sign1 != sign2 ->\n            if sign1 == 1, do: num1, else: num2\n\n          sign1 == 1 ->\n            if exp1 > exp2, do: num1, else: num2\n\n          sign1 == -1 ->\n            if exp1 < exp2, do: num1, else: num2\n        end\n    end\n    |> context()\n  end\n\n  def max(num1, num2) do\n    max(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Compares two values numerically and returns the minimum. Unlike most other\n  functions in `Decimal` if a number is NaN the result will be the other number.\n  Only if both numbers are NaN will NaN be returned.\n\n  ## Examples\n\n      iex> Decimal.min(1, \"2.0\")\n      Decimal.new(\"1\")\n\n      iex> Decimal.min(1, \"NaN\")\n      Decimal.new(\"1\")\n\n      iex> Decimal.min(\"NaN\", \"NaN\")\n      Decimal.new(\"NaN\")\n\n  \"\"\"\n  @spec min(decimal, decimal) :: t\n  def min(%Decimal{coef: :NaN}, %Decimal{} = num2), do: num2\n\n  def min(%Decimal{} = num1, %Decimal{coef: :NaN}), do: num1\n\n  def min(%Decimal{sign: sign1, exp: exp1} = num1, %Decimal{sign: sign2, exp: exp2} = num2) do\n    case compare(num1, num2) do\n      :lt ->\n        num1\n\n      :gt ->\n        num2\n\n      :eq ->\n        cond do\n          sign1 != sign2 ->\n            if sign1 == -1, do: num1, else: num2\n\n          sign1 == 1 ->\n            if exp1 < exp2, do: num1, else: num2\n\n          sign1 == -1 ->\n            if exp1 > exp2, do: num1, else: num2\n        end\n    end\n    |> context()\n  end\n\n  def min(num1, num2) do\n    min(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Negates the given number.\n\n  ## Examples\n\n      iex> Decimal.negate(1)\n      Decimal.new(\"-1\")\n\n      iex> Decimal.negate(\"-Inf\")\n      Decimal.new(\"Infinity\")\n\n  \"\"\"\n  doc_since(\"1.9.0\")\n  @spec negate(decimal) :: t\n  def negate(%Decimal{coef: :NaN} = num), do: num\n  def negate(%Decimal{sign: sign} = num), do: context(%{num | sign: -sign})\n  def negate(num), do: negate(decimal(num))\n\n  @doc \"\"\"\n  Applies the context to the given number rounding it to specified precision.\n  \"\"\"\n  doc_since(\"1.9.0\")\n  @spec apply_context(t) :: t\n  def apply_context(%Decimal{} = num), do: context(num)\n\n  @doc \"\"\"\n  Returns `true` if given number is positive, otherwise `false`.\n\n  ## Examples\n\n      iex> Decimal.positive?(Decimal.new(\"42\"))\n      true\n\n      iex> Decimal.positive?(Decimal.new(\"-42\"))\n      false\n\n      iex> Decimal.positive?(Decimal.new(\"0\"))\n      false\n\n      iex> Decimal.positive?(Decimal.new(\"NaN\"))\n      false\n\n  \"\"\"\n  doc_since(\"1.5.0\")\n  @spec positive?(t) :: boolean\n  def positive?(%Decimal{coef: :NaN}), do: false\n  def positive?(%Decimal{coef: 0}), do: false\n  def positive?(%Decimal{sign: -1}), do: false\n  def positive?(%Decimal{sign: 1}), do: true\n\n  @doc \"\"\"\n  Returns `true` if given number is negative, otherwise `false`.\n\n  ## Examples\n\n      iex> Decimal.negative?(Decimal.new(\"-42\"))\n      true\n\n      iex> Decimal.negative?(Decimal.new(\"42\"))\n      false\n\n      iex> Decimal.negative?(Decimal.new(\"0\"))\n      false\n\n      iex> Decimal.negative?(Decimal.new(\"NaN\"))\n      false\n\n  \"\"\"\n  doc_since(\"1.5.0\")\n  @spec negative?(t) :: boolean\n  def negative?(%Decimal{coef: :NaN}), do: false\n  def negative?(%Decimal{coef: 0}), do: false\n  def negative?(%Decimal{sign: 1}), do: false\n  def negative?(%Decimal{sign: -1}), do: true\n\n  @doc \"\"\"\n  Multiplies two numbers.\n\n  ## Exceptional conditions\n\n    * If one number is ±0 and the other is ±Infinity `:invalid_operation` is\n      signalled.\n\n  ## Examples\n\n      iex> Decimal.mult(\"0.5\", 3)\n      Decimal.new(\"1.5\")\n\n      iex> Decimal.mult(\"Inf\", -1)\n      Decimal.new(\"-Infinity\")\n\n  \"\"\"\n  @spec mult(decimal, decimal) :: t\n  def mult(%Decimal{coef: :NaN} = num1, %Decimal{}), do: num1\n\n  def mult(%Decimal{}, %Decimal{coef: :NaN} = num2), do: num2\n\n  def mult(%Decimal{coef: 0}, %Decimal{coef: :inf}),\n    do: error(:invalid_operation, \"0 * ±Infinity\", %Decimal{coef: :NaN})\n\n  def mult(%Decimal{coef: :inf}, %Decimal{coef: 0}),\n    do: error(:invalid_operation, \"0 * ±Infinity\", %Decimal{coef: :NaN})\n\n  def mult(%Decimal{sign: sign1, coef: :inf, exp: exp1}, %Decimal{sign: sign2, exp: exp2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    # exponent?\n    %Decimal{sign: sign, coef: :inf, exp: exp1 + exp2}\n  end\n\n  def mult(%Decimal{sign: sign1, exp: exp1}, %Decimal{sign: sign2, coef: :inf, exp: exp2}) do\n    sign = if sign1 == sign2, do: 1, else: -1\n    # exponent?\n    %Decimal{sign: sign, coef: :inf, exp: exp1 + exp2}\n  end\n\n  def mult(%Decimal{} = num1, %Decimal{} = num2) do\n    %Decimal{sign: sign1, coef: coef1, exp: exp1} = num1\n    %Decimal{sign: sign2, coef: coef2, exp: exp2} = num2\n    sign = if sign1 == sign2, do: 1, else: -1\n    %Decimal{sign: sign, coef: coef1 * coef2, exp: exp1 + exp2} |> context()\n  end\n\n  def mult(num1, num2) do\n    mult(decimal(num1), decimal(num2))\n  end\n\n  @doc \"\"\"\n  Normalizes the given decimal: removes trailing zeros from coefficient while\n  keeping the number numerically equivalent by increasing the exponent.\n\n  ## Examples\n\n      iex> Decimal.normalize(Decimal.new(\"1.00\"))\n      Decimal.new(\"1\")\n\n      iex> Decimal.normalize(Decimal.new(\"1.01\"))\n      Decimal.new(\"1.01\")\n\n  \"\"\"\n  doc_since(\"1.9.0\")\n  @spec normalize(t) :: t\n  def normalize(%Decimal{coef: :NaN} = num), do: num\n\n  def normalize(%Decimal{coef: :inf} = num) do\n    # exponent?\n    %{num | exp: 0}\n  end\n\n  def normalize(%Decimal{sign: sign, coef: coef, exp: exp}) do\n    if coef == 0 do\n      %Decimal{sign: sign, coef: 0, exp: 0}\n    else\n      %{do_normalize(coef, exp) | sign: sign} |> context\n    end\n  end\n\n  @doc \"\"\"\n  Rounds the given number to specified decimal places with the given strategy\n  (default is to round to nearest one). If places is negative, at least that\n  many digits to the left of the decimal point will be zero.\n\n  See `Decimal.Context` for more information about rounding algorithms.\n\n  ## Examples\n\n      iex> Decimal.round(\"1.234\")\n      Decimal.new(\"1\")\n\n      iex> Decimal.round(\"1.234\", 1)\n      Decimal.new(\"1.2\")\n\n  \"\"\"\n  @spec round(decimal, integer, rounding) :: t\n  def round(num, places \\\\ 0, mode \\\\ :half_up)\n\n  def round(%Decimal{coef: :NaN} = num, _, _), do: num\n\n  def round(%Decimal{coef: :inf} = num, _, _), do: num\n\n  def round(%Decimal{} = num, n, mode) do\n    %Decimal{sign: sign, coef: coef, exp: exp} = normalize(num)\n    digits = :erlang.integer_to_list(coef)\n    target_exp = -n\n    value = do_round(sign, digits, exp, target_exp, mode)\n    context(value, [])\n  end\n\n  def round(num, n, mode) do\n    round(decimal(num), n, mode)\n  end\n\n  @doc \"\"\"\n  Finds the square root.\n\n  ## Examples\n\n      iex> Decimal.sqrt(\"100\")\n      Decimal.new(\"10\")\n\n  \"\"\"\n  doc_since(\"1.7.0\")\n  @spec sqrt(decimal) :: t\n  def sqrt(%Decimal{coef: :NaN} = num),\n    do: error(:invalid_operation, \"operation on NaN\", num)\n\n  def sqrt(%Decimal{coef: 0, exp: exp} = num),\n    do: %{num | exp: exp >>> 1}\n\n  def sqrt(%Decimal{sign: -1} = num),\n    do: error(:invalid_operation, \"less than zero\", num)\n\n  def sqrt(%Decimal{sign: 1, coef: :inf} = num),\n    do: num\n\n  def sqrt(%Decimal{sign: 1, coef: coef, exp: exp}) do\n    precision = Context.get().precision + 1\n    digits = :erlang.integer_to_list(coef)\n    num_digits = length(digits)\n\n    # Since the root is calculated from integer operations only, it must be\n    # large enough to contain the desired precision. Calculate the amount of\n    # `shift` required (powers of 10).\n    case exp &&& 1 do\n      0 ->\n        # To get the desired `shift`, subtract the precision of `coef`'s square\n        # root from the desired precision.\n        #\n        # If `coef` is 10_000, the root is 100 (3 digits of precision).\n        # If `coef` is 100, the root is 10 (2 digits of precision).\n        shift = precision - ((num_digits + 1) >>> 1)\n        sqrt(coef, shift, exp)\n\n      _ ->\n        # If `exp` is odd, multiply `coef` by 10 and reduce shift by 1/2. `exp`\n        # must be even so the root's exponent is an integer.\n        shift = precision - ((num_digits >>> 1) + 1)\n        sqrt(coef * 10, shift, exp)\n    end\n  end\n\n  def sqrt(num) do\n    sqrt(decimal(num))\n  end\n\n  defp sqrt(coef, shift, exp) do\n    if shift >= 0 do\n      # shift `coef` up by `shift * 2` digits\n      sqrt(coef * pow10(shift <<< 1), shift, exp, true)\n    else\n      # shift `coef` down by `shift * 2` digits\n      operand = pow10(-shift <<< 1)\n      sqrt(Kernel.div(coef, operand), shift, exp, Kernel.rem(coef, operand) === 0)\n    end\n  end\n\n  defp sqrt(shifted_coef, shift, exp, exact) do\n    # the preferred exponent is `exp / 2` as per IEEE 754\n    exp = exp >>> 1\n    # guess a root 10x higher than desired precision\n    guess = pow10(Context.get().precision + 1)\n    root = sqrt_loop(shifted_coef, guess)\n\n    if exact and root * root === shifted_coef do\n      # if the root is exact, use preferred `exp` and shift `coef` to match\n      coef =\n        if shift >= 0,\n          do: Kernel.div(root, pow10(shift)),\n          else: root * pow10(-shift)\n\n      context(%Decimal{sign: 1, coef: coef, exp: exp})\n    else\n      # otherwise the calculated root is inexact (but still meets precision),\n      # so use the root as `coef` and get the final exponent by shifting `exp`\n      context(%Decimal{sign: 1, coef: root, exp: exp - shift})\n    end\n  end\n\n  # Babylonion method\n  defp sqrt_loop(coef, guess) do\n    quotient = Kernel.div(coef, guess)\n\n    if guess <= quotient do\n      guess\n    else\n      sqrt_loop(coef, (guess + quotient) >>> 1)\n    end\n  end\n\n  @doc \"\"\"\n  Creates a new decimal number from an integer or a string representation.\n\n  A decimal number will always be created exactly as specified with all digits\n  kept - it will not be rounded with the context.\n\n  ## Backus–Naur form\n\n      sign           ::=  \"+\" | \"-\"\n      digit          ::=  \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\"\n      indicator      ::=  \"e\" | \"E\"\n      digits         ::=  digit [digit]...\n      decimal-part   ::=  digits \".\" [digits] | [\".\"] digits\n      exponent-part  ::=  indicator [sign] digits\n      infinity       ::=  \"Infinity\" | \"Inf\"\n      nan            ::=  \"NaN\" [digits]\n      numeric-value  ::=  decimal-part [exponent-part] | infinity\n      numeric-string ::=  [sign] numeric-value | [sign] nan\n\n  ## Floats\n\n  See also `from_float/1`.\n\n  ## Examples\n\n      iex> Decimal.new(1)\n      Decimal.new(\"1\")\n\n      iex> Decimal.new(\"3.14\")\n      Decimal.new(\"3.14\")\n\n      iex> Decimal.new(\"1.79769313486231581e308\")\n      Decimal.new(\"1.79769313486231581e308\")\n\n      iex> Decimal.new(\"2.22507385850720139e-308\")\n      Decimal.new(\"2.22507385850720139e-308\")\n\n  \"\"\"\n  @spec new(decimal) :: t\n  def new(%Decimal{sign: sign, coef: coef, exp: exp} = num)\n      when sign in [1, -1] and ((is_integer(coef) and coef >= 0) or coef in [:NaN, :inf]) and\n             is_integer(exp),\n      do: num\n\n  def new(int) when is_integer(int),\n    do: %Decimal{sign: if(int < 0, do: -1, else: 1), coef: Kernel.abs(int)}\n\n  def new(binary) when is_binary(binary) do\n    case parse(binary) do\n      {decimal, \"\"} -> decimal\n      _ -> raise Error, reason: \"number parsing syntax: #{inspect(binary)}\"\n    end\n  end\n\n  @doc \"\"\"\n  Creates a new decimal number from the sign, coefficient and exponent such that\n  the number will be: `sign * coefficient * 10 ^ exponent`.\n\n  A decimal number will always be created exactly as specified with all digits\n  kept - it will not be rounded with the context.\n\n  ## Examples\n\n      iex> Decimal.new(1, 42, 0)\n      Decimal.new(\"42\")\n\n  \"\"\"\n  @spec new(sign :: 1 | -1, coef :: non_neg_integer | :NaN | :inf, exp :: integer) :: t\n  def new(sign, coef, exp)\n      when sign in [1, -1] and ((is_integer(coef) and coef >= 0) or coef in [:NaN, :inf]) and\n             is_integer(exp),\n      do: %Decimal{sign: sign, coef: coef, exp: exp}\n\n  @doc \"\"\"\n  Creates a new decimal number from a floating point number.\n\n  Floating point numbers use a fixed number of binary digits to represent\n  a decimal number which has inherent inaccuracy as some decimal numbers cannot\n  be represented exactly in limited precision binary.\n\n  Floating point numbers will be converted to decimal numbers with\n  `:io_lib_format.fwrite_g/1`. Since this conversion is not exact and\n  because of inherent inaccuracy mentioned above, we may run into counter-intuitive results:\n\n      iex> Enum.reduce([0.1, 0.1, 0.1], &+/2)\n      0.30000000000000004\n\n      iex> Enum.reduce([Decimal.new(\"0.1\"), Decimal.new(\"0.1\"), Decimal.new(\"0.1\")], &Decimal.add/2)\n      Decimal.new(\"0.3\")\n\n  For this reason, it's recommended to build decimals with `new/1`, which is always precise, instead.\n\n  ## Examples\n\n      iex> Decimal.from_float(3.14)\n      Decimal.new(\"3.14\")\n\n  \"\"\"\n  doc_since(\"1.5.0\")\n  @spec from_float(float) :: t\n  def from_float(float) when is_float(float) do\n    float\n    |> :io_lib_format.fwrite_g()\n    |> fix_float_exp()\n    |> IO.iodata_to_binary()\n    |> new()\n  end\n\n  @doc \"\"\"\n  Creates a new decimal number from an integer, string, float, or existing decimal number.\n\n  Because conversion from a floating point number is not exact, it's recommended\n  to instead use `new/1` or `from_float/1` when the argument's type is certain.\n  See `from_float/1`.\n\n  ## Examples\n\n      iex> {:ok, decimal} = Decimal.cast(3)\n      iex> decimal\n      Decimal.new(\"3\")\n\n      iex> Decimal.cast(\"bad\")\n      :error\n\n  \"\"\"\n  @spec cast(term) :: {:ok, t} | :error\n  def cast(integer) when is_integer(integer), do: {:ok, Decimal.new(integer)}\n  def cast(%Decimal{} = decimal), do: {:ok, decimal}\n  def cast(float) when is_float(float), do: {:ok, from_float(float)}\n\n  def cast(binary) when is_binary(binary) do\n    case parse(binary) do\n      {decimal, \"\"} -> {:ok, decimal}\n      _ -> :error\n    end\n  end\n\n  def cast(_), do: :error\n\n  @doc \"\"\"\n  Parses a binary into a decimal.\n\n  If successful, returns a tuple in the form of `{decimal, remainder_of_binary}`,\n  otherwise `:error`.\n\n  ## Examples\n\n      iex> Decimal.parse(\"3.14\")\n      {%Decimal{coef: 314, exp: -2, sign: 1}, \"\"}\n\n      iex> Decimal.parse(\"3.14.15\")\n      {%Decimal{coef: 314, exp: -2, sign: 1}, \".15\"}\n\n      iex> Decimal.parse(\"-1.1e3\")\n      {%Decimal{coef: 11, exp: 2, sign: -1}, \"\"}\n\n      iex> Decimal.parse(\"bad\")\n      :error\n\n  \"\"\"\n  @spec parse(binary()) :: {t(), binary()} | :error\n  def parse(\"+\" <> rest) do\n    parse_unsign(rest)\n  end\n\n  def parse(\"-\" <> rest) do\n    case parse_unsign(rest) do\n      {%Decimal{} = num, rest} -> {%{num | sign: -1}, rest}\n      :error -> :error\n    end\n  end\n\n  def parse(binary) when is_binary(binary) do\n    parse_unsign(binary)\n  end\n\n  @doc \"\"\"\n  Converts given number to its string representation.\n\n  ## Options\n\n    * `:scientific` - number converted to scientific notation.\n    * `:normal` - number converted without a exponent.\n    * `:xsd` - number converted to the [canonical XSD representation](https://www.w3.org/TR/xmlschema-2/#decimal).\n    * `:raw` - number converted to its raw, internal format.\n\n  ## Examples\n\n      iex> Decimal.to_string(Decimal.new(\"1.00\"))\n      \"1.00\"\n\n      iex> Decimal.to_string(Decimal.new(\"123e1\"), :scientific)\n      \"1.23E+3\"\n\n      iex> Decimal.to_string(Decimal.new(\"42.42\"), :normal)\n      \"42.42\"\n\n      iex> Decimal.to_string(Decimal.new(\"1.00\"), :xsd)\n      \"1.0\"\n\n      iex> Decimal.to_string(Decimal.new(\"4321.768\"), :raw)\n      \"4321768E-3\"\n\n  \"\"\"\n  @spec to_string(t, :scientific | :normal | :xsd | :raw) :: String.t()\n  def to_string(num, type \\\\ :scientific)\n\n  def to_string(%Decimal{sign: sign, coef: :NaN}, _type) do\n    if sign == 1, do: \"NaN\", else: \"-NaN\"\n  end\n\n  def to_string(%Decimal{sign: sign, coef: :inf}, _type) do\n    if sign == 1, do: \"Infinity\", else: \"-Infinity\"\n  end\n\n  def to_string(%Decimal{sign: sign, coef: coef, exp: exp}, :normal) do\n    list = integer_to_charlist(coef)\n\n    list =\n      if exp >= 0 do\n        list ++ :lists.duplicate(exp, ?0)\n      else\n        diff = length(list) + exp\n\n        if diff > 0 do\n          List.insert_at(list, diff, ?.)\n        else\n          ~c\"0.\" ++ :lists.duplicate(-diff, ?0) ++ list\n        end\n      end\n\n    list = if sign == -1, do: [?- | list], else: list\n    IO.iodata_to_binary(list)\n  end\n\n  def to_string(%Decimal{sign: sign, coef: coef, exp: exp}, :scientific) do\n    list = integer_to_charlist(coef)\n    length = length(list)\n    adjusted = exp + length - 1\n\n    list =\n      cond do\n        exp == 0 ->\n          list\n\n        exp < 0 and adjusted >= -6 ->\n          abs_exp = Kernel.abs(exp)\n          diff = -length + abs_exp + 1\n\n          if diff > 0 do\n            list = :lists.duplicate(diff, ?0) ++ list\n            List.insert_at(list, 1, ?.)\n          else\n            List.insert_at(list, exp - 1, ?.)\n          end\n\n        true ->\n          list = if length > 1, do: List.insert_at(list, 1, ?.), else: list\n          list = list ++ ~c\"E\"\n          list = if exp >= 0, do: list ++ ~c\"+\", else: list\n          list ++ integer_to_charlist(adjusted)\n      end\n\n    list = if sign == -1, do: [?- | list], else: list\n    IO.iodata_to_binary(list)\n  end\n\n  def to_string(%Decimal{sign: sign, coef: coef, exp: exp}, :raw) do\n    str = Integer.to_string(coef)\n    str = if sign == -1, do: [?- | str], else: str\n    str = if exp != 0, do: [str, \"E\", Integer.to_string(exp)], else: str\n\n    IO.iodata_to_binary(str)\n  end\n\n  def to_string(%Decimal{} = decimal, :xsd) do\n    decimal |> canonical_xsd() |> to_string(:normal)\n  end\n\n  defp canonical_xsd(%Decimal{coef: 0} = decimal), do: %{decimal | exp: -1}\n\n  defp canonical_xsd(%Decimal{coef: coef, exp: 0} = decimal),\n    do: %{decimal | coef: coef * 10, exp: -1}\n\n  defp canonical_xsd(%Decimal{coef: coef, exp: exp} = decimal)\n       when exp > 0,\n       do: canonical_xsd(%{decimal | coef: coef * 10, exp: exp - 1})\n\n  defp canonical_xsd(%Decimal{coef: coef} = decimal)\n       when Kernel.rem(coef, 10) != 0,\n       do: decimal\n\n  defp canonical_xsd(%Decimal{coef: coef, exp: exp} = decimal),\n    do: canonical_xsd(%{decimal | coef: Kernel.div(coef, 10), exp: exp + 1})\n\n  @doc \"\"\"\n  Returns the decimal represented as an integer.\n\n  Raises when loss of precision will occur.\n\n  ## Examples\n\n      iex> Decimal.to_integer(Decimal.new(\"42\"))\n      42\n\n      iex> Decimal.to_integer(Decimal.new(\"1.00\"))\n      1\n\n      iex> Decimal.to_integer(Decimal.new(\"1.10\"))\n      ** (ArgumentError) cannot convert Decimal.new(\"1.1\") without losing precision. Use Decimal.round/3 first.\n\n  \"\"\"\n  @spec to_integer(t) :: integer\n  def to_integer(%Decimal{sign: sign, coef: coef, exp: 0})\n      when is_integer(coef),\n      do: sign * coef\n\n  def to_integer(%Decimal{sign: sign, coef: coef, exp: exp})\n      when is_integer(coef) and exp > 0,\n      do: to_integer(%Decimal{sign: sign, coef: coef * 10, exp: exp - 1})\n\n  def to_integer(%Decimal{sign: sign, coef: coef, exp: exp})\n      when is_integer(coef) and exp < 0 and Kernel.rem(coef, 10) == 0,\n      do: to_integer(%Decimal{sign: sign, coef: Kernel.div(coef, 10), exp: exp + 1})\n\n  def to_integer(%Decimal{coef: coef} = decimal) when is_integer(coef) do\n    raise ArgumentError,\n          \"cannot convert #{inspect(decimal)} without losing precision. Use Decimal.round/3 first.\"\n  end\n\n  @doc \"\"\"\n  Returns the decimal converted to a float.\n\n  The returned float may have lower precision than the decimal.\n\n  Raises if the decimal cannot be converted to a float.\n\n  ## Examples\n\n      iex> Decimal.to_float(Decimal.new(\"1.5\"))\n      1.5\n\n      iex> Decimal.to_float(Decimal.new(\"-1.79769313486231581e308\"))\n      ** (Decimal.Error) : negative number smaller than DBL_MAX: Decimal.new(\"-1.79769313486231581E+308\")\n\n      iex> Decimal.to_float(Decimal.new(\"-1.79769313486231581e308\"))\n      ** (Decimal.Error) : negative number smaller than DBL_MAX: Decimal.new(\"-1.79769313486231581E+308\")\n\n      iex> Decimal.to_float(Decimal.new(\"2.22507385850720139e-308\"))\n      ** (Decimal.Error) : number smaller than DBL_MIN: Decimal.new(\"2.22507385850720139E-308\")\n\n      iex> Decimal.to_float(Decimal.new(\"-2.22507385850720139e-308\"))\n      ** (Decimal.Error): negative number bigger than DBL_MIN: Decimal.new(\\\"-2.22507385850720139E-308\\\")\n\n      iex> Decimal.to_float(Decimal.new(\"inf\"))\n      ** (ArgumentError) Decimal.new(\"Infinity\") cannot be converted to float\n\n  \"\"\"\n  @spec to_float(t) :: float\n  def to_float(%Decimal{coef: coef} = decimal) when is_integer(coef) do\n    %Decimal{sign: sign, coef: coef, exp: exp} = check_dbl_min_max(decimal)\n    # Convert back to float without loss\n    # http://www.exploringbinary.com/correct-decimal-to-floating-point-using-big-integers/\n    {num, den} = ratio(coef, exp)\n\n    boundary = den <<< 52\n\n    cond do\n      num == 0 ->\n        0.0\n\n      num >= boundary ->\n        {den, exp} = scale_down(num, boundary, 52)\n        decimal_to_float(sign, num, den, exp)\n\n      true ->\n        {num, exp} = scale_up(num, boundary, 52)\n        decimal_to_float(sign, num, den, exp)\n    end\n  end\n\n  def to_float(%Decimal{} = decimal) do\n    raise ArgumentError, \"#{inspect(decimal)} cannot be converted to float\"\n  end\n\n  @doc \"\"\"\n  Returns the scale of the decimal.\n\n  A decimal's scale is the number of digits after the decimal point. This\n  includes trailing zeros; see `normalize/1` to remove them.\n\n  ## Examples\n\n      iex> Decimal.scale(Decimal.new(\"42\"))\n      0\n\n      iex> Decimal.scale(Decimal.new(1, 2, 26))\n      0\n\n      iex> Decimal.scale(Decimal.new(\"99.12345\"))\n      5\n\n      iex> Decimal.scale(Decimal.new(\"1.50\"))\n      2\n  \"\"\"\n  @spec scale(t) :: non_neg_integer()\n  def scale(%Decimal{exp: exp}), do: Kernel.max(0, -exp)\n\n  defp scale_up(num, den, exp) when num >= den, do: {num, exp}\n  defp scale_up(num, den, exp), do: scale_up(num <<< 1, den, exp - 1)\n\n  defp scale_down(num, den, exp) do\n    new_den = den <<< 1\n\n    if num < new_den do\n      {den >>> 52, exp}\n    else\n      scale_down(num, new_den, exp + 1)\n    end\n  end\n\n  defp decimal_to_float(sign, num, den, exp) do\n    quo = Kernel.div(num, den)\n    rem = num - quo * den\n\n    tmp =\n      case den >>> 1 do\n        den when rem > den -> quo + 1\n        den when rem < den -> quo\n        _ when (quo &&& 1) === 1 -> quo + 1\n        _ -> quo\n      end\n\n    sign = if sign == -1, do: 1, else: 0\n    tmp = tmp - @power_of_2_to_52\n    exp = if tmp < @power_of_2_to_52, do: exp, else: exp + 1\n    <<tmp::float>> = <<sign::size(1), exp + 1023::size(11), tmp::size(52)>>\n    tmp\n  end\n\n  @doc \"\"\"\n  Returns `true` when the given `decimal` has no significant digits after the decimal point.\n\n  ## Examples\n\n      iex> Decimal.integer?(\"1.00\")\n      true\n\n      iex> Decimal.integer?(\"1.10\")\n      false\n\n  \"\"\"\n  doc_since(\"2.0.0\")\n  @spec integer?(decimal()) :: boolean\n  def integer?(%Decimal{coef: :NaN}), do: false\n  def integer?(%Decimal{coef: :inf}), do: false\n  def integer?(%Decimal{coef: coef, exp: exp}), do: exp >= 0 or zero_after_dot?(coef, exp)\n  def integer?(num), do: integer?(decimal(num))\n\n  defp zero_after_dot?(coef, exp) when coef >= 10 and exp < 0,\n    do: Kernel.rem(coef, 10) == 0 and zero_after_dot?(Kernel.div(coef, 10), exp + 1)\n\n  defp zero_after_dot?(coef, exp),\n    do: coef == 0 or exp == 0\n\n  ## ARITHMETIC ##\n\n  defp add_align(coef1, exp1, coef2, exp2) when exp1 == exp2, do: {coef1, coef2}\n\n  defp add_align(coef1, exp1, coef2, exp2) when exp1 > exp2,\n    do: {coef1 * pow10(exp1 - exp2), coef2}\n\n  defp add_align(coef1, exp1, coef2, exp2) when exp1 < exp2,\n    do: {coef1, coef2 * pow10(exp2 - exp1)}\n\n  defp add_sign(sign1, sign2, coef) do\n    cond do\n      coef > 0 -> 1\n      coef < 0 -> -1\n      sign1 == -1 and sign2 == -1 -> -1\n      sign1 != sign2 and Context.get().rounding == :floor -> -1\n      true -> 1\n    end\n  end\n\n  defp div_adjust(coef1, coef2, adjust) when coef1 < coef2,\n    do: div_adjust(coef1 * 10, coef2, adjust + 1)\n\n  defp div_adjust(coef1, coef2, adjust) when coef1 >= coef2 * 10,\n    do: div_adjust(coef1, coef2 * 10, adjust - 1)\n\n  defp div_adjust(coef1, coef2, adjust), do: {coef1, coef2, adjust}\n\n  defp div_calc(coef1, coef2, coef, adjust, prec10) do\n    cond do\n      coef1 >= coef2 ->\n        div_calc(coef1 - coef2, coef2, coef + 1, adjust, prec10)\n\n      coef1 == 0 and adjust >= 0 ->\n        {coef, adjust, coef1, []}\n\n      coef >= prec10 ->\n        signals = [:rounded]\n        signals = if base10?(coef1), do: signals, else: [:inexact | signals]\n        {coef, adjust, coef1, signals}\n\n      true ->\n        div_calc(coef1 * 10, coef2, coef * 10, adjust + 1, prec10)\n    end\n  end\n\n  defp div_int_calc(coef1, coef2, coef, adjust, precision) do\n    cond do\n      coef1 >= coef2 ->\n        div_int_calc(coef1 - coef2, coef2, coef + 1, adjust, precision)\n\n      adjust != precision ->\n        div_int_calc(coef1 * 10, coef2, coef * 10, adjust + 1, precision)\n\n      true ->\n        {coef, coef1}\n    end\n  end\n\n  defp integer_division(div_sign, coef1, exp1, coef2, exp2) do\n    precision = exp1 - exp2\n    {coef1, coef2, adjust} = div_adjust(coef1, coef2, 0)\n\n    {coef, _rem} = div_int_calc(coef1, coef2, 0, adjust, precision)\n\n    prec10 = pow10(Context.get().precision)\n\n    if coef > prec10 do\n      {\n        :error,\n        :invalid_operation,\n        \"integer division impossible, quotient too large\",\n        %Decimal{coef: :NaN}\n      }\n    else\n      {:ok, %Decimal{sign: div_sign, coef: coef, exp: 0}}\n    end\n  end\n\n  defp do_normalize(coef, exp) do\n    if Kernel.rem(coef, 10) == 0 do\n      do_normalize(Kernel.div(coef, 10), exp + 1)\n    else\n      %Decimal{coef: coef, exp: exp}\n    end\n  end\n\n  defp ratio(coef, exp) when exp >= 0, do: {coef * pow10(exp), 1}\n  defp ratio(coef, exp) when exp < 0, do: {coef, pow10(-exp)}\n\n  pow10_max =\n    Enum.reduce(0..104, 1, fn int, acc ->\n      defp pow10(unquote(int)), do: unquote(acc)\n      defp base10?(unquote(acc)), do: true\n      acc * 10\n    end)\n\n  defp pow10(num) when num > 104, do: pow10(104) * pow10(num - 104)\n\n  defp base10?(num) when num >= unquote(pow10_max) do\n    if Kernel.rem(num, unquote(pow10_max)) == 0 do\n      base10?(Kernel.div(num, unquote(pow10_max)))\n    else\n      false\n    end\n  end\n\n  defp base10?(_num), do: false\n\n  ## ROUNDING ##\n\n  defp do_round(sign, digits, exp, target_exp, rounding) do\n    num_digits = length(digits)\n    precision = num_digits - (target_exp - exp)\n\n    cond do\n      exp == target_exp ->\n        %Decimal{sign: sign, coef: digits_to_integer(digits), exp: exp}\n\n      exp < target_exp and precision < 0 ->\n        zeros = :lists.duplicate(target_exp - exp, ?0)\n        digits = zeros ++ digits\n        {signif, remain} = :lists.split(1, digits)\n\n        signif =\n          if increment?(rounding, sign, signif, remain),\n            do: digits_increment(signif),\n            else: signif\n\n        coef = digits_to_integer(signif)\n        %Decimal{sign: sign, coef: coef, exp: target_exp}\n\n      exp < target_exp and precision >= 0 ->\n        {signif, remain} = :lists.split(precision, digits)\n\n        signif =\n          if increment?(rounding, sign, signif, remain),\n            do: digits_increment(signif),\n            else: signif\n\n        coef = digits_to_integer(signif)\n        %Decimal{sign: sign, coef: coef, exp: target_exp}\n\n      exp > target_exp ->\n        digits = digits ++ Enum.map(1..(exp - target_exp), fn _ -> ?0 end)\n        coef = digits_to_integer(digits)\n        %Decimal{sign: sign, coef: coef, exp: target_exp}\n    end\n  end\n\n  defp digits_to_integer([]), do: 0\n  defp digits_to_integer(digits), do: :erlang.list_to_integer(digits)\n\n  defp precision(%Decimal{coef: :NaN} = num, _precision, _rounding) do\n    {num, []}\n  end\n\n  defp precision(%Decimal{coef: :inf} = num, _precision, _rounding) do\n    {num, []}\n  end\n\n  defp precision(%Decimal{sign: sign, coef: coef, exp: exp} = num, precision, rounding) do\n    digits = :erlang.integer_to_list(coef)\n    num_digits = length(digits)\n\n    if num_digits > precision do\n      do_precision(sign, digits, num_digits, exp, precision, rounding)\n    else\n      {num, []}\n    end\n  end\n\n  defp do_precision(sign, digits, num_digits, exp, precision, rounding) do\n    precision = Kernel.min(num_digits, precision)\n    {signif, remain} = :lists.split(precision, digits)\n\n    signif =\n      if increment?(rounding, sign, signif, remain), do: digits_increment(signif), else: signif\n\n    signals = if any_nonzero(remain), do: [:inexact, :rounded], else: [:rounded]\n\n    exp = exp + length(remain)\n    coef = digits_to_integer(signif)\n    dec = %Decimal{sign: sign, coef: coef, exp: exp}\n    {dec, signals}\n  end\n\n  defp increment?(_, _, _, []), do: false\n\n  defp increment?(:down, _, _, _), do: false\n\n  defp increment?(:up, _, _, _), do: true\n\n  defp increment?(:ceiling, sign, _, remain), do: sign == 1 and any_nonzero(remain)\n\n  defp increment?(:floor, sign, _, remain), do: sign == -1 and any_nonzero(remain)\n\n  defp increment?(:half_up, _, _, [digit | _]), do: digit >= ?5\n\n  defp increment?(:half_even, _, [], [?5 | rest]), do: any_nonzero(rest)\n\n  defp increment?(:half_even, _, signif, [?5 | rest]),\n    do: any_nonzero(rest) or Kernel.rem(:lists.last(signif), 2) == 1\n\n  defp increment?(:half_even, _, _, [digit | _]), do: digit > ?5\n\n  defp increment?(:half_down, _, _, [digit | rest]),\n    do: digit > ?5 or (digit == ?5 and any_nonzero(rest))\n\n  defp any_nonzero(digits), do: :lists.any(fn digit -> digit != ?0 end, digits)\n\n  defp digits_increment(digits), do: digits_increment(:lists.reverse(digits), [])\n\n  defp digits_increment([?9 | rest], acc), do: digits_increment(rest, [?0 | acc])\n\n  defp digits_increment([head | rest], acc), do: :lists.reverse(rest, [head + 1 | acc])\n\n  defp digits_increment([], acc), do: [?1 | acc]\n\n  ## CONTEXT ##\n\n  defp context(num, signals \\\\ []) do\n    context = Context.get()\n    {result, prec_signals} = precision(num, context.precision, context.rounding)\n    error(put_uniq(signals, prec_signals), nil, result, context)\n  end\n\n  defp put_uniq(list, elems) when is_list(elems) do\n    Enum.reduce(elems, list, &put_uniq(&2, &1))\n  end\n\n  defp put_uniq(list, elem) do\n    if elem in list, do: list, else: [elem | list]\n  end\n\n  ## PARSING ##\n\n  defp parse_unsign(<<first, remainder::size(7)-binary, rest::binary>>) when first in [?i, ?I] do\n    if String.downcase(remainder) == \"nfinity\" do\n      {%Decimal{coef: :inf}, rest}\n    else\n      :error\n    end\n  end\n\n  defp parse_unsign(<<first, remainder::size(2)-binary, rest::binary>>) when first in [?i, ?I] do\n    if String.downcase(remainder) == \"nf\" do\n      {%Decimal{coef: :inf}, rest}\n    else\n      :error\n    end\n  end\n\n  defp parse_unsign(<<first, remainder::size(2)-binary, rest::binary>>) when first in [?n, ?N] do\n    if String.downcase(remainder) == \"an\" do\n      {%Decimal{coef: :NaN}, rest}\n    else\n      :error\n    end\n  end\n\n  defp parse_unsign(bin) do\n    {int, rest} = parse_digits(bin)\n    {float, rest} = parse_float(rest)\n    {exp, rest} = parse_exp(rest)\n\n    if int == [] and float == [] do\n      :error\n    else\n      int = if int == [], do: ~c\"0\", else: int\n      exp = if exp == [], do: ~c\"0\", else: exp\n\n      number = %Decimal{\n        coef: List.to_integer(int ++ float),\n        exp: List.to_integer(exp) - length(float)\n      }\n\n      {number, rest}\n    end\n  end\n\n  defp parse_float(\".\" <> rest), do: parse_digits(rest)\n  defp parse_float(bin), do: {[], bin}\n\n  defp parse_exp(<<e, sign, digit, rest::binary>>)\n       when e in [?e, ?E] and sign in [?+, ?-] and digit in ?0..?9 do\n    {digits, rest} = parse_digits(rest)\n    {[sign, digit | digits], rest}\n  end\n\n  defp parse_exp(<<e, digit, rest::binary>>) when e in [?e, ?E] and digit in ?0..?9 do\n    {digits, rest} = parse_digits(rest)\n    {[digit | digits], rest}\n  end\n\n  defp parse_exp(bin) do\n    {[], bin}\n  end\n\n  defp parse_digits(bin), do: parse_digits(bin, [])\n\n  defp parse_digits(<<digit, rest::binary>>, acc) when digit in ?0..?9 do\n    parse_digits(rest, [digit | acc])\n  end\n\n  defp parse_digits(rest, acc) do\n    {:lists.reverse(acc), rest}\n  end\n\n  # Util\n\n  defp decimal(%Decimal{} = num), do: num\n  defp decimal(num) when is_integer(num), do: new(num)\n  defp decimal(num) when is_binary(num), do: new(num)\n\n  defp decimal(other) when is_float(other) do\n    raise ArgumentError,\n          \"implicit conversion of #{inspect(other)} to Decimal is not allowed. Use Decimal.from_float/1\"\n  end\n\n  defp handle_error(signals, reason, result, context) do\n    context = context || Context.get()\n    signals = List.wrap(signals)\n\n    flags = Enum.reduce(signals, context.flags, &put_uniq(&2, &1))\n    Context.set(%{context | flags: flags})\n    error_signal = Enum.find(signals, &(&1 in context.traps))\n\n    if error_signal do\n      error = [signal: error_signal, reason: reason]\n      {:error, error}\n    else\n      {:ok, result}\n    end\n  end\n\n  defp fix_float_exp(digits) do\n    fix_float_exp(digits, [])\n  end\n\n  defp fix_float_exp([?e | rest], [?0 | [?. | result]]) do\n    fix_float_exp(rest, [?e | result])\n  end\n\n  defp fix_float_exp([digit | rest], result) do\n    fix_float_exp(rest, [digit | result])\n  end\n\n  defp fix_float_exp([], result), do: :lists.reverse(result)\n\n  defp check_dbl_min_max(%Decimal{coef: :inf} = infinity), do: infinity\n\n  defp check_dbl_min_max(%Decimal{sign: 1} = num) do\n    cond do\n      Decimal.gt?(num, dbl_max(1)) ->\n        raise Error, reason: \"number bigger than DBL_MAX: #{inspect(num)}\"\n\n      Decimal.gt?(num, zero(1)) and Decimal.lt?(num, dbl_min(1)) ->\n        raise Error, reason: \"number smaller than DBL_MIN: #{inspect(num)}\"\n\n      true ->\n        num\n    end\n  end\n\n  defp check_dbl_min_max(num) do\n    cond do\n      Decimal.lt?(num, dbl_max(-1)) ->\n        raise Error, reason: \"negative number smaller than DBL_MAX: #{inspect(num)}\"\n\n      Decimal.lt?(num, zero(-1)) and Decimal.gt?(num, dbl_min(-1)) ->\n        raise Error, reason: \"negative number bigger than DBL_MIN: #{inspect(num)}\"\n\n      true ->\n        num\n    end\n  end\n\n  defp dbl_min(sign), do: %Decimal{sign: sign, coef: 22_250_738_585_072_014, exp: -324}\n  defp zero(sign), do: %Decimal{sign: sign, coef: 0, exp: 0}\n  defp dbl_max(sign), do: %Decimal{sign: sign, coef: 17_976_931_348_623_158, exp: 292}\n\n  if Version.compare(System.version(), \"1.3.0\") == :lt do\n    defp integer_to_charlist(string), do: Integer.to_char_list(string)\n  else\n    defp integer_to_charlist(string), do: Integer.to_charlist(string)\n  end\nend\n\ndefimpl Inspect, for: Decimal do\n  def inspect(dec, _opts) do\n    \"Decimal.new(\\\"\" <> Decimal.to_string(dec) <> \"\\\")\"\n  end\nend\n\ndefimpl String.Chars, for: Decimal do\n  def to_string(dec) do\n    Decimal.to_string(dec)\n  end\nend\n\n# TODO: remove when we require Elixir 1.18\nif Code.ensure_loaded?(JSON.Encoder) and function_exported?(JSON.Encoder, :encode, 2) do\n  defimpl JSON.Encoder, for: Decimal do\n    def encode(decimal, _encoder) do\n      [?\", Decimal.to_string(decimal), ?\"]\n    end\n  end\nend\n"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 1,
+      "effective": 1,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "001d84a5ebc2485ef0ca9dbe32ddc840": "schema",
+      "0112a69704c039c3754c2b3fe9142cb8": "schema",
+      "024cd1a55622fe4203e7d7614f842a16": "schema",
+      "025150cf8b7cb4622e48cd206714a0d9": "schema",
+      "02c7837fcea6187ec0a705b9ae117338": "fallback",
+      "02eff8c6e38e5c9d6c7a63bb131c84ac": "schema",
+      "03900f8ead7aca3033d6dea90173ac89": "schema",
+      "03b0f984a2fa7da4f3e4bff64254bb45": "schema",
+      "03b5abccdd1dd736731cfb40d0c16398": "schema",
+      "043ba566e9315f8229ef67e149f793b6": "schema",
+      "04a8f16dbd4cae68671e7c3fadb417cd": "schema",
+      "04e57e89c255327c7e5b068d44812ebe": "schema",
+      "04e7f33075025ebceb0cbea748d00e88": "schema",
+      "04ef9dbc45f96f2a2fa708cf3436d136": "schema",
+      "04ff087b52908d16e02073252f345ca8": "fallback",
+      "052a993af8c4026b0c5f987de59fe309": "schema",
+      "05ba016fae4e8711a6dfac553c502e35": "schema",
+      "0606679207e96d65106fd5ba43ef9607": "schema",
+      "069222def497f58ee72f50a001ada72d": "schema",
+      "08a27859bcc054ac56a5242ea14bfdf1": "fallback",
+      "0957329259b6e94e8b3ae9e990f972a1": "schema",
+      "0984c6da445c6c4276f8350ce291ff6d": "schema",
+      "09b3974c4f9b91d363eb3dbf181acf96": "fallback",
+      "09ba2536709a415fe1a93ed190eaba6d": "schema",
+      "0b8a38962b2899d8579d317ccef3773e": "schema",
+      "0c41637ee67b8c6f720f6f652d8cc6c8": "schema",
+      "0cb2461e6bade1b150282ce9256de889": "fallback",
+      "0ce8bb19b400a6f53bf70edf54c9d83e": "fallback",
+      "0d37609aa58fad13b2fdff3ffda4c2a7": "schema",
+      "0dcadb0f976b423361bfd077970a574f": "schema",
+      "0e420d4b6655db41e6bce7ad536c861a": "schema",
+      "0ebe46141244bf0bff8fceef91b05c93": "schema",
+      "0f7478d05ac2403929a38216ecc51961": "schema",
+      "0ff7ede2fcaddaafba3bc51757db2104": "fallback",
+      "122182fa5f9a04a3666c41b26ce7446c": "schema",
+      "12721923c85f1d63e4358eeded2d827a": "schema",
+      "12862ef568325841aa7aab781a33bda4": "schema",
+      "128b94c6523ee1516faf68b4f1f794f6": "schema",
+      "1290ae5591e785f19905e452cebb7ccc": "fallback",
+      "12af952ddae0ac4b784ca2c2ae7485a5": "fallback",
+      "13b2a3ac8a34450a11f7ede886a83e14": "fallback",
+      "13bb42b27de6c0ec58753dab8a4c5ed7": "fallback",
+      "14f86f643af056d5db3be75a53817283": "schema",
+      "1640039bf6ed1f12d5812e96ea377de9": "schema",
+      "16503a826f36c9412fb8ea4da3b6ec56": "schema",
+      "1680a278dbb171347145e54b341a885f": "fallback",
+      "169a5db2ade83b41b678635c359cd6f5": "schema",
+      "16cee77fed2732da16b87fe9a600f00a": "schema",
+      "17a90b40b8f54be4b6f148a9e8cd90bb": "schema",
+      "17bb4d7e61c061ccda67d0dec7e6f490": "fallback",
+      "17de2a674595bf3bebd7d58e0dcbebd9": "schema",
+      "18206ecec06333da78140d37f97f68cb": "schema",
+      "189d18b35f0fce4ce86943876d1a6434": "schema",
+      "191f384ce8cf0027428199644e6ead59": "fallback",
+      "19719dbe8f44f6fe936578a8a4bce632": "schema",
+      "19ed7e404418b1ef33c62242d8bc2629": "schema",
+      "1a11872d3187f8dbaf613e03489606ba": "fallback",
+      "1a448866f2a23f073cdbf399ffe43e44": "schema",
+      "1b754c000de6758b77d9c66c867cbc55": "schema",
+      "1d169cce3c735ce2dfa9e36f6cabc406": "fallback",
+      "1d519f15a36d20a585ef4b1e89b4f9d1": "schema",
+      "1d842aee8aaf1d31278bdae38ce178e6": "schema",
+      "1d84dd97ce0be816108575cda7378e1b": "fallback",
+      "1df56a42cd1d78d571b299b0c4445b75": "schema",
+      "1e7e2b19fc00ed43b153e8bd5daf4bc9": "schema",
+      "1e9b1ad11406611e54d20d2b22d61c08": "schema",
+      "1fa8d39c342265628a5d7a255168b17b": "schema",
+      "1fddfd881e0bea4cee5baed5d3ea05dc": "schema",
+      "21068e90215f5d01145ad3a16dc70354": "schema",
+      "220e0521326903ad259e219d23203535": "schema",
+      "222c93c2a6b344e182bd3df39a35c52b": "fallback",
+      "2302588ee5173782406b03bd7aedb7dc": "schema",
+      "233e9029e0c6d72cdcb66340b12d25e9": "schema",
+      "2356db17d475e0468f7c5c86ea8ce411": "fallback",
+      "237c37792a1a9e22933ce737c0366ccc": "fallback",
+      "2387cce4d1eabc78b3a5e6047e6e6644": "fallback",
+      "25ad405a414d92bce582dad3392c4e1d": "fallback",
+      "2645db87e9c579e5e397547ca2783645": "schema",
+      "26469478c2145536186c581b3b60f95f": "schema",
+      "2814259096f3a6af2986de768df1e9e6": "schema",
+      "28262b44c4473d03e09033463135c5d6": "schema",
+      "284b41cea27f0505043d8f89f0f03dd7": "fallback",
+      "28722fa828031b373c2f9e9e366906c6": "schema",
+      "289aea6af2c8ecf69efeebc49b9fba45": "fallback",
+      "28a2592a2df2326b697dfce00b353ddd": "fallback",
+      "2921768c5ca808f8797fae0c21f6cc1e": "schema",
+      "295ef7414ccaab3d362c1f52937a9b4a": "fallback",
+      "2a0bdc08a6b8d4ec5a6784d5af08f941": "schema",
+      "2a66f348782e3693beceae4615cee967": "schema",
+      "2addd7d82b31aa3aba377005bd2bf9d7": "schema",
+      "2ae7f626bb728fe265671e2d6d056d60": "schema",
+      "2b4e5b1aaf045ace42222d3cb2d7a3f8": "schema",
+      "2bd83fb582a790906c8d630e81f9e699": "schema",
+      "2c96f41f6a878f4acdada3e689b08e98": "schema",
+      "2c9d79b8344649ac52387be54c6e4eac": "fallback",
+      "2d60778fbd8018214209fc526f9f9bdc": "schema",
+      "2ddb38dbf97dbb4a3498885d4df1eaa7": "fallback",
+      "2dee4be7dd6f4f7de10d0e86e52d91be": "schema",
+      "2e5a711f7ee6befae01bc0975c290354": "schema",
+      "302b21de6f1e79bedf40f19f75d4c337": "schema"
+    },
+    "metrics": {
+      "fallback_count": 28,
+      "fallback_time_ms": 46269,
+      "fanout": {
+        "001d84a5ebc2485ef0ca9dbe32ddc840": 1,
+        "0112a69704c039c3754c2b3fe9142cb8": 2,
+        "024cd1a55622fe4203e7d7614f842a16": 2,
+        "025150cf8b7cb4622e48cd206714a0d9": 2,
+        "02c7837fcea6187ec0a705b9ae117338": 2,
+        "02eff8c6e38e5c9d6c7a63bb131c84ac": 1,
+        "03900f8ead7aca3033d6dea90173ac89": 3,
+        "03b0f984a2fa7da4f3e4bff64254bb45": 2,
+        "03b5abccdd1dd736731cfb40d0c16398": 1,
+        "043ba566e9315f8229ef67e149f793b6": 1,
+        "04a8f16dbd4cae68671e7c3fadb417cd": 1,
+        "04e57e89c255327c7e5b068d44812ebe": 1,
+        "04e7f33075025ebceb0cbea748d00e88": 1,
+        "04ef9dbc45f96f2a2fa708cf3436d136": 1,
+        "04ff087b52908d16e02073252f345ca8": 1,
+        "052a993af8c4026b0c5f987de59fe309": 1,
+        "05ba016fae4e8711a6dfac553c502e35": 1,
+        "0606679207e96d65106fd5ba43ef9607": 2,
+        "069222def497f58ee72f50a001ada72d": 2,
+        "08a27859bcc054ac56a5242ea14bfdf1": 3,
+        "0957329259b6e94e8b3ae9e990f972a1": 1,
+        "0984c6da445c6c4276f8350ce291ff6d": 1,
+        "09b3974c4f9b91d363eb3dbf181acf96": 1,
+        "09ba2536709a415fe1a93ed190eaba6d": 1,
+        "0b8a38962b2899d8579d317ccef3773e": 1,
+        "0c41637ee67b8c6f720f6f652d8cc6c8": 1,
+        "0cb2461e6bade1b150282ce9256de889": 3,
+        "0ce8bb19b400a6f53bf70edf54c9d83e": 1,
+        "0d37609aa58fad13b2fdff3ffda4c2a7": 1,
+        "0dcadb0f976b423361bfd077970a574f": 1,
+        "0e420d4b6655db41e6bce7ad536c861a": 2,
+        "0ebe46141244bf0bff8fceef91b05c93": 3,
+        "0f7478d05ac2403929a38216ecc51961": 1,
+        "0ff7ede2fcaddaafba3bc51757db2104": 1,
+        "122182fa5f9a04a3666c41b26ce7446c": 1,
+        "12721923c85f1d63e4358eeded2d827a": 2,
+        "12862ef568325841aa7aab781a33bda4": 1,
+        "128b94c6523ee1516faf68b4f1f794f6": 2,
+        "1290ae5591e785f19905e452cebb7ccc": 1,
+        "12af952ddae0ac4b784ca2c2ae7485a5": 1,
+        "13b2a3ac8a34450a11f7ede886a83e14": 2,
+        "13bb42b27de6c0ec58753dab8a4c5ed7": 2,
+        "14f86f643af056d5db3be75a53817283": 1,
+        "1640039bf6ed1f12d5812e96ea377de9": 1,
+        "16503a826f36c9412fb8ea4da3b6ec56": 1,
+        "1680a278dbb171347145e54b341a885f": 3,
+        "169a5db2ade83b41b678635c359cd6f5": 1,
+        "16cee77fed2732da16b87fe9a600f00a": 1,
+        "17a90b40b8f54be4b6f148a9e8cd90bb": 1,
+        "17bb4d7e61c061ccda67d0dec7e6f490": 1,
+        "17de2a674595bf3bebd7d58e0dcbebd9": 1,
+        "18206ecec06333da78140d37f97f68cb": 2,
+        "189d18b35f0fce4ce86943876d1a6434": 1,
+        "191f384ce8cf0027428199644e6ead59": 1,
+        "19719dbe8f44f6fe936578a8a4bce632": 1,
+        "19ed7e404418b1ef33c62242d8bc2629": 1,
+        "1a11872d3187f8dbaf613e03489606ba": 3,
+        "1a448866f2a23f073cdbf399ffe43e44": 1,
+        "1b754c000de6758b77d9c66c867cbc55": 2,
+        "1d169cce3c735ce2dfa9e36f6cabc406": 1,
+        "1d519f15a36d20a585ef4b1e89b4f9d1": 1,
+        "1d842aee8aaf1d31278bdae38ce178e6": 1,
+        "1d84dd97ce0be816108575cda7378e1b": 1,
+        "1df56a42cd1d78d571b299b0c4445b75": 1,
+        "1e7e2b19fc00ed43b153e8bd5daf4bc9": 1,
+        "1e9b1ad11406611e54d20d2b22d61c08": 1,
+        "1fa8d39c342265628a5d7a255168b17b": 2,
+        "1fddfd881e0bea4cee5baed5d3ea05dc": 1,
+        "21068e90215f5d01145ad3a16dc70354": 1,
+        "220e0521326903ad259e219d23203535": 1,
+        "222c93c2a6b344e182bd3df39a35c52b": 1,
+        "2302588ee5173782406b03bd7aedb7dc": 1,
+        "233e9029e0c6d72cdcb66340b12d25e9": 1,
+        "2356db17d475e0468f7c5c86ea8ce411": 1,
+        "237c37792a1a9e22933ce737c0366ccc": 1,
+        "2387cce4d1eabc78b3a5e6047e6e6644": 1,
+        "25ad405a414d92bce582dad3392c4e1d": 2,
+        "2645db87e9c579e5e397547ca2783645": 1,
+        "26469478c2145536186c581b3b60f95f": 1,
+        "2814259096f3a6af2986de768df1e9e6": 1,
+        "28262b44c4473d03e09033463135c5d6": 1,
+        "284b41cea27f0505043d8f89f0f03dd7": 2,
+        "28722fa828031b373c2f9e9e366906c6": 2,
+        "289aea6af2c8ecf69efeebc49b9fba45": 1,
+        "28a2592a2df2326b697dfce00b353ddd": 1,
+        "2921768c5ca808f8797fae0c21f6cc1e": 1,
+        "295ef7414ccaab3d362c1f52937a9b4a": 1,
+        "2a0bdc08a6b8d4ec5a6784d5af08f941": 2,
+        "2a66f348782e3693beceae4615cee967": 2,
+        "2addd7d82b31aa3aba377005bd2bf9d7": 2,
+        "2ae7f626bb728fe265671e2d6d056d60": 1,
+        "2b4e5b1aaf045ace42222d3cb2d7a3f8": 1,
+        "2bd83fb582a790906c8d630e81f9e699": 3,
+        "2c96f41f6a878f4acdada3e689b08e98": 1,
+        "2c9d79b8344649ac52387be54c6e4eac": 2,
+        "2d60778fbd8018214209fc526f9f9bdc": 2,
+        "2ddb38dbf97dbb4a3498885d4df1eaa7": 2,
+        "2dee4be7dd6f4f7de10d0e86e52d91be": 1,
+        "2e5a711f7ee6befae01bc0975c290354": 1,
+        "302b21de6f1e79bedf40f19f75d4c337": 2
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "attribute_engine_disabled": 3,
+        "missing_oracle_site": 76,
+        "no_applicable_mutator": 457,
+        "unsupported_dispatch": 1104
+      }
+    },
+    "mutation_kind": {
+      "001d84a5ebc2485ef0ca9dbe32ddc840": "arithmetic_op",
+      "0112a69704c039c3754c2b3fe9142cb8": "arithmetic_op",
+      "024cd1a55622fe4203e7d7614f842a16": "arithmetic_op",
+      "025150cf8b7cb4622e48cd206714a0d9": "arithmetic_op",
+      "02c7837fcea6187ec0a705b9ae117338": "guard_type_test",
+      "02eff8c6e38e5c9d6c7a63bb131c84ac": "arithmetic_op",
+      "03900f8ead7aca3033d6dea90173ac89": "comparison_negation",
+      "03b0f984a2fa7da4f3e4bff64254bb45": "atom_literal",
+      "03b5abccdd1dd736731cfb40d0c16398": "comparison_negation",
+      "043ba566e9315f8229ef67e149f793b6": "arithmetic_op",
+      "04a8f16dbd4cae68671e7c3fadb417cd": "comparison_negation",
+      "04e57e89c255327c7e5b068d44812ebe": "arithmetic_op",
+      "04e7f33075025ebceb0cbea748d00e88": "arithmetic_op",
+      "04ef9dbc45f96f2a2fa708cf3436d136": "arithmetic_op",
+      "04ff087b52908d16e02073252f345ca8": "guard_comparison_boundary",
+      "052a993af8c4026b0c5f987de59fe309": "arithmetic_op",
+      "05ba016fae4e8711a6dfac553c502e35": "arithmetic_op",
+      "0606679207e96d65106fd5ba43ef9607": "comparison_boundary",
+      "069222def497f58ee72f50a001ada72d": "atom_literal",
+      "08a27859bcc054ac56a5242ea14bfdf1": "guard_comparison_boundary",
+      "0957329259b6e94e8b3ae9e990f972a1": "comparison_negation",
+      "0984c6da445c6c4276f8350ce291ff6d": "comparison_negation",
+      "09b3974c4f9b91d363eb3dbf181acf96": "guard_type_test",
+      "09ba2536709a415fe1a93ed190eaba6d": "arithmetic_op",
+      "0b8a38962b2899d8579d317ccef3773e": "arithmetic_op",
+      "0c41637ee67b8c6f720f6f652d8cc6c8": "concat_op",
+      "0cb2461e6bade1b150282ce9256de889": "integer_literal_replace",
+      "0ce8bb19b400a6f53bf70edf54c9d83e": "comparison_negation",
+      "0d37609aa58fad13b2fdff3ffda4c2a7": "arithmetic_op",
+      "0dcadb0f976b423361bfd077970a574f": "comparison_negation",
+      "0e420d4b6655db41e6bce7ad536c861a": "arithmetic_op",
+      "0ebe46141244bf0bff8fceef91b05c93": "atom_literal",
+      "0f7478d05ac2403929a38216ecc51961": "atom_literal",
+      "0ff7ede2fcaddaafba3bc51757db2104": "guard_comparison_negation",
+      "122182fa5f9a04a3666c41b26ce7446c": "arithmetic_op",
+      "12721923c85f1d63e4358eeded2d827a": "comparison_boundary",
+      "12862ef568325841aa7aab781a33bda4": "arithmetic_op",
+      "128b94c6523ee1516faf68b4f1f794f6": "comparison_negation",
+      "1290ae5591e785f19905e452cebb7ccc": "comparison_negation",
+      "12af952ddae0ac4b784ca2c2ae7485a5": "comparison_negation",
+      "13b2a3ac8a34450a11f7ede886a83e14": "comparison_negation",
+      "13bb42b27de6c0ec58753dab8a4c5ed7": "comparison_negation",
+      "14f86f643af056d5db3be75a53817283": "arithmetic_op",
+      "1640039bf6ed1f12d5812e96ea377de9": "arithmetic_op",
+      "16503a826f36c9412fb8ea4da3b6ec56": "comparison_boundary",
+      "1680a278dbb171347145e54b341a885f": "atom_literal",
+      "169a5db2ade83b41b678635c359cd6f5": "atom_literal",
+      "16cee77fed2732da16b87fe9a600f00a": "comparison_negation",
+      "17a90b40b8f54be4b6f148a9e8cd90bb": "arithmetic_op",
+      "17bb4d7e61c061ccda67d0dec7e6f490": "atom_literal",
+      "17de2a674595bf3bebd7d58e0dcbebd9": "atom_literal",
+      "18206ecec06333da78140d37f97f68cb": "boolean_op",
+      "189d18b35f0fce4ce86943876d1a6434": "arithmetic_op",
+      "191f384ce8cf0027428199644e6ead59": "comparison_negation",
+      "19719dbe8f44f6fe936578a8a4bce632": "atom_literal",
+      "19ed7e404418b1ef33c62242d8bc2629": "arithmetic_op",
+      "1a11872d3187f8dbaf613e03489606ba": "atom_literal",
+      "1a448866f2a23f073cdbf399ffe43e44": "arithmetic_op",
+      "1b754c000de6758b77d9c66c867cbc55": "arithmetic_op",
+      "1d169cce3c735ce2dfa9e36f6cabc406": "guard_comparison_negation",
+      "1d519f15a36d20a585ef4b1e89b4f9d1": "arithmetic_op",
+      "1d842aee8aaf1d31278bdae38ce178e6": "arithmetic_op",
+      "1d84dd97ce0be816108575cda7378e1b": "guard_comparison_boundary",
+      "1df56a42cd1d78d571b299b0c4445b75": "arithmetic_op",
+      "1e7e2b19fc00ed43b153e8bd5daf4bc9": "concat_op",
+      "1e9b1ad11406611e54d20d2b22d61c08": "comparison_negation",
+      "1fa8d39c342265628a5d7a255168b17b": "arithmetic_op",
+      "1fddfd881e0bea4cee5baed5d3ea05dc": "comparison_negation",
+      "21068e90215f5d01145ad3a16dc70354": "comparison_boundary",
+      "220e0521326903ad259e219d23203535": "arithmetic_op",
+      "222c93c2a6b344e182bd3df39a35c52b": "atom_literal",
+      "2302588ee5173782406b03bd7aedb7dc": "comparison_negation",
+      "233e9029e0c6d72cdcb66340b12d25e9": "arithmetic_op",
+      "2356db17d475e0468f7c5c86ea8ce411": "comparison_negation",
+      "237c37792a1a9e22933ce737c0366ccc": "guard_comparison_negation",
+      "2387cce4d1eabc78b3a5e6047e6e6644": "comparison_negation",
+      "25ad405a414d92bce582dad3392c4e1d": "guard_comparison_boundary",
+      "2645db87e9c579e5e397547ca2783645": "comparison_negation",
+      "26469478c2145536186c581b3b60f95f": "atom_literal",
+      "2814259096f3a6af2986de768df1e9e6": "atom_literal",
+      "28262b44c4473d03e09033463135c5d6": "arithmetic_op",
+      "284b41cea27f0505043d8f89f0f03dd7": "guard_comparison_boundary",
+      "28722fa828031b373c2f9e9e366906c6": "boolean_op",
+      "289aea6af2c8ecf69efeebc49b9fba45": "boolean_op",
+      "28a2592a2df2326b697dfce00b353ddd": "atom_literal",
+      "2921768c5ca808f8797fae0c21f6cc1e": "arithmetic_op",
+      "295ef7414ccaab3d362c1f52937a9b4a": "comparison_negation",
+      "2a0bdc08a6b8d4ec5a6784d5af08f941": "comparison_boundary",
+      "2a66f348782e3693beceae4615cee967": "arithmetic_op",
+      "2addd7d82b31aa3aba377005bd2bf9d7": "comparison_negation",
+      "2ae7f626bb728fe265671e2d6d056d60": "comparison_negation",
+      "2b4e5b1aaf045ace42222d3cb2d7a3f8": "atom_literal",
+      "2bd83fb582a790906c8d630e81f9e699": "atom_literal",
+      "2c96f41f6a878f4acdada3e689b08e98": "arithmetic_op",
+      "2c9d79b8344649ac52387be54c6e4eac": "guard_comparison_boundary",
+      "2d60778fbd8018214209fc526f9f9bdc": "arithmetic_op",
+      "2ddb38dbf97dbb4a3498885d4df1eaa7": "guard_comparison_negation",
+      "2dee4be7dd6f4f7de10d0e86e52d91be": "arithmetic_op",
+      "2e5a711f7ee6befae01bc0975c290354": "comparison_boundary",
+      "302b21de6f1e79bedf40f19f75d4c337": "arithmetic_op"
+    },
+    "phase_timings": {
+      "baseline_tests_ms": 794,
+      "coverage_collection_ms": 6279,
+      "fallback_workers_ms": 48140,
+      "oracle_build_ms": 2773,
+      "plan_generation_ms": 136,
+      "report_writing_ms": 9,
+      "schema_build_ms": 2869,
+      "schema_workers_ms": 93653,
+      "total_ms": 154764
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 6277,
+      "coverage_match_distribution": {
+        "all_tests": 0,
+        "enclosing_function": 16,
+        "exact_line": 79,
+        "static_fallback": 5
+      },
+      "fallback_reason_distribution": {
+        "no_function_coverage": 5,
+        "no_line_coverage": 16
+      },
+      "mode": "coverage_with_static_fallback",
+      "selected_tests_avg": 1.39,
+      "selected_tests_median": 1
+    },
+    "stable_id_to_integer": {
+      "001d84a5ebc2485ef0ca9dbe32ddc840": 1,
+      "0112a69704c039c3754c2b3fe9142cb8": 2,
+      "024cd1a55622fe4203e7d7614f842a16": 3,
+      "025150cf8b7cb4622e48cd206714a0d9": 4,
+      "02c7837fcea6187ec0a705b9ae117338": 5,
+      "02eff8c6e38e5c9d6c7a63bb131c84ac": 6,
+      "03900f8ead7aca3033d6dea90173ac89": 7,
+      "03b0f984a2fa7da4f3e4bff64254bb45": 8,
+      "03b5abccdd1dd736731cfb40d0c16398": 9,
+      "043ba566e9315f8229ef67e149f793b6": 10,
+      "04a8f16dbd4cae68671e7c3fadb417cd": 11,
+      "04e57e89c255327c7e5b068d44812ebe": 12,
+      "04e7f33075025ebceb0cbea748d00e88": 13,
+      "04ef9dbc45f96f2a2fa708cf3436d136": 14,
+      "04ff087b52908d16e02073252f345ca8": 15,
+      "052a993af8c4026b0c5f987de59fe309": 16,
+      "05ba016fae4e8711a6dfac553c502e35": 17,
+      "0606679207e96d65106fd5ba43ef9607": 18,
+      "069222def497f58ee72f50a001ada72d": 19,
+      "08a27859bcc054ac56a5242ea14bfdf1": 20,
+      "0957329259b6e94e8b3ae9e990f972a1": 21,
+      "0984c6da445c6c4276f8350ce291ff6d": 22,
+      "09b3974c4f9b91d363eb3dbf181acf96": 23,
+      "09ba2536709a415fe1a93ed190eaba6d": 24,
+      "0b8a38962b2899d8579d317ccef3773e": 25,
+      "0c41637ee67b8c6f720f6f652d8cc6c8": 26,
+      "0cb2461e6bade1b150282ce9256de889": 27,
+      "0ce8bb19b400a6f53bf70edf54c9d83e": 28,
+      "0d37609aa58fad13b2fdff3ffda4c2a7": 29,
+      "0dcadb0f976b423361bfd077970a574f": 30,
+      "0e420d4b6655db41e6bce7ad536c861a": 31,
+      "0ebe46141244bf0bff8fceef91b05c93": 32,
+      "0f7478d05ac2403929a38216ecc51961": 33,
+      "0ff7ede2fcaddaafba3bc51757db2104": 34,
+      "122182fa5f9a04a3666c41b26ce7446c": 35,
+      "12721923c85f1d63e4358eeded2d827a": 36,
+      "12862ef568325841aa7aab781a33bda4": 37,
+      "128b94c6523ee1516faf68b4f1f794f6": 38,
+      "1290ae5591e785f19905e452cebb7ccc": 39,
+      "12af952ddae0ac4b784ca2c2ae7485a5": 40,
+      "13b2a3ac8a34450a11f7ede886a83e14": 41,
+      "13bb42b27de6c0ec58753dab8a4c5ed7": 42,
+      "14f86f643af056d5db3be75a53817283": 43,
+      "1640039bf6ed1f12d5812e96ea377de9": 44,
+      "16503a826f36c9412fb8ea4da3b6ec56": 45,
+      "1680a278dbb171347145e54b341a885f": 46,
+      "169a5db2ade83b41b678635c359cd6f5": 47,
+      "16cee77fed2732da16b87fe9a600f00a": 48,
+      "17a90b40b8f54be4b6f148a9e8cd90bb": 49,
+      "17bb4d7e61c061ccda67d0dec7e6f490": 50,
+      "17de2a674595bf3bebd7d58e0dcbebd9": 51,
+      "18206ecec06333da78140d37f97f68cb": 52,
+      "189d18b35f0fce4ce86943876d1a6434": 53,
+      "191f384ce8cf0027428199644e6ead59": 54,
+      "19719dbe8f44f6fe936578a8a4bce632": 55,
+      "19ed7e404418b1ef33c62242d8bc2629": 56,
+      "1a11872d3187f8dbaf613e03489606ba": 57,
+      "1a448866f2a23f073cdbf399ffe43e44": 58,
+      "1b754c000de6758b77d9c66c867cbc55": 59,
+      "1d169cce3c735ce2dfa9e36f6cabc406": 60,
+      "1d519f15a36d20a585ef4b1e89b4f9d1": 61,
+      "1d842aee8aaf1d31278bdae38ce178e6": 62,
+      "1d84dd97ce0be816108575cda7378e1b": 63,
+      "1df56a42cd1d78d571b299b0c4445b75": 64,
+      "1e7e2b19fc00ed43b153e8bd5daf4bc9": 65,
+      "1e9b1ad11406611e54d20d2b22d61c08": 66,
+      "1fa8d39c342265628a5d7a255168b17b": 67,
+      "1fddfd881e0bea4cee5baed5d3ea05dc": 68,
+      "21068e90215f5d01145ad3a16dc70354": 69,
+      "220e0521326903ad259e219d23203535": 70,
+      "222c93c2a6b344e182bd3df39a35c52b": 71,
+      "2302588ee5173782406b03bd7aedb7dc": 72,
+      "233e9029e0c6d72cdcb66340b12d25e9": 73,
+      "2356db17d475e0468f7c5c86ea8ce411": 74,
+      "237c37792a1a9e22933ce737c0366ccc": 75,
+      "2387cce4d1eabc78b3a5e6047e6e6644": 76,
+      "25ad405a414d92bce582dad3392c4e1d": 77,
+      "2645db87e9c579e5e397547ca2783645": 78,
+      "26469478c2145536186c581b3b60f95f": 79,
+      "2814259096f3a6af2986de768df1e9e6": 80,
+      "28262b44c4473d03e09033463135c5d6": 81,
+      "284b41cea27f0505043d8f89f0f03dd7": 82,
+      "28722fa828031b373c2f9e9e366906c6": 83,
+      "289aea6af2c8ecf69efeebc49b9fba45": 84,
+      "28a2592a2df2326b697dfce00b353ddd": 85,
+      "2921768c5ca808f8797fae0c21f6cc1e": 86,
+      "295ef7414ccaab3d362c1f52937a9b4a": 87,
+      "2a0bdc08a6b8d4ec5a6784d5af08f941": 88,
+      "2a66f348782e3693beceae4615cee967": 89,
+      "2addd7d82b31aa3aba377005bd2bf9d7": 90,
+      "2ae7f626bb728fe265671e2d6d056d60": 91,
+      "2b4e5b1aaf045ace42222d3cb2d7a3f8": 92,
+      "2bd83fb582a790906c8d630e81f9e699": 93,
+      "2c96f41f6a878f4acdada3e689b08e98": 94,
+      "2c9d79b8344649ac52387be54c6e4eac": 95,
+      "2d60778fbd8018214209fc526f9f9bdc": 96,
+      "2ddb38dbf97dbb4a3498885d4df1eaa7": 97,
+      "2dee4be7dd6f4f7de10d0e86e52d91be": 98,
+      "2e5a711f7ee6befae01bc0975c290354": 99,
+      "302b21de6f1e79bedf40f19f75d4c337": 100
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0.0,
+    "low": 0.0
+  }
+}

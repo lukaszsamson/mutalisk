@@ -117,12 +117,13 @@ defmodule Mut.Reporter.StrykerJson do
     put_incremental(base, snapshot)
   end
 
-  defp put_incremental(base, %{reused: reused, total: total})
+  defp put_incremental(base, %{reused: reused, total: total} = snapshot)
        when is_integer(reused) and reused > 0,
        do:
          Map.put(base, "incremental", %{
            "reused" => reused,
-           "executed" => max((total || 0) - reused, 0)
+           "executed" => max((total || 0) - reused, 0),
+           "reused_ids" => Map.get(snapshot, :reused_ids, [])
          })
 
   defp put_incremental(base, _snapshot), do: base

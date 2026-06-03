@@ -1,5 +1,42 @@
 # Mutalisk Benchmarks
 
+## v1.29 incremental cross-run history (M104–M107, 2026-06-03)
+
+The long-deferred v2 perf bet, shipped opt-in (`--incremental`). A warm run
+adopts a stored verdict for any mutant whose enclosing-function source and
+selected-test content are unchanged (M104 function-level digests), and only
+the remainder re-executes. The trust gate (M107) proved reuse never changes
+the answer.
+
+**Ground-truth (full vs `--incremental`, unchanged tree — verdicts must match):**
+
+| target | mutants | cold score | warm score | verdicts identical | reused / executed |
+|---|--:|--:|--:|:--:|--:|
+| demo_app (e2e, CI-locked) | 31 | 67.7 | 67.7 | yes | 31 / 0 |
+| decimal (`--max-mutants 100`) | 100 | 80.0 | 80.0 | yes | 89 / 1 |
+
+**Wall-clock (warm run on an unchanged tree):**
+
+| target | mutants | cold (full) | warm (`--incremental`) | speedup |
+|---|--:|--:|--:|--:|
+| demo_app | 31 | 15.7 s | 9.3 s | 1.69× |
+| decimal | 100 | 156 s | 16 s | **≈9.75×** |
+
+The win scales with mutant count: demo_app is fixed-overhead-bound (oracle +
+schema build + baseline + coverage dominate 31 tiny mutants); decimal is
+execution-bound, so reuse collapses 156 s → 16 s. The 16 s floor is the
+fixed-phase cost (the schema build still instruments all mutants — reused ones
+aren't skipped there yet; future optimization).
+
+**Diff-scoped (`bench/m107_incremental_validation.exs`, both properties PASS):**
+an equal-length semantics-preserving edit to `Arith.score` re-executes exactly
+its 7 mutants, reuses the other 24 (including `Arith.integer_parts` in the same
+file — function-level scope, not whole-file), off-target executed = 0, and warm
+verdicts equal a fresh full run on the edited tree.
+
+Decision + CI-usage guide: `docs/decisions/M107_incremental_history.md`.
+Evidence reports: `bench/results/decimal.incremental.{cold,warm}.json`.
+
 ## v1.27 close the catalogue-validation arc (M97–M98, 2026-06-02)
 
 The arc-closer. After two releases of "data-gated, no flips" deferred on
