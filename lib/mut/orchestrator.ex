@@ -34,10 +34,13 @@ defmodule Mut.Orchestrator do
     # M40 commit 3: build the tracer-macro index once per plan so the
     # walker can resolve if/unless to Kernel.if/2 / Kernel.unless/2
     # with proof (M39 spec, OpaquePolicy.trusted_kernel_control_flow?/3).
-    # `:env_walker` opt-in: when not in enabled_targets, no parsing or
-    # walking happens (byte-identity gate is binding).
+    # Built for `:env_walker` (its literal/variable surfaces) and for
+    # `:conditional` (the structural NegateConditional pass now gates its
+    # `if`/`unless` candidates on the same tracer proof — a skip-only
+    # cross-check that closes the Tier-3 trust gap). Absent for other plans,
+    # so the byte-identity gate is unaffected.
     macro_index =
-      if :env_walker in enabled_targets do
+      if :env_walker in enabled_targets or :conditional in enabled_targets do
         Mut.EnvOracle.build_macro_index(oracle.sites)
       else
         nil
@@ -154,7 +157,7 @@ defmodule Mut.Orchestrator do
     # M77: conditional mutators (opt-in `:conditional` target) — negate / force
     # if/unless conditions. Fallback-routed (whole-node span replace).
     {conditional_fallback, conditional_skips} =
-      conditional_results(ast, relative_file, source, enabled_targets, mutators)
+      conditional_results(ast, relative_file, source, enabled_targets, mutators, macro_index)
 
     # M81: statement-delete mutators (opt-in `:statement_delete` target) — delete
     # one non-last statement in a function body. Fallback-routed (whole-def
@@ -256,10 +259,31 @@ defmodule Mut.Orchestrator do
 
   # M77: conditional candidates via a syntactic AST walk. When the target is
   # off, no walk happens.
-  defp conditional_results(ast, relative_file, source, enabled_targets, mutators) do
+  #
+  # Tier-3 trust cross-check (ENV_WALKER.md): the syntactic walk finds every
+  # `if`/`unless`-shaped node, but a shadowed special form (`import Kernel,
+  # except: [if: 2]` + a custom `if` macro) would be mutated as if it were the
+  # Kernel form. So — exactly as the env-walker path does — gate each candidate
+  # on tracer proof that it resolved to `Kernel.if/2`/`Kernel.unless/2`
+  # (`kernel_control_flow_proven?/3`). Unproven sites are SKIPPED, not mutated.
+  # This is a pure post-filter: it can only remove candidates, so surviving
+  # candidates keep their stable IDs (no migration). On a normal project every
+  # `if`/`unless` is the Kernel form and proves out, so nothing changes.
+  defp conditional_results(ast, relative_file, source, enabled_targets, mutators, macro_index) do
     if :conditional in enabled_targets do
-      candidates = Mut.AstWalk.conditional_candidates(ast, file: relative_file, source: source)
-      enabled_fallback_results(candidates, :conditional, nil, mutators, source)
+      {proven, opaque} =
+        ast
+        |> Mut.AstWalk.conditional_candidates(file: relative_file, source: source)
+        |> Enum.split_with(fn candidate ->
+          Mut.OpaquePolicy.kernel_control_flow_proven?(
+            candidate.node,
+            macro_index,
+            candidate.file
+          )
+        end)
+
+      {mutants, skips} = enabled_fallback_results(proven, :conditional, nil, mutators, source)
+      {mutants, skips ++ Enum.map(opaque, &skip(&1, :opaque_control_flow, nil))}
     else
       {[], []}
     end

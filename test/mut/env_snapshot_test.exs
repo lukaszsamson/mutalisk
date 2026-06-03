@@ -109,15 +109,13 @@ defmodule Mut.EnvSnapshotTest do
   end
 
   describe "defaults" do
-    test "new struct defaults to trusted top_level normal-context with empty maps" do
+    test "new struct defaults to trusted top_level normal-context with empty binding scope" do
       snap = %EnvSnapshot{}
       assert snap.context == nil
       assert snap.scope == :top_level
       assert snap.trust_level == :trusted
-      assert snap.aliases == %{}
-      assert snap.imports == %{}
-      assert match?(%MapSet{}, snap.requires)
-      assert MapSet.size(snap.requires) == 0
+      assert match?(%MapSet{}, snap.bound_vars)
+      assert MapSet.size(snap.bound_vars) == 0
     end
   end
 end

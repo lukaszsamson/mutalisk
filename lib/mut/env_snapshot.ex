@@ -18,10 +18,11 @@ defmodule Mut.EnvSnapshot do
       `:quoted` (inside `quote do ... end`), `:generated` (AST
       node with `generated: true` metadata or a file mismatch).
 
-  `aliases`, `imports`, and `requires` are mutalisk-owned
-  serializable maps; they are NOT direct reads of `%Macro.Env{}`
-  private fields. M39 spec section "Public-API surface" forbids
-  direct private-field access.
+  `EnvSnapshot` carries *context + trust + binding scope*, not
+  module resolution. Alias/import/require resolution is the
+  compiler tracer oracle's job (`Mut.Trace` records the compiler's
+  `resolved_module/name/arity`); the walker never resolves modules,
+  so the snapshot intentionally holds no alias/import/require state.
 
   ## First-pass mutator gate
 
@@ -68,9 +69,6 @@ defmodule Mut.EnvSnapshot do
           context: context(),
           scope: scope(),
           trust_level: trust_level(),
-          aliases: %{optional(module()) => module()},
-          imports: %{optional(module()) => [{atom(), arity()}]},
-          requires: MapSet.t(module()),
           bound_vars: MapSet.t(atom())
         }
 
@@ -85,9 +83,6 @@ defmodule Mut.EnvSnapshot do
             context: nil,
             scope: :top_level,
             trust_level: :trusted,
-            aliases: %{},
-            imports: %{},
-            requires: MapSet.new(),
             # M54: local variable names bound and in scope at this node
             # (function params + enclosing clause-head patterns). Does not
             # enter stable-id identity.

@@ -113,16 +113,30 @@ defmodule Mut.OpaquePolicy do
       when context != nil,
       do: false
 
-  def trusted_kernel_control_flow?({name, _meta, _args}, _index, _snap)
+  def trusted_kernel_control_flow?(node, index, %Mut.EnvSnapshot{file: file}),
+    do: kernel_control_flow_proven?(node, index, file)
+
+  @doc """
+  The tracer-proof core of `trusted_kernel_control_flow?/3`, without the
+  `EnvSnapshot` scope/context guards: does the `macro_index` prove this
+  `if`/`unless` node resolved to `Kernel.if/2` / `Kernel.unless/2`?
+
+  Exposed so the purely-syntactic Tier-3 structural passes (`AstWalk`-based,
+  no `EnvSnapshot`) can apply the same compiler proof the env-walker path uses
+  — a pure skip filter (it can only *remove* candidates). `nil`/empty index, a
+  non-`if`/`unless` node, or no matching macro-dispatch event → `false`
+  (conservatively opaque).
+  """
+  @spec kernel_control_flow_proven?(term(), map() | nil, Path.t()) :: boolean()
+  def kernel_control_flow_proven?({name, _meta, _args}, _index, _file)
       when name not in [:if, :unless],
       do: false
 
-  def trusted_kernel_control_flow?(_node, nil, _snap), do: false
-  def trusted_kernel_control_flow?(_node, index, _snap) when map_size(index) == 0, do: false
+  def kernel_control_flow_proven?(_node, nil, _file), do: false
+  def kernel_control_flow_proven?(_node, index, _file) when map_size(index) == 0, do: false
 
-  def trusted_kernel_control_flow?({name, meta, args}, index, snap)
+  def kernel_control_flow_proven?({name, meta, args}, index, file)
       when name in [:if, :unless] and is_list(args) and is_list(meta) do
-    file = snap.file
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
     arity = length(args)
@@ -137,7 +151,7 @@ defmodule Mut.OpaquePolicy do
     end
   end
 
-  def trusted_kernel_control_flow?(_node, _index, _snap), do: false
+  def kernel_control_flow_proven?(_node, _index, _file), do: false
 
   @doc """
   Returns the canonical `trust_level` for a non-trusted macro

@@ -192,6 +192,58 @@ defmodule Mut.OpaquePolicyTest do
     end
   end
 
+  describe "kernel_control_flow_proven?/3 (Tier-3 syntactic gate, no EnvSnapshot)" do
+    defp kernel_if_index(file \\ "lib/foo.ex") do
+      %{
+        {file, 10, 5, :if, 2} => %{
+          kind: :imported_macro,
+          resolved_module: Kernel,
+          resolved_name: :if,
+          resolved_arity: 2
+        }
+      }
+    end
+
+    test "true with matching Kernel.if/2 proof for the candidate's file" do
+      assert OpaquePolicy.kernel_control_flow_proven?(
+               {:if, [line: 10, column: 5], [true, [do: 1, else: 2]]},
+               kernel_if_index(),
+               "lib/foo.ex"
+             )
+    end
+
+    test "false when the proof resolves to a user module (shadowed if)" do
+      idx = put_in(kernel_if_index()[{"lib/foo.ex", 10, 5, :if, 2}].resolved_module, MyApp.DSL)
+
+      refute OpaquePolicy.kernel_control_flow_proven?(
+               {:if, [line: 10, column: 5], [true, [do: 1]]},
+               idx,
+               "lib/foo.ex"
+             )
+    end
+
+    test "false on nil / empty index, non-if/unless node, and unmatched position" do
+      node = {:if, [line: 10, column: 5], [true, [do: 1]]}
+      refute OpaquePolicy.kernel_control_flow_proven?(node, nil, "lib/foo.ex")
+      refute OpaquePolicy.kernel_control_flow_proven?(node, %{}, "lib/foo.ex")
+
+      refute OpaquePolicy.kernel_control_flow_proven?(
+               {:case, [line: 10, column: 5], [1, [do: []]]},
+               kernel_if_index(),
+               "lib/foo.ex"
+             )
+
+      # Right node, wrong file/line -> no matching tracer event -> unproven.
+      refute OpaquePolicy.kernel_control_flow_proven?(node, kernel_if_index(), "lib/other.ex")
+
+      refute OpaquePolicy.kernel_control_flow_proven?(
+               {:if, [line: 99, column: 5], [true, [do: 1]]},
+               kernel_if_index(),
+               "lib/foo.ex"
+             )
+    end
+  end
+
   describe "opaque_call_trust_level/0" do
     test "always :opaque" do
       assert OpaquePolicy.opaque_call_trust_level() == :opaque
