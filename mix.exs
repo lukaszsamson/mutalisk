@@ -1,12 +1,27 @@
 defmodule Mutalisk.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
+  # Placeholder source URL — confirm/set once the public git remote exists (see
+  # docs/RELEASE.md, M112). The name follows the package + the author's other
+  # repos (e.g. crap_ex); update if the remote differs.
+  @source_url "https://github.com/lukaszsamson/mutalisk"
+
+  @description "Mutation testing for Elixir: a trustworthy, sandboxed engine " <>
+                 "with coverage-based test selection, Stryker-compatible JSON " <>
+                 "reports, umbrella support, and incremental cross-run history."
+
   @spec project() :: keyword
   def project do
     [
       app: :mutalisk,
-      version: "0.1.0",
+      version: @version,
       elixir: ">= 1.19.0",
+      name: "Mutalisk",
+      description: @description,
+      source_url: @source_url,
+      package: package(),
       start_permanent: Mix.env() == :prod,
       test_load_filters: [
         fn file ->
@@ -21,6 +36,23 @@ defmodule Mutalisk.MixProject do
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
         plt_add_apps: [:mix, :ex_unit]
       ]
+    ]
+  end
+
+  # Hex package metadata. `priv/` is intentionally excluded — it holds only the
+  # dev Dialyzer PLT and an unused schema reference; mutalisk reads no priv at
+  # runtime. Implementer docs (PLAN.md, the HLD, docs/decisions, docs/spikes,
+  # bench/) are excluded; only user-facing docs ship.
+  @spec package() :: keyword
+  defp package do
+    [
+      licenses: ["Apache-2.0"],
+      maintainers: ["Łukasz Samson"],
+      files: ~w(lib mix.exs README.md LICENSE CHANGELOG.md docs/MUTATORS.md),
+      links: %{
+        "GitHub" => @source_url,
+        "Docs" => "https://hexdocs.pm/mutalisk"
+      }
     ]
   end
 
