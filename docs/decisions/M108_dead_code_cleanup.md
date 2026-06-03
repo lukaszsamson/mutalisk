@@ -7,10 +7,15 @@ construction.** Four independent analyses agree (a real per-function CRAP run +
 three structural checks). The one flagged remnant (the `--worker-type` shim) is
 reachable, intentional UX whose removal is a behavior change + a
 release-management decision (out of v1.29 scope), so it is documented and
-retained. High-CRAP-but-live functions are flagged informationally (M108
-explicitly scopes out refactoring them). This is a data-gated outcome in the
-project's established discipline (M60/M88/M93/M95/M103: measure, and don't act
-on a hunch).
+retained.
+
+`crap_ex` flagged 8 functions over CRAP 30. On an explicit follow-up,
+**5 were remediated** (behavior-preserving refactor + targeted tests — the
+byte-identity gate confirms no behavior change); the remaining 3 are
+unit-coverage artifacts of functions covered by the e2e/integration layers (see
+the CRAP-results section). This is a data-gated outcome in the project's
+established discipline (M60/M88/M93/M95/M103: measure, and act on the real
+signal — not a hunch, and not on noise).
 
 ## Method
 
@@ -107,29 +112,36 @@ reuse feature, but `cross_run.exs` remains a **functionally distinct, working**
 standalone tool (it diffs two Stryker reports for human inspection — a different
 capability from reuse). Not dead; kept.
 
-## CRAP results — 8 functions over threshold (informational, NOT changed)
+## CRAP results — 8 over threshold, **5 remediated** this cycle
 
-`crap_ex` analyzed **1338 functions; 8 exceed CRAP 30** (worst 127.4). All are
-**live** — high CRAP means *risky to change* (complex + under-tested), never
-dead. M108 explicitly scopes out refactoring live high-CRAP code, so these are
-flags for a future cycle, not work items.
+`crap_ex`'s first pass found **8 functions over CRAP 30** (worst 127.4). All
+were **live** (high CRAP = risky to change, never dead). On a follow-up the
+five with a *real* signal — a genuine complexity or test-coverage gap — were
+remediated by **behavior-preserving refactor + targeted tests** (the byte-identity
+e2e + golden gates confirm zero behavior change: demo_app 67.7, 27 schema /
+4 fallback, 33 stable_ids).
 
-| function | CC | cov% | CRAP | note |
-|---|--:|--:|--:|---|
-| `Mut.Orchestrator.fallback_env_context/3` | 14 | 16.7 | **127.4** | 14-clause per-target dispatch; the niche-target clauses (`:map_update_drop`, `:receive_timeout`, …) aren't hit by unit tests → genuine **test-gap** signal |
-| `Mut.EnvWalker.descend/2` | 30 | 65.1 | 68.2 | genuinely **high CC (30)** — the strongest *refactor* candidate |
-| `Mut.AstWalk.literal?/1` | 9 | 33.3 | 33.0 | branchy literal classifier, unit-light |
-| `Mut.Trace.normalize_meta_value/1` | 8 | 25.0 | 35.0 | meta-normalization branches, unit-light |
-| `Mix.Tasks.Mut.render_reports/5` | 6 | 0.0 | 42.0 | mix-task layer; 0% is the coverage caveat (run under e2e) |
-| `Mix.Tasks.Mut.E2e.assert_incremental!/1` | 6 | 0.0 | 42.0 | the M106 e2e assertion (this release); branchy by construction, e2e-layer |
-| `Mut.EnvWalker.walk_try/2` | 6 | 0.0 | 42.0 | try/rescue/catch walk; unit-light |
-| `Mut.Worker.Formatter.handle_cast/2` | 6 | 0.0 | 42.0 | worker-port event handler; integration-covered |
+| function | before | after | how |
+|---|--:|--:|---|
+| `Orchestrator.fallback_env_context/3` | **127.4** | 5.9 | refactor — collapsed 9 identical `nil`-returning per-target clauses to one catch-all (CC 14→5); behavior-preserving (`nil` is the correct default for every non-pattern target) |
+| `EnvWalker.descend/2` | 68.2 | 27.3 | pure-extraction split (binding-scope forms vs `descend_expr/2` for plain expr/leaf nodes; CC 30→24, identical clause order) **+** new tests for the `cond`/`receive`/`try`/struct clauses (cov 65→82%) |
+| `EnvWalker.walk_try/2` | 42.0 | 6.7 | test — `try do/rescue/after` env-walk case (0→73% cov) |
+| `Trace.normalize_meta_value/1` | 35.0 | 8.0 | test — `to_dispatch_site/2` with tuple/list/scalar/pid meta values (25→100% cov) |
+| `AstWalk.literal?/1` | 33.0 | 9.0 | test — collection-literal module attributes (list / n-tuple / map / non-literal; 33→100% cov) |
 
-The right follow-up is **targeted unit tests** (especially
-`fallback_env_context/3`'s per-target clauses) and possibly **splitting
-`EnvWalker.descend/2`** (CC 30) — not removal, and not this cycle. `crap_ex`
-also dampened 2 generated dispatch tables (`Mut.JSON.pretty/2`,
-`Static.referenced_module/1`) — correctly not gated.
+The remaining **3 violations are coverage artifacts, not real gaps** — all are
+CC-6 functions at **0% _unit_ coverage** because `--export-coverage` captures
+only the unit suite; they are exercised by the layers it excludes:
+
+| function | why it's covered elsewhere |
+|---|---|
+| `Mix.Tasks.Mut.render_reports/5` | the report pipeline — run end-to-end on every `mut.e2e` |
+| `Mix.Tasks.Mut.E2e.assert_incremental!/1` | *is* e2e test-harness code (unit-testing a test assertion is circular) |
+| `Mut.Worker.Formatter.handle_cast/2` | worker-port event handling — covered by `integration_fallback` |
+
+Chasing these would mean contorting unit tests around mix-task / e2e / worker
+internals — out of "where it makes sense." `crap_ex` also correctly dampened 2
+generated dispatch tables (`Mut.JSON.pretty/2`, `Static.referenced_module/1`).
 
 ## Acceptance
 

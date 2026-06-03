@@ -60,6 +60,74 @@ defmodule Mut.EnvWalkerVariableTest do
     assert vars(src) == [{:v, [:x]}]
   end
 
+  # M108: cover the cond / receive / struct descent clauses (previously
+  # unexercised by env_walker tests), so reads inside them are still found.
+  test "descends cond clauses" do
+    src = ~S'''
+    defmodule Foo do
+      def run(a, b) do
+        cond do
+          a > b -> a
+          true -> b
+        end
+      end
+    end
+    '''
+
+    assert vars(src) == [a: [:b], b: [:a], a: [:b], b: [:a]]
+  end
+
+  test "descends receive do/after sections" do
+    src = ~S'''
+    defmodule Foo do
+      def run(a, b) do
+        receive do
+          {:msg, x} -> {x, a}
+        after
+          b -> a
+        end
+      end
+    end
+    '''
+
+    assert vars(src) == [a: [:b]]
+  end
+
+  test "descends struct field expressions without emptying the struct" do
+    src = ~S'''
+    defmodule Foo do
+      def run(a, b) do
+        %Range{first: a, last: b}
+      end
+    end
+    '''
+
+    # `a`/`b` are sole struct-field reads (no swap alternative survives), so no
+    # candidate — but the struct body is descended (clause exercised), not
+    # treated as an opaque leaf.
+    assert vars(src) == []
+  end
+
+  # M108: exercise the `try do/rescue/after` descent (walk_try) — the walker
+  # must descend every section so reads inside them are still found.
+  test "descends try do/rescue/after sections" do
+    src = ~S'''
+    defmodule Foo do
+      def run(a, b) do
+        try do
+          a + b
+        rescue
+          _e -> b
+        after
+          a
+        end
+      end
+    end
+    '''
+
+    assert vars(src) == [a: [:b], b: [:a], b: [:a], a: [:b]]
+  end
+
   test "underscore-prefixed and pinned names are neither bound nor swapped" do
     src = ~S'''
     defmodule Foo do

@@ -807,16 +807,23 @@ defmodule Mut.EnvWalker do
     descend_args(pairs, state)
   end
 
+  # Everything above is a binding-scope / special-form construct. Plain
+  # expression, collection, variable, and leaf nodes are handled by
+  # `descend_expr/2` — split out only to keep each function's cyclomatic
+  # complexity in check (M108/CRAP); the clause order across the two is
+  # identical to one flat dispatch, so behavior is unchanged.
+  defp descend(node, state), do: descend_expr(node, state)
+
   # Generic call node.
-  defp descend({name, meta, args}, state) when is_atom(name) and is_list(args) do
+  defp descend_expr({name, meta, args}, state) when is_atom(name) and is_list(args) do
     classify_call(name, meta, args, state)
   end
 
   # Two-tuple (e.g. {:do, body} keyword entries).
-  defp descend({_a, _b}, state), do: state
+  defp descend_expr({_a, _b}, state), do: state
 
   # List of children.
-  defp descend(list, state) when is_list(list) do
+  defp descend_expr(list, state) when is_list(list) do
     Enum.reduce(list, state, &walk(&1, &2))
   end
 
@@ -824,12 +831,12 @@ defmodule Mut.EnvWalker do
   # variable (calls carry a list as the third element). Emitting is gated on
   # `emit_variables` so literal/dispatch walks are unaffected (variables were
   # already leaves for them).
-  defp descend({name, meta, ctx} = node, state) when is_atom(name) and is_atom(ctx) do
+  defp descend_expr({name, meta, ctx} = node, state) when is_atom(name) and is_atom(ctx) do
     maybe_emit_variable_candidate(state, node, name, meta)
   end
 
   # Leaves.
-  defp descend(_other, state), do: state
+  defp descend_expr(_other, state), do: state
 
   defp descend_args(args, state) when is_list(args) do
     Enum.reduce(args, state, &walk(&1, &2))

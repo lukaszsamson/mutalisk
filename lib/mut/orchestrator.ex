@@ -685,30 +685,24 @@ defmodule Mut.Orchestrator do
     }
   end
 
+  # The env-context a fallback mutant carries, by target. Three cases:
+  #   * `:guard` — the guard's env_context (from the site, else the candidate).
+  #   * pattern targets (`:pattern_literal` M53, `:pattern_shape` M73) — the
+  #     candidate's `:match` context, which the literal/Pin mutators require.
+  #   * every other target — plain expression position (`nil`): module
+  #     attributes, env-walker collections, variable reads, and the whole-node
+  #     structural mutators (conditional/statement_delete/clause_delete/
+  #     pipeline_drop/map_update_drop/receive_timeout) need no env context.
+  # `nil` is the correct default, so unlisted targets fall through to it.
+  @pattern_targets [:pattern_literal, :pattern_shape]
+
   defp fallback_env_context(candidate, site, :guard),
     do: (site && site.env_context) || candidate.env_context
 
-  defp fallback_env_context(_candidate, _site, :module_attribute), do: nil
-  defp fallback_env_context(_candidate, _site, :env_walker), do: nil
-  # M53: pattern-position scalars carry `:match`, which the literal mutators'
-  # `applicable?/2` admit.
-  defp fallback_env_context(candidate, _site, :pattern_literal), do: candidate.env_context
-  # M54: variable references are reads (normal expression context).
-  defp fallback_env_context(_candidate, _site, :variable), do: nil
-  # M73: pin candidates carry `:match`, which Mut.Mutator.Pin requires.
-  defp fallback_env_context(candidate, _site, :pattern_shape), do: candidate.env_context
-  # M77: conditionals mutate the whole if/unless node; no env context needed.
-  defp fallback_env_context(_candidate, _site, :conditional), do: nil
-  # M81: statement deletion runs in body position by construction (collector).
-  defp fallback_env_context(_candidate, _site, :statement_delete), do: nil
-  # M87: clause deletion mutates the whole construct; no env context required.
-  defp fallback_env_context(_candidate, _site, :clause_delete), do: nil
-  # M94: pipeline drop mutates the whole `|>` chain; no env context required.
-  defp fallback_env_context(_candidate, _site, :pipeline_drop), do: nil
-  # M94: map-update drop mutates the whole `%{m | ...}` literal; no context.
-  defp fallback_env_context(_candidate, _site, :map_update_drop), do: nil
-  # M94: receive-timeout mutates the `after` clause within receive; no context.
-  defp fallback_env_context(_candidate, _site, :receive_timeout), do: nil
+  defp fallback_env_context(candidate, _site, target) when target in @pattern_targets,
+    do: candidate.env_context
+
+  defp fallback_env_context(_candidate, _site, _target), do: nil
 
   defp pair_with_site({%AstCandidate{}, %DispatchSite{}} = pair, _site), do: pair
   defp pair_with_site(%AstCandidate{} = candidate, site), do: {candidate, site}

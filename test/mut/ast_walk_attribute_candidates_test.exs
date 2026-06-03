@@ -64,6 +64,26 @@ defmodule Mut.AstWalk.AttributeCandidatesTest do
     assert [%{enclosing_module: Outer.Inner}] = candidates(source)
   end
 
+  # M108: cover the collection branches of the literal? classifier — a list,
+  # an n-tuple (`{:{}, ...}`), and a map are all literal-valued attributes.
+  test "emits collection-literal attributes (list / n-tuple / map)" do
+    assert [%{node: [1, 2, 3]}] = candidates("defmodule M do\n  @c [1, 2, 3]\nend\n")
+    assert [%{node: {:{}, _, [1, 2, 3]}}] = candidates("defmodule M do\n  @c {1, 2, 3}\nend\n")
+
+    assert [%{node: {:%{}, _, [a: 1, b: 2]}}] =
+             candidates("defmodule M do\n  @c %{a: 1, b: 2}\nend\n")
+  end
+
+  test "skips collections containing a non-literal element" do
+    assert [] = candidates("defmodule M do\n  @c [foo()]\nend\n")
+  end
+
+  # A bare 2-tuple is not classified literal (only `{:{}, ...}` n-tuples are),
+  # so it is skipped — guards the classifier's catch-all clause.
+  test "skips a bare two-tuple attribute" do
+    assert [] = candidates("defmodule M do\n  @c {1, 2}\nend\n")
+  end
+
   defp candidates(source) do
     assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
     Mut.AstWalk.attribute_candidates(ast, file: "sample.ex", source: source)

@@ -27,6 +27,29 @@ defmodule Mut.TraceTest do
     assert nil == Mut.Trace.to_dispatch_site({:remote_function, [], Kernel, :+, 2}, env)
   end
 
+  # M108: the recorded `meta` is normalized so it is always JSON/term-stable —
+  # tuples become lists, lists/scalars pass through, and anything else
+  # (pids, refs, funs) is inspected to a string.
+  test "normalizes recorded meta values (tuple -> list, scalars kept, exotic inspected)" do
+    meta = [
+      line: 10,
+      column: 5,
+      nested_tuple: {1, 2},
+      nested_list: [3, 4],
+      flag: true,
+      pid: self()
+    ]
+
+    site = Mut.Trace.to_dispatch_site({:remote_function, meta, String, :length, 1}, env())
+
+    assert site.meta[:line] == 10
+    assert site.meta[:nested_tuple] == [1, 2]
+    assert site.meta[:nested_list] == [3, 4]
+    assert site.meta[:flag] == true
+    assert is_binary(site.meta[:pid])
+    assert site.meta[:pid] =~ "#PID"
+  end
+
   test "normalizes local and imported dispatch events" do
     env = env()
 
