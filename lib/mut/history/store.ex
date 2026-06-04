@@ -23,7 +23,7 @@ defmodule Mut.History.Store do
   One reusable verdict. `status` is always a reusable one (killed/survived/
   timeout — error/invalid/skipped are never stored).
   """
-  @type record :: %{
+  @type verdict_record :: %{
           stable_id: String.t(),
           status: String.t(),
           source_digest: String.t(),
@@ -76,7 +76,7 @@ defmodule Mut.History.Store do
   entries not seen within `:retention_generations` (default 3) — bounding the
   store at roughly `plan_size × retention`.
   """
-  @spec build(store() | :cold, [record()], keyword()) :: store()
+  @spec build(store() | :cold, [verdict_record()], keyword()) :: store()
   def build(prev, records, opts \\ []) do
     retention = Keyword.get(opts, :retention_generations, @default_retention_generations)
     prev_verdicts = previous_verdicts(prev)
@@ -129,7 +129,7 @@ defmodule Mut.History.Store do
           (Path.t() -> String.t() | nil),
           pos_integer() | nil,
           String.t()
-        ) :: record() | nil
+        ) :: verdict_record() | nil
   def record_for(%Mut.Mutant{} = mutant, source_index, read_test, test_timeout_ms, project_digest) do
     if reusable_status?(mutant.status) do
       selected = mutant.covering_tests || []

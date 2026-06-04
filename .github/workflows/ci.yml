@@ -14,11 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Mutalisk's supported floor is Elixir >= 1.19. Widen this matrix to vet
-      # newer toolchains.
+      # Mutalisk's supported floor is Elixir >= 1.19. The matrix vets the floor
+      # and the current release (1.20 bumped the Mix manifest 34->35 and renamed
+      # `:elixir_quote` internals — both handled). Widen as new releases land.
       matrix:
         include:
           - elixir: "1.19"
+            otp: "28"
+          - elixir: "1.20"
             otp: "28"
     steps:
       - uses: actions/checkout@v6

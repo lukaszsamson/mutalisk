@@ -452,8 +452,6 @@ defmodule Mut.SchemaPlacer do
     if original_and_wildcard_arms?(arms), do: Enum.sort(ids), else: []
   end
 
-  defp schema_arm_ids(_arms), do: []
-
   defp schema_arm_entries(arms) when is_list(arms) do
     Enum.flat_map(arms, fn
       {:->, arm_meta, [[id], body]} when is_integer(id) and id > 0 ->
@@ -464,8 +462,6 @@ defmodule Mut.SchemaPlacer do
         []
     end)
   end
-
-  defp schema_arm_entries(_arms), do: []
 
   defp line_range({_name, meta, _args}, _arm_meta) when is_list(meta) do
     start_line = Keyword.fetch!(meta, :line)

@@ -392,8 +392,8 @@ defmodule Mut.Cli do
 
   defp test_paths(config), do: {:ok, string_list(Keyword.get(config, :test_paths, ["test"]))}
 
-  defp maybe_name_list(nil), do: {:ok, nil}
-
+  # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
+  # branch in `mutators/2`), so there is no nil clause.
   defp maybe_name_list(value) do
     {:ok, value |> name_list() |> Enum.map(&normalize_name/1)}
   end
@@ -419,8 +419,8 @@ defmodule Mut.Cli do
   defp number(value) when is_number(value), do: value
   defp number(_value), do: nil
 
-  defp validate_mutators(nil), do: :ok
-
+  # Only called with a non-nil list (from `maybe_name_list/1` in the
+  # `not is_nil(explicit)` branch), so there is no nil clause.
   defp validate_mutators(names) do
     unknown = Enum.reject(names, &(&1 in @known_mutators))
 

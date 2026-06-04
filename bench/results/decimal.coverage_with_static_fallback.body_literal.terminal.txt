@@ -1,0 +1,144 @@
+target=decimal repo=https://github.com/lukaszsamson/decimal.git ref=mutalisk-bench sha=78ff041047799f8bea75a47097430881cc9ba628 selection=coverage_with_static_fallback concurrency=1
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+Unchanged:
+  earmark_parser 1.4.41
+  ex_doc 0.35.1
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.1
+  nimble_parsec 1.4.0
+  stream_data 0.5.0
+* Getting ex_doc (Hex package)
+* Getting stream_data (Hex package)
+* Getting earmark_parser (Hex package)
+* Getting makeup_elixir (Hex package)
+* Getting makeup_erlang (Hex package)
+* Getting makeup (Hex package)
+* Getting nimble_parsec (Hex package)
+mix mut starting
+==> stream_data
+Compiling 3 files (.ex)
+warning: left..right inside match is deprecated, you must always match on the step: left..right//var or left..right//_ if you want to ignore it
+  lib/stream_data.ex:508: StreamData.integer/1
+
+warning: min..max inside match is deprecated, you must always match on the step: min..max//var or min..max//_ if you want to ignore it
+  lib/stream_data.ex:894: StreamData.list_length_range_fun/1
+
+Generated stream_data app
+==> mutalisk
+Compiling 95 files (.ex)
+Generated mutalisk app
+==> decimal
+Compiling 4 files (.ex)
+Generated decimal app
+warning: --worker-type is deprecated and ignored; `mix` is the only worker as of v1.15
+  (mutalisk 0.1.0) lib/mut/cli.ex:252: Mut.Cli.worker_type/2
+  (mutalisk 0.1.0) lib/mut/cli.ex:190: Mut.Cli.normalize/2
+  (mutalisk 0.1.0) lib/mix/tasks/mut.ex:84: Mix.Tasks.Mut.run/1
+  (mix 1.19.5) lib/mix/task.ex:499: anonymous fn/3 in Mix.Task.run_task/5
+  (mix 1.19.5) lib/mix/cli.ex:129: Mix.CLI.run_task/2
+  /Users/lukaszsamson/elixir/bin/mix:7: (file)
+
+Schema build starting
+Schema build complete
+[1/804] killed    lib/decimal.ex:1513  IntegerLiteral  replace integer literal 48 with 0
+[2/804] killed    lib/decimal.ex:2103  IntegerLiteral  replace integer literal 34 with 0
+[3/804] killed    lib/decimal.ex:1999  ComparisonNegation  replace == with !=
+[4/804] killed    lib/decimal.ex:441  Arithmetic  replace * with -
+[5/804] killed    lib/decimal.ex:991  ComparisonNegation  replace < with >=
+[6/804] killed    lib/decimal.ex:1239  Arithmetic  replace + with -
+[7/804] killed    lib/decimal.ex:1494  ComparisonNegation  replace == with !=
+[8/804] killed    lib/decimal.ex:1556  ComparisonNegation  replace != with ==
+[9/804] killed    lib/decimal.ex:1579  IntegerLiteral  replace integer literal 10 with 11
+[10/804] killed    lib/decimal.ex:1761  Arithmetic  replace + with -
+[11/804] killed    lib/decimal.ex:1725  IntegerLiteral  replace integer literal 10 with 0
+[12/804] killed    lib/decimal.ex:1052  BooleanLiteral  replace boolean literal true with false
+[13/804] survived  lib/decimal.ex:1824  Arithmetic  replace * with /
+[14/804] killed    lib/decimal.ex:2051  Boolean  replace || with &&
+[15/804] killed    lib/decimal.ex:718  IntegerLiteral  replace integer literal 1 with 0
+[16/804] survived  lib/decimal.ex:1852  IntegerLiteral  replace integer literal 1 with 0
+[17/804] killed    lib/decimal.ex:1545  ComparisonNegation  replace >= with <
+[18/804] killed    lib/decimal.ex:1331  IntegerLiteral  replace integer literal 1 with 0
+[19/804] killed    lib/decimal.ex:1049  BooleanLiteral  replace boolean literal false with true
+[20/804] killed    lib/decimal.ex:1240  IntegerLiteral  replace integer literal 10 with 0
+[21/804] killed    lib/decimal.ex:159  BooleanLiteral  replace boolean literal false with true
+[22/804] killed    lib/decimal.ex:1122  IntegerLiteral  replace integer literal 1 with 0
+[23/804] killed    lib/decimal.ex:1533  IntegerLiteral  replace integer literal 1 with 0
+[24/804] killed    lib/decimal.ex:1555  ComparisonNegation  replace == with !=
+[25/804] killed    lib/decimal.ex:1277  IntegerLiteral  replace integer literal 1 with 0
+[26/804] killed    lib/decimal.ex:1679  ComparisonNegation  replace < with >=
+[27/804] killed    lib/decimal.ex:1817  Arithmetic  replace * with /
+[28/804] survived  lib/decimal.ex:1114  ComparisonNegation  replace == with !=
+[29/804] killed    lib/decimal.ex:1533  Arithmetic  replace + with -
+[30/804] killed    lib/decimal.ex:1688  Arithmetic  replace * with -
+[31/804] killed    lib/decimal.ex:1674  IntegerLiteral  replace integer literal 1 with 0
+[32/804] killed    lib/decimal.ex:1568  Arithmetic  replace * with /
+[33/804] killed    lib/decimal.ex:1149  IntegerLiteral  replace integer literal 0 with 1
+[34/804] killed    lib/decimal.ex:1772  IntegerLiteral  replace integer literal 10 with 11
+[35/804] killed    lib/decimal.ex:1153  ComparisonNegation  replace == with !=
+[36/804] killed    lib/decimal.ex:1911  Arithmetic  replace + with *
+[37/804] killed    lib/decimal.ex:1544  ConcatOperator  replace ++ with --
+[38/804] killed    lib/decimal.ex:1549  IntegerLiteral  replace integer literal 1 with 0
+[39/804] killed    lib/decimal.ex:1850  IntegerLiteral  replace integer literal 48 with 0
+[40/804] killed    lib/decimal.ex:2071  IntegerLiteral  replace integer literal 101 with 102
+[41/804] killed    lib/decimal.ex:1874  IntegerLiteral  replace integer literal 1 with 0
+[42/804] killed    lib/decimal.ex:809  ComparisonNegation  replace == with !=
+[43/804] killed    lib/decimal.ex:1688  Arithmetic  replace * with +
+[44/804] killed    lib/decimal.ex:1154  IntegerLiteral  replace integer literal 0 with 1
+[45/804] killed    lib/decimal.ex:1782  IntegerLiteral  replace integer literal 10 with 0
+[46/804] killed    lib/decimal.ex:1572  Arithmetic  replace * with +
+[47/804] survived  lib/decimal.ex:672  Arithmetic  replace - with +
+[48/804] killed    lib/decimal.ex:1556  IntegerLiteral  replace integer literal 0 with 1
+[49/804] killed    lib/decimal.ex:1288  Arithmetic  replace + with -
+[50/804] killed    lib/decimal.ex:1772  Arithmetic  replace * with +
+[51/804] killed    lib/decimal.ex:1508  Arithmetic  replace + with -
+[52/804] survived  lib/decimal.ex:721  Arithmetic  replace - with *
+[53/804] killed    lib/decimal.ex:939  IntegerLiteral  replace integer literal 1 with 0
+[54/804] survived  lib/decimal.ex:672  Arithmetic  replace - with *
+[55/804] survived  lib/decimal.ex:1269  ComparisonBoundary  replace >= with >
+[56/804] survived  lib/decimal.ex:441  IntegerLiteral  replace integer literal 1 with 0
+[57/804] killed    lib/decimal.ex:1968  ComparisonNegation  replace == with !=
+[58/804] killed    lib/decimal.ex:1925  Boolean  replace and with or
+[59/804] killed    lib/decimal.ex:1076  BooleanLiteral  replace boolean literal false with true
+[60/804] survived  lib/decimal.ex:1239  IntegerLiteral  replace integer literal 1 with 0
+[61/804] killed    lib/decimal.ex:1691  IntegerLiteral  replace integer literal 1 with 0
+[62/804] killed    lib/decimal.ex:1782  Arithmetic  replace * with /
+[63/804] killed    lib/decimal.ex:1524  Arithmetic  replace + with *
+[64/804] killed    lib/decimal.ex:1742  IntegerLiteral  replace integer literal 1 with 0
+[65/804] killed    lib/decimal.ex:1579  IntegerLiteral  replace integer literal 1 with 0
+[66/804] killed    lib/decimal.ex:1827  IntegerLiteral  replace integer literal 104 with 0
+[67/804] killed    lib/decimal.ex:1251  IntegerLiteral  replace integer literal 1 with 0
+[68/804] survived  lib/decimal.ex:1116  Arithmetic  replace + with *
+[69/804] killed    lib/decimal.ex:1790  Arithmetic  replace - with *
+[70/804] killed    lib/decimal.ex:1754  Arithmetic  replace - with *
+[71/804] killed    lib/decimal.ex:1772  IntegerLiteral  replace integer literal 1 with 0
+[72/804] survived  lib/decimal.ex:1271  Arithmetic  replace * with -
+[73/804] killed    lib/decimal.ex:1782  Arithmetic  replace * with -
+[74/804] survived  lib/decimal.ex:1506  ConcatOperator  replace ++ with --
+[75/804] killed    lib/decimal.ex:1537  IntegerLiteral  replace integer literal 1 with 0
+[76/804] killed    lib/decimal.ex:1698  ComparisonNegation  replace == with !=
+[77/804] killed    lib/decimal.ex:1874  IntegerLiteral  replace integer literal 48 with 49
+[78/804] killed    lib/decimal.ex:1761  IntegerLiteral  replace integer literal 1 with 0
+[79/804] killed    lib/decimal.ex:1108  IntegerLiteral  replace integer literal 1 with 0
+[80/804] survived  lib/decimal.ex:1833  BooleanLiteral  replace boolean literal false with true
+[81/804] killed    lib/decimal.ex:1572  IntegerLiteral  replace integer literal 1 with 0
+[82/804] survived  lib/decimal.ex:945  ComparisonBoundary  replace < with <=
+[83/804] killed    lib/decimal.ex:1719  BooleanLiteral  replace boolean literal false with true
+[84/804] killed    lib/decimal.ex:1743  IntegerLiteral  replace integer literal 1 with 0
+[85/804] killed    lib/decimal.ex:1735  Arithmetic  replace * with -
+[86/804] killed    lib/decimal.ex:486  BooleanLiteral  replace boolean literal false with true
+[87/804] killed    lib/decimal.ex:1269  ComparisonNegation  replace >= with <
+[88/804] killed    lib/decimal.ex:1680  IntegerLiteral  replace integer literal 52 with 0
+[89/804] killed    lib/decimal.ex:1123  Arithmetic  replace + with *
+[90/804] killed    lib/decimal.ex:1996  ComparisonNegation  replace == with !=
+[91/804] killed    lib/decimal.ex:675  IntegerLiteral  replace integer literal 0 with 1
+[92/804] survived  lib/decimal.ex:435  IntegerLiteral  replace integer literal 0 with 1
+[93/804] killed    lib/decimal.ex:550  ComparisonNegation  replace == with !=
+[94/804] survived  lib/decimal.ex:1110  Arithmetic  replace + with *
+[95/804] killed    lib/decimal.ex:1233  IntegerLiteral  replace integer literal 1 with 0
+[96/804] killed    lib/decimal.ex:1827  IntegerLiteral  replace integer literal 104 with 0
+[97/804] killed    lib/decimal.ex:403  Arithmetic  replace - with *
+[98/804] killed    lib/decimal.ex:669  IntegerLiteral  replace integer literal 1 with 0

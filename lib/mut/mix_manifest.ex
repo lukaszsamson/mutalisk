@@ -1,7 +1,12 @@
 defmodule Mut.MixManifest do
   @moduledoc "Reads pinned Mix Elixir compiler manifests for fallback recompilation."
 
-  @supported_manifest_versions [29, 34]
+  # Elixir 1.20.0 bumped the manifest version 34 -> 35 with a byte-identical
+  # tuple shape (verified against a real v35 manifest: same 11-tuple outer,
+  # `{:module, kind, [source], ...}` 6-tuple module records, `{:source, size,
+  # mtime, digest, compile_refs, export_refs, runtime_refs, ...}` 12-tuple
+  # source records, refs still module lists). 34 = 1.20-rc.4, 29 = 1.19.
+  @supported_manifest_versions [29, 34, 35]
 
   defstruct version: nil, modules: %{}, sources: %{}
 

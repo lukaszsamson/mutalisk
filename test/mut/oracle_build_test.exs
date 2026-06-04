@@ -39,6 +39,14 @@ defmodule Mut.OracleBuildTest do
     |> Mut.JSON.encode!(pretty: true)
   end
 
+  # The `:elixir_*` Erlang modules (`:elixir_quote`, `:elixir_utils`, …) are
+  # the compiler's own internals, injected when it processes quote/macros —
+  # never user-source dispatches, never mutation targets. Their names drift
+  # across Elixir versions (1.20 renamed `:elixir_quote.shallow_validate_ast/1`
+  # to `:elixir_quote.unquote/1`), so filter them out to keep the golden
+  # version-tolerant rather than pinning it to one compiler release.
+  defp compile_time_module_dispatch?(%{"resolved_module" => "elixir_" <> _}), do: true
+
   defp compile_time_module_dispatch?(%{"column" => nil, "resolved_module" => module})
        when module in ["Elixir.Module", "Elixir.Kernel", "erlang"] do
     true
