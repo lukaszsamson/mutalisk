@@ -6032,8 +6032,23 @@ file → conservative `:error`, the documented P2 bucket):
   compile-time class).
 - **makeup** — 44 mutants, errors=2 (both NimbleParsec combinator compile-time
   class); weak suite as documented.
-- Fixed a real run.sh staleness bug: it still forwarded the M112-removed
-  `--worker-type` flag (would now error).
+
+*Broad plan-generation gate* (`bench/run.sh --debug-plan`, 25 prepped targets —
+oracle build + baseline + plan across the corpus; exercises every mutator walk
+and the M113/M115/M118/M121 paths). **20/25 PLAN_OK, 0 CRASH** — ~9,000 mutants
+planned across decimal, plug_crypto, nimble_options, jason, plug, gettext,
+phoenix_html, telemetry_metrics, nimble_pool, nimble_csv, castore, mime,
+gen_stage, makeup, timex (2534), absinthe, bandit, ecto (1547, DB-excluded),
+mint, phoenix_live_view (1303) — with **zero mutalisk crashes** in
+oracle/walk/plan. The 5 NOPLAN are all pre-existing baseline/environment
+failures, not mutalisk defects (this host runs Elixir 1.21.0-dev, so there is
+upstream test drift): phoenix_pubsub (clustering test), tzdata (1 doctest),
+credo (15 tests, the 1.19+ regex/parser drift), mox (1000s timeout),
+phoenix (its own test suite fails to compile under 1.21-dev's ParallelCompiler).
+
+- Fixed two real `bench/run.sh` staleness bugs: it still forwarded the
+  M112-removed `--worker-type` flag (would now error), and lacked a plan-only
+  mode (added `--debug-plan`).
 
 **Umbrella acceptance.**
 
