@@ -6001,3 +6001,59 @@ added where unit-testable; full `bin/verify` green.
   `preferred_cli_env: [mut: :test]` works without exporting `MIX_ENV`.
 - **T14** history — written in `after` from a live metrics snapshot, so a
   mid-run abort still persists partial verdicts for the next `--incremental`.
+
+## Acceptance validation — 2026-06-10 (post-review)
+
+Operational re-runs after the M113–M123 fixes. PRE = `4e1b734` (pre-review),
+POST = current HEAD.
+
+**Byte-identity gate (PRE vs POST).** Confirms M115's stable-id churn is bounded
+to exactly the literal classes it re-spanned, with zero collateral churn:
+
+- **jason** — 936 → 936 mutants (count identical); 97 ids changed, ALL
+  AtomLiteral (4) / NilLiteral (3) / StringLiteral (90), matching counts both
+  directions; 839 unchanged. Each churned literal is at the SAME
+  `file:line:col`+`start_byte`, only `end_byte` corrected (e.g. a StringLiteral
+  `2814` → `2817`).
+- **decimal** (canonical stress target) — 1001 → 1001; 137 changed = 75 Atom +
+  6 Nil + 56 String; 864 unchanged. Same pattern.
+- Harness: `/tmp/biq_gate.sh <target>` (copy corpus project, inject dep,
+  `mix mut --debug-plan` at HEAD then `4e1b734`, diff sorted stable-ids by
+  mutator). See [[byte-identity-gate-harness]].
+
+**OSS corpus (full `mix mut` via `bench/run.sh`, c=4).** No NEW errors from the
+fixes; the only `:error` mutants are the pre-existing compile-time-mutant class
+(a mutation in a function executed during test *compilation* crashes the test
+file → conservative `:error`, the documented P2 bucket):
+
+- **plug_crypto** — 82 mutants, **errors=0**, combined 65.0% (v1 zero-error
+  smoke holds).
+- **jason** — 405 mutants, errors=2 (both `Jason.Codegen.check_safe_key!`
+  compile-time class).
+- **makeup** — 44 mutants, errors=2 (both NimbleParsec combinator compile-time
+  class); weak suite as documented.
+- Fixed a real run.sh staleness bug: it still forwarded the M112-removed
+  `--worker-type` flag (would now error).
+
+**Umbrella acceptance.**
+
+- **unilink** (5-app) — `mix mut --debug-plan` succeeded: full umbrella oracle
+  build + baseline (PASSED) + plan = **1805 mutants distributed across all 5
+  apps** (backoffice 782, unilink 638, unilink_backend 285, unilink_background
+  71, unilink_tracking 29), invalid=0, **no `:parse_error` skips**. A capped
+  real run (`--max-mutants 25`, static, c=4) completed cleanly (exit 0): **0
+  dep-path errors** (per-app fallback manifest resolution — exactly R1's
+  `_build/.../lib/nil/` failure mode — works), fallback path exercised (48% of
+  executed), report written, and **no new `erl_crash.dump`** despite timeouts +
+  errors (validates M120 `ERL_CRASH_DUMP_SECONDS=0`). The 20/25 timeouts are
+  detections from the low-stable-id sample under all-tests static selection, not
+  a defect. (unilink `mix.exs` dep injection reverted; artifacts cleaned.)
+- **zorbito** (14-app) — informational (full run needs clustering/DB infra):
+  umbrella detected, all 14 apps resolved (no `nil`), `project_digest` stable.
+
+**Bug found + fixed during acceptance (M116 follow-up).** The umbrella
+`project_digest` crashed with `UnicodeConversionError` on unilink's first
+non-UTF-8 `priv` asset — M116 added the `priv/**/*` glob, and `normalize/1`'s
+`Code.string_to_quoted` runs `String.to_charlist`, which *raises* on invalid
+UTF-8. Guarded with `String.valid?/1` (falls back to raw bytes); regression test
+uses a real gzip header. `project_digest` now clean on both umbrellas.

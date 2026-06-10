@@ -1,0 +1,1365 @@
+{
+  "files": {
+    "lib/makeup.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/makeup_test.exs",
+            "test/html_formatter_test.exs",
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1415,
+          "id": "9184e105ce43ae9c9570fe9578c3cd61",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 33
+            },
+            "start": {
+              "column": 21,
+              "line": 33
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(module)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/makeup_test.exs",
+            "test/html_formatter_test.exs",
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1670,
+          "id": "c1332fd41856875ff3226208eb6ac829",
+          "killedBy": [
+            "MakeupTest:highlight_inner_html highlight using custom tag <samp>"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 56
+            },
+            "start": {
+              "column": 21,
+              "line": 56
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(module)",
+          "status": "Killed"
+        }
+      ],
+      "source": "defmodule Makeup do\n  @moduledoc \"\"\"\n  Syntax highlighting library for code, inspired by Pygments.\n\n  By default, it doesn't include any lexers. You must import\n  them separately (even the Elixir lexer).\n  \"\"\"\n  alias Makeup.Formatters.HTML.HTMLFormatter\n  alias Makeup.Lexers.ElixirLexer\n  alias Makeup.Registry\n\n  @doc \"\"\"\n  Highlights the given string using the given lexer and formatter.\n\n  By default it highlight the Elixir language using\n  `Makeup.Formatters.HTML.HTMLFormatter`.\n\n  ## Options:\n\n  - `:lexer` - module name of the lexer to use (default: `Makeup.Lexers.ElixirLexer`)\n  - `:lexer_options` - list of options for the lexer\n  - `:formatter` - module name of the formatter to use (defult: `Makeup.Formatters.HTML.HTMLFormatter`)\n  - `:formatter_options` - list of options for the formatter. For the included HTMLFormatter, that's:\n    - `:css_class` - css class(es) of the main `<pre>` element (default: `\"highlight\"`)\n    - `:highlight_tag` - tag that wraps every token (default: `\"span\"`)\n  \"\"\"\n  def highlight(source, options \\\\ []) do\n    {lexer, lexer_options} = fetch_lexer(options)\n\n    formatter =\n      case options[:formatter] do\n        nil -> HTMLFormatter\n        module when is_atom(module) -> module\n      end\n\n    formatter_options = Keyword.get(options, :formatter_options, [])\n    tokens = lexer.lex(source, lexer_options)\n    formatter.format_as_binary(tokens, formatter_options)\n  end\n\n  @doc \"\"\"\n  Convenience for formatting as the inner bits of HTML.\n  \"\"\"\n  def highlight_inner_html(source, options \\\\ []) do\n    {lexer, lexer_options} = fetch_lexer(options)\n    formatter_options = Keyword.get(options, :formatter_options, [])\n\n    tokens = lexer.lex(source, lexer_options)\n    HTMLFormatter.format_inner_as_binary(tokens, formatter_options)\n  end\n\n  defp fetch_lexer(options) do\n    {lexer, lexer_options} =\n      case options[:lexer] do\n        nil -> {ElixirLexer, []}\n        module when is_atom(module) -> {module, []}\n        name -> Registry.fetch_lexer_by_name!(name)\n      end\n\n    {lexer, Keyword.merge(lexer_options, Keyword.get(options, :lexer_options, []))}\n  end\n\n  @doc \"\"\"\n  Generates a CSS stylesheet for highlighted code for the given style.\n\n  It expects a `style`, either as an atom name or as \"style map\",\n  and the `css_class` as the top level class for highlighted code.\n\n  For example, if the `css_class` is `\"highlight\"` (the default), the stylesheet\n  has the form:\n\n  ```css\n  .highlight .someclass {...}\n  .highlight .anotherclass {...}\n  ```\n\n  See `Makeup.Styles.HTML.StyleMap` for all style maps.\n  \"\"\"\n  def stylesheet(style \\\\ :default_style, css_class \\\\ \"highlight\") do\n    HTMLFormatter.stylesheet(style, css_class)\n  end\nend\n"
+    },
+    "lib/makeup/formatters/html/html_formatter.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1076,
+          "id": "07e6101f41867d4e1c832882b5c13b44",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c >= 128)"
+          ],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 71
+            },
+            "start": {
+              "column": 23,
+              "line": 71
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(c)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard <= with >",
+          "duration": 1056,
+          "id": "0a260f50eb03cdb96d12cec062c0c3fe",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c >= 128)"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 51
+            },
+            "start": {
+              "column": 45,
+              "line": 51
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "c > 127",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard >= with <",
+          "duration": 1057,
+          "id": "25cb448d6b5e65aca965f4a4176d1c87",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c >= 128)"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 53
+            },
+            "start": {
+              "column": 45,
+              "line": 53
+            }
+          },
+          "mutatorName": "GuardComparisonNegation",
+          "replacement": "c < 128",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 38 with 0",
+          "duration": 1072,
+          "id": "2b91ea75ef318cb02fd83fb2b0b822e5",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 41
+            },
+            "start": {
+              "column": 19,
+              "line": 41
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1139,
+          "id": "334f6bcbd878bd88749ecfc3032856e5",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c <= 127)"
+          ],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 51
+            },
+            "start": {
+              "column": 27,
+              "line": 51
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(c)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 62 with 0",
+          "duration": 1132,
+          "id": "429b9644362d40879e48bfac32375b11",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 45
+            },
+            "start": {
+              "column": 19,
+              "line": 45
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard >= with >",
+          "duration": 1096,
+          "id": "5272396a29f3f85628a393800f52fdcf",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:edge case - character with value = 128"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 53
+            },
+            "start": {
+              "column": 45,
+              "line": 53
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "c > 128",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 692,
+          "id": "61c6d9f3359a3ba03be63caa055c7ecc",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c >= 128)"
+          ],
+          "location": {
+            "end": {
+              "column": 17,
+              "line": 13
+            },
+            "start": {
+              "column": 17,
+              "line": 13
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "css_class && []",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 34 with 35",
+          "duration": 1303,
+          "id": "6209b744492612922f9497e167cd9282",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c <= 127)"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 47
+            },
+            "start": {
+              "column": 19,
+              "line": 47
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "35",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_atom with is_nil",
+          "duration": 1386,
+          "id": "6c46f06dcc220143380125381fc4eaca",
+          "killedBy": [
+            "MakeupTest:stylesheet returns stylesheet in given style"
+          ],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 130
+            },
+            "start": {
+              "column": 41,
+              "line": 130
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_nil(style)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 39 with 40",
+          "duration": 1355,
+          "id": "7d291795eb7456f9c33c304a542ecc53",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c <= 127)"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 49
+            },
+            "start": {
+              "column": 19,
+              "line": 49
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "40",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard <= with <",
+          "duration": 1371,
+          "id": "7ee9eb776f96c1d0176a214add5dc6ca",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c <= 127)"
+          ],
+          "location": {
+            "end": {
+              "column": 53,
+              "line": 51
+            },
+            "start": {
+              "column": 45,
+              "line": 51
+            }
+          },
+          "mutatorName": "GuardComparisonBoundary",
+          "replacement": "c < 127",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1471,
+          "id": "9494a828722373499a4be7671edce7bd",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 36,
+              "line": 71
+            },
+            "start": {
+              "column": 23,
+              "line": 71
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(c)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1451,
+          "id": "9e0937f4ef1381007049d4030779690e",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 53
+            },
+            "start": {
+              "column": 27,
+              "line": 53
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(c)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 60 with 0",
+          "duration": 1455,
+          "id": "9f5cb11f5c62f13c5f2c37d2a8507b86",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 43
+            },
+            "start": {
+              "column": 19,
+              "line": 43
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 34 with 0",
+          "duration": 1236,
+          "id": "a32ed0c484f6dbf97a4137e236563b2c",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 47
+            },
+            "start": {
+              "column": 19,
+              "line": 47
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 60 with 61",
+          "duration": 1263,
+          "id": "a5da6fcb801ce5840064993f35faf60c",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c <= 127)"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 43
+            },
+            "start": {
+              "column": 19,
+              "line": 43
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "61",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 39 with 0",
+          "duration": 1241,
+          "id": "a863c2e0ee3e69f2521a5214254c1fe8",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 49
+            },
+            "start": {
+              "column": 19,
+              "line": 49
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "0",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 62 with 63",
+          "duration": 1204,
+          "id": "ad86e7e6bec232be23234d4d13e4ebf6",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 45
+            },
+            "start": {
+              "column": 19,
+              "line": 45
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "63",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace integer literal 38 with 39",
+          "duration": 1203,
+          "id": "b971fd9daa9c4633754ba1c00e152d11",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 41
+            },
+            "start": {
+              "column": 19,
+              "line": 41
+            }
+          },
+          "mutatorName": "IntegerLiteral",
+          "replacement": "39",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1610,
+          "id": "bfac9b528636a3f5a2382552ec901b38",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c >= 128)"
+          ],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 53
+            },
+            "start": {
+              "column": 27,
+              "line": 53
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(c)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1669,
+          "id": "c856a304ec5674a63e76c4a99ebcfcb5",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:encode ASCII character (c >= 128)"
+          ],
+          "location": {
+            "end": {
+              "column": 43,
+              "line": 61
+            },
+            "start": {
+              "column": 28,
+              "line": 61
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(iodata)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace == with !=",
+          "duration": 661,
+          "id": "e57f87b63a6dbe0cc2515296ce3e3e17",
+          "killedBy": [
+            "MakeupTest.Lexer.HTMLFormatterTest:special characters are correctly encoded"
+          ],
+          "location": {
+            "end": {
+              "column": 21,
+              "line": 14
+            },
+            "start": {
+              "column": 21,
+              "line": 14
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "selectable != false",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/html_formatter_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 923,
+          "id": "ecd611683b54883b1632f6d4d31acce1",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 40,
+              "line": 51
+            },
+            "start": {
+              "column": 27,
+              "line": 51
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(c)",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Formatters.HTML.HTMLFormatter do\n  @moduledoc \"\"\"\n  Turns a list of tokens into HTML fragments.\n  \"\"\"\n\n  @group_highlight_js \"lib/makeup/formatters/html/scripts/group_highlighter_javascript.js\" |> File.read!\n\n  defp render_token(escaped_value, css_class, meta, highlight_tag) do\n    group_id = meta[:group_id]\n    selectable = Map.get(meta, :selectable, [])\n\n    classes = [\n      css_class || [],\n      if selectable == false do \" unselectable\" else [] end\n    ]\n\n    [\n      \"<\",\n      highlight_tag,\n      ~S( class=\"),\n      classes,\n      ~S(\"),\n      if group_id do [~S( data-group-id=\"), group_id, ~S(\")] else [] end,\n      \">\",\n      escaped_value,\n      \"</\",\n      highlight_tag,\n      \">\",\n    ]\n  end\n\n  @doc \"\"\"\n  Format a single token into an iolist.\n  \"\"\"\n  def format_token({tag, meta, value}, highlight_tag) do\n    escaped_value = escape(value)\n    css_class = Makeup.Token.Utils.css_class_for_token_type(tag)\n    render_token(escaped_value, css_class, meta, highlight_tag)\n  end\n\n  defp escape_for(?&), do: \"&amp;\"\n\n  defp escape_for(?<), do: \"&lt;\"\n\n  defp escape_for(?>), do: \"&gt;\"\n\n  defp escape_for(?\"), do: \"&quot;\"\n\n  defp escape_for(?'), do: \"&#39;\"\n\n  defp escape_for(c) when is_integer(c) and c <= 127, do: c\n\n  defp escape_for(c) when is_integer(c) and c >= 128, do: << c :: utf8 >>\n\n  defp escape_for(string) when is_binary(string) do\n    string\n    |> to_charlist()\n    |> Enum.map(&escape_for/1)\n  end\n\n  defp escape(iodata) when is_list(iodata) do\n    iodata\n    |> :lists.flatten()\n    |> Enum.map(&escape_for/1)\n  end\n\n  defp escape(other) when is_binary(other) do\n    escape_for(other)\n  end\n\n  defp escape(c) when is_integer(c) do\n    [escape_for(c)]\n  end\n\n  defp escape(other) do\n    raise \"Found `#{inspect(other)}` inside what should be an iolist\"\n  end\n\n  @doc \"\"\"\n  Turns a list of tokens into an iolist which represents an HTML fragment.\n  This fragment can be embedded directly into an HTML document.\n  \"\"\"\n  def format_inner_as_iolist(tokens, opts) do\n    highlight_tag = Keyword.get(opts, :highlight_tag, \"span\")\n    Enum.map(tokens, &format_token(&1, highlight_tag))\n  end\n\n  @doc \"\"\"\n  Turns a list of tokens into an HTML fragment.\n  This fragment can be embedded directly into an HTML document.\n  \"\"\"\n  def format_inner_as_binary(tokens, opts) do\n    tokens\n    |> format_inner_as_iolist(opts)\n    |> IO.iodata_to_binary\n  end\n\n  @doc \"\"\"\n  Turns a list of tokens into an iolist which represents an HTML fragment.\n  This fragment can be embedded directly into an HTML document.\n  \"\"\"\n  def format_as_iolist(tokens, opts \\\\ []) do\n    css_class = Keyword.get(opts, :css_class, \"highlight\")\n    inner = format_inner_as_iolist(tokens, opts)\n\n    [\n      ~S(<pre class=\"),\n      css_class,\n      ~S(\"><code>),\n      inner,\n      ~S(</code></pre>)\n    ]\n  end\n\n  @doc \"\"\"\n  Turns a list of tokens into an HTML fragment.\n  This fragment can be embedded directly into an HTML document.\n  \"\"\"\n  def format_as_binary(tokens, opts \\\\ []) do\n    tokens\n    |> format_as_iolist(opts)\n    |> IO.iodata_to_binary\n  end\n\n  @doc \"\"\"\n  Return the CSS stylesheet for a given style.\n  \"\"\"\n  def stylesheet(style \\\\ :default_style, css_class \\\\ \"highlight\")\n\n  def stylesheet(style, css_class) when is_atom(style) do\n    stylesheet(apply(Makeup.Styles.HTML.StyleMap, style, []), css_class)\n  end\n\n  def stylesheet(style, css_class) do\n    Makeup.Styles.HTML.Style.stylesheet(style, css_class)\n  end\n\n  @doc \"\"\"\n  Return a JavaScript snippet to highlight code on mouseover.\n  This is \"raw\" javascript, and for inclusion in an HTML file\n  it must be wrapped in a `<script>` tag.\n  \"\"\"\n  def group_highlighter_javascript() do\n    @group_highlight_js\n  end\nend\n"
+    },
+    "lib/makeup/lexer.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 659,
+          "id": "f3c1ed4a9cc8aca3c67c5cf1ad0f8f9e",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 32,
+              "line": 76
+            },
+            "start": {
+              "column": 32,
+              "line": 76
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "all_but_last_line -- [first_line | lines]",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Lexer do\n  @moduledoc \"\"\"\n  A lexer turns raw source code into a list of tokens.\n  \"\"\"\n  alias Makeup.Lexer.Types, as: T\n  alias Makeup.Lexer.Postprocess\n\n  @doc \"\"\"\n  Parses the smallest number of tokens that make sense.\n  It's a `parsec`.\n  \"\"\"\n  @callback root_element(String.t) :: T.parsec_result\n\n  @doc \"\"\"\n  Parses the given string into a `parsec` result that includes a list of tokens.\n  \"\"\"\n  @callback root(String.t) :: T.parsec_result\n\n  @doc \"\"\"\n  Post-processes a list of tokens before matching the contained groups.\n  \"\"\"\n  @callback postprocess([T.token()], list()) :: [T.token()]\n\n  @doc \"\"\"\n  Matches groups in a list of tokens.\n  \"\"\"\n  @callback match_groups([T.token()], String.t) :: [T.token()]\n\n  @doc \"\"\"\n  Lexes a string into a list of tokens\n  \"\"\"\n  @callback lex(String.t(), list()) :: [T.token()]\n\n\n  @doc \"\"\"\n  Merges the token values into the original string.\n\n  Inverts the output of a lexer. That is, if `lexer` is a lexer, then:\n\n      string |> lexer.lex() |> Makeup.Lexer.unlex() == string\n\n  This only works for a correctly implemented lexer, of course.\n  The above identity can be treated as a lexer invariant for newly implemented lexers.\n  \"\"\"\n  @spec unlex(list(T.token())) :: String.t()\n  def unlex(tokens) do\n    tokens\n    |> Enum.map(&Postprocess.token_value_to_binary/1)\n    |> Enum.map(fn {_tag, _meta, value} -> value end)\n    |> Enum.join()\n  end\n\n  @doc \"\"\"\n  Splits a list of tokens on newline characters (`\\n`).\n\n  The result is a list of lists of tokens with no newlines.\n  \"\"\"\n  @spec split_into_lines(list(T.token())) :: list(list(T.token()))\n  def split_into_lines(tokens) do\n    {lines, last_line} =\n      Enum.reduce tokens, {[], []}, (fn token, {lines, line} ->\n        {ttype, meta, text} = Postprocess.token_value_to_binary(token)\n        case String.split(text, \"\\n\") do\n          [_] -> {lines, [token | line]}\n          [part | parts] ->\n            first_line = [{ttype, meta, part} | line] |> :lists.reverse\n\n            all_but_last_line =\n              parts\n              |> Enum.drop(-1)\n              |> Enum.map(fn tok_text -> [{ttype, meta, tok_text}] end)\n              |> :lists.reverse()\n\n            last_line = [{ttype, meta, Enum.at(parts, -1)}]\n\n            {all_but_last_line ++ [first_line | lines], last_line}\n        end\n      end)\n\n    :lists.reverse([last_line | lines])\n  end\n\n  @doc \"\"\"\n  Merge adjacent tokens of the same type and with the same attributes.\n\n  Doing this will require iterating over the list of tokens again,\n  so only do this if you have a good reason.\n  \"\"\"\n  @spec merge(list(T.token())) :: list(T.token())\n  def merge([{tag, meta, value1}, {tag, meta, value2} | rest]),\n    do: merge [{tag, meta, value1 <> value2} | rest]\n  def merge([token | rest]),\n    do: [token | merge(rest)]\n  def merge([]),\n    do: []\nend\n"
+    },
+    "lib/makeup/lexer/combinators.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 20758,
+          "id": "4adb7ede66e305c3d780d915fb33468e",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 75,
+              "line": 132
+            },
+            "start": {
+              "column": 62,
+              "line": 132
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(opts)",
+          "status": "Timeout"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace > with <=",
+          "duration": 730,
+          "id": "50f79aa41cc757055021c6cc9e1ce597",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 73
+            },
+            "start": {
+              "column": 51,
+              "line": 73
+            }
+          },
+          "mutatorName": "ComparisonNegation",
+          "replacement": "{byte_size(a), a} <= {byte_size(b), b}",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 1335,
+          "id": "5b74e630cf2bda3b7ab681fc21337962",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 62,
+              "line": 24
+            },
+            "start": {
+              "column": 49,
+              "line": 24
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(attrs)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_list with is_tuple",
+          "duration": 1313,
+          "id": "5e5074053c8ab4cf1292a7a0b42ffcbd",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 81,
+              "line": 222
+            },
+            "start": {
+              "column": 66,
+              "line": 222
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_tuple(middle)",
+          "status": "RuntimeError",
+          "statusReason": "\n== Compilation error in file test/lexer/combinators_test.exs ==\n** (FunctionClauseError) no function clause matching in Makeup.Lexer.Combinators.string_like/5    \n    \n    The following arguments were given to Makeup.Lexer.Combinators.string_like/5:\n    \n        # 1\n        \"--\"\n    \n        # 2\n        \"--\"\n    \n        # 3\n        []\n    \n        # 4\n        :comment\n    \n        # 5\n        %{}\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def string_like(+left+, +right+, +middle+, +ttype+, +attrs+) when -is_tuple(middle)-\n    \n    (makeup 1.2.1) Makeup.Lexer.Combinators.string_like/5\n    test/lexer/combinators_test.exs:71: anonymous fn/2 in :elixir_compiler_8.__MODULE__/1\n    (ex_unit 1.21.0-dev) lib/ex_unit/callbacks.ex:811: ExUnit.Callbacks.__describe__/4\n    test/lexer/combinators_test.exs:70: (module)\n    (elixir 1.21.0-dev) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.21.0-dev) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 604,
+          "id": "6cdfd50e0dc67c3139692132059c7428",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 238
+            },
+            "start": {
+              "column": 28,
+              "line": 238
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "middle -- [utf8_char([])]",
+          "status": "RuntimeError",
+          "statusReason": "\n== Compilation error in file test/lexer/combinators_test.exs ==\n** (FunctionClauseError) no function clause matching in NimbleParsec.choice/3    \n    \n    The following arguments were given to NimbleParsec.choice/3:\n    \n        # 1\n        []\n    \n        # 2\n        [[string: \"code\"]]\n    \n        # 3\n        []\n    \n    Attempted function clauses (showing 1 out of 1):\n    \n        def choice(+combinator+, -[_, _ | _] = choices-, +opts+) when +is_list(combinator)+\n    \n    (nimble_parsec 1.4.0) NimbleParsec.choice/3\n    (makeup 1.2.1) lib/makeup/lexer/combinators.ex:199: Makeup.Lexer.Combinators.string_like/5\n    test/lexer/combinators_test.exs:72: anonymous fn/2 in :elixir_compiler_8.__MODULE__/1\n    (ex_unit 1.21.0-dev) lib/ex_unit/callbacks.ex:811: ExUnit.Callbacks.__describe__/4\n    test/lexer/combinators_test.exs:70: (module)\n    (elixir 1.21.0-dev) lib/kernel/parallel_compiler.ex:667: Kernel.ParallelCompiler.require_file/2\n    (elixir 1.21.0-dev) lib/kernel/parallel_compiler.ex:550: anonymous fn/5 in Kernel.ParallelCompiler.spawn_workers/8\n"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace and with or",
+          "duration": 720,
+          "id": "74771a092ea14c587aff5941306f4172",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 28,
+              "line": 136
+            },
+            "start": {
+              "column": 28,
+              "line": 136
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "is_binary(left) or is_binary(right)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_float",
+          "duration": 1445,
+          "id": "8063b9cb041a926ff5982272e7daaad5",
+          "killedBy": [
+            "MakeupTest.Lexer.CombinatorsTest:string_like non-empty middle"
+          ],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 176
+            },
+            "start": {
+              "column": 13,
+              "line": 176
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_float(next)",
+          "status": "Killed"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_integer with is_number",
+          "duration": 1475,
+          "id": "886206539595a1fa743913d74ac1b8c9",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 176
+            },
+            "start": {
+              "column": 13,
+              "line": 176
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_number(next)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace guard is_map with is_list",
+          "duration": 1265,
+          "id": "aa3458697b9a9928a1488377db376bb0",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 82,
+              "line": 20
+            },
+            "start": {
+              "column": 69,
+              "line": 20
+            }
+          },
+          "mutatorName": "GuardTypeTest",
+          "replacement": "is_list(attrs)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/lexer/combinators_test.exs",
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace > with >=",
+          "duration": 522,
+          "id": "fa2ee0e23c7bd2ab0dd74e82968e9102",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 51,
+              "line": 73
+            },
+            "start": {
+              "column": 51,
+              "line": 73
+            }
+          },
+          "mutatorName": "ComparisonBoundary",
+          "replacement": "{byte_size(a), a} >= {byte_size(b), b}",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Lexer.Combinators do\n  @moduledoc \"\"\"\n  Common components useful in many lexers.\n  \"\"\"\n  import NimbleParsec\n\n  @doc \"\"\"\n  Wraps the given combinator into a token of the given `ttype`.\n\n  Instead of a combinator, the first argument can also be a string literal.\n  \"\"\"\n  def token(literal, token_type) when is_binary(literal) do\n    replace(string(literal), {token_type, %{}, literal})\n  end\n\n  def token(combinator, token_type) do\n    combinator |> post_traverse({__MODULE__, :__token__, [token_type]})\n  end\n\n  def token(literal, token_type, attrs) when is_binary(literal) and is_map(attrs) do\n    replace(string(literal), {token_type, attrs, literal})\n  end\n\n  def token(combinator, token_type, attrs) when is_map(attrs) do\n    combinator |> post_traverse({__MODULE__, :__token__, [token_type, attrs]})\n  end\n\n  @doc \"\"\"\n  Joins the result of the given combinator into a single string.\n\n  This is not usually necessary, but it can be useful if you want to match on the tokens.\n  It's easier to match on the token `{:keyword, %{}, \"unquote\"}` than on something like\n  `{:keyword, %{}, [\"u\", \"nquote\"]}`, even though both tokens will be treated the same way\n  by the formatter.\n  \"\"\"\n  def lexeme(combinator) do\n    combinator |> post_traverse({__MODULE__, :__lexeme__, []})\n  end\n\n  @doc false\n  def __token__(rest, [arg], context, _line, _offset, token_type) do\n    {rest, [{token_type, %{}, arg}], context}\n  end\n\n  def __token__(rest, arg, context, _line, _offset, token_type) when is_binary(arg) do\n    {rest, [{token_type, %{}, arg}], context}\n  end\n\n  def __token__(rest, args, context, _line, _offset, token_type) do\n    {rest, [{token_type, %{}, args |> :lists.reverse()}], context}\n  end\n\n  @doc false\n  def __token__(rest, [arg], context, _line, _offset, token_type, attrs) do\n    {rest, [{token_type, attrs, arg}], context}\n  end\n\n  def __token__(rest, arg, context, _line, _offset, token_type, attrs) when is_binary(arg) do\n    {rest, [{token_type, attrs, arg}], context}\n  end\n\n  def __token__(rest, args, context, _line, _offset, token_type, attrs) do\n    {rest, [{token_type, attrs, args |> :lists.reverse()}], context}\n  end\n\n  @doc false\n  def __lexeme__(rest, args, context, _line, _offset) do\n    result = args |> List.wrap() |> :lists.reverse() |> to_string()\n    {rest, [result], context}\n  end\n\n  defp reverse_sort(items) do\n    Enum.sort(items, fn a, b -> {byte_size(a), a} > {byte_size(b), b} end)\n  end\n\n  @doc \"\"\"\n  Matches one of the literal strings in the list.\n\n  The strings aren't matched in order: they are automatically sorted in a way\n  that guarantees that the longest strings will be tried first.\n\n  ## Examples\n\n      keywords = word_from_list(~w[do end catch after rescue])\n  \"\"\"\n  def word_from_list(words) do\n    choice(for word <- reverse_sort(words), do: string(word))\n  end\n\n  @doc \"\"\"\n  Matches one of the literal strings in the list and wraps it in a token of the given type.\n\n  This is is just a shorthand.\n\n  The strings aren't matched in order: they are automatically sorted in a way\n  that guarantees that the longest strings will be tried first.\n\n  ## Examples\n\n      keywords = word_from_list(~w[do end catch after rescue], :keyword)\n  \"\"\"\n  def word_from_list(words, ttype) do\n    choice(for word <- reverse_sort(words), do: string(word)) |> token(ttype)\n  end\n\n  @doc \"\"\"\n  Matches one of the literal strings in the list and wraps it in a token of the given `type`,\n  with the given `attrs`.\n\n  This is is just a shorthand.\n\n  The strings aren't matched in order: they are automatically sorted in a way\n  that guarantees that the longest strings will be tried first.\n  \"\"\"\n  def word_from_list(words, ttype, attrs) do\n    choice(for word <- reverse_sort(words), do: string(word)) |> token(ttype, attrs)\n  end\n\n  @doc \"\"\"\n  Matches a given combinator, repeated 0 or more times, surrounded by left and right delimiters.\n\n  Delimiters can be combinators or literal strings (either both combinators or both literal strings).\n  In case of literal strings, this function wraps the `right` and `left` delimiters\n  into a token of the `ttype` option (default: `:punctuation`).\n\n  It also succeeds if we get to the end of string and the closing delimiter is missing,\n  to avoid parsing the program multiple times in case of mismatched delimeters or invalid programs.\n  This behavior can be disabled by passing `eos: false` as option.\n  \"\"\"\n  def many_surrounded_by(combinator, left, right, opts \\\\ [])\n\n  def many_surrounded_by(combinator, left, right, opts) when is_list(opts) do\n    ttype =\n      Keyword.get_lazy(opts, :ttype, fn ->\n        # when both left and right are literal strings, wrap them into a :punctuation token by default\n        if is_binary(left) and is_binary(right) do\n          :punctuation\n        else\n          nil\n        end\n      end)\n\n    eos = Keyword.get(opts, :eos, true)\n    lookahead_right = if is_binary(right), do: string(right), else: right\n\n    maybe_wrap_token(left, ttype)\n    |> concat(\n      repeat(\n        lookahead_not(lookahead_right)\n        |> concat(combinator)\n      )\n    )\n    |> maybe_concat_with_eos(maybe_wrap_token(right, ttype), eos)\n  end\n\n  # TODO: deprecate this to use ttype option instead\n  def many_surrounded_by(combinator, left, right, ttype) do\n    many_surrounded_by(combinator, left, right, ttype: ttype)\n  end\n\n  defp maybe_concat_with_eos(first, second, true), do: choice(first, [second, eos()])\n  defp maybe_concat_with_eos(first, second, false), do: concat(first, second)\n\n  defp maybe_wrap_token(token, nil), do: token\n  defp maybe_wrap_token(token, ttype), do: token(token, ttype)\n\n  @doc false\n  def collect_raw_chars_and_binaries(rest, args, context, _line, _offset, ttype, attrs) do\n    result = merge_chars_helper(ttype, attrs, [], args)\n    {rest, result, context}\n  end\n\n  defp merge_chars_helper(_ttype, _attrs, [], []), do: []\n\n  defp merge_chars_helper(ttype, attrs, acc, [next | rest])\n       when is_integer(next) or is_binary(next) do\n    merge_chars_helper(ttype, attrs, [next | acc], rest)\n  end\n\n  defp merge_chars_helper(ttype, attrs, [], [element | rest]) do\n    [element | merge_chars_helper(ttype, attrs, [], rest)]\n  end\n\n  defp merge_chars_helper(ttype, attrs, acc, list) do\n    tok = {ttype, attrs, acc}\n    [tok | merge_chars_helper(ttype, attrs, [], list)]\n  end\n\n  @doc \"\"\"\n  A generic combinator for string-like syntactic structures.\n\n  It takes the following parameters:\n\n    * `left` - left delimiter for the string. Can be a binary or a general combinator.\n    * `right` - right delimiter for the string. Can be a binary or a general combinator\n    * `middle` - a list of parsers to run inside the string which parse entities\n      that aren't characters.\n      The most common example are special characters and string interpolation\n      for languages that support it like Elixir.\n    * `ttype` - the token type to use for the string delimiters and ordinary characters\n      (tokens parsd by the )\n    * `attrs` - metadata attributes for the string delimiters and ordinary characters\n\n  ## Examples\n\n      single_quoted_heredocs = string_like(\n        \"'''\",\n        \"'''\",\n        combinators_inside_string,\n        :string_char\n      )\n\n  The above is equivalent to the following more explicit version:\n\n      single_quoted_heredocs = string_like(\n        string(\"'''\"),\n        string(\"'''\"),\n        combinators_inside_string,\n        :string_char\n      )\n  \"\"\"\n  def string_like(left, right, middle, ttype, attrs \\\\ %{}) when is_list(middle) do\n    left_combinator =\n      case is_binary(left) do\n        true -> string(left)\n        false -> left\n      end\n\n    right_combinator =\n      case is_binary(right) do\n        true -> string(right)\n        false -> right\n      end\n\n    choices =\n      case middle do\n        [] -> utf8_char([])\n        _ -> choice(middle ++ [utf8_char([])])\n      end\n\n    left_combinator\n    |> repeat(lookahead_not(right_combinator) |> concat(choices))\n    |> concat(right_combinator)\n    |> post_traverse({__MODULE__, :collect_raw_chars_and_binaries, [ttype, attrs]})\n  end\nend\n"
+    },
+    "lib/makeup/lexer/groups.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 763,
+          "id": "03b13a20262bf5ac1d1344f29eb3925c",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 23,
+              "line": 213
+            },
+            "start": {
+              "column": 23,
+              "line": 213
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "open_branches_ast -- (middle_branches_ast ++ close_branches_ast)",
+          "status": "Survived"
+        },
+        {
+          "coveredBy": [
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 0,
+          "id": "0e01fd198c4d0c4558ae5723afd553dc",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 55,
+              "line": 282
+            },
+            "start": {
+              "column": 55,
+              "line": 282
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "unmatched_token_branch -- no_more_tokens_branch",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 0,
+          "id": "b848dc90d45b6601e2a6077d7873f10b",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 29,
+              "line": 282
+            },
+            "start": {
+              "column": 29,
+              "line": 282
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "branches -- (unmatched_token_branch ++ no_more_tokens_branch)",
+          "status": "CompileError",
+          "statusReason": "missing_source_span"
+        },
+        {
+          "coveredBy": [
+            "test/lexer_test.exs",
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 685,
+          "id": "cf9dff9b5568424a9e62a65c18405bd3",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 46,
+              "line": 213
+            },
+            "start": {
+              "column": 46,
+              "line": 213
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "middle_branches_ast -- close_branches_ast",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Lexer.Groups do\n  @moduledoc \"\"\"\n  Utilities to highlight groups of tokens on mouseover.\n\n  The typical example is to highlight matching pairs of delimiters,\n  such as parenthesis, angle brackets, etc.\n  \"\"\"\n\n  defp make_match([] = _patterns, _varnames, rest_of_tokens_varname) do\n    quote do\n      unquote(Macro.var(rest_of_tokens_varname, __MODULE__))\n    end\n  end\n\n  defp make_match([pattern | patterns], [varname | varnames], rest_of_tokens_varname) do\n    var = Macro.var(varname, __MODULE__)\n\n    quote do\n      [\n        unquote(pattern) = unquote(var)\n        | unquote(make_match(patterns, varnames, rest_of_tokens_varname))\n      ]\n    end\n  end\n\n  defp put_group_ids([], _group_id_varname) do\n    quote(do: [])\n  end\n\n  defp put_group_ids(tokens, group_id_varname) do\n    group_id = Macro.var(group_id_varname, __MODULE__)\n\n    for {ttype_varname, attr_varname, text_varname} <- tokens do\n      ttype = Macro.var(ttype_varname, __MODULE__)\n      attr = Macro.var(attr_varname, __MODULE__)\n      text = Macro.var(text_varname, __MODULE__)\n\n      quote do\n        {\n          unquote(ttype),\n          Map.put(\n            unquote(attr),\n            # The Map key (an atom)\n            unquote(group_id_varname),\n            # The variable holding the value\n            unquote(group_id)\n          ),\n          unquote(text)\n        }\n      end\n    end\n  end\n\n  defp open_branch(stack_name, pattern, group_prefix_varname, group_nr_varname) do\n    group_nr = Macro.var(group_nr_varname, __MODULE__)\n    group_prefix = Macro.var(group_prefix_varname, __MODULE__)\n    group_id = Macro.var(:group_id, __MODULE__)\n    rest_of_tokens = Macro.var(:rest_of_tokens, __MODULE__)\n\n    n = length(pattern)\n\n    token_varnames = for i <- 1..n, do: String.to_atom(\"token__#{i}\")\n    ttype_varnames = for i <- 1..n, do: String.to_atom(\"ttype__#{i}\")\n    attr_varnames = for i <- 1..n, do: String.to_atom(\"attr__#{i}\")\n    text_varnames = for i <- 1..n, do: String.to_atom(\"text__#{i}\")\n    tokens_data = Enum.zip([token_varnames, ttype_varnames, attr_varnames, text_varnames])\n\n    pattern_matches =\n      for {token_varname, ttype_varname, attr_varname, text_varname} <- tokens_data do\n        token = Macro.var(token_varname, __MODULE__)\n        ttype = Macro.var(ttype_varname, __MODULE__)\n        attr = Macro.var(attr_varname, __MODULE__)\n        text = Macro.var(text_varname, __MODULE__)\n\n        quote do\n          {unquote(ttype), unquote(attr), unquote(text)} = unquote(token)\n        end\n      end\n\n    tokens_pattern = make_match(pattern, token_varnames, :rest_of_tokens)\n\n    tokens_for_result = Enum.zip([ttype_varnames, attr_varnames, text_varnames])\n    head_tokens = put_group_ids(tokens_for_result, :group_id)\n\n    quote do\n      {stack, unquote(tokens_pattern)} ->\n        new_group_nr = unquote(group_nr) + 1\n        unquote(group_id) = unquote(group_prefix) <> \"-\" <> to_string(new_group_nr)\n        unquote_splicing(pattern_matches)\n        head_tokens = unquote(head_tokens)\n        head_of_stack = {unquote(stack_name), new_group_nr}\n        new_stack = [head_of_stack | stack]\n        {new_stack, new_group_nr, head_tokens, unquote(rest_of_tokens)}\n    end\n  end\n\n  defp close_branch(stack_name, pattern, group_prefix_varname, group_nr_varname) do\n    group_nr = Macro.var(group_nr_varname, __MODULE__)\n    group_prefix = Macro.var(group_prefix_varname, __MODULE__)\n    group_id = Macro.var(:group_id, __MODULE__)\n    rest_of_stack = Macro.var(:rest_of_stack, __MODULE__)\n    rest_of_tokens = Macro.var(:rest_of_tokens, __MODULE__)\n\n    n = length(pattern)\n\n    token_varnames = for i <- 1..n, do: String.to_atom(\"token__#{i}\")\n    ttype_varnames = for i <- 1..n, do: String.to_atom(\"ttype__#{i}\")\n    attr_varnames = for i <- 1..n, do: String.to_atom(\"attr__#{i}\")\n    text_varnames = for i <- 1..n, do: String.to_atom(\"text__#{i}\")\n    tokens_data = Enum.zip([token_varnames, ttype_varnames, attr_varnames, text_varnames])\n\n    pattern_matches =\n      for {token_varname, ttype_varname, attr_varname, text_varname} <- tokens_data do\n        token = Macro.var(token_varname, __MODULE__)\n        ttype = Macro.var(ttype_varname, __MODULE__)\n        attr = Macro.var(attr_varname, __MODULE__)\n        text = Macro.var(text_varname, __MODULE__)\n\n        quote do\n          {unquote(ttype), unquote(attr), unquote(text)} = unquote(token)\n        end\n      end\n\n    stack_pattern =\n      quote do\n        [{unquote(stack_name), current_group_nr} | unquote(rest_of_stack)]\n      end\n\n    tokens_pattern = make_match(pattern, token_varnames, :rest_of_tokens)\n\n    tokens_for_result = Enum.zip([ttype_varnames, attr_varnames, text_varnames])\n    head_tokens = put_group_ids(tokens_for_result, :group_id)\n\n    quote do\n      {unquote(stack_pattern), unquote(tokens_pattern)} ->\n        unquote(group_id) = unquote(group_prefix) <> \"-\" <> to_string(current_group_nr)\n        unquote_splicing(pattern_matches)\n        head_tokens = unquote(head_tokens)\n        {unquote(rest_of_stack), unquote(group_nr), head_tokens, unquote(rest_of_tokens)}\n    end\n  end\n\n  defp middle_branch(stack_name, pattern, group_prefix_varname, group_nr_varname) do\n    group_nr = Macro.var(group_nr_varname, __MODULE__)\n\n    group_prefix = Macro.var(group_prefix_varname, __MODULE__)\n    group_id = Macro.var(:group_id, __MODULE__)\n    rest_of_stack = Macro.var(:rest_of_stack, __MODULE__)\n    rest_of_tokens = Macro.var(:rest_of_tokens, __MODULE__)\n\n    n = length(pattern)\n\n    token_varnames = for i <- 1..n, do: String.to_atom(\"token__#{i}\")\n    ttype_varnames = for i <- 1..n, do: String.to_atom(\"ttype__#{i}\")\n    attr_varnames = for i <- 1..n, do: String.to_atom(\"attr__#{i}\")\n    text_varnames = for i <- 1..n, do: String.to_atom(\"text__#{i}\")\n    tokens_data = Enum.zip([token_varnames, ttype_varnames, attr_varnames, text_varnames])\n\n    pattern_matches =\n      for {token_varname, ttype_varname, attr_varname, text_varname} <- tokens_data do\n        token = Macro.var(token_varname, __MODULE__)\n        ttype = Macro.var(ttype_varname, __MODULE__)\n        attr = Macro.var(attr_varname, __MODULE__)\n        text = Macro.var(text_varname, __MODULE__)\n\n        quote do\n          {unquote(ttype), unquote(attr), unquote(text)} = unquote(token)\n        end\n      end\n\n    stack_pattern =\n      quote do\n        [{unquote(stack_name), current_group_nr} | unquote(rest_of_stack)]\n      end\n\n    tokens_pattern = make_match(pattern, token_varnames, :rest_of_tokens)\n\n    tokens_for_result = Enum.zip([ttype_varnames, attr_varnames, text_varnames])\n    head_tokens = put_group_ids(tokens_for_result, :group_id)\n\n    quote do\n      {unquote(stack_pattern) = stack, unquote(tokens_pattern)} ->\n        unquote(group_id) = unquote(group_prefix) <> \"-\" <> to_string(current_group_nr)\n        unquote_splicing(pattern_matches)\n        head_tokens = unquote(head_tokens)\n        {stack, unquote(group_nr), head_tokens, unquote(rest_of_tokens)}\n    end\n  end\n\n  defp branches_for_stack({stack_name, parts}) do\n    open_patterns = Keyword.fetch!(parts, :open)\n    middle_patterns = Keyword.get(parts, :middle, [])\n    close_patterns = Keyword.fetch!(parts, :close)\n\n    open_branches_ast =\n      Enum.map(\n        open_patterns,\n        fn pattern -> open_branch(stack_name, pattern, :group_prefix, :group_nr) end\n      )\n\n    middle_branches_ast =\n      Enum.map(\n        middle_patterns,\n        fn pattern -> middle_branch(stack_name, pattern, :group_prefix, :group_nr) end\n      )\n\n    close_branches_ast =\n      Enum.map(\n        close_patterns,\n        fn pattern -> close_branch(stack_name, pattern, :group_prefix, :group_nr) end\n      )\n\n    open_branches_ast ++ middle_branches_ast ++ close_branches_ast\n  end\n\n  @doc \"\"\"\n  Defines a function with the given `name` that takes a list of tokens and divides\n  matching delimiters into groups.\n\n  Takes as arguments a `name` for the function (must be an atom) and a list\n  containing the patterns describing the matching groups.\n\n  ## Examples\n\n      # Extracted from the default elixir lexer that ships with ExDoc\n      defgroupmatcher :match_groups, [\n        # Match opening and closing parenthesis\n        parentheses: [\n          open: [[{:punctuation, %{language: :elixir}, \"(\"}]],\n          close: [[{:punctuation, %{language: :elixir}, \")\"}]]\n        ],\n\n        # Match more complex delimiters, but still an open and close delimiter\n        fn_end: [\n          open: [[{:keyword, %{language: :elixir}, \"fn\"}]],\n          close: [[{:keyword, %{language: :elixir}, \"end\"}]]\n        ]\n\n        # Match delimiters with middle components\n        do_end: [\n          open: [\n            [{:keyword, %{language: :elixir}, \"do\"}]\n          ],\n          middle: [\n            [{:keyword, %{language: :elixir}, \"else\"}],\n            [{:keyword, %{language: :elixir}, \"catch\"}],\n            [{:keyword, %{language: :elixir}, \"rescue\"}],\n            [{:keyword, %{language: :elixir}, \"after\"}]\n          ],\n          close: [\n            [{:keyword, %{language: :elixir}, \"end\"}]\n          ]\n        ]\n      ]\n  \"\"\"\n  defmacro defgroupmatcher(name, stacks, opts \\\\ []) do\n    name_helper =\n      name\n      |> Atom.to_string()\n      |> Kernel.<>(\"__helper\")\n      |> String.to_atom()\n\n    branches =\n      stacks\n      |> Enum.map(&branches_for_stack/1)\n      |> List.flatten()\n\n    group_nr = Macro.var(:group_nr, __MODULE__)\n\n    unmatched_token_branch =\n      quote do\n        {old_stack, [token | toks]} ->\n          {old_stack, unquote(group_nr), [token], toks}\n      end\n\n    no_more_tokens_branch =\n      quote do\n        {old_stack, []} ->\n          {old_stack, unquote(group_nr), [], []}\n      end\n\n    all_branches = branches ++ unmatched_token_branch ++ no_more_tokens_branch\n\n    expr =\n      quote do\n        def unquote(name)(tokens, group_prefix \\\\ \"group\") do\n          unquote(name_helper)([], tokens, group_prefix, 0) |> :lists.flatten()\n        end\n\n        defp unquote(name_helper)(stack, tokens, group_prefix, group_nr) do\n          {new_stack, new_group_nr, head_tokens, rest_of_tokens} =\n            case {stack, tokens} do\n              unquote(all_branches)\n            end\n\n          case head_tokens do\n            [] ->\n              []\n\n            _ ->\n              # Don't worry about the nested list, we'll flatten it later\n              [\n                head_tokens\n                | unquote(name_helper)(new_stack, rest_of_tokens, group_prefix, new_group_nr)\n              ]\n          end\n        end\n      end\n\n    if Keyword.get(opts, :debug) do\n      expr\n      |> Macro.to_string()\n      |> Code.format_string!()\n      |> IO.puts()\n    end\n\n    expr\n  end\n\n  @doc \"\"\"\n  Returns a random prefix for group ids in an HTML file.\n\n  This is useful to avoid collisions.\n  The group ids should be unique for a certain HTML document, and the easiest way of guaranteeing it\n  is by generating long random prefixes.\n  \"\"\"\n  def random_prefix(n), do: Enum.map(1..n, fn _ -> Enum.random(?0..?9) end) |> to_string\nend\n"
+    },
+    "lib/makeup/styles/html/style.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/makeup_test.exs"
+          ],
+          "description": "replace || with &&",
+          "duration": 670,
+          "id": "692f94c22e4ad624defa9b4488ee9f59",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 33,
+              "line": 36
+            },
+            "start": {
+              "column": 33,
+              "line": 36
+            }
+          },
+          "mutatorName": "Boolean",
+          "replacement": "v2 && v1",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Styles.HTML.Style do\n  @moduledoc \"\"\"\n  The style struct.\n  \"\"\"\n\n  defstruct long_name: \"\",\n            short_name: \"\",\n            background_color: \"#ffffff\",\n            highlight_color: \"#ffffcc\",\n            styles: []\n\n  alias Makeup.Styles.HTML.TokenStyle\n  require Makeup.Token.Utils\n  alias Makeup.Token.Utils\n\n  defp handle_inheritance(style_map) do\n    # Handles insheritance between styles.\n    # This is automatic in Pygments' design, because they use class inheritance for tokens.\n    # We don't have class inheritance in elixir, so we must have something else.\n    # Here, we use a manually build hierarchy to fake inheritance.\n    #\n    # In any case, the goal is to have flat tokens at runtime.\n    # This function is only called at compile time.\n    Enum.reduce(Utils.precedence(), style_map, fn {parent_key, child_keys}, style_map ->\n      parent_style = style_map[parent_key]\n\n      Enum.reduce(child_keys, style_map, fn child_key, style_map ->\n        child_style = style_map[child_key]\n\n        Map.put(\n          style_map,\n          child_key,\n          Map.merge(\n            parent_style,\n            child_style,\n            fn _k, v1, v2 -> v2 || v1 end\n          )\n        )\n      end)\n    end)\n  end\n\n  require EEx\n\n  EEx.function_from_string(\n    :defp,\n    :render_css,\n    \"\"\"\n    .<%= highlight_class %> .hll {background-color: <%= highlight_color %>}\n    .<%= highlight_class %> {\\\n    <%= if token_text.color do %>color: <%= token_text.color %>; <% end %>\\\n    <%= if token_text.font_style do %>font-style: <%= token_text.font_style %>; <% end %>\\\n    <%= if token_text.font_weight do %>font-weight: <%= token_text.font_weight %>; <% end %>\\\n    <%= if token_text.border do %>border: <%= token_text.border %>; <% end %>\\\n    <%= if token_text.text_decoration do %>text-decoration: <%= token_text.text_decoration %>; <% end %>\\\n    <%= if background_color do %>background-color: <%= background_color %><% end %>}\\\n    .<%= highlight_class %> .unselectable {\n      -webkit-touch-callout: none;\n      -webkit-user-select: none;\n      -khtml-user-select: none;\n      -moz-user-select: none;\n      -ms-user-select: none;\n      user-select: none;\n    }\n    <%= for {css_class, token_style, token_type} <- styles do %>\n    .<%= highlight_class %> .<%= css_class %> {\\\n    <%= if token_style.color do %>color: <%= token_style.color %>; <% end %>\\\n    <%= if token_style.font_style do %>font-style: <%= token_style.font_style %>; <% end %>\\\n    <%= if token_style.font_weight do %>font-weight: <%= token_style.font_weight %>; <% end %>\\\n    <%= if token_style.border do %>border: <%= token_style.border %>; <% end %>\\\n    <%= if token_style.text_decoration do %>text-decoration: <%= token_style.text_decoration %>; <% end %>\\\n    <%= if token_style.background_color do %>background-color: <%= token_style.background_color %>; <% end %>\\\n    } /* :<%= Atom.to_string(token_type) %> */\\\n    <% end %>\n    \"\"\",\n    [:highlight_class, :highlight_color, :background_color, :token_text, :styles]\n  )\n\n  @doc \"\"\"\n  Generate a stylesheet for a style.\n  \"\"\"\n  def stylesheet(style, css_class \\\\ \"highlight\") do\n    token_styles =\n      style.styles\n      |> Map.delete(:text)\n      |> Enum.into([])\n      |> Enum.map(fn {token_type, token_style} ->\n        css_class = Makeup.Token.Utils.css_class_for_token_type(token_type)\n        {css_class, token_style, token_type}\n      end)\n      |> Enum.filter(fn {_, token_style, _} ->\n        Makeup.Styles.HTML.TokenStyle.not_empty?(token_style)\n      end)\n      |> Enum.sort()\n\n    token_text = style.styles[:text]\n\n    render_css(\n      css_class,\n      style.highlight_color,\n      style.background_color,\n      token_text,\n      token_styles\n    )\n  end\n\n  @doc \"\"\"\n  Creates a new style.\n\n  Takes care of unspecified token types and inheritance.\n  Writes and caches a CSS stylesheet for the style.\n  \"\"\"\n  def make_style(options \\\\ []) do\n    short_name = Keyword.fetch!(options, :short_name)\n    long_name = Keyword.fetch!(options, :long_name)\n    background_color = Keyword.fetch!(options, :background_color)\n    highlight_color = Keyword.fetch!(options, :highlight_color)\n    incomplete_style_map = Keyword.fetch!(options, :styles)\n\n    complete_style_map =\n      Utils.standard_token_types()\n      |> Enum.map(fn k -> {k, \"\"} end)\n      |> Enum.into(%{})\n      |> Map.merge(incomplete_style_map)\n      |> Enum.map(fn {k, v} -> {k, TokenStyle.from_string(v)} end)\n      |> Enum.into(%{})\n      |> handle_inheritance\n\n    %__MODULE__{\n      long_name: long_name,\n      short_name: short_name,\n      background_color: background_color,\n      highlight_color: highlight_color,\n      styles: complete_style_map\n    }\n  end\nend\n"
+    },
+    "lib/makeup/styles/html/token_style.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/makeup_test.exs"
+          ],
+          "description": "remove unary not",
+          "duration": 659,
+          "id": "9050480bff996caa0e6b61562b3b6643",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 5,
+              "line": 19
+            },
+            "start": {
+              "column": 5,
+              "line": 19
+            }
+          },
+          "mutatorName": "UnaryNot",
+          "replacement": "not_empty?(style)",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Styles.HTML.TokenStyle do\n  @moduledoc false\n\n  defstruct font_style: nil,\n            font_weight: nil,\n            border: nil,\n            text_decoration: nil,\n            color: nil,\n            background_color: nil,\n            literal: nil\n\n  @doc \"\"\"\n  A `TokenStyle` is considered empty if all its fields are `nil`.\n\n  A CSS class for an empty `TokenStyle` is not rendered in the stylesheet.\n  This saves a little space and makes the stylesheet more human-readable.\n  \"\"\"\n  def empty?(style) do\n    not not_empty?(style)\n  end\n\n  @doc \"\"\"\n  A `TokenStyle` is empty if at least a field is not `nil`.\n\n  A CSS class for an empty `TokenStyle` is rendered in the stylesheet.\n  \"\"\"\n  def not_empty?(style) do\n    style |> Map.from_struct() |> Map.values() |> Enum.any?()\n  end\n\n  # Foreground color\n  defp to_attr(\"#\" <> _ = color), do: {:color, color}\n  # Background color\n  defp to_attr(\"bg:\" <> color), do: {:background_color, color}\n  # Border (can only specify border color)\n  defp to_attr(\"border:\" <> color), do: {:border, color}\n  # Font weight (bold vs normal)\n  defp to_attr(\"bold\"), do: {:font_weight, \"bold\"}\n  defp to_attr(\"nobold\"), do: {:font_weight, \"normal\"}\n  # Font style (italic vs oblique vs normal)\n  defp to_attr(\"italic\"), do: {:font_style, \"italic\"}\n  defp to_attr(\"oblique\"), do: {:font_style, \"oblique\"}\n  defp to_attr(\"noitalic\"), do: {:font_style, \"normal\"}\n  # Text decoration (underline vs none)\n  defp to_attr(\"underline\"), do: {:text_decoration, \"underline\"}\n  # Unrecognized commands:\n  defp to_attr(other) do\n    # Log the command\n    IO.warn(\"unknown attribute #{inspect(other)}\")\n    false\n  end\n\n  @doc \"\"\"\n  Creates a `TokenStyle` from string description.\n\n  The string description is highly optimized for the goal of being typed by a human.\n  The following commands are recognized:\n\n  * `~r/#[0-9a-f]+/` for foreround color\n  * `~r/bg:#[0-9a-f]+/` for background color\n  * `~r/border:#[0-9a-f]+/` for border color\n  * `italic` for `font-style: italic`\n  * `oblique` for `font-style: oblique`\n  * `noitalic` for `font-style: normal`\n  * `underline` for `font-style: underline`\n\n  No other commands are currently recognized.\n  \"\"\"\n  def from_string(str) do\n    attrs =\n      str\n      |> String.split()\n      |> Enum.map(&to_attr/1)\n      |> Enum.filter(fn x -> x end)\n\n    struct(__MODULE__, attrs)\n  end\nend\n"
+    },
+    "lib/makeup/token/utils/hierarchy.ex": {
+      "language": "elixir",
+      "mutants": [
+        {
+          "coveredBy": [
+            "test/makeup_test.exs"
+          ],
+          "description": "replace ++ with --",
+          "duration": 661,
+          "id": "ad0a71ebbfc52bd791b48bf40e96f1b5",
+          "killedBy": [],
+          "location": {
+            "end": {
+              "column": 19,
+              "line": 17
+            },
+            "start": {
+              "column": 19,
+              "line": 17
+            }
+          },
+          "mutatorName": "ConcatOperator",
+          "replacement": "first_degree -- higher_degree",
+          "status": "Survived"
+        }
+      ],
+      "source": "defmodule Makeup.Token.Utils.Hierarchy do\n  @moduledoc false\n\n  def hierarchy_to_precedence(hierarchy) do\n    hierarchy\n    |> Enum.map(&dependencies/1)\n    |> List.flatten\n    |> Enum.reverse\n  end\n\n  def node_tag({tag, _, _}), do: tag\n  def node_tag({tag, _}), do: tag\n\n  defp descendants({_, _, children}) do\n    first_degree = Enum.map(children, &node_tag/1)\n    higher_degree = children |> Enum.map(&descendants/1)\n    (first_degree ++ higher_degree) |> List.flatten\n  end\n  defp descendants(_terminal), do: []\n\n  defp dependencies({tag, _, children} = node) do\n    node_dependencies = {tag, descendants(node)}\n    children_dependencies = children\n      |> Enum.map(&dependencies/1)\n      |> List.flatten\n\n    [node_dependencies | children_dependencies]\n  end\n  defp dependencies(_terminal), do: []\n\n  def to_nested_list_of_pairs({tag, class, children}) do\n    [{tag, class} | Enum.map(children, &to_nested_list_of_pairs/1)]\n  end\n  def to_nested_list_of_pairs({tag, class}) do\n    {tag, class}\n  end\n\n  def style_to_class_map(hierarchy) do\n    hierarchy\n    |> Enum.map(&to_nested_list_of_pairs/1)\n    |> List.flatten\n    |> Enum.into(%{})\n  end\n\nend"
+    }
+  },
+  "mutalisk": {
+    "concurrency": {
+      "configured": 4,
+      "effective": 4,
+      "schedulers_online": 12
+    },
+    "engine": {
+      "03b13a20262bf5ac1d1344f29eb3925c": "schema",
+      "07e6101f41867d4e1c832882b5c13b44": "fallback",
+      "0a260f50eb03cdb96d12cec062c0c3fe": "fallback",
+      "0e01fd198c4d0c4558ae5723afd553dc": "fallback",
+      "25cb448d6b5e65aca965f4a4176d1c87": "fallback",
+      "2b91ea75ef318cb02fd83fb2b0b822e5": "fallback",
+      "334f6bcbd878bd88749ecfc3032856e5": "fallback",
+      "429b9644362d40879e48bfac32375b11": "fallback",
+      "4adb7ede66e305c3d780d915fb33468e": "fallback",
+      "50f79aa41cc757055021c6cc9e1ce597": "schema",
+      "5272396a29f3f85628a393800f52fdcf": "fallback",
+      "5b74e630cf2bda3b7ab681fc21337962": "fallback",
+      "5e5074053c8ab4cf1292a7a0b42ffcbd": "fallback",
+      "61c6d9f3359a3ba03be63caa055c7ecc": "schema",
+      "6209b744492612922f9497e167cd9282": "fallback",
+      "692f94c22e4ad624defa9b4488ee9f59": "schema",
+      "6c46f06dcc220143380125381fc4eaca": "fallback",
+      "6cdfd50e0dc67c3139692132059c7428": "schema",
+      "74771a092ea14c587aff5941306f4172": "schema",
+      "7d291795eb7456f9c33c304a542ecc53": "fallback",
+      "7ee9eb776f96c1d0176a214add5dc6ca": "fallback",
+      "8063b9cb041a926ff5982272e7daaad5": "fallback",
+      "886206539595a1fa743913d74ac1b8c9": "fallback",
+      "9050480bff996caa0e6b61562b3b6643": "schema",
+      "9184e105ce43ae9c9570fe9578c3cd61": "fallback",
+      "9494a828722373499a4be7671edce7bd": "fallback",
+      "9e0937f4ef1381007049d4030779690e": "fallback",
+      "9f5cb11f5c62f13c5f2c37d2a8507b86": "fallback",
+      "a32ed0c484f6dbf97a4137e236563b2c": "fallback",
+      "a5da6fcb801ce5840064993f35faf60c": "fallback",
+      "a863c2e0ee3e69f2521a5214254c1fe8": "fallback",
+      "aa3458697b9a9928a1488377db376bb0": "fallback",
+      "ad0a71ebbfc52bd791b48bf40e96f1b5": "schema",
+      "ad86e7e6bec232be23234d4d13e4ebf6": "fallback",
+      "b848dc90d45b6601e2a6077d7873f10b": "fallback",
+      "b971fd9daa9c4633754ba1c00e152d11": "fallback",
+      "bfac9b528636a3f5a2382552ec901b38": "fallback",
+      "c1332fd41856875ff3226208eb6ac829": "fallback",
+      "c856a304ec5674a63e76c4a99ebcfcb5": "fallback",
+      "cf9dff9b5568424a9e62a65c18405bd3": "schema",
+      "e57f87b63a6dbe0cc2515296ce3e3e17": "schema",
+      "ecd611683b54883b1632f6d4d31acce1": "fallback",
+      "f3c1ed4a9cc8aca3c67c5cf1ad0f8f9e": "schema",
+      "fa2ee0e23c7bd2ab0dd74e82968e9102": "schema"
+    },
+    "metrics": {
+      "fallback_count": 32,
+      "fallback_time_ms": 58445,
+      "fanout": {
+        "03b13a20262bf5ac1d1344f29eb3925c": 2,
+        "07e6101f41867d4e1c832882b5c13b44": 2,
+        "0a260f50eb03cdb96d12cec062c0c3fe": 2,
+        "0e01fd198c4d0c4558ae5723afd553dc": 2,
+        "25cb448d6b5e65aca965f4a4176d1c87": 2,
+        "2b91ea75ef318cb02fd83fb2b0b822e5": 2,
+        "334f6bcbd878bd88749ecfc3032856e5": 2,
+        "429b9644362d40879e48bfac32375b11": 2,
+        "4adb7ede66e305c3d780d915fb33468e": 3,
+        "50f79aa41cc757055021c6cc9e1ce597": 3,
+        "5272396a29f3f85628a393800f52fdcf": 2,
+        "5b74e630cf2bda3b7ab681fc21337962": 3,
+        "5e5074053c8ab4cf1292a7a0b42ffcbd": 3,
+        "61c6d9f3359a3ba03be63caa055c7ecc": 2,
+        "6209b744492612922f9497e167cd9282": 2,
+        "692f94c22e4ad624defa9b4488ee9f59": 1,
+        "6c46f06dcc220143380125381fc4eaca": 2,
+        "6cdfd50e0dc67c3139692132059c7428": 3,
+        "74771a092ea14c587aff5941306f4172": 3,
+        "7d291795eb7456f9c33c304a542ecc53": 2,
+        "7ee9eb776f96c1d0176a214add5dc6ca": 2,
+        "8063b9cb041a926ff5982272e7daaad5": 3,
+        "886206539595a1fa743913d74ac1b8c9": 3,
+        "9050480bff996caa0e6b61562b3b6643": 1,
+        "9184e105ce43ae9c9570fe9578c3cd61": 4,
+        "9494a828722373499a4be7671edce7bd": 2,
+        "9e0937f4ef1381007049d4030779690e": 2,
+        "9f5cb11f5c62f13c5f2c37d2a8507b86": 2,
+        "a32ed0c484f6dbf97a4137e236563b2c": 2,
+        "a5da6fcb801ce5840064993f35faf60c": 2,
+        "a863c2e0ee3e69f2521a5214254c1fe8": 2,
+        "aa3458697b9a9928a1488377db376bb0": 3,
+        "ad0a71ebbfc52bd791b48bf40e96f1b5": 1,
+        "ad86e7e6bec232be23234d4d13e4ebf6": 2,
+        "b848dc90d45b6601e2a6077d7873f10b": 2,
+        "b971fd9daa9c4633754ba1c00e152d11": 2,
+        "bfac9b528636a3f5a2382552ec901b38": 2,
+        "c1332fd41856875ff3226208eb6ac829": 4,
+        "c856a304ec5674a63e76c4a99ebcfcb5": 2,
+        "cf9dff9b5568424a9e62a65c18405bd3": 2,
+        "e57f87b63a6dbe0cc2515296ce3e3e17": 2,
+        "ecd611683b54883b1632f6d4d31acce1": 2,
+        "f3c1ed4a9cc8aca3c67c5cf1ad0f8f9e": 2,
+        "fa2ee0e23c7bd2ab0dd74e82968e9102": 3
+      },
+      "invalid_mutants": {},
+      "rollback_count": 0,
+      "skipped": {
+        "attribute_engine_disabled": 2,
+        "missing_oracle_site": 32,
+        "no_applicable_mutator": 197,
+        "unsupported_dispatch": 435
+      }
+    },
+    "mutation_kind": {
+      "03b13a20262bf5ac1d1344f29eb3925c": "concat_op",
+      "07e6101f41867d4e1c832882b5c13b44": "guard_type_test",
+      "0a260f50eb03cdb96d12cec062c0c3fe": "guard_comparison_negation",
+      "0e01fd198c4d0c4558ae5723afd553dc": "concat_op",
+      "25cb448d6b5e65aca965f4a4176d1c87": "guard_comparison_negation",
+      "2b91ea75ef318cb02fd83fb2b0b822e5": "integer_literal_replace",
+      "334f6bcbd878bd88749ecfc3032856e5": "guard_type_test",
+      "429b9644362d40879e48bfac32375b11": "integer_literal_replace",
+      "4adb7ede66e305c3d780d915fb33468e": "guard_type_test",
+      "50f79aa41cc757055021c6cc9e1ce597": "comparison_negation",
+      "5272396a29f3f85628a393800f52fdcf": "guard_comparison_boundary",
+      "5b74e630cf2bda3b7ab681fc21337962": "guard_type_test",
+      "5e5074053c8ab4cf1292a7a0b42ffcbd": "guard_type_test",
+      "61c6d9f3359a3ba03be63caa055c7ecc": "boolean_op",
+      "6209b744492612922f9497e167cd9282": "integer_literal_replace",
+      "692f94c22e4ad624defa9b4488ee9f59": "boolean_op",
+      "6c46f06dcc220143380125381fc4eaca": "guard_type_test",
+      "6cdfd50e0dc67c3139692132059c7428": "concat_op",
+      "74771a092ea14c587aff5941306f4172": "boolean_op",
+      "7d291795eb7456f9c33c304a542ecc53": "integer_literal_replace",
+      "7ee9eb776f96c1d0176a214add5dc6ca": "guard_comparison_boundary",
+      "8063b9cb041a926ff5982272e7daaad5": "guard_type_test",
+      "886206539595a1fa743913d74ac1b8c9": "guard_type_test",
+      "9050480bff996caa0e6b61562b3b6643": "unary_not_removal",
+      "9184e105ce43ae9c9570fe9578c3cd61": "guard_type_test",
+      "9494a828722373499a4be7671edce7bd": "guard_type_test",
+      "9e0937f4ef1381007049d4030779690e": "guard_type_test",
+      "9f5cb11f5c62f13c5f2c37d2a8507b86": "integer_literal_replace",
+      "a32ed0c484f6dbf97a4137e236563b2c": "integer_literal_replace",
+      "a5da6fcb801ce5840064993f35faf60c": "integer_literal_replace",
+      "a863c2e0ee3e69f2521a5214254c1fe8": "integer_literal_replace",
+      "aa3458697b9a9928a1488377db376bb0": "guard_type_test",
+      "ad0a71ebbfc52bd791b48bf40e96f1b5": "concat_op",
+      "ad86e7e6bec232be23234d4d13e4ebf6": "integer_literal_replace",
+      "b848dc90d45b6601e2a6077d7873f10b": "concat_op",
+      "b971fd9daa9c4633754ba1c00e152d11": "integer_literal_replace",
+      "bfac9b528636a3f5a2382552ec901b38": "guard_type_test",
+      "c1332fd41856875ff3226208eb6ac829": "guard_type_test",
+      "c856a304ec5674a63e76c4a99ebcfcb5": "guard_type_test",
+      "cf9dff9b5568424a9e62a65c18405bd3": "concat_op",
+      "e57f87b63a6dbe0cc2515296ce3e3e17": "comparison_negation",
+      "ecd611683b54883b1632f6d4d31acce1": "guard_type_test",
+      "f3c1ed4a9cc8aca3c67c5cf1ad0f8f9e": "concat_op",
+      "fa2ee0e23c7bd2ab0dd74e82968e9102": "comparison_boundary"
+    },
+    "phase_timings": {
+      "baseline_tests_ms": 534,
+      "coverage_collection_ms": 0,
+      "fallback_workers_ms": 22106,
+      "oracle_build_ms": 3125,
+      "plan_generation_ms": 36,
+      "report_writing_ms": 3,
+      "schema_build_ms": 2763,
+      "schema_workers_ms": 2561,
+      "total_ms": 31337
+    },
+    "recompile_categories": {
+      "compile_error": 0,
+      "dep_path_error": 0,
+      "unknown": 0
+    },
+    "selection": {
+      "coverage_collection_wall_ms": 0,
+      "coverage_match_distribution": {
+        "all_tests": 0,
+        "enclosing_function": 0,
+        "exact_line": 0,
+        "static_fallback": 44
+      },
+      "fallback_reason_distribution": {
+        "static_only_mode": 44
+      },
+      "mode": "static",
+      "selected_tests_avg": 2.25,
+      "selected_tests_median": 2
+    },
+    "stable_id_to_integer": {
+      "03b13a20262bf5ac1d1344f29eb3925c": 1,
+      "07e6101f41867d4e1c832882b5c13b44": 2,
+      "0a260f50eb03cdb96d12cec062c0c3fe": 3,
+      "0e01fd198c4d0c4558ae5723afd553dc": 4,
+      "25cb448d6b5e65aca965f4a4176d1c87": 5,
+      "2b91ea75ef318cb02fd83fb2b0b822e5": 6,
+      "334f6bcbd878bd88749ecfc3032856e5": 7,
+      "429b9644362d40879e48bfac32375b11": 8,
+      "4adb7ede66e305c3d780d915fb33468e": 9,
+      "50f79aa41cc757055021c6cc9e1ce597": 10,
+      "5272396a29f3f85628a393800f52fdcf": 11,
+      "5b74e630cf2bda3b7ab681fc21337962": 12,
+      "5e5074053c8ab4cf1292a7a0b42ffcbd": 13,
+      "61c6d9f3359a3ba03be63caa055c7ecc": 14,
+      "6209b744492612922f9497e167cd9282": 15,
+      "692f94c22e4ad624defa9b4488ee9f59": 16,
+      "6c46f06dcc220143380125381fc4eaca": 17,
+      "6cdfd50e0dc67c3139692132059c7428": 18,
+      "74771a092ea14c587aff5941306f4172": 19,
+      "7d291795eb7456f9c33c304a542ecc53": 20,
+      "7ee9eb776f96c1d0176a214add5dc6ca": 21,
+      "8063b9cb041a926ff5982272e7daaad5": 22,
+      "886206539595a1fa743913d74ac1b8c9": 23,
+      "9050480bff996caa0e6b61562b3b6643": 24,
+      "9184e105ce43ae9c9570fe9578c3cd61": 25,
+      "9494a828722373499a4be7671edce7bd": 26,
+      "9e0937f4ef1381007049d4030779690e": 27,
+      "9f5cb11f5c62f13c5f2c37d2a8507b86": 28,
+      "a32ed0c484f6dbf97a4137e236563b2c": 29,
+      "a5da6fcb801ce5840064993f35faf60c": 30,
+      "a863c2e0ee3e69f2521a5214254c1fe8": 31,
+      "aa3458697b9a9928a1488377db376bb0": 32,
+      "ad0a71ebbfc52bd791b48bf40e96f1b5": 33,
+      "ad86e7e6bec232be23234d4d13e4ebf6": 34,
+      "b848dc90d45b6601e2a6077d7873f10b": 35,
+      "b971fd9daa9c4633754ba1c00e152d11": 36,
+      "bfac9b528636a3f5a2382552ec901b38": 37,
+      "c1332fd41856875ff3226208eb6ac829": 38,
+      "c856a304ec5674a63e76c4a99ebcfcb5": 39,
+      "cf9dff9b5568424a9e62a65c18405bd3": 40,
+      "e57f87b63a6dbe0cc2515296ce3e3e17": 41,
+      "ecd611683b54883b1632f6d4d31acce1": 42,
+      "f3c1ed4a9cc8aca3c67c5cf1ad0f8f9e": 43,
+      "fa2ee0e23c7bd2ab0dd74e82968e9102": 44
+    },
+    "test_timeout_ms": 10000
+  },
+  "schemaVersion": "2",
+  "thresholds": {
+    "high": 0,
+    "low": 0
+  }
+}
