@@ -143,8 +143,22 @@ defmodule Mut.CliTest do
   end
 
   test "rejects duplicate flags" do
-    assert {:error, message} = Cli.parse(["--files", "lib/a.ex", "--files", "lib/b.ex"])
+    assert {:error, message} = Cli.parse(["--concurrency", "1", "--concurrency", "2"])
     assert message =~ "conflicting duplicate flags"
+  end
+
+  test "accepts repeated --files and collects every pattern (M122)" do
+    assert {:ok, opts} = Cli.parse(["--files", "lib/a.ex", "--files", "lib/b.ex"])
+    assert opts.files == ["lib/a.ex", "lib/b.ex"]
+  end
+
+  test "exclude preserves each regex's flags (R17)" do
+    {:ok, opts} = Cli.parse([], exclude: [~r/ROUTER\.EX/i])
+
+    # The case-insensitive flag must survive — joining `Regex.source/1` dropped
+    # it, so a lowercase path would no longer match its uppercase pattern.
+    assert is_list(opts.exclude)
+    assert Enum.any?(opts.exclude, &Regex.match?(&1, "lib/app_web/router.ex"))
   end
 
   test "rejects unknown options" do

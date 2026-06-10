@@ -9,14 +9,23 @@ defmodule Mut.Worker do
     @moduledoc "Worker execution result."
 
     @enforce_keys [:status, :duration_ms]
-    defstruct [:status, :duration_ms, :killing_test, :raw_output, :recompile_category]
+    defstruct [
+      :status,
+      :duration_ms,
+      :killing_test,
+      :killing_test_file,
+      :raw_output,
+      :recompile_category
+    ]
 
-    @type status :: :killed | :survived | :timeout | :error | :invalid
-    @type recompile_category :: :compile_error | :parse_error | :dep_path_error | :unknown | nil
+    @type status :: :killed | :survived | :timeout | :error | :invalid | :no_coverage
+    @type recompile_category ::
+            :compile_error | :parse_error | :dep_path_error | :unknown | :timeout | nil
     @type t :: %__MODULE__{
             status: status,
             duration_ms: non_neg_integer,
             killing_test: String.t() | nil,
+            killing_test_file: String.t() | nil,
             raw_output: String.t() | nil,
             recompile_category: recompile_category
           }
@@ -93,7 +102,33 @@ defmodule Mut.Worker do
           raw_output: Exception.message(exception)
         }
     after
-      Sandbox.reset(sandbox)
+      # R6: the fallback path recompiles mutated source INTO the sandbox, so it
+      # must be restored before the next mutant reuses it. `reset/1` is
+      # self-healing (re-copies any mismatched file from the baseline), so a
+      # failure is either a transient FS race — retried once — or a genuinely
+      # poisoned sandbox, which we refuse to return silently to the pool: a
+      # contaminated sandbox produces FALSE verdicts for every subsequent mutant
+      # run on it. Raising here is the safe direction (loud abort over silent
+      # wrong answers). Schema runs never dirty the sandbox (the mutant is
+      # selected at runtime via MUT_ACTIVE), so only this path resets.
+      reset_sandbox!(sandbox)
+    end
+  end
+
+  defp reset_sandbox!(sandbox) do
+    case Sandbox.reset(sandbox) do
+      :ok ->
+        :ok
+
+      {:error, _reason} ->
+        case Sandbox.reset(sandbox) do
+          :ok ->
+            :ok
+
+          {:error, reason} ->
+            raise "sandbox #{sandbox.id} could not be reset after a fallback run " <>
+                    "(would contaminate later mutants): #{inspect(reason)}"
+        end
     end
   end
 
@@ -106,8 +141,15 @@ defmodule Mut.Worker do
       {"MUTALISK_ROLE", "worker"},
       {"MUTALISK_PATH", Path.expand(File.cwd!())},
       {"MUT_ACTIVE", Integer.to_string(mutant_id)}
+      | crash_dump_env()
     ]
   end
+
+  # R14: a mutant that crashes the worker BEAM (the common timeout/loop case)
+  # otherwise writes a multi-MB `erl_crash.dump` into the child's cwd — which
+  # has been observed landing in the host project root. `0` disables the dump
+  # entirely; nothing reads it.
+  defp crash_dump_env, do: [{"ERL_CRASH_DUMP_SECONDS", "0"}]
 
   @spec args([String.t()], pos_integer()) :: [String.t()]
   def args(test_files, test_timeout_ms \\ @default_test_timeout_ms)
@@ -165,7 +207,7 @@ defmodule Mut.Worker do
           )
 
         port
-        |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> collect(Keyword.get(opts, :timeout_ms, @default_timeout_ms))
         |> classify(elapsed(started))
 
       {:error, reason} ->
@@ -185,7 +227,7 @@ defmodule Mut.Worker do
           )
 
         port
-        |> collect("", Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> collect(Keyword.get(opts, :timeout_ms, @default_timeout_ms))
         |> classify(elapsed(started))
 
       {:error, reason} ->
@@ -221,7 +263,11 @@ defmodule Mut.Worker do
     Path.join([sandbox.path, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
   end
 
-  defp app(opts), do: Keyword.get(opts, :app, "demo_app")
+  # Require an explicit `:app` — the old `"demo_app"` fixture default silently
+  # built manifest paths under `_build/mut_schema/lib/demo_app/` for any project,
+  # so on a real project every fallback mutant failed to read its manifest and
+  # errored. All callers pass `:app`; a missing one is a bug, so fail loudly.
+  defp app(opts), do: Keyword.fetch!(opts, :app)
 
   defp recompile_output("", reason), do: inspect(reason)
   defp recompile_output(output, _reason), do: output
@@ -254,6 +300,7 @@ defmodule Mut.Worker do
       {"MUTALISK_ROLE", "fallback"},
       {"MUTALISK_PATH", Path.expand(File.cwd!())},
       {"MUT_ACTIVE", "0"}
+      | crash_dump_env()
     ]
   end
 
@@ -269,12 +316,25 @@ defmodule Mut.Worker do
     ])
   end
 
-  defp collect(port, output, timeout_ms) do
+  # Absolute monotonic deadline (R2): the host budget is wall-clock from port
+  # open, NOT an inactivity timer. The previous `after timeout_ms` reset on
+  # every output chunk, so a mutant looping *while printing* (supervisor
+  # restart + Logger) never tripped it and wedged the run (Task.async_stream is
+  # timeout: :infinity). The deadline is fixed once and the `after` shrinks as
+  # time passes, so a chatty hang is killed at the budget like a silent one.
+  defp collect(port, timeout_ms) do
+    deadline = System.monotonic_time(:millisecond) + timeout_ms
+    collect(port, "", deadline)
+  end
+
+  defp collect(port, output, deadline) do
+    remaining = max(deadline - System.monotonic_time(:millisecond), 0)
+
     receive do
-      {^port, {:data, data}} -> collect(port, bounded_output(output, data), timeout_ms)
+      {^port, {:data, data}} -> collect(port, bounded_output(output, data), deadline)
       {^port, {:exit_status, code}} -> {:exit, code, output}
     after
-      timeout_ms ->
+      remaining ->
         kill_port(port)
         {:timeout, output}
     end
@@ -300,11 +360,26 @@ defmodule Mut.Worker do
 
   defp classify({:exit, code, output}, duration_ms) do
     case Formatter.parse_output(output) do
+      # R9: zero tests ran (tag excludes / path filters matched nothing) is NOT
+      # a surviving mutant — no test had the chance to detect it. Classifying it
+      # `:survived` manufactures false survivors that drag the score down and
+      # imply test-suite gaps that don't exist. `:no_coverage` is excluded from
+      # the score denominator, like `:skipped`.
+      %{summary: %{"total" => 0}} when code == 0 ->
+        %Result{status: :no_coverage, duration_ms: duration_ms}
+
       %{summary: %{"failed" => 0}} when code == 0 ->
         %Result{status: :survived, duration_ms: duration_ms}
 
       %{summary: %{"failed" => failed}, tests: tests} when code != 0 and failed >= 1 ->
-        %Result{status: :killed, duration_ms: duration_ms, killing_test: killing_test(tests)}
+        failing = Enum.find(tests, &(&1["status"] == "failed"))
+
+        %Result{
+          status: :killed,
+          duration_ms: duration_ms,
+          killing_test: killing_test(failing),
+          killing_test_file: failing && failing["file"]
+        }
 
       # Nonzero exit with no parsed ExUnit failure (the suite crashed before/at
       # startup, test-helper load, or after the run) is classified :error and
@@ -323,14 +398,8 @@ defmodule Mut.Worker do
     end
   end
 
-  defp killing_test(tests) do
-    tests
-    |> Enum.find(&(&1["status"] == "failed"))
-    |> case do
-      nil -> nil
-      test -> "#{test["module"]} #{test["test"]}"
-    end
-  end
+  defp killing_test(nil), do: nil
+  defp killing_test(test), do: "#{test["module"]} #{test["test"]}"
 
   # Tree-kill the spawned process (not just the immediate os_pid): under a
   # version manager / wrapper `mix`, the immediate child forks the real BEAM,

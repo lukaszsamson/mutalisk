@@ -95,8 +95,27 @@ defmodule Mut.History.DigestTest do
   end
 
   describe "content_digest" do
-    test "whitespace-normalized" do
-      assert Digest.content_digest("a  b\n\tc") == Digest.content_digest("a b c")
+    test "pure-formatting churn does not change the digest" do
+      a = "defmodule A do\n  def f, do: 1\nend\n"
+      b = "defmodule A do\n\n  # a comment\n      def    f,   do:   1\nend"
+      assert Digest.content_digest(a) == Digest.content_digest(b)
+    end
+
+    test "semantic code change changes the digest" do
+      a = "def f, do: 1"
+      b = "def f, do: 2"
+      refute Digest.content_digest(a) == Digest.content_digest(b)
+    end
+
+    test "editing inside a string literal changes the digest (R4)" do
+      a = ~s|def f, do: "a  b"|
+      b = ~s|def f, do: "a b"|
+      refute Digest.content_digest(a) == Digest.content_digest(b)
+    end
+
+    test "non-Elixir / binary content falls back to raw bytes" do
+      assert Digest.content_digest(<<0, 1, 2>>) == Digest.content_digest(<<0, 1, 2>>)
+      refute Digest.content_digest(<<0, 1, 2>>) == Digest.content_digest(<<0, 1, 3>>)
     end
   end
 
@@ -137,6 +156,18 @@ defmodule Mut.History.DigestTest do
       before = Digest.project_digest(root)
       File.write!(Path.join(root, "test/a_test.exs"), "assert A.f() == 999")
       assert Digest.project_digest(root) == before
+    end
+
+    test "fingerprints umbrella child-app source under apps/* (R4)", %{root: root} do
+      app_lib = Path.join(root, "apps/a/lib")
+      File.mkdir_p!(app_lib)
+      File.write!(Path.join(app_lib, "helper.ex"), "defmodule A.Helper do\n  def g, do: 1\nend\n")
+
+      before = Digest.project_digest(root)
+      File.write!(Path.join(app_lib, "helper.ex"), "defmodule A.Helper do\n  def g, do: 2\nend\n")
+
+      refute Digest.project_digest(root) == before,
+             "editing apps/a/lib/helper.ex must change the fingerprint"
     end
   end
 end

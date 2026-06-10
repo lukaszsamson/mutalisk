@@ -19,9 +19,12 @@ defmodule Mut.History.Digest do
     * **`content_digest`** — a single file's normalized-source digest (used for
       the killing test in killed-verdict reuse).
 
-  All digests use the same SHA-256/128 hex encoding and whitespace
-  normalization `Mut.StableId` uses, so pure-formatting churn does not
-  invalidate — only semantic source change does.
+  All digests use SHA-256/128 hex encoding over AST-canonicalized source
+  (parse → `Macro.to_string`), so pure-formatting churn (indentation, blank
+  lines, comments) does not invalidate, while a semantic change — including an
+  edit *inside* a string/charlist literal — does. The earlier
+  collapse-all-whitespace normalization treated `"a  b"` and `"a b"` as
+  identical and reused stale verdicts across semantic string edits (R4).
   """
 
   @typedoc "Opaque per-file function index: line ranges + per-function digests."
@@ -101,7 +104,32 @@ defmodule Mut.History.Digest do
   # fingerprint. `_test.exs` files are excluded — each mutant's *selected* tests
   # are digested per-mutant by `selected_tests_digest/1`, and non-selected test
   # files cannot affect that mutant's verdict.
-  @project_globs ["lib/**/*.ex", "test/**/*.ex", "test/**/*.exs", "config/**/*.exs"]
+  #
+  # R4: the root-only `lib/** test/** config/**` globs matched nothing under
+  # `apps/<app>/...`, so editing an umbrella child left the fingerprint
+  # unchanged and a stale verdict was reused. The umbrella layout
+  # (`apps/*/{lib,test,config}`, each app's `mix.exs`) is fingerprinted
+  # explicitly. `.heex`/`.eex` templates, `lib/**/*.exs`, and `priv` (compiled
+  # or read at runtime/compile time) were also unfingerprinted.
+  @project_globs [
+    "lib/**/*.ex",
+    "lib/**/*.exs",
+    "lib/**/*.heex",
+    "lib/**/*.eex",
+    "test/**/*.ex",
+    "test/**/*.exs",
+    "config/**/*.exs",
+    "priv/**/*",
+    "apps/*/lib/**/*.ex",
+    "apps/*/lib/**/*.exs",
+    "apps/*/lib/**/*.heex",
+    "apps/*/lib/**/*.eex",
+    "apps/*/test/**/*.ex",
+    "apps/*/test/**/*.exs",
+    "apps/*/config/**/*.exs",
+    "apps/*/priv/**/*",
+    "apps/*/mix.exs"
+  ]
   @project_files ["mix.exs", "mix.lock"]
 
   @doc """
@@ -159,10 +187,13 @@ defmodule Mut.History.Digest do
     clauses
     |> Enum.group_by(fn {key, _range, _src} -> key end)
     |> Map.new(fn {key, group} ->
+      # `src` is already `Macro.to_string(node)` — AST-canonical, so formatting
+      # churn is neutralized and string-literal contents are preserved (no
+      # whitespace re-collapse here; R4).
       combined =
         group
         |> Enum.sort_by(fn {_key, {lo, _hi}, _src} -> lo end)
-        |> Enum.map_join("\n", fn {_key, _range, src} -> normalize(src) end)
+        |> Enum.map_join("\n", fn {_key, _range, src} -> src end)
 
       {key, sha(combined)}
     end)
@@ -204,7 +235,21 @@ defmodule Mut.History.Digest do
     lines
   end
 
-  defp normalize(s), do: s |> String.trim() |> String.replace(~r/\s+/, " ")
+  # Normalize source so pure-formatting churn (indentation, blank lines,
+  # comments) does not invalidate reuse, while a SEMANTIC change — including an
+  # edit *inside* a string/charlist literal or heredoc — does (R4). The old
+  # `String.replace(~r/\s+/, " ")` collapsed whitespace EVERYWHERE, so editing
+  # the contents of `"a  b"` to `"a b"` produced an identical digest and reused
+  # a stale verdict. Round-tripping through the AST canonicalizes code layout
+  # while preserving literal contents exactly. Non-Elixir or unparseable input
+  # (e.g. a binary `priv` asset) falls back to the raw bytes — the safe,
+  # over-invalidating direction.
+  defp normalize(source) when is_binary(source) do
+    case Code.string_to_quoted(source, emit_warnings: false) do
+      {:ok, ast} -> Macro.to_string(ast)
+      _ -> source
+    end
+  end
 
   defp sha(bin),
     do: :sha256 |> :crypto.hash(bin) |> binary_part(0, 16) |> Base.encode16(case: :lower)

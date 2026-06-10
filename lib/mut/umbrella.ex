@@ -61,6 +61,61 @@ defmodule Mut.Umbrella do
     end
   end
 
+  @doc """
+  The OTP app name (as a string) from a mix.exs AST, or `nil`.
+
+  Reads the `:app` entry of the project keyword list. The value may be an
+  atom literal (`app: :my_app`) or a module-attribute read (`app: @app`,
+  with `@app :my_app` defined earlier in the file) — the common idiom that
+  the previous 3-tuple clause mis-matched as the attribute-read node
+  `{:app, _, nil}` and returned the string `"nil"` (R1).
+  """
+  @spec app_from_ast(Macro.t()) :: String.t() | nil
+  def app_from_ast(ast) do
+    attrs = collect_attr_literals(ast)
+
+    {_ast, app} =
+      Macro.prewalk(ast, nil, fn
+        # keyword entry `app: :my_app`
+        {:app, value} = node, nil when is_atom(value) and not is_nil(value) ->
+          {node, Atom.to_string(value)}
+
+        # keyword entry `app: @app` (module-attribute read)
+        {:app, {:@, _, [{attr, _, ctx}]}} = node, nil
+        when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) ->
+          case Map.fetch(attrs, attr) do
+            {:ok, value} when is_atom(value) and not is_nil(value) ->
+              {node, Atom.to_string(value)}
+
+            _ ->
+              {node, nil}
+          end
+
+        node, app ->
+          {node, app}
+      end)
+
+    app
+  end
+
+  # Module-attribute definitions with an atom-literal value: `@app :my_app`.
+  # The definition node is `{:@, _, [{name, _, [value]}]}` (arg list); the
+  # *read* node `{:@, _, [{name, _, nil}]}` carries `nil` not a list, so it
+  # never matches here.
+  defp collect_attr_literals(ast) do
+    {_ast, map} =
+      Macro.prewalk(ast, %{}, fn
+        {:@, _, [{name, _, [value]}]} = node, acc
+        when is_atom(name) and is_atom(value) ->
+          {node, Map.put_new(acc, name, value)}
+
+        node, acc ->
+          {node, acc}
+      end)
+
+    map
+  end
+
   defp apps_path_glob(apps_dir), do: Path.join([apps_dir, "*"])
 
   defp root_project_ast(work_copy), do: project_ast(user_mix_path(work_copy))
@@ -88,21 +143,5 @@ defmodule Mut.Umbrella do
       end)
 
     value
-  end
-
-  defp app_from_ast(ast) do
-    {_ast, app} =
-      Macro.prewalk(ast, nil, fn
-        {:app, _meta, value}, nil when is_atom(value) ->
-          {{:app, [], value}, Atom.to_string(value)}
-
-        {:app, value}, nil when is_atom(value) ->
-          {{:app, value}, Atom.to_string(value)}
-
-        node, app ->
-          {node, app}
-      end)
-
-    app
   end
 end

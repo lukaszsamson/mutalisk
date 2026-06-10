@@ -72,10 +72,13 @@ defmodule Mut.ConfigTest do
     """)
 
     {:ok, opts} = Mut.Cli.parse([], Config.load(root))
-    assert %Regex{} = opts.exclude
-    assert Regex.match?(opts.exclude, "lib/foo.ex")
-    assert Regex.match?(opts.exclude, "lib/bar.ex")
-    refute Regex.match?(opts.exclude, "lib/baz.ex")
+    # R17: exclude is kept as a LIST of regexes (each preserving its own flags),
+    # matched by "any pattern matches", rather than joined into one source.
+    assert is_list(opts.exclude)
+    any? = fn file -> Enum.any?(opts.exclude, &Regex.match?(&1, file)) end
+    assert any?.("lib/foo.ex")
+    assert any?.("lib/bar.ex")
+    refute any?.("lib/baz.ex")
   end
 
   test "invalid .mutalisk.exs (not a keyword list) raises", %{root: root} do

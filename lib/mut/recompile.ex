@@ -50,7 +50,7 @@ defmodule Mut.Recompile do
     * `:unknown` — the elixir invocation failed but the output didn't
       match a known category. Surface verbatim for triage.
   """
-  @type error_category :: :compile_error | :parse_error | :dep_path_error | :unknown
+  @type error_category :: :compile_error | :parse_error | :dep_path_error | :unknown | :timeout
 
   @type result ::
           :ok
@@ -66,6 +66,14 @@ defmodule Mut.Recompile do
     "Crash dump is being written"
   ]
 
+  # R5: a generous but FINITE backstop on the per-mutant fallback recompile.
+  # Module-attribute (and other compile-time) mutants execute user code AT
+  # COMPILE TIME, so a mutant can drive the compiler into an infinite loop;
+  # without a timeout the whole `mix mut` run wedges with no recovery. 5 min is
+  # far above any real single-file recompile yet bounds a runaway. Overridable
+  # via `:compile_timeout_ms` for pathologically large dependent sets.
+  @compile_timeout_ms 300_000
+
   @spec recompile(Sandbox.t(), [Path.t()], [Path.t()], keyword) :: result
   def recompile(%Sandbox{} = sandbox, mutated_files, dependent_files, opts \\ [])
       when is_list(mutated_files) and is_list(dependent_files) and is_list(opts) do
@@ -75,11 +83,13 @@ defmodule Mut.Recompile do
     case Mut.ChildProcess.run("elixir", elixir_args(sandbox.path, files, default_app),
            cd: sandbox.path,
            env: env(),
+           timeout_ms: Keyword.get(opts, :compile_timeout_ms, @compile_timeout_ms),
            retry_on: @beam_startup_transients,
            max_retries: 2
          ) do
       {:exit, 0, _output} -> :ok
       {:exit, code, output} -> {:error, {:recompile_failed, categorize(output), code, output}}
+      {:timeout, output} -> {:error, {:recompile_failed, :timeout, 124, output}}
       {:error, reason} -> {:error, reason}
     end
   end

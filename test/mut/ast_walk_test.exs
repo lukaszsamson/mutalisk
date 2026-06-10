@@ -86,8 +86,105 @@ defmodule Mut.AstWalkTest do
     assert Enum.all?(first, &(String.length(&1.ast_path_hash) == 32))
   end
 
+  test "map_update_drop fires on a plain map update but NOT a struct update (R8)" do
+    assert [_] = map_update_candidates("def f(m), do: %{m | a: 1}")
+    assert [] == map_update_candidates("def f(s), do: %State{s | a: 1}")
+  end
+
+  test "pipeline_drop does not crash on a dynamic defmodule (R18)" do
+    source = """
+    defmodule unquote(name) do
+      def f(x), do: x |> a() |> b() |> c() |> d()
+    end
+    """
+
+    assert is_list(pipeline_candidates(source))
+  end
+
+  test "guard candidates fire inside an n-ary fn `when` clause (R12)" do
+    # `fn x, acc when is_integer(x) -> ...` is `{:when, _, [x, acc, guard]}`;
+    # the guard dispatch (`is_integer/1`) must still be discovered.
+    source = "f = fn x, acc when is_integer(x) -> acc end"
+    assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
+    guards = Mut.AstWalk.guard_candidates(ast, file: "sample.ex", source: source)
+
+    assert Enum.any?(guards, &(&1.syntactic_name == :is_integer))
+  end
+
+  test "StatementDelete skips a statement that is the sole reader of a param (T4)" do
+    # Deleting `y = x + 1` would leave param `x` unused → unused-variable warning
+    # → invalid under --warnings-as-errors. The hazard must gate it.
+    source = """
+    def f(x) do
+      y = x + 1
+      y * 2
+    end
+    """
+
+    refute Enum.any?(statement_delete(source), &(&1.syntactic_name == :statement_delete))
+  end
+
+  test "charlist collection span covers the whole literal, not one byte (T1)" do
+    source = ~S"""
+    def f do
+      x = 'abc'
+      x
+    end
+    """
+
+    [cand] =
+      collection_candidates(source)
+      |> Enum.filter(&(&1.syntactic_name == :__list_literal__))
+
+    span = cand.source_span
+    assert binary_part(source, span.start_byte, span.end_byte - span.start_byte) == "'abc'"
+  end
+
+  test "receive/after timeout literal is not an env-walker literal candidate (T5)" do
+    source = """
+    def f do
+      receive do
+        :msg -> :ok
+      after
+        1000 -> :timeout
+      end
+    end
+    """
+
+    # The `1000` timeout belongs to ReceiveTimeout (M94); the env walker must not
+    # also emit it as a literal candidate (it previously did, in match context,
+    # duplicating the mutant under a different stable id).
+    refute Enum.any?(env_candidates(source), fn {c, _snap} ->
+             match?({:__block__, _, [1000]}, c.node)
+           end)
+  end
+
   defp candidates(source) do
     assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
     Mut.AstWalk.dispatch_candidates(ast, file: "sample.ex", source: source)
+  end
+
+  defp statement_delete(source) do
+    assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
+    Mut.AstWalk.statement_delete_candidates(ast, file: "sample.ex", source: source)
+  end
+
+  defp collection_candidates(source) do
+    env_candidates(source) |> Enum.map(fn {cand, _snap} -> cand end)
+  end
+
+  defp env_candidates(source) do
+    {:ok, ast} = Mut.EnvWalker.parse_string(source, "sample.ex")
+    Mut.EnvWalker.collect_literal_candidates(ast, file: "sample.ex", source: source)
+  end
+
+  defp map_update_candidates(source) do
+    assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
+    Mut.AstWalk.map_update_drop_candidates(ast, file: "sample.ex", source: source)
+  end
+
+  defp pipeline_candidates(source) do
+    assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
+    Mut.AstWalk.pipeline_drop_candidates(ast, file: "sample.ex", source: source)
   end
 end

@@ -84,10 +84,62 @@ defmodule Mut.Orchestrator do
   defp filtered?(_file, nil), do: false
   defp filtered?(file, %Regex{} = regex), do: Regex.match?(regex, file)
 
+  defp filtered?(file, regexes) when is_list(regexes),
+    do: Enum.any?(regexes, &Regex.match?(&1, file))
+
   defp process_file(root, relative_file, oracle, mutators, enabled_targets, macro_index) do
     path = Path.join(root, relative_file)
-    {:ok, {ast, source}} = Mut.SourceParse.parse(path)
 
+    # M118: one unparsable lib file must not abort the whole run. Record it as a
+    # skip diagnostic (visible in the report) and continue with every other
+    # file, rather than crashing on a bang-match.
+    case Mut.SourceParse.parse(path) do
+      {:ok, {ast, source}} ->
+        process_parsed(
+          path,
+          relative_file,
+          ast,
+          source,
+          oracle,
+          mutators,
+          enabled_targets,
+          macro_index
+        )
+
+      {:error, reason} ->
+        unparsable_plan(relative_file, reason)
+    end
+  end
+
+  defp unparsable_plan(relative_file, reason) do
+    %Plan{
+      schema: [],
+      fallback: [],
+      invalid: [],
+      skipped: [
+        %{
+          file: relative_file,
+          line: nil,
+          column: nil,
+          syntactic_name: nil,
+          reason: :parse_error,
+          detail: inspect(reason)
+        }
+      ],
+      matched_pairs: []
+    }
+  end
+
+  defp process_parsed(
+         path,
+         relative_file,
+         ast,
+         source,
+         oracle,
+         mutators,
+         enabled_targets,
+         macro_index
+       ) do
     guard_candidates = Mut.AstWalk.guard_candidates(ast, file: relative_file, source: source)
 
     dispatch_candidates =
@@ -516,7 +568,10 @@ defmodule Mut.Orchestrator do
   end
 
   defp guard_candidate?(%AstCandidate{ast_path: path}) do
-    Enum.any?(path, &match?({:elem, :when, 1}, &1))
+    # R12: refuse ANY position inside a `when` (not just index 1) — for an
+    # n-ary head `fn x, acc when g` the guard sits at the last index, not 1.
+    # Every child of a `when` is a pattern or the guard; none is a body literal.
+    Enum.any?(path, &match?({:elem, :when, _idx}, &1))
   end
 
   defp dispatch_results(matched, mutators, source) do

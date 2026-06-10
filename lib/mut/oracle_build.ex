@@ -39,10 +39,21 @@ defmodule Mut.OracleBuild do
     end
   end
 
+  # R5: a finite backstop on the one-time oracle build. It compiles the user's
+  # UNMUTATED project + deps, so a hang here is a pathological user build rather
+  # than a mutant, but `:infinity` still wedges `mix mut` with no recovery. 20
+  # min is well above a cold full-project compile.
+  @build_timeout_ms 1_200_000
+
   defp run_child_mix(work_copy, args) do
-    case Mut.ChildProcess.run("mix", args, cd: work_copy, env: child_env(work_copy)) do
+    case Mut.ChildProcess.run("mix", args,
+           cd: work_copy,
+           env: child_env(work_copy),
+           timeout_ms: @build_timeout_ms
+         ) do
       {:exit, 0, _output} -> :ok
       {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+      {:timeout, output} -> {:error, {:compile_timeout, output_tail(output)}}
       {:error, reason} -> {:error, reason}
     end
   end

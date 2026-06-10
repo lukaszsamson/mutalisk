@@ -244,13 +244,19 @@ defmodule Mut.AstWalk do
       module_stack: []
     }
 
-    {_ast, acc} = Macro.prewalk(ast, acc, &sd_visit/2)
+    # R11: traverse (not prewalk) with a post-fn that pops the module stack, so
+    # `enclosing_module` is correct for modules that FOLLOW a nested module in
+    # the same file. The prewalk-only push never popped, so the stack only grew.
+    {_ast, acc} = Macro.traverse(ast, acc, &sd_visit/2, &md_post/2)
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp sd_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
-    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
-  end
+  # Shared module-stack pop for the opt-in collectors (sd/cd/mu/rt) that walk
+  # with their own pre-fn. Pops on every `defmodule` (balanced with the pushes
+  # those pre-fns do via the shared module helpers).
+  defp md_post(node, acc), do: {node, exit_module(node, acc)}
+
+  defp sd_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
 
   defp sd_visit({name, meta, [_head, body_kw]} = node, acc) when name in [:def, :defp] do
     with true <- Keyword.keyword?(body_kw),
@@ -270,6 +276,11 @@ defmodule Mut.AstWalk do
     # Exclude the LAST statement (its value is the def's return; deletion is the
     # noisiest sub-class per M39/M81 — opt-in within opt-in, excluded here).
     non_last = Enum.drop(indexed, -1)
+    # T4: function-head params are bindings too. Deleting the sole reader of a
+    # param leaves it unused → an "unused variable" warning, which under
+    # `--warnings-as-errors` is a compile error (the Invalid class). Treat them
+    # like `before`-bound names in the unused-binding hazard.
+    param_vars = head_param_vars(def_node)
 
     Enum.reduce(non_last, acc, fn {stmt, i}, acc ->
       before = Enum.take(stmts, i)
@@ -279,7 +290,7 @@ defmodule Mut.AstWalk do
         orphan_binding_hazard?(stmt, later) ->
           acc
 
-        unused_binding_hazard?(stmt, before, later) ->
+        unused_binding_hazard?(stmt, before, later, param_vars) ->
           acc
 
         true ->
@@ -384,8 +395,8 @@ defmodule Mut.AstWalk do
   # existing collect_lhs_bindings already walks a list-of-stmts via
   # Macro.prewalk); gather reads from `stmt` and `later`. If any binding's
   # only reader is in `stmt` (the candidate for deletion), gate.
-  defp unused_binding_hazard?(stmt, before, later) do
-    bound = collect_lhs_bindings(before)
+  defp unused_binding_hazard?(stmt, before, later, param_vars) do
+    bound = collect_lhs_bindings(before) ++ param_vars
 
     if bound == [] do
       false
@@ -395,6 +406,18 @@ defmodule Mut.AstWalk do
       Enum.any?(bound, fn name -> name in stmt_reads and name not in later_reads end)
     end
   end
+
+  # Variable names bound by the function head (params, including defaults and
+  # guarded heads). Used by the unused-binding hazard (T4).
+  defp head_param_vars({kind, _meta, [head | _]}) when kind in [:def, :defp],
+    do: head_param_vars(head)
+
+  defp head_param_vars({:when, _meta, [call | _guard]}), do: head_param_vars(call)
+
+  defp head_param_vars({name, _meta, args}) when is_atom(name) and is_list(args),
+    do: args |> Enum.flat_map(&pattern_vars/1) |> Enum.uniq()
+
+  defp head_param_vars(_other), do: []
 
   @doc """
   M87: clause-delete candidates for `case`/`cond`/`with`. Emits one candidate per
@@ -436,13 +459,11 @@ defmodule Mut.AstWalk do
       module_stack: []
     }
 
-    {_ast, acc} = Macro.prewalk(ast, acc, &cd_visit/2)
+    {_ast, acc} = Macro.traverse(ast, acc, &cd_visit/2, &md_post/2)
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp cd_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
-    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
-  end
+  defp cd_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
 
   defp cd_visit({:case, meta, [_scrutinee, [{:do, clauses}]]} = node, acc)
        when is_list(clauses) do
@@ -589,6 +610,14 @@ defmodule Mut.AstWalk do
     {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
   end
 
+  # R18: dynamic module name (`defmodule unquote(x)`, `defmodule mod`) — still
+  # push a (nil) frame so the post-walk pop stays balanced. Pushing only on the
+  # `__aliases__` form while popping on EVERY defmodule ran `tl([])` on the
+  # first dynamic defmodule and crashed the whole plan.
+  defp pipe_pre({:defmodule, _meta, _args} = node, acc) do
+    {node, %{acc | module_stack: [nil | acc.module_stack]}}
+  end
+
   defp pipe_pre({:|>, _meta, _args} = node, acc) do
     # This is the TOP of a pipeline chain (we prune the LHS so sub-pipes
     # never reach this clause). Process and replace with a leaf so the
@@ -600,10 +629,13 @@ defmodule Mut.AstWalk do
   defp pipe_pre(node, acc), do: {node, acc}
 
   defp pipe_post({:defmodule, _meta, _args} = node, acc) do
-    {node, %{acc | module_stack: tl(acc.module_stack)}}
+    {node, %{acc | module_stack: safe_tl(acc.module_stack)}}
   end
 
   defp pipe_post(node, acc), do: {node, acc}
+
+  defp safe_tl([]), do: []
+  defp safe_tl([_ | rest]), do: rest
 
   defp emit_pipeline_candidates(top_node, acc) do
     stages = flatten_pipeline(top_node)
@@ -718,23 +750,36 @@ defmodule Mut.AstWalk do
       module_stack: []
     }
 
-    {_ast, acc} = Macro.prewalk(ast, acc, &mu_visit/2)
+    {_ast, acc} = Macro.traverse(ast, acc, &mu_visit/2, &md_post/2)
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp mu_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
-    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
+  defp mu_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+
+  # R8: a struct update `%S{base | updates}` is `{:%, _, [alias, {:%{}, _,
+  # [{:|, ...}]}]}` — its INNER `%{}` has the exact shape the map-update clause
+  # below matches. Dropping that inner `%{}` would leave the `%S{}` wrapper
+  # dangling (`%S` + spliced base), invalid on every struct update. Tag the
+  # inner map so the map-update clause skips it; plain `%{m | ...}` (no struct
+  # wrapper) is untouched.
+  defp mu_visit({:%, meta, [alias_ast, {:%{}, inner_meta, [{:|, _, _} = upd]}]}, acc) do
+    tagged = {:%, meta, [alias_ast, {:%{}, [mut_struct_update: true] ++ inner_meta, [upd]}]}
+    {tagged, acc}
   end
 
   defp mu_visit({:%{}, meta, [{:|, _pipe_meta, [_base, updates]}]} = node, acc)
        when is_list(updates) do
-    case Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) do
-      nil ->
-        {node, acc}
+    if Keyword.get(meta, :mut_struct_update) do
+      {node, acc}
+    else
+      case Compute.from_meta(meta, acc.source, acc.file, acc.line_offsets) do
+        nil ->
+          {node, acc}
 
-      %Mut.SourceSpan{} = span ->
-        cand = build_map_update_candidate(node, meta, span, acc)
-        {node, %{acc | candidates: [cand | acc.candidates]}}
+        %Mut.SourceSpan{} = span ->
+          cand = build_map_update_candidate(node, meta, span, acc)
+          {node, %{acc | candidates: [cand | acc.candidates]}}
+      end
     end
   end
 
@@ -784,13 +829,11 @@ defmodule Mut.AstWalk do
       module_stack: []
     }
 
-    {_ast, acc} = Macro.prewalk(ast, acc, &rt_visit/2)
+    {_ast, acc} = Macro.traverse(ast, acc, &rt_visit/2, &md_post/2)
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp rt_visit({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
-    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
-  end
+  defp rt_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
 
   defp rt_visit({:receive, meta, [args]} = node, acc) when is_list(args) do
     with [{:->, _, [[_t], _body]} | _] <- Keyword.get(args, :after, nil),
@@ -1229,31 +1272,12 @@ defmodule Mut.AstWalk do
   defp literal_syntactic_name(value) when is_integer(value), do: :integer_literal
   defp literal_syntactic_name(value) when is_boolean(value), do: :boolean_literal
 
+  # R3: the schema literal walker shares the one proven M46 span algorithm
+  # (full-literal byte range), not the pre-M46 `column + String.length(token)`
+  # logic that mis-spanned atoms / strings / nil and produced silently corrupt
+  # mutations when SchemaPlacer refused and the candidate rerouted to fallback.
   defp literal_span(meta, value, acc) do
-    with line when is_integer(line) <- Keyword.get(meta, :line),
-         column when is_integer(column) <- Keyword.get(meta, :column) do
-      token = literal_token(meta, value)
-      end_column = column + String.length(token)
-
-      %Mut.SourceSpan{
-        file: acc.file,
-        start_line: line,
-        start_column: column,
-        end_line: line,
-        end_column: end_column,
-        start_byte: byte_offset(acc.source, acc.line_offsets, line, column),
-        end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
-      }
-    else
-      _missing -> nil
-    end
-  end
-
-  defp literal_token(meta, value) do
-    case Keyword.get(meta, :token) do
-      bin when is_binary(bin) and bin != "" -> bin
-      _ -> to_string(value)
-    end
+    Compute.literal_span(meta, value, acc.source, acc.file, acc.line_offsets)
   end
 
   # Don't double-traverse the inner literal value — the __block__
@@ -1291,7 +1315,8 @@ defmodule Mut.AstWalk do
   end
 
   defp refused_body_context?(path) do
-    Enum.any?(path, &match?({:elem, :when, 1}, &1)) or
+    # R12: any index inside a `when`, not just 1 — n-ary heads put the guard last.
+    Enum.any?(path, &match?({:elem, :when, _idx}, &1)) or
       Enum.any?(path, &match?({:elem, :@, _}, &1)) or
       Enum.any?(path, fn
         {:elem, kind, _}
@@ -1302,11 +1327,19 @@ defmodule Mut.AstWalk do
           false
       end) or
       lhs_match_path_walk?(path) or
+      generator_head_path_walk?(path) or
       clause_head_pattern_path_walk?(path) or
       function_head_walk?(path)
   end
 
   defp lhs_match_path_walk?(path), do: Enum.any?(path, &match?({:elem, :=, 0}, &1))
+
+  # `<-` generator/with heads: the left side of `pattern <- expr` (in `for`
+  # and `with`) is a PATTERN, not a body expression (R3). A literal there is a
+  # pattern-position constant — it must not be schema-gated, and previously
+  # flowed into the corrupt literal path (and duplicated M53 pattern-literal
+  # candidates under different stable IDs).
+  defp generator_head_path_walk?(path), do: Enum.any?(path, &match?({:elem, :<-, 0}, &1))
 
   # A `{:elem, :->, 0}` step is the HEAD (left) of a clause. For
   # case / fn / with-else / try-rescue|catch / receive that head is a
@@ -1497,8 +1530,15 @@ defmodule Mut.AstWalk do
 
   defp maybe_attribute_candidate(_node, _path, acc), do: acc
 
-  defp maybe_guard_candidates({:when, _meta, [_pattern, guard]}, path, acc) do
-    frame = %{kind: :when, path: path, next_index: 1}
+  # R12: a `when` clause head may be n-ary — `fn x, acc when g -> ...` is
+  # `{:when, _, [x, acc, g]}` (all patterns, then the guard LAST). Matching only
+  # the 2-element `[pattern, guard]` shape meant guard mutators never fired on
+  # multi-arg clauses. The guard is the last element; its path index is
+  # `length(args) - 1`.
+  defp maybe_guard_candidates({:when, _meta, args}, path, acc)
+       when is_list(args) and length(args) >= 2 do
+    guard = List.last(args)
+    frame = %{kind: :when, path: path, next_index: length(args) - 1}
     guard_acc = %{acc | frames: [frame], candidates: []}
     {_guard, guard_acc} = Macro.traverse(guard, guard_acc, &guard_dispatch_pre/2, &post/2)
     %{acc | candidates: Enum.reverse(guard_acc.candidates) ++ acc.candidates}
@@ -1652,6 +1692,15 @@ defmodule Mut.AstWalk do
     %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}
   end
 
+  # R11: a dynamic module name (`defmodule unquote(x)`, `defmodule mod`) still
+  # pushes a (nil) frame, because `exit_module` pops on EVERY defmodule. Pushing
+  # only on the `__aliases__` form left the stack unbalanced — a dynamic
+  # defmodule nested in a static one popped the static frame early, mis-attributing
+  # every later candidate's enclosing module.
+  defp enter_module({:defmodule, _meta, _args}, acc) do
+    %{acc | module_stack: [nil | acc.module_stack]}
+  end
+
   defp enter_module(_node, acc), do: acc
 
   defp exit_module({:defmodule, _meta, _args}, %{module_stack: [_module | rest]} = acc),
@@ -1736,12 +1785,27 @@ defmodule Mut.AstWalk do
   end
 
   defp rendered_span(line_text, rendered, column) do
+    # T6: `:binary.matches/2` returns BYTE offsets; the parser's `column` (and
+    # the `byte_offset/4` helper this feeds) are CHARACTER columns. Treating the
+    # byte offset as a column put the span at the wrong place on lines with
+    # multibyte characters before the match (e.g. a guard on a line with `é` or
+    # `→`). Convert each match's byte boundaries to character columns first.
     line_text
     |> :binary.matches(rendered)
-    |> Enum.map(fn {start_byte, length} -> {start_byte + 1, start_byte + length + 1} end)
+    |> Enum.map(fn {start_byte, length} ->
+      {byte_to_char_column(line_text, start_byte) + 1,
+       byte_to_char_column(line_text, start_byte + length) + 1}
+    end)
     |> Enum.find(fn {start_column, end_column} ->
       start_column <= column and column <= end_column
     end)
+  end
+
+  # Number of characters preceding `byte_offset` in `line_text` (a 0-based
+  # character column). `:binary.matches` aligns to the searched substring, so
+  # `byte_offset` is always a codepoint boundary and `binary_part/3` is safe.
+  defp byte_to_char_column(line_text, byte_offset) do
+    line_text |> binary_part(0, byte_offset) |> String.length()
   end
 
   defp attribute_value_column(line_text, attr_column, name) do

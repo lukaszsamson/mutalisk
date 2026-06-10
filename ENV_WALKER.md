@@ -292,5 +292,3 @@ and resolution is and remains the tracer oracle's job.*
   confirms it and adds the precise locus of the gap (the `macro_index` reaches
   Tier-2 env-walker surfaces but **not** the Tier-3 `AstWalk` structural
   mutators) and the additive, no-migration fix path.
-</content>
-</invoke>

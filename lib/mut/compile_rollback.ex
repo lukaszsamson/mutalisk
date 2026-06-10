@@ -44,15 +44,42 @@ defmodule Mut.CompileRollback do
 
   @spec diagnostic_anchors(String.t()) :: [anchor]
   def diagnostic_anchors(output) do
+    # R10: anchor ONLY on error diagnostics, not warnings. The rollback
+    # invalidates the mutants on each anchored line; a mutant whose instrumented
+    # line merely emitted a *warning* (while a DIFFERENT mutant caused the actual
+    # compile error) must not be invalidated. Elixir groups diagnostics under a
+    # `warning:`/`error:` header and prints the `file:line` on a following line,
+    # so we carry the current severity as we scan and keep only error anchors.
     output
     |> String.split("\n")
-    |> Enum.flat_map(fn line ->
-      Regex.scan(@anchor, line, capture: :all_names)
-      |> Enum.map(fn [file, line_number] ->
-        %{file: normalize_file(file), line: String.to_integer(line_number), diagnostic: line}
-      end)
+    |> Enum.reduce({:error, []}, fn line, {severity, acc} ->
+      severity = severity_for(line, severity)
+      {severity, acc ++ error_anchors(line, severity)}
     end)
+    |> elem(1)
     |> Enum.uniq_by(&{&1.file, &1.line, &1.diagnostic})
+  end
+
+  defp error_anchors(_line, :warning), do: []
+
+  defp error_anchors(line, :error) do
+    @anchor
+    |> Regex.scan(line, capture: :all_names)
+    |> Enum.map(fn [file, line_number] ->
+      %{file: normalize_file(file), line: String.to_integer(line_number), diagnostic: line}
+    end)
+  end
+
+  # Track the severity of the current diagnostic block. A `warning:` header
+  # opens a warning region (its `file:line` lines are ignored for rollback); an
+  # `error:` header or an `** (…Error)` exception line opens an error region.
+  defp severity_for(line, current) do
+    cond do
+      Regex.match?(~r/(^|\s)warning:/, line) -> :warning
+      Regex.match?(~r/(^|\s)error:/, line) -> :error
+      String.contains?(line, "** (") -> :error
+      true -> current
+    end
   end
 
   @spec locate_mutants(PlacementMap.t(), pos_integer) :: {:ok, [non_neg_integer()]} | :not_found
@@ -86,9 +113,19 @@ defmodule Mut.CompileRollback do
     end
   end
 
+  # R5: finite backstop on each rollback-bisection recompile (this loops,
+  # recompiling the schema build as it invalidates faulty mutants). `:infinity`
+  # would wedge the whole schema phase on a pathological compile.
+  @build_timeout_ms 1_200_000
+
   defp compile_and_loop(state) do
-    case Mut.ChildProcess.run("mix", state.compile_args, cd: state.work_copy_root, env: state.env) do
+    case Mut.ChildProcess.run("mix", state.compile_args,
+           cd: state.work_copy_root,
+           env: state.env,
+           timeout_ms: @build_timeout_ms
+         ) do
       {:exit, exit_code, output} -> loop(state, output, exit_code)
+      {:timeout, output} -> {:error, {:compile_timeout, Mut.ChildProcess.output_tail(output)}}
       {:error, reason} -> {:error, reason}
     end
   end

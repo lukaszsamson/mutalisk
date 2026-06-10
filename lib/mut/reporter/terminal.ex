@@ -21,7 +21,7 @@ defmodule Mut.Reporter.Terminal do
 
     line =
       [
-        "[#{index}/#{planned_total(snapshot)}] ",
+        "[#{index}/#{progress_total(snapshot)}] ",
         color(result.status, String.pad_trailing(status, 8)),
         "  ",
         location(mutant),
@@ -72,6 +72,8 @@ defmodule Mut.Reporter.Terminal do
       count_line("Errors", status_count(snapshot, :error), ""),
       "\n",
       count_line("Timeouts", status_count(snapshot, :timeout), ""),
+      "\n",
+      count_line("No coverage", status_count(snapshot, :no_coverage), ""),
       "\n\n",
       "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
@@ -154,7 +156,17 @@ defmodule Mut.Reporter.Terminal do
   defp planned_total(%Snapshot{planned_total: total}) when is_integer(total), do: total
   defp planned_total(%Snapshot{total: total}), do: total
 
-  defp executed?(%{status: status}), do: status not in [:skipped, :invalid]
+  # T12: under `--incremental`, reused verdicts are recorded in the ledger
+  # before execution, so the streamed `index` (executed-status ledger count)
+  # includes them. `planned_total` counts only the to-execute subset, so the
+  # progress denominator must add the reused count back or `index` overshoots
+  # it (the reported `[37/30]`).
+  defp progress_total(%Snapshot{reused: reused} = snapshot) when is_integer(reused),
+    do: planned_total(snapshot) + reused
+
+  defp progress_total(snapshot), do: planned_total(snapshot)
+
+  defp executed?(%{status: status}), do: status not in [:skipped, :invalid, :no_coverage]
 
   defp engine_line(snapshot, engine, label) do
     total = engine_total(snapshot, engine)

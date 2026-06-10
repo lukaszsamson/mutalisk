@@ -570,22 +570,20 @@ defmodule Mut.EnvWalker do
     }
   end
 
-  # Collections close with a bracket/brace whose position the parser
-  # records under `:closing` — the precise span end. The fallback patch
-  # splices this byte range, so it must cover the whole literal.
+  # Bracket/brace collections (`[..]`, `{..}`, `%{..}`) record the closing
+  # delimiter position under `:closing` — the precise span end. A charlist
+  # (`'abc'`) is also a list literal but is delimiter-quoted, not bracketed: it
+  # carries `:delimiter` and NO `:closing`, so the old code fell to a 1-byte
+  # span (just the opening `'`) and the fallback patch spliced over only that
+  # byte — corrupt (T1). Scan to the matching close delimiter for that case.
   defp collection_span(state, meta) do
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
 
     if is_integer(line) and is_integer(column) do
-      {end_line, end_column} =
-        case Keyword.get(meta, :closing) do
-          closing when is_list(closing) ->
-            {Keyword.get(closing, :line, line), Keyword.get(closing, :column, column) + 1}
-
-          _ ->
-            {line, column + 1}
-        end
+      start_byte = byte_offset(state, line, column)
+      end_byte = collection_end_byte(state, meta, line, column, start_byte)
+      {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
 
       %SourceSpan{
         file: state.file,
@@ -593,9 +591,25 @@ defmodule Mut.EnvWalker do
         start_column: column,
         end_line: end_line,
         end_column: end_column,
-        start_byte: byte_offset(state, line, column),
-        end_byte: byte_offset(state, end_line, end_column)
+        start_byte: start_byte,
+        end_byte: end_byte
       }
+    end
+  end
+
+  defp collection_end_byte(state, meta, line, column, start_byte) do
+    cond do
+      is_list(Keyword.get(meta, :closing)) ->
+        closing = Keyword.get(meta, :closing)
+        cl = Keyword.get(closing, :line, line)
+        cc = Keyword.get(closing, :column, column) + 1
+        byte_offset(state, cl, cc)
+
+      is_binary(Keyword.get(meta, :delimiter)) ->
+        scan_delimited_end(state.source, start_byte, Keyword.get(meta, :delimiter))
+
+      true ->
+        start_byte + 1
     end
   end
 
@@ -738,7 +752,7 @@ defmodule Mut.EnvWalker do
 
     case fetch_block(kw, :after) do
       nil -> state
-      after_clauses -> walk_clauses(List.wrap(after_clauses), state)
+      after_clauses -> walk_receive_after(List.wrap(after_clauses), state)
     end
   end
 
@@ -758,11 +772,24 @@ defmodule Mut.EnvWalker do
     walk_in_context(lhs, state, :match)
   end
 
-  # `when ...` — top-level `when` outside def is a guard expression.
-  defp descend({:when, _meta, [head, guard]}, state) do
-    state = walk(head, state)
+  # `when ...` — top-level `when` outside def is a guard expression. R12: the
+  # head may be n-ary (`fn x, acc when g`), so the guard is the LAST element and
+  # everything before it is a pattern/head, not just a single `[head, guard]`.
+  defp descend({:when, _meta, args}, state) when is_list(args) and length(args) >= 2 do
+    guard = List.last(args)
+    heads = Enum.drop(args, -1)
+    state = Enum.reduce(heads, state, &walk/2)
     walk_in_context(guard, state, :guard)
   end
+
+  # R13: module-attribute READ `@foo` is `{:@, _, [{name, _, ctx}]}` where the
+  # inner name node is variable-shaped (`ctx` is an atom/nil). Without this
+  # clause the walker descended into it and emitted `foo` as a mutable variable,
+  # yielding `@x` undefined-attribute mutants. The attribute name is never a
+  # variable, and a read has no value child to walk. A DEFINITION `@foo value`
+  # has inner `{name, _, [value]}` (ctx is a LIST), so it falls through to the
+  # generic descent and its value is still walked.
+  defp descend({:@, _meta, [{_name, _m, ctx}]}, state) when is_atom(ctx), do: state
 
   # `^pinned`.
   defp descend({:^, _meta, [child]}, state) do
@@ -899,10 +926,21 @@ defmodule Mut.EnvWalker do
   defp body_scope_for(_), do: :function_body
 
   # Decompose `head` into args + optional guard. Returns `{args, state_after_guard}`.
-  defp split_head({:when, _meta, [inner, guard]}, state) do
-    {args, state_after_args} = split_head(inner, state)
+  # R12: handle n-ary `when` (`fn x, acc when g`) — guard is the last element.
+  # A `def`-style head has a single inner call before the guard (recurse to get
+  # its args); a multi-pattern `fn` head's patterns ARE the args.
+  defp split_head({:when, _meta, args}, state) when is_list(args) and length(args) >= 2 do
+    guard = List.last(args)
+    heads = Enum.drop(args, -1)
+
+    {arg_list, state_after_args} =
+      case heads do
+        [single] -> split_head(single, state)
+        multiple -> {multiple, state}
+      end
+
     state_after_guard = walk_in_context(guard, state_after_args, :guard)
-    {args, state_after_guard}
+    {arg_list, state_after_guard}
   end
 
   defp split_head({_name, _meta, args}, state) when is_list(args), do: {args, state}
@@ -939,8 +977,30 @@ defmodule Mut.EnvWalker do
 
   defp walk_clauses(_, state), do: state
 
-  defp walk_clause_head([{:when, _, [pattern, guard]}], state) do
-    state = walk_in_context(pattern, state, :match)
+  # T5: the `after <timeout> -> body` head is the timeout EXPRESSION, not a
+  # message pattern — and the timeout literal is owned by the ReceiveTimeout
+  # mutator (M94). Walking it through `walk_clauses` (match context) made the
+  # literal ALSO a pattern-literal candidate, duplicating the mutant under a
+  # different stable id. Walk only the body; leave the timeout to ReceiveTimeout.
+  defp walk_receive_after(clauses, state) when is_list(clauses) do
+    Enum.reduce(clauses, state, fn
+      {:->, _meta, [_timeout_head, body]}, acc ->
+        body_state = walk(body, %{acc | context: nil})
+        %{acc | snapshots: body_state.snapshots, candidates: body_state.candidates}
+
+      _, acc ->
+        acc
+    end)
+  end
+
+  # R12: n-ary `when` — `[{:when, _, [p1, p2, ..., guard]}]`. Each pattern is
+  # walked in `:match`, only the LAST element (the guard) in `:guard`. The
+  # 2-element-only clause walked a multi-arg guard as `:match`, mis-classifying
+  # its literals.
+  defp walk_clause_head([{:when, _, args}], state) when is_list(args) and length(args) >= 2 do
+    guard = List.last(args)
+    patterns = Enum.drop(args, -1)
+    state = Enum.reduce(patterns, state, &walk_in_context(&1, &2, :match))
     walk_in_context(guard, state, :guard)
   end
 
@@ -1340,7 +1400,9 @@ defmodule Mut.EnvWalker do
 
   defp fetch_block(_, _), do: nil
 
-  defp function_name_arity({:when, _meta, [inner, _guard]}), do: function_name_arity(inner)
+  # R12: the head (a def call node) is the FIRST element; the guard is last.
+  # `[inner | _]` tolerates n-ary `when` rather than only the 2-element shape.
+  defp function_name_arity({:when, _meta, [inner | _guard]}), do: function_name_arity(inner)
 
   defp function_name_arity({name, _meta, args}) when is_atom(name) and is_list(args),
     do: {name, length(args)}

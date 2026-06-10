@@ -5,7 +5,14 @@ defmodule Mut.WorkCopy do
 
   alias Mut.Bootstrap.Overlay
 
-  @symlink_entries ["deps", "config", "priv"]
+  # R15: `priv` is COPIED, not symlinked. A symlink pointed every sandbox's
+  # `priv` at the user's REAL project dir, so tests writing under `priv` (SQLite
+  # DBs, generated assets, Mnesia) mutated the user's project and contended
+  # across concurrent sandboxes. `copy_project/2` already copies `priv` (cheaply,
+  # copy-on-write where supported); dropping it from the symlink set leaves that
+  # isolated copy in place. `deps`/`config` are read-only at test time and stay
+  # symlinked to avoid duplicating large dependency trees.
+  @symlink_entries ["deps", "config"]
   @transient_entries ["_build", "tmp"]
 
   @spec materialize(Path.t(), String.t(), keyword) :: {:ok, Path.t()} | {:error, term}

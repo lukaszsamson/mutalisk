@@ -97,7 +97,20 @@ defmodule Mut.ChildProcess do
   defp maybe_put(opts, key, value), do: [{key, value} | opts]
 
   defp port_env(env) do
-    Enum.map(env, fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)
+    env
+    |> ensure_crash_dump_quiet()
+    |> Enum.map(fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)
+  end
+
+  # R14: disable `erl_crash.dump` for every spawned child (compile/recompile
+  # phases run user code at compile time, which a mutant can crash). A caller
+  # that explicitly sets the var keeps its value.
+  defp ensure_crash_dump_quiet(env) do
+    if List.keymember?(env, "ERL_CRASH_DUMP_SECONDS", 0) do
+      env
+    else
+      [{"ERL_CRASH_DUMP_SECONDS", "0"} | env]
+    end
   end
 
   defp init_state(opts, log_io) do
@@ -109,19 +122,33 @@ defmodule Mut.ChildProcess do
     }
   end
 
+  # Absolute monotonic deadline (R2): the budget is wall-clock from port open,
+  # not an inactivity timer. The previous `after timeout_ms` reset on every
+  # output chunk, so a child looping while printing never tripped it. `:infinity`
+  # is preserved (no deadline) for callers that opt out of a timeout.
   defp collect(port, state, timeout_ms) do
+    collect(port, state, :deadline, deadline_from(timeout_ms))
+  end
+
+  defp collect(port, state, :deadline, deadline) do
     receive do
       {^port, {:data, data}} ->
-        collect(port, append_output(state, data), timeout_ms)
+        collect(port, append_output(state, data), :deadline, deadline)
 
       {^port, {:exit_status, code}} ->
         {:exit, code, state.output}
     after
-      timeout_ms ->
+      remaining(deadline) ->
         kill_port(port)
         {:timeout, state.output}
     end
   end
+
+  defp deadline_from(:infinity), do: :infinity
+  defp deadline_from(ms) when is_integer(ms), do: System.monotonic_time(:millisecond) + ms
+
+  defp remaining(:infinity), do: :infinity
+  defp remaining(deadline), do: max(deadline - System.monotonic_time(:millisecond), 0)
 
   defp append_output(%{max_bytes: max_bytes, log_io: log_io} = state, data) do
     write_log(log_io, data)

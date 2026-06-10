@@ -48,6 +48,97 @@ defmodule Mut.SourceSpan.Compute do
     end
   end
 
+  @doc """
+  Span covering a COMPLETE scalar literal (M46). The pre-M46 logic computed
+  `end_column = column + String.length(token)`, which spanned `:ok` as `":o"`
+  and `nil` as zero bytes — when rerouted to fallback that corrupt byte range
+  spliced `x == :ok` into `x == :errork` (R3). The end is instead derived from
+  the literal's actual source shape:
+
+    * `:token` (numbers) — the recorded token text length.
+    * `:delimiter` (strings, quoted atoms) — scan to the matching close,
+      honoring `\\`-escapes.
+    * bare atom / `nil` / `true` / `false` — `:` prefix (none for the bare
+      words) plus the atom text.
+    * otherwise — a conservative 1-byte span.
+
+  This is the single source of truth shared with `Mut.EnvWalker`'s literal
+  path; the schema literal walker (`Mut.AstWalk`) routes through here too.
+  """
+  @spec literal_span(keyword, term, String.t() | nil, Path.t(), line_offsets) ::
+          SourceSpan.t() | nil
+  def literal_span(_meta, _value, nil, _file, _line_offsets), do: nil
+
+  def literal_span(meta, value, source, file, line_offsets) do
+    line = Keyword.get(meta, :line)
+    column = Keyword.get(meta, :column)
+
+    if is_integer(line) and is_integer(column) do
+      start_byte = byte_offset(source, line_offsets, line, column)
+      end_byte = literal_end_byte(source, start_byte, meta, value)
+      {end_line, end_column} = byte_to_line_col(line_offsets, end_byte)
+
+      %SourceSpan{
+        file: file,
+        start_line: line,
+        start_column: column,
+        end_line: end_line,
+        end_column: end_column,
+        start_byte: start_byte,
+        end_byte: end_byte
+      }
+    end
+  end
+
+  defp literal_end_byte(source, start_byte, meta, value) do
+    cond do
+      token = Keyword.get(meta, :token) ->
+        start_byte + byte_size(to_string(token))
+
+      delimiter = Keyword.get(meta, :delimiter) ->
+        scan_delimited_end(source, start_byte, delimiter)
+
+      is_atom(value) ->
+        prefix = if value in [nil, true, false], do: 0, else: 1
+        start_byte + prefix + byte_size(Atom.to_string(value))
+
+      true ->
+        start_byte + 1
+    end
+  end
+
+  defp scan_delimited_end(source, start_byte, delimiter) do
+    dsize = byte_size(delimiter)
+    scan_delimiter_close(source, start_byte + dsize, delimiter, dsize)
+  end
+
+  defp scan_delimiter_close(source, pos, delimiter, dsize) do
+    cond do
+      pos + dsize > byte_size(source) ->
+        byte_size(source)
+
+      binary_part(source, pos, dsize) == delimiter ->
+        pos + dsize
+
+      binary_part(source, pos, 1) == "\\" ->
+        scan_delimiter_close(source, pos + 2, delimiter, dsize)
+
+      true ->
+        scan_delimiter_close(source, pos + 1, delimiter, dsize)
+    end
+  end
+
+  # Map representation: line_number => starting byte offset. Find the line whose
+  # offset is the greatest not exceeding `byte`.
+  defp byte_to_line_col(line_offsets, byte) do
+    {line, offset} =
+      line_offsets
+      |> Enum.filter(fn {_line, off} -> off <= byte end)
+      |> Enum.max_by(fn {_line, off} -> off end, fn -> {1, 0} end)
+
+    {line, byte - offset + 1}
+  end
+
   @spec line_offsets(String.t()) :: line_offsets
   def line_offsets(source) do
     source

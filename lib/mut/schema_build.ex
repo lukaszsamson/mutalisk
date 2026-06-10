@@ -225,17 +225,31 @@ defmodule Mut.SchemaBuild do
     end
   end
 
+  # R5: finite backstop on the one-time schema build (full instrumented project
+  # compile). `:infinity` would wedge `mix mut` on a pathological compile.
+  @build_timeout_ms 1_200_000
+
   defp run_child_mix(work_copy, args) do
-    case Mut.ChildProcess.run("mix", args, cd: work_copy, env: child_env()) do
+    case Mut.ChildProcess.run("mix", args,
+           cd: work_copy,
+           env: child_env(),
+           timeout_ms: @build_timeout_ms
+         ) do
       {:exit, 0, _output} -> :ok
       {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+      {:timeout, output} -> {:error, {:compile_timeout, output_tail(output)}}
       {:error, reason} -> {:error, reason}
     end
   end
 
   defp compile(work_copy) do
-    case Mut.ChildProcess.run("mix", @compile_args, cd: work_copy, env: child_env()) do
+    case Mut.ChildProcess.run("mix", @compile_args,
+           cd: work_copy,
+           env: child_env(),
+           timeout_ms: @build_timeout_ms
+         ) do
       {:exit, exit_code, output} -> {:compile, output, exit_code}
+      {:timeout, output} -> {:compile, output, 124}
       {:error, reason} -> {:compile, inspect(reason), 1}
     end
   end

@@ -46,7 +46,11 @@ defmodule Mix.Tasks.Mut do
   A CLI flag always wins; `config :mut` overrides the file; the file is the
   base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
   `enabled_targets`, `selection`, `fail_at`, `concurrency`, `test_timeout_ms`,
-  `reporters`, `output_path`, `exclude`.
+  `reporters`, `output_path`, `exclude`, `max_mutants`, `since`, `incremental`,
+  `history_path`, and `coverage_timeout_ms`. `exclude`, `history_path`, and
+  `coverage_timeout_ms` are config-only (no CLI flag); the rest accept a CLI
+  flag that overrides config. Run-scoped switches `debug_plan` and
+  `keep_work_copy` are CLI-only.
 
   `.mutalisk.exs` (in the project root, loaded if present) is a plain
   keyword-list term — no `Config` runtime needed:
@@ -105,6 +109,10 @@ defmodule Mix.Tasks.Mut do
   # classify. 10s matches v1.8 (the old 70 000 = 60 000 + 10 000).
   @host_deadline_buffer_ms 10_000
   @coverage_pathology_floor_ms 10_000
+  # R5: finite backstop for the baseline suite (includes an implicit compile);
+  # generous enough not to false-fail a large suite, finite enough to recover
+  # from a hang.
+  @baseline_timeout_ms 1_200_000
   @mutalisk_root Path.expand("../../..", __DIR__)
 
   @impl Mix.Task
@@ -142,7 +150,7 @@ defmodule Mix.Tasks.Mut do
       work_copy = Path.join([mutalisk_root, "tmp", "mut_work", run_id])
 
       Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
-        baseline_tests!(work_copy, mutalisk_root)
+        baseline_tests!(work_copy, mutalisk_root, opts.test_timeout_ms)
       end)
 
       baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
@@ -203,6 +211,12 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
+  # R15: destroying the original `pool` (the precisely-typed opaque
+  # `Sandbox.Pool` from `create_pool`) inside the `after` trips dialyzer's
+  # cross-module opaqueness check — the prior `final_pool` came back through the
+  # run functions with a looser type. `Sandbox` already exempts `destroy_pool/1`
+  # via `{:no_opaque, ...}`; mirror that at this call site.
+  @dialyzer {:no_opaque, execute_plan: 8}
   defp execute_plan(
          plan,
          target_root,
@@ -234,7 +248,7 @@ defmodule Mix.Tasks.Mut do
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
-    {snapshot, final_pool} =
+    {snapshot, _final_pool} =
       try do
         record_schema_build_metadata(metrics_pid, schema_result)
 
@@ -291,15 +305,29 @@ defmodule Mix.Tasks.Mut do
             opts
           )
 
-        # M105: record the per-mutant verdict store for incremental history.
-        # Runs before the `after` clause destroys the work copy (digests are
-        # computed against the exact source the verdicts came from). Always
-        # writes (history accrues for the next run) but changes nothing
-        # observable; never aborts the run on failure.
-        write_history(snapshot, source_root, target_root, opts)
-
         {snapshot, final_pool}
       after
+        # T14: persist incremental history in `after`, snapshotting the live
+        # metrics ledger — so a mid-run abort (worker crash, Ctrl-C, render
+        # failure) still records the verdicts produced so far for the next
+        # `--incremental` run, instead of only writing at the very end. Runs
+        # BEFORE the work copy is removed (digests need that source) and is
+        # wrapped to never raise. The reuse decision is already guarded by
+        # per-mutant digests, so a partial store is safe to reuse.
+        write_history(
+          Metrics.snapshot(metrics_pid),
+          schema_result.work_copy_root,
+          target_root,
+          opts
+        )
+
+        # R15: destroy the sandbox pool inside `after`, not after the try — an
+        # exception in the body (a worker crash, a render failure) otherwise
+        # skipped this and leaked every sandbox directory. All sandboxes share
+        # fixed paths under the run's pool dir, so destroying the original
+        # `pool` reclaims them regardless of checkout state on the failure path.
+        Sandbox.destroy_pool(pool)
+
         if opts.keep_work_copy do
           IO.puts(
             :stderr,
@@ -310,7 +338,6 @@ defmodule Mix.Tasks.Mut do
         end
       end
 
-    Sandbox.destroy_pool(final_pool)
     set_exit_code(snapshot, opts.fail_at)
     IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
   end
@@ -554,7 +581,14 @@ defmodule Mix.Tasks.Mut do
   defp changed_files_since(nil, _root), do: nil
 
   defp changed_files_since(ref, root) do
-    case System.cmd("git", ["-C", root, "diff", "--name-only", ref], stderr_to_stdout: true) do
+    # T2: `--relative` makes git emit paths relative to `-C root` (the project
+    # root) and restrict the diff to files under it. Without it, git returns
+    # REPOSITORY-root-relative paths (e.g. `apps/foo/lib/x.ex`), which never
+    # match the project-root-relative `mutant.file` (`lib/x.ex`) in a monorepo /
+    # umbrella — silently making the `--since` gate inert.
+    case System.cmd("git", ["-C", root, "diff", "--name-only", "--relative", ref],
+           stderr_to_stdout: true
+         ) do
       {output, 0} ->
         output |> String.split("\n", trim: true) |> MapSet.new()
 
@@ -578,7 +612,7 @@ defmodule Mix.Tasks.Mut do
     )
   end
 
-  defp baseline_tests!(work_copy, host_root) do
+  defp baseline_tests!(work_copy, host_root, test_timeout_ms) do
     env = [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_oracle"},
@@ -589,10 +623,28 @@ defmodule Mix.Tasks.Mut do
 
     log_path = Path.join([host_root, "tmp", "mut_baseline.log"])
 
-    case Mut.ChildProcess.run("mix", ["test", "--no-deps-check", "--no-archives-check"],
+    # R2: run the baseline under the SAME per-test timeout as mutant runs. A
+    # test that passes under ExUnit's 60s default but exceeds the mutation
+    # --timeout (10s default) would otherwise time out under every covering
+    # mutant and be silently counted as a kill. Failing it here, up front,
+    # makes the mismatch visible instead of a per-mutant false kill.
+    test_args = [
+      "test",
+      "--no-deps-check",
+      "--no-archives-check",
+      "--timeout",
+      Integer.to_string(test_timeout_ms)
+    ]
+
+    case Mut.ChildProcess.run("mix", test_args,
            cd: work_copy,
            env: env,
            max_output_bytes: 512_000,
+           # R5: a finite backstop so a hanging baseline suite (or a hung
+           # compile during `mix test`'s implicit compile) aborts visibly
+           # instead of wedging `mix mut` forever — the existing `{:timeout, _}`
+           # clause below was dead without this (default was `:infinity`).
+           timeout_ms: @baseline_timeout_ms,
            log_path: log_path
          ) do
       {:exit, 0, _output} ->
@@ -648,9 +700,12 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp run_coverage!(work_copy, opts) do
-    case CoverageRunner.run(work_copy,
-           test_paths: absolute_test_paths(work_copy, opts),
-           mutalisk_path: @mutalisk_root
+    case CoverageRunner.run(
+           work_copy,
+           [
+             test_paths: absolute_test_paths(work_copy, opts),
+             mutalisk_path: @mutalisk_root
+           ] ++ coverage_timeout_opt(opts)
          ) do
       {:ok, oracle} ->
         report_degraded_coverage(oracle)
@@ -660,6 +715,13 @@ defmodule Mix.Tasks.Mut do
         Mix.raise("coverage collection failed: #{inspect(reason)}")
     end
   end
+
+  # T9: pass the configured per-file coverage timeout through, if set; omit it
+  # so the runner keeps its built-in default otherwise.
+  defp coverage_timeout_opt(%{coverage_timeout_ms: ms}) when is_integer(ms),
+    do: [timeout_per_file_ms: ms]
+
+  defp coverage_timeout_opt(_opts), do: []
 
   # M64: surface per-file coverage degradation (crash-tolerant fallback).
   defp report_degraded_coverage(%{degraded_test_files: [_ | _] = degraded}) do
@@ -920,11 +982,30 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp record_last_killer(killer, mutant, %{status: :killed}, %{test_files: [test_file | _]}) do
-    if mutant.module, do: Mut.LastKiller.record_kill(killer, mutant.module, test_file)
+  defp record_last_killer(killer, mutant, %{status: :killed} = result, %{
+         test_files: [_ | _] = test_files
+       }) do
+    if mutant.module do
+      Mut.LastKiller.record_kill(killer, mutant.module, killer_file(result, test_files))
+    end
   end
 
   defp record_last_killer(_killer, _mutant, _result, _selected), do: :ok
+
+  # The last-killer hint must store the file the killing test ACTUALLY lives in,
+  # not the first *selected* file (the prior bug made the prioritisation hint
+  # point at a file that didn't kill). The worker reports the killer's file as
+  # ExUnit saw it (an absolute sandbox path); match it back to one of the
+  # selected files by basename so the stored value is in the same form
+  # `order_tests/4` later compares against. Fall back to the first selected file
+  # when the killer's file is unknown or unmatched.
+  defp killer_file(%{killing_test_file: file}, test_files) when is_binary(file) do
+    base = Path.basename(file)
+
+    Enum.find(test_files, hd(test_files), &(Path.basename(&1) == base))
+  end
+
+  defp killer_file(_result, [first | _]), do: first
 
   defp render_reports(snapshot, plan, work_copy, host_root, opts) do
     if :terminal in opts.reporters do
@@ -1117,34 +1198,28 @@ defmodule Mix.Tasks.Mut do
     |> Path.join("mix_user.exs")
     |> File.read!()
     |> Code.string_to_quoted!()
-    |> app_from_ast()
-  end
-
-  defp app_from_ast(ast) do
-    {_ast, app} =
-      Macro.prewalk(ast, nil, fn
-        {:app, _meta, value}, nil when is_atom(value) ->
-          {{:app, [], value}, Atom.to_string(value)}
-
-        {:app, value}, nil when is_atom(value) ->
-          {{:app, value}, Atom.to_string(value)}
-
-        node, app ->
-          {node, app}
-      end)
-
-    app
+    |> Mut.Umbrella.app_from_ast()
   end
 
   defp set_exit_code(snapshot, fail_at) do
-    if snapshot.score < fail_at do
+    # Compare the score at the SAME precision it is reported (1 decimal). A raw
+    # comparison failed `--fail-at 80` for a 79.96% run that the terminal prints
+    # as "80.0%" — the gate and the displayed number must agree.
+    if Float.round(snapshot.score, 1) < fail_at do
       System.at_exit(fn _status -> exit({:shutdown, 1}) end)
     end
   end
 
   defp enforce_test_env! do
-    unless Mix.env() == :test and System.get_env("MIX_ENV") == "test" do
-      Mix.raise("run `MIX_ENV=test mix mut`")
+    # `preferred_cli_env: [mut: :test]` (or an aliased task) sets `Mix.env/0` to
+    # `:test` WITHOUT the user exporting `MIX_ENV=test`. Gate on the actual Mix
+    # env only — every spawned child sets `MIX_ENV=test` in its own env, so the
+    # parent shell variable is irrelevant. Requiring the literal var rejected a
+    # correctly-configured `preferred_cli_env` setup.
+    unless Mix.env() == :test do
+      Mix.raise(
+        "`mix mut` must run in the test env (MIX_ENV=test or preferred_cli_env: [mut: :test])"
+      )
     end
   end
 

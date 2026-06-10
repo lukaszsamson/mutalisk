@@ -37,6 +37,23 @@ defmodule Mut.Reporter.TerminalTest do
     assert output =~ "replace + with -"
   end
 
+  test "stream_event denominator includes reused verdicts under --incremental (T12)" do
+    System.put_env("NO_COLOR", "1")
+    on_exit(fn -> System.delete_env("NO_COLOR") end)
+
+    mutant = mutant(:schema, :killed, "a", 1)
+    result = %Result{status: :killed, duration_ms: 12}
+    # 31 reused + 1 to-execute (planned_total = to-execute only). Index counts
+    # the executed-status ledger entry; the denominator must be 31 + 1 = 32, not
+    # the to-execute 1 (which would print the overshooting [1/1] then beyond).
+    snapshot = snapshot([entry(mutant, result)], planned_total: 1, reused: 31)
+
+    output =
+      ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
+
+    assert output =~ "[1/32]"
+  end
+
   test "stream_event honors NO_COLOR" do
     System.put_env("NO_COLOR", "1")
 
@@ -121,6 +138,7 @@ defmodule Mut.Reporter.TerminalTest do
            Invalid:   1 (Elixir.Mut.Reporter.TerminalTest: 1)
            Errors:    1
            Timeouts:  1
+           No coverage: 0
 
            Run time: 10.0s
            Fallback wall-clock: 70.0% of total
@@ -171,6 +189,7 @@ defmodule Mut.Reporter.TerminalTest do
           dep_path_error: 0,
           unknown: 0
         }),
+      reused: Keyword.get(opts, :reused),
       ledger: entries
     }
   end

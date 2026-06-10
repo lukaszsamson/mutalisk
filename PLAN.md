@@ -5719,16 +5719,273 @@ Horizon (not v1.30): execute the release (push/tag/`mix hex.publish` per
 `docs/RELEASE.md`); default `--incremental` after real CI adoption; the
 work-copy-compile floor optimization (M109's next lever).
 
-# Out of scope for v1.10 (do not let it sneak in)
+# 2026-06-10 post-v1.30 review — findings + proposed v1.31/v1.32 scope
 
-- New mutators (body-literal table TUNING is in scope; new mutator types are not).
-- Schema-routing migration code (decision in M25; code is v1.11+).
-- New CLI flags (M22's `--test-timeout-ms` is the last one for the v1.X line).
-- Cross-run state persistence (v2).
-- Wrapper guard schemata (v2 if metrics ever justify; v1.8 confirmed they don't).
-- Pattern-position mutators (v2 with env walker).
-- Variable mutators (v2 with env walker).
-- Coverage caching (v2).
-- Mutation semantics changes.
-- Stable_id input changes (a future schema-routing migration would be a separate, explicit migration milestone).
-- Per-test-case coverage attribution (v2).
+Full-codebase + docs/decisions review (4 parallel review passes: docs/decision
+log, mutation generation, execution engine, selection/incremental/reporting).
+Verdict: architecture and process are sound; **do not tag/publish 0.1.0 yet** —
+four clusters of high-severity correctness bugs would bite mainstream projects
+on day one. The common pattern: each gap sits exactly where the validation
+harnesses never reached (no `@app`-style mix.exs in the OSS corpus, zorbito
+full worker run never completed, M52 schema route skipped the span fix M46 had
+already proven on the env-walker path).
+
+## High-severity findings (wrong answers)
+
+- **R1. `app_from_ast` returns `"nil"` for the `@app :my_app` mix.exs idiom.**
+  `lib/mut/umbrella.ex:96` (+ duplicate in `lib/mix/tasks/mut.ex`): clause
+  `{:app, _meta, value} when is_atom(value)` matches the attribute-*read* node
+  `{:app, meta, nil}` (nil is an atom). Confirmed in source. Downstream:
+  every fallback mutant errors (manifest path `_build/mut_schema/lib/nil/...`),
+  and `snapshot_apps` globs nothing → `Sandbox.reset` has **no `_build`
+  baseline** — mutated beams never verified/swept between mutants. The OSS
+  corpus passed only because those projects spell `app: :name` literally.
+- **R2. Host "deadline" is an inactivity timer, not a deadline.**
+  `lib/mut/worker.ex:272-281`, `lib/mut/child_process.ex:112-124`:
+  `receive ... after` resets on every output chunk. A mutant hanging *while
+  printing* (supervisor restart loop + Logger) wedges the run forever
+  (`Task.async_stream` is `timeout: :infinity`); a legitimately silent gap
+  >~20s (`@tag timeout: 60_000`, slow `setup_all`) → port killed → `:timeout`
+  → **counted detected** → false kills. Related: baseline runs with ExUnit's
+  60s default while mutant runs force `--timeout 10000` (`worker.ex:128`) —
+  baseline-passing 10–60s tests fail under every covering mutant.
+- **R3. Schema-literal spans wrong for atoms/strings/nil (pre-M46 logic
+  resurrected in M52).** `lib/mut/ast_walk.ex:1232-1257` end-column =
+  `column + String.length(to_string(value))` — `:ok` spans `":o"`, `nil` spans
+  zero bytes. The env-walker path fixed this in M46
+  (`env_walker.ex:480-544`); `schema_literal_candidates` reuses the old
+  helper. On SchemaPlacer refusal → fallback reroute the corrupt byte range is
+  spliced: `cond do x == :ok ->` becomes `x == :errork` — a **silently wrong
+  mutation reachable with default settings**. Compounded: `refused_body_context?`
+  (`ast_walk.ex:1293-1339`) misses `<-` generator heads, so `with`/`for`
+  pattern literals flow into exactly this path (and duplicate M53
+  pattern-literal candidates under different stable IDs).
+- **R4. Incremental reuse still unsound on umbrellas.**
+  `lib/mut/history/digest.ex:104`: post-098e3fa `project_digest` globs
+  `lib/** test/** config/**` from root — nothing under `apps/<app>/...`
+  matches. Editing `apps/a/lib/helper.ex` leaves the fingerprint unchanged →
+  stale verdict reused. The P1a unsoundness reopened for the exact layout
+  (unilink/zorbito) incremental targets. Also: whitespace normalization
+  (`digest.ex:207`) collapses whitespace **inside string literals/heredocs**,
+  so a semantic string edit reuses stale verdicts. `priv/`, `.heex/.eex`,
+  `lib/**/*.exs` also unfingerprinted.
+- **R5. No timeout on any compile-phase child** (`recompile.ex:75`,
+  `compile_rollback.ex:90`, `schema_build.ex:228`, `oracle_build.ex:42`,
+  `baseline_tests!`) — all default `:infinity`; `baseline_tests!` even has a
+  dead `{:timeout, ...}` clause. Fallback recompiles execute user code at
+  compile time (what module-attribute mutants perturb) → mutant-induced
+  infinite compile hangs `mix mut` with no recovery.
+
+## Medium-severity findings
+
+- **R6.** `Sandbox.reset` result ignored on fallback path (`worker.ex:95-97`)
+  — failed reset returns a contaminated sandbox to the pool (schema retry path
+  checks it; fallback doesn't).
+- **R7.** Umbrella coverage structurally broken: `coverage/runner.ex:199`
+  hardcodes `Code.require_file("test/test_helper.exs", root)` — umbrella roots
+  have none → every file degrades → M65 coverage default silently becomes
+  whole-suite static on all umbrellas. Also pathological-coverage heuristic
+  (`runner.ex:14` vs `mut.ex:647`) counts cold `_build/mut_coverage` compile
+  against a compile-free baseline → coverage self-disables on small/fast
+  projects.
+- **R8.** `MapUpdateDrop` corrupts struct-update syntax
+  (`ast_walk.ex:729-741`): `%State{state | x: 1}` → `%Dstate`,
+  guaranteed-Invalid on every struct update.
+- **R9.** Zero-tests-run classified `:survived` (`worker.ex:303-305`) — false
+  survivors when tag excludes/path filters match nothing; formatter already
+  reports `total`, classify should branch on `total == 0` → `:no_coverage`.
+- **R10.** CompileRollback anchors on **warnings** too
+  (`compile_rollback.ex:106-139`): one genuine compile failure invalidates
+  every mutant whose instrumented line emitted a warning; stack-trace anchors
+  in non-instrumented files can abort the whole schema build.
+- **R11.** Nested-module attribution wrong (`ast_walk.ex:1651` pushes
+  unqualified name; sd/cd/mu/rt prewalk collectors push and never pop) —
+  `@mutalisk_ignore` silently fails for nested modules; wrong `module` on
+  late-file candidates.
+- **R12.** n-ary `when` (multi-arg `fn x, acc when g ->`) mishandled in 4
+  places (`orchestrator.ex:518`, `schema_placer.ex:311`, `ast_walk.ex:1500`,
+  `env_walker.ex:942`) — guard mutators never fire there; guard literals
+  walked as `:match` context.
+- **R13.** EnvWalker emits module-attribute reads as variable candidates
+  (`@` child matches the variable clause, `env_walker.ex:833`) — `@limit` →
+  `@x` undefined-attribute mutants. Also `mark_other_uses`
+  (`env_walker.ex:257`) counts reads across clauses/closures → the M57
+  unused-variable gate doesn't gate.
+- **R14.** Process-tree kill misses re-parented descendants
+  (`process_tree.ex:57-73` PPID-walk; exited shim orphans the looping BEAM).
+  No `ERL_CRASH_DUMP` control for children — the `erl_crash.dump` in repo root
+  is a killed child dumping into host cwd. Fix: own process group + kill
+  group; `ERL_CRASH_DUMP_SECONDS=0` in child env.
+- **R15.** Sandbox pool leaked on failure paths (`destroy_pool` after, not in,
+  the `try` — `mut.ex:237-313`; `rescue` misses exits). `priv`/`config`
+  **symlinked** into every sandbox (`work_copy.ex:78-90`) — concurrent tests
+  writing under priv contend and mutate the user's real project.
+- **R16.** Stryker JSON schema violations: `column(nil) → 0` (schema requires
+  ≥1; in-house validator wrongly accepts 0), `thresholds` floats vs schema
+  integers, skipped mutants never reach the report (`Ignored` mapping dead).
+  `StrykerJson.write` not atomic (history store is).
+- **R17.** `compile_exclude` drops regex flags (`cli.ex:243` joins
+  `Regex.source/1` — `~r/foo/i` becomes case-sensitive; excluded files get
+  mutated).
+- **R18.** `pipeline_drop_candidates` crashes plan on dynamic `defmodule`
+  (`ast_walk.ex:588-606`: push only on `__aliases__` form, pop via `tl/1` on
+  any defmodule → `tl([])` raises).
+
+## Low / robustness tail
+
+One unparsable lib or test file aborts the whole run via bang-match
+(`orchestrator.ex:89`, `test_selection/static.ex:60`); charlist
+`CollectionEmpty` spans corrupt (`env_walker.ex:576`); `--since` paths
+repo-root-relative vs project-root mutant paths → gate inert in monorepos;
+score prints `80.0%` while exiting 1 against `--fail-at 80` (display rounding);
+`record_last_killer` records first selected file, not the killing test's file;
+`StatementDelete` unused-binding hazard ignores params; `receive`-`after`
+timeout literal walked as pattern literal (overlaps ReceiveTimeout, no dedup);
+`rendered_span` byte-offset/column confusion on multibyte guard lines;
+coverage `prepend_project_ebins` loads target beams into the host VM;
+per-file coverage timeout hardwired 60s; `--files` can't take multiple
+patterns from CLI; `max_mutants`/`since`/`history_path` precedence
+inconsistencies vs documented model; `Worker.app` defaults to `"demo_app"`;
+incremental progress counter overshoots (`[37/30]`); `enforce_test_env!`
+requires literal MIX_ENV even with preferred_cli_env; mid-run abort persists
+no history (write-at-end only).
+
+## Doc drift
+
+CHANGELOG 0.1.0 + BENCHMARKS v1.29/v1.30 + M107 CI guide still claim
+diff-scoped reuse ("re-executes only what changed") — stale post-098e3fa.
+SPEC still documents `--worker-type` (dropped M112) and
+`timeout_factor/timeout_const` (now fixed `--test-timeout-ms`).
+`docs/RELEASE.md` says "no git remote today" (remote exists, main pushed, CI
+green). PLAN.md had no record of the four post-v1.30 commits (this section is
+that record). ENV_WALKER.md has a literal `</content></invoke>` artifact at
+EOF. Stray "Out of scope for v1.10" block above this section is misplaced
+historical text.
+
+## Proposed v1.31 scope — correctness blockers (gate: before tag/publish)
+
+- **M113** — fix `app_from_ast` (require keyword-tuple / literal-arg shape;
+  regression test with `@app`-style mix.exs); dedupe the two copies. (R1)
+- **M114** — absolute monotonic deadline in Worker/ChildProcess collect loops;
+  run baseline with the same `--timeout` as mutant runs (slow tests fail up
+  front, not as silent false kills). (R2)
+- **M115** — unify schema-literal spans on the M46 env-walker span logic
+  (delete old `literal_span`); add `<-` heads to `refused_body_context?`;
+  byte-identity gate harness as the regression net (stable-id migration, like
+  M52). (R3)
+- **M116** — umbrella-aware `project_digest` (`apps/*/{lib,test,config}/**`,
+  `apps/*/mix.exs`, `priv`, `.heex/.eex`, `lib/**/*.exs`); stop normalizing
+  whitespace inside string literals (or drop normalization). (R4)
+- **M117** — timeouts on all compile-phase children; check `Sandbox.reset`
+  result on fallback path + quarantine failed sandboxes; `total == 0` →
+  `:no_coverage`. (R5, R6, R9)
+
+## Proposed v1.32 scope — robustness for real projects
+
+- **M118** — never abort on one bad file: per-file skip + diagnostic for
+  parse failures in orchestrator and static selection.
+- **M119** — umbrella coverage: resolve each app's `test_helper.exs` /
+  `test_paths`; pathological-coverage heuristic excludes compile time. (R7)
+- **M120** — process hygiene: workers in own process group, kill group;
+  `ERL_CRASH_DUMP_SECONDS=0`; pool destroy in `after`; copy (not symlink)
+  `priv` or refuse concurrency>1 when tests write there. (R14, R15)
+- **M121** — mutator-correctness batch: MapUpdateDrop struct updates, nested
+  module stacks, n-ary `when`, `@attr` variable candidates + cross-clause
+  use-count, pipeline_drop defmodule crash, charlist spans, warning-anchor
+  rollback. (R8, R10–R13, R18)
+- **M122** — report/CLI batch: Stryker schema fixes + atomic write, regex
+  flags in exclude, precedence cleanups, multi-pattern `--files`. (R16, R17)
+
+## Release sequencing
+
+1. v1.31 (correctness) → re-run OSS corpus + byte-identity gate.
+2. Re-run unilink acceptance; complete zorbito full worker run (purely
+   operational per M98 — stop the dev instance) — both exercise exactly the
+   `@app`/umbrella-digest fixes.
+3. Refresh doc drift (CHANGELOG/SPEC/RELEASE/BENCHMARKS supersession notes).
+4. Tag v0.1.0, `mix hex.publish` per `docs/RELEASE.md`.
+5. Post-release levers (held, order of value): streaming/periodic history
+   flush (crash-recovery for `--incremental`), dependency-aware fingerprints
+   (restore sound diff-scoped reuse + M109 pruning), work-copy compile caching
+   (incremental floor), env-walker trust attachment for remaining Tier-3
+   structural mutators.
+
+## v1.31 + v1.32 delivery status — SHIPPED 2026-06-10
+
+All proposed milestones implemented with regression tests; full `bin/verify`
+green (lint/unit/dialyzer/golden/integration/e2e).
+
+- **M113 (R1)** — `Mut.Umbrella.app_from_ast/1` rewritten: dropped the broken
+  3-tuple clause that matched the attribute-read node `{:app, _, nil}`, added
+  `@app`-attribute resolution, deduped the `mut.ex` copy. Test:
+  `test/mut/umbrella_test.exs`.
+- **M114 (R2)** — `collect/*` in `Mut.Worker` + `Mut.ChildProcess` now use an
+  absolute monotonic deadline (not a per-chunk inactivity timer); baseline runs
+  under the same `--timeout` as mutants. Tests: child_process chatty-deadline.
+- **M115 (R3)** — schema-literal spans unified on the M46 algorithm in
+  `Mut.SourceSpan.Compute.literal_span/5` (full-literal byte range); `<-`
+  generator heads added to `refused_body_context?`. Tests:
+  `compute_literal_span_test.exs`.
+- **M116 (R4)** — `History.Digest`: umbrella-aware `project_digest` globs
+  (`apps/*/{lib,test,config}`, `.heex/.eex`, `lib/**/*.exs`, `priv`); whitespace
+  normalization replaced with AST round-trip so semantic string-literal edits
+  invalidate. Tests extended in `digest_test.exs`.
+- **M117 (R5,R6,R9)** — finite timeouts on every compile-phase child (recompile,
+  oracle/schema build, rollback, baseline); fallback-path `Sandbox.reset`
+  checked + retried, raising on persistent failure; zero-tests-run →
+  `:no_coverage` (excluded from score; `NoCoverage` in Stryker JSON).
+- **M118** — orchestrator + static selection skip an unparsable file with a
+  `:parse_error` diagnostic instead of bang-match aborting the run.
+- **M119 (R7)** — coverage runner resolves each test file's own
+  `test_helper.exs` (umbrella apps); pathological-coverage wall excludes the
+  one-time cold compile.
+- **M120 (R14,R15 partial)** — `ERL_CRASH_DUMP_SECONDS=0` in every spawned
+  child; sandbox pool destroyed inside `after` (leak-proof on failure); `priv`
+  copied (not symlinked) so tests can't mutate the user's real project.
+  DEFERRED: process-group kill of re-parented descendants (R14) needs
+  `setsid`-class session handling, not portable to macOS — validate on the
+  Linux umbrella targets.
+- **M121 (R8,R10–R13,R18)** — struct-update `%S{m|..}` no longer mutated as a
+  map-update; CompileRollback anchors on errors only (not warnings); n-ary
+  `when` handled across ast_walk/env_walker/schema_placer/orchestrator; `@attr`
+  reads no longer emitted as variable candidates; balanced module-stack push/pop
+  in sd/cd/mu/rt collectors + dynamic-`defmodule` frames (fixes `tl([])` crash).
+  DEFERRED: cross-clause variable use-count refinement (R13) needs a
+  clause-scope id threaded through the shared walker.
+- **M122 (R16,R17)** — Stryker JSON: column/line ≥ 1, integer thresholds,
+  atomic write, tightened validator; `compile_exclude` keeps each regex's flags
+  (list + any-match, no `source`-join); repeatable `--files`.
+
+## M123 — robustness tail — SHIPPED 2026-06-10
+
+The 14 low/robustness-tail items from the post-v1.30 review. Regression tests
+added where unit-testable; full `bin/verify` green.
+
+- **T1** charlist `CollectionEmpty` span — `collection_span` scans the closing
+  delimiter for delimiter-quoted lists (`'abc'`); was a 1-byte span.
+- **T2** `--since` gate — `git diff --relative` emits project-root-relative
+  paths matching `mutant.file` (was repo-root-relative → inert in monorepos).
+- **T3** last-killer — records the killing test's actual file (matched to a
+  selected file by basename), not the first selected file.
+- **T4** StatementDelete — unused-binding hazard now includes function-head
+  params, so deleting a param's sole reader is gated (no unused-var Invalid).
+- **T5** receive/`after` — timeout literal walked only via its body; the
+  literal is left to ReceiveTimeout (no duplicate under a second stable id).
+- **T6** `rendered_span` — `:binary.matches` byte offsets converted to char
+  columns (multibyte guard lines no longer mis-spanned).
+- **T7** coverage — host VM no longer has target ebins prepended; `Parser`
+  reads `.beam` compile_info directly (no module loading / version conflicts).
+- **T8** `--fail-at` — gate compares the score at the reported 1-decimal
+  precision (no exit-1 while printing "80.0%").
+- **T9** per-file coverage timeout — config-only `coverage_timeout_ms` threaded
+  through (was hardwired 60s).
+- **T10** precedence — `max_mutants`/`since` honor config (CLI > config),
+  documented config-key list corrected.
+- **T11** `Worker.app` — requires explicit `:app` (no `"demo_app"` default that
+  silently mis-resolved manifest paths).
+- **T12** progress counter — `--incremental` denominator adds reused count so
+  the index no longer overshoots (`[37/30]`).
+- **T13** `enforce_test_env!` — gates on `Mix.env() == :test` only, so
+  `preferred_cli_env: [mut: :test]` works without exporting `MIX_ENV`.
+- **T14** history — written in `after` from a live metrics snapshot, so a
+  mid-run abort still persists partial verdicts for the next `--incremental`.
