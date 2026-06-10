@@ -241,13 +241,21 @@ defmodule Mut.History.Digest do
   # `String.replace(~r/\s+/, " ")` collapsed whitespace EVERYWHERE, so editing
   # the contents of `"a  b"` to `"a b"` produced an identical digest and reused
   # a stale verdict. Round-tripping through the AST canonicalizes code layout
-  # while preserving literal contents exactly. Non-Elixir or unparseable input
-  # (e.g. a binary `priv` asset) falls back to the raw bytes — the safe,
-  # over-invalidating direction.
+  # while preserving literal contents exactly. Non-Elixir, unparseable, or
+  # NON-UTF-8 input (e.g. a binary `priv` asset — an image, gzip, seed DB; now
+  # fingerprinted by the M116/R4 `priv/**/*` glob) falls back to the raw bytes,
+  # the safe over-invalidating direction. The `String.valid?/1` guard is
+  # essential: `Code.string_to_quoted/2` runs `String.to_charlist/1`, which
+  # *raises* `UnicodeConversionError` on invalid UTF-8 rather than returning an
+  # error tuple — that crashed `project_digest` on the first binary priv file.
   defp normalize(source) when is_binary(source) do
-    case Code.string_to_quoted(source, emit_warnings: false) do
-      {:ok, ast} -> Macro.to_string(ast)
-      _ -> source
+    if String.valid?(source) do
+      case Code.string_to_quoted(source, emit_warnings: false) do
+        {:ok, ast} -> Macro.to_string(ast)
+        _ -> source
+      end
+    else
+      source
     end
   end
 

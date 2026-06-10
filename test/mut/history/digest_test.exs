@@ -117,6 +117,15 @@ defmodule Mut.History.DigestTest do
       assert Digest.content_digest(<<0, 1, 2>>) == Digest.content_digest(<<0, 1, 2>>)
       refute Digest.content_digest(<<0, 1, 2>>) == Digest.content_digest(<<0, 1, 3>>)
     end
+
+    test "invalid UTF-8 (e.g. a gzip/binary priv asset) does not crash" do
+      # `Code.string_to_quoted` runs `String.to_charlist`, which RAISES on
+      # invalid UTF-8 — caught a real `project_digest` crash on a binary priv
+      # file. <<0,1,2>> is valid UTF-8; a gzip header (0x1f 0x8b ...) is not.
+      gz = <<0x1F, 0x8B, 0x08, 0x00, 0xC5, 0x49, 0x25, 0xE5>>
+      assert is_binary(Digest.content_digest(gz))
+      refute Digest.content_digest(gz) == Digest.content_digest(gz <> <<0xFF>>)
+    end
   end
 
   describe "project_digest" do
