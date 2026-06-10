@@ -485,7 +485,7 @@ mkdir -p "$WORK_DIR/bench/results"
   MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix deps.get
   printf 'mix mut starting\n'
   START_MS="$(date +%s)000"
-  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" --worker-type "$WORKER_TYPE" "${ENABLE_FLAGS[@]}" --output-path "$REL_REPORT_PATH"
+  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" "${ENABLE_FLAGS[@]}" --output-path "$REL_REPORT_PATH"
   END_MS="$(date +%s)000"
   printf 'bench.wall_ms=%s\n' "$((END_MS - START_MS))"
 ) > "$TERMINAL_PATH" 2>&1
