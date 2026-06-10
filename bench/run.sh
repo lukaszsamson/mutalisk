@@ -7,6 +7,7 @@ SELECTION="static"
 CONCURRENCY="1"
 WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
+DEBUG_PLAN="0"
 
 usage() {
   printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban|absinthe|phoenix|phoenix_live_view|bandit] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
@@ -36,6 +37,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --enable-body-literal)
       ENABLE_BODY_LITERAL="1"
+      shift 1
+      ;;
+    --debug-plan)
+      DEBUG_PLAN="1"
       shift 1
       ;;
     -h|--help)
@@ -485,10 +490,24 @@ mkdir -p "$WORK_DIR/bench/results"
   MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix deps.get
   printf 'mix mut starting\n'
   START_MS="$(date +%s)000"
-  MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" "${ENABLE_FLAGS[@]}" --output-path "$REL_REPORT_PATH"
+  if [ "$DEBUG_PLAN" = "1" ]; then
+    # Plan-only: oracle build + baseline + plan generation, then exit before
+    # any mutant runs. Cheap broad validation that the front half (oracle,
+    # AST walk, every mutator, plan) runs cleanly on a prepped real project.
+    MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --debug-plan --selection "$SELECTION" "${ENABLE_FLAGS[@]}"
+  else
+    MUTALISK_PATH="$ROOT" MIX_ENV=test MIX_BUILD_PATH="_build/bench_cli" MIX_DEPS_PATH="_build/bench_deps" mix mut --fail-at 0 --selection "$SELECTION" --concurrency "$CONCURRENCY" "${ENABLE_FLAGS[@]}" --output-path "$REL_REPORT_PATH"
+  fi
   END_MS="$(date +%s)000"
   printf 'bench.wall_ms=%s\n' "$((END_MS - START_MS))"
 ) > "$TERMINAL_PATH" 2>&1
+
+if [ "$DEBUG_PLAN" = "1" ]; then
+  if [ -f "$WORK_DIR/plan.debug.json" ]; then
+    cp "$WORK_DIR/plan.debug.json" "$RESULTS_DIR/$RESULT_PREFIX.plan.debug.json"
+  fi
+  exit 0
+fi
 
 cp "$WORK_DIR/$REL_REPORT_PATH" "$REPORT_PATH"
 
