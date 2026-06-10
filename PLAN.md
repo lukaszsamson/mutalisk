@@ -5862,6 +5862,18 @@ that record). ENV_WALKER.md has a literal `</content></invoke>` artifact at
 EOF. Stray "Out of scope for v1.10" block above this section is misplaced
 historical text.
 
+> **Resolved 2026-06-10.** CHANGELOG reuse claim rewritten (project-fingerprint
+> reuse, not diff-scoped); SPEC `--worker-type` line updated (removed entirely
+> in M112) and the `timeout_factor/timeout_const` formula + config example
+> replaced with the fixed `test_timeout_ms` model; `:no_coverage` denominator
+> exclusion documented; `docs/RELEASE.md` one-time-setup step reframed as
+> remote *verification* (remote exists). BENCHMARKS and the M107 guide already
+> carried accurate 2026-06-03 supersession notes. ENV_WALKER.md artifact and
+> the stray "Out of scope for v1.10" block were removed in the M113–M123 work.
+> Historical `--worker-type` references in the HLD / PLAN milestone arc / spike
+> + decision docs are left intact — they accurately record the persistent-worker
+> arc and its removal.
+
 ## Proposed v1.31 scope — correctness blockers (gate: before tag/publish)
 
 - **M113** — fix `app_from_ast` (require keyword-tuple / literal-arg shape;
