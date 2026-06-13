@@ -178,5 +178,33 @@ defmodule Mut.History.DigestTest do
       refute Digest.project_digest(root) == before,
              "editing apps/a/lib/helper.ex must change the fingerprint"
     end
+
+    test "fingerprints priv assets under a dot-directory (R4 dotfile gap)", %{root: root} do
+      seed = Path.join(root, "priv/.migrations/seed.exs")
+      File.mkdir_p!(Path.dirname(seed))
+      File.write!(seed, "[count: 1]\n")
+
+      before = Digest.project_digest(root)
+      File.write!(seed, "[count: 2]\n")
+
+      refute Digest.project_digest(root) == before,
+             "editing priv/.migrations/seed.exs must change the fingerprint"
+    end
+
+    test "a non-source priv asset is hashed byte-exact, not AST-normalized (R4)", %{root: root} do
+      # `1.50` and `1.5` parse to the SAME Elixir AST, so AST-normalizing this
+      # asset would collapse a behaviour-affecting change (a test asserting the
+      # served string "1.50") and reuse a stale verdict. A data file must be
+      # byte-exact.
+      rates = Path.join(root, "priv/rates.txt")
+      File.mkdir_p!(Path.dirname(rates))
+      File.write!(rates, "1.50\n")
+
+      before = Digest.project_digest(root)
+      File.write!(rates, "1.5\n")
+
+      refute Digest.project_digest(root) == before,
+             "a byte-level change to a priv data file must change the fingerprint"
+    end
   end
 end

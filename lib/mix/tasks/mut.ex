@@ -905,11 +905,15 @@ defmodule Mix.Tasks.Mut do
         fn mutant ->
           {:ok, sandbox} = Mut.SandboxQueue.checkout(queue)
 
-          try do
-            run_one.(mutant, sandbox)
-          after
-            Mut.SandboxQueue.checkin(queue, sandbox)
-          end
+          # R6: check the sandbox back in ONLY on normal completion. The fallback
+          # path resets the sandbox in its own `after`; if that reset fails twice
+          # it raises (a poisoned sandbox would yield false verdicts for every
+          # later mutant). On that raise we deliberately do NOT check it back in,
+          # so no concurrent worker can pick up the contaminated sandbox before
+          # the run tears down. It stays in the pool's `checked_out` set and is
+          # still reclaimed by `destroy_pool`, so nothing leaks.
+          run_one.(mutant, sandbox)
+          Mut.SandboxQueue.checkin(queue, sandbox)
         end,
         max_concurrency: concurrency,
         ordered: false,

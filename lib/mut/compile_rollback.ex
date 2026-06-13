@@ -157,22 +157,44 @@ defmodule Mut.CompileRollback do
   end
 
   defp locate_anchors(anchors, placement_maps) do
+    # R10: a compile-time *exception* prints a multi-frame stacktrace
+    # (`lib/foo.ex:25: MyMod.caller/1`) whose frames point into instrumented
+    # files at lines that carry no mutant entry. Tolerate those un-mappable
+    # *frame* anchors instead of aborting the whole schema build. But an
+    # un-mappable *primary* diagnostic (an `error:`/`** (…)` header line) is NOT
+    # a frame — silently skipping it could mis-invalidate an unrelated mutant
+    # that a stray frame happened to map to, so we still abort loudly on it.
     anchors
-    |> Enum.reduce_while({:ok, []}, &locate_anchor(&1, &2, placement_maps))
+    |> Enum.reduce_while({:ok, []}, &locate_anchor_step(&1, &2, placement_maps))
     |> case do
+      {:ok, []} -> {:error, {:user_code_compile_failure, hd(anchors)}}
       {:ok, located} -> {:ok, Enum.reverse(located)}
       {:error, _reason} = error -> error
     end
   end
 
-  defp locate_anchor(anchor, {:ok, located}, placement_maps) do
-    placement_maps
-    |> Map.fetch!(anchor.file)
-    |> locate_mutants(anchor.line)
-    |> case do
+  defp locate_anchor_step(anchor, {:ok, located}, placement_maps) do
+    case locate_mutants(Map.fetch!(placement_maps, anchor.file), anchor.line) do
       {:ok, mut_ids} -> {:cont, {:ok, [%{anchor: anchor, mut_ids: mut_ids} | located]}}
-      :not_found -> {:halt, {:error, {:user_code_compile_failure, anchor}}}
+      :not_found -> skip_frame_or_abort(anchor, located)
     end
+  end
+
+  # Tolerate an un-mappable *stacktrace frame* (continue); abort on an
+  # un-mappable *primary* diagnostic (it would otherwise mis-invalidate an
+  # unrelated mutant that a stray frame mapped to).
+  defp skip_frame_or_abort(anchor, located) do
+    if stacktrace_frame?(anchor.diagnostic),
+      do: {:cont, {:ok, located}},
+      else: {:halt, {:error, {:user_code_compile_failure, anchor}}}
+  end
+
+  # A trailing stacktrace frame (`[(app vsn) ]lib/foo.ex:NN[:CC]: Mod.fun/arity`)
+  # carries no diagnostic keyword and ends in a `: <ref>` suffix; a diagnostic
+  # header carries `error:`/`warning:` or an `** (…)` exception tag.
+  defp stacktrace_frame?(line) do
+    not (Regex.match?(~r/(^|\s)(error|warning):/, line) or String.contains?(line, "** (")) and
+      Regex.match?(~r/\.exs?:\d+(:\d+)?: \S/, line)
   end
 
   defp invalidate_and_render(state, located) do

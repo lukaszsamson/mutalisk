@@ -148,18 +148,35 @@ defmodule Mut.History.Digest do
   """
   @spec project_digest(Path.t()) :: String.t()
   def project_digest(root) when is_binary(root) do
-    globbed = Enum.flat_map(@project_globs, &Path.wildcard(Path.join(root, &1)))
+    # `match_dot: true` so inputs under dot-directories or with dotfile names
+    # (`priv/.migrations/*`, `config/.runtime/*.exs`, `priv/.gz_assets/*`) are
+    # fingerprinted too — otherwise an edit to one leaves the project digest
+    # unchanged and a stale verdict is reused (R4 soundness gap).
+    globbed = Enum.flat_map(@project_globs, &Path.wildcard(Path.join(root, &1), match_dot: true))
     extra = Enum.map(@project_files, &Path.join(root, &1))
 
     (globbed ++ extra)
-    |> Enum.reject(&String.ends_with?(&1, "_test.exs"))
+    |> Enum.reject(&(String.ends_with?(&1, "_test.exs") or String.contains?(&1, "/.git/")))
     |> Enum.filter(&File.regular?/1)
     |> Enum.uniq()
     |> Enum.sort()
-    |> Enum.map(fn path -> {Path.relative_to(path, root), content_digest(File.read!(path))} end)
+    |> Enum.map(fn path -> {Path.relative_to(path, root), input_digest(path)} end)
     |> :erlang.term_to_binary()
     |> sha()
   end
+
+  # Elixir source is AST-normalized (via `content_digest`) so cosmetic churn —
+  # comments, reformatting — doesn't needlessly invalidate reuse. Every other
+  # input (priv assets, data files) is hashed BYTE-EXACT: a file the app reads
+  # verbatim has no "irrelevant formatting", and AST-normalizing one that happens
+  # to parse as Elixir (`priv/rates.txt` = `1.50` -> `1.5`) would silently
+  # collapse a behaviour-affecting change and reuse a stale verdict (R4).
+  defp input_digest(path) do
+    content = File.read!(path)
+    if elixir_source?(path), do: content_digest(content), else: sha(content)
+  end
+
+  defp elixir_source?(path), do: String.ends_with?(path, [".ex", ".exs", ".heex", ".eex"])
 
   # ---- internals ----
 

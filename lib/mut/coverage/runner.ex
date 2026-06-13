@@ -104,10 +104,21 @@ defmodule Mut.Coverage.Runner do
 
   defp compile(root, mutalisk_path), do: run_mix(root, ["compile"], mutalisk_path)
 
+  # Generous ceiling for the one-time coverage setup compiles (deps.get +
+  # deps.compile, then compile). Finite so a wedged toolchain can't hang the run
+  # forever — consistent with the finite timeouts on every other compile-phase
+  # child (R5).
+  @setup_timeout_ms 600_000
+
   defp run_mix(root, args, mutalisk_path) do
-    case Mut.ChildProcess.run("mix", args, cd: root, env: child_env(mutalisk_path)) do
+    case Mut.ChildProcess.run("mix", args,
+           cd: root,
+           env: child_env(mutalisk_path),
+           timeout_ms: @setup_timeout_ms
+         ) do
       {:exit, 0, _output} -> :ok
       {:exit, exit_code, output} -> {:error, {:mix_failed, args, exit_code, output_tail(output)}}
+      {:timeout, output} -> {:error, {:mix_timeout, args, @setup_timeout_ms, output_tail(output)}}
       {:error, reason} -> {:error, reason}
     end
   end

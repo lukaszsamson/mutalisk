@@ -6072,3 +6072,68 @@ non-UTF-8 `priv` asset — M116 added the `priv/**/*` glob, and `normalize/1`'s
 `Code.string_to_quoted` runs `String.to_charlist`, which *raises* on invalid
 UTF-8. Guarded with `String.valid?/1` (falls back to raw bytes); regression test
 uses a real gzip header. `project_digest` now clean on both umbrellas.
+
+## M124 — post-ship adversarial audit + incomplete-fix closure — SHIPPED 2026-06-13
+
+A second, independent adversarial pass over the M113–M123 fixes (multi-agent:
+a 19-agent audit of every shipped fix with a skeptical opus second-opinion gate,
+then a 5-agent re-review of the closure fixes below). Full `bin/verify` green
+(lint/unit 586/dialyzer 0/golden/integration/e2e). The audit confirmed most
+M113–M123 fixes correct and cleared two as already-complete/false alarms (R9 was
+never live at fix time — `worker.ex` already classified zero-tests-run as
+`:no_coverage`; R14 crash-dump quieting was fully shipped, process-group kill
+remains the documented macOS-portability deferral). It found **seven genuinely
+incomplete fixes**, all now closed with regression tests:
+
+- **R3 (span) follow-up** — the M115 unified `literal_span` still corrupted a
+  *quoted atom* `:"a b"` (`:delimiter` + atom value): the delimiter scan started
+  on the `:`, matched the opening quote as the close, and spanned `:"`. Fixed in
+  BOTH `SourceSpan.Compute` and `EnvWalker` by skipping the `:` first, keyed off
+  the actual source byte (`binary_part(...) == ":"`) so the latent quoted
+  keyword-key form (`"a b":`, column on the quote) can never corrupt either.
+  Tests: byte-exact `:"a b"` / escaped quoted atom in `compute_literal_span_test`.
+- **R11 (nested-module qualification)** — M121 fixed only the push/pop *balance*;
+  `enter_module` still pushed the *unqualified* nested name, so a fallback-engine
+  mutant in `Outer.Inner` carried `enclosing_module: Inner` while `@mutalisk_ignore`'s
+  set held `Outer.Inner` → ignore silently missed. Now qualifies against the
+  nearest static ancestor (exactly matching `ignored_modules/1` for every nesting
+  shape incl. dynamic frames). The re-review caught a SECOND duplicate push in
+  `pipe_pre` (pipeline-drop walk) — now delegates to `enter_module`. Tests:
+  nested-module attribution for both `statement_delete` and `pipeline_drop`.
+- **R10 (rollback anchors)** — M121 fixed the warnings half but a compile-time
+  *exception* stacktrace's frames (`lib/foo.ex:NN: Mod.fun/arity`) into
+  instrumented files at non-mutant lines still aborted the whole schema build.
+  `locate_anchors` now tolerates un-mappable *stacktrace frames* (discriminated
+  from `error:`/`** (` headers) while still aborting loudly on an un-mappable
+  *primary* diagnostic (so a stray frame can't mis-invalidate an unrelated mutant).
+- **R4 (incremental digest)** — two soundness gaps in the M116 fingerprint:
+  (a) `Path.wildcard` lacked `match_dot: true`, so inputs under dot-dirs
+  (`priv/.migrations/*`, `config/.runtime/*.exs`) were invisible → stale reuse;
+  (b) `content_digest` AST-normalized *every* file, so a behaviour-affecting edit
+  to a non-source priv asset (`priv/rates.txt` `1.50` → `1.5`) was normalized
+  away. Now: `match_dot: true` (+ skip `/.git/` cruft), and non-Elixir inputs are
+  hashed BYTE-EXACT (`input_digest`/`elixir_source?`) — normalization only for
+  real `.ex/.exs/.heex/.eex`. Tests: dotfile `.exs` + byte-exact `.txt` asset.
+- **R6 (sandbox contamination)** — the concurrent worker body checked a sandbox
+  back in via `after`, returning a *poisoned* sandbox (whose `reset_sandbox!`
+  double-failure raised) to the pool where a concurrent worker could reuse it.
+  Now checks in ONLY on normal return; on the raise the sandbox stays in
+  `checked_out` (never re-handed, still reclaimed by `destroy_pool`). (The
+  re-review confirmed no leak/deadlock/verdict regression.)
+- **R5 (compile timeouts) gap** — `Coverage.Runner.run_mix` (the one-time
+  `deps.get`/`deps.compile`/`compile` setup) still passed no `:timeout_ms`
+  (`:infinity`). Added a finite `@setup_timeout_ms` (600 s) + `{:timeout, _}`
+  handling, consistent with every other compile-phase child.
+- **`@app` last-write** — `collect_attr_literals` used `Map.put_new` (first
+  definition wins); a re-defined `@app` now resolves to its LAST value, matching
+  Elixir attribute semantics. Test in `umbrella_test`.
+
+Audit false-positive caught manually: `--since` IS already in the CLI strict
+list (`cli.ex`) and handled in `normalize/1` — no change. Also confirmed the
+priv *comment-only* collapse is SOUND (a comment change can't affect behaviour);
+only non-source byte changes needed the byte-exact route.
+
+Files: `source_span/compute.ex`, `env_walker.ex`, `ast_walk.ex`,
+`compile_rollback.ex`, `history/digest.ex`, `coverage/runner.ex`,
+`mix/tasks/mut.ex`, `umbrella.ex` (+ 7 regression tests). Branch
+`v1.31-correctness`.

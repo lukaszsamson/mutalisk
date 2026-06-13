@@ -96,7 +96,15 @@ defmodule Mut.SourceSpan.Compute do
         start_byte + byte_size(to_string(token))
 
       delimiter = Keyword.get(meta, :delimiter) ->
-        scan_delimited_end(source, start_byte, delimiter)
+        # A quoted atom (`:"a b"`) carries BOTH a `:delimiter` and an atom value;
+        # its literal begins with a `:` *before* the opening delimiter, so skip
+        # that byte before scanning for the close (else the scan starts on the
+        # `:`, matches the opening quote as the close, and yields a corrupt `:"`).
+        # Key off the actual source byte rather than `is_atom(value)`: a quoted
+        # keyword key (`"a b": 1`) is also an atom but its column points at the
+        # opening quote, not a `:`, so a byte-check is correct in every case.
+        atom_prefix = if has_atom_colon?(source, start_byte), do: 1, else: 0
+        scan_delimited_end(source, start_byte + atom_prefix, delimiter)
 
       is_atom(value) ->
         prefix = if value in [nil, true, false], do: 0, else: 1
@@ -105,6 +113,10 @@ defmodule Mut.SourceSpan.Compute do
       true ->
         start_byte + 1
     end
+  end
+
+  defp has_atom_colon?(source, start_byte) do
+    start_byte < byte_size(source) and binary_part(source, start_byte, 1) == ":"
   end
 
   defp scan_delimited_end(source, start_byte, delimiter) do

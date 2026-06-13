@@ -45,5 +45,16 @@ defmodule Mut.UmbrellaTest do
              end
              """) == nil
     end
+
+    test "a re-defined @app resolves to its LAST value (last-write-wins)" do
+      assert app("""
+             defmodule My.MixProject do
+               use Mix.Project
+               @app :placeholder
+               @app :real_app
+               def project, do: [app: @app, version: "0.1.0"]
+             end
+             """) == "real_app"
+    end
   end
 end

@@ -107,7 +107,9 @@ defmodule Mut.Umbrella do
       Macro.prewalk(ast, %{}, fn
         {:@, _, [{name, _, [value]}]} = node, acc
         when is_atom(name) and is_atom(value) ->
-          {node, Map.put_new(acc, name, value)}
+          # `Map.put` (not `put_new`): a re-defined attribute resolves to its
+          # LAST value, matching Elixir's last-write-wins attribute semantics.
+          {node, Map.put(acc, name, value)}
 
         node, acc ->
           {node, acc}

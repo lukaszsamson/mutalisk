@@ -54,4 +54,16 @@ defmodule Mut.SourceSpan.ComputeLiteralSpanTest do
   test "integer literal spans its digits" do
     assert spanned_bytes("def f, do: 42\n", 42) == "42"
   end
+
+  # R3 follow-up: a quoted atom carries BOTH a `:delimiter` and an atom value.
+  # The delimiter branch must skip the leading `:` before scanning for the close;
+  # otherwise it starts on the `:`, matches the opening quote as the close, and
+  # spans a corrupt `:"`.
+  test "quoted atom spans the full `:\"a b\"` (was `:\"`)" do
+    assert spanned_bytes(~s|def f, do: x == :"a b"\n|, :"a b") == ~s|:"a b"|
+  end
+
+  test "quoted atom with an escaped quote spans the whole token" do
+    assert spanned_bytes(~s|def f, do: x == :"a\\"b"\n|, :"a\"b") == ~s|:"a\\"b"|
+  end
 end

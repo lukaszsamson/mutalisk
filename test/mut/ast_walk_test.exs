@@ -159,6 +159,55 @@ defmodule Mut.AstWalkTest do
            end)
   end
 
+  test "fallback candidates in a nested module carry the fully-qualified enclosing_module (R11)" do
+    source = """
+    defmodule Outer do
+      defmodule Inner do
+        def f(x) do
+          IO.puts("side effect")
+          x - 1
+        end
+      end
+
+      def g(y) do
+        IO.puts("outer")
+        y + 1
+      end
+    end
+    """
+
+    cands = statement_delete(source)
+    modules = cands |> Enum.map(& &1.enclosing_module) |> Enum.uniq()
+
+    # Inner's candidate must be attributed to `Outer.Inner`, not the bare
+    # `Inner` — otherwise it never matches `ignored_modules/1` (which qualifies)
+    # and `@mutalisk_ignore` in a nested module is silently ignored.
+    assert Outer.Inner in modules
+    assert Outer in modules
+    refute Inner in modules
+  end
+
+  test "pipeline-drop candidates in a nested module also carry the qualified module (R11)" do
+    source = """
+    defmodule Outer do
+      defmodule Inner do
+        def f(x) do
+          x |> Map.put(:a, 1) |> Map.put(:b, 2) |> Map.put(:c, 3)
+        end
+      end
+    end
+    """
+
+    modules =
+      source
+      |> pipeline_candidates()
+      |> Enum.map(& &1.enclosing_module)
+      |> Enum.uniq()
+
+    assert Outer.Inner in modules
+    refute Inner in modules
+  end
+
   defp candidates(source) do
     assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
     Mut.AstWalk.dispatch_candidates(ast, file: "sample.ex", source: source)

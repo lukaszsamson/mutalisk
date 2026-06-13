@@ -606,16 +606,13 @@ defmodule Mut.AstWalk do
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp pipe_pre({:defmodule, _meta, [{:__aliases__, _, parts}, _body]} = node, acc) do
-    {node, %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}}
-  end
-
-  # R18: dynamic module name (`defmodule unquote(x)`, `defmodule mod`) — still
-  # push a (nil) frame so the post-walk pop stays balanced. Pushing only on the
-  # `__aliases__` form while popping on EVERY defmodule ran `tl([])` on the
-  # first dynamic defmodule and crashed the whole plan.
+  # Delegate to the shared `enter_module/2` so pipeline-drop candidates get the
+  # SAME fully-qualified `enclosing_module` as every other walk (R11) — a nested
+  # module must resolve to `Outer.Inner`, else `@mutalisk_ignore` misses it. This
+  # also keeps the R18 dynamic-defmodule frame (`enter_module` pushes a `nil`
+  # frame for non-`__aliases__` names) so the post-walk pop stays balanced.
   defp pipe_pre({:defmodule, _meta, _args} = node, acc) do
-    {node, %{acc | module_stack: [nil | acc.module_stack]}}
+    {node, enter_module(node, acc)}
   end
 
   defp pipe_pre({:|>, _meta, _args} = node, acc) do
@@ -1689,7 +1686,20 @@ defmodule Mut.AstWalk do
   defp prune({name, meta, _args}), do: {name, meta, []}
 
   defp enter_module({:defmodule, _meta, [{:__aliases__, _alias_meta, parts}, _body]}, acc) do
-    %{acc | module_stack: [Module.concat(parts) | acc.module_stack]}
+    # Fully-qualify nested modules so a fallback-engine candidate's
+    # `enclosing_module` matches `ignored_modules/1` (which builds
+    # `Module.concat(stack ++ parts)`): `defmodule Inner` inside `Outer` is
+    # `Outer.Inner`, not `Inner`. Qualify against the nearest *static* ancestor —
+    # dynamic-name frames are `nil` and, like `ignored_modules/1`, contribute
+    # nothing to the qualified name. (R11: only the push/pop *balance* was fixed
+    # before; the unqualified name made `@mutalisk_ignore` miss nested modules.)
+    qualified =
+      case Enum.find(acc.module_stack, &(&1 != nil)) do
+        nil -> Module.concat(parts)
+        parent -> Module.concat(parent, Module.concat(parts))
+      end
+
+    %{acc | module_stack: [qualified | acc.module_stack]}
   end
 
   # R11: a dynamic module name (`defmodule unquote(x)`, `defmodule mod`) still
