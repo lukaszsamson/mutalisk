@@ -206,5 +206,35 @@ defmodule Mut.History.DigestTest do
       refute Digest.project_digest(root) == before,
              "a byte-level change to a priv data file must change the fingerprint"
     end
+
+    test "fingerprints the overlay-renamed user mix.exs (mix_user.exs)", %{root: root} do
+      # In an overlayed work copy the user's real mix.exs is renamed to
+      # mix_user.exs; a dep/config change there must invalidate reuse even when
+      # mix.lock is untouched.
+      user_mix = Path.join(root, "mix_user.exs")
+      File.write!(user_mix, "defmodule M.MixProject do\n  def project, do: [app: :m]\nend\n")
+
+      before = Digest.project_digest(root)
+
+      File.write!(
+        user_mix,
+        "defmodule M.MixProject do\n  def project, do: [app: :m, elixirc_paths: [\"x\"]]\nend\n"
+      )
+
+      refute Digest.project_digest(root) == before,
+             "editing mix_user.exs must change the fingerprint"
+    end
+
+    test "fingerprints a non-Elixir test fixture read by a test", %{root: root} do
+      fixture = Path.join(root, "test/fixtures/data.json")
+      File.mkdir_p!(Path.dirname(fixture))
+      File.write!(fixture, ~s({"v": 1}\n))
+
+      before = Digest.project_digest(root)
+      File.write!(fixture, ~s({"v": 2}\n))
+
+      refute Digest.project_digest(root) == before,
+             "editing a test fixture must change the fingerprint"
+    end
   end
 end

@@ -116,21 +116,28 @@ defmodule Mut.History.Digest do
     "lib/**/*.exs",
     "lib/**/*.heex",
     "lib/**/*.eex",
-    "test/**/*.ex",
-    "test/**/*.exs",
+    # All of `test/**` (not just `*.ex[s]`): a non-Elixir fixture a selected
+    # test reads (`test/fixtures/*.json`, `.csv`, `.pem`, snapshots) changes the
+    # mutant's verdict but would otherwise leave the fingerprint unchanged.
+    # `_test.exs` is rejected below (covered per-mutant by selected_tests_digest).
+    "test/**/*",
     "config/**/*.exs",
     "priv/**/*",
     "apps/*/lib/**/*.ex",
     "apps/*/lib/**/*.exs",
     "apps/*/lib/**/*.heex",
     "apps/*/lib/**/*.eex",
-    "apps/*/test/**/*.ex",
-    "apps/*/test/**/*.exs",
+    "apps/*/test/**/*",
     "apps/*/config/**/*.exs",
     "apps/*/priv/**/*",
-    "apps/*/mix.exs"
+    "apps/*/mix.exs",
+    # In an overlayed work copy the user's real `mix.exs` is renamed to
+    # `mix_user.exs` (the generated overlay takes the `mix.exs` name). Fingerprint
+    # it so a dep/config/application change in the user's mix.exs invalidates
+    # reuse even when it doesn't touch `mix.lock`.
+    "apps/*/mix_user.exs"
   ]
-  @project_files ["mix.exs", "mix.lock"]
+  @project_files ["mix.exs", "mix.lock", "mix_user.exs"]
 
   @doc """
   Coarse project fingerprint: a digest over every project input that can change

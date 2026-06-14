@@ -218,29 +218,33 @@ defmodule Mut.Coverage.Runner do
 
   defp coverage_script(root, test_file, out_path) do
     test_helper = resolve_test_helper(test_file, root)
+    # `inspect/1` each interpolated path so it lands as a properly-escaped Elixir
+    # string literal — a project path containing `"`, `\`, or `#{...}` would
+    # otherwise produce a broken script and silently degrade coverage collection.
+    ebin_glob = inspect(Path.join(root, @build_path) <> "/lib/*/ebin")
 
     """
     tools = Path.wildcard(Path.join([List.to_string(:code.root_dir()), "lib", "tools-*", "ebin"])) |> List.first()
     :code.add_path(String.to_charlist(tools))
     Application.ensure_all_started(:tools)
     :cover.start()
-    Code.prepend_paths(Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"))
-    for ebin <- Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"),
+    Code.prepend_paths(Path.wildcard(#{ebin_glob}))
+    for ebin <- Path.wildcard(#{ebin_glob}),
         Path.basename(Path.dirname(ebin)) != "mutalisk" do
       for beam <- Path.wildcard(Path.join(ebin, "*.beam")) do
         {:ok, _module} = :cover.compile_beam(String.to_charlist(beam))
       end
     end
     ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
-    Code.require_file("#{test_helper}", "#{root}")
+    Code.require_file(#{inspect(test_helper)}, #{inspect(root)})
     # Test modules may still declare `async: true`; max_cases: 1 serializes this
     # per-file run, while v1.5 intentionally attributes only at file granularity.
     ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
-    Code.require_file("#{Path.relative_to(test_file, root)}", "#{root}")
+    Code.require_file(#{inspect(Path.relative_to(test_file, root))}, #{inspect(root)})
     result = ExUnit.run()
     line = :cover.analyse(:coverage, :line)
     function = :cover.analyse(:coverage, :function)
-    File.write!("#{out_path}", :erlang.term_to_binary({line, function, result}))
+    File.write!(#{inspect(out_path)}, :erlang.term_to_binary({line, function, result}))
     if result.failures > 0 do
       System.halt(2)
     else

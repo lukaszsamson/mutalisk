@@ -50,8 +50,15 @@ defmodule Mut.History.Store do
   @spec path(Path.t(), keyword()) :: Path.t()
   def path(root, opts \\ []) do
     case Keyword.get(opts, :history_path) do
-      nil -> default_path(root)
-      configured -> configured
+      nil ->
+        default_path(root)
+
+      # Expand a relative override against `root` so load (in the user project's
+      # cwd) and write (under `File.cd!(mutalisk_root, ...)`) resolve to the SAME
+      # absolute file — otherwise a relative `history_path` reads one file and
+      # writes another and reuse never warms. Absolute paths pass through.
+      configured ->
+        Path.expand(configured, root)
     end
   end
 
