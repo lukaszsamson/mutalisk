@@ -193,8 +193,11 @@ defmodule Mut.CompileRollback do
   # carries no diagnostic keyword and ends in a `: <ref>` suffix; a diagnostic
   # header carries `error:`/`warning:` or an `** (…)` exception tag.
   defp stacktrace_frame?(line) do
-    not (Regex.match?(~r/(^|\s)(error|warning):/, line) or String.contains?(line, "** (")) and
-      Regex.match?(~r/\.exs?:\d+(:\d+)?: \S/, line)
+    not diagnostic_header?(line) and Regex.match?(~r/\.exs?:\d+(:\d+)?: \S/, line)
+  end
+
+  defp diagnostic_header?(line) do
+    Regex.match?(~r/(^|\s)(error|warning):/, line) or String.contains?(line, "** (")
   end
 
   defp invalidate_and_render(state, located) do

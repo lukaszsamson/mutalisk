@@ -1694,9 +1694,9 @@ defmodule Mut.AstWalk do
     # nothing to the qualified name. (R11: only the push/pop *balance* was fixed
     # before; the unqualified name made `@mutalisk_ignore` miss nested modules.)
     qualified =
-      case Enum.find(acc.module_stack, &(&1 != nil)) do
+      case Enum.find(acc.module_stack, & &1) do
         nil -> Module.concat(parts)
-        parent -> Module.concat(parent, Module.concat(parts))
+        parent -> Module.concat([parent | parts])
       end
 
     %{acc | module_stack: [qualified | acc.module_stack]}

@@ -486,7 +486,7 @@ defmodule Mut.EnvWalker do
     # dialyzer treat the `is_integer/1` guards below as always-true.
     with true <- is_integer(line) and is_integer(column),
          start_byte when is_integer(start_byte) <- byte_offset(state, line, column) do
-      end_byte = literal_end_byte(state.source, start_byte, meta, value)
+      end_byte = SourceSpan.Compute.literal_end_byte(state.source, start_byte, meta, value)
       {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
 
       %SourceSpan{
@@ -500,57 +500,6 @@ defmodule Mut.EnvWalker do
       }
     else
       _ -> nil
-    end
-  end
-
-  defp literal_end_byte(source, start_byte, meta, value) do
-    cond do
-      token = Keyword.get(meta, :token) ->
-        start_byte + byte_size(to_string(token))
-
-      delimiter = Keyword.get(meta, :delimiter) ->
-        # A quoted atom (`:"a b"`) carries BOTH a `:delimiter` and an atom value;
-        # its literal begins with a `:` before the opening delimiter, so skip
-        # that byte before scanning for the close (else the scan starts on the
-        # `:`, matches the opening quote as the close, and yields a corrupt `:"`).
-        # Key off the actual source byte (a quoted keyword key `"a b": 1` is an
-        # atom too but its column points at the opening quote, not a `:`).
-        atom_prefix = if has_atom_colon?(source, start_byte), do: 1, else: 0
-        scan_delimited_end(source, start_byte + atom_prefix, delimiter)
-
-      is_atom(value) ->
-        # `:ok` is `:` + atom text; `nil` / `true` / `false` are the bare
-        # word. Both are derivable from the value with no escapes.
-        prefix = if value in [nil, true, false], do: 0, else: 1
-        start_byte + prefix + byte_size(Atom.to_string(value))
-
-      true ->
-        start_byte + 1
-    end
-  end
-
-  defp has_atom_colon?(source, start_byte) do
-    start_byte < byte_size(source) and binary_part(source, start_byte, 1) == ":"
-  end
-
-  defp scan_delimited_end(source, start_byte, delimiter) do
-    dsize = byte_size(delimiter)
-    scan_delimiter_close(source, start_byte + dsize, delimiter, dsize)
-  end
-
-  defp scan_delimiter_close(source, pos, delimiter, dsize) do
-    cond do
-      pos + dsize > byte_size(source) ->
-        byte_size(source)
-
-      binary_part(source, pos, dsize) == delimiter ->
-        pos + dsize
-
-      binary_part(source, pos, 1) == "\\" ->
-        scan_delimiter_close(source, pos + 2, delimiter, dsize)
-
-      true ->
-        scan_delimiter_close(source, pos + 1, delimiter, dsize)
     end
   end
 
@@ -617,7 +566,11 @@ defmodule Mut.EnvWalker do
         byte_offset(state, cl, cc)
 
       is_binary(Keyword.get(meta, :delimiter)) ->
-        scan_delimited_end(state.source, start_byte, Keyword.get(meta, :delimiter))
+        SourceSpan.Compute.scan_delimited_end(
+          state.source,
+          start_byte,
+          Keyword.get(meta, :delimiter)
+        )
 
       true ->
         start_byte + 1

@@ -90,7 +90,11 @@ defmodule Mut.SourceSpan.Compute do
     end
   end
 
-  defp literal_end_byte(source, start_byte, meta, value) do
+  # Shared with `Mut.EnvWalker` (the literal-span byte scan is identical in both
+  # span paths). Pure over `(source, start_byte, ...)` — no dependency on the
+  # caller's line-offset representation — so it lives here once.
+  @doc false
+  def literal_end_byte(source, start_byte, meta, value) do
     cond do
       token = Keyword.get(meta, :token) ->
         start_byte + byte_size(to_string(token))
@@ -119,7 +123,8 @@ defmodule Mut.SourceSpan.Compute do
     start_byte < byte_size(source) and binary_part(source, start_byte, 1) == ":"
   end
 
-  defp scan_delimited_end(source, start_byte, delimiter) do
+  @doc false
+  def scan_delimited_end(source, start_byte, delimiter) do
     dsize = byte_size(delimiter)
     scan_delimiter_close(source, start_byte + dsize, delimiter, dsize)
   end
