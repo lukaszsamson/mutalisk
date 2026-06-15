@@ -168,15 +168,19 @@ defmodule Mut.Recompile do
     # (false-invalids). `Mix.start/0` only boots Mix's agents — it does NOT
     # load the project or run the deps lock-check (the thing this module
     # avoids by skipping `mix`), so it is safe and side-effect-free here.
-    # `file` may arrive absolute, so locate the `apps/<app>` segment anywhere
-    # in the path (umbrella child); fall back to default_app (single-app).
+    # `file` may arrive absolute, so locate the `<apps_path>/<app>` segment
+    # anywhere in the path (umbrella child); fall back to default_app
+    # (single-app). `apps_path` honors a custom `:apps_path` (default "apps");
+    # `Path.split` (not `String.split(_, "/")`) handles the host separator.
     # `\#{...}` stays literal so it is interpolated in the child BEAM.
+    apps_path = Mut.Umbrella.apps_path_name(sandbox_path)
+
     eval = ~s"""
     Mix.start()
     ebin_of = fn file ->
       app =
-        case Enum.drop_while(String.split(file, "/"), &(&1 != "apps")) do
-          ["apps", a | _] -> a
+        case Enum.drop_while(Path.split(file), &(&1 != #{inspect(apps_path)})) do
+          [#{inspect(apps_path)}, a | _] -> a
           _ -> #{inspect(default_app)}
         end
 

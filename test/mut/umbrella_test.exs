@@ -57,4 +57,39 @@ defmodule Mut.UmbrellaTest do
              """) == "real_app"
     end
   end
+
+  describe "apps_path_name/1" do
+    setup do
+      root = Path.join(System.tmp_dir!(), "mut_apps_path_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(root)
+      on_exit(fn -> File.rm_rf!(root) end)
+      {:ok, root: root}
+    end
+
+    defp write_mix(root, body) do
+      File.write!(Path.join(root, "mix.exs"), body)
+    end
+
+    test "returns the configured custom :apps_path", %{root: root} do
+      write_mix(root, """
+      defmodule Up.MixProject do
+        use Mix.Project
+        def project, do: [apps_path: "packages", version: "0.1.0"]
+      end
+      """)
+
+      assert Umbrella.apps_path_name(root) == "packages"
+    end
+
+    test "defaults to \"apps\" for a single-app project or unset :apps_path", %{root: root} do
+      write_mix(root, """
+      defmodule Single.MixProject do
+        use Mix.Project
+        def project, do: [app: :single, version: "0.1.0"]
+      end
+      """)
+
+      assert Umbrella.apps_path_name(root) == "apps"
+    end
+  end
 end

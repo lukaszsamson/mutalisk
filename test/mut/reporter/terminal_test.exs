@@ -131,8 +131,8 @@ defmodule Mut.Reporter.TerminalTest do
              lib/arith.ex:5 Arithmetic               replace + with -
              lib/arith.ex:5 Arithmetic               replace + with -
 
-           Schema:    1/2 killed (50.0%)   wall: 3.0s
-           Fallback:  1/2 killed (50.0%)   wall: 7.0s
+           Schema:    1/2 detected (50.0%)   wall: 3.0s
+           Fallback:  1/2 detected (50.0%)   wall: 7.0s
              arithmetic_op:                1/2 killed
            Skipped:   1 (unsupported_dispatch: 1)
            Invalid:   1 (Elixir.Mut.Reporter.TerminalTest: 1)
@@ -165,6 +165,29 @@ defmodule Mut.Reporter.TerminalTest do
              median tests/mutant: 1
              coverage collection: 5832 ms
            """
+  end
+
+  test "engine line scores detected/(detected+survived), excluding invalid/error" do
+    summary =
+      []
+      |> snapshot(
+        by_status: %{killed: 1, timeout: 1, survived: 1, invalid: 2, error: 3},
+        by_engine_status: %{
+          {:schema, :killed} => 1,
+          {:schema, :timeout} => 1,
+          {:schema, :survived} => 1,
+          {:schema, :invalid} => 2,
+          {:schema, :error} => 3
+        },
+        wall_clock_ms: %{schema: 1000, fallback: 0, total: 1000}
+      )
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    # detected = killed(1) + timeout(1) = 2; scored = detected(2) + survived(1) = 3.
+    # The old `killed / engine_total` would have reported 1/7 (invalid + error in
+    # the denominator, timeout dropped), disagreeing with the headline score.
+    assert summary =~ "2/3 detected (66.7%)"
   end
 
   defp snapshot(entries, opts) do

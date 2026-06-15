@@ -191,7 +191,13 @@ defmodule Mut.History.Store do
   end
 
   defp decode(raw) do
-    {:ok, :json.decode(raw)}
+    # Use `Mut.JSON` (bridges Elixir's built-in `JSON`, OTP 25+) — NOT Erlang's
+    # `:json`, which only exists on OTP 27+ and would make every load a silent
+    # cold start on OTP 26. Symmetric with `write/1`, which encodes via Mut.JSON.
+    case Mut.JSON.decode(raw) do
+      {:ok, decoded} -> {:ok, decoded}
+      {:error, _} -> {:cold, :malformed}
+    end
   rescue
     _ -> {:cold, :malformed}
   end

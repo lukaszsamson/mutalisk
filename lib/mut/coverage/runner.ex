@@ -130,25 +130,31 @@ defmodule Mut.Coverage.Runner do
     File.mkdir_p!(Path.dirname(out_path))
     script = coverage_script(root, test_file, out_path)
 
-    case run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
-      {:error, reason} ->
-        {:error, reason}
+    try do
+      case run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
+        {:error, reason} ->
+          {:error, reason}
 
-      {:timeout, _output} ->
-        {:error, {:coverage_test_timeout, Path.relative_to(test_file, root), timeout_ms}}
+        {:timeout, _output} ->
+          {:error, {:coverage_test_timeout, Path.relative_to(test_file, root), timeout_ms}}
 
-      {:exit, exit_code, output} when exit_code != 0 ->
-        {:error,
-         {:coverage_test_failed, Path.relative_to(test_file, root), exit_code,
-          output_tail(output)}}
-
-      {:exit, 0, output} ->
-        if File.exists?(out_path) do
-          parse_test_output(root, test_file, out_path, output)
-        else
+        {:exit, exit_code, output} when exit_code != 0 ->
           {:error,
-           {:coverage_output_missing, Path.relative_to(test_file, root), output_tail(output)}}
-        end
+           {:coverage_test_failed, Path.relative_to(test_file, root), exit_code,
+            output_tail(output)}}
+
+        {:exit, 0, output} ->
+          if File.exists?(out_path) do
+            parse_test_output(root, test_file, out_path, output)
+          else
+            {:error,
+             {:coverage_output_missing, Path.relative_to(test_file, root), output_tail(output)}}
+          end
+      end
+    after
+      # The child writes one `.term` per test file to hand coverage back; remove
+      # it once read so `tmp/mut_coverage/` doesn't accumulate unboundedly.
+      File.rm(out_path)
     end
   end
 

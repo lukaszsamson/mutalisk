@@ -251,7 +251,7 @@ defmodule Mut.Worker do
       sandbox.path
       |> Mut.Umbrella.app_names()
       |> Enum.map(&{&1, manifest_path(sandbox, &1)})
-      |> Mut.MixManifest.read_combined()
+      |> Mut.MixManifest.read_combined(Mut.Umbrella.apps_path_name(sandbox.path))
     else
       sandbox
       |> manifest_path(app(opts))

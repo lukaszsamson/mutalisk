@@ -52,6 +52,20 @@ defmodule Mut.Umbrella do
     |> Enum.reject(&is_nil/1)
   end
 
+  @doc """
+  The umbrella's apps-directory NAME — the configured `:apps_path` (e.g.
+  `"packages"`) or `"apps"` when unset/single-app. Call sites that parse an
+  `<apps_path>/<app>/...` mutant or source path must use this rather than the
+  literal `"apps"`, or a custom `:apps_path` resolves the wrong app.
+  """
+  @spec apps_path_name(Path.t()) :: String.t()
+  def apps_path_name(work_copy) do
+    case root_project_ast(work_copy) do
+      {:ok, ast} -> apps_path_value(ast) || @default_apps_path
+      :error -> @default_apps_path
+    end
+  end
+
   @doc "The `:app` atom of a single app dir, as a string, or `nil`."
   @spec app_name(Path.t()) :: String.t() | nil
   def app_name(app_dir) do

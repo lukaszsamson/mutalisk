@@ -1191,8 +1191,10 @@ defmodule Mix.Tasks.Mut do
   # segment of the mutant's `apps/<app>/lib/...` path (umbrella app dir names
   # must equal their app names); single-app reads the project's :app. M68.
   defp fallback_app(work_copy, mutant) do
+    apps_dir = Mut.Umbrella.apps_path_name(work_copy)
+
     case Path.split(mutant.file) do
-      ["apps", app | _] -> app
+      [^apps_dir, app | _] -> app
       _ -> app_name(work_copy)
     end
   end
