@@ -45,7 +45,6 @@ defmodule Mut.Reporter.Terminal do
     # survived) — consistent with snapshot.score and the Stryker HTML viewer.
     detected = killed + timeout
     denominator = detected + survived
-    denominator = if denominator == 0, do: 0, else: denominator
 
     [
       "Mutation score: #{detected}/#{denominator} = #{format_pct(snapshot.score)}\n\n",

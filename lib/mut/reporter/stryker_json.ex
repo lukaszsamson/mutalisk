@@ -30,10 +30,19 @@ defmodule Mut.Reporter.StrykerJson do
       |> Enum.reject(&(is_nil(&1) or &1.status == :pending))
       |> Enum.sort_by(&{&1.file, &1.stable_id})
 
+    # M-perf: build a stable_id => ledger entry map once so mutant_result/3
+    # can look up the raw entry in O(1) instead of O(N) per mutant (was O(N^2)
+    # over the full ledger).
+    ledger_index =
+      Map.new(snapshot.ledger, fn entry ->
+        stable_id = entry |> Map.get(:mutant, %{}) |> Map.get(:stable_id)
+        {stable_id, entry}
+      end)
+
     %{
       "schemaVersion" => "2",
       "thresholds" => thresholds,
-      "files" => files(mutants, snapshot, source_loader),
+      "files" => files(mutants, ledger_index, source_loader),
       "mutalisk" => mutalisk_extension(plan, mutants, snapshot)
     }
   end
@@ -44,8 +53,27 @@ defmodule Mut.Reporter.StrykerJson do
     # truncated, invalid report — matching the history store's durability.
     File.mkdir_p!(Path.dirname(path))
     tmp = path <> ".tmp"
-    File.write!(tmp, Mut.JSON.encode!(rendered, pretty: true) <> "\n")
-    File.rename!(tmp, path)
+    encoded = Mut.JSON.encode!(rendered, pretty: true) <> "\n"
+    File.write!(tmp, encoded)
+
+    # File.rename!/2 raises File.RenameError (Elixir 1.19+) wrapping :exdev when
+    # src and dst live on different filesystems (e.g. /tmp -> project dir on
+    # macOS with Docker volumes). Fast path: atomic rename; fallback on :exdev:
+    # direct overwrite so the run is never aborted after completion due to a
+    # cross-device move. Any other rename failure (e.g. :eacces) is re-raised —
+    # it is a genuine error we should not paper over.
+    try do
+      File.rename!(tmp, path)
+    rescue
+      e in File.RenameError ->
+        unless e.reason == :exdev, do: reraise(e, __STACKTRACE__)
+        # Cross-device move failed; the rename left `tmp` in place. Write the
+        # report directly and remove the now-orphaned tmp file so it can't
+        # accumulate as stale scratch on a repeatedly cross-device target.
+        File.write!(path, encoded)
+        File.rm(tmp)
+    end
+
     :ok
   end
 
@@ -65,7 +93,7 @@ defmodule Mut.Reporter.StrykerJson do
   def status(:pending), do: nil
   def status(status), do: Map.fetch!(@statuses, status)
 
-  defp files(mutants, snapshot, source_loader) do
+  defp files(mutants, ledger_index, source_loader) do
     mutants
     |> Enum.group_by(& &1.file)
     |> Enum.sort_by(fn {file, _mutants} -> file end)
@@ -74,13 +102,13 @@ defmodule Mut.Reporter.StrykerJson do
        %{
          "language" => "elixir",
          "source" => source_loader.(file),
-         "mutants" => Enum.map(file_mutants, &mutant_result(&1, snapshot))
+         "mutants" => Enum.map(file_mutants, &mutant_result(&1, ledger_index))
        }}
     end)
   end
 
-  defp mutant_result(%Mutant{} = mutant, snapshot) do
-    entry = Enum.find(snapshot.ledger, &(Map.get(&1, :stable_id) == mutant.stable_id)) || %{}
+  defp mutant_result(%Mutant{} = mutant, ledger_index) do
+    entry = Map.get(ledger_index, mutant.stable_id, %{})
     status = Map.get(entry, :status, mutant.status)
 
     %{

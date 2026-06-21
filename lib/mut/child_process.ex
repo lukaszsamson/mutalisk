@@ -188,8 +188,14 @@ defmodule Mut.ChildProcess do
   defp trim_output(output, max_bytes) do
     marker = "\n...[mutalisk output truncated; retaining last #{max_bytes} bytes]...\n"
     keep_bytes = max(max_bytes - byte_size(marker), 0)
-    marker <> binary_part(output, byte_size(output), -keep_bytes)
+    # Advance to a valid UTF-8 boundary so JSON encoding never sees a broken grapheme.
+    marker <> utf8_align(binary_part(output, byte_size(output), -keep_bytes))
   end
+
+  # Drop at most 3 leading UTF-8 continuation bytes (0x80–0xBF) that result from
+  # slicing at an arbitrary byte offset inside a multi-byte codepoint.
+  defp utf8_align(<<b, rest::binary>>) when b >= 0x80 and b <= 0xBF, do: utf8_align(rest)
+  defp utf8_align(binary), do: binary
 
   # Tree-kill (TERM then KILL across the descendant tree) lives in
   # Mut.ProcessTree, shared with Mut.Worker so the two paths can't drift.

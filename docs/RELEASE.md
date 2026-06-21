@@ -20,8 +20,9 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 - [ ] `mix dialyzer` clean.
 - [ ] `mix docs` builds with **no warnings** (no broken refs).
 - [ ] `mix hex.build` packages successfully (valid metadata, Apache-2.0, no
-      license-mismatch warnings). Inspect the file list — only `lib`, `mix.exs`,
-      `README.md`, `LICENSE`, `CHANGELOG.md`, `docs/MUTATORS.md` ship.
+      license-mismatch warnings). Inspect the file list — `lib` (excluding the
+      internal-only `lib/mix/tasks/mut/` dev/CI tasks), `mix.exs`, `README.md`,
+      `LICENSE`, `CHANGELOG.md`, `docs/MUTATORS.md` ship.
 - [ ] `LICENSE` is verbatim Apache License 2.0.
 - [ ] `CHANGELOG.md` has the `0.1.0` entry.
 - [ ] No stray/cruft files at the repo root.
@@ -39,8 +40,8 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 
 ## Publish steps (each release)
 
-> The standing project constraint is *local-only on `master`*. These steps push
-> and publish — run them only when intentionally cutting a public release.
+> These steps push and publish — run them only when intentionally cutting a
+> public release.
 
 1. Re-run the readiness checklist above (especially `bin/verify`).
 2. Confirm the version in `mix.exs` (`@version`) and the matching
@@ -48,7 +49,7 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 3. Push the branch and tag the release:
 
    ```sh
-   git push -u origin master           # or your release branch -> main
+   git push -u origin main
    git tag v0.1.0
    git push origin v0.1.0
    ```
@@ -75,6 +76,6 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 - The `priv/plts/` Dialyzer PLT and the unused `priv/stryker_schema_v2.json`
   are **excluded** from the package (`files` in `mix.exs`) — Mutalisk reads no
   `priv/` at runtime.
-- `source_ref` in the docs config is `"main"`; source links resolve once the
-  remote exists and `main` is pushed. Bump to `"v<version>"` if you prefer
-  tag-pinned source links.
+- `source_ref` in the docs config is `"main"`; the remote exists and `main` is
+  pushed, so source links resolve correctly. Bump to `"v<version>"` if you
+  prefer tag-pinned source links.

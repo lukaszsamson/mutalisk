@@ -141,7 +141,9 @@ defmodule Mut.MixManifestTest do
     Path.join(result.work_copy_root, "_build/mut_schema/lib/demo_app/.mix/compile.elixir")
   end
 
-  defp fixture_root, do: Path.expand("test/fixtures/demo_app")
+  # Anchor to __DIR__ so the path is stable regardless of the process cwd
+  # (running `mix test` from a subdirectory or concurrently could shift cwd).
+  defp fixture_root, do: Path.expand("../fixtures/demo_app", __DIR__)
 
   defp deps(attrs \\ []) do
     defaults = [compile_deps: [], export_deps: [], struct_deps: [], runtime_deps: []]

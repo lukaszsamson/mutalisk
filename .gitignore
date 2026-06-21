@@ -26,6 +26,9 @@ mutalisk-*.tar
 # Local milestone handoff prompts.
 M*_PROMPT.txt
 
+# Claude Code harness scratch (scheduled-task lock, etc.) — not project source.
+/.claude/scheduled_tasks.lock
+
 # Dialyzer PLT cache.
 /priv/plts/
 

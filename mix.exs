@@ -3,9 +3,9 @@ defmodule Mutalisk.MixProject do
 
   @version "0.1.0"
 
-  # Placeholder source URL — confirm/set once the public git remote exists (see
-  # docs/RELEASE.md, M112). The name follows the package + the author's other
-  # repos (e.g. crap_ex); update if the remote differs.
+  # Public git remote confirmed at git@github.com:lukaszsamson/mutalisk.git
+  # (HTTPS canonical: https://github.com/lukaszsamson/mutalisk). Update only if
+  # the repo is transferred or renamed.
   @source_url "https://github.com/lukaszsamson/mutalisk"
 
   @description "Mutation testing for Elixir: a trustworthy, sandboxed engine " <>
@@ -49,7 +49,14 @@ defmodule Mutalisk.MixProject do
     [
       licenses: ["Apache-2.0"],
       maintainers: ["Łukasz Samson"],
-      files: ~w(lib mix.exs README.md LICENSE CHANGELOG.md docs/MUTATORS.md),
+      # "lib" is expanded to subtrees, excluding internal-only dev/test Mix tasks
+      # under lib/mix/tasks/mut/ (e2e, test_schema, test_fallback, recompile)
+      # that reference test fixtures not shipped in the package.
+      files: ~w(
+        lib/mut lib/mutalisk.ex
+        lib/mix/tasks/mut.ex lib/mix/tasks/compile
+        mix.exs README.md LICENSE CHANGELOG.md docs/MUTATORS.md
+      ),
       links: %{
         "GitHub" => @source_url,
         "Docs" => "https://hexdocs.pm/mutalisk"
@@ -81,8 +88,9 @@ defmodule Mutalisk.MixProject do
 
   # ex_doc / HexDocs config. README is the landing page; the mutator catalogue
   # and changelog ship as extras. Modules are grouped by role; engine internals
-  # fall under the default ungrouped list. `source_ref` is "main" until a
-  # tagged remote exists (M112/RELEASE.md) — source links resolve once it does.
+  # fall under the default ungrouped list. `source_ref` is "main"; the remote
+  # exists and main is pushed, so source links resolve correctly. Bump to
+  # "v<version>" if tag-pinned source links are preferred.
   @spec docs() :: keyword
   defp docs do
     [
