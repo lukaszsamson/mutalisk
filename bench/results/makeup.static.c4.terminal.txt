@@ -1,0 +1,147 @@
+target=makeup repo=https://github.com/elixir-makeup/makeup.git ref=v1.2.1 sha=3e0c0379cd1c062bea64e6ce6c8ea217e3f1ce06 selection=static concurrency=4
+mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
+deps.get starting
+Resolving Hex dependencies...
+Resolution completed in 0.008s
+Unchanged:
+  nimble_parsec 1.4.0
+  stream_data 1.1.0
+* Getting nimble_parsec (Hex package)
+* Getting stream_data (Hex package)
+You have added/upgraded packages you could sponsor, run `mix hex.sponsor` to learn more
+mix mut starting
+==> stream_data
+Compiling 3 files (.ex)
+     warning: unused require Integer
+     │
+ 542 │       require Integer
+     │       ~
+     │
+     └─ lib/stream_data.ex:542:7
+
+Generated stream_data app
+==> nimble_parsec
+Compiling 4 files (.ex)
+Generated nimble_parsec app
+==> mutalisk
+Compiling 102 files (.ex)
+Generated mutalisk app
+==> makeup
+Compiling 18 files (.ex)
+    warning: unused require Makeup.Token.Utils
+    │
+ 13 │   require Makeup.Token.Utils
+    │   ~
+    │
+    └─ lib/makeup/styles/html/style.ex:13:3
+
+Generated makeup app
+Schema build starting
+Schema build complete
+[1/44] survived  lib/makeup/styles/html/style.ex:36  Boolean  replace || with &&
+[2/44] killed    lib/makeup/formatters/html/html_formatter.ex:13  Boolean  replace || with &&
+[3/44] survived  lib/makeup/lexer/combinators.ex:73  ComparisonNegation  replace > with <=
+[4/44] survived  lib/makeup/lexer/groups.ex:213  ConcatOperator  replace ++ with --
+[5/44] survived  lib/makeup/styles/html/token_style.ex:19  UnaryNot  remove unary not
+[6/44] survived  lib/makeup/lexer/combinators.ex:136  Boolean  replace and with or
+[7/44] survived  lib/makeup/token/utils/hierarchy.ex:17  ConcatOperator  replace ++ with --
+[8/44] error     lib/makeup/lexer/combinators.ex:238  ConcatOperator  replace ++ with --
+[9/44] survived  lib/makeup/lexer/groups.ex:213  ConcatOperator  replace ++ with --
+[10/44] killed    lib/makeup/formatters/html/html_formatter.ex:14  ComparisonNegation  replace == with !=
+[11/44] survived  lib/makeup/lexer.ex:76  ConcatOperator  replace ++ with --
+[12/44] survived  lib/makeup/lexer/combinators.ex:73  ComparisonBoundary  replace > with >=
+[12/44] invalid   lib/makeup/lexer/groups.ex:282  ConcatOperator  replace ++ with --
+[13/44] killed    lib/makeup/formatters/html/html_formatter.ex:53  GuardComparisonNegation  replace guard >= with <
+[14/44] killed    lib/makeup/formatters/html/html_formatter.ex:51  GuardComparisonNegation  replace guard <= with >
+[15/44] killed    lib/makeup/formatters/html/html_formatter.ex:71  GuardTypeTest  replace guard is_integer with is_float
+[16/44] killed    lib/makeup/formatters/html/html_formatter.ex:41  IntegerLiteral  replace integer literal 38 with 0
+[17/44] killed    lib/makeup/formatters/html/html_formatter.ex:53  GuardComparisonBoundary  replace guard >= with >
+[18/44] killed    lib/makeup/formatters/html/html_formatter.ex:45  IntegerLiteral  replace integer literal 62 with 0
+[19/44] killed    lib/makeup/formatters/html/html_formatter.ex:51  GuardTypeTest  replace guard is_integer with is_float
+[20/44] killed    lib/makeup/formatters/html/html_formatter.ex:47  IntegerLiteral  replace integer literal 34 with 35
+[21/44] error     lib/makeup/lexer/combinators.ex:222  GuardTypeTest  replace guard is_list with is_tuple
+[22/44] survived  lib/makeup/lexer/combinators.ex:24  GuardTypeTest  replace guard is_map with is_list
+[23/44] killed    lib/makeup/formatters/html/html_formatter.ex:49  IntegerLiteral  replace integer literal 39 with 40
+[24/44] killed    lib/makeup/formatters/html/html_formatter.ex:130  GuardTypeTest  replace guard is_atom with is_nil
+[25/44] killed    lib/makeup/formatters/html/html_formatter.ex:51  GuardComparisonBoundary  replace guard <= with <
+[26/44] survived  lib/makeup.ex:33  GuardTypeTest  replace guard is_atom with is_nil
+[27/44] killed    lib/makeup/lexer/combinators.ex:176  GuardTypeTest  replace guard is_integer with is_float
+[28/44] survived  lib/makeup/lexer/combinators.ex:176  GuardTypeTest  replace guard is_integer with is_number
+[29/44] survived  lib/makeup/formatters/html/html_formatter.ex:53  GuardTypeTest  replace guard is_integer with is_number
+[30/44] survived  lib/makeup/formatters/html/html_formatter.ex:71  GuardTypeTest  replace guard is_integer with is_number
+[31/44] killed    lib/makeup/formatters/html/html_formatter.ex:43  IntegerLiteral  replace integer literal 60 with 0
+[32/44] killed    lib/makeup/formatters/html/html_formatter.ex:47  IntegerLiteral  replace integer literal 34 with 0
+[33/44] killed    lib/makeup/formatters/html/html_formatter.ex:49  IntegerLiteral  replace integer literal 39 with 0
+[34/44] killed    lib/makeup/formatters/html/html_formatter.ex:43  IntegerLiteral  replace integer literal 60 with 61
+[34/44] invalid   lib/makeup/lexer/groups.ex:282  ConcatOperator  replace ++ with --
+[35/44] killed    lib/makeup/formatters/html/html_formatter.ex:45  IntegerLiteral  replace integer literal 62 with 63
+[36/44] survived  lib/makeup/lexer/combinators.ex:20  GuardTypeTest  replace guard is_map with is_list
+[37/44] killed    lib/makeup/formatters/html/html_formatter.ex:41  IntegerLiteral  replace integer literal 38 with 39
+[38/44] killed    lib/makeup/formatters/html/html_formatter.ex:53  GuardTypeTest  replace guard is_integer with is_float
+[39/44] killed    lib/makeup.ex:56  GuardTypeTest  replace guard is_atom with is_nil
+[40/44] killed    lib/makeup/formatters/html/html_formatter.ex:61  GuardTypeTest  replace guard is_list with is_tuple
+[41/44] survived  lib/makeup/formatters/html/html_formatter.ex:51  GuardTypeTest  replace guard is_integer with is_number
+[42/44] timeout   lib/makeup/lexer/combinators.ex:132  GuardTypeTest  replace guard is_list with is_tuple
+Mutation score: 24/40 = 60.0%
+
+Surviving mutants:
+  lib/makeup/styles/html/style.ex:36 Boolean                  replace || with &&
+  lib/makeup/lexer/combinators.ex:73 ComparisonNegation       replace > with <=
+  lib/makeup/lexer/groups.ex:213 ConcatOperator           replace ++ with --
+  lib/makeup/styles/html/token_style.ex:19 UnaryNot                 remove unary not
+  lib/makeup/lexer/combinators.ex:136 Boolean                  replace and with or
+  lib/makeup/token/utils/hierarchy.ex:17 ConcatOperator           replace ++ with --
+  lib/makeup/lexer/groups.ex:213 ConcatOperator           replace ++ with --
+  lib/makeup/lexer.ex:76 ConcatOperator           replace ++ with --
+  lib/makeup/lexer/combinators.ex:73 ComparisonBoundary       replace > with >=
+  lib/makeup/lexer/combinators.ex:24 GuardTypeTest            replace guard is_map with is_list
+  lib/makeup.ex:33 GuardTypeTest            replace guard is_atom with is_nil
+  lib/makeup/lexer/combinators.ex:176 GuardTypeTest            replace guard is_integer with is_number
+  lib/makeup/formatters/html/html_formatter.ex:53 GuardTypeTest            replace guard is_integer with is_number
+  lib/makeup/formatters/html/html_formatter.ex:71 GuardTypeTest            replace guard is_integer with is_number
+  lib/makeup/lexer/combinators.ex:20 GuardTypeTest            replace guard is_map with is_list
+  lib/makeup/formatters/html/html_formatter.ex:51 GuardTypeTest            replace guard is_integer with is_number
+
+Schema:    2/12 killed (16.7%)   wall: 8.0s
+Fallback:  21/32 killed (65.6%)   wall: 58.4s
+  concat_op:                    0/2 killed
+  guard_comparison_boundary:    2/2 killed
+  guard_comparison_negation:    2/2 killed
+  guard_type_test:              7/16 killed
+  integer_literal_replace:      10/10 killed
+Skipped:   666 (attribute_engine_disabled: 2, missing_oracle_site: 32, no_applicable_mutator: 197, unsupported_dispatch: 435)
+Invalid:   2
+Errors:    2
+Timeouts:  1
+No coverage: 0
+
+Run time: 66.5s
+Fallback wall-clock: 87.9% of total
+Fallback mutants: 72.7% of executed
+
+Phases:
+  oracle build:         3125 ms
+  baseline tests:        534 ms
+  plan generation:        36 ms
+  schema build:         2763 ms
+  schema workers:       2561 ms
+  fallback workers:    22106 ms
+  report writing:          3 ms
+  total:               31337 ms
+
+Selection:
+  mode: static
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    44
+    all tests:          0
+  avg tests/mutant: 2.3
+  median tests/mutant: 2
+  coverage collection: 0 ms
+
+Concurrency: 4 workers
+Test timeout: 10000 ms
+
+Mutalisk run complete in 31604ms
+bench.wall_ms=34000

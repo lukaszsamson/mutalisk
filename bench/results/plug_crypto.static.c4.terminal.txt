@@ -2,9 +2,7 @@ target=plug_crypto repo=https://github.com/elixir-plug/plug_crypto.git ref=v2.1.
 mutalisk_path=/Users/lukaszsamson/claude_fun/mutalisk
 deps.get starting
 Resolving Hex dependencies...
-Resolution completed in 0.017s
-New:
-  jason 1.4.5
+Resolution completed in 0.013s
 Unchanged:
   earmark_parser 1.4.44
   ex_doc 0.37.3
@@ -19,146 +17,166 @@ Unchanged:
 * Getting makeup (Hex package)
 * Getting nimble_parsec (Hex package)
 mix mut starting
-==> jason
-Compiling 10 files (.ex)
-Generated jason app
 ==> mutalisk
-Compiling 72 files (.ex)
+Compiling 102 files (.ex)
 Generated mutalisk app
 ==> plug_crypto
 Compiling 5 files (.ex)
 Generated plug_crypto app
 Schema build starting
 Schema build complete
-[1/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with -
-[2/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
-[3/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with -
-[4/64] survived  lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with +
-[5/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with +
-[6/64] killed    lib/plug/crypto.ex:130  Boolean  replace and with or
-[7/64] survived  lib/plug/crypto/key_generator.ex:74  Boolean  replace and with or
-[8/64] killed    lib/plug/crypto/key_generator.ex:44  ComparisonBoundary  replace < with <=
-[9/64] survived  lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with +
-[10/64] survived  lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with +
-[11/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with +
-[12/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with *
-[13/64] survived  lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with *
-[14/64] survived  lib/plug/crypto.ex:356  ComparisonBoundary  replace < with <=
-[15/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with +
-[16/64] survived  lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with +
-[17/64] killed    lib/plug/crypto/key_generator.ex:47  ComparisonNegation  replace > with <=
-[18/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
-[19/64] killed    lib/plug/crypto.ex:356  ComparisonNegation  replace < with >=
-[20/64] survived  lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with +
-[21/64] survived  lib/plug/crypto.ex:159  ComparisonNegation  replace === with !==
-[22/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with *
-[23/64] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
-[24/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with +
-[25/64] survived  lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with *
-[26/64] survived  lib/plug/crypto/key_generator.ex:47  ComparisonBoundary  replace > with >=
-[27/64] survived  lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with *
-[28/64] killed    lib/plug/crypto.ex:130  ComparisonNegation  replace == with !=
-[29/64] survived  lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with *
-[30/64] survived  lib/plug/crypto.ex:134  Boolean  replace and with or
-[31/64] survived  lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with +
-[32/64] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with +
-[33/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with *
-[34/64] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with /
-[35/64] killed    lib/plug/crypto/key_generator.ex:44  Boolean  replace or with and
-[36/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with /
-[37/64] survived  lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with *
-[38/64] killed    lib/plug/crypto/key_generator.ex:44  ComparisonNegation  replace < with >=
-[39/64] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
-[40/64] killed    lib/plug/crypto/key_generator.ex:44  UnaryNot  remove unary not
-[41/64] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with -
-[42/64] survived  lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with *
-[43/64] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with *
-[44/64] killed    lib/plug/crypto/message_verifier.ex:31  GuardComparisonNegation  replace guard > with <=
-[45/64] killed    lib/plug/crypto.ex:355  GuardComparisonNegation  replace guard <= with >
-[46/64] killed    lib/plug/crypto.ex:48  GuardTypeTest  replace guard is_list with is_tuple
-[47/64] killed    lib/plug/crypto/message_encryptor.ex:52  GuardTypeTest  replace guard is_list with is_tuple
-[48/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_float
-[49/64] killed    lib/plug/crypto/message_encryptor.ex:37  GuardTypeTest  replace guard is_list with is_tuple
-[50/64] killed    lib/plug/crypto/message_encryptor.ex:38  GuardComparisonNegation  replace guard == with !=
-[51/64] killed    lib/plug/crypto.ex:23  GuardTypeTest  replace guard is_list with is_tuple
-[52/64] killed    lib/plug/crypto.ex:312  GuardTypeTest  replace guard is_list with is_tuple
-[53/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_atom with is_nil
-[54/64] survived  lib/plug/crypto.ex:79  GuardTypeTest  replace guard is_list with is_tuple
-[55/64] killed    lib/plug/crypto.ex:56  GuardTypeTest  replace guard is_map with is_list
-[56/64] killed    lib/plug/crypto/message_encryptor.ex:78  GuardComparisonNegation  replace guard === with !==
-[57/64] killed    lib/plug/crypto/message_encryptor.ex:76  GuardComparisonNegation  replace guard === with !==
-[58/64] killed    lib/plug/crypto.ex:52  GuardTypeTest  replace guard is_tuple with is_list
-[59/64] survived  lib/plug/crypto.ex:355  GuardComparisonBoundary  replace guard <= with <
-[60/64] killed    lib/plug/crypto.ex:317  GuardTypeTest  replace guard is_list with is_tuple
-[61/64] killed    lib/plug/crypto/message_verifier.ex:21  GuardComparisonNegation  replace guard > with <=
-[62/64] survived  lib/plug/crypto/message_verifier.ex:31  GuardComparisonBoundary  replace guard > with >=
-[63/64] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_integer
-[64/64] survived  lib/plug/crypto/message_verifier.ex:21  GuardComparisonBoundary  replace guard > with >=
-Mutation score: 39/64 = 60.9%
+[1/82] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with -
+[2/82] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with -
+[3/82] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
+[4/82] survived  lib/plug/crypto.ex:89  AtomLiteral  replace atom literal :ok with :error
+[5/82] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with +
+[6/82] survived  lib/plug/crypto.ex:77  AtomLiteral  replace atom literal :ok with :error
+[7/82] killed    lib/plug/crypto.ex:130  Boolean  replace and with or
+[8/82] killed    lib/plug/crypto/message_encryptor.ex:68  AtomLiteral  replace atom literal :error with :ok
+[9/82] survived  lib/plug/crypto/message_encryptor.ex:194  AtomLiteral  replace atom literal :error with :ok
+[10/82] killed    lib/plug/crypto/message_encryptor.ex:85  AtomLiteral  replace atom literal :error with :ok
+[11/82] killed    lib/plug/crypto/message_encryptor.ex:90  AtomLiteral  replace atom literal :error with :ok
+[12/82] survived  lib/plug/crypto/key_generator.ex:74  Boolean  replace and with or
+[13/82] survived  lib/plug/crypto.ex:356  ComparisonBoundary  replace < with <=
+[14/82] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
+[15/82] killed    lib/plug/crypto.ex:356  ComparisonNegation  replace < with >=
+[16/82] survived  lib/plug/crypto/message_encryptor.ex:190  AtomLiteral  replace atom literal :error with :ok
+[17/82] survived  lib/plug/crypto.ex:159  ComparisonNegation  replace === with !==
+[18/82] killed    lib/plug/crypto.ex:115  Boolean  replace and with or
+[19/82] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with +
+[20/82] killed    lib/plug/crypto.ex:130  ComparisonNegation  replace == with !=
+[21/82] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with +
+[22/82] survived  lib/plug/crypto.ex:134  Boolean  replace and with or
+[23/82] killed    lib/plug/crypto.ex:221  Arithmetic  replace * with /
+[24/82] killed    lib/plug/crypto/message_verifier.ex:66  AtomLiteral  replace atom literal :error with :ok
+[25/82] killed    lib/plug/crypto.ex:356  Arithmetic  replace + with *
+[26/82] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with /
+[27/82] killed    lib/plug/crypto/message_verifier.ex:70  AtomLiteral  replace atom literal :error with :ok
+[28/82] killed    lib/plug/crypto.ex:356  Arithmetic  replace * with -
+[29/82] killed    lib/plug/crypto.ex:115  ComparisonNegation  replace == with !=
+[30/82] killed    lib/plug/crypto.ex:93  Arithmetic  replace - with *
+[30/82] invalid   lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with +
+[30/82] invalid   lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with +
+[31/82] killed    lib/plug/crypto.ex:355  GuardComparisonNegation  replace guard <= with >
+[32/82] killed    lib/plug/crypto.ex:48  GuardTypeTest  replace guard is_list with is_tuple
+[32/82] invalid   lib/plug/crypto/key_generator.ex:44  ComparisonBoundary  replace < with <=
+[32/82] invalid   lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with +
+[33/82] survived  lib/plug/crypto/message_encryptor.ex:107  IntegerLiteral  replace integer literal 128 with 0
+[34/82] survived  lib/plug/crypto/message_encryptor.ex:97  AtomLiteral  replace atom literal :error with :ok
+[34/82] invalid   lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with +
+[34/82] invalid   lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with *
+[34/82] invalid   lib/plug/crypto/message_encryptor.ex:160  Arithmetic  replace - with *
+[35/82] killed    lib/plug/crypto/message_verifier.ex:31  GuardComparisonNegation  replace guard > with <=
+[36/82] killed    lib/plug/crypto/message_encryptor.ex:52  GuardTypeTest  replace guard is_list with is_tuple
+[37/82] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_float
+[38/82] killed    lib/plug/crypto.ex:23  GuardTypeTest  replace guard is_list with is_tuple
+[39/82] killed    lib/plug/crypto/message_encryptor.ex:37  GuardTypeTest  replace guard is_list with is_tuple
+[40/82] survived  lib/plug/crypto/message_encryptor.ex:109  IntegerLiteral  replace integer literal 256 with 0
+[41/82] killed    lib/plug/crypto/message_encryptor.ex:38  GuardComparisonNegation  replace guard == with !=
+[42/82] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_atom with is_nil
+[43/82] killed    lib/plug/crypto.ex:312  GuardTypeTest  replace guard is_list with is_tuple
+[43/82] invalid   lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with +
+[44/82] killed    lib/plug/crypto/message_encryptor.ex:78  GuardComparisonNegation  replace guard === with !==
+[45/82] survived  lib/plug/crypto.ex:79  GuardTypeTest  replace guard is_list with is_tuple
+[46/82] killed    lib/plug/crypto.ex:56  GuardTypeTest  replace guard is_map with is_list
+[47/82] survived  lib/plug/crypto/message_encryptor.ex:104  AtomLiteral  replace atom literal :error with :ok
+[47/82] invalid   lib/plug/crypto/message_encryptor.ex:167  Arithmetic  replace - with +
+[48/82] survived  lib/plug/crypto.ex:89  IntegerLiteral  replace integer literal 0 with 1
+[49/82] survived  lib/plug/crypto/message_encryptor.ex:109  IntegerLiteral  replace integer literal 256 with 257
+[49/82] invalid   lib/plug/crypto/key_generator.ex:47  ComparisonNegation  replace > with <=
+[49/82] invalid   lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with +
+[49/82] invalid   lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with *
+[50/82] survived  lib/plug/crypto/message_encryptor.ex:108  IntegerLiteral  replace integer literal 192 with 0
+[50/82] invalid   lib/plug/crypto/message_encryptor.ex:166  Arithmetic  replace - with *
+[50/82] invalid   lib/plug/crypto/key_generator.ex:47  ComparisonBoundary  replace > with >=
+[50/82] invalid   lib/plug/crypto/message_encryptor.ex:165  Arithmetic  replace - with *
+[50/82] invalid   lib/plug/crypto/message_encryptor.ex:164  Arithmetic  replace - with *
+[51/82] survived  lib/plug/crypto/message_encryptor.ex:107  IntegerLiteral  replace integer literal 128 with 129
+[51/82] invalid   lib/plug/crypto/message_encryptor.ex:162  Arithmetic  replace - with +
+[52/82] killed    lib/plug/crypto/message_encryptor.ex:76  GuardComparisonNegation  replace guard === with !==
+[53/82] survived  lib/plug/crypto/message_encryptor.ex:108  IntegerLiteral  replace integer literal 192 with 193
+[54/82] killed    lib/plug/crypto.ex:52  GuardTypeTest  replace guard is_tuple with is_list
+[54/82] invalid   lib/plug/crypto/message_encryptor.ex:161  Arithmetic  replace - with *
+[55/82] killed    lib/plug/crypto.ex:317  GuardTypeTest  replace guard is_list with is_tuple
+[56/82] survived  lib/plug/crypto.ex:355  GuardComparisonBoundary  replace guard <= with <
+[56/82] invalid   lib/plug/crypto/key_generator.ex:44  Boolean  replace or with and
+[56/82] invalid   lib/plug/crypto/key_generator.ex:44  ComparisonNegation  replace < with >=
+[56/82] invalid   lib/plug/crypto/key_generator.ex:44  UnaryNot  remove unary not
+[57/82] killed    lib/plug/crypto/message_verifier.ex:21  GuardComparisonNegation  replace guard > with <=
+[57/82] invalid   lib/plug/crypto/message_encryptor.ex:163  Arithmetic  replace - with *
+[58/82] survived  lib/plug/crypto/message_verifier.ex:31  GuardComparisonBoundary  replace guard > with >=
+[59/82] killed    lib/plug/crypto.ex:67  GuardTypeTest  replace guard is_number with is_integer
+[60/82] survived  lib/plug/crypto/message_verifier.ex:21  GuardComparisonBoundary  replace guard > with >=
+Mutation score: 39/60 = 65.0%
 
 Surviving mutants:
-  lib/plug/crypto/message_encryptor.ex:164 Arithmetic               replace - with +
+  lib/plug/crypto.ex:89 AtomLiteral              replace atom literal :ok with :error
+  lib/plug/crypto.ex:77 AtomLiteral              replace atom literal :ok with :error
+  lib/plug/crypto/message_encryptor.ex:194 AtomLiteral              replace atom literal :error with :ok
   lib/plug/crypto/key_generator.ex:74 Boolean                  replace and with or
-  lib/plug/crypto/message_encryptor.ex:163 Arithmetic               replace - with +
-  lib/plug/crypto/message_encryptor.ex:160 Arithmetic               replace - with +
-  lib/plug/crypto/message_encryptor.ex:161 Arithmetic               replace - with +
-  lib/plug/crypto/message_encryptor.ex:167 Arithmetic               replace - with *
-  lib/plug/crypto/message_encryptor.ex:160 Arithmetic               replace - with *
   lib/plug/crypto.ex:356 ComparisonBoundary       replace < with <=
-  lib/plug/crypto/message_encryptor.ex:166 Arithmetic               replace - with +
-  lib/plug/crypto/message_encryptor.ex:167 Arithmetic               replace - with +
-  lib/plug/crypto/message_encryptor.ex:165 Arithmetic               replace - with +
+  lib/plug/crypto/message_encryptor.ex:190 AtomLiteral              replace atom literal :error with :ok
   lib/plug/crypto.ex:159 ComparisonNegation       replace === with !==
-  lib/plug/crypto/message_encryptor.ex:162 Arithmetic               replace - with *
-  lib/plug/crypto/message_encryptor.ex:166 Arithmetic               replace - with *
-  lib/plug/crypto/key_generator.ex:47 ComparisonBoundary       replace > with >=
-  lib/plug/crypto/message_encryptor.ex:165 Arithmetic               replace - with *
-  lib/plug/crypto/message_encryptor.ex:164 Arithmetic               replace - with *
   lib/plug/crypto.ex:134 Boolean                  replace and with or
-  lib/plug/crypto/message_encryptor.ex:162 Arithmetic               replace - with +
-  lib/plug/crypto/message_encryptor.ex:161 Arithmetic               replace - with *
-  lib/plug/crypto/message_encryptor.ex:163 Arithmetic               replace - with *
+  lib/plug/crypto/message_encryptor.ex:107 IntegerLiteral           replace integer literal 128 with 0
+  lib/plug/crypto/message_encryptor.ex:97 AtomLiteral              replace atom literal :error with :ok
+  lib/plug/crypto/message_encryptor.ex:109 IntegerLiteral           replace integer literal 256 with 0
   lib/plug/crypto.ex:79 GuardTypeTest            replace guard is_list with is_tuple
+  lib/plug/crypto/message_encryptor.ex:104 AtomLiteral              replace atom literal :error with :ok
+  lib/plug/crypto.ex:89 IntegerLiteral           replace integer literal 0 with 1
+  lib/plug/crypto/message_encryptor.ex:109 IntegerLiteral           replace integer literal 256 with 257
+  lib/plug/crypto/message_encryptor.ex:108 IntegerLiteral           replace integer literal 192 with 0
+  lib/plug/crypto/message_encryptor.ex:107 IntegerLiteral           replace integer literal 128 with 129
+  lib/plug/crypto/message_encryptor.ex:108 IntegerLiteral           replace integer literal 192 with 193
   lib/plug/crypto.ex:355 GuardComparisonBoundary  replace guard <= with <
   lib/plug/crypto/message_verifier.ex:31 GuardComparisonBoundary  replace guard > with >=
   lib/plug/crypto/message_verifier.ex:21 GuardComparisonBoundary  replace guard > with >=
 
-Schema:    22/43 killed (51.2%)   wall: 68.4s
-Fallback:  17/21 killed (81.0%)   wall: 49.7s
+Schema:    22/30 killed (73.3%)   wall: 37.7s
+Fallback:  17/52 killed (32.7%)   wall: 40.8s
+  arithmetic_op:                0/16 killed
+  atom_literal:                 0/2 killed
+  boolean_op:                   0/1 killed
+  comparison_boundary:          0/2 killed
+  comparison_negation:          0/2 killed
   guard_comparison_boundary:    0/3 killed
   guard_comparison_negation:    6/6 killed
   guard_type_test:              11/12 killed
-Skipped:   471 (missing_oracle_site: 149, no_applicable_mutator: 33, unsupported_dispatch: 289)
-Invalid:   0
+  integer_literal_replace:      0/7 killed
+  unary_not_removal:            0/1 killed
+Skipped:   634 (missing_oracle_site: 149, no_applicable_mutator: 202, unsupported_dispatch: 283)
+Invalid:   22
 Errors:    0
 Timeouts:  0
+No coverage: 0
 
-Run time: 118.1s
-Fallback wall-clock: 42.1% of total
-Fallback mutants: 32.8% of executed
+Run time: 78.4s
+Fallback wall-clock: 52.0% of total
+Fallback mutants: 63.4% of executed
 
 Phases:
-  oracle build:         4863 ms
-  baseline tests:       1576 ms
-  plan generation:        13 ms
-  schema build:         3941 ms
-  schema workers:      22758 ms
-  fallback workers:    15055 ms
-  report writing:         10 ms
-  total:               48602 ms
+  oracle build:         2737 ms
+  baseline tests:       1824 ms
+  plan generation:        20 ms
+  schema build:         3733 ms
+  schema workers:      16355 ms
+  fallback workers:    11826 ms
+  report writing:          3 ms
+  total:               36802 ms
 
 Selection:
   mode: static
   match distribution:
     exact line:         0
     enclosing function: 0
-    static fallback:    64
+    static fallback:    82
     all tests:          0
   avg tests/mutant: 2.2
   median tests/mutant: 2
   coverage collection: 0 ms
 
 Concurrency: 4 workers
+Test timeout: 10000 ms
 
-Mutalisk run complete in 49209ms
-bench.wall_ms=53000
+Mutalisk run complete in 37253ms
+bench.wall_ms=40000

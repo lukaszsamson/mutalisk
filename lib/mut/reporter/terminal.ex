@@ -21,7 +21,7 @@ defmodule Mut.Reporter.Terminal do
 
     line =
       [
-        "[#{index}/#{planned_total(snapshot)}] ",
+        "[#{index}/#{progress_total(snapshot)}] ",
         color(result.status, String.pad_trailing(status, 8)),
         "  ",
         location(mutant),
@@ -72,6 +72,8 @@ defmodule Mut.Reporter.Terminal do
       count_line("Errors", status_count(snapshot, :error), ""),
       "\n",
       count_line("Timeouts", status_count(snapshot, :timeout), ""),
+      "\n",
+      count_line("No coverage", status_count(snapshot, :no_coverage), ""),
       "\n\n",
       "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
@@ -154,16 +156,36 @@ defmodule Mut.Reporter.Terminal do
   defp planned_total(%Snapshot{planned_total: total}) when is_integer(total), do: total
   defp planned_total(%Snapshot{total: total}), do: total
 
-  defp executed?(%{status: status}), do: status not in [:skipped, :invalid]
+  # T12: under `--incremental`, reused verdicts are recorded in the ledger
+  # before execution, so the streamed `index` (executed-status ledger count)
+  # includes them. `planned_total` counts only the to-execute subset, so the
+  # progress denominator must add the reused count back or `index` overshoots
+  # it (the reported `[37/30]`).
+  defp progress_total(%Snapshot{reused: reused} = snapshot) when is_integer(reused),
+    do: planned_total(snapshot) + reused
+
+  defp progress_total(snapshot), do: planned_total(snapshot)
+
+  defp executed?(%{status: status}), do: status not in [:skipped, :invalid, :no_coverage]
 
   defp engine_line(snapshot, engine, label) do
-    total = engine_total(snapshot, engine)
-    killed = Map.get(snapshot.by_engine_status, {engine, :killed}, 0)
-    score = if total == 0, do: 100.0, else: killed / total * 100.0
+    # Use the SAME score arithmetic as the headline mutation score: detected
+    # (killed + timeout) over scored (detected + survived). The old `killed /
+    # engine_total` counted :invalid/:error in the denominator and dropped
+    # :timeout from the numerator, so per-engine lines disagreed with the total.
+    killed = engine_status_count(snapshot, engine, :killed)
+    timeout = engine_status_count(snapshot, engine, :timeout)
+    survived = engine_status_count(snapshot, engine, :survived)
+    detected = killed + timeout
+    scored = detected + survived
+    score = if scored == 0, do: 100.0, else: detected / scored * 100.0
     wall_ms = Map.get(snapshot.wall_clock_ms, engine, 0)
 
-    "#{label} #{killed}/#{total} killed (#{format_pct(score)})   wall: #{format_seconds(wall_ms)}"
+    "#{label} #{detected}/#{scored} detected (#{format_pct(score)})   wall: #{format_seconds(wall_ms)}"
   end
+
+  defp engine_status_count(snapshot, engine, status),
+    do: Map.get(snapshot.by_engine_status, {engine, status}, 0)
 
   defp fallback_kind_lines(snapshot) do
     snapshot.ledger

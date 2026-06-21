@@ -25,7 +25,7 @@ Draft HLD/SPEC for a modern Elixir mutation testing library using source-level m
 - Elixir `>= 1.19.0` (see `mix.exs`; raised 1.17 → 1.18 at v1.7, then 1.18 → 1.19 in the v1.20+ line).
 - OTP `>= 26`.
 
-Rationale: modern parser metadata, reliable column metadata, good JIT behavior, and no backwards-compatibility burden for a new tool. The 1.18 floor was originally adopted at v1.7 for the persistent worker (M19), but **the persistent worker was removed in v1.15** (the single fresh-process-per-mutant model proved simpler and no slower on real targets — see README), so that rationale is now historical. The current `>= 1.19.0` floor is the v1.20+ baseline; the catalogue/engine work since then targets 1.19's parser and stdlib (e.g. `:json`). `--worker-type persistent` is rejected; `--worker-type mix` is accepted as a deprecated no-op.
+Rationale: modern parser metadata, reliable column metadata, good JIT behavior, and no backwards-compatibility burden for a new tool. The 1.18 floor was originally adopted at v1.7 for the persistent worker (M19), but **the persistent worker was removed in v1.15** (the single fresh-process-per-mutant model proved simpler and no slower on real targets — see README), so that rationale is now historical. The current `>= 1.19.0` floor is the v1.20+ baseline; the catalogue/engine work since then targets 1.19's parser and stdlib (e.g. `:json`). The `--worker-type` flag was removed entirely in M112 (the single fresh-process-per-mutant model is the only worker model); it is no longer accepted.
 
 ## High-Level Architecture
 
@@ -521,19 +521,18 @@ v2 incremental selection:
 - `:error`: infrastructure failure such as worker VM startup failure, sandbox corruption, OOM, or port crash unrelated to mutant compilation.
 - `:no_coverage`: no selected tests cover the mutant once coverage selection exists.
 
-Infrastructure errors are retried once in a fresh sandbox. If the retry also fails, the mutant is marked `:error` and excluded from the mutation score denominator by default. Invalid mutants are also excluded from the score denominator because they do not measure test quality.
+Infrastructure errors are retried once in a fresh sandbox. If the retry also fails, the mutant is marked `:error` and excluded from the mutation score denominator by default. `:invalid`, `:skipped`, and `:no_coverage` mutants are likewise excluded from the denominator because they do not measure test quality. (`:no_coverage` covers both no-coverage selection and a run where the selected tests executed zero tests — e.g. tag/path filters matched nothing — which must not be counted as a survivor.)
 
-Timeout formula:
-
-```text
-timeout = max(configured_min_timeout, baseline_selected_tests_time * timeout_factor + timeout_const)
-```
+Timeout model (superseded the baseline-scaled formula): a fixed per-test ExUnit
+timeout, configured by `--test-timeout-ms` (or the `test_timeout_ms` config
+key). The host applies the same value to the baseline run so a test that exceeds
+it fails up front rather than as a per-mutant false timeout. The host adds a
+small fixed buffer on top for its own drain/classify deadline.
 
 Defaults:
 
-- `timeout_factor: 2.0`
-- `timeout_const: 1000ms`
-- `min_timeout: 5000ms`
+- `test_timeout_ms: 10_000` (range `1_000`..`600_000`)
+- host deadline buffer: `10_000ms` on top of `test_timeout_ms`
 
 ## Reporting
 
@@ -582,8 +581,7 @@ config :mut,
   exclude: [~r/lib\/my_app_web\/router.ex/],
   fail_at: 80.0,
   concurrency: System.schedulers_online(),
-  timeout_factor: 2.0,
-  timeout_const: 1000,
+  test_timeout_ms: 10_000,
   reporters: [:terminal, :stryker_json]
 ```
 

@@ -40,6 +40,19 @@ defmodule Mut.History.StoreTest do
     }
   end
 
+  describe "path/2" do
+    test "expands a relative history_path against root so cwd can't split read/write", %{dir: dir} do
+      resolved = Store.path(dir, history_path: "tmp/h.json")
+      assert resolved == Path.expand("tmp/h.json", dir)
+      assert Path.type(resolved) == :absolute
+    end
+
+    test "passes an absolute history_path through unchanged", %{dir: dir} do
+      abs = Path.join(dir, "abs.json")
+      assert Store.path(dir, history_path: abs) == abs
+    end
+  end
+
   describe "round-trip" do
     test "build -> write -> load reproduces every verdict + digest", %{dir: dir} do
       path = Store.path(dir)

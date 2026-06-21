@@ -39,13 +39,17 @@ defmodule Mut.SandboxQueue do
   def init(%Sandbox.Pool{} = pool), do: {:ok, %{pool: pool, waiters: :queue.new()}}
 
   @impl GenServer
-  def handle_call(:checkout, from, state) do
+  def handle_call(:checkout, {pid, _tag} = from, state) do
     case Sandbox.checkout(state.pool) do
       {:ok, sandbox, pool} ->
         {:reply, {:ok, sandbox}, %{state | pool: pool}}
 
       {:error, :pool_empty} ->
-        {:noreply, %{state | waiters: :queue.in(from, state.waiters)}}
+        # Monitor the waiter so a checkin never hands a sandbox to a dead
+        # caller (which would silently leak it from the pool and, after a few
+        # such losses, deadlock the orchestrator at `checkout`).
+        ref = Process.monitor(pid)
+        {:noreply, %{state | waiters: :queue.in({from, ref, pid}, state.waiters)}}
     end
   end
 
@@ -53,21 +57,44 @@ defmodule Mut.SandboxQueue do
 
   @impl GenServer
   def handle_cast({:checkin, sandbox}, state) do
-    pool = Sandbox.checkin(sandbox, state.pool)
+    {pool, waiters} = dispatch(Sandbox.checkin(sandbox, state.pool), state.waiters)
+    {:noreply, %{state | pool: pool, waiters: waiters}}
+  end
 
-    case :queue.out(state.waiters) do
-      {{:value, waiter}, waiters} ->
-        case Sandbox.checkout(pool) do
-          {:ok, sandbox, pool} ->
-            GenServer.reply(waiter, {:ok, sandbox})
-            {:noreply, %{state | pool: pool, waiters: waiters}}
+  @impl GenServer
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+    waiters = :queue.filter(fn {_from, r, _pid} -> r != ref end, state.waiters)
+    {:noreply, %{state | waiters: waiters}}
+  end
 
-          {:error, :pool_empty} ->
-            {:noreply, %{state | pool: pool}}
-        end
+  # Hand the just-returned sandbox to the first STILL-LIVING waiter, skipping
+  # any that died while queued (their monitor may not have fired yet).
+  defp dispatch(pool, waiters) do
+    case :queue.out(waiters) do
+      {{:value, {from, ref, pid}}, rest} ->
+        Process.demonitor(ref, [:flush])
+        hand_off(pool, from, pid, rest)
 
       {:empty, _waiters} ->
-        {:noreply, %{state | pool: pool}}
+        {pool, waiters}
+    end
+  end
+
+  defp hand_off(pool, from, pid, rest) do
+    # Skip a waiter that died while queued; try the next.
+    if Process.alive?(pid), do: give(pool, from, pid, rest), else: dispatch(pool, rest)
+  end
+
+  defp give(pool, from, pid, rest) do
+    case Sandbox.checkout(pool) do
+      {:ok, sandbox, pool} ->
+        GenServer.reply(from, {:ok, sandbox})
+        {pool, rest}
+
+      {:error, :pool_empty} ->
+        # No sandbox free (more living waiters than returned sandboxes);
+        # re-monitor and keep this waiter at the front of the queue.
+        {pool, :queue.in_r({from, Process.monitor(pid), pid}, rest)}
     end
   end
 end

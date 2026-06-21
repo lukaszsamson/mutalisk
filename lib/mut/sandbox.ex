@@ -183,14 +183,16 @@ defmodule Mut.Sandbox do
 
   defp remove_stray_files(sandbox) do
     baseline_paths = baseline(sandbox)
-    baseline_roots = baseline_roots(baseline_paths)
+    apps_dir = Mut.Umbrella.apps_path_name(sandbox.path)
+    baseline_roots = baseline_roots(baseline_paths, apps_dir)
 
     sandbox.path
     |> all_files()
     |> Enum.each(fn file ->
       relative = Path.relative_to(file, sandbox.path)
 
-      if tracked_root?(relative, baseline_roots) and not Map.has_key?(baseline_paths, relative) do
+      if tracked_root?(relative, baseline_roots, apps_dir) and
+           not Map.has_key?(baseline_paths, relative) do
         File.rm!(file)
       end
     end)
@@ -239,21 +241,23 @@ defmodule Mut.Sandbox do
   # apps like mutalisk and deps' ebins untouched). Without this, reset
   # would delete `_build/mut_schema/lib/mutalisk/ebin/mutalisk.app`,
   # breaking subsequent `mix test` runs in the sandbox.
-  defp baseline_roots(paths) do
+  defp baseline_roots(paths, apps_dir) do
     paths
     |> Map.keys()
-    |> Enum.map(&path_root/1)
+    |> Enum.map(&path_root(&1, apps_dir))
     |> Map.new(&{&1, true})
   end
 
-  defp tracked_root?(relative, roots), do: Map.has_key?(roots, path_root(relative))
+  defp tracked_root?(relative, roots, apps_dir),
+    do: Map.has_key?(roots, path_root(relative, apps_dir))
 
-  defp path_root(relative) do
+  defp path_root(relative, apps_dir) do
     case Path.split(relative) do
       ["_build" | _] = parts -> parts |> Enum.take(4) |> Path.join()
-      # Umbrella source: confine stray-sweeping to apps/<app>/lib (not all of
-      # apps/, which holds each app's mix.exs/test/priv that aren't tracked).
-      ["apps", _app, "lib" | _] = parts -> parts |> Enum.take(3) |> Path.join()
+      # Umbrella source: confine stray-sweeping to <apps_path>/<app>/lib (not all
+      # of <apps_path>/, which holds each app's mix.exs/test/priv that aren't
+      # tracked). `apps_dir` honors a custom `:apps_path` (default "apps").
+      [^apps_dir, _app, "lib" | _] = parts -> parts |> Enum.take(3) |> Path.join()
       [first | _] -> first
     end
   end

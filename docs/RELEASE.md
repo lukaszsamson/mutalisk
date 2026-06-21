@@ -28,17 +28,12 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 
 ## One-time setup (before the first publish)
 
-1. **Create the public git remote** and confirm the URL. The placeholder in
-   `mix.exs` (`@source_url`) and the absolute repo links in `README.md` assume
-   `https://github.com/lukaszsamson/mutalisk` — update both if the remote
-   differs:
-
-   ```sh
-   git remote add origin git@github.com:<owner>/mutalisk.git
-   ```
-
-   Then verify `@source_url` in `mix.exs` and the `Project documents` links in
-   `README.md` point at the real remote.
+1. **Confirm the public git remote.** The remote already exists, `main` is
+   pushed, and CI is green; this is a verification step, not setup. The
+   `@source_url` in `mix.exs` and the absolute repo links in `README.md` assume
+   `https://github.com/lukaszsamson/mutalisk` — confirm `git remote -v` matches,
+   and if a different owner/URL is used, update `@source_url` in `mix.exs` and
+   the `Project documents` links in `README.md` to match.
 
 2. **Hex account** — authenticate once: `mix hex.user auth` (or `register`).
 

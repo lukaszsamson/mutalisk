@@ -19,9 +19,12 @@ defmodule Mut.History.Digest do
     * **`content_digest`** — a single file's normalized-source digest (used for
       the killing test in killed-verdict reuse).
 
-  All digests use the same SHA-256/128 hex encoding and whitespace
-  normalization `Mut.StableId` uses, so pure-formatting churn does not
-  invalidate — only semantic source change does.
+  All digests use SHA-256/128 hex encoding over AST-canonicalized source
+  (parse → `Macro.to_string`), so pure-formatting churn (indentation, blank
+  lines, comments) does not invalidate, while a semantic change — including an
+  edit *inside* a string/charlist literal — does. The earlier
+  collapse-all-whitespace normalization treated `"a  b"` and `"a b"` as
+  identical and reused stale verdicts across semantic string edits (R4).
   """
 
   @typedoc "Opaque per-file function index: line ranges + per-function digests."
@@ -101,8 +104,40 @@ defmodule Mut.History.Digest do
   # fingerprint. `_test.exs` files are excluded — each mutant's *selected* tests
   # are digested per-mutant by `selected_tests_digest/1`, and non-selected test
   # files cannot affect that mutant's verdict.
-  @project_globs ["lib/**/*.ex", "test/**/*.ex", "test/**/*.exs", "config/**/*.exs"]
-  @project_files ["mix.exs", "mix.lock"]
+  #
+  # R4: the root-only `lib/** test/** config/**` globs matched nothing under
+  # `apps/<app>/...`, so editing an umbrella child left the fingerprint
+  # unchanged and a stale verdict was reused. The umbrella layout
+  # (`apps/*/{lib,test,config}`, each app's `mix.exs`) is fingerprinted
+  # explicitly. `.heex`/`.eex` templates, `lib/**/*.exs`, and `priv` (compiled
+  # or read at runtime/compile time) were also unfingerprinted.
+  @project_globs [
+    "lib/**/*.ex",
+    "lib/**/*.exs",
+    "lib/**/*.heex",
+    "lib/**/*.eex",
+    # All of `test/**` (not just `*.ex[s]`): a non-Elixir fixture a selected
+    # test reads (`test/fixtures/*.json`, `.csv`, `.pem`, snapshots) changes the
+    # mutant's verdict but would otherwise leave the fingerprint unchanged.
+    # `_test.exs` is rejected below (covered per-mutant by selected_tests_digest).
+    "test/**/*",
+    "config/**/*.exs",
+    "priv/**/*",
+    "apps/*/lib/**/*.ex",
+    "apps/*/lib/**/*.exs",
+    "apps/*/lib/**/*.heex",
+    "apps/*/lib/**/*.eex",
+    "apps/*/test/**/*",
+    "apps/*/config/**/*.exs",
+    "apps/*/priv/**/*",
+    "apps/*/mix.exs",
+    # In an overlayed work copy the user's real `mix.exs` is renamed to
+    # `mix_user.exs` (the generated overlay takes the `mix.exs` name). Fingerprint
+    # it so a dep/config/application change in the user's mix.exs invalidates
+    # reuse even when it doesn't touch `mix.lock`.
+    "apps/*/mix_user.exs"
+  ]
+  @project_files ["mix.exs", "mix.lock", "mix_user.exs"]
 
   @doc """
   Coarse project fingerprint: a digest over every project input that can change
@@ -120,18 +155,35 @@ defmodule Mut.History.Digest do
   """
   @spec project_digest(Path.t()) :: String.t()
   def project_digest(root) when is_binary(root) do
-    globbed = Enum.flat_map(@project_globs, &Path.wildcard(Path.join(root, &1)))
+    # `match_dot: true` so inputs under dot-directories or with dotfile names
+    # (`priv/.migrations/*`, `config/.runtime/*.exs`, `priv/.gz_assets/*`) are
+    # fingerprinted too — otherwise an edit to one leaves the project digest
+    # unchanged and a stale verdict is reused (R4 soundness gap).
+    globbed = Enum.flat_map(@project_globs, &Path.wildcard(Path.join(root, &1), match_dot: true))
     extra = Enum.map(@project_files, &Path.join(root, &1))
 
     (globbed ++ extra)
-    |> Enum.reject(&String.ends_with?(&1, "_test.exs"))
+    |> Enum.reject(&(String.ends_with?(&1, "_test.exs") or String.contains?(&1, "/.git/")))
     |> Enum.filter(&File.regular?/1)
     |> Enum.uniq()
     |> Enum.sort()
-    |> Enum.map(fn path -> {Path.relative_to(path, root), content_digest(File.read!(path))} end)
+    |> Enum.map(fn path -> {Path.relative_to(path, root), input_digest(path)} end)
     |> :erlang.term_to_binary()
     |> sha()
   end
+
+  # Elixir source is AST-normalized (via `content_digest`) so cosmetic churn —
+  # comments, reformatting — doesn't needlessly invalidate reuse. Every other
+  # input (priv assets, data files) is hashed BYTE-EXACT: a file the app reads
+  # verbatim has no "irrelevant formatting", and AST-normalizing one that happens
+  # to parse as Elixir (`priv/rates.txt` = `1.50` -> `1.5`) would silently
+  # collapse a behaviour-affecting change and reuse a stale verdict (R4).
+  defp input_digest(path) do
+    content = File.read!(path)
+    if elixir_source?(path), do: content_digest(content), else: sha(content)
+  end
+
+  defp elixir_source?(path), do: String.ends_with?(path, [".ex", ".exs", ".heex", ".eex"])
 
   # ---- internals ----
 
@@ -159,10 +211,13 @@ defmodule Mut.History.Digest do
     clauses
     |> Enum.group_by(fn {key, _range, _src} -> key end)
     |> Map.new(fn {key, group} ->
+      # `src` is already `Macro.to_string(node)` — AST-canonical, so formatting
+      # churn is neutralized and string-literal contents are preserved (no
+      # whitespace re-collapse here; R4).
       combined =
         group
         |> Enum.sort_by(fn {_key, {lo, _hi}, _src} -> lo end)
-        |> Enum.map_join("\n", fn {_key, _range, src} -> normalize(src) end)
+        |> Enum.map_join("\n", fn {_key, _range, src} -> src end)
 
       {key, sha(combined)}
     end)
@@ -204,7 +259,29 @@ defmodule Mut.History.Digest do
     lines
   end
 
-  defp normalize(s), do: s |> String.trim() |> String.replace(~r/\s+/, " ")
+  # Normalize source so pure-formatting churn (indentation, blank lines,
+  # comments) does not invalidate reuse, while a SEMANTIC change — including an
+  # edit *inside* a string/charlist literal or heredoc — does (R4). The old
+  # `String.replace(~r/\s+/, " ")` collapsed whitespace EVERYWHERE, so editing
+  # the contents of `"a  b"` to `"a b"` produced an identical digest and reused
+  # a stale verdict. Round-tripping through the AST canonicalizes code layout
+  # while preserving literal contents exactly. Non-Elixir, unparseable, or
+  # NON-UTF-8 input (e.g. a binary `priv` asset — an image, gzip, seed DB; now
+  # fingerprinted by the M116/R4 `priv/**/*` glob) falls back to the raw bytes,
+  # the safe over-invalidating direction. The `String.valid?/1` guard is
+  # essential: `Code.string_to_quoted/2` runs `String.to_charlist/1`, which
+  # *raises* `UnicodeConversionError` on invalid UTF-8 rather than returning an
+  # error tuple — that crashed `project_digest` on the first binary priv file.
+  defp normalize(source) when is_binary(source) do
+    if String.valid?(source) do
+      case Code.string_to_quoted(source, emit_warnings: false) do
+        {:ok, ast} -> Macro.to_string(ast)
+        _ -> source
+      end
+    else
+      source
+    end
+  end
 
   defp sha(bin),
     do: :sha256 |> :crypto.hash(bin) |> binary_part(0, 16) |> Base.encode16(case: :lower)

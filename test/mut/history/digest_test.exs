@@ -95,8 +95,36 @@ defmodule Mut.History.DigestTest do
   end
 
   describe "content_digest" do
-    test "whitespace-normalized" do
-      assert Digest.content_digest("a  b\n\tc") == Digest.content_digest("a b c")
+    test "pure-formatting churn does not change the digest" do
+      a = "defmodule A do\n  def f, do: 1\nend\n"
+      b = "defmodule A do\n\n  # a comment\n      def    f,   do:   1\nend"
+      assert Digest.content_digest(a) == Digest.content_digest(b)
+    end
+
+    test "semantic code change changes the digest" do
+      a = "def f, do: 1"
+      b = "def f, do: 2"
+      refute Digest.content_digest(a) == Digest.content_digest(b)
+    end
+
+    test "editing inside a string literal changes the digest (R4)" do
+      a = ~s|def f, do: "a  b"|
+      b = ~s|def f, do: "a b"|
+      refute Digest.content_digest(a) == Digest.content_digest(b)
+    end
+
+    test "non-Elixir / binary content falls back to raw bytes" do
+      assert Digest.content_digest(<<0, 1, 2>>) == Digest.content_digest(<<0, 1, 2>>)
+      refute Digest.content_digest(<<0, 1, 2>>) == Digest.content_digest(<<0, 1, 3>>)
+    end
+
+    test "invalid UTF-8 (e.g. a gzip/binary priv asset) does not crash" do
+      # `Code.string_to_quoted` runs `String.to_charlist`, which RAISES on
+      # invalid UTF-8 — caught a real `project_digest` crash on a binary priv
+      # file. <<0,1,2>> is valid UTF-8; a gzip header (0x1f 0x8b ...) is not.
+      gz = <<0x1F, 0x8B, 0x08, 0x00, 0xC5, 0x49, 0x25, 0xE5>>
+      assert is_binary(Digest.content_digest(gz))
+      refute Digest.content_digest(gz) == Digest.content_digest(gz <> <<0xFF>>)
     end
   end
 
@@ -137,6 +165,76 @@ defmodule Mut.History.DigestTest do
       before = Digest.project_digest(root)
       File.write!(Path.join(root, "test/a_test.exs"), "assert A.f() == 999")
       assert Digest.project_digest(root) == before
+    end
+
+    test "fingerprints umbrella child-app source under apps/* (R4)", %{root: root} do
+      app_lib = Path.join(root, "apps/a/lib")
+      File.mkdir_p!(app_lib)
+      File.write!(Path.join(app_lib, "helper.ex"), "defmodule A.Helper do\n  def g, do: 1\nend\n")
+
+      before = Digest.project_digest(root)
+      File.write!(Path.join(app_lib, "helper.ex"), "defmodule A.Helper do\n  def g, do: 2\nend\n")
+
+      refute Digest.project_digest(root) == before,
+             "editing apps/a/lib/helper.ex must change the fingerprint"
+    end
+
+    test "fingerprints priv assets under a dot-directory (R4 dotfile gap)", %{root: root} do
+      seed = Path.join(root, "priv/.migrations/seed.exs")
+      File.mkdir_p!(Path.dirname(seed))
+      File.write!(seed, "[count: 1]\n")
+
+      before = Digest.project_digest(root)
+      File.write!(seed, "[count: 2]\n")
+
+      refute Digest.project_digest(root) == before,
+             "editing priv/.migrations/seed.exs must change the fingerprint"
+    end
+
+    test "a non-source priv asset is hashed byte-exact, not AST-normalized (R4)", %{root: root} do
+      # `1.50` and `1.5` parse to the SAME Elixir AST, so AST-normalizing this
+      # asset would collapse a behaviour-affecting change (a test asserting the
+      # served string "1.50") and reuse a stale verdict. A data file must be
+      # byte-exact.
+      rates = Path.join(root, "priv/rates.txt")
+      File.mkdir_p!(Path.dirname(rates))
+      File.write!(rates, "1.50\n")
+
+      before = Digest.project_digest(root)
+      File.write!(rates, "1.5\n")
+
+      refute Digest.project_digest(root) == before,
+             "a byte-level change to a priv data file must change the fingerprint"
+    end
+
+    test "fingerprints the overlay-renamed user mix.exs (mix_user.exs)", %{root: root} do
+      # In an overlayed work copy the user's real mix.exs is renamed to
+      # mix_user.exs; a dep/config change there must invalidate reuse even when
+      # mix.lock is untouched.
+      user_mix = Path.join(root, "mix_user.exs")
+      File.write!(user_mix, "defmodule M.MixProject do\n  def project, do: [app: :m]\nend\n")
+
+      before = Digest.project_digest(root)
+
+      File.write!(
+        user_mix,
+        "defmodule M.MixProject do\n  def project, do: [app: :m, elixirc_paths: [\"x\"]]\nend\n"
+      )
+
+      refute Digest.project_digest(root) == before,
+             "editing mix_user.exs must change the fingerprint"
+    end
+
+    test "fingerprints a non-Elixir test fixture read by a test", %{root: root} do
+      fixture = Path.join(root, "test/fixtures/data.json")
+      File.mkdir_p!(Path.dirname(fixture))
+      File.write!(fixture, ~s({"v": 1}\n))
+
+      before = Digest.project_digest(root)
+      File.write!(fixture, ~s({"v": 2}\n))
+
+      refute Digest.project_digest(root) == before,
+             "editing a test fixture must change the fingerprint"
     end
   end
 end

@@ -11,7 +11,6 @@ defmodule Mut.Coverage.Runner do
 
   @spec run(Path.t(), keyword) :: {:ok, CoverageOracle.t()} | {:error, term}
   def run(work_copy_root, opts \\ []) do
-    started = monotonic_ms()
     test_paths = Keyword.get(opts, :test_paths, ["test"])
     timeout_ms = Keyword.get(opts, :timeout_per_file_ms, @default_timeout_ms)
     fallback_static_tests = Keyword.get(opts, :fallback_static_tests, %{})
@@ -21,6 +20,13 @@ defmodule Mut.Coverage.Runner do
          :ok <- deps_compile(work_copy_root, mutalisk_path),
          :ok <- compile(work_copy_root, mutalisk_path) do
       test_files = discover_test_files(work_copy_root, test_paths)
+
+      # R7: start timing AFTER the one-time cold `_build/mut_coverage` compile.
+      # The pathological-coverage heuristic compares this wall against the
+      # baseline test wall, which is compile-free (the oracle build is already
+      # warm) — counting the cold compile here made coverage look pathological
+      # on small/fast projects and silently self-disable.
+      started = monotonic_ms()
 
       test_files
       |> collect_files(work_copy_root, timeout_ms, mutalisk_path)
@@ -98,10 +104,21 @@ defmodule Mut.Coverage.Runner do
 
   defp compile(root, mutalisk_path), do: run_mix(root, ["compile"], mutalisk_path)
 
+  # Generous ceiling for the one-time coverage setup compiles (deps.get +
+  # deps.compile, then compile). Finite so a wedged toolchain can't hang the run
+  # forever — consistent with the finite timeouts on every other compile-phase
+  # child (R5).
+  @setup_timeout_ms 600_000
+
   defp run_mix(root, args, mutalisk_path) do
-    case Mut.ChildProcess.run("mix", args, cd: root, env: child_env(mutalisk_path)) do
+    case Mut.ChildProcess.run("mix", args,
+           cd: root,
+           env: child_env(mutalisk_path),
+           timeout_ms: @setup_timeout_ms
+         ) do
       {:exit, 0, _output} -> :ok
       {:exit, exit_code, output} -> {:error, {:mix_failed, args, exit_code, output_tail(output)}}
+      {:timeout, output} -> {:error, {:mix_timeout, args, @setup_timeout_ms, output_tail(output)}}
       {:error, reason} -> {:error, reason}
     end
   end
@@ -113,25 +130,31 @@ defmodule Mut.Coverage.Runner do
     File.mkdir_p!(Path.dirname(out_path))
     script = coverage_script(root, test_file, out_path)
 
-    case run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
-      {:error, reason} ->
-        {:error, reason}
+    try do
+      case run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
+        {:error, reason} ->
+          {:error, reason}
 
-      {:timeout, _output} ->
-        {:error, {:coverage_test_timeout, Path.relative_to(test_file, root), timeout_ms}}
+        {:timeout, _output} ->
+          {:error, {:coverage_test_timeout, Path.relative_to(test_file, root), timeout_ms}}
 
-      {:exit, exit_code, output} when exit_code != 0 ->
-        {:error,
-         {:coverage_test_failed, Path.relative_to(test_file, root), exit_code,
-          output_tail(output)}}
-
-      {:exit, 0, output} ->
-        if File.exists?(out_path) do
-          parse_test_output(root, test_file, out_path, output)
-        else
+        {:exit, exit_code, output} when exit_code != 0 ->
           {:error,
-           {:coverage_output_missing, Path.relative_to(test_file, root), output_tail(output)}}
-        end
+           {:coverage_test_failed, Path.relative_to(test_file, root), exit_code,
+            output_tail(output)}}
+
+        {:exit, 0, output} ->
+          if File.exists?(out_path) do
+            parse_test_output(root, test_file, out_path, output)
+          else
+            {:error,
+             {:coverage_output_missing, Path.relative_to(test_file, root), output_tail(output)}}
+          end
+      end
+    after
+      # The child writes one `.term` per test file to hand coverage back; remove
+      # it once read so `tmp/mut_coverage/` doesn't accumulate unboundedly.
+      File.rm(out_path)
     end
   end
 
@@ -150,7 +173,11 @@ defmodule Mut.Coverage.Runner do
 
   defp parse_test_output(root, test_file, out_path, output) do
     {line, function} = read_coverage_term(out_path)
-    prepend_project_ebins(root)
+    # T7: do NOT prepend the target's ebins to the HOST code path. `Parser`
+    # resolves module sources by reading each `.beam`'s compile_info directly
+    # (`beam_module_source/2`, no load) — loading the target's modules into the
+    # mutalisk host VM polluted it and risked version conflicts with mutalisk's
+    # own deps. The coverage CHILD already loads what `:cover` needs.
     test_id = {:file, Path.relative_to(test_file, root)}
     {by_line, by_function} = Parser.parse(line, function, test_id, root)
 
@@ -174,37 +201,56 @@ defmodule Mut.Coverage.Runner do
     end
   end
 
-  defp prepend_project_ebins(root) do
-    root
-    |> Path.join("#{@build_path}/lib/*/ebin")
-    |> Path.wildcard()
-    |> Enum.reject(&(Path.basename(Path.dirname(&1)) == "mutalisk"))
-    |> Enum.each(&(&1 |> String.to_charlist() |> Code.prepend_path()))
+  # R7: resolve the test_helper relative to the test FILE, not the project root.
+  # An umbrella root has no `test/test_helper.exs` — each child app carries its
+  # own `apps/<app>/test/test_helper.exs`. Hardcoding the root path degraded
+  # every per-file coverage run on umbrellas, silently collapsing coverage
+  # selection to whole-suite static. Walk up from the test file to the nearest
+  # `test_helper.exs`; fall back to the root helper for the single-app shape.
+  defp resolve_test_helper(test_file, root) do
+    test_file
+    |> Path.dirname()
+    |> Stream.iterate(&Path.dirname/1)
+    |> Enum.reduce_while("test/test_helper.exs", fn dir, fallback ->
+      candidate = Path.join(dir, "test_helper.exs")
+
+      cond do
+        File.exists?(candidate) -> {:halt, Path.relative_to(candidate, root)}
+        dir in [root, "/", "."] -> {:halt, fallback}
+        true -> {:cont, fallback}
+      end
+    end)
   end
 
   defp coverage_script(root, test_file, out_path) do
+    test_helper = resolve_test_helper(test_file, root)
+    # `inspect/1` each interpolated path so it lands as a properly-escaped Elixir
+    # string literal — a project path containing `"`, `\`, or `#{...}` would
+    # otherwise produce a broken script and silently degrade coverage collection.
+    ebin_glob = inspect(Path.join(root, @build_path) <> "/lib/*/ebin")
+
     """
     tools = Path.wildcard(Path.join([List.to_string(:code.root_dir()), "lib", "tools-*", "ebin"])) |> List.first()
     :code.add_path(String.to_charlist(tools))
     Application.ensure_all_started(:tools)
     :cover.start()
-    Code.prepend_paths(Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"))
-    for ebin <- Path.wildcard("#{Path.join(root, @build_path)}/lib/*/ebin"),
+    Code.prepend_paths(Path.wildcard(#{ebin_glob}))
+    for ebin <- Path.wildcard(#{ebin_glob}),
         Path.basename(Path.dirname(ebin)) != "mutalisk" do
       for beam <- Path.wildcard(Path.join(ebin, "*.beam")) do
         {:ok, _module} = :cover.compile_beam(String.to_charlist(beam))
       end
     end
     ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
-    Code.require_file("test/test_helper.exs", "#{root}")
+    Code.require_file(#{inspect(test_helper)}, #{inspect(root)})
     # Test modules may still declare `async: true`; max_cases: 1 serializes this
     # per-file run, while v1.5 intentionally attributes only at file granularity.
     ExUnit.configure(formatters: [Mut.Worker.Formatter], autorun: false, max_cases: 1)
-    Code.require_file("#{Path.relative_to(test_file, root)}", "#{root}")
+    Code.require_file(#{inspect(Path.relative_to(test_file, root))}, #{inspect(root)})
     result = ExUnit.run()
     line = :cover.analyse(:coverage, :line)
     function = :cover.analyse(:coverage, :function)
-    File.write!("#{out_path}", :erlang.term_to_binary({line, function, result}))
+    File.write!(#{inspect(out_path)}, :erlang.term_to_binary({line, function, result}))
     if result.failures > 0 do
       System.halt(2)
     else

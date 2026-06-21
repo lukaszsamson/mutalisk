@@ -49,6 +49,20 @@ defmodule Mut.OrchestratorTest do
     assert skip_reasons(plan) == %{missing_oracle_site: 1}
   end
 
+  test "an unparsable file is skipped with a :parse_error diagnostic, not a crash (M118)" do
+    bad = Path.join(@fixture_root, "lib/broken.ex")
+    File.write!(bad, "defmodule Broken do def f( end\n")
+    on_exit(fn -> File.rm_rf!(bad) end)
+
+    plan =
+      Mut.Orchestrator.plan(@fixture_root, oracle(), files: ["lib/sample.ex", "lib/broken.ex"])
+
+    # The good file still produced its mutants; the bad file is recorded as a skip.
+    assert length(plan.schema) == 2
+    assert Map.get(skip_reasons(plan), :parse_error) == 1
+    assert Enum.any?(plan.skipped, &(&1.file == "lib/broken.ex" and &1.reason == :parse_error))
+  end
+
   test "oracle-backed unsupported candidates are not reported as missing" do
     plan =
       Mut.Orchestrator.plan(@fixture_root, oracle_with_unsupported_site(),

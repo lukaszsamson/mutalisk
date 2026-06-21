@@ -13,7 +13,8 @@ defmodule Mut.WorkerTest do
              {"MIX_DEPS_PATH", "_build/mut_schema/deps"},
              {"MUTALISK_ROLE", "worker"},
              {"MUTALISK_PATH", Path.expand(File.cwd!())},
-             {"MUT_ACTIVE", "12"}
+             {"MUT_ACTIVE", "12"},
+             {"ERL_CRASH_DUMP_SECONDS", "0"}
            ]
 
     assert Worker.args(["test/arith_test.exs"]) == [
@@ -55,6 +56,15 @@ defmodule Mut.WorkerTest do
     result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix)
 
     assert result.status == :survived
+  end
+
+  test "run_schema classifies zero-tests-run as :no_coverage, not :survived (R9)" do
+    path = fake_sandbox("nocov")
+    mix = no_tests_shim()
+
+    result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix)
+
+    assert result.status == :no_coverage
   end
 
   test "run_schema closes timed out ports" do
@@ -146,6 +156,21 @@ defmodule Mut.WorkerTest do
     File.rm_rf!(path)
     File.mkdir_p!(path)
     File.write!(Path.join(path, "mix.exs"), "mix")
+    path
+  end
+
+  # Exits 0 having run zero tests (tag excludes / path filters matched nothing).
+  defp no_tests_shim do
+    path = Path.expand(Path.join(["tmp", "tests", "worker", "mix_no_tests.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    printf '%s\\n' '{"event":"suite_finished","total":0,"failed":0,"passed":0,"skipped":0}'
+    exit 0
+    """)
+
+    File.chmod!(path, 0o755)
     path
   end
 

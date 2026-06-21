@@ -411,7 +411,7 @@ defmodule Mut.Metrics do
     survived = Map.get(by_status, :survived, 0)
     timeout = Map.get(by_status, :timeout, 0)
 
-    executed_ledger = Enum.reject(ledger, &(&1.status in [:skipped, :invalid]))
+    executed_ledger = Enum.reject(ledger, &(&1.status in [:skipped, :invalid, :no_coverage]))
 
     %Snapshot{
       total: length(executed_ledger),

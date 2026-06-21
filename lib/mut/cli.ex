@@ -20,10 +20,11 @@ defmodule Mut.Cli do
             test_paths: [String.t()],
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
-            exclude: Regex.t() | nil,
+            exclude: [Regex.t()] | nil,
             incremental: boolean,
             since: String.t() | nil,
-            history_path: String.t() | nil
+            history_path: String.t() | nil,
+            coverage_timeout_ms: pos_integer | nil
           }
 
     defstruct [
@@ -43,6 +44,7 @@ defmodule Mut.Cli do
       :exclude,
       :since,
       :history_path,
+      :coverage_timeout_ms,
       incremental: false
     ]
   end
@@ -154,7 +156,7 @@ defmodule Mut.Cli do
     {parsed, rest, invalid} =
       OptionParser.parse(argv,
         strict: [
-          files: :string,
+          files: [:string, :keep],
           mutators: :string,
           enable: :string,
           fail_at: :float,
@@ -196,10 +198,11 @@ defmodule Mut.Cli do
          {:ok, reporters} <- reporters(parsed, config),
          {:ok, output_path} <- output_path(parsed, config),
          {:ok, concurrency} <- concurrency(parsed, config),
-         {:ok, max_mutants} <- max_mutants(parsed),
+         {:ok, max_mutants} <- max_mutants(parsed, config),
          {:ok, selection} <- selection(parsed, config),
          {:ok, test_paths} <- test_paths(config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
+         {:ok, coverage_timeout_ms} <- coverage_timeout_ms(config),
          {:ok, exclude} <- exclude(config) do
       {:ok,
        %Options{
@@ -218,8 +221,12 @@ defmodule Mut.Cli do
          test_timeout_ms: test_timeout_ms,
          exclude: exclude,
          incremental: Keyword.get(parsed, :incremental, Keyword.get(config, :incremental, false)),
-         since: Keyword.get(parsed, :since),
-         history_path: Keyword.get(config, :history_path)
+         # T10: CLI flag wins, config is the fallback — uniform with every other
+         # key. `--since`/`--max-mutants` previously ignored config entirely,
+         # silently dropping a value set in `.mutalisk.exs`.
+         since: Keyword.get(parsed, :since, Keyword.get(config, :since)),
+         history_path: Keyword.get(config, :history_path),
+         coverage_timeout_ms: coverage_timeout_ms
        }}
     end
   end
@@ -231,16 +238,19 @@ defmodule Mut.Cli do
     case Keyword.get(config, :exclude) do
       nil -> {:ok, nil}
       [] -> {:ok, nil}
-      %Regex{} = regex -> {:ok, regex}
-      [%Regex{} = regex] -> {:ok, regex}
-      regexes when is_list(regexes) -> compile_exclude(regexes)
+      %Regex{} = regex -> {:ok, [regex]}
+      regexes when is_list(regexes) -> validate_exclude_list(regexes)
       other -> {:error, "config :exclude must be a Regex or list of Regex; got #{inspect(other)}"}
     end
   end
 
-  defp compile_exclude(regexes) do
+  # R17: keep each pattern as its own Regex rather than joining their `source`s
+  # into one — `Regex.source/1` drops the flags, so `~r/foo/i` would silently
+  # become case-sensitive and an intended-excluded file would still be mutated.
+  # The matcher tests "any pattern matches", which preserves every flag.
+  defp validate_exclude_list(regexes) do
     if Enum.all?(regexes, &match?(%Regex{}, &1)) do
-      {:ok, Regex.compile!(Enum.map_join(regexes, "|", &Regex.source/1))}
+      {:ok, regexes}
     else
       {:error, "config :exclude list must contain only Regex values"}
     end
@@ -279,8 +289,12 @@ defmodule Mut.Cli do
     # every `apps/<app>/lib/`. An explicit `--files`/config value is honoured
     # verbatim. (M71: a `["lib"]` default produced 0 mutants on umbrellas, whose
     # root has no lib/.)
-    value = Keyword.get(parsed, :files, Keyword.get(config, :files, nil))
-    {:ok, string_list(value)}
+    # `--files` may be repeated to mutate several glob patterns in one run
+    # (M122); each occurrence is collected. Falls back to config, then nil.
+    case Keyword.get_values(parsed, :files) do
+      [] -> {:ok, string_list(Keyword.get(config, :files, nil))}
+      values -> {:ok, string_list(values)}
+    end
   end
 
   defp mutators(parsed, config) do
@@ -361,11 +375,23 @@ defmodule Mut.Cli do
     end
   end
 
-  defp max_mutants(parsed) do
-    case Keyword.get(parsed, :max_mutants) do
+  defp max_mutants(parsed, config) do
+    case Keyword.get(parsed, :max_mutants, Keyword.get(config, :max_mutants)) do
       nil -> {:ok, nil}
       value when is_integer(value) and value >= 1 -> {:ok, value}
-      _invalid -> {:error, "--max-mutants must be at least 1; run `mix help mut`"}
+      _invalid -> {:error, "max_mutants must be at least 1; run `mix help mut`"}
+    end
+  end
+
+  # Config-only per-file coverage-collection timeout (ms). `nil` lets
+  # `Mut.Coverage.Runner` use its built-in default. Surfaced so a project with a
+  # slow test file under `:cover` instrumentation can raise the bound instead of
+  # silently degrading that file to static selection (T9).
+  defp coverage_timeout_ms(config) do
+    case Keyword.get(config, :coverage_timeout_ms) do
+      nil -> {:ok, nil}
+      value when is_integer(value) and value >= 1 -> {:ok, value}
+      _invalid -> {:error, "coverage_timeout_ms must be a positive integer"}
     end
   end
 
@@ -453,10 +479,14 @@ defmodule Mut.Cli do
     end
   end
 
+  # Flags that may legitimately appear more than once (collected into a list).
+  @repeatable_flags ["files"]
+
   defp duplicate_cli_option?(argv) do
     argv
     |> Enum.filter(&String.starts_with?(&1, "--"))
     |> Enum.map(&(&1 |> String.trim_leading("--") |> String.split("=", parts: 2) |> List.first()))
+    |> Enum.reject(&(&1 in @repeatable_flags))
     |> Enum.frequencies()
     |> Enum.any?(fn {_key, count} -> count > 1 end)
   end

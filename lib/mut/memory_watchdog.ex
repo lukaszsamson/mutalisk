@@ -16,9 +16,16 @@ defmodule Mut.MemoryWatchdog do
 
     # Open the file inside the spawned process to avoid raw-fd cross-process
     # ownership pitfalls. `spawn` (not `spawn_link`) so a watchdog shutdown
-    # never propagates exit signals back to the orchestrator.
+    # never propagates exit signals back to the orchestrator. We DO
+    # `Process.monitor(parent)` so the loop stops and closes the file if the
+    # orchestrator dies WITHOUT sending `:stop` — otherwise a crashed run would
+    # orphan a background loop writing forever.
+    parent = self()
+
     pid =
       spawn(fn ->
+        Process.monitor(parent)
+
         case File.open(log_path, [:write, :binary]) do
           {:ok, io} ->
             write_header(io)
@@ -46,6 +53,12 @@ defmodule Mut.MemoryWatchdog do
 
     receive do
       :stop ->
+        File.close(io)
+        :ok
+
+      {:DOWN, _ref, :process, _pid, _reason} ->
+        # Orchestrator died without `:stop` — close and exit instead of looping
+        # forever as an orphan.
         File.close(io)
         :ok
     after

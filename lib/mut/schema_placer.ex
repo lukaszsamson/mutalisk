@@ -308,7 +308,8 @@ defmodule Mut.SchemaPlacer do
 
   defp refused_context(path) do
     cond do
-      Enum.any?(path, &match?({:elem, :when, 1}, &1)) -> "inside a when clause guard"
+      # R12: any index inside a `when`, not just 1 (n-ary heads put the guard last).
+      Enum.any?(path, &match?({:elem, :when, _idx}, &1)) -> "inside a when clause guard"
       function_head_path?(path) -> "inside a def/defp/defmacro/defmacrop head pattern"
       macro_body_path?(path) -> "inside a defmacro/defmacrop body"
       Enum.any?(path, &match?({:elem, :@, _index}, &1)) -> "inside a module attribute value"

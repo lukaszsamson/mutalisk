@@ -104,4 +104,27 @@ defmodule Mut.ChildProcessTest do
     # success short-circuits retry, regardless of output matching retry_on.
     assert File.read!(counter) == "1\n"
   end
+
+  test "absolute deadline kills a chatty process that never goes quiet (R2)" do
+    dir = tmp_script_dir()
+
+    # Emits a line every 50ms forever — under an inactivity timer this never
+    # trips the deadline; under an absolute deadline it is killed on budget.
+    script =
+      write_script(dir, "chatty.sh", """
+      #!/bin/sh
+      while true; do
+        echo "still working"
+        sleep 0.05
+      done
+      """)
+
+    started = System.monotonic_time(:millisecond)
+    assert {:timeout, output} = ChildProcess.run(script, [], timeout_ms: 300)
+    elapsed = System.monotonic_time(:millisecond) - started
+
+    assert output =~ "still working"
+    # Killed near the budget, not running unbounded.
+    assert elapsed < 3_000
+  end
 end

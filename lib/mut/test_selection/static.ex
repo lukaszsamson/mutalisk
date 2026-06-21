@@ -57,8 +57,13 @@ defmodule Mut.TestSelection.Static do
   end
 
   defp analyze_file(file, analysis) do
-    {:ok, {ast, _source}} = Mut.SourceParse.parse(file)
-    traverse(ast, analysis, file)
+    # M118: an unparsable test file must not abort the whole run. Skipping its
+    # analysis only drops that file's dispatch-index entries — the safe
+    # direction (static selection over-selects, never silently under-selects).
+    case Mut.SourceParse.parse(file) do
+      {:ok, {ast, _source}} -> traverse(ast, analysis, file)
+      {:error, _reason} -> analysis
+    end
   end
 
   defp traverse(node, analysis, _file) when is_atom(node) or is_number(node) or is_binary(node),

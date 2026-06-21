@@ -58,18 +58,18 @@ defmodule Mut.MixManifest do
   so `dependents/3` on the merged manifest spans app boundaries — a module
   mutated in app A yields dependent source files in app B.
   """
-  @spec read_combined([{String.t(), Path.t()}]) :: {:ok, t} | {:error, term}
-  def read_combined(entries) when is_list(entries) do
+  @spec read_combined([{String.t(), Path.t()}], String.t()) :: {:ok, t} | {:error, term}
+  def read_combined(entries, apps_path \\ "apps") when is_list(entries) do
     Enum.reduce_while(entries, {:ok, %__MODULE__{}}, fn {app, path}, {:ok, acc} ->
       case read(path) do
-        {:ok, manifest} -> {:cont, {:ok, merge(acc, prefix_sources(manifest, app))}}
+        {:ok, manifest} -> {:cont, {:ok, merge(acc, prefix_sources(manifest, app, apps_path))}}
         {:error, _reason} = error -> {:halt, error}
       end
     end)
   end
 
-  defp prefix_sources(%__MODULE__{} = m, app) do
-    prefix = fn source -> Path.join(["apps", app, source]) end
+  defp prefix_sources(%__MODULE__{} = m, app, apps_path) do
+    prefix = fn source -> Path.join([apps_path, app, source]) end
 
     %__MODULE__{
       version: m.version,

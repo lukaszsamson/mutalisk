@@ -11,7 +11,8 @@ defmodule Mut.Reporter.StrykerJson do
     timeout: "Timeout",
     invalid: "CompileError",
     error: "RuntimeError",
-    skipped: "Ignored"
+    skipped: "Ignored",
+    no_coverage: "NoCoverage"
   }
 
   @valid_statuses Map.values(@statuses)
@@ -21,7 +22,7 @@ defmodule Mut.Reporter.StrykerJson do
   @spec render(Snapshot.t(), Plan.t(), (Path.t() -> String.t()), keyword) :: map()
   def render(%Snapshot{} = snapshot, %Plan{} = plan, source_loader, opts)
       when is_function(source_loader, 1) do
-    thresholds = Keyword.get(opts, :thresholds, %{"high" => 80, "low" => 60})
+    thresholds = coerce_thresholds(Keyword.get(opts, :thresholds, %{"high" => 80, "low" => 60}))
 
     mutants =
       snapshot.ledger
@@ -39,7 +40,12 @@ defmodule Mut.Reporter.StrykerJson do
 
   @spec write(rendered :: map(), path :: Path.t()) :: :ok
   def write(rendered, path) when is_map(rendered) and is_binary(path) do
-    File.write!(path, Mut.JSON.encode!(rendered, pretty: true) <> "\n")
+    # R16: atomic write (tmp + rename) so a crash mid-write can't leave a
+    # truncated, invalid report — matching the history store's durability.
+    File.mkdir_p!(Path.dirname(path))
+    tmp = path <> ".tmp"
+    File.write!(tmp, Mut.JSON.encode!(rendered, pretty: true) <> "\n")
+    File.rename!(tmp, path)
     :ok
   end
 
@@ -214,18 +220,30 @@ defmodule Mut.Reporter.StrykerJson do
 
   defp location(%Mutant{span: {start_line, start_column, end_line, end_column}}) do
     %{
-      "start" => %{"line" => start_line, "column" => column(start_column)},
-      "end" => %{"line" => end_line || start_line, "column" => column(end_column || start_column)}
+      "start" => %{"line" => line(start_line), "column" => column(start_column)},
+      "end" => %{
+        "line" => line(end_line || start_line),
+        "column" => column(end_column || start_column)
+      }
     }
   end
 
   defp location(%Mutant{line: line, column: column}) do
-    point = %{"line" => line, "column" => column(column)}
+    point = %{"line" => line(line), "column" => column(column)}
     %{"start" => point, "end" => point}
   end
 
-  defp column(nil), do: 0
-  defp column(column), do: column
+  # R16: the Stryker mutation-testing-elements schema requires `line`/`column`
+  # to be positive integers (1-based). The previous `column(nil) -> 0` emitted a
+  # 0 column that real Stryker tooling rejects (our in-house validator wrongly
+  # accepted it). A missing position falls back to 1, the schema minimum.
+  defp column(nil), do: 1
+  defp column(column) when is_integer(column) and column > 0, do: column
+  defp column(_column), do: 1
+
+  defp line(nil), do: 1
+  defp line(line) when is_integer(line) and line > 0, do: line
+  defp line(_line), do: 1
 
   defp status_reason(mutant, entry, status) when status in [:error, :invalid] do
     cond do
@@ -272,13 +290,27 @@ defmodule Mut.Reporter.StrykerJson do
   defp validate_schema_version(violations, _rendered),
     do: ["schemaVersion must be \"2\"" | violations]
 
+  # R16: the schema types thresholds.high/low as INTEGERS; the validator
+  # previously accepted any number, so a float threshold passed our gate but
+  # would be rejected by real Stryker tooling.
   defp validate_thresholds(violations, %{"thresholds" => %{"high" => high, "low" => low}})
-       when is_number(high) and is_number(low),
+       when is_integer(high) and is_integer(low),
        do: violations
 
   defp validate_thresholds(violations, _rendered) do
-    ["thresholds.high and thresholds.low must be numeric" | violations]
+    ["thresholds.high and thresholds.low must be integers" | violations]
   end
+
+  # Round to the schema's integer type so a caller passing float thresholds
+  # (or a percentage) still produces a valid report.
+  defp coerce_thresholds(%{} = thresholds) do
+    Map.new(thresholds, fn
+      {key, value} when is_number(value) -> {key, round(value)}
+      {key, value} -> {key, value}
+    end)
+  end
+
+  defp coerce_thresholds(other), do: other
 
   defp validate_files(violations, %{"files" => files}) when is_map(files) do
     Enum.reduce(files, violations, fn {file, file_report}, acc ->
@@ -343,11 +375,12 @@ defmodule Mut.Reporter.StrykerJson do
   defp require_location(violations, _mutant, path),
     do: ["#{path}.location must include start and end" | violations]
 
+  # R16: the schema requires 1-based positions — column must be > 0, not >= 0.
   defp require_position(violations, %{"line" => line, "column" => column}, _path)
-       when is_integer(line) and line > 0 and is_integer(column) and column >= 0,
+       when is_integer(line) and line > 0 and is_integer(column) and column > 0,
        do: violations
 
   defp require_position(violations, _position, path) do
-    ["#{path} must include positive integer line and non-negative integer column" | violations]
+    ["#{path} must include positive integer line and column" | violations]
   end
 end

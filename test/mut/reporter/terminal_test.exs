@@ -37,6 +37,23 @@ defmodule Mut.Reporter.TerminalTest do
     assert output =~ "replace + with -"
   end
 
+  test "stream_event denominator includes reused verdicts under --incremental (T12)" do
+    System.put_env("NO_COLOR", "1")
+    on_exit(fn -> System.delete_env("NO_COLOR") end)
+
+    mutant = mutant(:schema, :killed, "a", 1)
+    result = %Result{status: :killed, duration_ms: 12}
+    # 31 reused + 1 to-execute (planned_total = to-execute only). Index counts
+    # the executed-status ledger entry; the denominator must be 31 + 1 = 32, not
+    # the to-execute 1 (which would print the overshooting [1/1] then beyond).
+    snapshot = snapshot([entry(mutant, result)], planned_total: 1, reused: 31)
+
+    output =
+      ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
+
+    assert output =~ "[1/32]"
+  end
+
   test "stream_event honors NO_COLOR" do
     System.put_env("NO_COLOR", "1")
 
@@ -114,13 +131,14 @@ defmodule Mut.Reporter.TerminalTest do
              lib/arith.ex:5 Arithmetic               replace + with -
              lib/arith.ex:5 Arithmetic               replace + with -
 
-           Schema:    1/2 killed (50.0%)   wall: 3.0s
-           Fallback:  1/2 killed (50.0%)   wall: 7.0s
+           Schema:    1/2 detected (50.0%)   wall: 3.0s
+           Fallback:  1/2 detected (50.0%)   wall: 7.0s
              arithmetic_op:                1/2 killed
            Skipped:   1 (unsupported_dispatch: 1)
            Invalid:   1 (Elixir.Mut.Reporter.TerminalTest: 1)
            Errors:    1
            Timeouts:  1
+           No coverage: 0
 
            Run time: 10.0s
            Fallback wall-clock: 70.0% of total
@@ -149,6 +167,29 @@ defmodule Mut.Reporter.TerminalTest do
            """
   end
 
+  test "engine line scores detected/(detected+survived), excluding invalid/error" do
+    summary =
+      []
+      |> snapshot(
+        by_status: %{killed: 1, timeout: 1, survived: 1, invalid: 2, error: 3},
+        by_engine_status: %{
+          {:schema, :killed} => 1,
+          {:schema, :timeout} => 1,
+          {:schema, :survived} => 1,
+          {:schema, :invalid} => 2,
+          {:schema, :error} => 3
+        },
+        wall_clock_ms: %{schema: 1000, fallback: 0, total: 1000}
+      )
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    # detected = killed(1) + timeout(1) = 2; scored = detected(2) + survived(1) = 3.
+    # The old `killed / engine_total` would have reported 1/7 (invalid + error in
+    # the denominator, timeout dropped), disagreeing with the headline score.
+    assert summary =~ "2/3 detected (66.7%)"
+  end
+
   defp snapshot(entries, opts) do
     %Snapshot{
       total: Keyword.get(opts, :total, length(entries)),
@@ -171,6 +212,7 @@ defmodule Mut.Reporter.TerminalTest do
           dep_path_error: 0,
           unknown: 0
         }),
+      reused: Keyword.get(opts, :reused),
       ledger: entries
     }
   end
