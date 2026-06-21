@@ -5,37 +5,37 @@ defmodule Mix.Tasks.Mut do
 
   ## Options
 
-    --files PATTERN          Only mutate files matching glob pattern
-    --mutators NAMES         Comma-separated mutator name list
-    --enable TARGETS         Comma-separated enabled targets:
-                              dispatch (default), guard (default),
-                              env_walker (default: only AtomLiteral
-                              active; pass it explicitly to run all
-                              env-walker literals), module_attribute
-                              (opt-in), body_literal (opt-in).
-                              Passing --enable selects the full mutator
-                              set gated by the listed targets.
-    --fail-at SCORE          Mutation score threshold; exit 1 below
-                              (default: 80)
-    --reporters NAMES        Comma-separated: terminal, stryker-json
-                              (default: both)
-    --output-path PATH       Stryker JSON output path
-                              (default: stryker.report.json)
-    --concurrency N          Worker pool size for parallel mutant execution.
-                              Default: min(schedulers_online, 4). Use
-                              --concurrency 1 for sequential execution.
-    --max-mutants N          Cap total mutants (stable-id sorted sample if
-                              exceeded)
-    --debug-plan             Dump plan JSON to plan.debug.json and exit before
-                               any mutant runs
-    --selection MODE         Test selection mode: static, coverage,
-                               coverage_with_static_fallback (default, since
-                               v1.19/M65). `static` is the fully-portable
-                               escape hatch.
-    --keep-work-copy         Skip cleanup of tmp/mut_work/<run_id>/ on exit
-                               (debug aid; default: false)
-    --test-timeout-ms N      Per-test ExUnit timeout in milliseconds.
-                               Default 10000. Range 1000..600000.
+    - `--files PATTERN` — Only mutate files matching glob pattern
+    - `--mutators NAMES` — Comma-separated mutator name list
+    - `--enable TARGETS` — Comma-separated enabled targets:
+      `dispatch` (default), `guard` (default),
+      `env_walker` (default: only AtomLiteral
+      active; pass it explicitly to run all
+      env-walker literals), `module_attribute`
+      (opt-in), `body_literal` (opt-in).
+      Passing --enable selects the full mutator
+      set gated by the listed targets.
+    - `--fail-at SCORE` — Mutation score threshold; exit 1 below
+      (default: 80)
+    - `--reporters NAMES` — Comma-separated: `terminal`, `stryker-json`
+      (default: both)
+    - `--output-path PATH` — Stryker JSON output path
+      (default: `stryker.report.json`)
+    - `--concurrency N` — Worker pool size for parallel mutant execution.
+      Default: min(schedulers_online, 4). Use
+      `--concurrency 1` for sequential execution.
+    - `--max-mutants N` — Cap total mutants (stable-id sorted sample if
+      exceeded)
+    - `--debug-plan` — Dump plan JSON to plan.debug.json and exit before
+      any mutant runs
+    - `--selection MODE` — Test selection mode: `static`, `coverage`,
+      `coverage_with_static_fallback` (default, since
+      v1.19/M65). `static` is the fully-portable
+      escape hatch.
+    - `--keep-work-copy` — Skip cleanup of tmp/mut_work/<run_id>/ on exit
+      (debug aid; default: false)
+    - `--test-timeout-ms N` — Per-test ExUnit timeout in milliseconds.
+      Default 10000. Range 1000..600000.
 
   ## Configuration
 

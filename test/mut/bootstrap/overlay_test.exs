@@ -18,7 +18,7 @@ defmodule Mut.Bootstrap.OverlayTest do
   end
 
   test "materialize installs a per-app overlay for umbrella projects" do
-    work_copy = tmp_dir("umbrella")
+    work_copy = tmp_dir("umbrella", __ENV__)
 
     File.write!(
       Path.join(work_copy, "mix.exs"),
@@ -52,7 +52,7 @@ defmodule Mut.Bootstrap.OverlayTest do
   end
 
   test "Mut.Umbrella detects apps_path and enumerates app names" do
-    work_copy = tmp_dir("umbrella_detect")
+    work_copy = tmp_dir("umbrella_detect", __ENV__)
 
     File.write!(
       Path.join(work_copy, "mix.exs"),
@@ -72,7 +72,7 @@ defmodule Mut.Bootstrap.OverlayTest do
   end
 
   test "Mut.Umbrella treats a plain project as non-umbrella" do
-    work_copy = tmp_dir("vanilla")
+    work_copy = tmp_dir("vanilla", __ENV__)
 
     File.write!(
       Path.join(work_copy, "mix.exs"),
@@ -83,10 +83,22 @@ defmodule Mut.Bootstrap.OverlayTest do
     assert Mut.Umbrella.app_names(work_copy) == []
   end
 
-  defp tmp_dir(name) do
-    dir = Path.expand(Path.join(["tmp", "tests", "overlay", name]))
+  # Each test gets a unique directory keyed on its line number to avoid
+  # collisions under concurrent or repeated runs (R-isolation).
+  defp tmp_dir(name, env) do
+    dir =
+      Path.expand(
+        Path.join([
+          "tmp",
+          "tests",
+          "overlay",
+          "#{name}_#{env.line}_#{System.unique_integer([:positive])}"
+        ])
+      )
+
     File.rm_rf!(dir)
     File.mkdir_p!(dir)
+    on_exit(fn -> File.rm_rf!(dir) end)
     dir
   end
 end

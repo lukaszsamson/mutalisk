@@ -75,7 +75,9 @@ defmodule Mut.History.Digest do
     ranges
     |> Enum.filter(fn {lo, hi, _key} -> line >= lo and line <= hi end)
     # Smallest enclosing clause wins (nested/anonymous spans), most specific.
-    |> Enum.min_by(fn {lo, hi, _key} -> hi - lo end, fn -> nil end)
+    # Tie-break by the key term so equal-span clauses always resolve to the same
+    # entry regardless of AST traversal order (R: non-deterministic digest).
+    |> Enum.min_by(fn {lo, hi, key} -> {hi - lo, key} end, fn -> nil end)
     |> case do
       {_lo, _hi, key} -> Map.get(digests, key, file_digest)
       nil -> file_digest

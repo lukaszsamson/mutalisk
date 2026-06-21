@@ -326,9 +326,9 @@ defmodule Mut.Cli do
         Keyword.get(config, :enabled_targets, @default_enabled_targets)
       )
 
-    with {:ok, targets} <- atom_list(value, &target_atom/1),
-         :ok <- validate_targets(targets) do
-      {:ok, targets}
+    with {:ok, names} <- string_name_list(value),
+         :ok <- validate_target_names(names) do
+      names_to_target_atoms(names)
     end
   end
 
@@ -348,9 +348,9 @@ defmodule Mut.Cli do
   defp reporters(parsed, config) do
     value = Keyword.get(parsed, :reporters, Keyword.get(config, :reporters, @default_reporters))
 
-    with {:ok, reporters} <- atom_list(value, &reporter_atom/1),
-         :ok <- validate_reporters(reporters) do
-      {:ok, reporters}
+    with {:ok, names} <- string_name_list(value),
+         :ok <- validate_reporter_names(names) do
+      names_to_reporter_atoms(names)
     end
   end
 
@@ -406,13 +406,17 @@ defmodule Mut.Cli do
         Keyword.get(config, :selection, :coverage_with_static_fallback)
       )
 
-    mode = target_atom(value)
+    # Validate string FIRST, then convert to atom to avoid interning untrusted input.
+    # For atoms (from config defaults), convert to string; for strings (from CLI), normalize.
+    name = normalize_name(value)
+    known_strings = Enum.map(@known_selection_modes, &Atom.to_string/1)
 
-    if mode in @known_selection_modes do
-      {:ok, mode}
+    if name in known_strings do
+      # Safe: every @known_selection_modes atom exists at compile time.
+      {:ok, String.to_existing_atom(name)}
     else
-      {:error,
-       "unknown --selection mode #{inspect(mode)}; known: #{known(@known_selection_modes)}"}
+      # Render the rejected value in atom form (`:name`) without interning it.
+      {:error, "unknown --selection mode :#{name}; known: #{known(@known_selection_modes)}"}
     end
   end
 
@@ -422,10 +426,6 @@ defmodule Mut.Cli do
   # branch in `mutators/2`), so there is no nil clause.
   defp maybe_name_list(value) do
     {:ok, value |> name_list() |> Enum.map(&normalize_name/1)}
-  end
-
-  defp atom_list(value, mapper) do
-    {:ok, value |> name_list() |> Enum.map(mapper)}
   end
 
   defp name_list(value) when is_binary(value) do
@@ -457,28 +457,6 @@ defmodule Mut.Cli do
     end
   end
 
-  defp validate_targets(targets) do
-    unknown = Enum.reject(targets, &(&1 in @known_targets))
-
-    if unknown == [] do
-      :ok
-    else
-      {:error,
-       "unknown --enable target #{inspect(List.first(unknown))}; known: #{known(@known_targets)}"}
-    end
-  end
-
-  defp validate_reporters(reporters) do
-    unknown = Enum.reject(reporters, &(&1 in @known_reporters))
-
-    if unknown == [] do
-      :ok
-    else
-      {:error,
-       "unknown --reporters value #{inspect(List.first(unknown))}; known: #{known(@known_reporters)}"}
-    end
-  end
-
   # Flags that may legitimately appear more than once (collected into a list).
   @repeatable_flags ["files"]
 
@@ -491,13 +469,90 @@ defmodule Mut.Cli do
     |> Enum.any?(fn {_key, count} -> count > 1 end)
   end
 
-  defp target_atom(value), do: normalize_name(value) |> String.to_atom()
+  # Convert string name to target atom ONLY after validation of the string.
+  # Avoid interning arbitrary atoms from untrusted input.
+  defp name_to_target_atom(name) when is_binary(name) do
+    String.to_existing_atom(name)
+  rescue
+    ArgumentError -> {:error, name}
+  end
 
-  defp reporter_atom(value) do
-    value
-    |> normalize_name()
-    |> String.replace("-", "_")
-    |> String.to_atom()
+  # Convert string name to reporter atom ONLY after validation of the string.
+  defp name_to_reporter_atom(name) when is_binary(name) do
+    String.to_existing_atom(name)
+  rescue
+    ArgumentError -> {:error, name}
+  end
+
+  # Batch-convert validated target names to atoms.
+  defp names_to_target_atoms(names) do
+    atoms = Enum.map(names, &name_to_target_atom/1)
+
+    if Enum.any?(atoms, &match?({:error, _}, &1)) do
+      {:error, "internal error: validated target name failed to convert to atom"}
+    else
+      {:ok, atoms}
+    end
+  end
+
+  # Batch-convert validated reporter names to atoms.
+  defp names_to_reporter_atoms(names) do
+    atoms = Enum.map(names, &name_to_reporter_atom/1)
+
+    if Enum.any?(atoms, &match?({:error, _}, &1)) do
+      {:error, "internal error: validated reporter name failed to convert to atom"}
+    else
+      {:ok, atoms}
+    end
+  end
+
+  # Coerce input (atom, string, or list) to a normalized list of strings.
+  defp string_name_list(value) when is_atom(value) do
+    {:ok, [Atom.to_string(value) |> normalize_name()]}
+  end
+
+  defp string_name_list(value) when is_binary(value) do
+    {:ok,
+     value
+     |> String.split(",", trim: true)
+     |> Enum.map(&String.trim/1)
+     |> Enum.reject(&(&1 == ""))
+     |> Enum.map(&normalize_name/1)}
+  end
+
+  defp string_name_list(value) when is_list(value) do
+    {:ok, Enum.map(value, &normalize_name(to_string(&1)))}
+  end
+
+  defp string_name_list(_value) do
+    {:error, "invalid input type for target/reporter list"}
+  end
+
+  # Validate normalized target names against known list (string validation).
+  defp validate_target_names(names) do
+    known_strings = Enum.map(@known_targets, &Atom.to_string/1)
+    unknown = Enum.reject(names, &(&1 in known_strings))
+
+    if unknown == [] do
+      :ok
+    else
+      # Render the rejected value in atom form (`:name`) without interning it.
+      {:error, "unknown --enable target :#{List.first(unknown)}; known: #{known(@known_targets)}"}
+    end
+  end
+
+  # Validate normalized reporter names against known list (string validation).
+  defp validate_reporter_names(names) do
+    known_strings = Enum.map(@known_reporters, &Atom.to_string/1)
+    unknown = Enum.reject(names, &(&1 in known_strings))
+
+    if unknown == [] do
+      :ok
+    else
+      # Render the rejected value in atom form (`:name`) without interning it.
+      {:error,
+       "unknown --reporters value :#{List.first(unknown)}; known: #{known(@known_reporters)}"}
+    end
   end
 
   defp normalize_name(value) when is_atom(value), do: Atom.to_string(value)

@@ -73,7 +73,14 @@ defmodule Mut.History.Store do
     with {:ok, raw} <- read_file(path),
          {:ok, decoded} <- decode(raw),
          :ok <- check_versions(decoded) do
-      {:ok, from_json(decoded)}
+      # R: from_json/1 can raise MatchError (missing "verdicts"/"generation" keys
+      # that passed check_versions) or ArgumentError (trunc/1 on a non-numeric
+      # "generation").  Any structural problem must yield cold-start, never crash.
+      try do
+        {:ok, from_json(decoded)}
+      rescue
+        _ -> {:cold, :malformed}
+      end
     end
   end
 

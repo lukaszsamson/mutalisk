@@ -126,8 +126,24 @@ defmodule Mut.SourceSpan.Compute do
   @doc false
   def scan_delimited_end(source, start_byte, delimiter) do
     dsize = byte_size(delimiter)
-    scan_delimiter_close(source, start_byte + dsize, delimiter, dsize)
+
+    # A non-interpolated heredoc literal (`"""..."""` / `'''...'''`) is a bare
+    # binary too, so it reaches this scanner with a 3-byte `:delimiter` (the
+    # parser records the triple-quote). Heredocs have DIFFERENT close
+    # semantics than a single-quote string: the closing triple-quote must sit
+    # on its own line (only indentation before it), and a mid-line `"""` in the
+    # body does NOT close. Scanning byte-for-byte for the next `"""` (the
+    # single-line rule) would match such an interior triple-quote and truncate
+    # the span. Interpolated heredocs (`{:<<>>, ...}`) and `~S"""`-style sigils
+    # (call nodes) never reach here, so only the literal-heredoc case matters.
+    if heredoc_delimiter?(delimiter) do
+      scan_heredoc_close(source, start_byte + dsize, delimiter, dsize)
+    else
+      scan_delimiter_close(source, start_byte + dsize, delimiter, dsize)
+    end
   end
+
+  defp heredoc_delimiter?(delimiter), do: delimiter in ["\"\"\"", "'''"]
 
   defp scan_delimiter_close(source, pos, delimiter, dsize) do
     cond do
@@ -145,13 +161,56 @@ defmodule Mut.SourceSpan.Compute do
     end
   end
 
+  # Heredoc close: the terminating triple-quote is only recognized when it
+  # begins a line (after the opening triple-quote, content starts on the NEXT
+  # line). We track `at_line_start?` — true right after a newline and while only
+  # spaces/tabs (the indentation) have followed it — and accept the delimiter
+  # only at such a position. `\\`-escapes still skip a byte pair (heredoc bodies
+  # honor escapes), which also prevents an escaped char from spuriously
+  # resetting the line-start flag.
+  defp scan_heredoc_close(source, pos, delimiter, dsize, at_line_start? \\ false) do
+    cond do
+      pos + dsize > byte_size(source) ->
+        byte_size(source)
+
+      at_line_start? and binary_part(source, pos, dsize) == delimiter ->
+        pos + dsize
+
+      binary_part(source, pos, 1) == "\\" ->
+        # A `\`-escape skips the escaped byte too. But a `\`-newline is a line
+        # continuation: the escaped newline still ends the line, so the closing
+        # delimiter on the NEXT line must remain recognizable. Clearing
+        # `at_line_start?` unconditionally here would overshoot the span to EOF
+        # when a body line ends in `\` right before the closing fence.
+        next_at_line_start? = binary_part(source, pos + 1, 1) == "\n"
+        scan_heredoc_close(source, pos + 2, delimiter, dsize, next_at_line_start?)
+
+      binary_part(source, pos, 1) == "\n" ->
+        scan_heredoc_close(source, pos + 1, delimiter, dsize, true)
+
+      at_line_start? and binary_part(source, pos, 1) in [" ", "\t"] ->
+        scan_heredoc_close(source, pos + 1, delimiter, dsize, true)
+
+      true ->
+        scan_heredoc_close(source, pos + 1, delimiter, dsize, false)
+    end
+  end
+
   # Map representation: line_number => starting byte offset. Find the line whose
-  # offset is the greatest not exceeding `byte`.
+  # offset is the greatest not exceeding `byte`. `line_offsets` is an UNSORTED
+  # map (no ordering to exploit), so this is unavoidably O(lines); a single
+  # `reduce` replaces the prior `filter |> max_by` two-pass with no intermediate
+  # list. Provably equivalent: per-line offsets are strictly increasing in
+  # `line_offsets/1`, so they are unique — there are no ties for `max_by` to
+  # disambiguate — and the seed `{1, 0}` reproduces the old `max_by` default
+  # (it can only win when no offset `<= byte`, i.e. byte < 0, which never
+  # happens since line 1's offset is 0 and `byte >= 0`).
   defp byte_to_line_col(line_offsets, byte) do
     {line, offset} =
-      line_offsets
-      |> Enum.filter(fn {_line, off} -> off <= byte end)
-      |> Enum.max_by(fn {_line, off} -> off end, fn -> {1, 0} end)
+      Enum.reduce(line_offsets, {1, 0}, fn
+        {l, off}, {_bl, boff} when off <= byte and off > boff -> {l, off}
+        _entry, best -> best
+      end)
 
     {line, byte - offset + 1}
   end

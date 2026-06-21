@@ -350,9 +350,15 @@ defmodule Mut.Worker do
         "\n...[mutalisk worker output truncated; retaining last #{@max_output_bytes} bytes]...\n"
 
       keep_bytes = @max_output_bytes - byte_size(marker)
-      marker <> binary_part(combined, byte_size(combined), -keep_bytes)
+      # Advance to a valid UTF-8 boundary so JSON encoding never sees a broken grapheme.
+      marker <> utf8_align(binary_part(combined, byte_size(combined), -keep_bytes))
     end
   end
+
+  # Drop at most 3 leading UTF-8 continuation bytes (0x80–0xBF) that result from
+  # slicing at an arbitrary byte offset inside a multi-byte codepoint.
+  defp utf8_align(<<b, rest::binary>>) when b >= 0x80 and b <= 0xBF, do: utf8_align(rest)
+  defp utf8_align(binary), do: binary
 
   defp classify({:timeout, output}, duration_ms) do
     %Result{status: :timeout, duration_ms: duration_ms, raw_output: output}

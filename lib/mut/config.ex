@@ -46,8 +46,20 @@ defmodule Mut.Config do
 
   defp load_file(path) do
     if File.exists?(path) do
-      {term, _bindings} = Code.eval_file(path)
-      validate(term)
+      try do
+        {term, _bindings} = Code.eval_file(path)
+        validate(term)
+      rescue
+        # Parse- and compile-class failures from the user's config file. Both
+        # TokenMissingError and MismatchedDelimiterError (Elixir 1.17+) cover the
+        # common "unclosed bracket/heredoc/paren" typos and do NOT inherit from
+        # SyntaxError, so they must be listed explicitly. Use Exception.message/1
+        # rather than `e.message`: CompileError has no :message key (only
+        # :description/:line/:file) and `e.message` would raise a confusing
+        # KeyError over the friendly error we are trying to produce.
+        e in [CompileError, SyntaxError, TokenMissingError, MismatchedDelimiterError] ->
+          Mix.raise("invalid #{path}:\n#{Exception.message(e)}")
+      end
     else
       []
     end
