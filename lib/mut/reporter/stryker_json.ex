@@ -66,7 +66,12 @@ defmodule Mut.Reporter.StrykerJson do
       File.rename!(tmp, path)
     rescue
       e in File.RenameError ->
-        if e.reason == :exdev, do: File.write!(path, encoded), else: reraise(e, __STACKTRACE__)
+        unless e.reason == :exdev, do: reraise(e, __STACKTRACE__)
+        # Cross-device move failed; the rename left `tmp` in place. Write the
+        # report directly and remove the now-orphaned tmp file so it can't
+        # accumulate as stale scratch on a repeatedly cross-device target.
+        File.write!(path, encoded)
+        File.rm(tmp)
     end
 
     :ok
