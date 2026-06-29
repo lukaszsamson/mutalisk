@@ -15,7 +15,19 @@ defmodule Mix.Tasks.Mut.Recompile do
         ]
       )
 
-    app = Keyword.fetch!(opts, :app)
+    app =
+      case Keyword.fetch(opts, :app) do
+        {:ok, app} ->
+          app
+
+        :error ->
+          Mix.raise(
+            "mut.recompile is an internal task invoked by the mutation engine and " <>
+              "requires --app <name> --ebin <path> plus source files; it is not meant " <>
+              "to be run by hand"
+          )
+      end
+
     files = validate_files!(files)
 
     ebin =

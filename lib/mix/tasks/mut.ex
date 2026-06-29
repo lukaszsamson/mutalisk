@@ -174,7 +174,7 @@ defmodule Mix.Tasks.Mut do
       work_copy = Path.join([mutalisk_root, "tmp", "mut_work", run_id])
 
       Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
-        baseline_tests!(work_copy, mutalisk_root, opts.test_timeout_ms)
+        baseline_tests!(work_copy, mutalisk_root, opts.test_timeout_ms, run_id)
       end)
 
       baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
@@ -236,7 +236,7 @@ defmodule Mix.Tasks.Mut do
       if opts.keep_work_copy do
         IO.puts(
           :stderr,
-          "[mutalisk] --keep-work-copy: retaining #{Path.join([mutalisk_root, "tmp", "mut_work", run_id])}"
+          "[mutalisk] --keep-work-copy: retaining oracle/baseline work copy #{Path.join([mutalisk_root, "tmp", "mut_work", run_id])}"
         )
       else
         File.rm_rf!(Path.join([mutalisk_root, "tmp", "mut_work", run_id]))
@@ -364,7 +364,7 @@ defmodule Mix.Tasks.Mut do
         if opts.keep_work_copy do
           IO.puts(
             :stderr,
-            "[mutalisk] --keep-work-copy: retaining #{schema_result.work_copy_root}"
+            "[mutalisk] --keep-work-copy: retaining schema-build work copy #{schema_result.work_copy_root}"
           )
         else
           File.rm_rf!(schema_result.work_copy_root)
@@ -655,7 +655,7 @@ defmodule Mix.Tasks.Mut do
     )
   end
 
-  defp baseline_tests!(work_copy, host_root, test_timeout_ms) do
+  defp baseline_tests!(work_copy, host_root, test_timeout_ms, run_id) do
     env = [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_oracle"},
@@ -664,7 +664,9 @@ defmodule Mix.Tasks.Mut do
       {"MUTALISK_PATH", host_root}
     ]
 
-    log_path = Path.join([host_root, "tmp", "mut_baseline.log"])
+    # Per-run filename: a fixed `mut_baseline.log` is overwritten when several
+    # projects run against the same mutalisk checkout (Exploratory #41).
+    log_path = Path.join([host_root, "tmp", "mut_baseline-#{run_id}.log"])
 
     # R2: run the baseline under the SAME per-test timeout as mutant runs. A
     # test that passes under ExUnit's 60s default but exceeds the mutation
