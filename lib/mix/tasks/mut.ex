@@ -7,18 +7,24 @@ defmodule Mix.Tasks.Mut do
 
     - `--files PATTERN` — Only mutate files matching glob pattern
     - `--mutators NAMES` — Comma-separated mutator name list
-    - `--enable TARGETS` — Comma-separated enabled targets:
-      `dispatch` (default), `guard` (default),
-      `env_walker` (default: only AtomLiteral
-      active; pass it explicitly to run all
-      env-walker literals), `module_attribute`
-      (opt-in), `body_literal` (opt-in).
-      Passing --enable selects the full mutator
-      set gated by the listed targets.
+    - `--enable TARGETS` — Comma-separated enabled targets. Defaults:
+      `dispatch`, `guard`, `env_walker` (only
+      AtomLiteral active; pass it explicitly to run
+      all env-walker literals), `pattern_shape`.
+      Opt-in: `module_attribute`, `body_literal`,
+      `pattern_literal`, `variable`, `conditional`,
+      `statement_delete`, `clause_delete`,
+      `guard_boolean`, `pipeline_drop`,
+      `map_update_drop`, `receive_timeout`. Passing
+      --enable selects the full mutator set gated by
+      the listed targets. Note: an opt-in mutator
+      selected via `--mutators` ALSO needs its
+      target enabled (see docs/MUTATORS.md).
     - `--fail-at SCORE` — Mutation score threshold; exit 1 below
       (default: 80)
     - `--reporters NAMES` — Comma-separated: `terminal`, `stryker-json`
-      (default: both)
+      (default: both), `html`, `github-actions`
+      (opt-in)
     - `--output-path PATH` — Stryker JSON output path
       (default: `stryker.report.json`)
     - `--concurrency N` — Worker pool size for parallel mutant execution.
@@ -184,7 +190,16 @@ defmodule Mix.Tasks.Mut do
       plan = maybe_limit_plan(plan, opts.max_mutants)
 
       if opts.debug_plan do
-        Mut.Plan.dump_json(plan, Path.join(target_root, "plan.debug.json"))
+        plan_path = Path.join(target_root, "plan.debug.json")
+        Mut.Plan.dump_json(plan, plan_path)
+        # #43: confirm the write + counts rather than exiting silently.
+        schema_n = length(plan.schema)
+        fallback_n = length(plan.fallback)
+
+        IO.puts(
+          "[mutalisk] --debug-plan: wrote #{plan_path} " <>
+            "(#{schema_n + fallback_n} mutants: #{schema_n} schema, #{fallback_n} fallback)"
+        )
       else
         # M109: under `--incremental`, partition + record reused verdicts BEFORE
         # schema build so reused mutants are pruned from instrumentation. The
@@ -1267,9 +1282,28 @@ defmodule Mix.Tasks.Mut do
 
     warn_unmatched_file_patterns(Enum.reverse(unmatched))
 
-    expanded
-    |> Enum.uniq()
-    |> Enum.sort()
+    # Mutalisk mutates compiled `.ex` source. Drop anything else a user points
+    # `--files` at — a `README.md` would record a `parse_error` skip (#35) and a
+    # `_test.exs` (a `.exs` file) would record noisy `missing_oracle_site` skips
+    # (#36). Warn so the drop is visible rather than silent noise in the plan.
+    {source, non_source} =
+      expanded
+      |> Enum.uniq()
+      |> Enum.split_with(&String.ends_with?(&1, ".ex"))
+
+    warn_non_source_files(Enum.sort(non_source))
+
+    Enum.sort(source)
+  end
+
+  defp warn_non_source_files([]), do: :ok
+
+  defp warn_non_source_files(files) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --files: ignoring #{length(files)} non-source file(s) " <>
+        "(only `.ex` files are mutated): #{Enum.join(files, ", ")}"
+    )
   end
 
   defp warn_unmatched_file_patterns([]), do: :ok

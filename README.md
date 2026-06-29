@@ -27,12 +27,20 @@ That builds the mutants, runs your tests against each, prints a summary, and
 writes `stryker.report.json` (viewable in the
 [Stryker mutation testing elements](https://stryker-mutator.io/) HTML viewer).
 
+Because the dependency is `only: [:test]`, the task only exists under the test
+environment — always run it with `MIX_ENV=test` (or add a `preferred_cli_env`
+alias). Plain `mix mut` in the default env fails with "task could not be found".
+
 Useful flags (see `mix help mut` for the full list):
 
-    mix mut --files "lib/my_app/core/**/*.ex"   # only mutate some files
-    mix mut --concurrency 8                       # parallel workers
-    mix mut --fail-at 70                          # exit non-zero below 70%
-    mix mut --reporters terminal,html             # pick reporters
+    MIX_ENV=test mix mut --files "lib/my_app/core/**/*.ex"   # only mutate some files
+    MIX_ENV=test mix mut --concurrency 8                      # parallel workers
+    MIX_ENV=test mix mut --fail-at 70                         # exit non-zero below 70%
+    MIX_ENV=test mix mut --reporters terminal,html           # pick reporters
+
+Mutalisk runs your suite as-is (it does **not** pass `--warnings-as-errors`), so
+compiler warnings in the target do not affect the mutation score. Keep your own
+`mix compile --warnings-as-errors` gate in CI if you rely on it.
 
 ## Interpreting the score
 

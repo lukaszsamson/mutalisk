@@ -5,9 +5,17 @@ version. A mutant that your tests catch is **killed**; one they don't is
 **survived** — a gap in your test suite.
 
 Mutators are split into two tiers. **Default-on** mutators run with a bare
-`mix mut`. **Opt-in** mutators run only when you ask for them, either by
-target (`--enable <target>`) or by name (`--mutators <name>`); they are
-either noisier (more equivalent/false-positive mutants) or niche.
+`mix mut`. **Opt-in** mutators run only when you ask for them; they are either
+noisier (more equivalent/false-positive mutants) or niche.
+
+> **Selecting an opt-in mutator requires BOTH its name and its target.**
+> `--mutators` and `--enable` are independent gates that are AND-ed together:
+> `--mutators` picks which mutators to consider, `--enable` unlocks the
+> engine/target family they belong to. So `--mutators attribute_literal` alone
+> produces zero mutants (the `module_attribute` target is off by default) — you
+> must pass `--enable module_attribute --mutators attribute_literal`. Each opt-in
+> row below names the target you also need to enable. Enabling a target without
+> naming a mutator runs every mutator gated by that target.
 
 ## Default-on
 
@@ -34,9 +42,11 @@ validation matrix).
 ## Opt-in
 
 Reach for these when you want a deeper check and can tolerate more
-equivalent/noise mutants. Enable a whole target with `--enable <target>`
-or pick a mutator with `--mutators <name>` (comma-separated lists; the
-mutator name is the snake_case of the module, e.g. `negate_conditional`).
+equivalent/noise mutants. Enable a whole target with `--enable <target>`, or to
+run just one mutator pass both its name and target:
+`--enable <target> --mutators <name>` (comma-separated lists; the mutator name is
+the snake_case of the module, e.g. `negate_conditional`). `--mutators <name>`
+without enabling its target produces no mutants — see the note above.
 
 | Mutator | Target | What it does |
 |---|---|---|
