@@ -17,7 +17,7 @@ defmodule Mut.Cli do
             max_mutants: pos_integer | nil,
             debug_plan: boolean,
             selection: atom,
-            test_paths: [String.t()],
+            test_paths: [String.t()] | nil,
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
             exclude: [Regex.t()] | nil,
@@ -420,7 +420,13 @@ defmodule Mut.Cli do
     end
   end
 
-  defp test_paths(config), do: {:ok, string_list(Keyword.get(config, :test_paths, ["test"]))}
+  # Default `nil` (not `["test"]`) so the orchestrator's umbrella-aware path
+  # resolution applies: a single app uses `test/`; an umbrella has no root
+  # `test/`, so each child app's `apps/<app>/test/` is used instead. An explicit
+  # config/CLI value is honoured verbatim. A hardcoded `["test"]` default found
+  # zero test files in umbrellas, so every mutant fell to the "all tests" bucket
+  # with a recorded selected-test count of 0 (Exploratory issue #3).
+  defp test_paths(config), do: {:ok, string_list(Keyword.get(config, :test_paths))}
 
   # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
   # branch in `mutators/2`), so there is no nil clause.

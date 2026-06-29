@@ -60,6 +60,10 @@ defmodule Mix.Tasks.Mut do
   flag that overrides config. Run-scoped switches `debug_plan` and
   `keep_work_copy` are CLI-only.
 
+  When `test_paths` is unset it defaults to `test/` for a single app and to
+  every child app's `apps/<app>/test/` for an umbrella. Set it explicitly only
+  to override that — note a bare `["test"]` finds no tests in an umbrella.
+
   `.mutalisk.exs` (in the project root, loaded if present) is a plain
   keyword-list term — no `Config` runtime needed:
 
@@ -1169,7 +1173,16 @@ defmodule Mix.Tasks.Mut do
     do: Enum.map(selected, &Path.relative_to(&1, work_copy))
 
   defp absolute_test_paths(work_copy, opts),
-    do: Enum.map(opts.test_paths, &Path.join(work_copy, &1))
+    do: Enum.map(default_test_paths(work_copy, opts.test_paths), &Path.join(work_copy, &1))
+
+  # Resolve the project-relative test directories. An explicit config/CLI
+  # `test_paths` is honoured verbatim; the default (`nil`) is umbrella-aware
+  # (single app -> `test/`; umbrella -> each child app's `apps/<app>/test/`).
+  # Without this an umbrella discovers zero test files, so test-selection metrics
+  # record 0 tests/mutant even though the worker still runs the full suite via
+  # the empty-selection sentinel. (Exploratory issue #3.)
+  defp default_test_paths(_work_copy, paths) when is_list(paths), do: paths
+  defp default_test_paths(work_copy, nil), do: Mut.Umbrella.default_test_dirs(work_copy)
 
   defp expand_file_patterns(_work_copy, nil, _project_root), do: nil
 

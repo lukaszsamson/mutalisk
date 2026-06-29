@@ -32,7 +32,10 @@ defmodule Mut.CliTest do
     assert opts.debug_plan == false
     # M65: default selection flipped to coverage_with_static_fallback.
     assert opts.selection == :coverage_with_static_fallback
-    assert opts.test_paths == ["test"]
+    # Default is nil so test-path resolution is umbrella-aware at runtime
+    # (single app -> "test"; umbrella -> each app's "apps/<app>/test"). An
+    # explicit config value is still honoured verbatim (see "spec" test below).
+    assert opts.test_paths == nil
   end
 
   test "M48: default-on tier resolves to v1 dispatch+guard mutators + AtomLiteral" do

@@ -41,6 +41,23 @@ defmodule Mut.Umbrella do
   end
 
   @doc """
+  Default project-relative test directories for a work copy: `["test"]` for a
+  single app, or each child app's `<apps_path>/<app>/test` for an umbrella (the
+  umbrella root has no `test/` of its own). Mirrors the source-discovery split
+  in `Mut.Orchestrator`. Used when no explicit `test_paths` is configured.
+  """
+  @spec default_test_dirs(Path.t()) :: [Path.t()]
+  def default_test_dirs(work_copy) do
+    if umbrella?(work_copy) do
+      work_copy
+      |> app_dirs()
+      |> Enum.map(&Path.join(Path.relative_to(&1, work_copy), "test"))
+    else
+      ["test"]
+    end
+  end
+
+  @doc """
   OTP app names (as strings) for every umbrella child app, read from each
   app's project `:app`. `[]` for single-app projects.
   """
