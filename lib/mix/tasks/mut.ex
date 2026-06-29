@@ -36,6 +36,14 @@ defmodule Mix.Tasks.Mut do
       (debug aid; default: false)
     - `--test-timeout-ms N` — Per-test ExUnit timeout in milliseconds.
       Default 10000. Range 1000..600000.
+    - `--incremental` — Reuse verdicts from a prior run's history for
+      unchanged mutants instead of re-executing them
+      (opt-in; see `history_path` config). Materially
+      changes execution and report interpretation.
+    - `--since REF` — With `--incremental`, restrict reuse to mutants
+      whose file changed since git `REF` (e.g. `HEAD~1`,
+      `main`). Outside a git repo or with an unknown ref,
+      reuse falls back to digest checks with a warning.
 
   ## Configuration
 
@@ -157,7 +165,7 @@ defmodule Mix.Tasks.Mut do
 
       plan =
         Metrics.with_phase(metrics_pid, :plan_generation, fn ->
-          build_plan(work_copy, oracle, opts)
+          build_plan(work_copy, oracle, opts, target_root)
         end)
 
       {coverage_oracle, selection_mode} =
@@ -593,19 +601,29 @@ defmodule Mix.Tasks.Mut do
         output |> String.split("\n", trim: true) |> MapSet.new()
 
       {output, _code} ->
+        # Surface only the first line of git's output. The full text (e.g. the
+        # multi-line `git diff --no-index` usage printed when run outside a repo)
+        # is noise that buries the actionable message. (Exploratory issue #10.)
+        detail =
+          output
+          |> String.split("\n", trim: true)
+          |> List.first()
+
+        suffix = if detail, do: " (#{detail})", else: ""
+
         IO.puts(
           :stderr,
-          "[mutalisk] --since #{ref}: git diff failed; reuse falls back to digest checks only\n" <>
-            String.trim(output)
+          "[mutalisk] --since #{ref}: git diff failed#{suffix}; " <>
+            "reuse falls back to digest checks only"
         )
 
         nil
     end
   end
 
-  defp build_plan(work_copy, oracle, opts) do
+  defp build_plan(work_copy, oracle, opts, project_root) do
     Mut.Orchestrator.plan(work_copy, oracle,
-      files: expand_file_patterns(work_copy, opts.files),
+      files: expand_file_patterns(work_copy, opts.files, project_root),
       mutators: Cli.resolve_mutators(opts.mutators),
       enabled_targets: opts.enabled_targets,
       file_filter: opts.exclude
@@ -1153,33 +1171,75 @@ defmodule Mix.Tasks.Mut do
   defp absolute_test_paths(work_copy, opts),
     do: Enum.map(opts.test_paths, &Path.join(work_copy, &1))
 
-  defp expand_file_patterns(_work_copy, nil), do: nil
+  defp expand_file_patterns(_work_copy, nil, _project_root), do: nil
 
-  defp expand_file_patterns(work_copy, patterns) do
-    patterns
-    |> Enum.flat_map(&expand_file_pattern(work_copy, &1))
-    |> Enum.reject(&File.dir?(Path.join(work_copy, &1)))
+  defp expand_file_patterns(work_copy, patterns, project_root) do
+    # Track which patterns matched nothing so a typo / unmatched glob is surfaced
+    # rather than silently yielding an empty plan that looks like a clean run.
+    # (Exploratory issues #1 and #2.)
+    {expanded, unmatched} =
+      Enum.reduce(patterns, {[], []}, fn pattern, {acc, miss} ->
+        case expand_file_pattern(work_copy, pattern, project_root) do
+          [] -> {acc, [pattern | miss]}
+          files -> {files ++ acc, miss}
+        end
+      end)
+
+    warn_unmatched_file_patterns(Enum.reverse(unmatched))
+
+    expanded
     |> Enum.uniq()
     |> Enum.sort()
   end
 
-  defp expand_file_pattern(work_copy, pattern) do
-    path = Path.join(work_copy, pattern)
+  defp warn_unmatched_file_patterns([]), do: :ok
+
+  defp warn_unmatched_file_patterns(patterns) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --files matched no source files: #{Enum.join(patterns, ", ")}\n" <>
+        "  Patterns are resolved relative to the project root (e.g. `lib/foo.ex`, " <>
+        "`apps/*/lib/**/*.ex`). Absolute paths inside the project are accepted; " <>
+        "paths outside it cannot be mutated."
+    )
+  end
+
+  defp expand_file_pattern(work_copy, pattern, project_root) do
+    path = Path.join(work_copy, normalize_file_pattern(pattern, project_root))
 
     cond do
       File.dir?(path) ->
-        path
-        |> Path.join("**/*.ex")
-        |> Path.wildcard()
-        |> Enum.map(&Path.relative_to(&1, work_copy))
+        path |> Path.join("**/*.ex") |> wildcard_files(work_copy)
 
       File.regular?(path) ->
         [Path.relative_to(path, work_copy)]
 
       true ->
-        path
-        |> Path.wildcard()
-        |> Enum.map(&Path.relative_to(&1, work_copy))
+        # A bare glob may match directories too (e.g. `lib/*` over a dir-only
+        # tree). Drop them here so a pattern that contributes no real source
+        # file is reported as unmatched rather than silently yielding nothing.
+        wildcard_files(path, work_copy)
+    end
+  end
+
+  defp wildcard_files(glob, work_copy) do
+    glob
+    |> Path.wildcard()
+    |> Enum.reject(&File.dir?/1)
+    |> Enum.map(&Path.relative_to(&1, work_copy))
+  end
+
+  # `--files` patterns are resolved against the sandbox work-copy, whose layout
+  # mirrors the project root. An absolute path the user passes points at the
+  # original project (the cwd), so relativize it to the project root first;
+  # otherwise `Path.join(work_copy, "/abs/path")` never matches and the file is
+  # silently dropped. A path outside the project is left unchanged by
+  # `relative_to`, so it joins to a non-existent work-copy path that matches
+  # nothing and falls through to the unmatched-pattern warning. (Exploratory #1.)
+  defp normalize_file_pattern(pattern, project_root) do
+    case Path.type(pattern) do
+      :absolute -> Path.relative_to(pattern, project_root)
+      _ -> pattern
     end
   end
 

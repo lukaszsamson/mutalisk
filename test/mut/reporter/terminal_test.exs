@@ -32,7 +32,7 @@ defmodule Mut.Reporter.TerminalTest do
     assert output =~ "[1/33]"
     assert output =~ IO.ANSI.green()
     assert output =~ "killed"
-    assert output =~ "lib/arith.ex:5"
+    assert output =~ "lib/arith.ex:5:8"
     assert output =~ "Arithmetic"
     assert output =~ "replace + with -"
   end
@@ -65,7 +65,7 @@ defmodule Mut.Reporter.TerminalTest do
       ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
 
     refute output =~ "\e["
-    assert output == "[1/1] survived  lib/arith.ex:5  Arithmetic  replace + with -\n"
+    assert output == "[1/1] survived  lib/arith.ex:5:8  Arithmetic  replace + with -\n"
   end
 
   test "render_summary is byte stable" do
@@ -128,8 +128,8 @@ defmodule Mut.Reporter.TerminalTest do
            Mutation score: 3/5 = 60.0%
 
            Surviving mutants:
-             lib/arith.ex:5 Arithmetic               replace + with -
-             lib/arith.ex:5 Arithmetic               replace + with -
+             lib/arith.ex:5:8 Arithmetic               replace + with -
+             lib/arith.ex:5:8 Arithmetic               replace + with -
 
            Schema:    1/2 detected (50.0%)   wall: 3.0s
            Fallback:  1/2 detected (50.0%)   wall: 7.0s
@@ -140,7 +140,7 @@ defmodule Mut.Reporter.TerminalTest do
            Timeouts:  1
            No coverage: 0
 
-           Run time: 10.0s
+           Mutant execution time: 10.0s
            Fallback wall-clock: 70.0% of total
            Fallback mutants: 50.0% of executed
 
@@ -188,6 +188,39 @@ defmodule Mut.Reporter.TerminalTest do
     # The old `killed / engine_total` would have reported 1/7 (invalid + error in
     # the denominator, timeout dropped), disagreeing with the headline score.
     assert summary =~ "2/3 detected (66.7%)"
+  end
+
+  test "render_summary reports no-score when no mutants were evaluated (issue #4)" do
+    summary =
+      []
+      |> snapshot(by_status: %{}, score: 100.0)
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Mutation score: 0/0 (no scorable mutants)"
+    refute summary =~ "= 100.0%"
+  end
+
+  test "render_summary surfaces a concise reason for errored mutants (issue #6)" do
+    errored = mutant(:fallback, :error, "errored", 9)
+
+    result = %Result{
+      status: :error,
+      duration_ms: 5,
+      raw_output: "** (FunctionClauseError) no clause matching\n    long stack trace here\n"
+    }
+
+    summary =
+      [entry(errored, result)]
+      |> snapshot(by_status: %{error: 1})
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Errored mutants:"
+    assert summary =~ "lib/arith.ex:5:8"
+    assert summary =~ "FunctionClauseError"
+    # Only the first line of the reason is shown (no multi-line stack dump).
+    refute summary =~ "long stack trace here"
   end
 
   defp snapshot(entries, opts) do

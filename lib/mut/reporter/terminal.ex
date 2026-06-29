@@ -47,8 +47,9 @@ defmodule Mut.Reporter.Terminal do
     denominator = detected + survived
 
     [
-      "Mutation score: #{detected}/#{denominator} = #{format_pct(snapshot.score)}\n\n",
+      score_line(detected, denominator, snapshot.score),
       surviving_block(snapshot),
+      errored_block(snapshot),
       "\n",
       engine_line(snapshot, :schema, "Schema:   "),
       "\n",
@@ -74,7 +75,7 @@ defmodule Mut.Reporter.Terminal do
       "\n",
       count_line("No coverage", status_count(snapshot, :no_coverage), ""),
       "\n\n",
-      "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
+      "Mutant execution time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
       "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n",
       phase_block(snapshot),
@@ -135,6 +136,63 @@ defmodule Mut.Reporter.Terminal do
     "\nConcurrency: #{c.effective} workers#{suffix}\n"
   end
 
+  # A run with no scorable mutants (denominator 0) has no meaningful score: the
+  # underlying `score/3` returns 100.0 as a neutral default, but printing
+  # "0/0 = 100.0%" reads as a passing run when nothing was scored. Surface it
+  # explicitly instead. "Scorable" rather than "evaluated" because errored /
+  # invalid / skipped mutants may still be present (and listed below) — they just
+  # don't contribute to the score. (Exploratory issue #4.)
+  defp score_line(_detected, 0, _score),
+    do: "Mutation score: 0/0 (no scorable mutants)\n\n"
+
+  defp score_line(detected, denominator, score),
+    do: "Mutation score: #{detected}/#{denominator} = #{format_pct(score)}\n\n"
+
+  # Errored mutants carry an actionable reason (compile error or test output) in
+  # the ledger; the headline only counts them. Surface a concise, single-line
+  # reason here so users don't have to open the JSON report. (Exploratory #6.)
+  defp errored_block(snapshot) do
+    errored = Enum.filter(snapshot.ledger, &(&1.status == :error))
+
+    if errored == [] do
+      ""
+    else
+      [
+        "\nErrored mutants:\n",
+        Enum.map(errored, fn entry ->
+          mutant = entry.mutant
+
+          "  #{String.pad_trailing(location(mutant), 16)} #{String.pad_trailing(mutant.mutator_name, 24)} #{error_reason(entry)}\n"
+        end)
+      ]
+    end
+  end
+
+  defp error_reason(entry) do
+    reason =
+      cond do
+        not is_nil(Map.get(entry.mutant, :compile_error)) ->
+          inspect(entry.mutant.compile_error)
+
+        match?(%{raw_output: out} when is_binary(out), Map.get(entry, :result)) ->
+          entry.result.raw_output
+
+        true ->
+          "(see stryker.report.json for the full reason)"
+      end
+
+    reason
+    |> String.split("\n", trim: true)
+    |> List.first("")
+    |> String.trim()
+    |> truncate(100)
+  end
+
+  # Codepoint-based slice so truncation never splits a multibyte UTF-8 char.
+  defp truncate(text, max) do
+    if String.length(text) > max, do: String.slice(text, 0, max) <> "…", else: text
+  end
+
   defp surviving_block(snapshot) do
     survivors = Enum.filter(snapshot.ledger, &(&1.status == :survived))
 
@@ -146,7 +204,7 @@ defmodule Mut.Reporter.Terminal do
         Enum.map(survivors, fn entry ->
           mutant = entry.mutant
 
-          "  #{String.pad_trailing(location(mutant), 13)} #{String.pad_trailing(mutant.mutator_name, 24)} #{mutant.description}\n"
+          "  #{String.pad_trailing(location(mutant), 16)} #{String.pad_trailing(mutant.mutator_name, 24)} #{mutant.description}\n"
         end)
       ]
     end
@@ -305,6 +363,11 @@ defmodule Mut.Reporter.Terminal do
   defp format_seconds(ms), do: :erlang.float_to_binary(ms / 1000, decimals: 1) <> "s"
   defp format_pct(value), do: :erlang.float_to_binary(value, decimals: 1) <> "%"
   defp format_float(value), do: :erlang.float_to_binary(value * 1.0, decimals: 1)
+
+  # Include the column when known: same-line mutants (e.g. two operators on one
+  # line) are otherwise indistinguishable in terminal rows. (Exploratory #5.)
+  defp location(%Mutant{file: file, line: line, column: column}) when is_integer(column),
+    do: "#{file}:#{line}:#{column}"
 
   defp location(%Mutant{file: file, line: line}), do: "#{file}:#{line}"
 
