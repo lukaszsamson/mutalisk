@@ -77,6 +77,27 @@ defmodule Mut.Reporter.HtmlTest do
 
   test "clean run renders a no-survivors message" do
     map = %{"files" => %{}}
-    assert Html.render(map) =~ "No surviving mutants"
+    html = Html.render(map)
+    assert html =~ "No surviving mutants"
+    assert html =~ "🎉"
+  end
+
+  test "error-only run is not presented as clean (issue #34)" do
+    map = %{
+      "files" => %{
+        "lib/foo.ex" => %{
+          "source" => "defmodule Foo do\nend\n",
+          "mutants" => [
+            %{"status" => "RuntimeError", "mutatorName" => "Arithmetic", "description" => "x"},
+            %{"status" => "RuntimeError", "mutatorName" => "Arithmetic", "description" => "y"}
+          ]
+        }
+      }
+    }
+
+    html = Html.render(map)
+    refute html =~ "🎉"
+    assert html =~ "2 mutants errored"
+    assert html =~ "results are incomplete"
   end
 end

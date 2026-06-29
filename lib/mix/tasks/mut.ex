@@ -141,6 +141,12 @@ defmodule Mix.Tasks.Mut do
 
   defp run_pipeline(opts) do
     target_root = File.cwd!()
+    # Validate (and prepare) report output paths and warn on no-op flag combos
+    # BEFORE the expensive oracle/schema build, so bad input fails fast instead
+    # of crashing after minutes of work (Exploratory #44) or running silently
+    # with no effect (#15).
+    validate_output_paths!(target_root, opts)
+    warn_unused_since(opts)
     mutalisk_root = @mutalisk_root
     run_id = run_id()
     started = System.monotonic_time(:millisecond)
@@ -669,8 +675,19 @@ defmodule Mix.Tasks.Mut do
            timeout_ms: @baseline_timeout_ms,
            log_path: log_path
          ) do
-      {:exit, 0, _output} ->
-        :ok
+      {:exit, 0, output} ->
+        # A suite that runs zero tests passes (exit 0) but mutation testing is
+        # meaningless without tests — every mutant would "error/no-coverage" and
+        # the run would falsely look healthy. Fail fast with a clear message
+        # (Exploratory #31, #32).
+        if no_tests_ran?(output) do
+          Mix.raise(
+            "baseline ran no tests; aborting mutation run. Mutation testing needs a " <>
+              "test suite — add tests, or check `test_paths` / MIX_ENV (full log: #{log_path})"
+          )
+        else
+          :ok
+        end
 
       {:exit, _exit_code, output} ->
         Mix.raise(
@@ -687,6 +704,13 @@ defmodule Mix.Tasks.Mut do
           "baseline tests timed out; aborting mutation run (full log: #{log_path})\n\n#{output_tail(output)}"
         )
     end
+  end
+
+  # ExUnit prints this when the suite contains no tests; the `0 tests` summary is
+  # a belt-and-braces fallback for environments that phrase it differently.
+  defp no_tests_ran?(output) do
+    String.contains?(output, "There are no tests to run") or
+      Regex.match?(~r/\b0 tests?,/, output)
   end
 
   defp collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms) do
@@ -1044,11 +1068,11 @@ defmodule Mix.Tasks.Mut do
       rendered = render_stryker_report(snapshot, plan, work_copy, opts)
 
       if :stryker_json in opts.reporters do
-        StrykerJson.write(rendered, Path.join(host_root, opts.output_path))
+        StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path))
       end
 
       if :html in opts.reporters do
-        Html.write(rendered, Path.join(host_root, html_output_path(opts)))
+        Html.write(rendered, resolve_output_path(host_root, html_output_path(opts)))
       end
 
       if :github_actions in opts.reporters do
@@ -1062,6 +1086,49 @@ defmodule Mix.Tasks.Mut do
   defp html_output_path(opts) do
     Path.rootname(opts.output_path) <> ".html"
   end
+
+  # Resolve a user output path against the project root, honoring ABSOLUTE paths
+  # verbatim. `Path.join(root, "/abs")` strips the leading slash and writes under
+  # the project (Exploratory #14); branch on Path.type instead.
+  defp resolve_output_path(host_root, path) do
+    if Path.type(path) == :absolute, do: path, else: Path.join(host_root, path)
+  end
+
+  # Fail fast on an unwritable report path (e.g. a parent that is a regular file)
+  # before the run, rather than crashing in the reporter after all the work is
+  # done (Exploratory #44). Creating the dir now is harmless — it is where the
+  # report will be written. github_actions writes to stdout, so it is exempt.
+  defp validate_output_paths!(host_root, opts) do
+    [{:stryker_json, opts.output_path}, {:html, html_output_path(opts)}]
+    |> Enum.filter(fn {reporter, _path} -> reporter in opts.reporters end)
+    |> Enum.each(fn {reporter, path} ->
+      resolved = resolve_output_path(host_root, path)
+      parent = Path.dirname(resolved)
+
+      case File.mkdir_p(parent) do
+        :ok ->
+          :ok
+
+        {:error, reason} ->
+          Mix.raise(
+            "cannot write #{reporter} report to #{resolved}: " <>
+              "#{:file.format_error(reason)} (#{parent})"
+          )
+      end
+    end)
+  end
+
+  # `--since` only affects `--incremental` reuse. Used alone it is silently
+  # ignored; warn so a user does not think a change-scoped run happened
+  # (Exploratory #15).
+  defp warn_unused_since(%{since: since, incremental: false}) when is_binary(since) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --since #{since} has no effect without --incremental; ignoring it"
+    )
+  end
+
+  defp warn_unused_since(_opts), do: :ok
 
   defp render_reports_with_timing(metrics_pid, plan, work_copy, host_root, opts) do
     Metrics.start_phase(metrics_pid, :report_writing)
@@ -1281,13 +1348,37 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp set_exit_code(snapshot, fail_at) do
-    # Compare the score at the SAME precision it is reported (1 decimal). A raw
-    # comparison failed `--fail-at 80` for a 79.96% run that the terminal prints
-    # as "80.0%" — the gate and the displayed number must agree.
-    if Float.round(snapshot.score, 1) < fail_at do
-      System.at_exit(fn _status -> exit({:shutdown, 1}) end)
+    errors = Map.get(snapshot.by_status, :error, 0)
+    killed = Map.get(snapshot.by_status, :killed, 0)
+    timeout = Map.get(snapshot.by_status, :timeout, 0)
+    survived = Map.get(snapshot.by_status, :survived, 0)
+    scorable = killed + timeout + survived
+
+    cond do
+      # Mutants ran but every one errored — nothing was actually scored, and the
+      # neutral default score of 100.0 must NOT pass CI (Exploratory #32). The
+      # no-test baseline guard catches the common cause earlier; this is a
+      # defense-in-depth net for error-only runs from any cause.
+      scorable == 0 and errors > 0 ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] #{errors} mutant(s) errored and none were scorable; failing the run"
+        )
+
+        fail_run()
+
+      # Compare the score at the SAME precision it is reported (1 decimal). A raw
+      # comparison failed `--fail-at 80` for a 79.96% run that the terminal prints
+      # as "80.0%" — the gate and the displayed number must agree.
+      Float.round(snapshot.score, 1) < fail_at ->
+        fail_run()
+
+      true ->
+        :ok
     end
   end
+
+  defp fail_run, do: System.at_exit(fn _status -> exit({:shutdown, 1}) end)
 
   defp enforce_test_env! do
     # `preferred_cli_env: [mut: :test]` (or an aliased task) sets `Mix.env/0` to

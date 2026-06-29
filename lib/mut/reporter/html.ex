@@ -27,6 +27,14 @@ defmodule Mut.Reporter.Html do
     total_survivors =
       survivors_by_file |> Enum.map(fn {_f, _s, m} -> length(m) end) |> Enum.sum()
 
+    # An error-only run has zero survivors but is NOT clean — surface the errored
+    # count so the report does not present an incomplete run as a pass
+    # (Exploratory #34).
+    errored =
+      files
+      |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
+      |> Enum.count(&(Map.get(&1, "status") == "RuntimeError"))
+
     """
     <!DOCTYPE html>
     <html lang="en">
@@ -37,12 +45,22 @@ defmodule Mut.Reporter.Html do
     </head>
     <body>
     <h1>Mutalisk — surviving mutants</h1>
-    <p class="summary">#{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.</p>
-    #{render_files(survivors_by_file)}
+    <p class="summary">#{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.#{errored_note(errored)}</p>
+    #{render_body(survivors_by_file, errored)}
     </body>
     </html>
     """
   end
+
+  defp errored_note(0), do: ""
+  defp errored_note(n), do: " #{n} mutant#{plural(n)} errored."
+
+  # No survivors but errors present → incomplete, not clean.
+  defp render_body([], errored) when errored > 0 do
+    ~s(<p class="errored">No surviving mutants, but #{errored} mutant#{plural(errored)} errored — results are incomplete. See the terminal output or Stryker JSON for details.</p>)
+  end
+
+  defp render_body(survivors_by_file, _errored), do: render_files(survivors_by_file)
 
   @doc "Render and write the HTML report to `path`."
   @spec write(rendered :: map(), path :: Path.t()) :: :ok
@@ -109,7 +127,7 @@ defmodule Mut.Reporter.Html do
     """
     body{font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;margin:2rem;color:#1a1a1a;background:#fafafa}
     h1{font-size:1.4rem}h2{font-size:1rem;margin:1.5rem 0 .5rem;color:#444}
-    .summary{color:#666}.clean{color:#137333;font-size:1.1rem}
+    .summary{color:#666}.clean{color:#137333;font-size:1.1rem}.errored{color:#b06000;font-size:1.05rem}
     .file{margin-bottom:1.5rem}
     .mutant{border:1px solid #e0e0e0;border-left:4px solid #d93025;border-radius:4px;padding:.6rem .8rem;margin:.5rem 0;background:#fff}
     .loc{font-weight:600;color:#202124}.pos{color:#888;font-weight:400;margin-left:.4rem}

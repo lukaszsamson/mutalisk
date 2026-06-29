@@ -28,10 +28,12 @@ defmodule Mut.Reporter.GitHubActions do
     |> Map.get("files", %{})
     |> Enum.sort_by(fn {file, _data} -> file end)
     |> Enum.flat_map(fn {file, data} ->
-      data
-      |> Map.get("mutants", [])
-      |> Enum.filter(&survivor?/1)
-      |> Enum.map(&annotation(file, &1))
+      mutants = Map.get(data, "mutants", [])
+
+      # Surviving mutants are warnings; errored mutants are emitted as `::error`
+      # so an error-only run is not silent in CI (Exploratory #33).
+      Enum.map(Enum.filter(mutants, &survivor?/1), &annotation(file, &1)) ++
+        Enum.map(Enum.filter(mutants, &errored?/1), &error_annotation(file, &1))
     end)
   end
 
@@ -45,6 +47,10 @@ defmodule Mut.Reporter.GitHubActions do
   defp survivor?(%{"status" => "NoCoverage"}), do: true
   defp survivor?(_mutant), do: false
 
+  # `:error` mutants serialize to the Stryker "RuntimeError" status.
+  defp errored?(%{"status" => "RuntimeError"}), do: true
+  defp errored?(_mutant), do: false
+
   defp annotation(file, mutant) do
     %{"line" => line, "column" => col} = start_location(mutant)
     mutator = Map.get(mutant, "mutatorName", "Mutation")
@@ -55,6 +61,16 @@ defmodule Mut.Reporter.GitHubActions do
       "Mutalisk: surviving mutant [#{mutator}] #{description} — replacement: `#{replacement}`"
 
     "::warning file=#{file},line=#{line},col=#{col}::#{escape(message)}"
+  end
+
+  defp error_annotation(file, mutant) do
+    %{"line" => line, "column" => col} = start_location(mutant)
+    mutator = Map.get(mutant, "mutatorName", "Mutation")
+    description = Map.get(mutant, "description", "")
+
+    message = "Mutalisk: errored mutant [#{mutator}] #{description}"
+
+    "::error file=#{file},line=#{line},col=#{col}::#{escape(message)}"
   end
 
   defp start_location(mutant) do
