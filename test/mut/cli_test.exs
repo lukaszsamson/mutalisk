@@ -196,6 +196,76 @@ defmodule Mut.CliTest do
     assert message =~ "--test-timeout-ms must be an integer between"
   end
 
+  describe "input validation (exploratory #11-28)" do
+    test "rejects empty --reporters / --mutators / --enable" do
+      assert {:error, m} = Cli.parse(["--reporters", ""])
+      assert m =~ "reporters must not be empty"
+
+      assert {:error, m} = Cli.parse(["--mutators", ""])
+      assert m =~ "mutators must not be empty"
+
+      assert {:error, m} = Cli.parse(["--enable", ""])
+      assert m =~ "--enable targets must not be empty"
+    end
+
+    test "rejects empty config reporters / mutators / enabled_targets lists" do
+      assert {:error, m} = Cli.parse([], reporters: [])
+      assert m =~ "reporters must not be empty"
+
+      assert {:error, m} = Cli.parse([], mutators: [])
+      assert m =~ "mutators must not be empty"
+
+      assert {:error, m} = Cli.parse([], enabled_targets: [])
+      assert m =~ "--enable targets must not be empty"
+    end
+
+    test "rejects non-boolean config :incremental" do
+      assert {:error, m} = Cli.parse([], incremental: "false")
+      assert m =~ "incremental must be true or false"
+    end
+
+    test "rejects non-string / empty config :since" do
+      assert {:error, m} = Cli.parse([], since: 123)
+      assert m =~ "since must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], since: [])
+      assert m =~ "since must be a non-empty string"
+    end
+
+    test "rejects non-string config :output_path and :history_path" do
+      assert {:error, m} = Cli.parse([], output_path: 123)
+      assert m =~ "output_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], output_path: [])
+      assert m =~ "output_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], history_path: 123)
+      assert m =~ "history_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], history_path: [])
+      assert m =~ "history_path must be a non-empty string"
+    end
+
+    test "rejects non-string config :files / :test_paths (no silent coercion)" do
+      assert {:error, m} = Cli.parse([], files: 123)
+      assert m =~ "config :files must be a string or list of strings"
+
+      assert {:error, m} = Cli.parse([], files: [123])
+      assert m =~ "config :files must be a string or list of strings"
+
+      assert {:error, m} = Cli.parse([], test_paths: [123])
+      assert m =~ "config :test_paths must be a string or list of strings"
+    end
+
+    test "still accepts valid string/list values" do
+      assert {:ok, %Options{files: ["lib/a.ex"], test_paths: ["test"]}} =
+               Cli.parse([], files: "lib/a.ex", test_paths: ["test"])
+
+      assert {:ok, %Options{incremental: true, since: "HEAD~1", history_path: "h.json"}} =
+               Cli.parse([], incremental: true, since: "HEAD~1", history_path: "h.json")
+    end
+  end
+
   test "resolves mutators and aliases" do
     assert Cli.resolve_mutators(["arithmetic"]) == [Mut.Mutator.Arithmetic]
 

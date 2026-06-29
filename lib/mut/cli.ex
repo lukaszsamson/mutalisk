@@ -203,7 +203,10 @@ defmodule Mut.Cli do
          {:ok, test_paths} <- test_paths(config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
          {:ok, coverage_timeout_ms} <- coverage_timeout_ms(config),
-         {:ok, exclude} <- exclude(config) do
+         {:ok, exclude} <- exclude(config),
+         {:ok, incremental} <- incremental(parsed, config),
+         {:ok, since} <- since(parsed, config),
+         {:ok, history_path} <- history_path(config) do
       {:ok,
        %Options{
          files: files,
@@ -220,14 +223,42 @@ defmodule Mut.Cli do
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          test_timeout_ms: test_timeout_ms,
          exclude: exclude,
-         incremental: Keyword.get(parsed, :incremental, Keyword.get(config, :incremental, false)),
-         # T10: CLI flag wins, config is the fallback — uniform with every other
-         # key. `--since`/`--max-mutants` previously ignored config entirely,
-         # silently dropping a value set in `.mutalisk.exs`.
-         since: Keyword.get(parsed, :since, Keyword.get(config, :since)),
-         history_path: Keyword.get(config, :history_path),
+         incremental: incremental,
+         since: since,
+         history_path: history_path,
          coverage_timeout_ms: coverage_timeout_ms
        }}
+    end
+  end
+
+  # `incremental` must be a real boolean. A config string like "false" is truthy
+  # and would silently enable reuse (Exploratory #16). CLI `--incremental` is
+  # always boolean (OptionParser); config wins fallback per the T10 rule.
+  defp incremental(parsed, config) do
+    case Keyword.get(parsed, :incremental, Keyword.get(config, :incremental, false)) do
+      value when is_boolean(value) -> {:ok, value}
+      other -> {:error, "incremental must be true or false; got #{inspect(other)}"}
+    end
+  end
+
+  # `since` is a git ref. Must be a non-empty string (or nil). A non-string value
+  # otherwise reaches `System.cmd/3` and crashes with a raw ArgumentError
+  # (Exploratory #20, #28). CLI flag wins, config is the fallback (T10).
+  defp since(parsed, config) do
+    case Keyword.get(parsed, :since, Keyword.get(config, :since)) do
+      nil -> {:ok, nil}
+      value when is_binary(value) and value != "" -> {:ok, value}
+      other -> {:error, "since must be a non-empty string git ref; got #{inspect(other)}"}
+    end
+  end
+
+  # Config-only `history_path`. Must be a non-empty string (or nil). A non-string
+  # value otherwise crashes in `Path.expand`/history I/O (Exploratory #19, #27).
+  defp history_path(config) do
+    case Keyword.get(config, :history_path) do
+      nil -> {:ok, nil}
+      value when is_binary(value) and value != "" -> {:ok, value}
+      other -> {:error, "config :history_path must be a non-empty string; got #{inspect(other)}"}
     end
   end
 
@@ -292,8 +323,12 @@ defmodule Mut.Cli do
     # `--files` may be repeated to mutate several glob patterns in one run
     # (M122); each occurrence is collected. Falls back to config, then nil.
     case Keyword.get_values(parsed, :files) do
-      [] -> {:ok, string_list(Keyword.get(config, :files, nil))}
-      values -> {:ok, string_list(values)}
+      # CLI `--files` values are always strings (OptionParser :string). Config
+      # values are validated strictly so a typo like `files: 123` or `[123]`
+      # surfaces a friendly error instead of crashing / silently coercing
+      # (Exploratory #18, #24).
+      [] -> strict_string_list("config :files", Keyword.get(config, :files))
+      values -> {:ok, values}
     end
   end
 
@@ -303,6 +338,7 @@ defmodule Mut.Cli do
     cond do
       not is_nil(explicit) ->
         with {:ok, names} <- maybe_name_list(explicit),
+             :ok <- non_empty(names, "mutators"),
              :ok <- validate_mutators(names) do
           {:ok, names}
         end
@@ -327,6 +363,7 @@ defmodule Mut.Cli do
       )
 
     with {:ok, names} <- string_name_list(value),
+         :ok <- non_empty(names, "--enable targets"),
          :ok <- validate_target_names(names) do
       names_to_target_atoms(names)
     end
@@ -349,14 +386,21 @@ defmodule Mut.Cli do
     value = Keyword.get(parsed, :reporters, Keyword.get(config, :reporters, @default_reporters))
 
     with {:ok, names} <- string_name_list(value),
+         :ok <- non_empty(names, "reporters"),
          :ok <- validate_reporter_names(names) do
       names_to_reporter_atoms(names)
     end
   end
 
   defp output_path(parsed, config) do
-    {:ok,
-     Keyword.get(parsed, :output_path, Keyword.get(config, :output_path, "stryker.report.json"))}
+    case Keyword.get(
+           parsed,
+           :output_path,
+           Keyword.get(config, :output_path, "stryker.report.json")
+         ) do
+      value when is_binary(value) and value != "" -> {:ok, value}
+      other -> {:error, "output_path must be a non-empty string; got #{inspect(other)}"}
+    end
   end
 
   defp concurrency(parsed, config) do
@@ -426,7 +470,8 @@ defmodule Mut.Cli do
   # config/CLI value is honoured verbatim. A hardcoded `["test"]` default found
   # zero test files in umbrellas, so every mutant fell to the "all tests" bucket
   # with a recorded selected-test count of 0 (Exploratory issue #3).
-  defp test_paths(config), do: {:ok, string_list(Keyword.get(config, :test_paths))}
+  defp test_paths(config),
+    do: strict_string_list("config :test_paths", Keyword.get(config, :test_paths))
 
   # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
   # branch in `mutators/2`), so there is no nil clause.
@@ -444,9 +489,29 @@ defmodule Mut.Cli do
   defp name_list(value) when is_list(value), do: value
   defp name_list(value), do: [value]
 
-  defp string_list(nil), do: nil
-  defp string_list(value) when is_binary(value), do: [value]
-  defp string_list(values) when is_list(values), do: Enum.map(values, &to_string/1)
+  # Strict variant for path-valued keys (`files`, `test_paths`): a string, a list
+  # of strings, or nil. Non-string entries are REJECTED, not coerced — a config
+  # typo like `files: 123` or `files: [123]` should be a friendly error, not a
+  # silent `"123"` pattern that matches nothing (Exploratory #18, #24, #25).
+  defp strict_string_list(_label, nil), do: {:ok, nil}
+  defp strict_string_list(_label, value) when is_binary(value), do: {:ok, [value]}
+
+  defp strict_string_list(label, value) when is_list(value) do
+    if Enum.all?(value, &is_binary/1) do
+      {:ok, value}
+    else
+      {:error, "#{label} must be a string or list of strings; got #{inspect(value)}"}
+    end
+  end
+
+  defp strict_string_list(label, other),
+    do: {:error, "#{label} must be a string or list of strings; got #{inspect(other)}"}
+
+  # Reject an explicitly-empty selection (`--reporters ""`, `mutators: []`, …).
+  # Defaults are non-empty, so an empty list here always means the user asked for
+  # nothing, which would silently no-op the run (Exploratory #11–13, #21–23).
+  defp non_empty([], label), do: {:error, "#{label} must not be empty; run `mix help mut`"}
+  defp non_empty(_names, _label), do: :ok
 
   defp number(value) when is_number(value), do: value
   defp number(_value), do: nil
