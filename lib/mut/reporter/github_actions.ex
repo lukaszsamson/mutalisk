@@ -30,10 +30,11 @@ defmodule Mut.Reporter.GitHubActions do
     |> Enum.flat_map(fn {file, data} ->
       mutants = Map.get(data, "mutants", [])
 
-      # Surviving mutants are warnings; errored mutants are emitted as `::error`
-      # so an error-only run is not silent in CI (Exploratory #33).
+      # Surviving mutants are warnings; errored / failed-to-compile mutants are
+      # emitted as `::error` so an error-only run is not silent in CI
+      # (Exploratory #33; adversarial: include CompileError too).
       Enum.map(Enum.filter(mutants, &survivor?/1), &annotation(file, &1)) ++
-        Enum.map(Enum.filter(mutants, &errored?/1), &error_annotation(file, &1))
+        Enum.map(Enum.filter(mutants, &inconclusive?/1), &error_annotation(file, &1))
     end)
   end
 
@@ -47,9 +48,11 @@ defmodule Mut.Reporter.GitHubActions do
   defp survivor?(%{"status" => "NoCoverage"}), do: true
   defp survivor?(_mutant), do: false
 
-  # `:error` mutants serialize to the Stryker "RuntimeError" status.
-  defp errored?(%{"status" => "RuntimeError"}), do: true
-  defp errored?(_mutant), do: false
+  # `:error` mutants serialize to "RuntimeError", `:invalid` to "CompileError".
+  # Both failed to produce a verdict and are surfaced as CI errors.
+  defp inconclusive?(%{"status" => "RuntimeError"}), do: true
+  defp inconclusive?(%{"status" => "CompileError"}), do: true
+  defp inconclusive?(_mutant), do: false
 
   defp annotation(file, mutant) do
     %{"line" => line, "column" => col} = start_location(mutant)
@@ -67,8 +70,9 @@ defmodule Mut.Reporter.GitHubActions do
     %{"line" => line, "column" => col} = start_location(mutant)
     mutator = Map.get(mutant, "mutatorName", "Mutation")
     description = Map.get(mutant, "description", "")
+    kind = if Map.get(mutant, "status") == "CompileError", do: "invalid", else: "errored"
 
-    message = "Mutalisk: errored mutant [#{mutator}] #{description}"
+    message = "Mutalisk: #{kind} mutant [#{mutator}] #{description}"
 
     "::error file=#{file},line=#{line},col=#{col}::#{escape(message)}"
   end

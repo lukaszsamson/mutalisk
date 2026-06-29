@@ -27,13 +27,14 @@ defmodule Mut.Reporter.Html do
     total_survivors =
       survivors_by_file |> Enum.map(fn {_f, _s, m} -> length(m) end) |> Enum.sum()
 
-    # An error-only run has zero survivors but is NOT clean — surface the errored
-    # count so the report does not present an incomplete run as a pass
-    # (Exploratory #34).
-    errored =
+    # A run whose mutants only errored (RuntimeError) or failed to compile
+    # (CompileError) has zero survivors but is NOT clean — surface the
+    # inconclusive count so an incomplete run is not presented as a pass
+    # (Exploratory #34; adversarial: include CompileError too).
+    inconclusive =
       files
       |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
-      |> Enum.count(&(Map.get(&1, "status") == "RuntimeError"))
+      |> Enum.count(&(Map.get(&1, "status") in ["RuntimeError", "CompileError"]))
 
     """
     <!DOCTYPE html>
@@ -45,22 +46,22 @@ defmodule Mut.Reporter.Html do
     </head>
     <body>
     <h1>Mutalisk — surviving mutants</h1>
-    <p class="summary">#{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.#{errored_note(errored)}</p>
-    #{render_body(survivors_by_file, errored)}
+    <p class="summary">#{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.#{inconclusive_note(inconclusive)}</p>
+    #{render_body(survivors_by_file, inconclusive)}
     </body>
     </html>
     """
   end
 
-  defp errored_note(0), do: ""
-  defp errored_note(n), do: " #{n} mutant#{plural(n)} errored."
+  defp inconclusive_note(0), do: ""
+  defp inconclusive_note(n), do: " #{n} mutant#{plural(n)} errored or failed to compile."
 
-  # No survivors but errors present → incomplete, not clean.
-  defp render_body([], errored) when errored > 0 do
-    ~s(<p class="errored">No surviving mutants, but #{errored} mutant#{plural(errored)} errored — results are incomplete. See the terminal output or Stryker JSON for details.</p>)
+  # No survivors but inconclusive mutants present → incomplete, not clean.
+  defp render_body([], inconclusive) when inconclusive > 0 do
+    ~s(<p class="errored">No surviving mutants, but #{inconclusive} mutant#{plural(inconclusive)} errored or failed to compile — results are incomplete. See the terminal output or Stryker JSON for details.</p>)
   end
 
-  defp render_body(survivors_by_file, _errored), do: render_files(survivors_by_file)
+  defp render_body(survivors_by_file, _inconclusive), do: render_files(survivors_by_file)
 
   @doc "Render and write the HTML report to `path`."
   @spec write(rendered :: map(), path :: Path.t()) :: :ok

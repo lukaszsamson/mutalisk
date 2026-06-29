@@ -150,8 +150,8 @@ defmodule Mix.Tasks.Mut do
     # Validate (and prepare) report output paths and warn on no-op flag combos
     # BEFORE the expensive oracle/schema build, so bad input fails fast instead
     # of crashing after minutes of work (Exploratory #44) or running silently
-    # with no effect (#15).
-    validate_output_paths!(target_root, opts)
+    # with no effect (#15). Skipped under --debug-plan, which writes no report.
+    unless opts.debug_plan, do: validate_output_paths!(target_root, opts)
     warn_unused_since(opts)
     mutalisk_root = @mutalisk_root
     run_id = run_id()
@@ -723,11 +723,18 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  # ExUnit prints this when the suite contains no tests; the `0 tests` summary is
-  # a belt-and-braces fallback for environments that phrase it differently.
+  # True only when the WHOLE baseline ran zero tests. Umbrella-safe: `mix test`
+  # prints one "N tests, M failures" summary per child app, and a test-less child
+  # app legitimately prints "0 tests," / "There are no tests to run" while other
+  # apps ran many — so we must not abort on the mere presence of those phrases
+  # (Exploratory #31, adversarial #3). Sum every reported test count; a non-empty
+  # summary aborts only when every app reported 0. With no summary at all, fall
+  # back to the "no tests to run" phrase (single-app, no test files).
   defp no_tests_ran?(output) do
-    String.contains?(output, "There are no tests to run") or
-      Regex.match?(~r/\b0 tests?,/, output)
+    case Regex.scan(~r/(\d+) tests?,/, output) do
+      [] -> String.contains?(output, "There are no tests to run")
+      matches -> Enum.all?(matches, fn [_full, count] -> count == "0" end)
+    end
   end
 
   defp collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms) do
@@ -1385,20 +1392,23 @@ defmodule Mix.Tasks.Mut do
 
   defp set_exit_code(snapshot, fail_at) do
     errors = Map.get(snapshot.by_status, :error, 0)
+    invalid = Map.get(snapshot.by_status, :invalid, 0)
     killed = Map.get(snapshot.by_status, :killed, 0)
     timeout = Map.get(snapshot.by_status, :timeout, 0)
     survived = Map.get(snapshot.by_status, :survived, 0)
     scorable = killed + timeout + survived
+    inconclusive = errors + invalid
 
     cond do
-      # Mutants ran but every one errored — nothing was actually scored, and the
-      # neutral default score of 100.0 must NOT pass CI (Exploratory #32). The
+      # Mutants ran but every one errored or failed to compile — nothing was
+      # actually scored, and the neutral default score of 100.0 must NOT pass CI
+      # (Exploratory #32; adversarial: include :invalid/CompileError too). The
       # no-test baseline guard catches the common cause earlier; this is a
-      # defense-in-depth net for error-only runs from any cause.
-      scorable == 0 and errors > 0 ->
+      # defense-in-depth net for error/invalid-only runs from any cause.
+      scorable == 0 and inconclusive > 0 ->
         IO.puts(
           :stderr,
-          "[mutalisk] #{errors} mutant(s) errored and none were scorable; failing the run"
+          "[mutalisk] #{inconclusive} mutant(s) errored/invalid and none were scorable; failing the run"
         )
 
         fail_run()

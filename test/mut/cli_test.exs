@@ -257,6 +257,26 @@ defmodule Mut.CliTest do
       assert m =~ "config :test_paths must be a string or list of strings"
     end
 
+    test "rejects non-string/atom :mutators entries without crashing" do
+      assert {:error, m} = Cli.parse([], mutators: [123])
+      assert m =~ "mutators must be strings"
+
+      assert {:error, m} = Cli.parse([], mutators: 123)
+      assert m =~ "mutators must be strings"
+
+      # atoms are still accepted
+      assert {:ok, _} = Cli.parse([], mutators: [:arithmetic])
+    end
+
+    test "rejects non-string/atom :selection without crashing" do
+      assert {:error, m} = Cli.parse([], selection: 123)
+      assert m =~ "selection must be one of"
+
+      # atom + string still accepted
+      assert {:ok, %{selection: :coverage}} = Cli.parse([], selection: :coverage)
+      assert {:ok, %{selection: :static}} = Cli.parse(["--selection", "static"])
+    end
+
     test "still accepts valid string/list values" do
       assert {:ok, %Options{files: ["lib/a.ex"], test_paths: ["test"]}} =
                Cli.parse([], files: "lib/a.ex", test_paths: ["test"])

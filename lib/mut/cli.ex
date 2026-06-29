@@ -452,15 +452,22 @@ defmodule Mut.Cli do
 
     # Validate string FIRST, then convert to atom to avoid interning untrusted input.
     # For atoms (from config defaults), convert to string; for strings (from CLI), normalize.
-    name = normalize_name(value)
-    known_strings = Enum.map(@known_selection_modes, &Atom.to_string/1)
+    # A non-string/atom config value (e.g. `selection: 123`) must not crash
+    # `normalize_name/1` — reject it with a friendly error.
+    if is_binary(value) or is_atom(value) do
+      name = normalize_name(value)
+      known_strings = Enum.map(@known_selection_modes, &Atom.to_string/1)
 
-    if name in known_strings do
-      # Safe: every @known_selection_modes atom exists at compile time.
-      {:ok, String.to_existing_atom(name)}
+      if name in known_strings do
+        # Safe: every @known_selection_modes atom exists at compile time.
+        {:ok, String.to_existing_atom(name)}
+      else
+        # Render the rejected value in atom form (`:name`) without interning it.
+        {:error, "unknown --selection mode :#{name}; known: #{known(@known_selection_modes)}"}
+      end
     else
-      # Render the rejected value in atom form (`:name`) without interning it.
-      {:error, "unknown --selection mode :#{name}; known: #{known(@known_selection_modes)}"}
+      {:error,
+       "selection must be one of #{known(@known_selection_modes)}; got #{inspect(value, charlists: :as_lists)}"}
     end
   end
 
@@ -474,9 +481,18 @@ defmodule Mut.Cli do
     do: strict_string_list("config :test_paths", Keyword.get(config, :test_paths))
 
   # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
-  # branch in `mutators/2`), so there is no nil clause.
+  # branch in `mutators/2`), so there is no nil clause. Mutator names must be
+  # strings or atoms; a non-string list entry (e.g. `mutators: [123]`) would
+  # otherwise crash `normalize_name/1` with a raw FunctionClauseError instead of
+  # a friendly error (Exploratory #24/#25 sibling for the mutators key).
   defp maybe_name_list(value) do
-    {:ok, value |> name_list() |> Enum.map(&normalize_name/1)}
+    names = name_list(value)
+
+    if Enum.all?(names, &(is_binary(&1) or is_atom(&1))) do
+      {:ok, Enum.map(names, &normalize_name/1)}
+    else
+      {:error, "mutators must be strings (or atoms); got #{inspect(value, charlists: :as_lists)}"}
+    end
   end
 
   defp name_list(value) when is_binary(value) do
