@@ -193,6 +193,15 @@ defmodule Mut.Metrics do
     GenServer.cast(pid, {:set_concurrency, configured})
   end
 
+  @doc """
+  Override the effective worker count once it is known (it is capped at the
+  number of mutants to run, so it can be lower than the configured value).
+  """
+  @spec set_effective_concurrency(GenServer.server(), pos_integer()) :: :ok
+  def set_effective_concurrency(pid, effective) when is_integer(effective) and effective > 0 do
+    GenServer.cast(pid, {:set_effective_concurrency, effective})
+  end
+
   @spec record_selection(GenServer.server(), Mutant.t(), atom(), atom() | nil, non_neg_integer()) ::
           :ok
   def record_selection(pid, %Mutant{} = mutant, match_kind, fallback_reason, selected_count)
@@ -348,21 +357,25 @@ defmodule Mut.Metrics do
   end
 
   def handle_cast({:set_concurrency, configured}, state) do
-    schedulers = System.schedulers_online()
-
-    # `effective` is the actual maximum worker concurrency the pool runs at,
-    # which is the configured value: `run_with_concurrency/4` passes it
-    # straight to `Task.async_stream(max_concurrency: ...)`, and the sandbox
-    # pool is sized to it — neither caps at scheduler count. Reporting
-    # `min(configured, schedulers)` understated the real max concurrency
-    # whenever a user oversubscribed (`--concurrency` above core count).
-    # `schedulers_online` is the separate signal for "true CPU parallelism".
+    # `effective` starts equal to `configured`; `set_effective_concurrency`
+    # lowers it once the run knows how many mutants there are (the pool never
+    # exceeds the mutant count). The pool/`Task.async_stream` are sized to
+    # `effective`, NOT capped at scheduler count, so oversubscription above core
+    # count is honoured; `schedulers_online` is the separate "true CPU
+    # parallelism" signal.
     concurrency = %{
       configured: configured,
       effective: configured,
-      schedulers_online: schedulers
+      schedulers_online: System.schedulers_online()
     }
 
+    {:noreply, %{state | concurrency: concurrency}}
+  end
+
+  def handle_cast({:set_effective_concurrency, effective}, state) do
+    concurrency = Map.put(state.concurrency || %{}, :effective, effective)
+    concurrency = Map.put_new(concurrency, :configured, effective)
+    concurrency = Map.put_new(concurrency, :schedulers_online, System.schedulers_online())
     {:noreply, %{state | concurrency: concurrency}}
   end
 

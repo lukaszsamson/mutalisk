@@ -123,11 +123,18 @@ defmodule Mut.Reporter.Terminal do
   defp concurrency_block(%Snapshot{concurrency: c}) do
     suffix =
       cond do
-        c.configured > c.schedulers_online ->
-          " (capped at #{c.schedulers_online} schedulers_online)"
+        # Effective < configured: the pool was capped to the mutant count (no
+        # point in more workers than mutants).
+        c.effective < c.configured ->
+          " (#{c.configured} requested, capped to #{c.effective} — no more workers than mutants)"
 
-        c.configured == 1 ->
+        c.effective == 1 ->
           " (sequential)"
+
+        # Oversubscribed past CPU count but NOT capped — say so without the
+        # misleading word "capped" (Exploratory #58).
+        c.effective > c.schedulers_online ->
+          " (above #{c.schedulers_online} schedulers_online)"
 
         true ->
           ""

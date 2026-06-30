@@ -25,13 +25,18 @@ defmodule Mix.Tasks.Mut do
     - `--reporters NAMES` — Comma-separated: `terminal`, `stryker-json`
       (default: both), `html`, `github-actions`
       (opt-in)
-    - `--output-path PATH` — Stryker JSON output path
-      (default: `stryker.report.json`)
+    - `--output-path PATH` — Report output path (default:
+      `stryker.report.json`). Absolute paths are honored;
+      relative paths are under the project root. The
+      `html` reporter writes the same path with a
+      `.html` extension.
     - `--concurrency N` — Worker pool size for parallel mutant execution.
       Default: min(schedulers_online, 4). Use
       `--concurrency 1` for sequential execution.
     - `--max-mutants N` — Cap total mutants (stable-id sorted sample if
-      exceeded)
+      exceeded). Caps EXECUTION only — it is applied
+      after planning and coverage collection, so it
+      does not reduce analysis time.
     - `--debug-plan` — Dump plan JSON to plan.debug.json and exit before
       any mutant runs
     - `--selection MODE` — Test selection mode: `static`, `coverage`,
@@ -274,8 +279,17 @@ defmodule Mix.Tasks.Mut do
 
     IO.puts("Schema build complete")
 
+    # Never materialize more sandboxes than there are mutants to run: a tiny run
+    # with a large `--concurrency` (e.g. `--concurrency 999 --max-mutants 1`)
+    # otherwise spends minutes creating/tearing down a huge pool for no benefit
+    # (Exploratory #57). The capped value also drives the reported "effective"
+    # worker count so the summary is accurate (#58).
+    mutant_count = executable_count(schema_result.plan)
+    effective_concurrency = max(1, min(opts.concurrency, mutant_count))
+    Metrics.set_effective_concurrency(metrics_pid, effective_concurrency)
+
     {:ok, pool} =
-      Sandbox.create_pool(schema_result, opts.concurrency, run_id: run_id, force: true)
+      Sandbox.create_pool(schema_result, effective_concurrency, run_id: run_id, force: true)
 
     {:ok, last_killer} = Mut.LastKiller.start_link([])
 
@@ -308,7 +322,7 @@ defmodule Mix.Tasks.Mut do
           metrics_pid: metrics_pid,
           last_killer: last_killer,
           stream?: :terminal in opts.reporters,
-          concurrency: opts.concurrency,
+          concurrency: effective_concurrency,
           test_timeout_ms: opts.test_timeout_ms,
           host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
         }
@@ -1398,31 +1412,42 @@ defmodule Mix.Tasks.Mut do
     survived = Map.get(snapshot.by_status, :survived, 0)
     scorable = killed + timeout + survived
     inconclusive = errors + invalid
+    score = Float.round(snapshot.score, 1)
 
     cond do
-      # Mutants ran but every one errored or failed to compile — nothing was
-      # actually scored, and the neutral default score of 100.0 must NOT pass CI
-      # (Exploratory #32; adversarial: include :invalid/CompileError too). The
-      # no-test baseline guard catches the common cause earlier; this is a
-      # defense-in-depth net for error/invalid-only runs from any cause.
-      scorable == 0 and inconclusive > 0 ->
+      # No mutant produced a score (empty/unmatched `--files`, or every mutant
+      # errored/failed to compile) while a threshold was set. The neutral default
+      # score of 100.0 must NOT pass CI (Exploratory #32, #51, #52). `--fail-at 0`
+      # is the explicit opt-out for exploratory runs, so only gate when > 0.
+      scorable == 0 and fail_at > 0 ->
+        detail = if inconclusive > 0, do: " (#{inconclusive} errored/invalid)", else: ""
+
         IO.puts(
           :stderr,
-          "[mutalisk] #{inconclusive} mutant(s) errored/invalid and none were scorable; failing the run"
+          "[mutalisk] no scorable mutants#{detail}; failing --fail-at #{fmt_pct(fail_at)}"
         )
 
         fail_run()
 
       # Compare the score at the SAME precision it is reported (1 decimal). A raw
       # comparison failed `--fail-at 80` for a 79.96% run that the terminal prints
-      # as "80.0%" — the gate and the displayed number must agree.
-      Float.round(snapshot.score, 1) < fail_at ->
+      # as "80.0%" — the gate and the displayed number must agree. Print the
+      # reason to stderr so non-terminal reporters still explain the failure
+      # (Exploratory #59, #60, #61).
+      score < fail_at ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] mutation score #{fmt_pct(score)} below --fail-at #{fmt_pct(fail_at)}; failing"
+        )
+
         fail_run()
 
       true ->
         :ok
     end
   end
+
+  defp fmt_pct(value), do: :erlang.float_to_binary(value * 1.0, decimals: 1) <> "%"
 
   defp fail_run, do: System.at_exit(fn _status -> exit({:shutdown, 1}) end)
 
