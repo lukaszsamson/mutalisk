@@ -42,7 +42,9 @@ defmodule Mix.Tasks.Mut do
     - `--selection MODE` — Test selection mode: `static`, `coverage`,
       `coverage_with_static_fallback` (default, since
       v1.19/M65). `static` is the fully-portable
-      escape hatch.
+      escape hatch — also the fast choice on
+      macro-heavy/generated apps (e.g. Phoenix) where
+      coverage collection is slow before it falls back.
     - `--keep-work-copy` — Skip cleanup of tmp/mut_work/<run_id>/ on exit
       (debug aid; default: false)
     - `--test-timeout-ms N` — Per-test ExUnit timeout in milliseconds.
