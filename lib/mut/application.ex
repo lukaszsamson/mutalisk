@@ -16,9 +16,15 @@ defmodule Mut.Application do
   defp parse_active(""), do: 0
 
   defp parse_active(value) do
-    case Integer.parse(value) do
-      {id, ""} when id >= 0 -> id
-      _invalid -> 0
+    trimmed = String.trim(value)
+
+    case Integer.parse(trimmed) do
+      {id, ""} when id >= 0 ->
+        id
+
+      _invalid ->
+        IO.puts(:stderr, "[mutalisk] invalid MUT_ACTIVE=#{inspect(value)}; using 0")
+        0
     end
   end
 end

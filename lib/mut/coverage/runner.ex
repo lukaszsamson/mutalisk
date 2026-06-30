@@ -13,6 +13,7 @@ defmodule Mut.Coverage.Runner do
   def run(work_copy_root, opts \\ []) do
     test_paths = Keyword.get(opts, :test_paths, ["test"])
     timeout_ms = Keyword.get(opts, :timeout_per_file_ms, @default_timeout_ms)
+    budget_ms = Keyword.get(opts, :collection_budget_ms)
     fallback_static_tests = Keyword.get(opts, :fallback_static_tests, %{})
     mutalisk_path = Keyword.get(opts, :mutalisk_path, File.cwd!())
 
@@ -29,9 +30,31 @@ defmodule Mut.Coverage.Runner do
       started = monotonic_ms()
 
       test_files
-      |> collect_files(work_copy_root, timeout_ms, mutalisk_path)
+      |> collect_files(
+        work_copy_root,
+        timeout_ms,
+        mutalisk_path,
+        started,
+        budget_ms,
+        &run_test_file/4,
+        &monotonic_ms/0
+      )
       |> put_collection_metadata(started, fallback_static_tests)
     end
+  end
+
+  @doc false
+  def collect_files_for_test(test_files, root, opts) do
+    collect_files(
+      test_files,
+      root,
+      Keyword.fetch!(opts, :timeout_per_file_ms),
+      Keyword.get(opts, :mutalisk_path, "mutalisk"),
+      Keyword.get(opts, :started_ms, 0),
+      Keyword.get(opts, :collection_budget_ms),
+      Keyword.fetch!(opts, :runner),
+      Keyword.fetch!(opts, :clock)
+    )
   end
 
   # M64: per-file crash-tolerant collection. A test file whose coverage
@@ -40,19 +63,89 @@ defmodule Mut.Coverage.Runner do
   # failure: gettext/credo/timex). Degraded files fall back to static selection
   # (Mut.TestSelection.Coverage unions their static coverage), so the mutants
   # they cover still run their tests — no false survivors.
-  defp collect_files(test_files, root, timeout_ms, mutalisk_path) do
-    {oracle, degraded} =
-      Enum.reduce(test_files, {empty_oracle(), []}, fn test_file, {oracle, degraded} ->
-        case run_test_file(root, test_file, timeout_ms, mutalisk_path) do
-          {:ok, partial} ->
-            {merge_oracle(oracle, partial), degraded}
+  defp collect_files(
+         test_files,
+         root,
+         timeout_ms,
+         mutalisk_path,
+         started,
+         budget_ms,
+         runner,
+         clock
+       ) do
+    ctx = %{
+      test_files: test_files,
+      root: root,
+      timeout_ms: timeout_ms,
+      mutalisk_path: mutalisk_path,
+      runner: runner
+    }
 
-          {:error, reason} ->
-            {oracle, [{Path.relative_to(test_file, root), reason} | degraded]}
-        end
+    {oracle, degraded} =
+      test_files
+      |> Enum.with_index()
+      |> Enum.reduce_while({empty_oracle(), []}, fn {test_file, index}, {oracle, degraded} ->
+        budget = remaining_budget(started, budget_ms, clock)
+        state = {oracle, degraded}
+
+        run_or_degrade(budget, index, test_file, state, ctx)
       end)
 
-    {:ok, %{oracle | degraded_test_files: Enum.reverse(degraded)}}
+    {:ok, %{oracle | degraded_test_files: Enum.reverse(Enum.uniq(degraded))}}
+  end
+
+  defp remaining_budget(_started, nil, _clock), do: :unbounded
+
+  defp remaining_budget(started, budget_ms, clock) do
+    remaining = budget_ms - (clock.() - started)
+
+    if remaining <= 0 do
+      {:exhausted, budget_ms}
+    else
+      {:ok, remaining}
+    end
+  end
+
+  defp run_or_degrade(
+         {:exhausted, budget_ms},
+         index,
+         _test_file,
+         {oracle, degraded},
+         ctx
+       ) do
+    remaining = Enum.drop(ctx.test_files, index)
+    budget_degraded = Enum.reverse(degrade_remaining(ctx.root, remaining, budget_ms))
+    {:halt, {oracle, budget_degraded ++ degraded}}
+  end
+
+  defp run_or_degrade(
+         budget,
+         _index,
+         test_file,
+         {oracle, degraded},
+         ctx
+       ) do
+    effective_timeout_ms = effective_timeout(ctx.timeout_ms, budget)
+    result = ctx.runner.(ctx.root, test_file, effective_timeout_ms, ctx.mutalisk_path)
+    record_collection_result(result, oracle, degraded, ctx.root, test_file)
+  end
+
+  defp effective_timeout(timeout_ms, {:ok, budget_ms}), do: min(timeout_ms, budget_ms)
+  defp effective_timeout(timeout_ms, :unbounded), do: timeout_ms
+
+  defp record_collection_result({:ok, partial}, oracle, degraded, _root, _test_file) do
+    {:cont, {merge_oracle(oracle, partial), degraded}}
+  end
+
+  defp record_collection_result({:error, reason}, oracle, degraded, root, test_file) do
+    {:cont, {oracle, [{Path.relative_to(test_file, root), reason} | degraded]}}
+  end
+
+  defp degrade_remaining(root, test_files, budget_ms) do
+    Enum.map(test_files, fn test_file ->
+      rel = Path.relative_to(test_file, root)
+      {rel, {:coverage_collection_budget_exceeded, rel, budget_ms}}
+    end)
   end
 
   defp put_collection_metadata({:ok, oracle}, started, fallback_static_tests) do

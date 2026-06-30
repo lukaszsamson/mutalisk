@@ -11,11 +11,15 @@ defmodule Mut.Mutator.Defaults do
       body-literal integer/boolean, and the env-walker String/Float/Nil/
       Collection literals). Reached via an explicit `--enable <target>`
       or `--mutators <name>`.
+    * **explicit-only** (`explicit_only/0`) — experimental mutators that are
+      accepted by `--mutators <name>` but do not join target-only selection.
     * **presets** — deferred (M46: only one literal is default-on; a
       `--enable literal` preset needs ≥2 candidates).
 
-  `list/0` is the full set, used to register every mutator's
-  compatibility predicate with `Mut.Match.Registry` regardless of tier.
+  `list/0` is the target-selectable set used by a full `--enable` plan.
+  `all/0` includes explicit-only mutators and is used to register every
+  mutator's compatibility predicate with `Mut.Match.Registry` regardless of
+  tier.
   """
 
   @default_on [
@@ -87,6 +91,10 @@ defmodule Mut.Mutator.Defaults do
     Mut.Mutator.ReceiveTimeout
   ]
 
+  @explicit_only [
+    Mut.Mutator.VariableToLiteral
+  ]
+
   @doc "Mutators active with no --enable/--mutators flags (default plan)."
   @spec default_on() :: [module]
   def default_on, do: @default_on
@@ -94,6 +102,10 @@ defmodule Mut.Mutator.Defaults do
   @doc "Mutators reachable only via explicit --enable/--mutators."
   @spec opt_in() :: [module]
   def opt_in, do: @opt_in
+
+  @doc "Mutators reachable only via explicit --mutators."
+  @spec explicit_only() :: [module]
+  def explicit_only, do: @explicit_only
 
   # M63: the literal mutators that fire in PATTERN positions by default (i.e.
   # without `--enable pattern_literal`). Only IntegerLiteral-in-pattern cleared
@@ -105,12 +117,16 @@ defmodule Mut.Mutator.Defaults do
   @spec graduated_pattern_literal_mutators() :: [module]
   def graduated_pattern_literal_mutators, do: @graduated_pattern_literal
 
-  @doc "Full mutator set (all tiers)."
+  @doc "Target-selectable mutator set (default-on plus opt-in target mutators)."
   @spec list() :: [module]
   def list, do: @default_on ++ @opt_in
 
+  @doc "Every implemented mutator, including explicit-only experimental mutators."
+  @spec all() :: [module]
+  def all, do: list() ++ @explicit_only
+
   @spec register_all() :: :ok
   def register_all do
-    Enum.each(list(), &Mut.Match.Registry.register/1)
+    Enum.each(all(), &Mut.Match.Registry.register/1)
   end
 end

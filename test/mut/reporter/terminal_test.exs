@@ -54,6 +54,25 @@ defmodule Mut.Reporter.TerminalTest do
     assert output =~ "[1/32]"
   end
 
+  test "stream_event can use the recorded event index instead of snapshot ledger count" do
+    System.put_env("NO_COLOR", "1")
+    on_exit(fn -> System.delete_env("NO_COLOR") end)
+
+    first = mutant(:schema, :killed, "a", 1)
+    second = mutant(:schema, :survived, "b", 2)
+    result = %Result{status: :survived, duration_ms: 12}
+
+    snapshot =
+      snapshot([entry(first, %Result{status: :killed, duration_ms: 1}), entry(second, result)],
+        total: 2
+      )
+
+    output =
+      ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, second, result, 1) end)
+
+    assert output =~ "[1/2]"
+  end
+
   test "stream_event honors NO_COLOR" do
     System.put_env("NO_COLOR", "1")
 
@@ -190,6 +209,18 @@ defmodule Mut.Reporter.TerminalTest do
     assert summary =~ "2/3 detected (66.7%)"
   end
 
+  test "empty per-engine score is not shown as 100 percent" do
+    summary =
+      []
+      |> snapshot(by_status: %{}, by_engine_status: %{}, score: 100.0)
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Schema:    0/0 detected (no scorable mutants)"
+    assert summary =~ "Fallback:  0/0 detected (no scorable mutants)"
+    refute summary =~ "0/0 detected (100.0%)"
+  end
+
   test "render_summary reports no-score when no mutants were evaluated (issue #4)" do
     summary =
       []
@@ -198,7 +229,52 @@ defmodule Mut.Reporter.TerminalTest do
       |> IO.iodata_to_binary()
 
     assert summary =~ "Mutation score: 0/0 (no scorable mutants)"
+    assert summary =~ "Surviving mutants:\n  no scorable mutants were produced"
+    refute summary =~ "Surviving mutants:\n  none"
     refute summary =~ "= 100.0%"
+  end
+
+  test "render_summary lists no-coverage mutants as undetected" do
+    no_coverage = mutant(:schema, :no_coverage, "no-cov", 12)
+
+    summary =
+      [entry(no_coverage, %Result{status: :no_coverage, duration_ms: 5})]
+      |> snapshot(by_status: %{no_coverage: 1}, score: 0.0)
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Mutation score: 0/1 = 0.0%"
+    assert summary =~ "Surviving mutants:"
+    assert summary =~ "lib/arith.ex:5:8"
+    assert summary =~ "(no coverage)"
+    refute summary =~ "Surviving mutants:\n  none"
+  end
+
+  test "stream_event handles no_coverage status" do
+    mutant = mutant(:schema, :no_coverage, "no-cov", 12)
+    result = %Result{status: :no_coverage, duration_ms: 12}
+    snapshot = snapshot([entry(mutant, result)], total: 1)
+
+    output =
+      ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
+
+    assert output =~ "[1/1]"
+    assert output =~ "no_coverage"
+  end
+
+  test "render_summary reports requested and effective concurrency accurately" do
+    summary =
+      []
+      |> snapshot(
+        concurrency: %{configured: 999, effective: 1, schedulers_online: 12},
+        by_status: %{},
+        score: 100.0
+      )
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Concurrency: 1 workers (999 requested, capped to 1"
+    refute summary =~ "capped at 12 schedulers_online"
   end
 
   test "render_summary surfaces a concise reason for errored mutants (issue #6)" do

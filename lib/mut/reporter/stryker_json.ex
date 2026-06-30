@@ -52,7 +52,7 @@ defmodule Mut.Reporter.StrykerJson do
     # R16: atomic write (tmp + rename) so a crash mid-write can't leave a
     # truncated, invalid report — matching the history store's durability.
     File.mkdir_p!(Path.dirname(path))
-    tmp = path <> ".tmp"
+    tmp = tmp_path(path)
     encoded = Mut.JSON.encode!(rendered, pretty: true) <> "\n"
     File.write!(tmp, encoded)
 
@@ -75,6 +75,14 @@ defmodule Mut.Reporter.StrykerJson do
     end
 
     :ok
+  end
+
+  defp tmp_path(path) do
+    suffix =
+      :erlang.unique_integer([:positive])
+      |> Integer.to_string()
+
+    path <> ".#{suffix}.tmp"
   end
 
   @spec validate(rendered :: map()) :: :ok | {:error, [violation()]}

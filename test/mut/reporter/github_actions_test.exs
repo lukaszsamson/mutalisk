@@ -104,4 +104,27 @@ defmodule Mut.Reporter.GitHubActionsTest do
     assert message =~ "100%25 off"
     assert message =~ "%0A"
   end
+
+  test "escapes workflow-command property values" do
+    map = %{
+      "files" => %{
+        "lib/weird%,:\nname.ex" => %{
+          "source" => "x",
+          "mutants" => [
+            %{
+              "status" => "Survived",
+              "mutatorName" => "M",
+              "description" => "d",
+              "replacement" => "r",
+              "location" => %{"start" => %{"line" => 1, "column" => 1}}
+            }
+          ]
+        }
+      }
+    }
+
+    [line] = GitHubActions.render(map)
+    assert line =~ "file=lib/weird%25%2C%3A%0Aname.ex"
+    refute line =~ "file=lib/weird%,:"
+  end
 end

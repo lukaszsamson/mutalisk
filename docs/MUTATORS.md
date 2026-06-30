@@ -8,14 +8,14 @@ Mutators are split into two tiers. **Default-on** mutators run with a bare
 `mix mut`. **Opt-in** mutators run only when you ask for them; they are either
 noisier (more equivalent/false-positive mutants) or niche.
 
-> **Selecting an opt-in mutator requires BOTH its name and its target.**
-> `--mutators` and `--enable` are independent gates that are AND-ed together:
-> `--mutators` picks which mutators to consider, `--enable` unlocks the
-> engine/target family they belong to. So `--mutators attribute_literal` alone
-> produces zero mutants (the `module_attribute` target is off by default) — you
-> must pass `--enable module_attribute --mutators attribute_literal`. Each opt-in
-> row below names the target you also need to enable. Enabling a target without
-> naming a mutator runs every mutator gated by that target.
+> **Targets and mutator names are independent gates.** `--mutators` picks which
+> mutators to consider; `--enable` unlocks target families. If a mutator's target
+> is not enabled by default, pass both, for example
+> `--enable module_attribute --mutators attribute_literal`. If the target is
+> already enabled by default (`dispatch`, `guard`, `env_walker`,
+> `pattern_shape`), naming the mutator is enough. Enabling a target without
+> naming a mutator runs the default selectable mutator set unlocked by that
+> target; a few experimental mutators still require `--mutators` explicitly.
 
 ## Default-on
 
@@ -42,21 +42,23 @@ validation matrix).
 ## Opt-in
 
 Reach for these when you want a deeper check and can tolerate more
-equivalent/noise mutants. Enable a whole target with `--enable <target>`, or to
-run just one mutator pass both its name and target:
-`--enable <target> --mutators <name>` (comma-separated lists; the mutator name is
-the snake_case of the module, e.g. `negate_conditional`). `--mutators <name>`
-without enabling its target produces no mutants — see the note above.
+equivalent/noise mutants. Enable a whole non-default target with
+`--enable <target>`, or run just one mutator with `--mutators <name>` plus
+`--enable <target>` when that target is not enabled by default. Names are
+comma-separated and use the snake_case module name, e.g.
+`negate_conditional`.
 
 | Mutator | Target | What it does |
 |---|---|---|
 | `AttributeLiteral` | `module_attribute` | mutate module-attribute literal values |
 | `IntegerLiteral` (body) / `BooleanLiteral` | `body_literal` | integer/boolean literals in function bodies |
+| `AtomLiteral` / `BooleanLiteral` / `StringLiteral` / `NilLiteral` (pattern) | `pattern_literal` | opt-in pattern-position literal mutations; `IntegerLiteral` in patterns is already default-on |
 | `StringLiteral` | `env_walker` | `""` / `"x"` string-literal swaps |
 | `FloatLiteral` | `env_walker` | float-literal change |
 | `NilLiteral` | `env_walker` | `nil`-literal swaps |
 | `CollectionEmpty` | `env_walker` | empty a list / 2-tuple / map / n-tuple (never a struct) |
 | `VariableReplace` | `variable` | swap a variable reference for another in scope |
+| `VariableToLiteral` | `variable` | replace a typed variable reference with a boundary literal; requires explicit `--mutators variable_to_literal` |
 | `BitwiseOperator` | `dispatch` | bitwise op swaps (`band`/`bor`/`bsl`/…) |
 | `Membership` | `dispatch` | `in` ↔ `not in` |
 | `NegateConditional` | `conditional` | `if`/`unless` condition: negate (`!cond`) / force true / force false |
@@ -82,5 +84,5 @@ A mutator graduates from opt-in to default-on only after it clears the
 M62 gate on every target in the OSS validation matrix. The opt-in tier is
 not "lower quality" — several opt-in mutators are valuable but produce
 enough equivalent mutants (changes the tests *can't* distinguish) that
-running them by default would muddy the headline score. See
-`docs/decisions/` for per-mutator graduation rationales.
+running them by default would muddy the headline score. The source repository
+keeps the detailed per-mutator graduation records.

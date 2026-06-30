@@ -63,7 +63,7 @@ defmodule Mut.Reporter.GitHubActions do
     message =
       "Mutalisk: surviving mutant [#{mutator}] #{description} — replacement: `#{replacement}`"
 
-    "::warning file=#{file},line=#{line},col=#{col}::#{escape(message)}"
+    "::warning file=#{escape_property(file)},line=#{line},col=#{col}::#{escape_message(message)}"
   end
 
   defp error_annotation(file, mutant) do
@@ -74,7 +74,7 @@ defmodule Mut.Reporter.GitHubActions do
 
     message = "Mutalisk: #{kind} mutant [#{mutator}] #{description}"
 
-    "::error file=#{file},line=#{line},col=#{col}::#{escape(message)}"
+    "::error file=#{escape_property(file)},line=#{line},col=#{col}::#{escape_message(message)}"
   end
 
   defp start_location(mutant) do
@@ -88,10 +88,18 @@ defmodule Mut.Reporter.GitHubActions do
   end
 
   # Workflow-command message escaping (GitHub spec): %, CR, LF.
-  defp escape(message) do
+  defp escape_message(message) do
     message
     |> String.replace("%", "%25")
     |> String.replace("\r", "%0D")
     |> String.replace("\n", "%0A")
+  end
+
+  # Workflow-command property escaping also needs comma and colon escaping.
+  defp escape_property(value) do
+    value
+    |> escape_message()
+    |> String.replace(":", "%3A")
+    |> String.replace(",", "%2C")
   end
 end

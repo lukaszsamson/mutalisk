@@ -150,8 +150,24 @@ defmodule Mut.CliTest do
     assert message =~ "conflicting duplicate flags"
   end
 
+  test "rejects contradictory boolean flag forms" do
+    for argv <- [
+          ["--incremental", "--no-incremental"],
+          ["--debug-plan", "--no-debug-plan"],
+          ["--keep-work-copy", "--no-keep-work-copy"]
+        ] do
+      assert {:error, message} = Cli.parse(argv)
+      assert message =~ "conflicting duplicate flags"
+    end
+  end
+
   test "accepts repeated --files and collects every pattern (M122)" do
     assert {:ok, opts} = Cli.parse(["--files", "lib/a.ex", "--files", "lib/b.ex"])
+    assert opts.files == ["lib/a.ex", "lib/b.ex"]
+  end
+
+  test "accepts comma-separated --files patterns" do
+    assert {:ok, opts} = Cli.parse(["--files", "lib/a.ex, lib/b.ex"])
     assert opts.files == ["lib/a.ex", "lib/b.ex"]
   end
 
@@ -176,6 +192,10 @@ defmodule Mut.CliTest do
 
     assert {:error, message} = Cli.parse(["--concurrency", "0"])
     assert message =~ "--concurrency must be at least 1"
+
+    too_high = max(System.schedulers_online() * 4, 16) + 1
+    assert {:error, message} = Cli.parse(["--concurrency", Integer.to_string(too_high)])
+    assert message =~ "--concurrency must be between 1 and"
   end
 
   test "test_timeout_ms defaults to 10_000 and accepts overrides" do
@@ -230,6 +250,9 @@ defmodule Mut.CliTest do
 
       assert {:error, m} = Cli.parse([], since: [])
       assert m =~ "since must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], since: " ")
+      assert m =~ "since must be a non-empty string"
     end
 
     test "rejects non-string config :output_path and :history_path" do
@@ -239,11 +262,25 @@ defmodule Mut.CliTest do
       assert {:error, m} = Cli.parse([], output_path: [])
       assert m =~ "output_path must be a non-empty string"
 
+      assert {:error, m} = Cli.parse(["--output-path", " "])
+      assert m =~ "output_path must be a non-empty string"
+
       assert {:error, m} = Cli.parse([], history_path: 123)
       assert m =~ "history_path must be a non-empty string"
 
       assert {:error, m} = Cli.parse([], history_path: [])
       assert m =~ "history_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], history_path: " ")
+      assert m =~ "history_path must be a non-empty string"
+    end
+
+    test "rejects unknown config keys" do
+      assert {:error, m} = Cli.parse([], fail_att: 0)
+      assert m =~ "unknown config key :fail_att"
+
+      assert {:error, m} = Cli.parse([], reporter: [:html])
+      assert m =~ "unknown config key :reporter"
     end
 
     test "rejects non-string config :files / :test_paths (no silent coercion)" do
@@ -275,6 +312,9 @@ defmodule Mut.CliTest do
       # atom + string still accepted
       assert {:ok, %{selection: :coverage}} = Cli.parse([], selection: :coverage)
       assert {:ok, %{selection: :static}} = Cli.parse(["--selection", "static"])
+
+      assert {:ok, %{selection: :coverage_with_static_fallback}} =
+               Cli.parse([], selection: :"coverage-with-static-fallback")
     end
 
     test "still accepts valid string/list values" do
@@ -304,6 +344,11 @@ defmodule Mut.CliTest do
     test "rejects empty config :test_paths (#56)" do
       assert {:error, m} = Cli.parse([], test_paths: [])
       assert m =~ "config :test_paths must not be empty"
+    end
+
+    test "rejects absolute config :test_paths" do
+      assert {:error, m} = Cli.parse([], test_paths: [Path.expand("test")])
+      assert m =~ "config :test_paths must contain project-relative paths"
     end
 
     test "rejects trailing-comma empty segments in reporters/mutators/enable (#65-67)" do
@@ -340,6 +385,13 @@ defmodule Mut.CliTest do
 
       assert {:ok, %Options{files: ["lib/a.ex", "lib/b.ex"]}} =
                Cli.parse([], files: ["lib/a.ex", "lib/b.ex"])
+    end
+
+    test "deduplicates repeated reporters" do
+      assert {:ok, %Options{reporters: [:html]}} = Cli.parse(["--reporters", "html,html"])
+
+      assert {:ok, %Options{reporters: [:terminal]}} =
+               Cli.parse([], reporters: [:terminal, :terminal])
     end
   end
 

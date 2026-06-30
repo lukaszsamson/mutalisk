@@ -88,4 +88,15 @@ defmodule Mut.ConfigTest do
 
     assert_raise Mix.Error, ~r/\.mutalisk\.exs is invalid/, fn -> Config.load(root) end
   end
+
+  test "Config.config syntax in .mutalisk.exs raises a friendly file error", %{root: root} do
+    File.write!(Path.join(root, ".mutalisk.exs"), """
+    import Config
+    config :mut, selection: :static
+    """)
+
+    assert_raise Mix.Error, ~r/invalid .*\.mutalisk\.exs:.*could not set configuration/s, fn ->
+      Config.load(root)
+    end
+  end
 end

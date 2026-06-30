@@ -5,7 +5,9 @@ defmodule Mix.Tasks.Mut do
 
   ## Options
 
-    - `--files PATTERN` — Only mutate files matching glob pattern
+    - `--files "PATTERN"` — Only mutate files matching glob pattern. Quote
+      globs so your shell does not expand them first. Repeat the flag or use
+      comma-separated patterns to mutate several paths.
     - `--mutators NAMES` — Comma-separated mutator name list
     - `--enable TARGETS` — Comma-separated enabled targets. Defaults:
       `dispatch`, `guard`, `env_walker` (only
@@ -16,10 +18,11 @@ defmodule Mix.Tasks.Mut do
       `statement_delete`, `clause_delete`,
       `guard_boolean`, `pipeline_drop`,
       `map_update_drop`, `receive_timeout`. Passing
-      --enable selects the full mutator set gated by
-      the listed targets. Note: an opt-in mutator
-      selected via `--mutators` ALSO needs its
-      target enabled (see docs/MUTATORS.md).
+      --enable selects the default selectable mutator
+      set gated by the listed targets. Note: an opt-in
+      mutator selected via `--mutators` ALSO needs its
+      target enabled, and a few experimental mutators
+      require `--mutators` explicitly (see docs/MUTATORS.md).
     - `--fail-at SCORE` — Mutation score threshold; exit 1 below
       (default: 80)
     - `--reporters NAMES` — Comma-separated: `terminal`, `stryker-json`
@@ -32,13 +35,16 @@ defmodule Mix.Tasks.Mut do
       `.html` extension.
     - `--concurrency N` — Worker pool size for parallel mutant execution.
       Default: min(schedulers_online, 4). Use
-      `--concurrency 1` for sequential execution.
+      `--concurrency 1` for sequential execution. Explicit
+      values are bounded to avoid pathological sandbox
+      startup/teardown costs.
     - `--max-mutants N` — Cap total mutants (stable-id sorted sample if
       exceeded). Caps EXECUTION only — it is applied
       after planning and coverage collection, so it
       does not reduce analysis time.
     - `--debug-plan` — Dump plan JSON to plan.debug.json and exit before
-      any mutant runs
+      any mutant runs. It still builds the oracle and baseline plan; it is not
+      a zero-cost parser-only mode.
     - `--selection MODE` — Test selection mode: `static`, `coverage`,
       `coverage_with_static_fallback` (default, since
       v1.19/M65). `static` is the fully-portable
@@ -70,8 +76,12 @@ defmodule Mix.Tasks.Mut do
   `reporters`, `output_path`, `exclude`, `max_mutants`, `since`, `incremental`,
   `history_path`, and `coverage_timeout_ms`. `exclude`, `history_path`, and
   `coverage_timeout_ms` are config-only (no CLI flag); the rest accept a CLI
-  flag that overrides config. Run-scoped switches `debug_plan` and
-  `keep_work_copy` are CLI-only.
+  flag that overrides config. `history_path` controls where every run writes
+  reusable verdict history for future `--incremental` runs. `coverage_timeout_ms`
+  is a positive integer in milliseconds for each per-test-file coverage
+  collection attempt; in `coverage_with_static_fallback`, timed-out files degrade
+  to static selection. Run-scoped switches `debug_plan` and `keep_work_copy` are
+  CLI-only.
 
   When `test_paths` is unset it defaults to `test/` for a single app and to
   every child app's `apps/<app>/test/` for an umbrella. Set it explicitly only
@@ -85,14 +95,12 @@ defmodule Mix.Tasks.Mut do
         selection: :coverage_with_static_fallback,
         fail_at: 75.0,
         concurrency: 8,
-        enabled_targets: [:dispatch, :guard],
         exclude: [~r"lib/my_app_web/router.ex"]
       ]
 
   Or via application config:
 
       config :mut,
-        enabled_targets: [:dispatch, :guard],
         exclude: [~r/lib\\/my_app_web\\/router.ex/],
         fail_at: 80.0,
         selection: :coverage_with_static_fallback,
@@ -141,6 +149,9 @@ defmodule Mix.Tasks.Mut do
   @mutalisk_root Path.expand("../../..", __DIR__)
 
   @impl Mix.Task
+  def run(["--help"]), do: print_help()
+  def run(["-h"]), do: print_help()
+
   def run(argv) do
     enforce_test_env!()
 
@@ -152,6 +163,12 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
+  defp print_help do
+    @moduledoc
+    |> String.trim()
+    |> Mix.shell().info()
+  end
+
   defp run_pipeline(opts) do
     target_root = File.cwd!()
     # Validate (and prepare) report output paths and warn on no-op flag combos
@@ -160,6 +177,7 @@ defmodule Mix.Tasks.Mut do
     # with no effect (#15). Skipped under --debug-plan, which writes no report.
     unless opts.debug_plan, do: validate_output_paths!(target_root, opts)
     warn_unused_since(opts)
+    warn_unused_output_path(opts)
     mutalisk_root = @mutalisk_root
     run_id = run_id()
     started = System.monotonic_time(:millisecond)
@@ -181,7 +199,7 @@ defmodule Mix.Tasks.Mut do
       work_copy = Path.join([mutalisk_root, "tmp", "mut_work", run_id])
 
       Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
-        baseline_tests!(work_copy, mutalisk_root, opts.test_timeout_ms, run_id)
+        baseline_tests!(work_copy, mutalisk_root, opts, run_id)
       end)
 
       baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
@@ -191,9 +209,6 @@ defmodule Mix.Tasks.Mut do
           build_plan(work_copy, oracle, opts, target_root)
         end)
 
-      {coverage_oracle, selection_mode} =
-        collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms)
-
       plan = maybe_limit_plan(plan, opts.max_mutants)
 
       if opts.debug_plan do
@@ -202,40 +217,52 @@ defmodule Mix.Tasks.Mut do
         # #43: confirm the write + counts rather than exiting silently.
         schema_n = length(plan.schema)
         fallback_n = length(plan.fallback)
+        skipped_n = length(plan.skipped)
+        invalid_n = Enum.count(plan.skipped, &(&1.reason in [:invalid, "invalid"]))
 
         IO.puts(
           "[mutalisk] --debug-plan: wrote #{plan_path} " <>
-            "(#{schema_n + fallback_n} mutants: #{schema_n} schema, #{fallback_n} fallback)"
+            "(#{schema_n + fallback_n} executable: #{schema_n} schema, #{fallback_n} fallback; " <>
+            "#{skipped_n} skipped, #{invalid_n} invalid)"
         )
-      else
-        # M109: under `--incremental`, partition + record reused verdicts BEFORE
-        # schema build so reused mutants are pruned from instrumentation. The
-        # plan handed to `execute_plan` is the to-execute subset; reused verdicts
-        # are already recorded in the ledger and appear in the report/score.
-        # Non-incremental: no-op (full plan, nothing recorded) → v1.29-identical.
-        exec_plan =
-          prune_reused_for_incremental(
-            plan,
-            work_copy,
-            opts,
-            coverage_oracle,
-            selection_mode,
-            metrics_pid,
-            target_root
-          )
 
-        File.cd!(mutalisk_root, fn ->
-          execute_plan(
-            exec_plan,
-            target_root,
-            run_id,
-            opts,
-            started,
-            metrics_pid,
-            coverage_oracle,
-            selection_mode
-          )
-        end)
+        set_debug_plan_exit_code(plan, opts.fail_at)
+      else
+        if executable_count(plan) == 0 do
+          execute_empty_plan(plan, work_copy, target_root, opts, started, metrics_pid)
+        else
+          {coverage_oracle, selection_mode} =
+            collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms)
+
+          # M109: under `--incremental`, partition + record reused verdicts BEFORE
+          # schema build so reused mutants are pruned from instrumentation. The
+          # plan handed to `execute_plan` is the to-execute subset; reused verdicts
+          # are already recorded in the ledger and appear in the report/score.
+          # Non-incremental: no-op (full plan, nothing recorded) → v1.29-identical.
+          exec_plan =
+            prune_reused_for_incremental(
+              plan,
+              work_copy,
+              opts,
+              coverage_oracle,
+              selection_mode,
+              metrics_pid,
+              target_root
+            )
+
+          File.cd!(mutalisk_root, fn ->
+            execute_plan(
+              exec_plan,
+              target_root,
+              run_id,
+              opts,
+              started,
+              metrics_pid,
+              coverage_oracle,
+              selection_mode
+            )
+          end)
+        end
       end
     after
       Mut.MemoryWatchdog.stop(watchdog_pid)
@@ -249,6 +276,24 @@ defmodule Mix.Tasks.Mut do
         File.rm_rf!(Path.join([mutalisk_root, "tmp", "mut_work", run_id]))
       end
     end
+  end
+
+  defp execute_empty_plan(plan, work_copy, target_root, opts, started, metrics_pid) do
+    Metrics.set_effective_concurrency(metrics_pid, 1)
+    Metrics.set_planned_total(metrics_pid, 0)
+    record_skipped_plan(metrics_pid, plan)
+
+    snapshot =
+      render_reports_with_timing(
+        metrics_pid,
+        plan,
+        work_copy,
+        target_root,
+        opts
+      )
+
+    set_exit_code(snapshot, opts.fail_at)
+    IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
   end
 
   # R15: destroying the original `pool` (the precisely-typed opaque
@@ -294,6 +339,7 @@ defmodule Mix.Tasks.Mut do
       Sandbox.create_pool(schema_result, effective_concurrency, run_id: run_id, force: true)
 
     {:ok, last_killer} = Mut.LastKiller.start_link([])
+    progress_pid = start_progress(opts)
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
@@ -323,7 +369,7 @@ defmodule Mix.Tasks.Mut do
           work_copy: source_root,
           metrics_pid: metrics_pid,
           last_killer: last_killer,
-          stream?: :terminal in opts.reporters,
+          progress_pid: progress_pid,
           concurrency: effective_concurrency,
           test_timeout_ms: opts.test_timeout_ms,
           host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
@@ -405,7 +451,7 @@ defmodule Mix.Tasks.Mut do
     store_path = History.Store.path(target_root, history_path: opts.history_path)
 
     prev =
-      case History.Store.load(store_path) do
+      case load_history_store(store_path, opts) do
         {:ok, store} -> store
         {:cold, _reason} -> :cold
       end
@@ -415,6 +461,23 @@ defmodule Mix.Tasks.Mut do
     error ->
       IO.puts(:stderr, "[mutalisk] history write skipped: #{Exception.message(error)}")
       :ok
+  end
+
+  defp load_history_store(path, opts) do
+    result = History.Store.load(path)
+
+    case result do
+      {:cold, reason} when is_binary(opts.history_path) and reason != :missing ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] configured history_path #{path} is unusable (#{reason}); starting cold"
+        )
+
+      _ ->
+        :ok
+    end
+
+    result
   end
 
   # Reusable verdicts (killed/survived/timeout) from the ledger, digested per
@@ -621,7 +684,10 @@ defmodule Mix.Tasks.Mut do
   defp binary_or_nil(_value), do: nil
 
   defp load_verdicts(target_root, opts) do
-    case History.Store.load(History.Store.path(target_root, history_path: opts.history_path)) do
+    case load_history_store(
+           History.Store.path(target_root, history_path: opts.history_path),
+           opts
+         ) do
       {:ok, store} -> store.verdicts
       {:cold, _reason} -> %{}
     end
@@ -671,7 +737,7 @@ defmodule Mix.Tasks.Mut do
     )
   end
 
-  defp baseline_tests!(work_copy, host_root, test_timeout_ms, run_id) do
+  defp baseline_tests!(work_copy, host_root, opts, run_id) do
     env = [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_oracle"},
@@ -689,13 +755,14 @@ defmodule Mix.Tasks.Mut do
     # --timeout (10s default) would otherwise time out under every covering
     # mutant and be silently counted as a kill. Failing it here, up front,
     # makes the mismatch visible instead of a per-mutant false kill.
-    test_args = [
-      "test",
-      "--no-deps-check",
-      "--no-archives-check",
-      "--timeout",
-      Integer.to_string(test_timeout_ms)
-    ]
+    test_args =
+      [
+        "test",
+        "--no-deps-check",
+        "--no-archives-check",
+        "--timeout",
+        Integer.to_string(opts.test_timeout_ms)
+      ] ++ baseline_test_args(work_copy, opts)
 
     case Mut.ChildProcess.run("mix", test_args,
            cd: work_copy,
@@ -739,6 +806,9 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
+  defp baseline_test_args(work_copy, opts),
+    do: default_test_paths(work_copy, opts.test_paths)
+
   # True only when the WHOLE baseline ran zero tests. Umbrella-safe: `mix test`
   # prints one "N tests, M failures" summary per child app, and a test-less child
   # app legitimately prints "0 tests," / "There are no tests to run" while other
@@ -765,7 +835,7 @@ defmodule Mix.Tasks.Mut do
       mode when mode in [:coverage, :coverage_with_static_fallback] ->
         oracle =
           Metrics.with_phase(metrics_pid, :coverage_collection, fn ->
-            run_coverage!(work_copy, opts)
+            run_coverage!(work_copy, opts, baseline_tests_ms)
           end)
 
         wall_ms = oracle.collection_wall_ms
@@ -785,13 +855,14 @@ defmodule Mix.Tasks.Mut do
     coverage_wall_ms > max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)
   end
 
-  defp run_coverage!(work_copy, opts) do
+  defp run_coverage!(work_copy, opts, baseline_tests_ms) do
     case CoverageRunner.run(
            work_copy,
            [
              test_paths: absolute_test_paths(work_copy, opts),
              mutalisk_path: @mutalisk_root
-           ] ++ coverage_timeout_opt(opts)
+           ] ++
+             coverage_timeout_opt(opts) ++ coverage_budget_opt(opts.selection, baseline_tests_ms)
          ) do
       {:ok, oracle} ->
         report_degraded_coverage(oracle)
@@ -808,6 +879,12 @@ defmodule Mix.Tasks.Mut do
     do: [timeout_per_file_ms: ms]
 
   defp coverage_timeout_opt(_opts), do: []
+
+  defp coverage_budget_opt(:coverage_with_static_fallback, baseline_tests_ms) do
+    [collection_budget_ms: max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)]
+  end
+
+  defp coverage_budget_opt(_selection, _baseline_tests_ms), do: []
 
   # M64: surface per-file coverage degradation (crash-tolerant fallback).
   defp report_degraded_coverage(%{degraded_test_files: [_ | _] = degraded}) do
@@ -932,7 +1009,7 @@ defmodule Mix.Tasks.Mut do
 
   defp execute_schema_mutant(mutant, sandbox, ctx) do
     selected = selected_tests(ctx.selection_context, mutant)
-    record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy)
+    record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy, ctx.all_test_files)
     worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
 
     result =
@@ -947,7 +1024,7 @@ defmodule Mix.Tasks.Mut do
 
   defp execute_fallback_mutant(mutant, sandbox, ctx) do
     selected = selected_tests(ctx.selection_context, mutant)
-    record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy)
+    record_selection_metrics(ctx.metrics_pid, mutant, selected, ctx.work_copy, ctx.all_test_files)
     worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
 
     result =
@@ -968,7 +1045,7 @@ defmodule Mix.Tasks.Mut do
     )
 
     record_last_killer(ctx.last_killer, mutant, result, selected)
-    maybe_stream_event(ctx.stream?, ctx.metrics_pid, mutant, result)
+    maybe_stream_event(ctx.progress_pid, ctx.metrics_pid, mutant, result)
   end
 
   defp run_with_concurrency(pool, mutants, 1, run_one) do
@@ -1015,11 +1092,24 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp maybe_stream_event(true, metrics_pid, mutant, result) do
-    Terminal.stream_event(Metrics.snapshot(metrics_pid), mutant, result)
+  defp start_progress(%{reporters: reporters}) do
+    if :terminal in reporters do
+      {:ok, pid} = Agent.start_link(fn -> 0 end)
+      pid
+    end
   end
 
-  defp maybe_stream_event(false, _metrics_pid, _mutant, _result), do: :ok
+  defp maybe_stream_event(nil, _metrics_pid, _mutant, _result), do: :ok
+
+  defp maybe_stream_event(progress_pid, metrics_pid, mutant, result) do
+    snapshot = Metrics.snapshot(metrics_pid)
+
+    Agent.get_and_update(progress_pid, fn index ->
+      next = index + 1
+      Terminal.stream_event(snapshot, mutant, result, next)
+      {:ok, next}
+    end)
+  end
 
   defp record_schema_build_metadata(metrics_pid, schema_result) do
     Enum.each(schema_result.invalid_mutants, fn invalidation ->
@@ -1035,7 +1125,11 @@ defmodule Mix.Tasks.Mut do
       Metrics.record_compile_rollback(metrics_pid, file, length(invalidations))
     end)
 
-    Enum.each(schema_result.plan.skipped, fn skipped ->
+    record_skipped_plan(metrics_pid, schema_result.plan)
+  end
+
+  defp record_skipped_plan(metrics_pid, plan) do
+    Enum.each(plan.skipped, fn skipped ->
       Metrics.record_skipped(
         metrics_pid,
         Map.merge(skipped, %{engine: nil, mutation_kind: nil})
@@ -1047,9 +1141,15 @@ defmodule Mix.Tasks.Mut do
     Metrics.record_mutant(metrics_pid, mutant, result)
   end
 
-  defp record_selection_metrics(metrics_pid, mutant, selection_result, work_copy) do
+  defp record_selection_metrics(metrics_pid, mutant, selection_result, work_copy, all_test_files) do
     fallback_reason = fallback_reason(metrics_pid, selection_result.match_kind)
-    count = length(relative_tests(selection_result.test_files, work_copy))
+
+    count =
+      if selection_result.match_kind == :all_tests and selection_result.test_files == [] do
+        length(all_test_files)
+      else
+        length(relative_tests(selection_result.test_files, work_copy))
+      end
 
     Metrics.record_selection(
       metrics_pid,
@@ -1123,6 +1223,10 @@ defmodule Mix.Tasks.Mut do
 
   # HTML report path: the Stryker JSON output path with a `.html` extension
   # (e.g. stryker.report.json -> stryker.report.html).
+  defp html_output_path(%{reporters: [:html], output_path: path}) do
+    if Path.extname(path) == ".html", do: path, else: Path.rootname(path) <> ".html"
+  end
+
   defp html_output_path(opts) do
     Path.rootname(opts.output_path) <> ".html"
   end
@@ -1139,11 +1243,31 @@ defmodule Mix.Tasks.Mut do
   # done (Exploratory #44). Creating the dir now is harmless — it is where the
   # report will be written. github_actions writes to stdout, so it is exempt.
   defp validate_output_paths!(host_root, opts) do
-    [{:stryker_json, opts.output_path}, {:html, html_output_path(opts)}]
-    |> Enum.filter(fn {reporter, _path} -> reporter in opts.reporters end)
+    targets = reporter_output_paths(host_root, opts)
+
+    targets
+    |> Enum.group_by(fn {_reporter, resolved} -> resolved end, fn {reporter, _resolved} ->
+      reporter
+    end)
+    |> Enum.find(fn {_resolved, reporters} -> length(reporters) > 1 end)
+    |> case do
+      nil ->
+        :ok
+
+      {resolved, reporters} ->
+        Mix.raise(
+          "report output paths collide at #{resolved}: " <>
+            "#{Enum.map_join(reporters, ", ", &reporter_cli_name/1)}"
+        )
+    end
+
+    targets
     |> Enum.each(fn {reporter, path} ->
-      resolved = resolve_output_path(host_root, path)
-      parent = Path.dirname(resolved)
+      parent = Path.dirname(path)
+
+      if File.dir?(path) do
+        Mix.raise("cannot write #{reporter} report to #{path}: target is a directory")
+      end
 
       case File.mkdir_p(parent) do
         :ok ->
@@ -1151,12 +1275,20 @@ defmodule Mix.Tasks.Mut do
 
         {:error, reason} ->
           Mix.raise(
-            "cannot write #{reporter} report to #{resolved}: " <>
+            "cannot write #{reporter} report to #{path}: " <>
               "#{:file.format_error(reason)} (#{parent})"
           )
       end
     end)
   end
+
+  defp reporter_output_paths(host_root, opts) do
+    [{:stryker_json, opts.output_path}, {:html, html_output_path(opts)}]
+    |> Enum.filter(fn {reporter, _path} -> reporter in opts.reporters end)
+    |> Enum.map(fn {reporter, path} -> {reporter, resolve_output_path(host_root, path)} end)
+  end
+
+  defp reporter_cli_name(reporter), do: reporter |> Atom.to_string() |> String.replace("_", "-")
 
   # `--since` only affects `--incremental` reuse. Used alone it is silently
   # ignored; warn so a user does not think a change-scoped run happened
@@ -1170,27 +1302,27 @@ defmodule Mix.Tasks.Mut do
 
   defp warn_unused_since(_opts), do: :ok
 
+  defp warn_unused_output_path(%{reporters: reporters, output_path: path})
+       when path != "stryker.report.json" do
+    unless Enum.any?([:stryker_json, :html], &(&1 in reporters)) do
+      names = Enum.map_join(reporters, ",", &reporter_cli_name/1)
+
+      IO.puts(
+        :stderr,
+        "[mutalisk] --output-path #{path} has no effect with #{names} reporting; ignoring it"
+      )
+    end
+  end
+
+  defp warn_unused_output_path(_opts), do: :ok
+
   defp render_reports_with_timing(metrics_pid, plan, work_copy, host_root, opts) do
     Metrics.start_phase(metrics_pid, :report_writing)
     snapshot = Metrics.snapshot(metrics_pid)
 
-    # Render (and validate) inside the timed phase to capture the report-build
-    # cost, but DON'T write the file yet: the file is written exactly once,
-    # after the phase closes, from the snapshot that includes this phase's
-    # timing. Previously the JSON was written here AND again below — a wasted
-    # write plus an independent failure point on the discarded first write.
-    if :terminal in opts.reporters do
-      _iodata = Terminal.render_summary(snapshot)
-    end
-
-    if :stryker_json in opts.reporters do
-      _rendered = render_stryker_report(snapshot, plan, work_copy, opts)
-    end
-
-    Metrics.end_phase(metrics_pid, :report_writing)
-    snapshot = Metrics.snapshot(metrics_pid)
     render_reports(snapshot, plan, work_copy, host_root, opts)
-    snapshot
+    Metrics.end_phase(metrics_pid, :report_writing)
+    Metrics.snapshot(metrics_pid)
   end
 
   # Render + validate the Stryker JSON without writing it (used to time the
@@ -1266,10 +1398,15 @@ defmodule Mix.Tasks.Mut do
   defp worker_test_files(selected, all_test_files, work_copy) do
     selected = selected.test_files
 
-    if selected == [] or length(selected) == length(all_test_files) do
-      []
-    else
-      Enum.map(selected, &Path.relative_to(&1, work_copy))
+    cond do
+      selected == [] ->
+        []
+
+      length(selected) == length(all_test_files) ->
+        Enum.map(all_test_files, &Path.relative_to(&1, work_copy))
+
+      true ->
+        Enum.map(selected, &Path.relative_to(&1, work_copy))
     end
   end
 
@@ -1412,7 +1549,8 @@ defmodule Mix.Tasks.Mut do
     killed = Map.get(snapshot.by_status, :killed, 0)
     timeout = Map.get(snapshot.by_status, :timeout, 0)
     survived = Map.get(snapshot.by_status, :survived, 0)
-    scorable = killed + timeout + survived
+    no_coverage = Map.get(snapshot.by_status, :no_coverage, 0)
+    scorable = killed + timeout + survived + no_coverage
     inconclusive = errors + invalid
     score = Float.round(snapshot.score, 1)
 
@@ -1446,6 +1584,17 @@ defmodule Mix.Tasks.Mut do
 
       true ->
         :ok
+    end
+  end
+
+  defp set_debug_plan_exit_code(plan, fail_at) do
+    if executable_count(plan) == 0 and fail_at > 0 do
+      IO.puts(
+        :stderr,
+        "[mutalisk] no scorable mutants; failing --fail-at #{fmt_pct(fail_at)}"
+      )
+
+      fail_run()
     end
   end
 

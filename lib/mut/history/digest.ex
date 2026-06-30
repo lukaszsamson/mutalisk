@@ -1,7 +1,6 @@
 defmodule Mut.History.Digest do
   @moduledoc """
-  M105: digest computation for incremental cross-run history (design in
-  `docs/spikes/M104_incremental_history.md`).
+  M105: digest computation for incremental cross-run history.
 
   Three digests drive the M106 reuse decision:
 

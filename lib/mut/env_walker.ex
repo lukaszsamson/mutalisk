@@ -4,7 +4,7 @@ defmodule Mut.EnvWalker do
   @moduledoc """
   Source-AST walker that classifies nodes for v2 mutators.
 
-  Implements the design from `docs/spikes/M39_env_walker.md`. The
+  Implements the AST-only environment walk used by the mutation oracle. The
   walker does NOT execute top-level code, evaluate module bodies,
   invoke module callbacks, or expand user macros. It uses syntax
   and an optional tracer-macro index to decide trust.
@@ -19,8 +19,8 @@ defmodule Mut.EnvWalker do
     * `:file` — relative source path used in snapshot fields.
     * `:source` — source text used for `source_span` computation.
     * `:macro_index` — optional `tracer_macro_index` map (see
-      `M39_env_walker.md`). When absent, `if` / `unless` are
-      conservatively classified as opaque.
+      tracer metadata. When absent, `if` / `unless` are conservatively
+      classified as opaque.
 
   ## Output shape
 
@@ -98,8 +98,8 @@ defmodule Mut.EnvWalker do
 
   # M56: type-determining operators/functions whose DIRECT operands carry a
   # syntactic type hint for the VariableToLiteral mutator. Unambiguous LOCAL
-  # forms only (remote calls like `String.length/1` are not walked yet — see
-  # the descent-gap note in docs/decisions/M56). Strict boolean `and`/`or`/`not`
+  # forms only (remote calls like `String.length/1` are not walked yet). Strict
+  # boolean `and`/`or`/`not`
   # require boolean operands; `&&`/`||`/`!` (truthy-any) are excluded.
   @number_hint_ops ~w(+ - * / abs round trunc ceil floor)a
   @binary_hint_ops ~w(<> byte_size bit_size)a

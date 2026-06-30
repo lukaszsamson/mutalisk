@@ -9,6 +9,7 @@ defmodule Mut.Reporter.Terminal do
     killed: :green,
     survived: :red,
     timeout: :yellow,
+    no_coverage: :red,
     error: :magenta,
     invalid: :magenta,
     skipped: :light_black
@@ -16,7 +17,12 @@ defmodule Mut.Reporter.Terminal do
 
   @spec stream_event(Snapshot.t(), Mutant.t(), Result.t()) :: :ok
   def stream_event(%Snapshot{} = snapshot, %Mutant{} = mutant, %Result{} = result) do
-    index = Enum.count(snapshot.ledger, &executed?/1)
+    stream_event(snapshot, mutant, result, Enum.count(snapshot.ledger, &executed?/1))
+  end
+
+  @spec stream_event(Snapshot.t(), Mutant.t(), Result.t(), pos_integer()) :: :ok
+  def stream_event(%Snapshot{} = snapshot, %Mutant{} = mutant, %Result{} = result, index)
+      when is_integer(index) and index >= 1 do
     status = Atom.to_string(result.status)
 
     line =
@@ -40,11 +46,13 @@ defmodule Mut.Reporter.Terminal do
     killed = status_count(snapshot, :killed)
     survived = status_count(snapshot, :survived)
     timeout = status_count(snapshot, :timeout)
+    no_coverage = status_count(snapshot, :no_coverage)
     # Timeouts are detections (see Mut.Metrics score/3), so the displayed
     # fraction is detected/total = (killed + timeout) / (killed + timeout +
-    # survived) — consistent with snapshot.score and the Stryker HTML viewer.
+    # survived + no_coverage) — consistent with snapshot.score and the Stryker
+    # HTML viewer.
     detected = killed + timeout
-    denominator = detected + survived
+    denominator = detected + survived + no_coverage
 
     [
       score_line(detected, denominator, snapshot.score),
@@ -201,21 +209,36 @@ defmodule Mut.Reporter.Terminal do
   end
 
   defp surviving_block(snapshot) do
-    survivors = Enum.filter(snapshot.ledger, &(&1.status == :survived))
+    survivors = Enum.filter(snapshot.ledger, &(&1.status in [:survived, :no_coverage]))
 
-    if survivors == [] do
-      "Surviving mutants:\n  none\n"
-    else
-      [
-        "Surviving mutants:\n",
-        Enum.map(survivors, fn entry ->
-          mutant = entry.mutant
+    cond do
+      survivors != [] ->
+        [
+          "Surviving mutants:\n",
+          Enum.map(survivors, fn entry ->
+            mutant = entry.mutant
 
-          "  #{String.pad_trailing(location(mutant), 16)} #{String.pad_trailing(mutant.mutator_name, 24)} #{mutant.description}\n"
-        end)
-      ]
+            "  #{String.pad_trailing(location(mutant), 16)} #{String.pad_trailing(mutant.mutator_name, 24)} #{survivor_description(entry)}\n"
+          end)
+        ]
+
+      scorable_count(snapshot) == 0 ->
+        "Surviving mutants:\n  no scorable mutants were produced\n"
+
+      true ->
+        "Surviving mutants:\n  none\n"
     end
   end
+
+  defp scorable_count(snapshot) do
+    status_count(snapshot, :killed) + status_count(snapshot, :timeout) +
+      status_count(snapshot, :survived) + status_count(snapshot, :no_coverage)
+  end
+
+  defp survivor_description(%{status: :no_coverage, mutant: mutant}),
+    do: mutant.description <> " (no coverage)"
+
+  defp survivor_description(%{mutant: mutant}), do: mutant.description
 
   defp planned_total(%Snapshot{planned_total: total}) when is_integer(total), do: total
   defp planned_total(%Snapshot{total: total}), do: total
@@ -230,22 +253,29 @@ defmodule Mut.Reporter.Terminal do
 
   defp progress_total(snapshot), do: planned_total(snapshot)
 
-  defp executed?(%{status: status}), do: status not in [:skipped, :invalid, :no_coverage]
+  defp executed?(%{status: status}), do: status not in [:skipped, :invalid]
 
   defp engine_line(snapshot, engine, label) do
     # Use the SAME score arithmetic as the headline mutation score: detected
-    # (killed + timeout) over scored (detected + survived). The old `killed /
-    # engine_total` counted :invalid/:error in the denominator and dropped
-    # :timeout from the numerator, so per-engine lines disagreed with the total.
+    # (killed + timeout) over scored (detected + survived + no_coverage). The
+    # old `killed / engine_total` counted :invalid/:error in the denominator and
+    # dropped :timeout from the numerator, so per-engine lines disagreed with
+    # the total.
     killed = engine_status_count(snapshot, engine, :killed)
     timeout = engine_status_count(snapshot, engine, :timeout)
     survived = engine_status_count(snapshot, engine, :survived)
+    no_coverage = engine_status_count(snapshot, engine, :no_coverage)
     detected = killed + timeout
-    scored = detected + survived
-    score = if scored == 0, do: 100.0, else: detected / scored * 100.0
+    scored = detected + survived + no_coverage
     wall_ms = Map.get(snapshot.wall_clock_ms, engine, 0)
 
-    "#{label} #{detected}/#{scored} detected (#{format_pct(score)})   wall: #{format_seconds(wall_ms)}"
+    if scored == 0 do
+      "#{label} 0/0 detected (no scorable mutants)   wall: #{format_seconds(wall_ms)}"
+    else
+      score = detected / scored * 100.0
+
+      "#{label} #{detected}/#{scored} detected (#{format_pct(score)})   wall: #{format_seconds(wall_ms)}"
+    end
   end
 
   defp engine_status_count(snapshot, engine, status),

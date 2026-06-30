@@ -24,7 +24,7 @@ tests don't actually pin down behavior.
   execute in **sandboxed subprocesses** — the trust anchor that keeps a mutant
   from corrupting the runner.
 - **Mutator catalogue** — 13 default-on mutators (arithmetic, comparison,
-  boolean, dispatch swaps, conditionals, literals, and more) plus 16 opt-in
+  boolean, dispatch swaps, atom/integer literals, pins, and more) plus 16 opt-in
   ones. Full catalogue and enable/disable guidance in
   [the mutator reference](docs/MUTATORS.md).
 - **Coverage-based test selection** (`--selection`, default
@@ -55,4 +55,4 @@ tests don't actually pin down behavior.
 ---
 
 Per-milestone development history (the internal v1.x milestone arc) lives in
-`PLAN.md` and the `docs/decisions/` records, not here.
+the source repository, not in the packaged changelog.

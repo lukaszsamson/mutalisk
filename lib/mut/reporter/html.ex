@@ -36,18 +36,31 @@ defmodule Mut.Reporter.Html do
       |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
       |> Enum.count(&(Map.get(&1, "status") in ["RuntimeError", "CompileError"]))
 
+    skipped =
+      rendered
+      |> get_in(["mutalisk", "metrics", "skipped"])
+      |> skipped_count()
+
+    total_mutants =
+      files
+      |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
+      |> length()
+
+    score = score_summary(files, rendered)
+    heading = heading(total_survivors, inconclusive, skipped, total_mutants)
+
     """
     <!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="utf-8">
-    <title>Mutalisk — surviving mutants</title>
+    <title>#{heading}</title>
     <style>#{css()}</style>
     </head>
     <body>
-    <h1>Mutalisk — surviving mutants</h1>
-    <p class="summary">#{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.#{inconclusive_note(inconclusive)}</p>
-    #{render_body(survivors_by_file, inconclusive)}
+    <h1>#{heading}</h1>
+    <p class="summary">#{score} #{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.#{inconclusive_note(inconclusive)}#{skipped_note(skipped)}</p>
+    #{render_body(survivors_by_file, inconclusive, skipped, total_mutants)}
     </body>
     </html>
     """
@@ -56,12 +69,36 @@ defmodule Mut.Reporter.Html do
   defp inconclusive_note(0), do: ""
   defp inconclusive_note(n), do: " #{n} mutant#{plural(n)} errored or failed to compile."
 
+  defp skipped_note(0), do: ""
+  defp skipped_note(n), do: " #{n} candidate#{plural(n)} skipped."
+
+  defp heading(_total_survivors, _inconclusive, skipped, 0) when skipped > 0,
+    do: "Mutalisk — no scorable mutants"
+
+  defp heading(_total_survivors, _inconclusive, _skipped, 0),
+    do: "Mutalisk — no scorable mutants"
+
+  defp heading(0, inconclusive, _skipped, _total_mutants) when inconclusive > 0,
+    do: "Mutalisk — incomplete mutation run"
+
+  defp heading(_total_survivors, _inconclusive, _skipped, _total_mutants),
+    do: "Mutalisk — surviving mutants"
+
   # No survivors but inconclusive mutants present → incomplete, not clean.
-  defp render_body([], inconclusive) when inconclusive > 0 do
+  defp render_body([], inconclusive, _skipped, _total_mutants) when inconclusive > 0 do
     ~s(<p class="errored">No surviving mutants, but #{inconclusive} mutant#{plural(inconclusive)} errored or failed to compile — results are incomplete. See the terminal output or Stryker JSON for details.</p>)
   end
 
-  defp render_body(survivors_by_file, _inconclusive), do: render_files(survivors_by_file)
+  defp render_body([], _inconclusive, skipped, 0) when skipped > 0 do
+    ~s(<p class="errored">No scorable mutants were produced; #{skipped} candidate#{plural(skipped)} skipped. This is not a clean mutation pass.</p>)
+  end
+
+  defp render_body([], _inconclusive, _skipped, 0) do
+    ~s(<p class="errored">No scorable mutants were produced. This is not a clean mutation pass.</p>)
+  end
+
+  defp render_body(survivors_by_file, _inconclusive, _skipped, _total_mutants),
+    do: render_files(survivors_by_file)
 
   @doc "Render and write the HTML report to `path`."
   @spec write(rendered :: map(), path :: Path.t()) :: :ok
@@ -73,6 +110,45 @@ defmodule Mut.Reporter.Html do
   defp survivor?(%{"status" => "Survived"}), do: true
   defp survivor?(%{"status" => "NoCoverage"}), do: true
   defp survivor?(_mutant), do: false
+
+  defp skipped_count(nil), do: 0
+
+  defp skipped_count(%{} = skipped) do
+    skipped
+    |> Map.values()
+    |> Enum.filter(&is_integer/1)
+    |> Enum.sum()
+  end
+
+  defp skipped_count(_other), do: 0
+
+  defp score_summary(files, rendered) do
+    statuses =
+      files
+      |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
+      |> Enum.frequencies_by(&Map.get(&1, "status"))
+
+    detected = Map.get(statuses, "Killed", 0) + Map.get(statuses, "Timeout", 0)
+    denominator = detected + Map.get(statuses, "Survived", 0) + Map.get(statuses, "NoCoverage", 0)
+    threshold = get_in(rendered, ["thresholds", "high"])
+
+    score =
+      if denominator == 0 do
+        "Mutation score: 0/0 (no scorable mutants)."
+      else
+        "Mutation score: #{detected}/#{denominator} = #{format_pct(detected / denominator * 100.0)}."
+      end
+
+    score <> threshold_note(threshold)
+  end
+
+  defp threshold_note(threshold) when is_number(threshold),
+    do: " Threshold: #{format_pct(threshold)}."
+
+  defp threshold_note(_threshold), do: ""
+
+  defp format_pct(value) when is_number(value),
+    do: :erlang.float_to_binary(value * 1.0, decimals: 1) <> "%"
 
   defp render_files([]), do: ~s(<p class="clean">No surviving mutants. 🎉</p>)
 

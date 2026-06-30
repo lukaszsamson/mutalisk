@@ -57,7 +57,13 @@ defmodule Mut.Config do
         # rather than `e.message`: CompileError has no :message key (only
         # :description/:line/:file) and `e.message` would raise a confusing
         # KeyError over the friendly error we are trying to produce.
-        e in [CompileError, SyntaxError, TokenMissingError, MismatchedDelimiterError] ->
+        e in [
+          CompileError,
+          SyntaxError,
+          TokenMissingError,
+          MismatchedDelimiterError,
+          RuntimeError
+        ] ->
           Mix.raise("invalid #{path}:\n#{Exception.message(e)}")
       end
     else

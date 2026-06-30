@@ -110,6 +110,28 @@ defmodule Mut.Reporter.StrykerJsonTest do
     )
   end
 
+  test "write does not overwrite a user-visible .tmp sibling" do
+    dir =
+      Path.join(System.tmp_dir!(), "mutalisk-stryker-json-#{System.unique_integer([:positive])}")
+
+    File.mkdir_p!(dir)
+    path = Path.join(dir, "report.json")
+    collision = path <> ".tmp"
+    File.write!(collision, "KEEP")
+
+    rendered = %{
+      "schemaVersion" => "2",
+      "thresholds" => %{"high" => 80, "low" => 60},
+      "files" => %{}
+    }
+
+    assert :ok = StrykerJson.write(rendered, path)
+    assert File.read!(collision) == "KEEP"
+    assert File.exists?(path)
+
+    File.rm_rf!(dir)
+  end
+
   defp fixture_snapshot_and_plan(statuses) do
     mutants = Enum.map(statuses, &mutant/1)
 
@@ -157,14 +179,15 @@ defmodule Mut.Reporter.StrykerJsonTest do
      %Plan{schema: mutants, fallback: [], skipped: []}}
   end
 
-  # Mirror Mut.Metrics.score/3: timeout is a detection, counted with killed in
-  # both numerator and denominator; error/invalid/skipped excluded.
+  # Mirror Mut.Metrics scoring: timeout is a detection; no_coverage is
+  # undetected; error/invalid/skipped excluded.
   defp score(counts) do
     killed = Map.get(counts, :killed, 0)
     timeout = Map.get(counts, :timeout, 0)
     survived = Map.get(counts, :survived, 0)
+    no_coverage = Map.get(counts, :no_coverage, 0)
     detected = killed + timeout
-    total = detected + survived
+    total = detected + survived + no_coverage
     if total == 0, do: 100.0, else: detected / total * 100.0
   end
 

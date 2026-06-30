@@ -73,6 +73,18 @@ defmodule Mut.History.StoreTest do
       assert a["generation"] == 1
     end
 
+    test "write does not overwrite a user-visible .tmp sibling", %{dir: dir} do
+      path = Store.path(dir)
+      File.mkdir_p!(Path.dirname(path))
+      collision = path <> ".tmp"
+      File.write!(collision, "KEEP")
+
+      assert :ok = Store.write(path, Store.build(:cold, [record("a", :killed)]))
+
+      assert File.read!(collision) == "KEEP"
+      assert File.exists?(path)
+    end
+
     test "generation increments across runs and merges", %{dir: dir} do
       path = Store.path(dir)
 

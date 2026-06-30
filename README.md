@@ -13,7 +13,7 @@ Add to your `mix.exs`:
 
     defp deps do
       [
-        {:mutalisk, "~> 0.1", only: [:test]}
+        {:mutalisk, "~> 0.1", only: [:test], runtime: false}
       ]
     end
 
@@ -29,7 +29,9 @@ writes `stryker.report.json` (viewable in the
 
 Because the dependency is `only: [:test]`, the task only exists under the test
 environment — always run it with `MIX_ENV=test` (or add a `preferred_cli_env`
-alias). Plain `mix mut` in the default env fails with "task could not be found".
+alias). `runtime: false` keeps Mutalisk out of your app's normal test start
+graph; mutation workers enable the runtime dependency in their own overlay.
+Plain `mix mut` in the default env fails with "task could not be found".
 
 Useful flags (see `mix help mut` for the full list):
 
@@ -54,13 +56,15 @@ The terminal summary reports a **mutation score** and a per-status breakdown:
   killed).
 - **CompileError** / **RuntimeError** — the mutant didn't compile, or crashed
   the run for reasons unrelated to a test assertion. Excluded from the score.
+- **NoCoverage** — no selected test executed for the mutant. Counted as
+  undetected, like a survivor, because the report cannot prove a test guards it.
 - **Ignored** — skipped (unsupported target, `@mutalisk_ignore`, or an
   `exclude` match). Excluded from the score.
 
-The score is `detected / (detected + survived)` where `detected = killed +
-timeout`. CompileError, RuntimeError, and Ignored mutants are excluded from
-both — they don't measure test quality. This matches the score the Stryker
-HTML viewer derives from the same report.
+The score is `detected / (detected + survived + no_coverage)` where
+`detected = killed + timeout`. CompileError, RuntimeError, and Ignored mutants
+are excluded from both — they don't measure test quality. This matches the
+score the Stryker HTML viewer derives from the same report.
 
 ## Handling surviving mutants
 
@@ -78,7 +82,7 @@ Each surviving mutant is a specific, located suggestion. For each one, pick:
    (see below), or an `exclude` path pattern in config.
 
 Use `--reporters html` for a clickable report of every survivor with its
-source line and mutation, or `--reporters github_actions` to get inline PR
+source line and mutation, or `--reporters github-actions` to get inline PR
 annotations in CI.
 
 ## Source-level ignores
@@ -104,7 +108,6 @@ Settings layer, lowest to highest precedence:
       selection: :coverage_with_static_fallback,
       fail_at: 75.0,
       concurrency: 8,
-      enabled_targets: [:dispatch, :guard],
       exclude: [~r"lib/my_app_web/router.ex"]
     ]
 
@@ -113,18 +116,19 @@ Or `config :mut, ...` in `config/test.exs`. CLI flags override both. Run
 
 ## Mutators
 
-13 low-noise mutators run by default; 16 more are opt-in. See
-[docs/MUTATORS.md](docs/MUTATORS.md) for the full catalogue and how to enable
-the opt-in ones.
+13 low-noise mutators run by default; 17 more are opt-in or explicit-only. See
+[docs/MUTATORS.md](docs/MUTATORS.md) for the full catalogue and enablement
+rules.
 
 ## Reporters
 
 - `terminal` (default) — the summary printed to stdout.
-- `stryker_json` (default) — `stryker.report.json` for the Stryker HTML viewer.
+- `stryker-json` (default) — `stryker.report.json` for the Stryker HTML viewer.
 - `html` (opt-in) — a self-contained `stryker.report.html` listing survivors.
-- `github_actions` (opt-in) — `::warning` annotations for inline PR comments.
+- `github-actions` (opt-in) — `::warning` annotations for inline PR comments.
 
-Select with `--reporters a,b` or `config :mut, reporters: [...]`.
+Select with `--reporters a,b` or `config :mut, reporters: [...]`. Config may
+use atoms such as `:stryker_json`; CLI examples use the hyphenated names.
 
 ## Per-test timeout policy
 
@@ -150,7 +154,7 @@ global default.
 ## Project documents
 
 - [docs/MUTATORS.md](docs/MUTATORS.md) — the mutator catalogue
-- [HLD](https://github.com/lukaszsamson/mutalisk/blob/main/ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md) — the design / spec
-- [PLAN.md](https://github.com/lukaszsamson/mutalisk/blob/main/PLAN.md) — milestone history
-- [BENCHMARKS.md](https://github.com/lukaszsamson/mutalisk/blob/main/BENCHMARKS.md) — OSS validation runs
-- [docs/BOOTSTRAP.md](https://github.com/lukaszsamson/mutalisk/blob/main/docs/BOOTSTRAP.md) — the child-process bootstrap design
+- [HLD](https://github.com/lukaszsamson/mutalisk/blob/main/ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md) — latest design / spec on `main`
+- [PLAN.md](https://github.com/lukaszsamson/mutalisk/blob/main/PLAN.md) — latest milestone history on `main`
+- [BENCHMARKS.md](https://github.com/lukaszsamson/mutalisk/blob/main/BENCHMARKS.md) — latest OSS validation runs on `main`
+- [docs/BOOTSTRAP.md](https://github.com/lukaszsamson/mutalisk/blob/main/docs/BOOTSTRAP.md) — latest child-process bootstrap design on `main`

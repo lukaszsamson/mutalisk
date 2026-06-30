@@ -111,7 +111,8 @@ defmodule Mut.Cli do
   # runs the v1 dispatch+guard mutators PLUS AtomLiteral (M46 default_on
   # decision): the env walker runs by default but only AtomLiteral is
   # active. String/Float/Nil/Collection stay opt-in. Any explicit --enable
-  # or --mutators selects from the full set with v1.15 gating semantics.
+  # selects the target-selectable set; --mutators can also name explicit-only
+  # mutators such as VariableToLiteral.
   # @default_on_mutators mirrors `Mut.Mutator.Defaults.default_on/0` as CLI
   # names (a test asserts they resolve to the same modules).
   @default_on_mutators ~w(
@@ -122,6 +123,25 @@ defmodule Mut.Cli do
   # M83: :pattern_shape moves into the default enabled targets so Pin (the only
   # graduated :pattern_shape mutator) fires without `--enable pattern_shape`.
   @default_enabled_targets [:dispatch, :guard, :env_walker, :pattern_shape]
+  @min_explicit_concurrency_ceiling 16
+  @known_config_keys [
+    :files,
+    :test_paths,
+    :mutators,
+    :enabled_targets,
+    :selection,
+    :fail_at,
+    :concurrency,
+    :test_timeout_ms,
+    :reporters,
+    :output_path,
+    :exclude,
+    :max_mutants,
+    :since,
+    :incremental,
+    :history_path,
+    :coverage_timeout_ms
+  ]
 
   @spec parse([String.t()], keyword) :: {:ok, Options.t()} | {:error, String.t()}
   def parse(argv, config \\ []) when is_list(argv) and is_list(config) do
@@ -191,7 +211,8 @@ defmodule Mut.Cli do
   end
 
   defp normalize(parsed, config) do
-    with {:ok, files} <- files(parsed, config),
+    with :ok <- validate_config_keys(config),
+         {:ok, files} <- files(parsed, config),
          {:ok, mutators} <- mutators(parsed, config),
          {:ok, enabled_targets} <- enabled_targets(parsed, config),
          {:ok, fail_at} <- fail_at(parsed, config),
@@ -246,9 +267,20 @@ defmodule Mut.Cli do
   # (Exploratory #20, #28). CLI flag wins, config is the fallback (T10).
   defp since(parsed, config) do
     case Keyword.get(parsed, :since, Keyword.get(config, :since)) do
-      nil -> {:ok, nil}
-      value when is_binary(value) and value != "" -> {:ok, value}
-      other -> {:error, "since must be a non-empty string git ref; got #{inspect(other)}"}
+      nil ->
+        {:ok, nil}
+
+      value when is_binary(value) ->
+        trimmed = String.trim(value)
+
+        if trimmed == "" do
+          {:error, "since must be a non-empty string git ref; got #{inspect(value)}"}
+        else
+          {:ok, trimmed}
+        end
+
+      other ->
+        {:error, "since must be a non-empty string git ref; got #{inspect(other)}"}
     end
   end
 
@@ -256,9 +288,18 @@ defmodule Mut.Cli do
   # value otherwise crashes in `Path.expand`/history I/O (Exploratory #19, #27).
   defp history_path(config) do
     case Keyword.get(config, :history_path) do
-      nil -> {:ok, nil}
-      value when is_binary(value) and value != "" -> {:ok, value}
-      other -> {:error, "config :history_path must be a non-empty string; got #{inspect(other)}"}
+      nil ->
+        {:ok, nil}
+
+      value when is_binary(value) ->
+        if String.trim(value) == "" do
+          {:error, "config :history_path must be a non-empty string; got #{inspect(value)}"}
+        else
+          {:ok, value}
+        end
+
+      other ->
+        {:error, "config :history_path must be a non-empty string; got #{inspect(other)}"}
     end
   end
 
@@ -320,16 +361,25 @@ defmodule Mut.Cli do
     # every `apps/<app>/lib/`. An explicit `--files`/config value is honoured
     # verbatim. (M71: a `["lib"]` default produced 0 mutants on umbrellas, whose
     # root has no lib/.)
-    # `--files` may be repeated to mutate several glob patterns in one run
-    # (M122); each occurrence is collected. Falls back to config, then nil.
+    # `--files` may be repeated or comma-separated to mutate several glob
+    # patterns in one run (M122/R130). Falls back to config, then nil.
     case Keyword.get_values(parsed, :files) do
       # CLI `--files` values are strings (OptionParser :string) but may be blank
       # (`--files ""` would expand to the whole project — #54; `--files " "` to a
       # no-op — #53). Config values may be a typo (`files: 123`/`[123]` — #18/#24)
       # or empty (`files: []` — #55). `path_list/2` rejects all of these.
       [] -> path_list("config :files", Keyword.get(config, :files))
-      values -> path_list("--files", values)
+      values -> path_list("--files", split_cli_paths(values))
     end
+  end
+
+  defp split_cli_paths(values) do
+    values
+    |> Enum.flat_map(fn value ->
+      value
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+    end)
   end
 
   defp mutators(parsed, config) do
@@ -343,8 +393,8 @@ defmodule Mut.Cli do
           {:ok, names}
         end
 
-      # Explicit --enable (or config) selects from the full set with v1.15
-      # gating; nil resolves to Defaults.list/0.
+      # Explicit --enable (or config) selects the target-selectable set with
+      # v1.15 gating; nil resolves to Defaults.list/0.
       enable_given?(parsed, config) ->
         {:ok, nil}
 
@@ -388,7 +438,9 @@ defmodule Mut.Cli do
     with {:ok, names} <- string_name_list("reporters", value),
          :ok <- non_empty(names, "reporters"),
          :ok <- validate_reporter_names(names) do
-      names_to_reporter_atoms(names)
+      with {:ok, reporters} <- names_to_reporter_atoms(names) do
+        {:ok, Enum.uniq(reporters)}
+      end
     end
   end
 
@@ -398,8 +450,15 @@ defmodule Mut.Cli do
            :output_path,
            Keyword.get(config, :output_path, "stryker.report.json")
          ) do
-      value when is_binary(value) and value != "" -> {:ok, value}
-      other -> {:error, "output_path must be a non-empty string; got #{inspect(other)}"}
+      value when is_binary(value) ->
+        if String.trim(value) == "" do
+          {:error, "output_path must be a non-empty string; got #{inspect(value)}"}
+        else
+          {:ok, value}
+        end
+
+      other ->
+        {:error, "output_path must be a non-empty string; got #{inspect(other)}"}
     end
   end
 
@@ -411,11 +470,18 @@ defmodule Mut.Cli do
     # bounded across hardware. Users with more cores can raise it
     # explicitly via `--concurrency 8` or higher.
     default = min(System.schedulers_online(), 4)
+    max = max(System.schedulers_online() * 4, @min_explicit_concurrency_ceiling)
     value = Keyword.get(parsed, :concurrency, Keyword.get(config, :concurrency, default))
 
     case value do
-      value when is_integer(value) and value >= 1 -> {:ok, value}
-      _invalid -> {:error, "--concurrency must be at least 1; run `mix help mut`"}
+      value when is_integer(value) and value >= 1 and value <= max ->
+        {:ok, value}
+
+      value when is_integer(value) and value > max ->
+        {:error, "--concurrency must be between 1 and #{max} on this machine; run `mix help mut`"}
+
+      _invalid ->
+        {:error, "--concurrency must be at least 1; run `mix help mut`"}
     end
   end
 
@@ -509,6 +575,9 @@ defmodule Mut.Cli do
       Enum.any?(value, &(String.trim(&1) == "")) ->
         {:error, "#{label} contains a blank path; run `mix help mut`"}
 
+      label == "config :test_paths" and Enum.any?(value, &(Path.type(&1) == :absolute)) ->
+        {:error, "#{label} must contain project-relative paths; got absolute path"}
+
       true ->
         {:ok, value}
     end
@@ -547,9 +616,23 @@ defmodule Mut.Cli do
     argv
     |> Enum.filter(&String.starts_with?(&1, "--"))
     |> Enum.map(&(&1 |> String.trim_leading("--") |> String.split("=", parts: 2) |> List.first()))
+    |> Enum.map(&String.trim_leading(&1, "no-"))
     |> Enum.reject(&(&1 in @repeatable_flags))
     |> Enum.frequencies()
     |> Enum.any?(fn {_key, count} -> count > 1 end)
+  end
+
+  defp validate_config_keys(config) do
+    unknown = config |> Keyword.keys() |> Enum.reject(&(&1 in @known_config_keys))
+
+    case unknown do
+      [] ->
+        :ok
+
+      [key | _] ->
+        {:error,
+         "unknown config key #{inspect(key)}; known: #{Enum.map_join(@known_config_keys, ", ", &inspect/1)}"}
+    end
   end
 
   # Convert string name to target atom ONLY after validation of the string.
@@ -661,7 +744,8 @@ defmodule Mut.Cli do
     end
   end
 
-  defp normalize_name(value) when is_atom(value), do: Atom.to_string(value)
+  defp normalize_name(value) when is_atom(value),
+    do: value |> Atom.to_string() |> normalize_name()
 
   defp normalize_name(value) when is_binary(value) do
     value

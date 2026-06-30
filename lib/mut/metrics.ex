@@ -122,7 +122,7 @@ defmodule Mut.Metrics do
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, opts)
 
   @spec record_mutant(pid :: GenServer.server(), mutant :: Mutant.t(), result :: Result.t()) ::
-          :ok
+          pos_integer()
   def record_mutant(pid, %Mutant{} = mutant, %Result{} = result) do
     # Synchronous: a mutant result must be recorded before the worker task
     # returns, so the post-run report snapshot (taken from the parent after the
@@ -258,8 +258,9 @@ defmodule Mut.Metrics do
     status = result.status
     duration_ms = result.duration_ms || 0
     entry = ledger_entry(mutant, result, status)
+    index = Enum.count(state.ledger, &executed_ledger_entry?/1) + 1
 
-    {:reply, :ok,
+    {:reply, index,
      state
      |> increment_status(status)
      |> increment_engine_status(mutant.engine, status)
@@ -417,18 +418,21 @@ defmodule Mut.Metrics do
     }
   end
 
+  defp executed_ledger_entry?(%{status: status}), do: status not in [:skipped, :invalid]
+
   defp build_snapshot(state) do
     ledger = Enum.reverse(state.ledger)
     by_status = state.by_status
     killed = Map.get(by_status, :killed, 0)
     survived = Map.get(by_status, :survived, 0)
     timeout = Map.get(by_status, :timeout, 0)
+    no_coverage = Map.get(by_status, :no_coverage, 0)
 
-    executed_ledger = Enum.reject(ledger, &(&1.status in [:skipped, :invalid, :no_coverage]))
+    executed_ledger = Enum.reject(ledger, &(&1.status in [:skipped, :invalid]))
 
     %Snapshot{
       total: length(executed_ledger),
-      score: score(killed, timeout, survived),
+      score: score(killed, timeout, survived, no_coverage),
       planned_total: state.planned_total,
       by_status: by_status,
       by_engine_status: state.by_engine_status,
@@ -488,16 +492,12 @@ defmodule Mut.Metrics do
     %{exact_line: 0, enclosing_function: 0, static_fallback: 0, all_tests: 0}
   end
 
-  # `:timeout` is a DETECTION (the mutation drove a test past its time budget —
-  # typically an infinite loop the mutant introduced), not a non-detection. Per
-  # the SPEC's Result Classification only `:error`/`:invalid` (and
-  # `:skipped`/`:no_coverage`) are excluded from the denominator; `:timeout`
-  # joins `:killed` in the numerator. This matches the Stryker HTML viewer's
-  # (killed + timeout) / (killed + timeout + survived) so mix mut's terminal
-  # score agrees with the HTML score derived from the same report.
-  defp score(killed, timeout, survived) do
+  # `:timeout` is a detection. `:no_coverage` is an undetected behavioral
+  # verdict in Stryker's schema, so include it in the denominator to keep the
+  # CLI score, fail-at gate, and JSON/HTML-derived scores aligned.
+  defp score(killed, timeout, survived, no_coverage) do
     detected = killed + timeout
-    total = detected + survived
+    total = detected + survived + no_coverage
     if total == 0, do: 100.0, else: detected / total * 100.0
   end
 

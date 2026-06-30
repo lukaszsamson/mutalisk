@@ -67,7 +67,6 @@ defmodule Mut.Mutator.FunctionReplace do
   # candidates, both equivalent; bandit added 0) — insufficient evidence to
   # ship into a default-on surface, where equivalent mutants would depress
   # users' scores. Held as candidates for a future cycle with richer targets.
-  # See docs/decisions/M103_catalogue_additions.md.
 
   @impl true
   def name, do: "FunctionReplace"

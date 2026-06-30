@@ -278,8 +278,16 @@ defmodule Mut.TestSelection.Static do
 
   defp discover_test_files(test_paths) do
     test_paths
-    |> Enum.flat_map(fn path -> path |> Path.join("**/*_test.exs") |> Path.wildcard() end)
+    |> Enum.flat_map(&discover_path/1)
     |> Enum.sort()
+  end
+
+  defp discover_path(path) do
+    if File.regular?(path) and String.ends_with?(path, "_test.exs") do
+      [path]
+    else
+      path |> Path.join("**/*_test.exs") |> Path.wildcard()
+    end
   end
 
   defp module_concat(parts) do
