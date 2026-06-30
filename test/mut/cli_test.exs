@@ -259,10 +259,10 @@ defmodule Mut.CliTest do
 
     test "rejects non-string/atom :mutators entries without crashing" do
       assert {:error, m} = Cli.parse([], mutators: [123])
-      assert m =~ "mutators must be strings"
+      assert m =~ "config :mutators must contain only strings or atoms"
 
       assert {:error, m} = Cli.parse([], mutators: 123)
-      assert m =~ "mutators must be strings"
+      assert m =~ "config :mutators must be a string, atom, or list"
 
       # atoms are still accepted
       assert {:ok, _} = Cli.parse([], mutators: [:arithmetic])
@@ -283,6 +283,63 @@ defmodule Mut.CliTest do
 
       assert {:ok, %Options{incremental: true, since: "HEAD~1", history_path: "h.json"}} =
                Cli.parse([], incremental: true, since: "HEAD~1", history_path: "h.json")
+    end
+  end
+
+  describe "input validation (exploratory #51-70)" do
+    test "rejects empty / blank / empty-list --files (no whole-project or no-op run)" do
+      # #54: "" would expand to the whole project
+      assert {:error, m} = Cli.parse(["--files", ""])
+      assert m =~ "--files contains a blank path"
+
+      # #53: whitespace-only
+      assert {:error, m} = Cli.parse(["--files", " "])
+      assert m =~ "--files contains a blank path"
+
+      # #55: config files: []
+      assert {:error, m} = Cli.parse([], files: [])
+      assert m =~ "config :files must not be empty"
+    end
+
+    test "rejects empty config :test_paths (#56)" do
+      assert {:error, m} = Cli.parse([], test_paths: [])
+      assert m =~ "config :test_paths must not be empty"
+    end
+
+    test "rejects trailing-comma empty segments in reporters/mutators/enable (#65-67)" do
+      assert {:error, m} = Cli.parse(["--reporters", "terminal,"])
+      assert m =~ "empty segment"
+
+      assert {:error, m} = Cli.parse(["--mutators", "arithmetic,"])
+      assert m =~ "empty segment"
+
+      assert {:error, m} = Cli.parse(["--enable", "dispatch,"])
+      assert m =~ "empty segment"
+    end
+
+    test "unknown reporter error uses documented hyphen spelling (#68)" do
+      assert {:error, m} = Cli.parse(["--reporters", "nope"])
+      assert m =~ "stryker-json"
+      assert m =~ "github-actions"
+      refute m =~ "stryker_json"
+    end
+
+    test "config reporters/enabled_targets non-string entries get a config type error (#69,#70)" do
+      assert {:error, m} = Cli.parse([], reporters: [123])
+      assert m =~ "config :reporters must contain only strings or atoms"
+
+      assert {:error, m} = Cli.parse([], enabled_targets: [123])
+      assert m =~ "config :enabled_targets must contain only strings or atoms"
+    end
+
+    test "valid comma lists and atom config still parse" do
+      assert {:ok, %Options{reporters: [:terminal, :html]}} =
+               Cli.parse(["--reporters", "terminal,html"])
+
+      assert {:ok, %Options{reporters: [:terminal]}} = Cli.parse([], reporters: [:terminal])
+
+      assert {:ok, %Options{files: ["lib/a.ex", "lib/b.ex"]}} =
+               Cli.parse([], files: ["lib/a.ex", "lib/b.ex"])
     end
   end
 

@@ -323,12 +323,12 @@ defmodule Mut.Cli do
     # `--files` may be repeated to mutate several glob patterns in one run
     # (M122); each occurrence is collected. Falls back to config, then nil.
     case Keyword.get_values(parsed, :files) do
-      # CLI `--files` values are always strings (OptionParser :string). Config
-      # values are validated strictly so a typo like `files: 123` or `[123]`
-      # surfaces a friendly error instead of crashing / silently coercing
-      # (Exploratory #18, #24).
-      [] -> strict_string_list("config :files", Keyword.get(config, :files))
-      values -> {:ok, values}
+      # CLI `--files` values are strings (OptionParser :string) but may be blank
+      # (`--files ""` would expand to the whole project — #54; `--files " "` to a
+      # no-op — #53). Config values may be a typo (`files: 123`/`[123]` — #18/#24)
+      # or empty (`files: []` — #55). `path_list/2` rejects all of these.
+      [] -> path_list("config :files", Keyword.get(config, :files))
+      values -> path_list("--files", values)
     end
   end
 
@@ -362,7 +362,7 @@ defmodule Mut.Cli do
         Keyword.get(config, :enabled_targets, @default_enabled_targets)
       )
 
-    with {:ok, names} <- string_name_list(value),
+    with {:ok, names} <- string_name_list("enabled_targets", value),
          :ok <- non_empty(names, "--enable targets"),
          :ok <- validate_target_names(names) do
       names_to_target_atoms(names)
@@ -385,7 +385,7 @@ defmodule Mut.Cli do
   defp reporters(parsed, config) do
     value = Keyword.get(parsed, :reporters, Keyword.get(config, :reporters, @default_reporters))
 
-    with {:ok, names} <- string_name_list(value),
+    with {:ok, names} <- string_name_list("reporters", value),
          :ok <- non_empty(names, "reporters"),
          :ok <- validate_reporter_names(names) do
       names_to_reporter_atoms(names)
@@ -478,50 +478,46 @@ defmodule Mut.Cli do
   # zero test files in umbrellas, so every mutant fell to the "all tests" bucket
   # with a recorded selected-test count of 0 (Exploratory issue #3).
   defp test_paths(config),
-    do: strict_string_list("config :test_paths", Keyword.get(config, :test_paths))
+    do: path_list("config :test_paths", Keyword.get(config, :test_paths))
 
   # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
-  # branch in `mutators/2`), so there is no nil clause. Mutator names must be
-  # strings or atoms; a non-string list entry (e.g. `mutators: [123]`) would
-  # otherwise crash `normalize_name/1` with a raw FunctionClauseError instead of
-  # a friendly error (Exploratory #24/#25 sibling for the mutators key).
-  defp maybe_name_list(value) do
-    names = name_list(value)
+  # branch in `mutators/2`). Reuses `string_name_list/2` so mutators get the same
+  # treatment as reporters/targets: non-string/atom entries are rejected with a
+  # friendly error rather than a raw FunctionClauseError (#24/#25 sibling), and a
+  # trailing-comma empty segment (`arithmetic,`) is rejected (#66).
+  defp maybe_name_list(value), do: string_name_list("mutators", value)
 
-    if Enum.all?(names, &(is_binary(&1) or is_atom(&1))) do
-      {:ok, Enum.map(names, &normalize_name/1)}
-    else
-      {:error, "mutators must be strings (or atoms); got #{inspect(value, charlists: :as_lists)}"}
+  # Validator for path-valued keys (`files`, `test_paths`): `nil` (use the
+  # umbrella-aware default), a non-blank string, or a NON-EMPTY list of non-blank
+  # strings. Rejects, with a friendly error rather than a crash or silent no-op:
+  #   - non-string entries / wrong types (#18, #24, #25)
+  #   - empty list `[]` (#55, #56)
+  #   - empty string `""` (would expand to the whole project — #54)
+  #   - whitespace-only entries (no-op run — #53)
+  defp path_list(_label, nil), do: {:ok, nil}
+  defp path_list(label, value) when is_binary(value), do: path_list(label, [value])
+
+  defp path_list(label, value) when is_list(value) do
+    cond do
+      value == [] ->
+        {:error, "#{label} must not be empty; run `mix help mut`"}
+
+      not Enum.all?(value, &is_binary/1) ->
+        {:error,
+         "#{label} must be a string or list of strings; got #{inspect(value, charlists: :as_lists)}"}
+
+      Enum.any?(value, &(String.trim(&1) == "")) ->
+        {:error, "#{label} contains a blank path; run `mix help mut`"}
+
+      true ->
+        {:ok, value}
     end
   end
 
-  defp name_list(value) when is_binary(value) do
-    value
-    |> String.split(",", trim: true)
-    |> Enum.map(&String.trim/1)
-    |> Enum.reject(&(&1 == ""))
-  end
-
-  defp name_list(value) when is_list(value), do: value
-  defp name_list(value), do: [value]
-
-  # Strict variant for path-valued keys (`files`, `test_paths`): a string, a list
-  # of strings, or nil. Non-string entries are REJECTED, not coerced — a config
-  # typo like `files: 123` or `files: [123]` should be a friendly error, not a
-  # silent `"123"` pattern that matches nothing (Exploratory #18, #24, #25).
-  defp strict_string_list(_label, nil), do: {:ok, nil}
-  defp strict_string_list(_label, value) when is_binary(value), do: {:ok, [value]}
-
-  defp strict_string_list(label, value) when is_list(value) do
-    if Enum.all?(value, &is_binary/1) do
-      {:ok, value}
-    else
-      {:error, "#{label} must be a string or list of strings; got #{inspect(value)}"}
-    end
-  end
-
-  defp strict_string_list(label, other),
-    do: {:error, "#{label} must be a string or list of strings; got #{inspect(other)}"}
+  defp path_list(label, other),
+    do:
+      {:error,
+       "#{label} must be a string or list of strings; got #{inspect(other, charlists: :as_lists)}"}
 
   # Reject an explicitly-empty selection (`--reporters ""`, `mutators: []`, …).
   # Defaults are non-empty, so an empty list here always means the user asked for
@@ -594,25 +590,45 @@ defmodule Mut.Cli do
   end
 
   # Coerce input (atom, string, or list) to a normalized list of strings.
-  defp string_name_list(value) when is_atom(value) do
+  # `label` is the config key name, used in friendly errors.
+  defp string_name_list(_label, value) when is_atom(value) do
     {:ok, [Atom.to_string(value) |> normalize_name()]}
   end
 
-  defp string_name_list(value) when is_binary(value) do
-    {:ok,
-     value
-     |> String.split(",", trim: true)
-     |> Enum.map(&String.trim/1)
-     |> Enum.reject(&(&1 == ""))
-     |> Enum.map(&normalize_name/1)}
+  defp string_name_list(label, value) when is_binary(value) do
+    segments = value |> String.split(",") |> Enum.map(&String.trim/1)
+    non_empty = Enum.reject(segments, &(&1 == ""))
+
+    cond do
+      # Whole value blank ("" / "  " / ","): yield [] so `non_empty/2` reports
+      # "must not be empty" with the right wording.
+      non_empty == [] ->
+        {:ok, []}
+
+      # A trailing/extra comma left an empty segment ("terminal,"): reject it
+      # rather than silently dropping it, so a typo is not hidden (#65, #66, #67).
+      length(non_empty) != length(segments) ->
+        {:error, "#{label} has an empty segment in #{inspect(value)}; remove the extra comma"}
+
+      true ->
+        {:ok, Enum.map(non_empty, &normalize_name/1)}
+    end
   end
 
-  defp string_name_list(value) when is_list(value) do
-    {:ok, Enum.map(value, &normalize_name(to_string(&1)))}
+  defp string_name_list(label, value) when is_list(value) do
+    # Config lists may carry non-string/atom entries (`reporters: [123]`); reject
+    # with a config-typed message instead of stringifying to a CLI-style unknown
+    # value error (#69, #70).
+    if Enum.all?(value, &(is_binary(&1) or is_atom(&1))) do
+      {:ok, Enum.map(value, &normalize_name(to_string(&1)))}
+    else
+      {:error,
+       "config :#{label} must contain only strings or atoms; got #{inspect(value, charlists: :as_lists)}"}
+    end
   end
 
-  defp string_name_list(_value) do
-    {:error, "invalid input type for target/reporter list"}
+  defp string_name_list(label, _value) do
+    {:error, "config :#{label} must be a string, atom, or list of strings/atoms"}
   end
 
   # Validate normalized target names against known list (string validation).
@@ -636,9 +652,12 @@ defmodule Mut.Cli do
     if unknown == [] do
       :ok
     else
-      # Render the rejected value in atom form (`:name`) without interning it.
-      {:error,
-       "unknown --reporters value :#{List.first(unknown)}; known: #{known(@known_reporters)}"}
+      # Show the known list in the documented CLI spelling (hyphenated:
+      # `stryker-json`, `github-actions`) rather than the internal underscore
+      # atoms, so the error matches `mix help mut` (#68). The rejected value is
+      # rendered in atom form (`:name`) without interning it.
+      known = Enum.map_join(@known_reporters, ", ", &String.replace(Atom.to_string(&1), "_", "-"))
+      {:error, "unknown --reporters value :#{List.first(unknown)}; known: #{known}"}
     end
   end
 
