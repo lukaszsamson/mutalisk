@@ -86,14 +86,15 @@ defmodule Mut.SchemaBuild do
 
   defp materialize(user_project_root, opts) do
     Mut.WorkCopy.materialize(user_project_root, Keyword.get_lazy(opts, :run_id, &run_id/0),
-      force: Keyword.get(opts, :force, false)
+      force: Keyword.get(opts, :force, false),
+      root: Keyword.get(opts, :root)
     )
   end
 
   defp build_in_work_copy(work_copy, plan, opts) do
     with :ok <- Mut.WorkCopy.install_overlay(work_copy, :schema),
          {:ok, placement_maps, original_sources, refusals} <- instrument_files(work_copy, plan),
-         plan <- reroute_refused(plan, refusals),
+         plan <- reroute_refused(plan, refusals, original_sources),
          :ok <- run_child_mix(work_copy, @deps_args),
          {:compile, output, exit_code} <- compile(work_copy),
          {:ok, final} <-
@@ -142,21 +143,55 @@ defmodule Mut.SchemaBuild do
   # runtime, so a schema-wrapped expression inside a macro body never sees the
   # active id. Source-patch (fallback) substitution still works for those
   # sites because it replaces the bytes before compilation.
-  defp reroute_refused(%Plan{} = plan, []), do: plan
+  defp reroute_refused(%Plan{} = plan, [], _original_sources), do: plan
 
-  defp reroute_refused(%Plan{} = plan, refusals) do
+  defp reroute_refused(%Plan{} = plan, refusals, original_sources) do
     refused_ids = MapSet.new(refusals, & &1.mutant.id)
 
     {refused, kept_schema} =
       Enum.split_with(plan.schema, &MapSet.member?(refused_ids, &1.id))
 
-    rerouted =
-      Enum.map(refused, fn mutant ->
-        %{mutant | engine: :fallback}
-      end)
+    # Schema-built mutants carry no byte span (the schema engine addresses them
+    # by AST path). The fallback engine splices source bytes, so a rerouted
+    # mutant MUST have a span — otherwise `Mut.FallbackPatch.render/2` fails with
+    # `missing_source_span` and the mutant is reported `invalid`. Recover the
+    # span by text-searching the original source where we can; a mutant we still
+    # cannot locate is routed to fallback unchanged and surfaces as `invalid` at
+    # runtime (its prior behaviour — never silently dropped).
+    rerouted = Enum.map(refused, &reroute_to_fallback(&1, original_sources))
 
     %{plan | schema: kept_schema, fallback: plan.fallback ++ rerouted}
   end
+
+  defp reroute_to_fallback(mutant, original_sources) do
+    cond do
+      is_integer(mutant.start_byte) and is_integer(mutant.end_byte) ->
+        %{mutant | engine: :fallback}
+
+      span = recompute_span(mutant, original_sources) ->
+        %{
+          mutant
+          | engine: :fallback,
+            start_byte: span.start_byte,
+            end_byte: span.end_byte,
+            span: {span.start_line, span.start_column, span.end_line, span.end_column},
+            original_source: slice_source(original_sources[mutant.file], span)
+        }
+
+      true ->
+        %{mutant | engine: :fallback}
+    end
+  end
+
+  defp recompute_span(%{original_ast: ast, file: file} = _mutant, original_sources) do
+    Mut.AstWalk.fallback_span(ast, original_sources[file], file)
+  end
+
+  defp slice_source(source, %{start_byte: s, end_byte: e})
+       when is_binary(source) and is_integer(s) and is_integer(e) and e >= s,
+       do: binary_part(source, s, e - s)
+
+  defp slice_source(_source, _span), do: nil
 
   defp restore_original_sources(work_copy, original_sources) do
     Enum.each(original_sources, fn {file, source} ->

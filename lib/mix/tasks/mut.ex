@@ -51,8 +51,8 @@ defmodule Mix.Tasks.Mut do
       escape hatch — also the fast choice on
       macro-heavy/generated apps (e.g. Phoenix) where
       coverage collection is slow before it falls back.
-    - `--keep-work-copy` — Skip cleanup of tmp/mut_work/<run_id>/ on exit
-      (debug aid; default: false)
+    - `--keep-work-copy` — Skip cleanup of the run's temporary work copies on
+      exit and print their retained paths (debug aid; default: false)
     - `--test-timeout-ms N` — Per-test ExUnit timeout in milliseconds.
       Default 10000. Range 1000..600000.
     - `--incremental` — Reuse verdicts from a prior run's history for
@@ -131,6 +131,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Reporter.StrykerJson
   alias Mut.Reporter.Terminal
   alias Mut.Sandbox
+  alias Mut.Selection.DowngradeHint
   alias Mut.TestSelection.Coverage, as: CoverageSelection
   alias Mut.TestSelection.Static
   alias Mut.Worker
@@ -179,6 +180,12 @@ defmodule Mix.Tasks.Mut do
     warn_unused_since(opts)
     warn_unused_output_path(opts)
     mutalisk_root = @mutalisk_root
+    # #40/#49: every runtime artifact (work copies, sandboxes, memory/baseline
+    # logs) lives under this target-scoped OS-temp root — NEVER under the mutalisk
+    # dependency checkout, which `mix deps.clean` wipes, CI caches surprise, and
+    # can be read-only. See `artifact_root/1` for why OS-temp over the target's
+    # `_build`.
+    artifact_root = artifact_root(target_root)
     run_id = run_id()
     started = System.monotonic_time(:millisecond)
     {:ok, metrics_pid} = Metrics.start_link([])
@@ -186,20 +193,30 @@ defmodule Mix.Tasks.Mut do
     Metrics.set_test_timeout_ms(metrics_pid, opts.test_timeout_ms)
 
     {:ok, watchdog_pid} =
-      Mut.MemoryWatchdog.start(Path.join([mutalisk_root, "tmp", "mut_memory.log"]))
+      Mut.MemoryWatchdog.start(Path.join(artifact_root, "mut_memory.log"))
 
     try do
       {:ok, oracle} =
         Metrics.with_phase(metrics_pid, :oracle_build, fn ->
+          # The `File.cd!(mutalisk_root, ...)` here is NOT for steering artifact
+          # locations (those are passed explicitly via `:root`); it makes the
+          # `File.cwd!()`-derived `MUTALISK_PATH` in `Mut.OracleBuild`'s child mix
+          # env resolve to the mutalisk checkout, so the work copy's overlay pins
+          # `{:mutalisk, path: <checkout>}`.
           File.cd!(mutalisk_root, fn ->
-            Mut.OracleBuild.run(target_root, run_id: run_id, force: true, keep: true)
+            Mut.OracleBuild.run(target_root,
+              run_id: run_id,
+              force: true,
+              keep: true,
+              root: artifact_root
+            )
           end)
         end)
 
-      work_copy = Path.join([mutalisk_root, "tmp", "mut_work", run_id])
+      work_copy = Path.join([artifact_root, "mut_work", run_id])
 
       Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
-        baseline_tests!(work_copy, mutalisk_root, opts, run_id)
+        baseline_tests!(work_copy, mutalisk_root, artifact_root, opts, run_id)
       end)
 
       baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
@@ -232,7 +249,13 @@ defmodule Mix.Tasks.Mut do
           execute_empty_plan(plan, work_copy, target_root, opts, started, metrics_pid)
         else
           {coverage_oracle, selection_mode} =
-            collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms)
+            collect_coverage_for_selection(
+              target_root,
+              work_copy,
+              opts,
+              metrics_pid,
+              baseline_tests_ms
+            )
 
           # M109: under `--incremental`, partition + record reused verdicts BEFORE
           # schema build so reused mutants are pruned from instrumentation. The
@@ -250,10 +273,17 @@ defmodule Mix.Tasks.Mut do
               target_root
             )
 
+          # As with the oracle build, this `File.cd!(mutalisk_root, ...)` exists
+          # only so the `File.cwd!()`-derived `MUTALISK_PATH` in the schema-build
+          # and worker child mix envs points at the mutalisk checkout. Artifact
+          # locations (schema work copy, sandbox pool) are passed explicitly via
+          # `artifact_root`, so they land under the target-scoped temp root
+          # regardless of cwd.
           File.cd!(mutalisk_root, fn ->
             execute_plan(
               exec_plan,
               target_root,
+              artifact_root,
               run_id,
               opts,
               started,
@@ -270,10 +300,10 @@ defmodule Mix.Tasks.Mut do
       if opts.keep_work_copy do
         IO.puts(
           :stderr,
-          "[mutalisk] --keep-work-copy: retaining oracle/baseline work copy #{Path.join([mutalisk_root, "tmp", "mut_work", run_id])}"
+          "[mutalisk] --keep-work-copy: retaining oracle/baseline work copy #{Path.join([artifact_root, "mut_work", run_id])}"
         )
       else
-        File.rm_rf!(Path.join([mutalisk_root, "tmp", "mut_work", run_id]))
+        File.rm_rf!(Path.join([artifact_root, "mut_work", run_id]))
       end
     end
   end
@@ -301,10 +331,11 @@ defmodule Mix.Tasks.Mut do
   # cross-module opaqueness check — the prior `final_pool` came back through the
   # run functions with a looser type. `Sandbox` already exempts `destroy_pool/1`
   # via `{:no_opaque, ...}`; mirror that at this call site.
-  @dialyzer {:no_opaque, execute_plan: 8}
+  @dialyzer {:no_opaque, execute_plan: 9}
   defp execute_plan(
          plan,
          target_root,
+         artifact_root,
          run_id,
          opts,
          started,
@@ -320,7 +351,8 @@ defmodule Mix.Tasks.Mut do
           user_project_root: target_root,
           run_id: "#{run_id}-schema",
           force: true,
-          keep: true
+          keep: true,
+          root: artifact_root
         )
       end)
 
@@ -336,7 +368,11 @@ defmodule Mix.Tasks.Mut do
     Metrics.set_effective_concurrency(metrics_pid, effective_concurrency)
 
     {:ok, pool} =
-      Sandbox.create_pool(schema_result, effective_concurrency, run_id: run_id, force: true)
+      Sandbox.create_pool(schema_result, effective_concurrency,
+        run_id: run_id,
+        force: true,
+        root: artifact_root
+      )
 
     {:ok, last_killer} = Mut.LastKiller.start_link([])
     progress_pid = start_progress(opts)
@@ -737,18 +773,21 @@ defmodule Mix.Tasks.Mut do
     )
   end
 
-  defp baseline_tests!(work_copy, host_root, opts, run_id) do
+  defp baseline_tests!(work_copy, mutalisk_root, artifact_root, opts, run_id) do
     env = [
       {"MIX_ENV", "test"},
       {"MIX_BUILD_PATH", "_build/mut_oracle"},
       {"MIX_DEPS_PATH", "_build/mut_oracle/deps"},
       {"MUTALISK_ROLE", "schema"},
-      {"MUTALISK_PATH", host_root}
+      # Read-only reference to the mutalisk checkout so the work copy's overlay
+      # can pin `{:mutalisk, path: <checkout>}`; not a write target.
+      {"MUTALISK_PATH", mutalisk_root}
     ]
 
-    # Per-run filename: a fixed `mut_baseline.log` is overwritten when several
-    # projects run against the same mutalisk checkout (Exploratory #41).
-    log_path = Path.join([host_root, "tmp", "mut_baseline-#{run_id}.log"])
+    # #40/#41: the baseline log lives under the target-scoped artifact root (not
+    # the dependency checkout) and is per-run, so concurrent/repeat runs never
+    # clobber a shared `tmp/mut_baseline.log`.
+    log_path = Path.join([artifact_root, "mut_baseline-#{run_id}.log"])
 
     # R2: run the baseline under the SAME per-test timeout as mutant runs. A
     # test that passes under ExUnit's 60s default but exceeds the mutation
@@ -823,7 +862,13 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp collect_coverage_for_selection(work_copy, opts, metrics_pid, baseline_tests_ms) do
+  defp collect_coverage_for_selection(
+         target_root,
+         work_copy,
+         opts,
+         metrics_pid,
+         baseline_tests_ms
+       ) do
     Metrics.set_selection_mode(metrics_pid, opts.selection)
 
     case opts.selection do
@@ -832,21 +877,71 @@ defmodule Mix.Tasks.Mut do
         Metrics.set_coverage_collection_wall_ms(metrics_pid, 0)
         {nil, :static}
 
-      mode when mode in [:coverage, :coverage_with_static_fallback] ->
-        oracle =
-          Metrics.with_phase(metrics_pid, :coverage_collection, fn ->
-            run_coverage!(work_copy, opts, baseline_tests_ms)
-          end)
+      # #64: only the fallback mode consults the hint — `--selection coverage`
+      # is an explicit user override and always attempts collection (it raises
+      # on pathology rather than silently downgrading; see
+      # `handle_pathological_coverage/6`'s `:coverage` clause).
+      :coverage_with_static_fallback ->
+        case DowngradeHint.check(target_root) do
+          {:skip, hint} ->
+            skip_coverage_via_hint(target_root, hint, metrics_pid)
 
-        wall_ms = oracle.collection_wall_ms
-        Metrics.set_coverage_collection_wall_ms(metrics_pid, wall_ms)
-
-        if pathological_coverage_collection?(wall_ms, baseline_tests_ms) do
-          handle_pathological_coverage(mode, wall_ms, baseline_tests_ms, metrics_pid, oracle)
-        else
-          {oracle, mode}
+          :collect ->
+            collect_coverage!(
+              target_root,
+              work_copy,
+              opts,
+              metrics_pid,
+              baseline_tests_ms,
+              :coverage_with_static_fallback
+            )
         end
+
+      :coverage ->
+        collect_coverage!(target_root, work_copy, opts, metrics_pid, baseline_tests_ms, :coverage)
     end
+  end
+
+  defp collect_coverage!(target_root, work_copy, opts, metrics_pid, baseline_tests_ms, mode) do
+    oracle =
+      Metrics.with_phase(metrics_pid, :coverage_collection, fn ->
+        run_coverage!(work_copy, opts, baseline_tests_ms)
+      end)
+
+    wall_ms = oracle.collection_wall_ms
+    Metrics.set_coverage_collection_wall_ms(metrics_pid, wall_ms)
+
+    if pathological_coverage_collection?(wall_ms, baseline_tests_ms) do
+      handle_pathological_coverage(
+        mode,
+        wall_ms,
+        baseline_tests_ms,
+        metrics_pid,
+        oracle,
+        target_root
+      )
+    else
+      {oracle, mode}
+    end
+  end
+
+  # #64: skip the collection phase entirely — record a ~0ms phase so metrics
+  # stay consistent with the `:static` branch above, rather than omitting the
+  # phase.
+  defp skip_coverage_via_hint(target_root, hint, metrics_pid) do
+    Metrics.with_phase(metrics_pid, :coverage_collection, fn -> :ok end)
+    Metrics.set_coverage_collection_wall_ms(metrics_pid, 0)
+    Metrics.set_selection_mode(metrics_pid, :downgraded_to_static)
+
+    IO.puts(
+      :stderr,
+      "[mutalisk] skipping coverage collection: a previous run on this project downgraded " <>
+        "to static selection (collection #{Map.get(hint, "coverage_wall_ms")}ms vs baseline " <>
+        "#{Map.get(hint, "baseline_tests_ms")}ms). Pass --selection coverage to force " <>
+        "collection, or delete #{DowngradeHint.path(target_root)} to reset."
+    )
+
+    {nil, :downgraded_to_static}
   end
 
   @spec pathological_coverage_collection?(non_neg_integer(), non_neg_integer()) :: boolean()
@@ -911,7 +1006,8 @@ defmodule Mix.Tasks.Mut do
          wall_ms,
          baseline_ms,
          metrics_pid,
-         oracle
+         oracle,
+         target_root
        ) do
     IO.puts(
       :stderr,
@@ -919,10 +1015,18 @@ defmodule Mix.Tasks.Mut do
     )
 
     Metrics.set_selection_mode(metrics_pid, :downgraded_to_static)
+    persist_downgrade_hint(target_root, wall_ms, baseline_ms)
     {oracle, :downgraded_to_static}
   end
 
-  defp handle_pathological_coverage(:coverage, wall_ms, baseline_ms, _metrics_pid, _oracle) do
+  defp handle_pathological_coverage(
+         :coverage,
+         wall_ms,
+         baseline_ms,
+         _metrics_pid,
+         _oracle,
+         _target_root
+       ) do
     ratio =
       if baseline_ms == 0,
         do: "inf",
@@ -931,6 +1035,31 @@ defmodule Mix.Tasks.Mut do
     Mix.raise(
       "Coverage collection took #{wall_ms}ms vs baseline #{baseline_ms}ms (#{ratio}x threshold). Rerun with --selection coverage_with_static_fallback to fall back automatically, or --selection static to skip coverage entirely."
     )
+  end
+
+  # #64: persist the downgrade so a future `coverage_with_static_fallback` run
+  # on the SAME project (same `project_digest`) can skip collection entirely
+  # instead of repeating this ~every-run tax. Non-fatal: a write failure
+  # (read-only `_build`, disk full, ...) only warns — it must never fail the
+  # run that already has a valid oracle/result in hand.
+  defp persist_downgrade_hint(target_root, wall_ms, baseline_ms) do
+    digest = History.Digest.project_digest(target_root)
+
+    case DowngradeHint.write(target_root, %{
+           coverage_wall_ms: wall_ms,
+           baseline_tests_ms: baseline_ms,
+           project_digest: digest
+         }) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] warning: could not persist coverage-downgrade hint at " <>
+            "#{DowngradeHint.path(target_root)}: #{inspect(reason)}"
+        )
+    end
   end
 
   defp build_selection_context(
@@ -1002,10 +1131,45 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp run_fallback_mutants(pool, plan, ctx) do
+    warn_if_fallback_manifest_unreadable(plan.fallback, ctx)
+
     run_with_concurrency(pool, plan.fallback, ctx.concurrency, fn mutant, sandbox ->
       execute_fallback_mutant(mutant, sandbox, ctx)
     end)
   end
+
+  # Preflight the Mix manifest ONCE before the fallback phase. Every fallback
+  # mutant reads it to compute recompile dependents, so an unreadable manifest
+  # (e.g. a new Elixir release bumping the manifest version) otherwise surfaces
+  # as N identical cryptic per-mutant errors — one loud diagnostic up front
+  # tells the user the whole engine is out, and why. The mutants still run and
+  # error individually so they stay visible in the report.
+  defp warn_if_fallback_manifest_unreadable([], _ctx), do: :ok
+
+  defp warn_if_fallback_manifest_unreadable([mutant | _rest], ctx) do
+    app = fallback_app(ctx.work_copy, mutant)
+
+    manifest_path =
+      Path.join([ctx.work_copy, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
+
+    case Mut.MixManifest.read(manifest_path) do
+      {:ok, _manifest} ->
+        :ok
+
+      {:error, reason} ->
+        Mix.shell().error(
+          "[mutalisk] fallback engine cannot read the Mix compiler manifest " <>
+            "(#{manifest_path}): #{format_manifest_error(reason)}\n" <>
+            "[mutalisk] every fallback mutant will be reported as an error; " <>
+            "this usually means the Elixir version is newer than mutalisk supports"
+        )
+    end
+  end
+
+  defp format_manifest_error({exception, message}) when is_atom(exception),
+    do: "#{inspect(exception)}: #{message}"
+
+  defp format_manifest_error(reason), do: inspect(reason)
 
   defp execute_schema_mutant(mutant, sandbox, ctx) do
     selected = selected_tests(ctx.selection_context, mutant)
@@ -1622,5 +1786,44 @@ defmodule Mix.Tasks.Mut do
   defp run_id do
     random = :crypto.strong_rand_bytes(4) |> Base.url_encode64(padding: false)
     "mut-#{System.os_time(:second)}-#{random}"
+  end
+
+  # #40/#49: the per-target root for ALL runtime artifacts. We deliberately use
+  # the OS temp dir rather than the target project's `_build`: `Mut.WorkCopy`
+  # copies the WHOLE project tree and only prunes `_build`/`tmp` AFTER the copy,
+  # so a root inside the target's `_build` would recursively self-copy. The
+  # temp dir also survives `mix clean`/`mix deps.clean` semantics being irrelevant
+  # here — it is transient scratch, cleaned per run. A short hash of the absolute
+  # target root scopes the dir per project so concurrent runs of different
+  # projects never collide while runs of the same project stay discoverable.
+  defp artifact_root(target_root) do
+    slug =
+      :sha256
+      |> :crypto.hash(Path.expand(target_root))
+      |> Base.url_encode64(padding: false)
+      |> binary_part(0, 16)
+
+    root = Path.join([System.tmp_dir!(), "mutalisk", slug])
+    File.mkdir_p!(root)
+    canonical_path(root)
+  end
+
+  # Resolve symlinks in the artifact root so the child compiler's real (physical)
+  # file paths and the `MUTALISK_PROJECT_ROOT` we hand it agree. On macOS
+  # `System.tmp_dir!()` sits under `/var`, a symlink to `/private/var`: the
+  # compiler records `__ENV__.file` as `/private/var/...` (getcwd resolves the
+  # link) while an unresolved `/var/...` root makes `Path.relative_to` (in
+  # `Mut.Trace`) fail to strip the prefix, storing absolute oracle-site keys that
+  # never match the work-copy-relative candidate files (every mutant then skips
+  # as `missing_oracle_site`). Resolving here keeps both sides byte-identical.
+  defp canonical_path(path) do
+    {:ok, cwd} = File.cwd()
+
+    try do
+      File.cd!(path)
+      File.cwd!()
+    after
+      File.cd!(cwd)
+    end
   end
 end

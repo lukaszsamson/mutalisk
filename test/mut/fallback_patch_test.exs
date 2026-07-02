@@ -26,6 +26,36 @@ defmodule Mut.FallbackPatchTest do
     assert patch.end_column == 46
   end
 
+  test "operator-only span substitutes just the operator, preserving operand literals" do
+    # Regression: a guard/comparison whose operand is a non-decimal literal
+    # (hex 0x7FF, underscored 10_000, char ?a) gets an OPERATOR-only span (the
+    # whole-expression text search fails because Macro.to_string normalises the
+    # literal). The patch must replace only the operator and keep `0x7FF` intact,
+    # not splice in `2047`.
+    source = "      <<c::utf8>> when c <= 0x7FF ->\n"
+    start_byte = :binary.match(source, "<=") |> elem(0)
+    end_byte = start_byte + byte_size("<=")
+
+    mutant =
+      mutant(
+        start_byte: start_byte,
+        end_byte: end_byte,
+        original_ast: {:<=, [], [{:c, [], nil}, 0x7FF]},
+        mutated_ast: {:<, [], [{:c, [], nil}, 0x7FF]}
+      )
+
+    assert {:ok, %SourcePatch{} = patch} = FallbackPatch.render(mutant, source)
+    assert patch.original == "<="
+    assert patch.replacement == "<"
+
+    patched =
+      binary_part(source, 0, patch.start_byte) <>
+        patch.replacement <>
+        binary_part(source, patch.end_byte, byte_size(source) - patch.end_byte)
+
+    assert patched == "      <<c::utf8>> when c < 0x7FF ->\n"
+  end
+
   test "M99 #2: EnvWalker span feeds the patcher byte-correctly on non-ASCII source" do
     # End-to-end span→patch chain on a line with a multi-byte char before the
     # literal: EnvWalker must compute a codepoint-correct byte span, and the

@@ -162,8 +162,19 @@ defmodule Mut.Cli do
       key = normalize_name(name)
 
       case Map.fetch(mapping, key) do
-        {:ok, modules} -> List.wrap(modules)
-        :error -> raise ArgumentError, unknown_mutator_message(key)
+        {:ok, modules} ->
+          List.wrap(modules)
+
+        :error ->
+          # The terminal/HTML reports display each mutator by its CamelCase
+          # module name (e.g. `Arithmetic`, `ComparisonBoundary`). A user who
+          # copies that name into `--mutators` would otherwise hit "unknown
+          # mutator". Accept it by falling back to the snake_case form before
+          # giving up.
+          case Map.fetch(mapping, Macro.underscore(key)) do
+            {:ok, modules} -> List.wrap(modules)
+            :error -> raise ArgumentError, unknown_mutator_message(key)
+          end
       end
     end)
     |> Enum.uniq()
@@ -600,7 +611,11 @@ defmodule Mut.Cli do
   # Only called with a non-nil list (from `maybe_name_list/1` in the
   # `not is_nil(explicit)` branch), so there is no nil clause.
   defp validate_mutators(names) do
-    unknown = Enum.reject(names, &(&1 in @known_mutators))
+    # Reports display each mutator by its CamelCase module name (`Arithmetic`).
+    # Accept that form here too — `resolve_mutators/1` applies the same
+    # `Macro.underscore` fallback — so a name copied from a report validates.
+    unknown =
+      Enum.reject(names, &(&1 in @known_mutators or Macro.underscore(&1) in @known_mutators))
 
     if unknown == [] do
       :ok

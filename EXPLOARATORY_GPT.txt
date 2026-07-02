@@ -10,7 +10,8 @@ has been sufficiently verified across a range of projects.
 
 ## Resolution status (updated 2026-06-30)
 
-All 70 issues triaged: 64 FIXED, 1 already mitigated, 5 deferred/intentional.
+All 70 issues triaged: 67 FIXED (incl. #40/#49/#64 on 2026-07-02), 1 already
+mitigated, 2 intentional (#38, #39).
 Fixes landed on branch `release-review-fixes`:
   - 9fdf8f6  CLI clarity + reporting (#1, #2, #4, #5, #6, #7, #9, #10)
   - 207dccc  umbrella-aware default test_paths (#3)
@@ -69,7 +70,7 @@ mutants now EXIT NON-ZERO (#51,#52) rather than passing via the 100% default.
 | 37 | P2 | FIXED | `mut.recompile` friendly error (also: not shipped) |
 | 38 | P3 | INTENTIONAL | `@moduledoc false` hides internal tasks; "no documentation" is standard Mix behavior for hidden tasks |
 | 39 | P2 | INTENTIONAL | `compile.mut_oracle` is a compiler integration (must ship to compile mutants); writes only transient `_build` artifacts; hidden via `@moduledoc false` |
-| 40 | P2 | DEFERRED | work copies / memory log under the dependency checkout's `tmp/`. Relocation is a core-engine change (work-copy base + MUTALISK_PATH decoupling) best done as focused follow-up; per-run work dirs are cleaned up, baseline log now per-run (#41) |
+| 40 | P2 | FIXED (2026-07-02) | all runtime artifacts (work copies, sandboxes, memory + baseline logs) relocated to a canonicalized per-project OS-temp root `System.tmp_dir!()/mutalisk/<sha256(target)[0..15]>`; nothing is written under the dependency checkout. OS-temp chosen over target `_build` because WorkCopy copies the whole tree and prunes `_build` only after (self-copy risk); root is symlink-canonicalized (macOS `/var`→`/private/var`) so oracle-site keys stay work-copy-relative |
 | 41 | P3 | FIXED | baseline log is per-run (`mut_baseline-<run_id>.log`) |
 | 42 | P3 | FIXED | README: `only: [:test]` needs `MIX_ENV=test mix mut` |
 | 43 | P3 | FIXED | `--debug-plan` prints path + mutant counts |
@@ -78,7 +79,7 @@ mutants now EXIT NON-ZERO (#51,#52) rather than passing via the 100% default.
 | 46 | P2 | FIXED | MUTATORS.md: same clarification for body_literal |
 | 47 | P2 | FIXED | empty `--reporters` now rejected (see #11) |
 | 48 | P3 | FIXED | keep-work-copy labels oracle vs schema copy |
-| 49 | P2 | DEFERRED | keep-work-copy paths under checkout — same relocation as #40; messages clarified (#48) |
+| 49 | P2 | FIXED (2026-07-02) | `--keep-work-copy` retains + prints paths under the per-project OS-temp root (see #40); cleanup targets the same root |
 | 50 | P3 | FIXED | README notes the suite runs without --warnings-as-errors |
 | 51 | P2 | FIXED | non-source `--files` no-op now fails `--fail-at > 0` |
 | 52 | P2 | FIXED | unmatched `--files` no-op now fails `--fail-at > 0` |
@@ -93,7 +94,7 @@ mutants now EXIT NON-ZERO (#51,#52) rather than passing via the 100% default.
 | 61 | P2 | FIXED | threshold-fail reason printed for html reporter |
 | 62 | P3 | FIXED | `--output-path` docs cover absolute + html `.html` |
 | 63 | P2 | FIXED | `--max-mutants` docs note it caps execution only |
-| 64 | P2 | DEFERRED | coverage burns time on macro-heavy apps before fallback; doc hint added (`--selection static`), early-abort tracked as follow-up |
+| 64 | P2 | FIXED (2026-07-02) | pathological-coverage downgrade is now persisted to `_build/mut_selection_downgrade.json` (target project, project-digest keyed); subsequent default-mode runs skip collection with a one-line notice + reset instructions (`--selection coverage` forces, deleting the file resets; digest mismatch auto-invalidates). Verified on guarded_struct: 2nd run saves ~51s with identical results. In-run budget/early-abort machinery unchanged |
 | 65 | P3 | FIXED | trailing comma in `--reporters` rejected |
 | 66 | P3 | FIXED | trailing comma in `--mutators` rejected |
 | 67 | P3 | FIXED | trailing comma in `--enable` rejected |
@@ -107,9 +108,10 @@ dialyzer (0 errors), format. Each batch passed an adversarial review pass; the
 reviews' own findings (mutators/selection type crashes, umbrella no-test
 false-positive, invalid-mutant handling) were fixed in 97afad4.
 
-Deferred items (#40, #49 work-copy relocation; #64 coverage early-abort; #38,
-#39 intentional Mix behavior) are the only ones not fully code-changed — see
-their per-issue notes below.
+Update 2026-07-02: the deferred items #40/#49 (work-copy relocation) and #64
+(repeat coverage-collection tax) are now FIXED — see their table rows. The only
+remaining non-code items are #38/#39 (intentional Mix behavior for hidden
+tasks/compiler integration). Suite after these fixes: 684 passing (all tags).
 
 ## Issues
 

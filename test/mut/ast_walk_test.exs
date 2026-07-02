@@ -208,6 +208,35 @@ defmodule Mut.AstWalkTest do
     refute Inner in modules
   end
 
+  describe "fallback_span/3 (refused-context reroute span recovery)" do
+    test "recovers a byte span for a comparison in a cond clause head" do
+      # Regression: a comparison inside a `cond` clause head is refused by the
+      # schema placer and rerouted to the fallback engine. Dispatch candidates
+      # carry no byte span, so without recovery the fallback patch failed with
+      # `missing_source_span` and the mutant was dropped as `invalid` — hiding a
+      # real survivor. `fallback_span/3` must locate `n < 10` on its line.
+      source = "defmodule M do\n  def f(n) do\n    cond do\n      n < 10 -> :a\n      true -> :b\n    end\n  end\nend\n"
+      {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
+
+      node =
+        ast
+        |> Macro.prewalk([], fn
+          {:<, _m, args} = n, acc when length(args) == 2 -> {n, [n | acc]}
+          n, acc -> {n, acc}
+        end)
+        |> elem(1)
+        |> List.first()
+
+      span = Mut.AstWalk.fallback_span(node, source, "sample.ex")
+      assert %Mut.SourceSpan{start_line: 4, start_column: 7} = span
+      assert binary_part(source, span.start_byte, span.end_byte - span.start_byte) == "n < 10"
+    end
+
+    test "returns nil when source is nil" do
+      assert Mut.AstWalk.fallback_span({:<, [line: 1, column: 1], [1, 2]}, nil, "f.ex") == nil
+    end
+  end
+
   defp candidates(source) do
     assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
     Mut.AstWalk.dispatch_candidates(ast, file: "sample.ex", source: source)

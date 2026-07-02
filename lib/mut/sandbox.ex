@@ -26,25 +26,33 @@ defmodule Mut.Sandbox do
       :run_id,
       :sandboxes,
       :checked_out,
-      :schema_result
+      :schema_result,
+      :parent
     ]
 
     @type t :: %__MODULE__{
             run_id: String.t(),
             sandboxes: term,
             checked_out: term,
-            schema_result: Mut.SchemaBuild.Result.t()
+            schema_result: Mut.SchemaBuild.Result.t(),
+            parent: Path.t()
           }
   end
 
-  @sandbox_root Path.join(["tmp", "mut_sandboxes"])
+  # #40/#49: the sandbox base defaults to a cwd-relative `tmp/mut_sandboxes`
+  # (used by mutalisk's own test suite), but `mix mut` passes an explicit
+  # target-scoped OS-temp root via the `:root` option so no sandbox is ever
+  # created under the dependency checkout.
+  @sandbox_dir "mut_sandboxes"
+  @default_sandbox_root "tmp"
 
   @spec create_pool(SchemaBuild.Result.t(), pos_integer, keyword) ::
           {:ok, Pool.t()} | {:error, term}
   def create_pool(%SchemaBuild.Result{} = schema_result, concurrency, opts \\ [])
       when is_integer(concurrency) and concurrency > 0 and is_list(opts) do
     run_id = Keyword.get_lazy(opts, :run_id, &run_id/0)
-    parent = pool_path(run_id)
+    root = Keyword.get(opts, :root) || @default_sandbox_root
+    parent = pool_path(run_id, root)
 
     with :ok <- prepare_parent(parent, Keyword.get(opts, :force, false)),
          {:ok, sandboxes} <- create_sandboxes(schema_result, concurrency, parent) do
@@ -53,7 +61,8 @@ defmodule Mut.Sandbox do
          run_id: run_id,
          sandboxes: MapSet.new(sandboxes),
          checked_out: MapSet.new(),
-         schema_result: schema_result
+         schema_result: schema_result,
+         parent: parent
        }}
     end
   rescue
@@ -106,7 +115,7 @@ defmodule Mut.Sandbox do
     |> Enum.uniq_by(& &1.path)
     |> Enum.each(&File.rm_rf!(&1.path))
 
-    File.rm_rf!(pool_path(pool.run_id))
+    File.rm_rf!(pool.parent)
     :ok
   end
 
@@ -300,7 +309,8 @@ defmodule Mut.Sandbox do
     end
   end
 
-  defp pool_path(run_id), do: Path.expand(Path.join(@sandbox_root, run_id))
+  defp pool_path(run_id, root),
+    do: Path.expand(Path.join([root, @sandbox_dir, run_id]))
 
   defp run_id do
     random = :crypto.strong_rand_bytes(4) |> Base.url_encode64(padding: false)

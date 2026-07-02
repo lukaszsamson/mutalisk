@@ -110,6 +110,45 @@ defmodule Mut.SchemaPlacerTest do
     end
   end
 
+  test "cond clause head is instrumented (boolean expression, not a pattern)" do
+    # Regression: a comparison in a `cond` clause head is a body position. It
+    # was wrongly refused as a clause-head pattern, rerouted to fallback, and
+    # (lacking a byte span) dropped as `invalid` — hiding survivors. It must be
+    # schema-instrumented exactly like an `if` condition.
+    source = "defmodule Sample do\n  def f(n) do\n    cond do\n      n < 10 -> :a\n      true -> :b\n    end\n  end\nend\n"
+    ast = parsed!(source)
+
+    mutant =
+      mutant(
+        ast,
+        source,
+        :<,
+        11,
+        4,
+        {:<=, [line: 4, column: 9], [{:n, [line: 4, column: 7], nil}, 10]}
+      )
+
+    {instrumented, refusals} = SchemaPlacer.place_with_refusals(ast, [mutant])
+    assert refusals == []
+    assert [{:case, _meta, _arms}] = schema_cases(instrumented)
+  end
+
+  test "case clause head dispatch is still refused (real pattern position)" do
+    # Guards against over-correction: only `cond` heads are body positions.
+    # A `case` `->` head is a pattern — a mutant there must still be refused.
+    source = "defmodule Sample do\n  def f(x) do\n    case x do\n      a when a > 0 -> a\n      _ -> 0\n    end\n  end\nend\n"
+    ast = parsed!(source)
+
+    # `a > 0` is a guard inside the case clause head; place a comparison mutant
+    # on it and confirm it is refused (guards are never schema-instrumented).
+    hash = path_hash_for(ast, source, :>)
+    refused_mutant = mutant(hash, 31, {:>=, [line: 4, column: 16], [{:a, [line: 4, column: 14], nil}, 0]}, 4)
+
+    {instrumented, refusals} = SchemaPlacer.place_with_refusals(ast, [refused_mutant])
+    assert schema_cases(instrumented) == []
+    assert [_refusal] = refusals
+  end
+
   test "instrument_file returns rendered source and placement map keyed by formatted case locations" do
     source = "defmodule Sample do\n  def f(a), do: a + 1\nend\n"
     path = Path.expand("tmp/schema_placer_sample.ex")

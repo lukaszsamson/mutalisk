@@ -405,4 +405,19 @@ defmodule Mut.CliTest do
              Mut.Mutator.GuardComparisonNegation
            ]
   end
+
+  test "accepts CamelCase mutator names as shown in reports" do
+    # The terminal/HTML reports label mutators by their CamelCase module name;
+    # a name copied from a report must validate (parse) and resolve.
+    assert {:ok, opts} = Cli.parse(["--mutators", "Arithmetic,ComparisonBoundary"])
+
+    assert Cli.resolve_mutators(opts.mutators) == [
+             Mut.Mutator.Arithmetic,
+             Mut.Mutator.ComparisonBoundary
+           ]
+
+    assert Cli.resolve_mutators(["GuardComparisonBoundary"]) == [
+             Mut.Mutator.GuardComparisonBoundary
+           ]
+  end
 end
