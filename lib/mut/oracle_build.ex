@@ -47,15 +47,17 @@ defmodule Mut.OracleBuild do
   @build_timeout_ms 1_200_000
 
   defp run_child_mix(work_copy, args) do
-    case Mut.ChildProcess.run("mix", args,
-           cd: work_copy,
-           env: child_env(work_copy),
-           timeout_ms: @build_timeout_ms
-         ) do
-      {:exit, 0, _output} -> :ok
-      {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
-      {:timeout, output} -> {:error, {:compile_timeout, output_tail(output)}}
-      {:error, reason} -> {:error, reason}
+    with :ok <- Mut.BuildPathCompat.alias_test_build_path(work_copy, "_build/mut_oracle") do
+      case Mut.ChildProcess.run("mix", args,
+             cd: work_copy,
+             env: child_env(work_copy),
+             timeout_ms: @build_timeout_ms
+           ) do
+        {:exit, 0, _output} -> :ok
+        {:exit, exit_code, output} -> {:error, {:compile_failed, exit_code, output_tail(output)}}
+        {:timeout, output} -> {:error, {:compile_timeout, output_tail(output)}}
+        {:error, reason} -> {:error, reason}
+      end
     end
   end
 

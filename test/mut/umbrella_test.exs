@@ -103,6 +103,31 @@ defmodule Mut.UmbrellaTest do
 
       assert Umbrella.default_test_dirs(root) == ["packages/thing/test"]
     end
+
+    test "@apps_path module attribute is honoured" do
+      root = Path.join(System.tmp_dir!(), "mut_attr_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(Path.join([root, "packages", "thing"]))
+      on_exit(fn -> File.rm_rf!(root) end)
+
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Up.MixProject do
+        use Mix.Project
+        @apps_path "packages"
+        def project, do: [apps_path: @apps_path, version: "0.1.0"]
+      end
+      """)
+
+      File.write!(Path.join([root, "packages", "thing", "mix.exs"]), """
+      defmodule Thing.MixProject do
+        use Mix.Project
+        def project, do: [app: :thing, version: "0.1.0"]
+      end
+      """)
+
+      assert Umbrella.umbrella?(root)
+      assert Umbrella.app_dirs(root) == [Path.join([root, "packages", "thing"])]
+      assert Umbrella.default_test_dirs(root) == ["packages/thing/test"]
+    end
   end
 
   describe "apps_path_name/1" do
@@ -122,6 +147,18 @@ defmodule Mut.UmbrellaTest do
       defmodule Up.MixProject do
         use Mix.Project
         def project, do: [apps_path: "packages", version: "0.1.0"]
+      end
+      """)
+
+      assert Umbrella.apps_path_name(root) == "packages"
+    end
+
+    test "returns @apps_path module attribute value", %{root: root} do
+      write_mix(root, """
+      defmodule Up.MixProject do
+        use Mix.Project
+        @apps_path "packages"
+        def project, do: [apps_path: @apps_path, version: "0.1.0"]
       end
       """)
 

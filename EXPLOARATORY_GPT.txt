@@ -3452,3 +3452,95 @@ completion.
 
 Expected: retained artifact paths should be printed before the final completion
 line so the completion line is actually final.
+
+### 141. Tests that use `_build/test` fixtures fail under Mutalisk build paths
+
+**STATUS: FIXED.** Work-copy phases now alias `_build/test` to the active
+Mutalisk build path (`_build/mut_oracle`, `_build/mut_schema`, or
+`_build/mut_coverage`) before running target Mix commands.
+
+Severity: P1
+Surface: Real-project compatibility / public Mix conventions
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_build_path_probe
+MIX_ENV=test mix test
+MIX_ENV=test mix mut --selection static --files lib/mutalisk_build_path_probe.ex \
+  --max-mutants 1 --fail-at 0 --reporters terminal --concurrency 1
+```
+
+The probe test writes a fixture to
+`_build/test/lib/mutalisk_build_path_probe/fixture.txt` and then reads it via
+`Application.app_dir(:mutalisk_build_path_probe, "fixture.txt")`.
+
+Observed before fix: normal `mix test` passed, but Mutalisk aborted during
+baseline tests because `Application.app_dir/2` resolved under
+`_build/mut_oracle/lib/...` while the test-created file lived under
+`_build/test/lib/...`.
+
+Expected: target tests that follow Mix's conventional test build path should
+continue to pass inside Mutalisk's disposable build paths.
+
+### 142. `apps_path: @apps_path` crashes umbrella detection
+
+**STATUS: FIXED.** Umbrella `apps_path` parsing now resolves string module
+attributes and ignores unresolved AST values instead of passing them into path
+functions.
+
+Severity: P2
+Surface: Umbrella project detection / public Mix project config
+
+Reproduction:
+
+```elixir
+defmodule AttrUmbrella.MixProject do
+  use Mix.Project
+  @apps_path "apps"
+  def project, do: [apps_path: @apps_path, version: "0.1.0"]
+end
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut --selection static --debug-plan --fail-at 0 --reporters terminal
+```
+
+Observed before fix: Mutalisk crashed during oracle/plan setup with
+`FunctionClauseError` in `IO.chardata_to_string/1` because the raw
+`@apps_path` AST node reached `Path.join/2`.
+
+Expected: common umbrella module-attribute configuration should resolve the
+same way `@app` already does.
+
+### 143. Custom literal `apps_path` errors selected worker test execution
+
+**STATUS: FIXED.** For custom-`apps_path` umbrellas, selected tests that all
+belong to one child app are now run through that child app using child-relative
+test paths.
+
+Severity: P1
+Surface: Umbrella worker execution / selected test paths
+
+Reproduction:
+
+```sh
+mix new custom_umbrella --umbrella
+cd custom_umbrella
+mv apps packages
+# configure root mix.exs with apps_path: "packages"
+# create packages/core/lib/core.ex and packages/core/test/core_test.exs
+
+MIX_ENV=test mix mut --selection static --files 'packages/*/lib/*.ex' \
+  --max-mutants 1 --fail-at 0 --concurrency 1 --reporters terminal
+```
+
+Observed before fix: selected tests were passed as root-relative paths like
+`packages/core/test/core_test.exs`, and Mix rejected them with
+`Paths given to "mix test" did not match any directory/file`, causing scorable
+mutants to be reported as `error`.
+
+Expected: custom umbrella app paths should execute selected child tests instead
+of turning valid mutants into runtime errors.

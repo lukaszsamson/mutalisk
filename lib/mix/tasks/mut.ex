@@ -799,6 +799,7 @@ defmodule Mix.Tasks.Mut do
     # the dependency checkout) and is per-run, so concurrent/repeat runs never
     # clobber a shared `tmp/mut_baseline.log`.
     log_path = Path.join([artifact_root, "mut_baseline-#{run_id}.log"])
+    :ok = Mut.BuildPathCompat.alias_test_build_path(work_copy, "_build/mut_oracle")
 
     # R2: run the baseline under the SAME per-test timeout as mutant runs. A
     # test that passes under ExUnit's 60s default but exceeds the mutation
@@ -1186,10 +1187,11 @@ defmodule Mix.Tasks.Mut do
     worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
 
     result =
-      Worker.run_schema(sandbox, mutant.id, worker_tests,
+      Worker.run_schema(sandbox, mutant.id, worker_tests.files,
         timeout_ms: ctx.host_deadline_ms,
         test_timeout_ms: ctx.test_timeout_ms,
-        retry_on_error: true
+        retry_on_error: true,
+        umbrella_app: worker_tests.umbrella_app
       )
 
     record_after_run(ctx, mutant, selected, result)
@@ -1201,10 +1203,11 @@ defmodule Mix.Tasks.Mut do
     worker_tests = worker_test_files(selected, ctx.all_test_files, ctx.work_copy)
 
     result =
-      Worker.run_fallback(sandbox, mutant, worker_tests,
+      Worker.run_fallback(sandbox, mutant, worker_tests.files,
         app: fallback_app(sandbox.path, mutant),
         timeout_ms: ctx.host_deadline_ms,
-        test_timeout_ms: ctx.test_timeout_ms
+        test_timeout_ms: ctx.test_timeout_ms,
+        umbrella_app: worker_tests.umbrella_app
       )
 
     record_after_run(ctx, mutant, selected, result)
@@ -1571,15 +1574,48 @@ defmodule Mix.Tasks.Mut do
   defp worker_test_files(selected, all_test_files, work_copy) do
     selected = selected.test_files
 
-    cond do
-      selected == [] ->
-        []
+    tests =
+      cond do
+        selected == [] -> []
+        length(selected) == length(all_test_files) -> all_test_files
+        true -> selected
+      end
 
-      length(selected) == length(all_test_files) ->
-        Enum.map(all_test_files, &Path.relative_to(&1, work_copy))
+    normalize_worker_test_files(tests, work_copy)
+  end
 
-      true ->
-        Enum.map(selected, &Path.relative_to(&1, work_copy))
+  defp normalize_worker_test_files([], _work_copy), do: %{files: [], umbrella_app: nil}
+
+  defp normalize_worker_test_files(tests, work_copy) do
+    apps_path = Mut.Umbrella.apps_path_name(work_copy)
+
+    if Mut.Umbrella.umbrella?(work_copy) and apps_path != "apps" do
+      normalize_custom_umbrella_tests(tests, work_copy, apps_path)
+    else
+      %{files: Enum.map(tests, &Path.relative_to(&1, work_copy)), umbrella_app: nil}
+    end
+  end
+
+  defp normalize_custom_umbrella_tests(tests, work_copy, apps_path) do
+    tests
+    |> Enum.map(&custom_umbrella_test(&1, work_copy, apps_path))
+    |> case do
+      [{app, _file} | _rest] = entries when not is_nil(app) ->
+        if Enum.all?(entries, &(elem(&1, 0) == app)) do
+          %{files: Enum.map(entries, &elem(&1, 1)), umbrella_app: app}
+        else
+          %{files: [], umbrella_app: nil}
+        end
+
+      _entries ->
+        %{files: Enum.map(tests, &Path.relative_to(&1, work_copy)), umbrella_app: nil}
+    end
+  end
+
+  defp custom_umbrella_test(test, work_copy, apps_path) do
+    case test |> Path.relative_to(work_copy) |> Path.split() do
+      [^apps_path, app, "test" | rest] -> {app, Path.join(["test" | rest])}
+      _other -> {nil, nil}
     end
   end
 

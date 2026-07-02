@@ -204,15 +204,24 @@ defmodule Mut.Coverage.Runner do
   @setup_timeout_ms 600_000
 
   defp run_mix(root, args, mutalisk_path) do
-    case Mut.ChildProcess.run("mix", args,
-           cd: root,
-           env: child_env(mutalisk_path),
-           timeout_ms: @setup_timeout_ms
-         ) do
-      {:exit, 0, _output} -> :ok
-      {:exit, exit_code, output} -> {:error, {:mix_failed, args, exit_code, output_tail(output)}}
-      {:timeout, output} -> {:error, {:mix_timeout, args, @setup_timeout_ms, output_tail(output)}}
-      {:error, reason} -> {:error, reason}
+    with :ok <- Mut.BuildPathCompat.alias_test_build_path(root, @build_path) do
+      case Mut.ChildProcess.run("mix", args,
+             cd: root,
+             env: child_env(mutalisk_path),
+             timeout_ms: @setup_timeout_ms
+           ) do
+        {:exit, 0, _output} ->
+          :ok
+
+        {:exit, exit_code, output} ->
+          {:error, {:mix_failed, args, exit_code, output_tail(output)}}
+
+        {:timeout, output} ->
+          {:error, {:mix_timeout, args, @setup_timeout_ms, output_tail(output)}}
+
+        {:error, reason} ->
+          {:error, reason}
+      end
     end
   end
 
@@ -253,14 +262,16 @@ defmodule Mut.Coverage.Runner do
 
   defp run_coverage_mix(root, script, timeout_ms, mutalisk_path) do
     with {:ok, mix_path} <- mix_path() do
-      Mut.ChildProcess.run(
-        mix_path,
-        ["run", "--no-compile", "--no-deps-check", "--no-archives-check", "-e", script],
-        cd: root,
-        env: child_env(mutalisk_path),
-        timeout_ms: timeout_ms,
-        max_output_bytes: 512_000
-      )
+      with :ok <- Mut.BuildPathCompat.alias_test_build_path(root, @build_path) do
+        Mut.ChildProcess.run(
+          mix_path,
+          ["run", "--no-compile", "--no-deps-check", "--no-archives-check", "-e", script],
+          cd: root,
+          env: child_env(mutalisk_path),
+          timeout_ms: timeout_ms,
+          max_output_bytes: 512_000
+        )
+      end
     end
   end
 

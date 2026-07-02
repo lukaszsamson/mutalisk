@@ -88,6 +88,73 @@ defmodule Mix.Tasks.MutE2ETest do
     end
   end
 
+  @tag timeout: 180_000
+  test "mix mut preserves conventional _build/test fixture paths" do
+    root = tmp_project!("build_path_app")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_build_path_probe!(root)
+
+    assert {test_output, 0} =
+             System.cmd("mix", ["test"],
+               cd: root,
+               env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+               stderr_to_stdout: true
+             )
+
+    assert test_output =~ ~r/(0 failures|Result: 2 passed)/
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut --selection static --files lib/build_path_app.ex --max-mutants 1 --fail-at 0 --reporters terminal --concurrency 1),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    refute output =~ "baseline tests failed", output
+    assert output =~ "Mutation score:"
+
+    {_detected, denominator} = parse_score(output)
+    assert denominator > 0, output
+  end
+
+  @tag timeout: 180_000
+  test "mix mut runs selected tests in custom apps_path umbrella children" do
+    root = tmp_project!("custom_apps_path_umbrella")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_custom_apps_path_umbrella!(root)
+
+    assert {test_output, 0} =
+             System.cmd("mix", ["test"],
+               cd: root,
+               env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+               stderr_to_stdout: true
+             )
+
+    assert test_output =~ ~r/(0 failures|Result: 1 passed)/
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut --selection static --files packages/core/lib/core.ex --mutators boolean --max-mutants 1 --fail-at 0 --reporters terminal --concurrency 1),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    refute output =~ "Paths given to \"mix test\" did not match", output
+    refute output =~ "[1/1] error", output
+
+    {detected, denominator} = parse_score(output)
+    assert denominator > 0, output
+    assert detected > 0, output
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do
@@ -121,6 +188,134 @@ defmodule Mix.Tasks.MutE2ETest do
     ]
     |> Enum.flat_map(&Path.wildcard/1)
     |> MapSet.new()
+  end
+
+  defp tmp_project!(name) do
+    root = Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
+    File.rm_rf!(root)
+    File.mkdir_p!(root)
+    root
+  end
+
+  defp write_build_path_probe!(root) do
+    File.mkdir_p!(Path.join(root, "lib"))
+    File.mkdir_p!(Path.join(root, "test"))
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule BuildPathApp.MixProject do
+      use Mix.Project
+
+      def project do
+        [
+          app: :build_path_app,
+          version: "0.1.0",
+          elixir: "~> 1.19",
+          deps: deps()
+        ]
+      end
+
+      def application do
+        [extra_applications: [:logger]]
+      end
+
+      defp deps do
+        [
+          {:mutalisk, path: #{inspect(@checkout)}, only: :test, runtime: false}
+        ]
+      end
+    end
+    """)
+
+    File.write!(Path.join(root, "lib/build_path_app.ex"), """
+    defmodule BuildPathApp do
+      def add(a, b), do: a + b
+      def label(true), do: :yes
+      def label(false), do: :no
+      def fixture_path(name), do: Application.app_dir(:build_path_app, name)
+    end
+    """)
+
+    File.write!(Path.join(root, "test/test_helper.exs"), "ExUnit.start()\n")
+
+    File.write!(Path.join(root, "test/build_path_app_test.exs"), """
+    defmodule BuildPathAppTest do
+      use ExUnit.Case
+
+      test "label" do
+        assert BuildPathApp.add(1, 2) == 3
+        assert BuildPathApp.label(true) == :yes
+        assert BuildPathApp.label(false) == :no
+      end
+
+      test "fixture created under _build/test is readable through Application.app_dir" do
+        fixture = Path.join(["_build", "test", "lib", "build_path_app", "fixture.txt"])
+        File.mkdir_p!(Path.dirname(fixture))
+        File.write!(fixture, "ok")
+
+        assert File.read!(BuildPathApp.fixture_path("fixture.txt")) == "ok"
+      end
+    end
+    """)
+  end
+
+  defp write_custom_apps_path_umbrella!(root) do
+    File.mkdir_p!(Path.join([root, "packages", "core", "lib"]))
+    File.mkdir_p!(Path.join([root, "packages", "core", "test"]))
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule CustomAppsPathUmbrella.MixProject do
+      use Mix.Project
+
+      def project do
+        [
+          apps_path: "packages",
+          version: "0.1.0",
+          deps: deps()
+        ]
+      end
+
+      defp deps do
+        [
+          {:mutalisk, path: #{inspect(@checkout)}, only: :test, runtime: false}
+        ]
+      end
+    end
+    """)
+
+    File.write!(Path.join([root, "packages", "core", "mix.exs"]), """
+    defmodule Core.MixProject do
+      use Mix.Project
+
+      def project do
+        [
+          app: :core,
+          version: "0.1.0",
+          elixir: "~> 1.19"
+        ]
+      end
+    end
+    """)
+
+    File.write!(Path.join([root, "packages", "core", "lib", "core.ex"]), """
+    defmodule Core do
+      def flag?(a, b), do: a || b
+    end
+    """)
+
+    File.write!(
+      Path.join([root, "packages", "core", "test", "test_helper.exs"]),
+      "ExUnit.start()\n"
+    )
+
+    File.write!(Path.join([root, "packages", "core", "test", "core_test.exs"]), """
+    defmodule CoreTest do
+      use ExUnit.Case
+
+      test "flag" do
+        assert Core.flag?(true, false)
+      end
+    end
+    """)
   end
 
   # Per-project artifact roots to delete: the `<tmp>/mutalisk/<slug>` prefix of
