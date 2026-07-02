@@ -166,9 +166,29 @@ defmodule Mut.CliTest do
     assert opts.files == ["lib/a.ex", "lib/b.ex"]
   end
 
+  test "accepts multiple path tokens after one --files flag" do
+    assert {:ok, opts} =
+             Cli.parse([
+               "--files",
+               "lib/a.ex",
+               "lib/b.ex",
+               "lib/c.ex",
+               "--reporters",
+               "terminal"
+             ])
+
+    assert opts.files == ["lib/a.ex", "lib/b.ex", "lib/c.ex"]
+    assert opts.reporters == [:terminal]
+  end
+
   test "accepts comma-separated --files patterns" do
     assert {:ok, opts} = Cli.parse(["--files", "lib/a.ex, lib/b.ex"])
     assert opts.files == ["lib/a.ex", "lib/b.ex"]
+  end
+
+  test "still rejects unexpected arguments after non-files flags" do
+    assert {:error, message} = Cli.parse(["--reporters", "terminal", "lib/a.ex"])
+    assert message =~ "unexpected arguments lib/a.ex"
   end
 
   test "exclude preserves each regex's flags (R17)" do

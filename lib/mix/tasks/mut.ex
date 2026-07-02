@@ -6,8 +6,9 @@ defmodule Mix.Tasks.Mut do
   ## Options
 
     - `--files "PATTERN"` — Only mutate files matching glob pattern. Quote
-      globs so your shell does not expand them first. Repeat the flag or use
-      comma-separated patterns to mutate several paths.
+      globs so your shell does not expand them first. Repeat the flag, pass
+      multiple path tokens after it, or use comma-separated patterns to mutate
+      several paths.
     - `--mutators NAMES` — Comma-separated mutator name list
     - `--enable TARGETS` — Comma-separated enabled targets. Defaults:
       `dispatch`, `guard`, `env_walker` (only

@@ -188,6 +188,8 @@ defmodule Mut.Cli do
   def known_mutator_names, do: @known_mutators
 
   defp parse_argv(argv) do
+    argv = expand_multi_file_args(argv)
+
     {parsed, rest, invalid} =
       OptionParser.parse(argv,
         strict: [
@@ -224,6 +226,31 @@ defmodule Mut.Cli do
         {:ok, parsed}
     end
   end
+
+  defp expand_multi_file_args(argv), do: expand_multi_file_args(argv, [])
+
+  defp expand_multi_file_args([], acc), do: Enum.reverse(acc)
+
+  defp expand_multi_file_args(["--files" | rest], acc) do
+    {files, rest} = Enum.split_while(rest, &not_option?/1)
+
+    case files do
+      [] ->
+        expand_multi_file_args(rest, ["--files" | acc])
+
+      [_one | _] ->
+        expanded =
+          files
+          |> Enum.reverse()
+          |> Enum.flat_map(&[&1, "--files"])
+
+        expand_multi_file_args(rest, expanded ++ acc)
+    end
+  end
+
+  defp expand_multi_file_args([arg | rest], acc), do: expand_multi_file_args(rest, [arg | acc])
+
+  defp not_option?(arg), do: not String.starts_with?(arg, "-")
 
   defp normalize(parsed, config) do
     with :ok <- validate_config_keys(config),

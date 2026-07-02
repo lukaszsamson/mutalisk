@@ -3623,3 +3623,30 @@ dependency task is unavailable.
 
 Expected: docs should show help commands that work with the recommended
 `only: [:test], runtime: false` dependency setup.
+
+### 147. `--files a b c` is rejected even though all values are file selections
+
+**STATUS: FIXED.** The CLI now expands multiple non-option tokens following a
+single `--files` flag into repeated `--files` entries, while preserving errors
+for unrelated trailing arguments after other flags.
+
+Severity: P2
+Surface: CLI option ergonomics
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix mut --selection static --files \
+  lib/mutalisk_phx_probe_web/controllers/page_controller.ex \
+  lib/mutalisk_phx_probe_web/router.ex \
+  lib/mutalisk_phx_probe_web/controllers/error_json.ex \
+  --max-mutants 6 --fail-at 0 --reporters terminal
+```
+
+Observed before fix: Mutalisk failed before running with
+`unexpected arguments lib/.../router.ex lib/.../error_json.ex`.
+
+Expected: common CLI usage should accept several file patterns after one
+`--files` flag, matching the intent of repeated and comma-separated file
+selection.
