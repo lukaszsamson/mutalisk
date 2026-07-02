@@ -3404,3 +3404,51 @@ Observed before fix: Mutalisk surfaced the raw
 
 Expected: config loader errors should name `.mutalisk.exs` and explain the
 invalid file context rather than leaking an implementation stacktrace.
+
+### 139. Real-project runs are silent during long oracle/baseline/plan phases
+
+**STATUS: FIXED.** The Mix task now prints start/complete messages for oracle
+build, baseline tests, and plan generation before schema build starts.
+
+Severity: P2
+Surface: CLI progress on real projects
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_oss_probe/decimal
+MIX_ENV=test mix mut --selection static --files lib/decimal/context.ex \
+  --max-mutants 1 --fail-at 0 --concurrency 1 --reporters terminal
+```
+
+Observed before fix: the Decimal run printed nothing for roughly a minute while
+oracle build, baseline tests, and plan generation ran, then finally printed
+`Schema build starting`. The final phase timings showed 24s oracle build, 7s
+baseline tests, and 0.8s plan generation before the first visible progress.
+
+Expected: long pre-schema phases should be visible so users can distinguish
+real work from a hung command.
+
+### 140. `--keep-work-copy` prints retained oracle path after "run complete"
+
+**STATUS: FIXED.** The final `Mutalisk run complete` line is now printed by
+`run_pipeline/1` after both schema and oracle/baseline keep-work-copy messages.
+
+Severity: P3
+Surface: CLI completion / debug artifact paths
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_oss_probe/decimal
+MIX_ENV=test mix mut --selection static --files lib/decimal/context.ex \
+  --max-mutants 1 --fail-at 0 --concurrency 1 --reporters terminal \
+  --keep-work-copy
+```
+
+Observed before fix: the schema work-copy path printed, then
+`Mutalisk run complete`, then the oracle/baseline work-copy path printed after
+completion.
+
+Expected: retained artifact paths should be printed before the final completion
+line so the completion line is actually final.

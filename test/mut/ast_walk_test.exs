@@ -215,7 +215,9 @@ defmodule Mut.AstWalkTest do
       # carry no byte span, so without recovery the fallback patch failed with
       # `missing_source_span` and the mutant was dropped as `invalid` — hiding a
       # real survivor. `fallback_span/3` must locate `n < 10` on its line.
-      source = "defmodule M do\n  def f(n) do\n    cond do\n      n < 10 -> :a\n      true -> :b\n    end\n  end\nend\n"
+      source =
+        "defmodule M do\n  def f(n) do\n    cond do\n      n < 10 -> :a\n      true -> :b\n    end\n  end\nend\n"
+
       {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
 
       node =

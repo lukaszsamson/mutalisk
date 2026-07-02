@@ -22,6 +22,8 @@ defmodule Mut.Selection.DowngradeHint do
 
   @format_version 1
 
+  alias Mut.History.Digest
+
   @typedoc "Decoded hint file contents (string keys, as read from JSON)."
   @type hint :: %{optional(String.t()) => term()}
 
@@ -44,7 +46,7 @@ defmodule Mut.Selection.DowngradeHint do
   def check(root) do
     case read(root) do
       {:ok, hint} ->
-        current = Mut.History.Digest.project_digest(root)
+        current = Digest.project_digest(root)
 
         if Map.get(hint, "project_digest") == current do
           {:skip, hint}

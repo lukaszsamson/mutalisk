@@ -196,6 +196,8 @@ defmodule Mix.Tasks.Mut do
       Mut.MemoryWatchdog.start(Path.join(artifact_root, "mut_memory.log"))
 
     try do
+      IO.puts("Oracle build starting")
+
       {:ok, oracle} =
         Metrics.with_phase(metrics_pid, :oracle_build, fn ->
           # The `File.cd!(mutalisk_root, ...)` here is NOT for steering artifact
@@ -213,13 +215,21 @@ defmodule Mix.Tasks.Mut do
           end)
         end)
 
+      IO.puts("Oracle build complete")
+
       work_copy = Path.join([artifact_root, "mut_work", run_id])
+
+      IO.puts("Baseline tests starting")
 
       Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
         baseline_tests!(work_copy, mutalisk_root, artifact_root, opts, run_id)
       end)
 
+      IO.puts("Baseline tests complete")
+
       baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
+
+      IO.puts("Plan generation starting")
 
       plan =
         Metrics.with_phase(metrics_pid, :plan_generation, fn ->
@@ -227,6 +237,7 @@ defmodule Mix.Tasks.Mut do
         end)
 
       plan = maybe_limit_plan(plan, opts.max_mutants)
+      IO.puts("Plan generation complete")
 
       if opts.debug_plan do
         plan_path = Path.join(target_root, "plan.debug.json")
@@ -246,7 +257,7 @@ defmodule Mix.Tasks.Mut do
         set_debug_plan_exit_code(plan, opts.fail_at)
       else
         if executable_count(plan) == 0 do
-          execute_empty_plan(plan, work_copy, target_root, opts, started, metrics_pid)
+          execute_empty_plan(plan, work_copy, target_root, opts, metrics_pid)
         else
           {coverage_oracle, selection_mode} =
             collect_coverage_for_selection(
@@ -286,7 +297,6 @@ defmodule Mix.Tasks.Mut do
               artifact_root,
               run_id,
               opts,
-              started,
               metrics_pid,
               coverage_oracle,
               selection_mode
@@ -306,9 +316,13 @@ defmodule Mix.Tasks.Mut do
         File.rm_rf!(Path.join([artifact_root, "mut_work", run_id]))
       end
     end
+
+    unless opts.debug_plan do
+      IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
+    end
   end
 
-  defp execute_empty_plan(plan, work_copy, target_root, opts, started, metrics_pid) do
+  defp execute_empty_plan(plan, work_copy, target_root, opts, metrics_pid) do
     Metrics.set_effective_concurrency(metrics_pid, 1)
     Metrics.set_planned_total(metrics_pid, 0)
     record_skipped_plan(metrics_pid, plan)
@@ -323,7 +337,6 @@ defmodule Mix.Tasks.Mut do
       )
 
     set_exit_code(snapshot, opts.fail_at)
-    IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
   end
 
   # R15: destroying the original `pool` (the precisely-typed opaque
@@ -331,14 +344,13 @@ defmodule Mix.Tasks.Mut do
   # cross-module opaqueness check — the prior `final_pool` came back through the
   # run functions with a looser type. `Sandbox` already exempts `destroy_pool/1`
   # via `{:no_opaque, ...}`; mirror that at this call site.
-  @dialyzer {:no_opaque, execute_plan: 9}
+  @dialyzer {:no_opaque, execute_plan: 8}
   defp execute_plan(
          plan,
          target_root,
          artifact_root,
          run_id,
          opts,
-         started,
          metrics_pid,
          coverage_oracle,
          selection_mode
@@ -470,7 +482,6 @@ defmodule Mix.Tasks.Mut do
       end
 
     set_exit_code(snapshot, opts.fail_at)
-    IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
   end
 
   # M105: write the incremental-history verdict store from the run ledger.
@@ -1168,8 +1179,6 @@ defmodule Mix.Tasks.Mut do
 
   defp format_manifest_error({exception, message}) when is_atom(exception),
     do: "#{inspect(exception)}: #{message}"
-
-  defp format_manifest_error(reason), do: inspect(reason)
 
   defp execute_schema_mutant(mutant, sandbox, ctx) do
     selected = selected_tests(ctx.selection_context, mutant)

@@ -4,6 +4,7 @@ defmodule Mix.Tasks.Mut.E2e do
   use Mix.Task
 
   alias Mut.Reporter.StrykerJson
+  alias Mut.Selection.DowngradeHint
 
   @shortdoc "Runs mix mut end-to-end against demo_app"
   @fixture_root Path.expand("test/fixtures/demo_app")
@@ -14,6 +15,8 @@ defmodule Mix.Tasks.Mut.E2e do
     Mix.Task.run("app.start")
 
     default = run_fixture!("default", [])
+
+    DowngradeHint.delete(@fixture_root)
 
     coverage =
       run_fixture!(

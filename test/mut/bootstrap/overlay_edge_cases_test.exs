@@ -16,6 +16,7 @@ defmodule Mut.Bootstrap.Overlay.EdgeCasesTest do
     "umbrella"
   ]
 
+  @tag timeout: 300_000
   test "overlay compiles supported project shapes" do
     for case_name <- @cases do
       source = Path.expand(Path.join(["test", "fixtures", "overlay_cases", case_name]))

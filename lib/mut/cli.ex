@@ -160,24 +160,28 @@ defmodule Mut.Cli do
     names
     |> Enum.flat_map(fn name ->
       key = normalize_name(name)
-
-      case Map.fetch(mapping, key) do
-        {:ok, modules} ->
-          List.wrap(modules)
-
-        :error ->
-          # The terminal/HTML reports display each mutator by its CamelCase
-          # module name (e.g. `Arithmetic`, `ComparisonBoundary`). A user who
-          # copies that name into `--mutators` would otherwise hit "unknown
-          # mutator". Accept it by falling back to the snake_case form before
-          # giving up.
-          case Map.fetch(mapping, Macro.underscore(key)) do
-            {:ok, modules} -> List.wrap(modules)
-            :error -> raise ArgumentError, unknown_mutator_message(key)
-          end
-      end
+      resolve_mutator_modules(mapping, key)
     end)
     |> Enum.uniq()
+  end
+
+  defp resolve_mutator_modules(mapping, key) do
+    case Map.fetch(mapping, key) do
+      {:ok, modules} ->
+        List.wrap(modules)
+
+      :error ->
+        resolve_mutator_modules_by_report_name(mapping, key)
+    end
+  end
+
+  defp resolve_mutator_modules_by_report_name(mapping, key) do
+    # The terminal/HTML reports display each mutator by its CamelCase module
+    # name. Accept that copied name before giving up.
+    case Map.fetch(mapping, Macro.underscore(key)) do
+      {:ok, modules} -> List.wrap(modules)
+      :error -> raise ArgumentError, unknown_mutator_message(key)
+    end
   end
 
   @spec known_mutator_names() :: [String.t()]
