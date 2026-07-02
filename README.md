@@ -33,7 +33,8 @@ alias). `runtime: false` keeps Mutalisk out of your app's normal test start
 graph; mutation workers enable the runtime dependency in their own overlay.
 Plain `mix mut` in the default env fails with "task could not be found".
 
-Useful flags (see `mix help mut` for the full list):
+Useful flags (see `MIX_ENV=test mix help mut` or `mix mut --help` for the full
+list):
 
     MIX_ENV=test mix mut --files "lib/my_app/core/**/*.ex"   # only mutate some files
     MIX_ENV=test mix mut --concurrency 8                      # parallel workers
@@ -112,7 +113,7 @@ Settings layer, lowest to highest precedence:
     ]
 
 Or `config :mut, ...` in `config/test.exs`. CLI flags override both. Run
-`mix help mut` for every key and flag.
+`MIX_ENV=test mix help mut` or `mix mut --help` for every key and flag.
 
 ## Mutators
 

@@ -182,7 +182,7 @@ defmodule Mut.Reporter.TerminalTest do
                all tests:          0
              avg tests/mutant: 1.5
              median tests/mutant: 1
-             coverage collection: 5832 ms
+             coverage runner wall-clock: 5832 ms
            """
   end
 
@@ -223,13 +223,36 @@ defmodule Mut.Reporter.TerminalTest do
 
   test "render_summary reports no-score when no mutants were evaluated (issue #4)" do
     summary =
-      []
-      |> snapshot(by_status: %{}, score: 100.0)
+      [
+        skipped_entry(%{
+          file: "lib/web/router.ex",
+          line: 12,
+          column: 5,
+          reason: :unsupported_dispatch,
+          syntactic_name: :scope
+        }),
+        skipped_entry(%{
+          file: "lib/web/router.ex",
+          line: 15,
+          column: 7,
+          reason: :no_applicable_mutator,
+          syntactic_name: :pipe_through
+        })
+      ]
+      |> snapshot(
+        by_status: %{skipped: 2},
+        skipped_by_reason: %{unsupported_dispatch: 1, no_applicable_mutator: 1},
+        score: 100.0
+      )
       |> Terminal.render_summary()
       |> IO.iodata_to_binary()
 
     assert summary =~ "Mutation score: 0/0 (no scorable mutants)"
     assert summary =~ "Surviving mutants:\n  no scorable mutants were produced"
+    assert summary =~ "No scorable mutants were produced. Most likely reasons:"
+    assert summary =~ "unsupported_dispatch: 1"
+    assert summary =~ "lib/web/router.ex:12:5: unsupported_dispatch (:scope)"
+    assert summary =~ "Next steps: broaden --files/--mutators/--enable"
     refute summary =~ "Surviving mutants:\n  none"
     refute summary =~ "= 100.0%"
   end
@@ -336,6 +359,19 @@ defmodule Mut.Reporter.TerminalTest do
       mutant: mutant,
       result: result
     }
+  end
+
+  defp skipped_entry(attrs) do
+    Map.merge(
+      %{
+        id: nil,
+        stable_id: nil,
+        engine: nil,
+        status: :skipped,
+        mutation_kind: nil
+      },
+      attrs
+    )
   end
 
   defp mutant(engine, status, stable_id, id) do

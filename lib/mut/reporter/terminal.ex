@@ -57,6 +57,7 @@ defmodule Mut.Reporter.Terminal do
     [
       score_line(detected, denominator, snapshot.score),
       surviving_block(snapshot),
+      no_scorable_guidance_block(snapshot),
       errored_block(snapshot),
       "\n",
       engine_line(snapshot, :schema, "Schema:   "),
@@ -162,6 +163,52 @@ defmodule Mut.Reporter.Terminal do
 
   defp score_line(detected, denominator, score),
     do: "Mutation score: #{detected}/#{denominator} = #{format_pct(score)}\n\n"
+
+  defp no_scorable_guidance_block(snapshot) do
+    if scorable_count(snapshot) == 0 do
+      skipped = Enum.filter(snapshot.ledger, &(&1.status == :skipped))
+
+      if skipped == [] do
+        ""
+      else
+        [
+          "\nNo scorable mutants were produced. Most likely reasons:\n",
+          no_scorable_reason_lines(snapshot),
+          "Examples of skipped sites:\n",
+          skipped |> Enum.take(5) |> Enum.map(&skipped_example_line/1),
+          "Next steps: broaden --files/--mutators/--enable, or run --debug-plan for the full skipped-site list.\n"
+        ]
+      end
+    else
+      ""
+    end
+  end
+
+  defp no_scorable_reason_lines(snapshot) do
+    snapshot.skipped_by_reason
+    |> Enum.sort_by(fn {_reason, count} -> -count end)
+    |> Enum.take(3)
+    |> Enum.map(fn {reason, count} -> "  - #{group_key(reason)}: #{count}\n" end)
+  end
+
+  defp skipped_example_line(entry) do
+    location = skipped_location(entry)
+    reason = entry |> Map.get(:skip_reason, Map.get(entry, :reason)) |> group_key()
+    syntactic = entry |> Map.get(:syntactic_name) |> skipped_syntactic()
+
+    "  - #{location}: #{reason}#{syntactic}\n"
+  end
+
+  defp skipped_location(%{file: file, line: line, column: column})
+       when is_integer(line) and is_integer(column),
+       do: "#{file}:#{line}:#{column}"
+
+  defp skipped_location(%{file: file, line: line}) when is_integer(line), do: "#{file}:#{line}"
+  defp skipped_location(%{file: file}), do: file
+  defp skipped_location(_entry), do: "(unknown location)"
+
+  defp skipped_syntactic(nil), do: ""
+  defp skipped_syntactic(name), do: " (#{inspect(name)})"
 
   # Errored mutants carry an actionable reason (compile error or test output) in
   # the ledger; the headline only counts them. Surface a concise, single-line
@@ -348,7 +395,7 @@ defmodule Mut.Reporter.Terminal do
       {:oracle_build_ms, "oracle build"},
       {:baseline_tests_ms, "baseline tests"},
       {:plan_generation_ms, "plan generation"},
-      {:coverage_collection_ms, "coverage collection"},
+      {:coverage_collection_ms, "coverage phase"},
       {:schema_build_ms, "schema build"},
       {:schema_workers_ms, "schema workers"},
       {:fallback_workers_ms, "fallback workers"},
@@ -393,7 +440,7 @@ defmodule Mut.Reporter.Terminal do
       "    all tests:          #{Map.get(distribution, :all_tests, 0)}\n",
       "  avg tests/mutant: #{format_float(Map.get(selection, :selected_tests_avg, 0.0))}\n",
       "  median tests/mutant: #{Map.get(selection, :selected_tests_median, 0)}\n",
-      "  coverage collection: #{Map.get(selection, :coverage_collection_wall_ms, 0)} ms\n"
+      "  coverage runner wall-clock: #{Map.get(selection, :coverage_collection_wall_ms, 0)} ms\n"
     ]
   end
 

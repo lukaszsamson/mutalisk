@@ -3544,3 +3544,82 @@ mutants to be reported as `error`.
 
 Expected: custom umbrella app paths should execute selected child tests instead
 of turning valid mutants into runtime errors.
+
+### 144. Phoenix/Jason-style no-scorable runs do not explain what to try next
+
+**STATUS: FIXED.** Terminal summaries for zero-scorable runs now include the
+top skipped reasons, concrete skipped file/line examples, and a next-step hint
+to broaden selection or run `--debug-plan`.
+
+Severity: P2
+Surface: Terminal report usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix mut --selection static \
+  --files lib/mutalisk_phx_probe_web/controllers/page_controller.ex \
+  --files lib/mutalisk_phx_probe_web/router.ex \
+  --files lib/mutalisk_phx_probe_web/controllers/error_json.ex \
+  --max-mutants 6 --fail-at 0 --reporters terminal --concurrency 2
+```
+
+Observed before fix: the run spent about 13 seconds building oracle/baseline
+state and then reported only `Mutation score: 0/0 (no scorable mutants)` plus
+grouped internal skip counters such as `unsupported_dispatch` and
+`no_applicable_mutator`.
+
+Expected: when no mutants are scorable, the terminal output should show enough
+specific skipped-site context for users to understand whether they pointed at
+DSL/generated code, selected unsupported dispatches, or need different
+`--files`/`--mutators`/`--enable` settings.
+
+### 145. Coverage timing labels use the same wording for different timings
+
+**STATUS: FIXED.** The terminal report now labels the outer metrics row as
+`coverage phase` and the selection metric as `coverage runner wall-clock`.
+
+Severity: P3
+Surface: Terminal report clarity
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_real_audit/decimal
+MIX_ENV=test mix mut --files lib/decimal/context.ex \
+  --max-mutants 1 --fail-at 0 --reporters terminal
+```
+
+Observed before fix: a downgraded coverage run could print two different
+durations with the same apparent label, for example `Coverage collection took
+23760ms`, `Phases: coverage collection: 47360 ms`, and
+`Selection: coverage collection: 23760 ms`.
+
+Expected: the report should distinguish the outer Mutalisk phase timing from
+the coverage runner's measured wall-clock duration.
+
+### 146. README points test-only installs at `mix help mut` without `MIX_ENV=test`
+
+**STATUS: FIXED.** README help references now use `MIX_ENV=test mix help mut`
+or `mix mut --help`.
+
+Severity: P3
+Surface: Install/discoverability docs
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix help mut
+MIX_ENV=test mix help mut
+mix mut --help
+```
+
+Observed before fix: Phoenix-style test-only installs can successfully run
+`mix mut --help` through the task/preferred-env path, while plain
+`mix help mut` may run in the default environment where the `:test`-only
+dependency task is unavailable.
+
+Expected: docs should show help commands that work with the recommended
+`only: [:test], runtime: false` dependency setup.
