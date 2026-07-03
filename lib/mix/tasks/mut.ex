@@ -503,7 +503,7 @@ defmodule Mix.Tasks.Mut do
     store_path = History.Store.path(target_root, history_path: opts.history_path)
 
     prev =
-      case load_history_store(store_path, opts) do
+      case load_history_store(store_path, opts, warn: false) do
         {:ok, store} -> store
         {:cold, _reason} -> :cold
       end
@@ -515,11 +515,12 @@ defmodule Mix.Tasks.Mut do
       :ok
   end
 
-  defp load_history_store(path, opts) do
+  defp load_history_store(path, opts, load_opts \\ []) do
     result = History.Store.load(path)
+    warn? = Keyword.get(load_opts, :warn, true)
 
     case result do
-      {:cold, reason} when is_binary(opts.history_path) and reason != :absent ->
+      {:cold, reason} when warn? and is_binary(opts.history_path) and reason != :absent ->
         IO.puts(
           :stderr,
           "[mutalisk] configured history_path #{path} is unusable (#{reason}); starting cold"

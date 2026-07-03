@@ -177,6 +177,32 @@ defmodule Mix.Tasks.MutE2ETest do
     assert File.exists?(Path.join(root, "tmp/custom-history.json"))
   end
 
+  @tag timeout: 180_000
+  test "malformed configured history_path warns once before being replaced" do
+    root = tmp_project!("malformed_history_path")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_configured_history_probe!(root)
+    history_path = Path.join(root, "tmp/custom-history.json")
+    File.mkdir_p!(Path.dirname(history_path))
+    File.write!(history_path, "{bad json")
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut --incremental),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    assert output =~ "configured history_path"
+    assert output =~ "unusable (malformed)"
+    assert length(Regex.scan(~r/configured history_path/, output)) == 1
+    assert {:ok, _decoded} = Mut.JSON.decode(File.read!(history_path))
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do

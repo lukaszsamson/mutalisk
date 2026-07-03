@@ -3746,3 +3746,40 @@ run then wrote the history file successfully.
 
 Expected: absent history should start cold silently. Only unusable existing
 configured history, such as malformed JSON or a version mismatch, should warn.
+
+### 151. Malformed configured history_path warns twice in one incremental run
+
+**STATUS: FIXED.** The reuse-side load still warns once for unusable configured
+history, but the write-side merge load is quiet and replaces the bad store.
+
+Severity: P3
+Surface: Incremental usability / warning quality
+
+Reproduction:
+
+```sh
+cd /tmp/mut_config_history_malformed
+mkdir -p tmp
+printf '{bad json' > tmp/custom-history.json
+cat > .mutalisk.exs <<'EOF'
+[
+  selection: :static,
+  files: "lib/arith.ex",
+  max_mutants: 1,
+  fail_at: 0.0,
+  reporters: [:terminal],
+  concurrency: 1,
+  history_path: "tmp/custom-history.json"
+]
+EOF
+
+MIX_ENV=test mix mut --incremental
+```
+
+Observed before fix: the same warning appeared before schema build and again at
+the end of the run:
+`configured history_path ... is unusable (malformed); starting cold`.
+
+Expected: one warning is enough to explain that reuse started cold. The final
+history write should quietly replace the malformed store with the new valid
+history file.
