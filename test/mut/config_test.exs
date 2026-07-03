@@ -1,7 +1,7 @@
 defmodule Mut.ConfigTest do
   use ExUnit.Case, async: false
 
-  @moduledoc "M100: .mutalisk.exs loading + config precedence (file < config :mut < CLI)."
+  @moduledoc "M100: .mutalisk.exs loading + config precedence."
 
   alias Mut.Config
 
@@ -9,21 +9,29 @@ defmodule Mut.ConfigTest do
     root = Path.expand("tmp/tests/config/#{System.unique_integer([:positive])}")
     File.rm_rf!(root)
     File.mkdir_p!(root)
-    # Snapshot + clear :mut app env so tests are isolated.
-    saved = Application.get_all_env(:mut)
+    # Snapshot + clear app env so tests are isolated.
+    saved_legacy = Application.get_all_env(:mut)
+    saved = Application.get_all_env(:mutalisk)
 
     on_exit(fn ->
       File.rm_rf!(root)
       Enum.each(Application.get_all_env(:mut), fn {k, _} -> Application.delete_env(:mut, k) end)
-      Enum.each(saved, fn {k, v} -> Application.put_env(:mut, k, v) end)
+
+      Enum.each(Application.get_all_env(:mutalisk), fn {k, _} ->
+        Application.delete_env(:mutalisk, k)
+      end)
+
+      Enum.each(saved_legacy, fn {k, v} -> Application.put_env(:mut, k, v) end)
+      Enum.each(saved, fn {k, v} -> Application.put_env(:mutalisk, k, v) end)
     end)
 
-    Enum.each(saved, fn {k, _} -> Application.delete_env(:mut, k) end)
+    Enum.each(saved_legacy, fn {k, _} -> Application.delete_env(:mut, k) end)
+    Enum.each(saved, fn {k, _} -> Application.delete_env(:mutalisk, k) end)
     {:ok, root: root}
   end
 
-  test "no .mutalisk.exs returns just config :mut", %{root: root} do
-    Application.put_env(:mut, :fail_at, 70.0)
+  test "no .mutalisk.exs returns just config :mutalisk", %{root: root} do
+    Application.put_env(:mutalisk, :fail_at, 70.0)
     config = Config.load(root)
     assert config[:fail_at] == 70.0
   end
@@ -39,17 +47,27 @@ defmodule Mut.ConfigTest do
     assert config[:concurrency] == 2
   end
 
-  test "config :mut overrides .mutalisk.exs (file < app)", %{root: root} do
+  test "config :mutalisk overrides .mutalisk.exs (file < app)", %{root: root} do
     File.write!(Path.join(root, ".mutalisk.exs"), """
     [selection: :static, fail_at: 50.0, concurrency: 2]
     """)
 
-    Application.put_env(:mut, :fail_at, 90.0)
+    Application.put_env(:mutalisk, :fail_at, 90.0)
 
     config = Config.load(root)
-    assert config[:fail_at] == 90.0, "config :mut must override the file"
+    assert config[:fail_at] == 90.0, "config :mutalisk must override the file"
     assert config[:selection] == :static, "file value kept when app doesn't set it"
     assert config[:concurrency] == 2
+  end
+
+  test "config :mutalisk overrides legacy config :mut", %{root: root} do
+    Application.put_env(:mut, :fail_at, 60.0)
+    Application.put_env(:mut, :selection, :coverage)
+    Application.put_env(:mutalisk, :fail_at, 90.0)
+
+    config = Config.load(root)
+    assert config[:fail_at] == 90.0
+    assert config[:selection] == :coverage
   end
 
   test "CLI flags override the merged file+app config (file < app < CLI)", %{root: root} do
@@ -57,7 +75,7 @@ defmodule Mut.ConfigTest do
     [fail_at: 50.0, concurrency: 2]
     """)
 
-    Application.put_env(:mut, :fail_at, 90.0)
+    Application.put_env(:mutalisk, :fail_at, 90.0)
 
     merged = Config.load(root)
     {:ok, opts} = Mut.Cli.parse(["--fail-at", "33.0"], merged)

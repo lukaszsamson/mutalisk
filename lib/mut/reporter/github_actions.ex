@@ -3,7 +3,7 @@ defmodule Mut.Reporter.GitHubActions do
   M101: emit GitHub Actions workflow `::warning` commands for surviving
   mutants, so they appear as inline annotations on the PR's changed files.
 
-  Opt-in (`--reporters github_actions` / `config :mut, reporters: [...]`).
+  Opt-in (`--reporters github_actions` / `config :mutalisk, reporters: [...]`).
   Consumes the Stryker JSON map the tool already builds, so it shares the
   file/line/mutation data with the other reporters and never recomputes a
   score or changes the default reporters.

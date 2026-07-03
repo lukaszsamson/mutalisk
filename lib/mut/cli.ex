@@ -347,7 +347,7 @@ defmodule Mut.Cli do
 
   # `exclude` is config-only (no CLI flag): a single Regex, a list of Regex, or
   # nil/[]. Compiled to one combined Regex (or nil) for file filtering. Comes
-  # from the merged `.mutalisk.exs` + `config :mut` map (file < app).
+  # from the merged `.mutalisk.exs` + application config map (file < app).
   defp exclude(config) do
     case Keyword.get(config, :exclude) do
       nil -> {:ok, nil}

@@ -257,6 +257,33 @@ defmodule Mix.Tasks.MutE2ETest do
     refute File.exists?(Path.join(root, "tmp/custom-history.json"))
   end
 
+  @tag timeout: 180_000
+  test "config mutalisk namespace overrides project file without Mix app warning" do
+    root = tmp_project!("config_namespace")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_configured_history_probe!(root)
+    write_mutalisk_app_config!(root)
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    refute output =~ "You have configured application :mut", output
+
+    report_path = Path.join(root, "tmp/config-report.json")
+    assert File.exists?(report_path)
+    {:ok, report} = Mut.JSON.decode(File.read!(report_path))
+    assert Map.keys(report["files"]) == ["lib/configured_history_path.ex"]
+    assert report["mutalisk"]["selection"]["mode"] == "static"
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do
@@ -473,6 +500,28 @@ defmodule Mix.Tasks.MutE2ETest do
       concurrency: 1,
       history_path: "tmp/custom-history.json"
     ]
+    """)
+  end
+
+  defp write_mutalisk_app_config!(root) do
+    File.mkdir_p!(Path.join(root, "config"))
+
+    File.write!(Path.join(root, "config/config.exs"), """
+    import Config
+    import_config "\#{config_env()}.exs"
+    """)
+
+    File.write!(Path.join(root, "config/test.exs"), """
+    import Config
+
+    config :mutalisk,
+      selection: :static,
+      files: "lib/configured_history_path.ex",
+      max_mutants: 1,
+      fail_at: 0.0,
+      reporters: [:stryker_json],
+      output_path: "tmp/config-report.json",
+      concurrency: 1
     """)
   end
 

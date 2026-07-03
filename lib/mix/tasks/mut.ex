@@ -69,9 +69,9 @@ defmodule Mix.Tasks.Mut do
 
   Settings can come from three layers, lowest to highest precedence:
 
-      .mutalisk.exs project file  <  config :mut  <  CLI flags
+      .mutalisk.exs project file  <  config :mutalisk  <  CLI flags
 
-  A CLI flag always wins; `config :mut` overrides the file; the file is the
+  A CLI flag always wins; `config :mutalisk` overrides the file; the file is the
   base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
   `enabled_targets`, `selection`, `fail_at`, `concurrency`, `test_timeout_ms`,
   `reporters`, `output_path`, `exclude`, `max_mutants`, `since`, `incremental`,
@@ -101,7 +101,7 @@ defmodule Mix.Tasks.Mut do
 
   Or via application config:
 
-      config :mut,
+      config :mutalisk,
         exclude: [~r/lib\\/my_app_web\\/router.ex/],
         fail_at: 80.0,
         selection: :coverage_with_static_fallback,
@@ -157,7 +157,7 @@ defmodule Mix.Tasks.Mut do
   def run(argv) do
     enforce_test_env!()
 
-    # Effective config: `.mutalisk.exs` (project file) < `config :mut` < CLI
+    # Effective config: `.mutalisk.exs` (project file) < app config < CLI
     # flags. Mut.Config merges the first two; Cli.parse layers CLI flags on top.
     case Cli.parse(argv, Mut.Config.load(File.cwd!())) do
       {:ok, opts} -> run_pipeline(opts)

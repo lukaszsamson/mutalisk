@@ -34,8 +34,8 @@ tests don't actually pin down behavior.
   including cross-app dependents.
 - **Reports** — Stryker-compatible JSON (`stryker.report.json`) and a terminal
   summary by default; opt-in HTML and GitHub Actions (PR annotation) reporters.
-- **Configuration** — layered `.mutalisk.exs` file < `config :mut` < CLI flags;
-  exclude files by pattern; `@mutalisk_ignore true` to skip a module.
+- **Configuration** — layered `.mutalisk.exs` file < `config :mutalisk` < CLI
+  flags; exclude files by pattern; `@mutalisk_ignore true` to skip a module.
 - **Incremental cross-run history** (`--incremental`, opt-in) — reuse a prior
   run's verdicts when the project is unchanged. Reuse is gated on a coarse
   project fingerprint (all `lib`/test-support/config sources plus `mix.lock`)

@@ -100,7 +100,7 @@ mutant in that module:
 
 Settings layer, lowest to highest precedence:
 
-    .mutalisk.exs project file  <  config :mut  <  CLI flags
+    .mutalisk.exs project file  <  config :mutalisk  <  CLI flags
 
 `.mutalisk.exs` (project root, optional) is a plain keyword list:
 
@@ -112,7 +112,7 @@ Settings layer, lowest to highest precedence:
       exclude: [~r"lib/my_app_web/router.ex"]
     ]
 
-Or `config :mut, ...` in `config/test.exs`. CLI flags override both. Run
+Or `config :mutalisk, ...` in `config/test.exs`. CLI flags override both. Run
 `MIX_ENV=test mix help mut` or `mix mut --help` for every key and flag.
 
 ## Mutators
@@ -128,14 +128,14 @@ rules.
 - `html` (opt-in) — a self-contained `stryker.report.html` listing survivors.
 - `github-actions` (opt-in) — `::warning` annotations for inline PR comments.
 
-Select with `--reporters a,b` or `config :mut, reporters: [...]`. Config may
+Select with `--reporters a,b` or `config :mutalisk, reporters: [...]`. Config may
 use atoms such as `:stryker_json`; CLI examples use the hyphenated names.
 
 ## Per-test timeout policy
 
 Mutalisk runs ExUnit with a **10 000 ms per-test timeout** (not ExUnit's
 60 000 ms default), passed as `mix test --timeout 10000`. Override with
-`--test-timeout-ms` or `config :mut, test_timeout_ms: N`.
+`--test-timeout-ms` or `config :mutalisk, test_timeout_ms: N`.
 
 Mutation-introduced bugs are usually infinite loops or unbounded recursion —
 1–10 s is plenty of evidence to classify them, and a 60 s timeout per such

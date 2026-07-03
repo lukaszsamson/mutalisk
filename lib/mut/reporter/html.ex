@@ -4,7 +4,7 @@ defmodule Mut.Reporter.Html do
   each survivor lives on plus the specific mutation (original → replacement) —
   so a team can act on them without a separate viewer.
 
-  Opt-in (`--reporters html` / `config :mut, reporters: [...]`). Consumes the
+  Opt-in (`--reporters html` / `config :mutalisk, reporters: [...]`). Consumes the
   Stryker JSON map the tool already builds (shared file/line/mutation data);
   never recomputes a score or changes the default reporters. Output is a
   single static `.html` file (inline CSS, no assets).

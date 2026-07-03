@@ -3834,3 +3834,42 @@ warning that `--incremental` was ignored.
 
 Expected: debug-plan users should be told that incremental mode is disabled for
 the debug-plan path and that history will not be read or written.
+
+### 154. Documented config :mut namespace triggers Mix unavailable-app warning
+
+**STATUS: FIXED.** Mutalisk now supports `config :mutalisk` as the documented
+application config namespace while preserving legacy `config :mut` as a lower
+precedence fallback.
+
+Severity: P2
+Surface: Configuration API / first-run usability
+
+Reproduction:
+
+```sh
+cd /tmp/mut_config_precedence_probe
+cat > config/config.exs <<'EOF'
+import Config
+import_config "#{config_env()}.exs"
+EOF
+cat > config/test.exs <<'EOF'
+import Config
+config :mut,
+  selection: :static,
+  files: "lib/beta.ex",
+  fail_at: 0.0,
+  reporters: [:stryker_json],
+  output_path: "tmp/app-config-report.json"
+EOF
+
+MIX_ENV=test mix mut
+```
+
+Observed before fix: the documented `config :mut` path worked, but Mix printed:
+`You have configured application :mut in your configuration file, but the
+application is not available.` The package application is `:mutalisk`, so the
+documented config namespace looked like a user mistake on every configured run.
+
+Expected: documented application config should not produce a Mix unavailable-app
+warning. Users should configure `config :mutalisk`; existing `config :mut`
+projects should continue to work for compatibility.
