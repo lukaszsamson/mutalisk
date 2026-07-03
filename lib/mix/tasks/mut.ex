@@ -783,8 +783,11 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp build_plan(work_copy, oracle, opts, project_root) do
+    files = expand_file_patterns(work_copy, opts.files, project_root)
+    warn_excluded_selected_files(files, opts.exclude)
+
     Mut.Orchestrator.plan(work_copy, oracle,
-      files: expand_file_patterns(work_copy, opts.files, project_root),
+      files: files,
       mutators: Cli.resolve_mutators(opts.mutators),
       enabled_targets: opts.enabled_targets,
       file_filter: opts.exclude
@@ -1714,6 +1717,35 @@ defmodule Mix.Tasks.Mut do
         "paths outside it cannot be mutated."
     )
   end
+
+  defp warn_excluded_selected_files(nil, _exclude), do: :ok
+  defp warn_excluded_selected_files(_files, nil), do: :ok
+
+  defp warn_excluded_selected_files(files, exclude) do
+    excluded = Enum.filter(files, &excluded_file?(&1, exclude))
+
+    case {excluded, length(excluded), length(files)} do
+      {[], _excluded_count, _file_count} ->
+        :ok
+
+      {_excluded, excluded_count, excluded_count} ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] config :exclude removed every explicitly selected source file " <>
+            "(#{excluded_count}/#{excluded_count}): #{Enum.join(excluded, ", ")}"
+        )
+
+      {_excluded, excluded_count, file_count} ->
+        IO.puts(
+          :stderr,
+          "[mutalisk] config :exclude removed #{excluded_count}/#{file_count} explicitly " <>
+            "selected source file(s): #{Enum.join(excluded, ", ")}"
+        )
+    end
+  end
+
+  defp excluded_file?(file, regexes) when is_list(regexes),
+    do: Enum.any?(regexes, &Regex.match?(&1, file))
 
   defp expand_file_pattern(work_copy, pattern, project_root) do
     path = Path.join(work_copy, normalize_file_pattern(pattern, project_root))

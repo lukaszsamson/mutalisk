@@ -284,6 +284,29 @@ defmodule Mix.Tasks.MutE2ETest do
     assert report["mutalisk"]["selection"]["mode"] == "static"
   end
 
+  @tag timeout: 180_000
+  test "configured exclude explains when it removes selected source files" do
+    root = tmp_project!("exclude_selected_files")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_configured_history_probe!(root)
+    write_exclude_selected_config!(root)
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 1, output
+    assert output =~ "config :exclude removed every explicitly selected source file"
+    assert output =~ "lib/configured_history_path.ex"
+    assert output =~ "no scorable mutants"
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do
@@ -521,6 +544,27 @@ defmodule Mix.Tasks.MutE2ETest do
       fail_at: 0.0,
       reporters: [:stryker_json],
       output_path: "tmp/config-report.json",
+      concurrency: 1
+    """)
+  end
+
+  defp write_exclude_selected_config!(root) do
+    File.mkdir_p!(Path.join(root, "config"))
+
+    File.write!(Path.join(root, "config/config.exs"), """
+    import Config
+    import_config "\#{config_env()}.exs"
+    """)
+
+    File.write!(Path.join(root, "config/test.exs"), """
+    import Config
+
+    config :mutalisk,
+      selection: :static,
+      files: "lib/configured_history_path.ex",
+      exclude: [~r/configured_history_path\\.ex$/],
+      fail_at: 80.0,
+      reporters: [:terminal],
       concurrency: 1
     """)
   end

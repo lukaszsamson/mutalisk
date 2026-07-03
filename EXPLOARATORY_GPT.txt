@@ -3873,3 +3873,37 @@ documented config namespace looked like a user mistake on every configured run.
 Expected: documented application config should not produce a Mix unavailable-app
 warning. Users should configure `config :mutalisk`; existing `config :mut`
 projects should continue to work for compatibility.
+
+### 155. config :exclude can silently remove every selected file
+
+**STATUS: FIXED.** When `exclude` removes explicitly selected source files,
+Mutalisk now warns which selected files were removed, including the all-removed
+case that leads to 0/0 no-scorable output.
+
+Severity: P3
+Surface: Configuration API / no-scorable diagnostics
+
+Reproduction:
+
+```sh
+cd /tmp/mut_exclude_config_probe
+cat > config/test.exs <<'EOF'
+import Config
+config :mutalisk,
+  selection: :static,
+  files: ["lib/drop_me.ex"],
+  exclude: [~r/drop_me\\.ex$/],
+  fail_at: 80.0,
+  reporters: [:terminal]
+EOF
+
+MIX_ENV=test mix mut
+```
+
+Observed before fix: the run failed with `Mutation score: 0/0 (no scorable
+mutants)` and the release-gate failure, but did not mention that the configured
+`exclude` pattern had removed the only explicitly selected source file.
+
+Expected: when `files` explicitly selects source files and `exclude` removes
+some or all of them, the terminal output should say so before the no-scorable
+summary.
