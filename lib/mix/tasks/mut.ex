@@ -179,6 +179,7 @@ defmodule Mix.Tasks.Mut do
     # with no effect (#15). Skipped under --debug-plan, which writes no report.
     unless opts.debug_plan, do: validate_output_paths!(target_root, opts)
     warn_unused_since(opts)
+    warn_unused_incremental(opts)
     warn_unused_output_path(opts)
     mutalisk_root = @mutalisk_root
     # #40/#49: every runtime artifact (work copies, sandboxes, memory/baseline
@@ -1483,6 +1484,16 @@ defmodule Mix.Tasks.Mut do
   end
 
   defp warn_unused_since(_opts), do: :ok
+
+  defp warn_unused_incremental(%{debug_plan: true, incremental: true}) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --incremental has no effect with --debug-plan; " <>
+        "history will not be read or written"
+    )
+  end
+
+  defp warn_unused_incremental(_opts), do: :ok
 
   defp warn_unused_output_path(%{debug_plan: true, output_path: path})
        when path != "stryker.report.json" do

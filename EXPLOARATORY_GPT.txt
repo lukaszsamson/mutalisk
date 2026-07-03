@@ -3809,3 +3809,28 @@ warning that `--output-path` was ignored.
 Expected: because `--debug-plan` bypasses normal reporters, a custom
 `--output-path` should produce an explicit no-effect warning and point users to
 `plan.debug.json`.
+
+### 153. --debug-plan silently ignores --incremental
+
+**STATUS: FIXED.** `--debug-plan` now warns when `--incremental` is passed,
+because debug-plan exits after plan generation and does not read or write
+history.
+
+Severity: P3
+Surface: Debug plan / incremental option ergonomics
+
+Reproduction:
+
+```sh
+cd test/fixtures/demo_app
+rm -f _build/mut_history/history.json
+MIX_ENV=test mix mut --debug-plan --incremental --since HEAD \
+  --selection static --files lib/arith.ex --max-mutants 1 --fail-at 0
+```
+
+Observed before fix: the command exited successfully and wrote
+`plan.debug.json`, but did not read, reuse, or write history and printed no
+warning that `--incremental` was ignored.
+
+Expected: debug-plan users should be told that incremental mode is disabled for
+the debug-plan path and that history will not be read or written.

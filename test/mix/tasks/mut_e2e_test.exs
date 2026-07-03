@@ -234,6 +234,29 @@ defmodule Mix.Tasks.MutE2ETest do
     refute File.exists?(output_path)
   end
 
+  @tag timeout: 180_000
+  test "debug plan warns that incremental mode is ignored" do
+    root = tmp_project!("debug_plan_incremental")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_configured_history_probe!(root)
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut --debug-plan --incremental --since HEAD),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    assert output =~ "--incremental has no effect with --debug-plan"
+    assert output =~ "history will not be read or written"
+    assert File.exists?(Path.join(root, "plan.debug.json"))
+    refute File.exists?(Path.join(root, "tmp/custom-history.json"))
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do
