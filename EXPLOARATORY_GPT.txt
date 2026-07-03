@@ -3711,3 +3711,38 @@ still printed `Schema build starting`/`complete` and spent about 11 seconds in
 
 Expected: a full-reuse incremental run should skip schema build and worker
 setup entirely; there are no mutants left to instrument or execute.
+
+### 150. First configured history_path run warns that missing history is unusable
+
+**STATUS: FIXED.** Missing configured history is now treated as the normal cold
+start it is; malformed or version-mismatched configured history still warns.
+
+Severity: P3
+Surface: Incremental usability / config-only API
+
+Reproduction:
+
+```sh
+cd /tmp/mut_config_history_probe
+cat > .mutalisk.exs <<'EOF'
+[
+  selection: :static,
+  files: "lib/arith.ex",
+  max_mutants: 1,
+  fail_at: 0.0,
+  reporters: [:terminal],
+  concurrency: 1,
+  history_path: "tmp/custom-history.json"
+]
+EOF
+
+MIX_ENV=test mix mut --incremental
+```
+
+Observed before fix: the first run printed the configured-history warning twice:
+`configured history_path ... is unusable (absent); starting cold`, even though a
+missing history file is expected on the first configured incremental run. The
+run then wrote the history file successfully.
+
+Expected: absent history should start cold silently. Only unusable existing
+configured history, such as malformed JSON or a version mismatch, should warn.

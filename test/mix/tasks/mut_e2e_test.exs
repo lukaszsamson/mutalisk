@@ -155,6 +155,28 @@ defmodule Mix.Tasks.MutE2ETest do
     assert detected > 0, output
   end
 
+  @tag timeout: 180_000
+  test "configured relative history_path starts cold without an unusable warning" do
+    root = tmp_project!("configured_history_path")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_configured_history_probe!(root)
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        ~w(mut --incremental),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    refute output =~ "configured history_path", output
+    refute output =~ "unusable (absent)", output
+    assert File.exists?(Path.join(root, "tmp/custom-history.json"))
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do
@@ -315,6 +337,62 @@ defmodule Mix.Tasks.MutE2ETest do
         assert Core.flag?(true, false)
       end
     end
+    """)
+  end
+
+  defp write_configured_history_probe!(root) do
+    File.mkdir_p!(Path.join(root, "lib"))
+    File.mkdir_p!(Path.join(root, "test"))
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule ConfiguredHistoryPath.MixProject do
+      use Mix.Project
+
+      def project do
+        [
+          app: :configured_history_path,
+          version: "0.1.0",
+          elixir: "~> 1.19",
+          deps: deps()
+        ]
+      end
+
+      defp deps do
+        [
+          {:mutalisk, path: #{inspect(@checkout)}, only: :test, runtime: false}
+        ]
+      end
+    end
+    """)
+
+    File.write!(Path.join(root, "lib/configured_history_path.ex"), """
+    defmodule ConfiguredHistoryPath do
+      def multiply(a, b), do: a * b
+    end
+    """)
+
+    File.write!(Path.join(root, "test/test_helper.exs"), "ExUnit.start()\n")
+
+    File.write!(Path.join(root, "test/configured_history_path_test.exs"), """
+    defmodule ConfiguredHistoryPathTest do
+      use ExUnit.Case
+
+      test "multiply" do
+        assert ConfiguredHistoryPath.multiply(2, 3) == 6
+      end
+    end
+    """)
+
+    File.write!(Path.join(root, ".mutalisk.exs"), """
+    [
+      selection: :static,
+      files: "lib/configured_history_path.ex",
+      max_mutants: 1,
+      fail_at: 0.0,
+      reporters: [:terminal],
+      concurrency: 1,
+      history_path: "tmp/custom-history.json"
+    ]
     """)
   end
 
