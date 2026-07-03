@@ -90,6 +90,9 @@ defmodule Mut.Reporter.HtmlTest do
 
     html = Html.render(map)
     assert html =~ "No surviving mutants"
+    assert html =~ "<title>Mutalisk — no surviving mutants</title>"
+    assert html =~ "<h1>Mutalisk — no surviving mutants</h1>"
+    refute html =~ "<title>Mutalisk — surviving mutants</title>"
     assert html =~ "🎉"
     assert html =~ "Mutation score: 1/1 = 100.0%"
   end

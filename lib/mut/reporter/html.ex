@@ -81,6 +81,9 @@ defmodule Mut.Reporter.Html do
   defp heading(0, inconclusive, _skipped, _total_mutants) when inconclusive > 0,
     do: "Mutalisk — incomplete mutation run"
 
+  defp heading(0, _inconclusive, _skipped, _total_mutants),
+    do: "Mutalisk — no surviving mutants"
+
   defp heading(_total_survivors, _inconclusive, _skipped, _total_mutants),
     do: "Mutalisk — surviving mutants"
 

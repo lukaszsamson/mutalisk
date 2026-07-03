@@ -3650,3 +3650,64 @@ Observed before fix: Mutalisk failed before running with
 Expected: common CLI usage should accept several file patterns after one
 `--files` flag, matching the intent of repeated and comma-separated file
 selection.
+
+### 148. Clean HTML report title says "surviving mutants"
+
+**STATUS: FIXED.** Clean HTML reports now use `Mutalisk — no surviving mutants`
+for the page title and H1.
+
+Severity: P3
+Surface: HTML reporter clarity
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix mut --selection static --files lib/mutalisk_phx_probe/billing.ex \
+  --max-mutants 3 --fail-at 0 \
+  --reporters terminal,stryker-json,html \
+  --output-path /private/tmp/mutalisk_phx_custom.json
+open /private/tmp/mutalisk_phx_custom.html
+```
+
+Observed before fix: the run was clean (`3/3 killed`, zero survivors), but the
+HTML document title and H1 were `Mutalisk — surviving mutants`.
+
+Expected: a clean HTML report should clearly say there are no surviving
+mutants; the "surviving mutants" heading should be reserved for reports that
+actually contain survivors.
+
+### 149. Full incremental reuse still pays schema-build cost
+
+**STATUS: FIXED.** After incremental pruning, if every executable mutant was
+reused from history, Mutalisk now renders reports immediately instead of
+building the schema-instrumented project.
+
+Severity: P2
+Surface: Incremental performance / real-project usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+cat > .mutalisk.exs <<'EOF'
+[
+  history_path: "/private/tmp/mutalisk_phx_history.json"
+]
+EOF
+
+rm -f /private/tmp/mutalisk_phx_history.json
+mix mut --selection static --files lib/mutalisk_phx_probe/billing.ex \
+  --max-mutants 3 --fail-at 0 --reporters stryker-json \
+  --output-path /private/tmp/mutalisk_phx_inc1.json
+mix mut --selection static --files lib/mutalisk_phx_probe/billing.ex \
+  --max-mutants 3 --fail-at 0 --reporters terminal,stryker-json \
+  --output-path /private/tmp/mutalisk_phx_inc2.json --incremental
+```
+
+Observed before fix: the warm run reused all 3 verdicts (`executed: 0`) but
+still printed `Schema build starting`/`complete` and spent about 11 seconds in
+`schema_build_ms`.
+
+Expected: a full-reuse incremental run should skip schema build and worker
+setup entirely; there are no mutants left to instrument or execute.

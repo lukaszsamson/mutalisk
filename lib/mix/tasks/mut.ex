@@ -285,24 +285,28 @@ defmodule Mix.Tasks.Mut do
               target_root
             )
 
-          # As with the oracle build, this `File.cd!(mutalisk_root, ...)` exists
-          # only so the `File.cwd!()`-derived `MUTALISK_PATH` in the schema-build
-          # and worker child mix envs points at the mutalisk checkout. Artifact
-          # locations (schema work copy, sandbox pool) are passed explicitly via
-          # `artifact_root`, so they land under the target-scoped temp root
-          # regardless of cwd.
-          File.cd!(mutalisk_root, fn ->
-            execute_plan(
-              exec_plan,
-              target_root,
-              artifact_root,
-              run_id,
-              opts,
-              metrics_pid,
-              coverage_oracle,
-              selection_mode
-            )
-          end)
+          if executable_count(exec_plan) == 0 do
+            execute_empty_plan(exec_plan, work_copy, target_root, opts, metrics_pid)
+          else
+            # As with the oracle build, this `File.cd!(mutalisk_root, ...)` exists
+            # only so the `File.cwd!()`-derived `MUTALISK_PATH` in the schema-build
+            # and worker child mix envs points at the mutalisk checkout. Artifact
+            # locations (schema work copy, sandbox pool) are passed explicitly via
+            # `artifact_root`, so they land under the target-scoped temp root
+            # regardless of cwd.
+            File.cd!(mutalisk_root, fn ->
+              execute_plan(
+                exec_plan,
+                target_root,
+                artifact_root,
+                run_id,
+                opts,
+                metrics_pid,
+                coverage_oracle,
+                selection_mode
+              )
+            end)
+          end
         end
       end
     after
