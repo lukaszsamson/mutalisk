@@ -1484,6 +1484,15 @@ defmodule Mix.Tasks.Mut do
 
   defp warn_unused_since(_opts), do: :ok
 
+  defp warn_unused_output_path(%{debug_plan: true, output_path: path})
+       when path != "stryker.report.json" do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --output-path #{path} has no effect with --debug-plan; " <>
+        "writing plan.debug.json"
+    )
+  end
+
   defp warn_unused_output_path(%{reporters: reporters, output_path: path})
        when path != "stryker.report.json" do
     unless Enum.any?([:stryker_json, :html], &(&1 in reporters)) do

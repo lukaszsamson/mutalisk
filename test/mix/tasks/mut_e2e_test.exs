@@ -203,6 +203,37 @@ defmodule Mix.Tasks.MutE2ETest do
     assert {:ok, _decoded} = Mut.JSON.decode(File.read!(history_path))
   end
 
+  @tag timeout: 180_000
+  test "debug plan warns that custom output_path is ignored" do
+    root = tmp_project!("debug_plan_output_path")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_configured_history_probe!(root)
+    output_path = Path.join(root, "tmp/ignored-report.json")
+
+    {output, exit_status} =
+      System.cmd(
+        "mix",
+        [
+          "mut",
+          "--debug-plan",
+          "--output-path",
+          output_path,
+          "--reporters",
+          "stryker-json"
+        ],
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+
+    assert exit_status == 0, output
+    assert output =~ "--output-path #{output_path} has no effect with --debug-plan"
+    assert output =~ "writing plan.debug.json"
+    assert File.exists?(Path.join(root, "plan.debug.json"))
+    refute File.exists?(output_path)
+  end
+
   # Parse "Mutation score: X/N" (both "X/N = P%" and the "0/0 (no scorable
   # mutants)" no-op line match, so N==0 is observable and asserted against).
   defp parse_score(output) do

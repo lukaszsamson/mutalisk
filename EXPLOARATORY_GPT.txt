@@ -3783,3 +3783,29 @@ the end of the run:
 Expected: one warning is enough to explain that reuse started cold. The final
 history write should quietly replace the malformed store with the new valid
 history file.
+
+### 152. --debug-plan silently ignores custom --output-path
+
+**STATUS: FIXED.** `--debug-plan` now warns when a custom `--output-path` is
+provided, because the plan always writes to `plan.debug.json` and no reporter
+output is produced.
+
+Severity: P3
+Surface: Debug plan / CLI option ergonomics
+
+Reproduction:
+
+```sh
+cd test/fixtures/demo_app
+MIX_ENV=test mix mut --debug-plan --selection static --files lib/arith.ex \
+  --max-mutants 1 --fail-at 0 \
+  --reporters stryker-json --output-path /tmp/should_not_exist.json
+```
+
+Observed before fix: the command exited successfully, wrote
+`plan.debug.json`, did not write `/tmp/should_not_exist.json`, and printed no
+warning that `--output-path` was ignored.
+
+Expected: because `--debug-plan` bypasses normal reporters, a custom
+`--output-path` should produce an explicit no-effect warning and point users to
+`plan.debug.json`.
