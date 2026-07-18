@@ -310,3 +310,8 @@ ISSUE 5 (correctness, HIGH): Elixir 1.21-dev writes Mix manifest v36; every
      when the manifest is unreadable (mix_manifest.ex + mix/tasks/mut.ex)
   All five are correctness/usability issues that HID real mutants or produced
   scary noise. Full suite (all tags incl. golden/integration/e2e): 674 passing.
+
+Current audit (2026-07-18): all five fixes remain present with regression
+coverage. The release harness, warning-free docs build, Hex package build, and
+an unpacked-package consumer mutation smoke test are green on Elixir 1.20.2 /
+OTP 28.

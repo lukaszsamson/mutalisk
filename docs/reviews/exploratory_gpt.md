@@ -8,10 +8,17 @@ Goal: Explore public CLI/config/API behavior across fresh target projects and
 record reproducible issues. Stop when 10 issues are found or the public surface
 has been sufficiently verified across a range of projects.
 
-## Resolution status (updated 2026-06-30)
+## Resolution status (audited 2026-07-18)
 
-All 70 issues triaged: 67 FIXED (incl. #40/#49/#64 on 2026-07-02), 1 already
-mitigated, 2 intentional (#38, #39).
+All 155 issues are triaged: 152 FIXED, 1 already mitigated by Hex package
+exclusions (#8), and 2 intentional hidden/compiler Mix-task behaviors (#38,
+#39). No open or deferred finding remains. The current regression suite covers
+the fixes, and the full release harness, warning-free docs build, Hex package
+build, and unpacked-package consumer smoke test are green on Elixir 1.20.2 /
+OTP 28.
+
+The table below records the original #1-#70 batch. Findings #71-#155 each carry
+their resolution inline in the issue record.
 Fixes landed on branch `release-review-fixes`:
   - 9fdf8f6  CLI clarity + reporting (#1, #2, #4, #5, #6, #7, #9, #10)
   - 207dccc  umbrella-aware default test_paths (#3)
@@ -108,7 +115,7 @@ dialyzer (0 errors), format. Each batch passed an adversarial review pass; the
 reviews' own findings (mutators/selection type crashes, umbrella no-test
 false-positive, invalid-mutant handling) were fixed in 97afad4.
 
-Update 2026-07-02: the deferred items #40/#49 (work-copy relocation) and #64
+Update 2026-07-02: the formerly deferred items #40/#49 (work-copy relocation) and #64
 (repeat coverage-collection tax) are now FIXED — see their table rows. The only
 remaining non-code items are #38/#39 (intentional Mix behavior for hidden
 tasks/compiler integration). Suite after these fixes: 684 passing (all tags).
@@ -1272,15 +1279,9 @@ or should explain what they write and why.
 
 ### 40. Runtime artifacts are written under the Mutalisk dependency checkout
 
-**STATUS: DEFERRED (partially mitigated).** Work copies and the memory log are
-anchored at `@mutalisk_root` (the dependency checkout) via a `File.cd!` into it
-during the oracle/schema build. Relocating them (to the OS temp dir or the
-target project) is feasible but is a core-engine change — it requires
-parameterizing the work-copy base AND decoupling `MUTALISK_PATH` from the
-process cwd, touching the heart of the build path. That is best done as a
-focused, separately-tested change rather than bundled into this hardening sweep.
-Mitigations already in place: per-run work dirs are cleaned up after each run,
-and the baseline log is now per-run (#41). Tracked for a follow-up.
+**STATUS: FIXED.** All runtime artifacts now live under a canonicalized,
+per-project OS-temp root. `MUTALISK_PATH` is decoupled from artifact placement,
+and regression/e2e coverage verifies real-project build paths and cleanup.
 
 Severity: P2
 Surface: Runtime side effects
@@ -1500,11 +1501,9 @@ copies, or print one primary path plus a short explanation.
 
 ### 49. `--keep-work-copy` retained paths live under the dependency checkout
 
-**STATUS: DEFERRED (messaging clarified).** Same root cause as #40 — the work
-copies live under the dependency checkout. The full relocation is deferred (see
-#40). The retention messages are now clearer (#48: they label the oracle/baseline
-vs schema-build copy), so a user can find the retained paths even though they
-currently sit under the checkout.
+**STATUS: FIXED.** The retained oracle/baseline and schema-build work copies are
+labelled separately and live under the canonical per-project OS-temp root from
+#40, outside the dependency checkout.
 
 Severity: P2
 Surface: Public CLI debug workflow (`--keep-work-copy`)
