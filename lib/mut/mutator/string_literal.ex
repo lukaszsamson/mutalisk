@@ -97,7 +97,7 @@ defmodule Mut.Mutator.StringLiteral do
   # `→ "x"` row collapses to a no-op via `equivalent?/1` when the source
   # value is already "x". M49 dropped the M44 prepend-space row
   # (`s → " " <> s`): execution showed it was equivalent-heavy and dragged
-  # the kill rate (see docs/decisions/M46_string_literal_table.md).
+  # the kill rate.
   defp replacements do
     [
       {"", "replace non-empty string literal with \"\""},

@@ -1,7 +1,6 @@
 defmodule Mut.History.Store do
   @moduledoc """
-  M105: persistent per-mutant verdict store for incremental cross-run history
-  (design in `docs/spikes/M104_incremental_history.md`).
+  M105: persistent per-mutant verdict store for incremental cross-run history.
 
   A JSON file under the **user project's** `_build/mut_history/history.json`
   (configurable). It persists across runs (the work copy does not), never
@@ -116,10 +115,15 @@ defmodule Mut.History.Store do
   @spec write(Path.t(), store()) :: :ok
   def write(path, store) do
     File.mkdir_p!(Path.dirname(path))
-    tmp = path <> ".tmp"
+    tmp = tmp_path(path)
     File.write!(tmp, Mut.JSON.encode!(to_json(store), pretty: true) <> "\n")
     File.rename!(tmp, path)
     :ok
+  end
+
+  defp tmp_path(path) do
+    suffix = :erlang.unique_integer([:positive]) |> Integer.to_string()
+    path <> ".#{suffix}.tmp"
   end
 
   @doc "Whether a status is a reusable verdict worth storing."

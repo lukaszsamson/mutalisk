@@ -19,7 +19,12 @@ defmodule Mut.WorkCopy do
   def materialize(user_project_root, run_id, opts \\ [])
       when is_binary(run_id) and is_list(opts) do
     user_project_root = Path.expand(user_project_root)
-    work_copy = Path.expand(Path.join([File.cwd!(), "tmp", "mut_work", run_id]))
+    # #40/#49: the artifact base is supplied explicitly by the caller so work
+    # copies never depend on the process cwd. The default (`<cwd>/tmp`) preserves
+    # the historic layout used by mutalisk's own test suite; `mix mut` passes a
+    # target-scoped OS-temp root so nothing lands under the dependency checkout.
+    root = Keyword.get(opts, :root) || Path.join(File.cwd!(), "tmp")
+    work_copy = Path.expand(Path.join([root, "mut_work", run_id]))
 
     with :ok <- assert_mix_project(user_project_root),
          :ok <- prepare_destination(work_copy, Keyword.get(opts, :force, false)),

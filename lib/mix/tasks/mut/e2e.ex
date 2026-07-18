@@ -4,6 +4,7 @@ defmodule Mix.Tasks.Mut.E2e do
   use Mix.Task
 
   alias Mut.Reporter.StrykerJson
+  alias Mut.Selection.DowngradeHint
 
   @shortdoc "Runs mix mut end-to-end against demo_app"
   @fixture_root Path.expand("test/fixtures/demo_app")
@@ -14,6 +15,8 @@ defmodule Mix.Tasks.Mut.E2e do
     Mix.Task.run("app.start")
 
     default = run_fixture!("default", [])
+
+    DowngradeHint.delete(@fixture_root)
 
     coverage =
       run_fixture!(
@@ -77,10 +80,16 @@ defmodule Mix.Tasks.Mut.E2e do
     reused = Map.get(inc, "reused", 0)
     executed = Map.get(inc, "executed", -1)
     total = Enum.sum(Map.values(warm.counts.statuses))
+    phases = warm.report["mutalisk"]["phase_timings"] || %{}
 
     unless reused == total and executed == 0 do
       raise "incremental: expected full reuse on unchanged tree, got " <>
               "reused=#{reused} executed=#{executed} total=#{total}"
+    end
+
+    unless Map.get(phases, "schema_build_ms", 0) == 0 do
+      raise "incremental: full-reuse warm run should skip schema build, got " <>
+              "schema_build_ms=#{inspect(Map.get(phases, "schema_build_ms"))}"
     end
 
     assert_contains!(warm.output, "Incremental: #{reused} reused from history")

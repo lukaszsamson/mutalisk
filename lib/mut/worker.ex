@@ -151,27 +151,34 @@ defmodule Mut.Worker do
   # entirely; nothing reads it.
   defp crash_dump_env, do: [{"ERL_CRASH_DUMP_SECONDS", "0"}]
 
-  @spec args([String.t()], pos_integer()) :: [String.t()]
-  def args(test_files, test_timeout_ms \\ @default_test_timeout_ms)
-      when is_list(test_files) and is_integer(test_timeout_ms) and test_timeout_ms > 0 do
-    [
-      "test",
-      "--no-compile",
-      "--no-deps-check",
-      "--no-archives-check",
-      "--max-failures",
-      "1",
-      # Per-test timeout. Mutation-test workloads need fast detection
-      # of infinite loops in mutants; ExUnit's default 60 s was
-      # per-target-test, not per-mutant, and dominated wall-clock on
-      # Decimal (21 timeouts * 60 s). Tests legitimately needing more
-      # can override per-test via @tag timeout:, or raise the global
-      # with --test-timeout-ms.
-      "--timeout",
-      Integer.to_string(test_timeout_ms),
-      "--formatter",
-      "Mut.Worker.Formatter"
-    ] ++ test_files
+  @spec args([String.t()], pos_integer(), keyword()) :: [String.t()]
+  def args(test_files, test_timeout_ms \\ @default_test_timeout_ms, opts \\ [])
+      when is_list(test_files) and is_integer(test_timeout_ms) and test_timeout_ms > 0 and
+             is_list(opts) do
+    args =
+      [
+        "test",
+        "--no-compile",
+        "--no-deps-check",
+        "--no-archives-check",
+        "--max-failures",
+        "1",
+        # Per-test timeout. Mutation-test workloads need fast detection
+        # of infinite loops in mutants; ExUnit's default 60 s was
+        # per-target-test, not per-mutant, and dominated wall-clock on
+        # Decimal (21 timeouts * 60 s). Tests legitimately needing more
+        # can override per-test via @tag timeout:, or raise the global
+        # with --test-timeout-ms.
+        "--timeout",
+        Integer.to_string(test_timeout_ms),
+        "--formatter",
+        "Mut.Worker.Formatter"
+      ] ++ test_files
+
+    case Keyword.get(opts, :umbrella_app) do
+      app when is_binary(app) -> ["do", "--app", app | args]
+      _ -> args
+    end
   end
 
   defp do_run_schema(sandbox, mutant_id, test_files, opts) do
@@ -201,7 +208,7 @@ defmodule Mut.Worker do
         port =
           open_mix_port(
             mix_path,
-            args(test_files, test_timeout(opts)),
+            args(test_files, test_timeout(opts), opts),
             sandbox.path,
             env(mutant_id)
           )
@@ -221,7 +228,7 @@ defmodule Mut.Worker do
         port =
           open_mix_port(
             mix_path,
-            args(test_files, test_timeout(opts)),
+            args(test_files, test_timeout(opts), opts),
             sandbox.path,
             fallback_env()
           )

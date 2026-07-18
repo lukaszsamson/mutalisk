@@ -1,0 +1,3908 @@
+# Mutalisk Exploratory Test Log
+
+Date: 2026-06-29
+Environment: macOS, Mix 1.20.2 / Erlang OTP 28
+Mutalisk checkout: /Users/lukaszsamson/claude_fun/mutalisk
+
+Goal: Explore public CLI/config/API behavior across fresh target projects and
+record reproducible issues. Stop when 10 issues are found or the public surface
+has been sufficiently verified across a range of projects.
+
+## Resolution status (audited 2026-07-18)
+
+All 155 issues are triaged: 152 FIXED, 1 already mitigated by Hex package
+exclusions (#8), and 2 intentional hidden/compiler Mix-task behaviors (#38,
+#39). No open or deferred finding remains. The current regression suite covers
+the fixes, and the full release harness, warning-free docs build, Hex package
+build, and unpacked-package consumer smoke test are green on Elixir 1.20.2 /
+OTP 28.
+
+The table below records the original #1-#70 batch. Findings #71-#155 each carry
+their resolution inline in the issue record.
+Fixes landed on branch `release-review-fixes`:
+  - 9fdf8f6  CLI clarity + reporting (#1, #2, #4, #5, #6, #7, #9, #10)
+  - 207dccc  umbrella-aware default test_paths (#3)
+  - 6809b29  CLI/config input validation (#11–13, #16–28)
+  - e9f0d8d  output-path handling, no-test/error-only, --since warn (#14,#15,#31–34,#44)
+  - c93d134  help/docs completeness, --files .ex filter, --debug-plan (#29,#30,#35,#36,#42,#43,#45,#46,#50)
+  - 1f2c212  keep-work-copy messages, per-run baseline log, mut.recompile (#37,#41,#48)
+  - 97afad4  adversarial-review follow-ups (mutators/selection types, umbrella no-test, invalid-mutant handling)
+  - 15b404f  blank/empty --files, comma typos, config list type errors (#53,#54,#55,#56,#65–70)
+  - 851ef00  no-scorable runs fail CI, visible threshold reason, concurrency cap (#51,#52,#57–62)
+  - 9147344  --selection static fast-path doc note (#64 mitigation)
+
+Note (behavior change worth release notes): trailing/leading/double commas in
+`--reporters`/`--mutators`/`--enable` are now REJECTED (#65–67) where they were
+previously silently tolerated. `--fail-at > 0` runs that produce zero scorable
+mutants now EXIT NON-ZERO (#51,#52) rather than passing via the 100% default.
+
+| #  | Sev | Status | Notes |
+|----|-----|--------|-------|
+| 1  | P2 | FIXED | abs `--files` relativized to project root |
+| 2  | P2 | FIXED | unmatched `--files` now warns |
+| 3  | P3 | FIXED | umbrella test discovery (root cause, not label) |
+| 4  | P2 | FIXED | "0/0 (no scorable mutants)" instead of 100% |
+| 5  | P3 | FIXED | terminal rows include column |
+| 6  | P3 | FIXED | concise error reason block |
+| 7  | P3 | FIXED | relabeled "Mutant execution time" |
+| 8  | P2 | ALREADY MITIGATED | internal tasks excluded from Hex package |
+| 9  | P2 | FIXED | `--incremental`/`--since` added to Options docs |
+| 10 | P2 | FIXED | concise `--since` git-failure warning |
+| 11 | P2 | FIXED | empty `--reporters` rejected |
+| 12 | P2 | FIXED | empty `--mutators` rejected |
+| 13 | P2 | FIXED | empty `--enable` rejected |
+| 14 | P2 | FIXED | absolute `--output-path` honored |
+| 15 | P3 | FIXED | `--since` without `--incremental` warns |
+| 16 | P2 | FIXED | `incremental` must be boolean |
+| 17 | P2 | FIXED | `output_path` type validated |
+| 18 | P2 | FIXED | `files`/`test_paths` type validated |
+| 19 | P2 | FIXED | `history_path` type validated |
+| 20 | P2 | FIXED | `since` type validated |
+| 21 | P2 | FIXED | config `reporters: []` rejected |
+| 22 | P2 | FIXED | config `mutators: []` rejected |
+| 23 | P2 | FIXED | config `enabled_targets: []` rejected |
+| 24 | P2 | FIXED | non-string `files` entries rejected (no coercion) |
+| 25 | P2 | FIXED | non-string `test_paths` entries rejected |
+| 26 | P2 | FIXED | `output_path: []` rejected |
+| 27 | P2 | FIXED | `history_path: []` rejected |
+| 28 | P2 | FIXED | `since: []` rejected |
+| 29 | P2 | FIXED | help lists `html`/`github-actions` reporters |
+| 30 | P2 | FIXED | help lists full `--enable` target set |
+| 31 | P2 | FIXED | no-test project aborts at baseline (umbrella-safe) |
+| 32 | P1 | FIXED | error/invalid-only run fails CI (exit 1) |
+| 33 | P2 | FIXED | github_actions emits `::error` for errored/invalid |
+| 34 | P2 | FIXED | html no longer shows error-only run as clean |
+| 35 | P3 | FIXED | non-`.ex` `--files` ignored with warning |
+| 36 | P3 | FIXED | test-file `--files` ignored with warning |
+| 37 | P2 | FIXED | `mut.recompile` friendly error (also: not shipped) |
+| 38 | P3 | INTENTIONAL | `@moduledoc false` hides internal tasks; "no documentation" is standard Mix behavior for hidden tasks |
+| 39 | P2 | INTENTIONAL | `compile.mut_oracle` is a compiler integration (must ship to compile mutants); writes only transient `_build` artifacts; hidden via `@moduledoc false` |
+| 40 | P2 | FIXED (2026-07-02) | all runtime artifacts (work copies, sandboxes, memory + baseline logs) relocated to a canonicalized per-project OS-temp root `System.tmp_dir!()/mutalisk/<sha256(target)[0..15]>`; nothing is written under the dependency checkout. OS-temp chosen over target `_build` because WorkCopy copies the whole tree and prunes `_build` only after (self-copy risk); root is symlink-canonicalized (macOS `/var`→`/private/var`) so oracle-site keys stay work-copy-relative |
+| 41 | P3 | FIXED | baseline log is per-run (`mut_baseline-<run_id>.log`) |
+| 42 | P3 | FIXED | README: `only: [:test]` needs `MIX_ENV=test mix mut` |
+| 43 | P3 | FIXED | `--debug-plan` prints path + mutant counts |
+| 44 | P2 | FIXED | output path validated up front (fail fast) |
+| 45 | P2 | FIXED | MUTATORS.md: name+target both required (AND gate) |
+| 46 | P2 | FIXED | MUTATORS.md: same clarification for body_literal |
+| 47 | P2 | FIXED | empty `--reporters` now rejected (see #11) |
+| 48 | P3 | FIXED | keep-work-copy labels oracle vs schema copy |
+| 49 | P2 | FIXED (2026-07-02) | `--keep-work-copy` retains + prints paths under the per-project OS-temp root (see #40); cleanup targets the same root |
+| 50 | P3 | FIXED | README notes the suite runs without --warnings-as-errors |
+| 51 | P2 | FIXED | non-source `--files` no-op now fails `--fail-at > 0` |
+| 52 | P2 | FIXED | unmatched `--files` no-op now fails `--fail-at > 0` |
+| 53 | P3 | FIXED | whitespace-only `--files` rejected |
+| 54 | P1 | FIXED | empty `--files ""` rejected (no longer whole-project) |
+| 55 | P2 | FIXED | config `files: []` rejected |
+| 56 | P2 | FIXED | config `test_paths: []` rejected |
+| 57 | P2 | FIXED | pool capped at mutant count (no giant pool) |
+| 58 | P3 | FIXED | terminal concurrency line no longer falsely "capped" |
+| 59 | P2 | FIXED | threshold-fail reason printed for github-actions reporter |
+| 60 | P2 | FIXED | threshold-fail reason printed for stryker-json reporter |
+| 61 | P2 | FIXED | threshold-fail reason printed for html reporter |
+| 62 | P3 | FIXED | `--output-path` docs cover absolute + html `.html` |
+| 63 | P2 | FIXED | `--max-mutants` docs note it caps execution only |
+| 64 | P2 | FIXED (2026-07-02) | pathological-coverage downgrade is now persisted to `_build/mut_selection_downgrade.json` (target project, project-digest keyed); subsequent default-mode runs skip collection with a one-line notice + reset instructions (`--selection coverage` forces, deleting the file resets; digest mismatch auto-invalidates). Verified on guarded_struct: 2nd run saves ~51s with identical results. In-run budget/early-abort machinery unchanged |
+| 65 | P3 | FIXED | trailing comma in `--reporters` rejected |
+| 66 | P3 | FIXED | trailing comma in `--mutators` rejected |
+| 67 | P3 | FIXED | trailing comma in `--enable` rejected |
+| 68 | P3 | FIXED | unknown-reporter error uses hyphen spelling |
+| 69 | P3 | FIXED | config `reporters: [123]` gives config type error |
+| 70 | P3 | FIXED | config `enabled_targets: [123]` gives config type error |
+
+Verified end-to-end against isolated copies of the exploratory target projects
+(single-app, umbrella, no-test). Gates green: 620 unit tests, credo --strict,
+dialyzer (0 errors), format. Each batch passed an adversarial review pass; the
+reviews' own findings (mutators/selection type crashes, umbrella no-test
+false-positive, invalid-mutant handling) were fixed in 97afad4.
+
+Update 2026-07-02: the formerly deferred items #40/#49 (work-copy relocation) and #64
+(repeat coverage-collection tax) are now FIXED — see their table rows. The only
+remaining non-code items are #38/#39 (intentional Mix behavior for hidden
+tasks/compiler integration). Suite after these fixes: 684 passing (all tags).
+
+## Issues
+
+### 1. Absolute `--files` path silently selects zero mutants
+
+**STATUS: FIXED (9fdf8f6).** Absolute `--files` paths are now relativized to the
+project root via `normalize_file_pattern/2`, so they map into the sandbox and
+select the expected mutants. Verified: a non-empty plan now results.
+
+Severity: P2
+Surface: Public CLI (`mix mut --files`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --files /private/tmp/mutalisk_exploratory/basic_lib/lib/basic_lib.ex --debug-plan --fail-at 0
+cat plan.debug.json
+```
+
+Observed:
+
+```json
+{
+  "schema": [],
+  "fallback": [],
+  "invalid": [],
+  "skipped": []
+}
+```
+
+Expected: The absolute path should either be accepted and mapped to the target
+project file, or rejected with a clear error. Succeeding with an empty plan makes
+it look like mutation testing ran successfully when no source was tested.
+
+Notes: The same project produced a non-empty plan with
+`--files lib/basic_lib.ex`.
+
+### 2. Unmatched `--files` pattern silently succeeds with an empty plan
+
+**STATUS: FIXED (9fdf8f6).** `--files` patterns that match no source file now
+emit a clear stderr warning (`warn_unmatched_file_patterns/1`), including
+directory-only glob matches that contribute no files. Verified.
+
+Severity: P2
+Surface: Public CLI (`mix mut --files`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --files lib/nope.ex --debug-plan --fail-at 0
+cat plan.debug.json
+```
+
+Observed:
+
+```json
+{
+  "schema": [],
+  "fallback": [],
+  "invalid": [],
+  "skipped": []
+}
+```
+
+Expected: A typo or unmatched pattern should be reported clearly, at least as a
+warning and preferably as a non-zero error unless the user explicitly opts into
+allowing an empty mutation plan.
+
+### 3. Umbrella selection metrics report `all tests` but average/median zero
+
+**STATUS: FIXED (207dccc).** Root cause was deeper than a label: the default
+`test_paths` was `["test"]`, which finds no tests in an umbrella (tests live
+under `apps/<app>/test/`), so coverage-based selection was effectively disabled
+and every mutant ran the whole suite via the empty-selection sentinel. The
+default is now umbrella-aware (`Mut.Umbrella.default_test_dirs/1`). Verified on
+this reproducer: distribution flips from `all tests: 6 / avg 0.0` to
+`exact line: 6 / avg 1.7 / median 2`, coverage collection now runs (1015 ms).
+
+Severity: P3
+Surface: Public CLI terminal report
+Target: fresh umbrella project at `/private/tmp/mutalisk_exploratory/basic_umbrella`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_umbrella
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 8
+```
+
+Observed excerpt:
+
+```text
+Selection:
+  mode: coverage_with_static_fallback
+  match distribution:
+    exact line:         0
+    enclosing function: 0
+    static fallback:    0
+    all tests:          6
+  avg tests/mutant: 0.0
+  median tests/mutant: 0
+  coverage collection: 0 ms
+```
+
+Expected: If six mutants ran with all tests selected, the average/median tests
+per mutant should not be zero. If the counter intentionally means something
+else, the terminal labels are misleading.
+
+### 4. A no-executed-mutant run reports `0/0 = 100.0%`
+
+**STATUS: FIXED (9fdf8f6).** A run with no scorable mutants now prints
+`Mutation score: 0/0 (no scorable mutants)` instead of the misleading
+`0/0 = 100.0%`. (The internal score still defaults to 100.0 for the threshold
+gate; only the report wording changed — exit-code policy was left unchanged.)
+
+Severity: P2
+Surface: Public CLI terminal report / threshold behavior
+Target: fresh umbrella project at `/private/tmp/mutalisk_exploratory/basic_umbrella`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_umbrella
+MIX_ENV=test mix mut --files apps/edge/lib/umbrella_edge.ex --fail-at 0 --concurrency 1
+```
+
+Observed excerpt:
+
+```text
+Mutation score: 0/0 = 100.0%
+Surviving mutants:
+  none
+Skipped:   9 (no_applicable_mutator: 6, unsupported_dispatch: 3)
+```
+
+Expected: A run with no executed mutants should be reported as no score / not
+applicable, or fail unless explicitly allowed. Reporting 100% can make CI look
+healthy while no mutation was actually evaluated.
+
+### 5. Terminal report hides columns, making same-line mutants indistinguishable
+
+**STATUS: FIXED (9fdf8f6).** Terminal survivor/progress/error rows now render
+`file:line:column` when the column is known, so same-line mutants are
+distinguishable. Verified.
+
+Severity: P3
+Surface: Public CLI terminal report
+Target: generated Phoenix app at `/private/tmp/mutalisk_exploratory/basic_phx`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_phx
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 8
+```
+
+Observed excerpt:
+
+```text
+[3/8] survived  lib/basic_phx_web/components/core_components.ex:101  Boolean  replace || with &&
+[6/8] survived  lib/basic_phx_web/components/core_components.ex:101  Boolean  replace || with &&
+```
+
+The Stryker JSON shows these are different expressions on the same line:
+column 20 and column 39. Terminal output omits the column, so the two survivors
+look identical and are hard to act on without opening JSON.
+
+Expected: Include at least `file:line:column` in terminal survivor rows when the
+column is known.
+
+### 6. Terminal report does not show error reason for errored mutants
+
+**STATUS: FIXED (9fdf8f6).** Errored mutants now get an "Errored mutants:" block
+with a concise single-line reason (compile error or test output, codepoint-safe
+truncated to 100 chars), so users don't have to open the JSON report.
+
+Severity: P3
+Surface: Public CLI terminal report
+Target: generated Phoenix app at `/private/tmp/mutalisk_exploratory/basic_phx`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_phx
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 8
+```
+
+Observed terminal excerpt:
+
+```text
+[8/8] error     lib/basic_phx_web.ex:106  GuardTypeTest  replace guard is_atom with is_nil
+Errors:    1
+```
+
+The generated `stryker.report.json` contains the actionable `statusReason`,
+including the `FunctionClauseError` and test file stack, but the terminal
+summary does not point the user to that reason or show a short excerpt.
+
+Expected: For errored mutants, terminal output should include a concise reason
+or tell the user where to find details.
+
+### 7. Fully reused incremental run reports `Run time: 0.0s` despite multi-second work
+
+**STATUS: FIXED (9fdf8f6).** The line is relabeled `Mutant execution time:` —
+it sums per-mutant execution wall-clock (0 for fully-reused runs) and
+deliberately excludes oracle/baseline/coverage/schema/report phases, which the
+`Phases:` block already reports. The label no longer reads as total elapsed.
+
+Severity: P3
+Surface: Public CLI terminal report (`--incremental`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --incremental --fail-at 0 --concurrency 1 --max-mutants 4
+MIX_ENV=test mix mut --incremental --fail-at 0 --concurrency 1 --max-mutants 4
+```
+
+Observed on the second run:
+
+```text
+Run time: 0.0s
+Phases:
+  oracle build:        1703 ms
+  baseline tests:       456 ms
+  plan generation:       24 ms
+  coverage collection: 2125 ms
+  schema build:        1769 ms
+  report writing:         3 ms
+  total:               6122 ms
+Incremental: 4 reused from history
+```
+
+Expected: The top-level run time should reflect the command's actual elapsed
+time, or be explicitly labeled as "mutant execution time" if it intentionally
+excludes oracle/baseline/coverage/schema/report phases.
+
+### 8. Hidden internal Mix tasks are callable from user projects and fail confusingly
+
+**STATUS: ALREADY MITIGATED (no change needed).** The internal dev tasks
+(`mut.e2e`, `mut.test_schema`, `mut.test_fallback`, `mut.recompile`) are
+excluded from the published Hex package (`files:` in `mix.exs`) and carry
+`@moduledoc false`, so users installing Mutalisk from Hex cannot invoke them.
+The reproduction above used a path-dependency on the source checkout, which
+ships those task files; that is not the published surface.
+
+Severity: P2
+Surface: Packaged Mix task surface
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut.e2e
+```
+
+Observed:
+
+```text
+** (RuntimeError) mix mut default failed with 1
+==> demo_app
+Unchecked dependencies for environment test:
+* mutalisk (/private/tmp/mutalisk_exploratory/basic_lib)
+  could not find an app file at "_build/test/lib/mutalisk/ebin/mutalisk.app".
+  Another app file was found in the same directory "_build/test/lib/mutalisk/ebin/basic_lib.app",
+  try changing the dependency name to :basic_lib
+```
+
+Expected: Internal verification tasks such as `mut.e2e`, `mut.test_schema`, and
+`mut.test_fallback` should not be shipped/callable in user projects, or should
+fail immediately with a clear "internal task" message. The current failure makes
+it look like the user's dependency setup is corrupt.
+
+### 9. Accepted CLI flags `--incremental` and `--since` are missing from the options help
+
+**STATUS: FIXED (9fdf8f6).** Both flags are now documented in the `## Options`
+section of the `mix mut` `@moduledoc`. Verified via `mix help mut`.
+
+Severity: P2
+Surface: Public CLI help
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--incremental", "--since", "HEAD~1"], []))'
+MIX_ENV=test mix help mut | rg -n "incremental|since|history"
+```
+
+Observed: `Mut.Cli.parse/2` accepts both flags and returns
+`incremental: true, since: "HEAD~1"`, but `mix help mut` only mentions those
+names in the configuration-key paragraph. They are absent from the `## Options`
+list.
+
+Expected: Every supported CLI flag should be documented in the options section,
+especially `--incremental`, because it materially changes execution behavior and
+report interpretation.
+
+### 10. Invalid `--since` outside a git repo dumps full `git diff` help and exits successfully
+
+**STATUS: FIXED (9fdf8f6).** A failed `--since` git diff now prints a single
+concise line (mutalisk message + the first line of git's output) instead of the
+full multi-line `git diff --no-index` usage banner. Reuse still falls back to
+digest-only checks (intentional, now clearly stated in the warning and docs).
+
+Severity: P2
+Surface: Public CLI (`--since` / `--incremental`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --since definitely-not-a-ref --incremental --fail-at 0 --concurrency 1 --max-mutants 2
+```
+
+Observed:
+
+```text
+[mutalisk] --since definitely-not-a-ref: git diff failed; reuse falls back to digest checks only
+warning: Not a git repository. Use --no-index to compare two paths outside a working tree
+usage: git diff --no-index [<options>] <path> <path> [<pathspec>...]
+...
+Mutalisk run complete in 6109ms
+```
+
+The command exits 0 after printing the full `git diff` usage text and silently
+falling back to digest-only reuse.
+
+Expected: Invalid `--since` input should either fail fast with a concise error,
+or produce a short warning without dumping pages of git help. If the option is
+ignored/fallback-only outside git repos, that behavior should be explicit and
+easy to understand.
+
+### 11. Empty `--reporters ""` is accepted and produces no report output
+
+Severity: P2
+Surface: Public CLI (`--reporters`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+rm -f empty_reporters.json stryker.report.json
+MIX_ENV=test mix mut --reporters "" --fail-at 0 --concurrency 1 --max-mutants 1 --output-path empty_reporters.json
+ls empty_reporters.json stryker.report.json
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+Mutalisk run complete in 13027ms
+ls: empty_reporters.json: No such file or directory
+ls: stryker.report.json: No such file or directory
+```
+
+Expected: Empty reporter lists should be rejected, or default reporters should
+be used. A successful mutation run with no terminal summary and no report file
+is easy to mistake for a healthy no-op.
+
+### 12. Empty `--mutators ""` is accepted and runs zero scorable mutants
+
+Severity: P2
+Surface: Public CLI (`--mutators`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --mutators "" --fail-at 0 --concurrency 1 --output-path empty_mutators.json
+```
+
+Observed:
+
+```text
+Mutation score: 0/0 (no scorable mutants)
+Skipped:   12 (no_applicable_mutator: 6, unsupported_dispatch: 6)
+Mutalisk run complete in 12202ms
+```
+
+Expected: Empty mutator selection should be rejected as invalid input. If the
+user explicitly asks for a mutator list, an empty list should not silently
+produce a successful zero-mutant run.
+
+### 13. Empty `--enable ""` is accepted and silently changes the enabled target set
+
+Severity: P2
+Surface: Public CLI (`--enable`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --enable "" --fail-at 0 --concurrency 1 --max-mutants 1 --output-path empty_enable.json
+```
+
+Observed:
+
+```text
+[1/1] killed    lib/basic_lib.ex:22:24  Boolean  replace or with and
+Skipped:   8 (guard_engine_disabled: 6, unsupported_dispatch: 2)
+```
+
+Expected: Empty `--enable` should be rejected. Instead, it is accepted and
+alters engine gating in a non-obvious way (`guard_engine_disabled`) while still
+executing some schema mutants.
+
+### 14. Absolute `--output-path` is treated as target-relative
+
+Severity: P2
+Surface: Public CLI (`--output-path`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+rm -f /private/tmp/mutalisk_abs_out.json private/tmp/mutalisk_abs_out.json
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 1 \
+  --reporters stryker-json --output-path /private/tmp/mutalisk_abs_out.json
+ls /private/tmp/mutalisk_abs_out.json private/tmp/mutalisk_abs_out.json
+```
+
+Observed:
+
+```text
+ls: /private/tmp/mutalisk_abs_out.json: No such file or directory
+-rw-r--r-- ... private/tmp/mutalisk_abs_out.json
+```
+
+Expected: Absolute output paths should either be honored as absolute paths or
+rejected. Writing to `./private/tmp/...` under the target project is surprising
+and can leave report files in the wrong place.
+
+### 15. `--since` is accepted without `--incremental` and silently ignored
+
+Severity: P3
+Surface: Public CLI (`--since`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --since HEAD --fail-at 0 --concurrency 1 --max-mutants 1 --reporters terminal
+```
+
+Observed: The command runs a normal non-incremental mutation pass with no
+warning that `--since HEAD` has no effect unless incremental reuse is active.
+
+Expected: Either imply `--incremental`, reject `--since` without
+`--incremental`, or print a concise warning that `--since` is ignored.
+
+### 16. `.mutalisk.exs` accepts `incremental: "false"` and treats it as enabled
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[
+  incremental: "false",
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut
+```
+
+Observed:
+
+```text
+Incremental: 1 reused from history
+```
+
+Expected: `incremental` config should require a boolean. A string value of
+`"false"` should not enable incremental reuse by virtue of being truthy.
+
+### 17. `.mutalisk.exs` accepts non-string `output_path` and crashes at report writing
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[
+  output_path: 123,
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:stryker_json]
+]
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut
+```
+
+Observed:
+
+```text
+** (FunctionClauseError) no function clause matching in IO.chardata_to_string/1
+    (elixir 1.19.5) lib/path.ex:687: Path.do_join/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:1047: Mix.Tasks.Mut.render_reports/5
+```
+
+Expected: Invalid config value types should be rejected during CLI/config
+normalization with a friendly error, before the mutation run spends time
+building schemas and executing mutants.
+
+### 18. `.mutalisk.exs` invalid `files` or `test_paths` type crashes with `FunctionClauseError`
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[
+  files: 123,
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut
+```
+
+Observed:
+
+```text
+** (FunctionClauseError) no function clause matching in Mut.Cli.string_list/1
+    (mutalisk 0.1.0) lib/mut/cli.ex:447: Mut.Cli.string_list/1
+    (mutalisk 0.1.0) lib/mut/cli.ex:295: Mut.Cli.files/2
+```
+
+The same parser path also raises for `test_paths: 123`.
+
+Expected: Config should validate `files` and `test_paths` as string or list of
+strings and return a friendly `Mix.raise` message.
+
+### 19. `.mutalisk.exs` non-string `history_path` crashes in incremental mode
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `history_path`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[
+  incremental: true,
+  history_path: 123,
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut
+```
+
+Observed:
+
+```text
+** (FunctionClauseError) no function clause matching in IO.chardata_to_string/1
+    (elixir 1.19.5) lib/path.ex:224: Path.expand/2
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:587: Mix.Tasks.Mut.load_verdicts/2
+```
+
+Expected: `history_path` should require a string path and fail during config
+normalization, not during incremental history loading.
+
+### 20. `.mutalisk.exs` non-string `since` crashes in incremental git diff
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `since`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[
+  incremental: true,
+  since: 123,
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut
+```
+
+Observed:
+
+```text
+** (ArgumentError) all arguments for System.cmd/3 must be binaries
+    (elixir 1.19.5) lib/system.ex:1131: System.cmd/3
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:601: Mix.Tasks.Mut.changed_files_since/2
+```
+
+Expected: `since` should require a string git ref and be rejected with a
+friendly config error before reaching `System.cmd/3`.
+
+### 21. `.mutalisk.exs` accepts `reporters: []` and produces no report output
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `reporters`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  reporters: [],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1
+]
+```
+
+```sh
+rm -f stryker.report.json
+MIX_ENV=test mix mut
+ls -l stryker.report.json
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+Mutalisk run complete in 6710ms
+ls: stryker.report.json: No such file or directory
+```
+
+Expected: Empty reporter lists from config should be rejected or defaulted.
+
+### 22. `.mutalisk.exs` accepts `mutators: []` and runs zero scorable mutants
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `mutators`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  mutators: [],
+  reporters: [:terminal],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1
+]
+```
+
+Observed:
+
+```text
+Mutation score: 0/0 (no scorable mutants)
+Skipped:   13 (attribute_engine_disabled: 1, no_applicable_mutator: 6, unsupported_dispatch: 6)
+```
+
+Expected: Empty config mutator lists should be rejected as invalid input.
+
+### 23. `.mutalisk.exs` accepts `enabled_targets: []` and changes target gating in a surprising way
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `enabled_targets`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  enabled_targets: [],
+  reporters: [:terminal],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1
+]
+```
+
+Observed:
+
+```text
+[1/1] killed    lib/basic_lib.ex:26:37  Membership  negate membership (in -> not in)
+Skipped:   9 (attribute_engine_disabled: 1, guard_engine_disabled: 6, unsupported_dispatch: 2)
+```
+
+Expected: An empty target list should be rejected. If accepted, it should not
+enable a surprising subset of dispatch mutators while disabling guards and
+attributes.
+
+### 24. `.mutalisk.exs` coerces non-string `files` list entries to strings
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `files`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  files: [123],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Observed:
+
+```text
+[mutalisk] --files matched no source files: 123
+Mutation score: 0/0 (no scorable mutants)
+```
+
+Expected: `files` should require strings. Numeric entries should not be silently
+coerced into path patterns.
+
+### 25. `.mutalisk.exs` coerces non-string `test_paths` entries and produces inconsistent selection metrics
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `test_paths`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  test_paths: [123],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Observed:
+
+```text
+Selection:
+  match distribution:
+    all tests:          1
+  avg tests/mutant: 0.0
+  median tests/mutant: 0
+```
+
+Expected: `test_paths` should require strings and reject non-string list
+entries before test selection.
+
+### 26. `.mutalisk.exs` `output_path: []` crashes by trying to write to the project directory
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `output_path`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  output_path: [],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:stryker_json]
+]
+```
+
+Observed:
+
+```text
+** (File.RenameError) could not rename from "/private/tmp/mutalisk_exploratory/basic_lib.tmp" to "/private/tmp/mutalisk_exploratory/basic_lib": illegal operation on a directory
+    (mutalisk 0.1.0) lib/mut/reporter/stryker_json.ex:66: Mut.Reporter.StrykerJson.write/2
+```
+
+Expected: `output_path` should require a non-empty string path.
+
+### 27. `.mutalisk.exs` `history_path: []` exits successfully but cannot write history
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `history_path`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  incremental: true,
+  history_path: [],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Observed:
+
+```text
+[mutalisk] history write skipped: could not rename from "/private/tmp/mutalisk_exploratory/basic_lib.tmp" to "/private/tmp/mutalisk_exploratory/basic_lib": illegal operation on a directory
+Mutalisk run complete in 6740ms
+```
+
+Expected: `history_path` should require a non-empty string and fail before the
+run, not silently skip persistence after doing the work.
+
+### 28. `.mutalisk.exs` `since: []` crashes in `System.cmd/3`
+
+Severity: P2
+Surface: Public configuration (`.mutalisk.exs`, `since`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+[
+  incremental: true,
+  since: [],
+  max_mutants: 1,
+  fail_at: 0.0,
+  concurrency: 1,
+  reporters: [:terminal]
+]
+```
+
+Observed:
+
+```text
+** (ArgumentError) all arguments for System.cmd/3 must be binaries
+    (mutalisk 0.1.0) lib/mix/tasks/mut.ex:601: Mix.Tasks.Mut.changed_files_since/2
+```
+
+Expected: `since` should require a non-empty string ref.
+
+### 29. `mix help mut` omits accepted reporters `html` and `github_actions`
+
+Severity: P2
+Surface: Public CLI help
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix help mut
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--reporters", "html,github-actions"], []))'
+```
+
+Observed: help says:
+
+```text
+--reporters NAMES — Comma-separated: terminal, stryker-json
+```
+
+but the parser accepts `[:html, :github_actions]`.
+
+Expected: The options help should list all valid reporter names or point to the
+complete list.
+
+### 30. `mix help mut` omits many accepted `--enable` targets
+
+Severity: P2
+Surface: Public CLI help
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix help mut
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--enable", "variable,pattern-shape,conditional,statement-delete,clause-delete,guard-boolean,pipeline-drop,map-update-drop,receive-timeout"], []))'
+```
+
+Observed: help lists only `dispatch`, `guard`, `env_walker`,
+`module_attribute`, and `body_literal`, but the parser accepts additional
+targets such as `variable`, `pattern_shape`, `conditional`,
+`statement_delete`, `clause_delete`, `guard_boolean`, `pipeline_drop`,
+`map_update_drop`, and `receive_timeout`.
+
+Expected: `mix help mut` should expose the full accepted target set.
+
+### 31. Projects with no tests classify every mutant as an error instead of aborting at baseline
+
+Severity: P2
+Surface: Public CLI / baseline validation
+Target: no-test Mix project at `/private/tmp/mutalisk_exploratory/no_tests`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/no_tests
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 4
+```
+
+Observed:
+
+```text
+[1/4] error     lib/no_tests.ex:6:37  Arithmetic  replace - with +
+...
+Errored mutants:
+  lib/no_tests.ex:6:37 Arithmetic               There are no tests to run
+Errors:    4
+```
+
+Expected: A project with no tests should fail baseline validation with a clear
+message, not spend time running mutants and classify all of them as errors.
+
+### 32. No-test projects exit 0 even with `--fail-at 100`
+
+Severity: P1
+Surface: Public CLI / CI threshold behavior
+Target: no-test Mix project at `/private/tmp/mutalisk_exploratory/no_tests`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/no_tests
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --max-mutants 2
+echo $?
+```
+
+Observed:
+
+```text
+Mutation score: 0/0 (no scorable mutants)
+Errors:    2
+Mutalisk run complete in 7150ms
+# exit code: 0
+```
+
+Expected: A run with no scorable mutants and only errors should fail CI,
+especially under `--fail-at 100`.
+
+### 33. GitHub Actions reporter emits nothing for error-only runs
+
+Severity: P2
+Surface: Public reporter (`github_actions`)
+Target: no-test Mix project at `/private/tmp/mutalisk_exploratory/no_tests`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/no_tests
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 2 --reporters github_actions
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+Mutalisk run complete in 7550ms
+```
+
+Expected: Error mutants should be surfaced as annotations or at least as a
+terminal warning when the selected reporter is CI-oriented.
+
+### 34. HTML reporter says “No surviving mutants” for error-only runs
+
+Severity: P2
+Surface: Public reporter (`html`)
+Target: no-test Mix project at `/private/tmp/mutalisk_exploratory/no_tests`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/no_tests
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 2 --reporters html --output-path error_only.json
+head -80 error_only.html
+```
+
+Observed:
+
+```html
+<p class="summary">0 surviving mutants across 0 files.</p>
+<p class="clean">No surviving mutants. 🎉</p>
+```
+
+Expected: HTML output should not present an error-only run as clean. It should
+show errors or at least state that no score was produced.
+
+### 35. `--files README.md` parses a non-Elixir file and records a parse-error skip
+
+Severity: P3
+Surface: Public CLI (`--files`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --files README.md --debug-plan --fail-at 0
+cat plan.debug.json
+```
+
+Observed:
+
+```json
+{
+  "reason": "parse_error",
+  "file": "README.md",
+  "detail": "{\".../README.md\", 7, \"https:\"}"
+}
+```
+
+Expected: Non-Elixir files should be rejected up front or ignored with a clear
+warning, not parsed into internal skip records.
+
+### 36. `--files test/...` attempts to mutate test files and produces many `missing_oracle_site` skips
+
+Severity: P3
+Surface: Public CLI (`--files`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --files test/basic_lib_test.exs --debug-plan --fail-at 0
+```
+
+Observed: `plan.debug.json` contains many skipped candidates for ExUnit DSL
+calls and assertions, all with `reason: "missing_oracle_site"` from
+`test/basic_lib_test.exs`.
+
+Expected: If Mutalisk is source-code mutation testing, test-file globs should
+be rejected or clearly warned as unsupported rather than producing a noisy plan.
+
+### 37. Hidden `mix mut.recompile` task is callable and fails with a raw `KeyError`
+
+Severity: P2
+Surface: Packaged Mix task surface
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut.recompile
+```
+
+Observed:
+
+```text
+** (KeyError) key :app not found in: []
+    (mutalisk 0.1.0) lib/mix/tasks/mut/recompile.ex:18: Mix.Tasks.Mut.Recompile.run/1
+```
+
+Expected: Internal tasks should not be callable from user projects, or should
+fail with a clear internal-task message.
+
+### 38. Hidden internal tasks have no help text
+
+**STATUS: INTENTIONAL (no change).** These tasks carry `@moduledoc false`, which
+is the standard Mix mechanism to hide a task from the `mix help` listing.
+"There is no documentation for this task" when one is queried directly is
+expected behavior for any intentionally-hidden task, not a defect.
+
+Severity: P3
+Surface: Packaged Mix task surface
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix help mut.recompile
+MIX_ENV=test mix help compile.mut_oracle
+```
+
+Observed:
+
+```text
+mix mut.recompile
+There is no documentation for this task
+
+mix compile.mut_oracle
+There is no documentation for this task
+```
+
+Expected: Shipped tasks should either be documented or hidden/unavailable to
+consumer projects.
+
+### 39. `mix compile.mut_oracle` is callable in user projects and silently writes internal artifacts
+
+**STATUS: INTENTIONAL (no change).** `compile.mut_oracle` is a Mix *compiler*
+task that the mutation engine relies on to compile instrumented mutants, so it
+must ship in the package. Being invokable is inherent to all `compile.*` tasks.
+It writes only a transient `_build/.../.mut_oracle.jsonl` artifact (under
+`_build`, gitignored) and is hidden from help via `@moduledoc false`. Running it
+standalone is harmless.
+
+Severity: P2
+Surface: Packaged compiler task
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix compile.mut_oracle --force
+find . -maxdepth 4 -name '*oracle*' -print
+```
+
+Observed:
+
+```text
+./_build/test/.mut_oracle.jsonl
+```
+
+Expected: Internal compiler tasks should not be user-invokable without context,
+or should explain what they write and why.
+
+### 40. Runtime artifacts are written under the Mutalisk dependency checkout
+
+**STATUS: FIXED.** All runtime artifacts now live under a canonicalized,
+per-project OS-temp root. `MUTALISK_PATH` is decoupled from artifact placement,
+and regression/e2e coverage verifies real-project build paths and cleanup.
+
+Severity: P2
+Surface: Runtime side effects
+Target: runs from `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+find /Users/lukaszsamson/claude_fun/mutalisk/tmp -maxdepth 2 -type f -o -type d | sort | tail
+```
+
+Observed:
+
+```text
+/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_baseline.log
+/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_memory.log
+/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/...
+```
+
+Expected: Running Mutalisk as a dependency should keep runtime logs and work
+state under the target project or an OS temp dir, not under the dependency
+checkout/package directory.
+
+### 41. Baseline failure message points to a global dependency-side log path
+
+Severity: P3
+Surface: Public CLI / diagnostics
+Target: failing baseline project at `/private/tmp/mutalisk_exploratory/failing_project`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/failing_project
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 2
+```
+
+Observed:
+
+```text
+** (Mix) baseline tests failed; aborting mutation run (full log: /Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_baseline.log)
+```
+
+Expected: Baseline logs should be target-scoped or run-id scoped. A single
+dependency-side `tmp/mut_baseline.log` is easy to overwrite across projects and
+is surprising for users.
+
+### 42. Default-env `mix mut` is not discoverable when dependency is installed as documented
+
+Severity: P3
+Surface: Public CLI task discoverability
+Target: fresh Mix library with `{:mutalisk, path: ..., only: :test}`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+mix mut --fail-at 0 --max-mutants 1
+mix help mut
+```
+
+Observed:
+
+```text
+** (Mix) The task "mut" could not be found
+```
+
+Expected: The README does show `MIX_ENV=test mix mut`, but later examples use
+plain `mix mut ...`. The task-not-found failure is a poor first-run experience
+for the documented `only: [:test]` install.
+
+### 43. `--debug-plan` succeeds silently
+
+Severity: P3
+Surface: Public CLI (`--debug-plan`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+rm -f plan.debug.json
+MIX_ENV=test mix mut --files lib/basic_lib.ex --debug-plan --fail-at 0
+```
+
+Observed: The command exits 0 and writes `plan.debug.json`, but prints no
+message indicating where the plan was written or how many mutants it contains.
+
+Expected: Debug mode should print at least `wrote plan.debug.json` plus counts.
+
+### 44. Invalid `--output-path` parent crashes after doing mutation work
+
+Severity: P2
+Surface: Public CLI (`--output-path`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 1 \
+  --reporters stryker-json --output-path lib/basic_lib.ex/report.json
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+** (File.Error) could not make directory (with -p) ".../lib/basic_lib.ex": not a directory
+    (mutalisk 0.1.0) lib/mut/reporter/stryker_json.ex:54: Mut.Reporter.StrykerJson.write/2
+```
+
+Expected: Output path validity should be checked before expensive mutation work
+starts, with a friendly error.
+
+### 45. `docs/MUTATORS.md` says opt-in mutators run by name, but `attribute_literal` still needs `--enable`
+
+Severity: P2
+Surface: Public docs / CLI behavior
+Target: disposable library with `@limit 10`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --mutators attribute_literal --fail-at 0 --concurrency 1
+MIX_ENV=test mix mut --enable module_attribute --mutators attribute_literal --fail-at 0 --concurrency 1
+```
+
+Observed:
+
+```text
+# by name only
+Mutation score: 0/0 (no scorable mutants)
+Skipped: ... (attribute_engine_disabled: 1, ...)
+
+# with target enabled
+[1/2] killed    lib/basic_lib.ex:6:3  AttributeLiteral  replace attribute literal 10 with 0
+[2/2] killed    lib/basic_lib.ex:6:3  AttributeLiteral  replace attribute literal 10 with 11
+```
+
+Expected: Either `--mutators attribute_literal` should enable the required
+target, or docs should state that some named mutators still require `--enable`.
+
+### 46. `docs/MUTATORS.md` says body-literal mutators run by name, but `boolean_literal` still needs `--enable body_literal`
+
+Severity: P2
+Surface: Public docs / CLI behavior
+Target: disposable library with boolean literals
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --mutators boolean_literal --fail-at 0 --concurrency 1 --max-mutants 4
+MIX_ENV=test mix mut --enable body_literal --mutators boolean_literal --fail-at 0 --concurrency 1 --max-mutants 4
+```
+
+Observed:
+
+```text
+# by name only
+Mutation score: 0/0 (no scorable mutants)
+
+# with target enabled
+[1/1] survived  lib/basic_lib.ex:21:32  BooleanLiteral  replace boolean literal true with false
+```
+
+Expected: Named mutator selection should match the docs or the docs should
+explain the target gate.
+
+### 47. Empty reporters plus failing threshold exits 1 without explaining why
+
+Severity: P2
+Surface: Public CLI (`--reporters`, `--fail-at`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --reporters "" --fail-at 100 --concurrency 1 --max-mutants 4
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+Mutalisk run complete in 8886ms
+# exit code: 1
+```
+
+Expected: Even if reporters are disabled, a failing threshold should emit a
+minimal failure reason or empty reporters should be rejected.
+
+### 48. `--keep-work-copy` prints two retention paths for one run
+
+Severity: P3
+Surface: Public CLI debug workflow (`--keep-work-copy`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --keep-work-copy --fail-at 0 --concurrency 1 --max-mutants 1 --reporters terminal
+```
+
+Observed:
+
+```text
+[mutalisk] --keep-work-copy: retaining .../tmp/mut_work/mut-1782747702-27WL6A-schema
+Mutalisk run complete in 6988ms
+[mutalisk] --keep-work-copy: retaining .../tmp/mut_work/mut-1782747702-27WL6A
+```
+
+Expected: The debug output should distinguish schema-build and execution work
+copies, or print one primary path plus a short explanation.
+
+### 49. `--keep-work-copy` retained paths live under the dependency checkout
+
+**STATUS: FIXED.** The retained oracle/baseline and schema-build work copies are
+labelled separately and live under the canonical per-project OS-temp root from
+#40, outside the dependency checkout.
+
+Severity: P2
+Surface: Public CLI debug workflow (`--keep-work-copy`)
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --keep-work-copy --fail-at 0 --concurrency 1 --max-mutants 1 --reporters terminal
+```
+
+Observed:
+
+```text
+/Users/lukaszsamson/claude_fun/mutalisk/tmp/mut_work/mut-1782747702-27WL6A
+```
+
+Expected: A user running Mutalisk in their app expects retained debug work
+copies under their project or OS temp, not inside the dependency checkout.
+
+### 50. Target compile warnings do not affect mutation readiness
+
+Severity: P3
+Surface: Public CLI baseline validation
+Target: warning project at `/private/tmp/mutalisk_exploratory/warn_project`
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/warn_project
+mix test
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 4
+```
+
+Observed:
+
+```text
+warning: variable "unused" is unused
+...
+Mutation score: 2/2 = 100.0%
+Mutalisk run complete in 8203ms
+```
+
+Expected: At minimum, the docs should state whether Mutalisk intentionally runs
+without `--warnings-as-errors`. For release/CI use, a mutation score of 100% on
+code with compiler warnings can be misleading.
+
+### 51. Non-source `--files` still exits successfully with zero scorable mutants
+
+**STATUS: FIXED (CI gate; not fail-fast).** The run now exits non-zero when no
+mutants are scorable and `--fail-at` is greater than zero, and prints
+`[mutalisk] no scorable mutants; failing --fail-at ...`. It still reaches the
+post-plan/reporting stage before failing.
+
+Severity: P2
+Surface: Public CLI file selection / CI threshold
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --files README.md --fail-at 100 --concurrency 1 --reporters terminal
+echo $?
+```
+
+Observed:
+
+```text
+[mutalisk] --files: ignoring 1 non-source file(s) (only `.ex` files are mutated): README.md
+Mutation score: 0/0 (no scorable mutants)
+Mutalisk run complete in 17315ms
+```
+
+The command exited `0`, despite `--fail-at 100` and despite selecting no
+mutatable source. It also still paid oracle, baseline, coverage, and schema-build
+cost before reporting the empty run.
+
+Expected: An explicitly provided `--files` value that leaves no source files
+should fail fast or at least fail the threshold gate as a no-op mutation run.
+
+### 52. Unmatched `--files` patterns still exit successfully with zero scorable mutants
+
+**STATUS: FIXED (CI gate; not fail-fast).** Unmatched explicit patterns now
+still warn, but the empty scorable set exits non-zero under a positive
+`--fail-at` threshold with an explicit no-scorable-mutants failure line.
+
+Severity: P2
+Surface: Public CLI file selection / CI threshold
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --files lib/nope.ex --fail-at 100 --concurrency 1 --reporters terminal
+echo $?
+```
+
+Observed:
+
+```text
+[mutalisk] --files matched no source files: lib/nope.ex
+Mutation score: 0/0 (no scorable mutants)
+Mutalisk run complete in 17241ms
+```
+
+The warning is useful, but the run still exits `0`, so CI can pass after a typo
+in a scoped mutation command.
+
+Expected: A user-supplied unmatched pattern should fail fast or cause a
+non-zero exit when the run contains no scorable mutants.
+
+### 53. Whitespace-only `--files` values are accepted and run as empty no-op selections
+
+**STATUS: FIXED.** `--files " "` now fails during CLI parsing with
+`--files contains a blank path`.
+
+Severity: P3
+Surface: Public CLI validation
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --files " " --fail-at 100 --concurrency 1 --reporters terminal
+```
+
+Observed:
+
+```text
+[mutalisk] --files matched no source files:
+Mutation score: 0/0 (no scorable mutants)
+Mutalisk run complete in 16777ms
+```
+
+Expected: Blank/whitespace path inputs should be rejected during CLI parsing,
+not treated as a real pattern that proceeds through the full pipeline.
+
+### 54. Empty `--files ""` mutates the entire project
+
+**STATUS: FIXED.** Empty file patterns now fail during CLI parsing with
+`--files contains a blank path` instead of resolving to the project root.
+
+Severity: P1
+Surface: Public CLI validation and file selection
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--files", ""], []))'
+MIX_ENV=test mix mut --files "" --fail-at 100 --concurrency 1 --reporters terminal
+```
+
+Observed:
+
+```text
+files: [""]
+...
+[1/11] killed    lib/basic_lib.ex:11:14  Arithmetic  replace * with +
+...
+Mutation score: 9/11 = 81.8%
+```
+
+`Path.join(work_copy, "")` resolves to the work-copy root, so an empty file
+pattern expands to every `.ex` file. This is the opposite of the user's scoped
+selection intent.
+
+Expected: Empty file patterns should be rejected before execution.
+
+### 55. `.mutalisk.exs` accepts `files: []` and creates a silent no-op run
+
+**STATUS: FIXED.** `files: []` is rejected during config parsing with
+`config :files must not be empty`.
+
+Severity: P2
+Surface: Project configuration validation
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[files: []]
+```
+
+```sh
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --reporters terminal
+echo $?
+```
+
+Observed:
+
+```text
+Mutation score: 0/0 (no scorable mutants)
+Mutalisk run complete in 7007ms
+```
+
+The command exited `0`. The parser currently accepts the empty list because
+`strict_string_list/2` validates element types but not list cardinality
+([lib/mut/cli.ex](/Users/lukaszsamson/claude_fun/mutalisk/lib/mut/cli.ex:515)).
+
+Expected: `files: []` should be rejected like empty `reporters`, `mutators`, and
+`enabled_targets`.
+
+### 56. `.mutalisk.exs` accepts `test_paths: []` and records all-tests selection with zero tests
+
+**STATUS: FIXED.** `test_paths: []` is rejected during config parsing with
+`config :test_paths must not be empty`.
+
+Severity: P2
+Surface: Project configuration validation / test selection metrics
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+[test_paths: []]
+```
+
+```sh
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --max-mutants 2 --reporters terminal
+```
+
+Observed:
+
+```text
+Mutation score: 2/2 = 100.0%
+Selection:
+  match distribution:
+    all tests:          2
+  avg tests/mutant: 0.0
+  median tests/mutant: 0
+  coverage collection: 0 ms
+```
+
+Baseline still runs the full suite through `mix test`, but configured test
+discovery is empty. Workers receive the empty-selection sentinel and execute the
+full suite, while selection metrics say zero tests.
+
+Expected: `test_paths: []` should be rejected or normalized to the default, not
+accepted as a misleading full-suite sentinel.
+
+### 57. Oversized `--concurrency` is accepted and can make a one-mutant run take over a minute
+
+**STATUS: FIXED.** Explicit concurrency now has a machine-relative upper bound
+(`max(System.schedulers_online() * 4, 16)`), and execution caps effective
+sandbox workers to the mutant count. `--concurrency 999` now fails at parsing on
+this machine.
+
+Severity: P2
+Surface: Public CLI performance and resource safety
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 0 --concurrency 999 --max-mutants 1 --reporters terminal
+```
+
+Observed:
+
+```text
+Mutation score: 1/1 = 100.0%
+Phases:
+  schema workers:        653 ms
+  total:               45337 ms
+Concurrency: 999 workers (capped at 12 schedulers_online)
+Mutalisk run complete in 65238ms
+```
+
+The single-mutant run spent most of its wall time outside useful mutant
+execution, apparently creating/tearing down a huge sandbox pool.
+
+Expected: `--concurrency` should be capped, rejected above a sane bound, or at
+least warned before doing expensive setup.
+
+### 58. Terminal concurrency output says workers are capped when execution is not capped
+
+**STATUS: FIXED.** The metrics now track requested vs effective concurrency, the
+pool is capped to the number of mutants, and terminal output no longer says
+`capped at schedulers_online`.
+
+Severity: P3
+Surface: Terminal reporter accuracy
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 0 --concurrency 999 --max-mutants 1 --reporters terminal
+```
+
+Observed:
+
+```text
+Concurrency: 999 workers (capped at 12 schedulers_online)
+```
+
+The metrics code records `effective: configured` and comments that execution is
+not capped at scheduler count ([lib/mut/metrics.ex](/Users/lukaszsamson/claude_fun/mutalisk/lib/mut/metrics.ex:350)).
+The terminal reporter still appends a "capped" suffix based only on
+`configured > schedulers_online` ([lib/mut/reporter/terminal.ex](/Users/lukaszsamson/claude_fun/mutalisk/lib/mut/reporter/terminal.ex:123)).
+
+Expected: The summary should either print the real effective worker count, or
+use wording such as "999 workers; 12 schedulers_online" without implying a cap.
+
+### 59. GitHub Actions-only threshold failures exit 1 without score or fail-at reason
+
+**STATUS: FIXED.** The fail-at gate now prints a minimal stderr reason for
+below-threshold scores even when the terminal reporter is disabled.
+
+Severity: P2
+Surface: CI reporter UX
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --max-mutants 4 --reporters github-actions
+echo $?
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+::warning file=lib/basic_lib.ex,line=10,col=57::Mutalisk: surviving mutant [...]
+Mutalisk run complete in 17965ms
+```
+
+The command exited `1`, but stdout/stderr never printed the mutation score or
+the `--fail-at` comparison that caused the failure.
+
+Expected: Any reporter combination that can fail CI should emit a minimal
+threshold summary.
+
+### 60. Stryker JSON-only threshold failures exit 1 without any visible failure reason
+
+**STATUS: FIXED.** Stryker JSON-only runs now print the threshold failure line,
+for example `mutation score 75.0% below --fail-at 100.0%; failing`.
+
+Severity: P2
+Surface: Machine reporter CLI UX
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --max-mutants 4 \
+  --reporters stryker-json --output-path /private/tmp/mut_sj_only.json
+echo $?
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+Mutalisk run complete in 17033ms
+```
+
+The command exited `1`, but the console output contains no score, survivor
+count, or threshold reason.
+
+Expected: Non-terminal reporters should still get a short console failure line
+when `--fail-at` schedules a non-zero exit.
+
+### 61. HTML-only threshold failures exit 1 while the generated page omits the score and threshold
+
+**STATUS: FIXED (CLI failure reason).** The HTML report still focuses on
+survivors, but HTML-only CLI runs now print the threshold failure reason before
+exiting non-zero.
+
+Severity: P2
+Surface: HTML reporter / CI artifact
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --max-mutants 4 \
+  --reporters html --output-path /private/tmp/mut_html_only.json
+echo $?
+sed -n '1,80p' /private/tmp/mut_html_only.html
+```
+
+Observed:
+
+```text
+Schema build starting
+Schema build complete
+Mutalisk run complete in 17859ms
+```
+
+The HTML page says only:
+
+```html
+<p class="summary">1 surviving mutant across 1 file.</p>
+```
+
+It does not include the mutation score or `--fail-at 100` failure reason.
+
+Expected: The HTML report should include the score and threshold status, or the
+CLI should print that failure reason when terminal output is disabled.
+
+### 62. `--output-path` is documented as Stryker JSON but is also reused for HTML output naming
+
+**STATUS: FIXED (documentation).** Reporter-specific output-path semantics are
+now documented in `mix help mut`: `--output-path` is a report output base path,
+and the HTML reporter writes the same path with a `.html` extension.
+
+Severity: P3
+Surface: Public CLI docs / reporter file output
+Target: fresh Mix library at `/private/tmp/mutalisk_exploratory/basic_lib`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 100 --concurrency 1 --max-mutants 4 \
+  --reporters html --output-path /private/tmp/mut_html_only.json
+ls -l /private/tmp/mut_html_only.json /private/tmp/mut_html_only.html
+```
+
+Observed:
+
+```text
+/private/tmp/mut_html_only.html exists
+/private/tmp/mut_html_only.json does not exist
+```
+
+`mix help mut` describes `--output-path PATH` as "Stryker JSON output path",
+but HTML-only mode rewrites the extension and writes an HTML file instead.
+
+Expected: The help should explain reporter-specific output behavior, or HTML
+should have its own output option/path.
+
+### 63. `--max-mutants` is applied after coverage collection
+
+**STATUS: FIXED (documentation).** The runtime behavior is unchanged, but
+`mix help mut` now explicitly says `--max-mutants` caps execution only and is
+applied after planning and coverage collection, so it does not reduce analysis
+time.
+
+Severity: P2
+Surface: Public CLI performance semantics
+Target: generated Phoenix app at `/private/tmp/mutalisk_exploratory/basic_phx`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 4 --reporters terminal
+```
+
+Observed:
+
+```text
+Coverage collection took 41805ms vs baseline 582ms; falling back to static selection.
+Phases:
+  coverage collection: 50697 ms
+Skipped: ... no_applicable_mutator: 253 ...
+```
+
+Code confirms the ordering: build full plan, collect coverage, then apply
+`maybe_limit_plan/2` ([lib/mix/tasks/mut.ex](/Users/lukaszsamson/claude_fun/mutalisk/lib/mix/tasks/mut.ex:182)).
+
+Expected: `--max-mutants` should reduce expensive coverage/planning work where
+possible, or the CLI help should state that it only caps execution after full
+analysis.
+
+### 64. Default coverage mode spends about 50 seconds on a generated Phoenix app before falling back
+
+**STATUS: FIXED.** `coverage_with_static_fallback` now passes a
+baseline-relative collection budget to the coverage runner. Once the budget is
+exhausted, unvisited test files are marked degraded and safely handled by the
+existing static-fallback union. Re-running the generated Phoenix fixture reduced
+the total run from about 78s to about 44s; coverage collection wall dropped to
+about 10.2s before downgrading to static selection.
+
+Severity: P2
+Surface: Default run performance
+Target: generated Phoenix app at `/private/tmp/mutalisk_exploratory/basic_phx`
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --fail-at 0 --concurrency 1 --max-mutants 4 --reporters terminal
+```
+
+Observed:
+
+```text
+Coverage collection took 41805ms vs baseline 582ms; falling back to static selection.
+Phases:
+  oracle build:         13928 ms
+  coverage collection:  50697 ms
+  schema build:          9506 ms
+  total:                ~78s
+```
+
+The fallback works, but the default release experience on a stock Phoenix app
+still burns most of the run on doomed coverage collection before downgrading.
+
+Expected: Pathological coverage collection should be avoided earlier, be capped
+more aggressively, or default to static for known generated/macro-heavy targets.
+
+### 65. Trailing comma in `--reporters` is silently accepted
+
+**STATUS: FIXED.** Empty comma-list segments are now rejected.
+
+Severity: P3
+Surface: Public CLI validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--reporters", "terminal,"], []))'
+```
+
+Observed:
+
+```text
+{:ok, %Mut.Cli.Options{reporters: [:terminal], ...}}
+```
+
+`string_name_list/1` splits with `trim: true` and rejects empty segments
+([lib/mut/cli.ex](/Users/lukaszsamson/claude_fun/mutalisk/lib/mut/cli.ex:601)),
+so a malformed comma list is normalized silently.
+
+Expected: Empty segments in comma-separated CLI lists should be rejected.
+
+### 66. Trailing comma in `--mutators` is silently accepted
+
+**STATUS: FIXED.** Empty comma-list segments are now rejected.
+
+Severity: P3
+Surface: Public CLI validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--mutators", "arithmetic,"], []))'
+```
+
+Observed:
+
+```text
+{:ok, %Mut.Cli.Options{mutators: ["arithmetic"], ...}}
+```
+
+Expected: A trailing empty mutator segment should be rejected so typos are not
+silently hidden.
+
+### 67. Trailing comma in `--enable` is silently accepted
+
+**STATUS: FIXED.** Empty comma-list segments are now rejected.
+
+Severity: P3
+Surface: Public CLI validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--enable", "dispatch,"], []))'
+```
+
+Observed:
+
+```text
+{:ok, %Mut.Cli.Options{enabled_targets: [:dispatch], mutators: nil, ...}}
+```
+
+Expected: A trailing empty target segment should be rejected, especially because
+`--enable` changes the mutator tiering behavior.
+
+### 68. Invalid reporter errors list underscore names while help documents hyphen aliases
+
+**STATUS: FIXED.** Unknown reporter errors now list documented hyphenated names
+such as `stryker-json` and `github-actions`.
+
+Severity: P3
+Surface: Public CLI error messaging
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--reporters", "nope"], []))'
+mix help mut
+```
+
+Observed:
+
+```text
+unknown --reporters value :nope; known: terminal, stryker_json, html, github_actions
+```
+
+Help documents `stryker-json` and `github-actions`, while the error lists
+`stryker_json` and `github_actions`.
+
+Expected: Error messages should match the documented CLI spelling, or list both
+forms explicitly.
+
+### 69. Config `reporters: [123]` reports an unknown CLI value instead of a config type error
+
+**STATUS: FIXED.** Non-string/non-atom reporter config entries now produce a
+config type error.
+
+Severity: P3
+Surface: Project configuration validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse([], reporters: [123]))'
+```
+
+Observed:
+
+```text
+{:error, "unknown --reporters value :123; known: terminal, stryker_json, html, github_actions"}
+```
+
+The config path stringifies list entries in `string_name_list/1`
+([lib/mut/cli.ex](/Users/lukaszsamson/claude_fun/mutalisk/lib/mut/cli.ex:610)).
+
+Expected: Config should reject non-string/non-atom reporter list entries with a
+message that names `config :reporters`.
+
+### 70. Config `enabled_targets: [123]` reports an unknown CLI target instead of a config type error
+
+**STATUS: FIXED.** Non-string/non-atom enabled target config entries now produce
+a config type error.
+
+Severity: P3
+Surface: Project configuration validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse([], enabled_targets: [123]))'
+```
+
+Observed:
+
+```text
+{:error, "unknown --enable target :123; known: dispatch, guard, module_attribute, ..."}
+```
+
+This has the same root cause as #69: config list entries are stringified before
+validation, producing a CLI-style unknown-value error.
+
+Expected: Config should reject non-string/non-atom enabled target entries with a
+message that names `config :enabled_targets`.
+
+### 71. HexDocs exposes internal `Mut.*` modules while the true public API is unclear
+
+**STATUS: FIXED.** `mix.exs` now filters generated docs to the supported public
+surface (`mix mut` and `Mutalisk`), and `Mutalisk` now documents its runtime
+diagnostic helpers.
+
+Severity: P2
+Surface: Public API / HexDocs usability
+Target: package/docs build from `/Users/lukaszsamson/claude_fun/mutalisk`
+
+Reproduction:
+
+```sh
+mix docs --formatter html
+find doc -maxdepth 1 -name 'Mut.*.html' | head
+```
+
+Observed before fix:
+
+```text
+doc/Mut.Coverage.Runner.html
+doc/Mut.Orchestrator.html
+doc/Mut.Runtime.html
+doc/Mut.SchemaBuild.html
+...
+```
+
+The package has to ship engine modules under `lib/mut`, but HexDocs presented
+them as user-facing API. Meanwhile `Mutalisk` only said "Public entry points"
+and had no function docs for the helpers it delegates.
+
+Expected: HexDocs should clearly expose the supported API surface and avoid
+encouraging users to depend on internal engine modules.
+
+### 72. `--debug-plan` exits successfully for a non-source `--files` no-op
+
+**STATUS: FIXED.** Empty debug plans now apply the same no-scorable
+`--fail-at` gate as normal runs.
+
+Severity: P2
+Surface: CLI exit status / CI readiness
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --debug-plan --files README.md --fail-at 100 --concurrency 1 --reporters terminal
+```
+
+Observed before fix: the run warned that `README.md` is not an `.ex` source,
+wrote `plan.debug.json` with 0 mutants, and exited 0.
+
+Expected: with a positive `--fail-at`, a zero-scorable debug plan should fail
+CI just like a normal zero-scorable run.
+
+### 73. `--debug-plan` exits successfully for unmatched explicit source paths
+
+**STATUS: FIXED.** Empty debug plans now exit 1 under a positive `--fail-at`.
+
+Severity: P2
+Surface: CLI exit status / CI readiness
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --debug-plan --files lib/nope.ex --fail-at 100 --concurrency 1 --reporters terminal
+```
+
+Observed before fix: the run warned that `--files` matched no source files,
+wrote a 0-mutant plan, and exited 0.
+
+Expected: unmatched explicit mutation input should not pass a release/CI gate.
+
+### 74. Public `Mutalisk.set_active/1` raises raw `FunctionClauseError` for invalid ids
+
+**STATUS: FIXED.** `Mut.Runtime.set_active/1` now raises a clear
+`ArgumentError` for non-integer or negative ids.
+
+Severity: P3
+Surface: Public runtime helper
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'for id <- [-1, "1", 1.0], do: try do Mutalisk.set_active(id) rescue e -> IO.puts(Exception.format(:error, e, __STACKTRACE__)) end'
+```
+
+Observed before fix: each invalid value produced a raw function-clause crash in
+`Mut.Runtime.set_active/1`.
+
+Expected: the documented public helper should fail with a useful argument
+message.
+
+### 75. `MUT_ACTIVE` silently treats whitespace-padded valid ids as 0
+
+**STATUS: FIXED.** Startup now trims `MUT_ACTIVE` before parsing.
+
+Severity: P3
+Surface: Runtime environment parsing
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run --no-start -e 'System.put_env("MUT_ACTIVE", " 42 "); {:ok, pid} = Mut.Application.start(:normal, []); IO.inspect(Mut.Runtime.get_active()); Supervisor.stop(pid)'
+```
+
+Observed before fix: `" 42 "` parsed as invalid and selected mutant 0.
+
+Expected: surrounding shell/config whitespace should not disable a valid id.
+
+### 76. `--debug-plan` silently ignores reporter and output-path options
+
+**STATUS: FIXED.** Help now documents that `--debug-plan` still builds the
+oracle and baseline plan, and debug-plan output explicitly reports its fixed
+`plan.debug.json` artifact.
+
+Severity: P3
+Surface: CLI usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --debug-plan --selection static --files lib/basic_lib.ex --reporters html --output-path /private/tmp/debug_plan_should_not_write.json
+```
+
+Observed: the command writes only `plan.debug.json` in the project root. It does
+not write HTML or use `--output-path`, and it does not explain that those
+options are ignored in debug-plan mode.
+
+Expected: either reject/warn for ignored reporter/output options, or document
+debug-plan as a separate fixed-output mode.
+
+### 77. Contradictory boolean CLI forms are accepted by last-write-wins parsing
+
+**STATUS: FIXED.** Duplicate flag detection now normalizes `--no-...` forms so
+`--incremental --no-incremental`, `--debug-plan --no-debug-plan`, and
+`--keep-work-copy --no-keep-work-copy` are rejected.
+
+Severity: P2
+Surface: CLI parser
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--incremental", "--no-incremental"], []))'
+```
+
+Observed before fix: parse succeeded with whichever value appeared last.
+
+Expected: contradictory explicit intent should be treated as a duplicate flag
+conflict.
+
+### 78. Whitespace-only `--output-path` is accepted
+
+**STATUS: FIXED.** `output_path` now rejects strings whose trimmed value is
+blank.
+
+Severity: P2
+Surface: CLI/config validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--output-path", " "], []))'
+```
+
+Observed before fix: parse succeeded with `output_path: " "`.
+
+Expected: whitespace-only output paths should fail at parse time.
+
+### 79. Whitespace-only `--since` is accepted
+
+**STATUS: FIXED.** `since` now trims valid refs and rejects blank refs.
+
+Severity: P3
+Surface: Incremental config validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--incremental", "--since", " "], []))'
+```
+
+Observed before fix: parse succeeded with `since: " "`, leaving a bad git ref
+for later.
+
+Expected: blank refs should fail with the same friendly validation as `""`.
+
+### 80. Report output validation misses existing directory targets
+
+**STATUS: FIXED.** Report path validation now fails fast when the final report
+target is an existing directory.
+
+Severity: P2
+Surface: Reporter output validation
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_exploratory/basic_lib
+MIX_ENV=test mix mut --output-path . --max-mutants 1 --fail-at 0 --concurrency 1 --reporters stryker-json
+```
+
+Observed before fix: validation checked only the parent directory, so the run
+could do the expensive mutation work and then crash while writing the report.
+
+Expected: directory targets should be rejected before oracle/schema/mutant work.
+
+### 81. Stryker JSON writer can overwrite a user-visible `.tmp` sibling file
+
+**STATUS: FIXED.** The writer now uses a unique same-directory temp filename
+instead of the predictable `path <> ".tmp"`.
+
+Severity: P2
+Surface: Reporter data safety
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'path = Path.join(System.tmp_dir!(), "mutalisk_tmp_collision.json"); File.write!(path <> ".tmp", "KEEP"); Mut.Reporter.StrykerJson.write(%{"schemaVersion" => "2", "thresholds" => %{"high" => 80, "low" => 60}, "files" => %{}}, path); IO.inspect(File.read(path <> ".tmp"))'
+```
+
+Observed before fix: the pre-existing `.tmp` sibling disappeared.
+
+Expected: atomic temp files should not collide with user-visible files.
+
+### 82. GitHub Actions reporter does not escape annotation property values
+
+**STATUS: FIXED.** `file=` property values now escape `%`, CR, LF, comma, and
+colon.
+
+Severity: P3
+Surface: GitHub Actions annotations
+
+Reproduction: render a surviving mutant in a file path containing `%`, `,`, `:`,
+or a newline.
+
+Observed before fix: only the message was escaped; `file=#{file}` was
+interpolated raw, which can corrupt workflow-command annotations.
+
+Expected: workflow-command properties need property escaping, not only message
+escaping.
+
+### 83. Unknown config keys are silently ignored
+
+**STATUS: FIXED.** `Mut.Cli.parse/2` now rejects keys outside the documented
+configuration surface.
+
+Severity: P2
+Surface: Project configuration validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse([], fail_att: 0, reporter: [:html]))'
+```
+
+Observed before fix: parse succeeded with default `fail_at` and default
+reporters, hiding typos.
+
+Expected: typos in `.mutalisk.exs` / `config :mut` should fail clearly.
+
+### 84. Config `history_path: " "` is accepted
+
+**STATUS: FIXED.** `history_path` now rejects blank-after-trim strings.
+
+Severity: P3
+Surface: Incremental history config
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse([], history_path: " "))'
+```
+
+Observed before fix: parse succeeded and later history code would treat a blank
+path as a real configured store path.
+
+Expected: whitespace-only history paths should be rejected.
+
+### 85. Configured `test_paths` are ignored by the baseline suite
+
+**STATUS: FIXED.** Superseded by #93; baseline now receives configured/default
+test paths.
+
+Severity: P2
+Surface: Test selection / baseline execution
+
+Code reference: `baseline_tests!/4` builds `mix test --no-deps-check ...` with
+no configured test path arguments.
+
+Observed: a project with `test_paths: ["test/unit"]` still runs the whole
+project baseline suite, including tests outside the configured mutation test
+universe.
+
+Expected: baseline should run the same configured test universe used for
+mutation selection, or the limitation should be rejected/documented explicitly.
+
+### 86. "All selected tests" collapses to bare `mix test`
+
+**STATUS: FIXED.** Superseded by #94; all-selected configured tests now remain
+explicit worker test files.
+
+Severity: P2
+Surface: Worker test execution
+
+Code reference: `worker_test_files/3` returns `[]` when selected tests equal
+`all_test_files`; `Mut.Worker.args([])` then runs bare `mix test`.
+
+Observed: with configured `test_paths`, "all selected configured tests" can turn
+into "all project tests".
+
+Expected: the empty sentinel should mean all configured/discovered tests, not
+necessarily the entire project test suite.
+
+### 87. Absolute `test_paths` are silently mangled under the work copy
+
+**STATUS: FIXED.** Superseded by #95; absolute configured `test_paths` now fail
+with a project-relative-path error.
+
+Severity: P2
+Surface: Project configuration validation
+
+Code reference: `absolute_test_paths/2` maps configured paths with
+`Path.join(work_copy, path)`.
+
+Observed: an absolute original-project path is joined under the sandbox work
+copy rather than relativized or rejected, which can discover zero tests and
+degrade selection.
+
+Expected: absolute test paths should be accepted intentionally by relativizing
+inside the project, or rejected with a clear config error.
+
+### 88. HTML reporter path semantics are ambiguous for HTML-only runs
+
+**STATUS: FIXED.** HTML-only runs now honor an explicit `.html` output path
+instead of appending another `.html`.
+
+Severity: P3
+Surface: Reporter CLI usability
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix mut --reporters html --output-path report.json
+```
+
+Observed: HTML output is derived with `Path.rootname(output_path) <> ".html"`,
+so `report.json` becomes `report.html`; the help text says HTML writes the same
+path with a `.html` extension, but for HTML-only users `--output-path` does not
+mean the literal output path.
+
+Expected: clarify that `--output-path` is a report base path, or honor explicit
+`.html` names when only HTML is requested.
+
+### 89. README reporter spellings differ from CLI help and errors
+
+**STATUS: FIXED.** README now uses hyphenated CLI reporter names and notes that
+config may still use atom/underscore forms.
+
+Severity: P3
+Surface: Release documentation
+
+Observed: README examples/documentation use underscore spellings such as
+`stryker_json` / `github_actions`, while `mix help mut` and parser errors use
+the hyphenated CLI spellings `stryker-json` / `github-actions`.
+
+Expected: user-facing docs should pick one canonical CLI spelling and mention
+aliases only if they are intentional.
+
+### 90. Changelog overstates default-on conditional mutation
+
+**STATUS: FIXED.** The changelog now names actual default-on categories and no
+longer lists conditionals as default-on.
+
+Severity: P3
+Surface: Release notes
+
+Observed: `CHANGELOG.md` says default-on mutators include conditionals, while
+the conditional target / `NegateConditional` remains opt-in in the mutator
+catalogue.
+
+Expected: release notes should match the actual default mutation surface.
+
+### 91. `--debug-plan` help omits that baseline and coverage still run
+
+**STATUS: FIXED.** Help now documents that `--debug-plan` skips mutant
+execution, not oracle/baseline planning work.
+
+Severity: P3
+Surface: CLI help / performance expectations
+
+Observed: help says `--debug-plan` dumps plan JSON and exits before mutant runs.
+That is true but incomplete: the command still builds the oracle, runs baseline
+tests, and may collect coverage before dumping the plan.
+
+Expected: help should state that `--debug-plan` skips mutant execution, not all
+pre-execution analysis, so users understand why it can still be expensive.
+
+### 92. `mix mut --help` and `mix mut -h` fail as unknown options
+
+**STATUS: FIXED.** The Mix task now handles `--help` and `-h` directly and
+prints the task help without requiring `MIX_ENV=test`.
+
+Severity: P2
+Surface: Public CLI usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --help
+MIX_ENV=test mix mut -h
+```
+
+Observed before fix: both commands failed with `unknown option --help` /
+`unknown option -h; run mix help mut`.
+
+Expected: conventional help flags should show task help.
+
+### 93. Configured `test_paths` are ignored by the baseline suite
+
+**STATUS: FIXED.** The baseline `mix test` invocation now appends the
+configured/default test paths.
+
+Severity: P2
+Surface: Test execution / configuration correctness
+
+Reproduction: In `/private/tmp/mutalisk_goal_probe/goal_lib`, configure
+`.mutalisk.exs` with `test_paths: ["test/goal_lib_test.exs"]` and add a failing
+`test/ignored_failure_test.exs`.
+
+Observed before fix: the baseline path was bare `mix test`, so tests outside
+the configured universe could fail or slow every mutation run.
+
+Expected: baseline should run the same configured test universe as mutation
+workers and selection.
+
+### 94. "All selected tests" can collapse to the whole project test suite
+
+**STATUS: FIXED.** When selection means "all discovered configured tests", the
+worker now receives the explicit discovered test file list instead of the empty
+bare-`mix test` sentinel.
+
+Severity: P2
+Surface: Worker execution / configured test scope
+
+Observed before fix: a configured `test_paths` subset could still become a full
+project test run whenever selection matched every discovered test file.
+
+Expected: "all selected" should mean all configured/discovered selected tests,
+not every test in the project.
+
+### 95. Absolute `test_paths` are silently mangled under the work copy
+
+**STATUS: FIXED.** Configured `test_paths` now reject absolute paths with a
+clear project-relative-path error.
+
+Severity: P2
+Surface: Project configuration validation
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse([], test_paths: [Path.expand("test")]))'
+```
+
+Observed before fix: absolute paths were joined under the sandbox work copy,
+which could discover zero tests and degrade selection.
+
+Expected: absolute test paths should either be intentionally relativized or
+rejected. The safer public API is rejection.
+
+### 96. Specific test-file paths in `test_paths` are not discovered for static selection
+
+**STATUS: FIXED.** Shared/static test discovery now accepts regular
+`*_test.exs` files in addition to directories.
+
+Severity: P2
+Surface: Test selection metrics and behavior
+
+Reproduction:
+
+```elixir
+test_paths: ["test/goal_lib_test.exs"]
+```
+
+Observed before fix: coverage discovery could handle file paths, but static
+selection reported `avg tests/mutant: 0.0` because `discover_test_files/1`
+returned `[]` for a regular file.
+
+Expected: explicit test-file paths should be first-class `test_paths` values.
+
+### 97. `NoCoverage` is excluded from the CLI score but emitted as Stryker `NoCoverage`
+
+**STATUS: FIXED.** `:no_coverage` now counts as an undetected behavioral
+verdict in the CLI score denominator, matching Stryker JSON/HTML semantics.
+
+Severity: P2
+Surface: Scoring consistency / fail-at correctness
+
+Observed before fix: one killed mutant plus one no-coverage mutant printed
+`Mutation score: 1/1 = 100.0%`, while Stryker consumers treat `NoCoverage` as
+undetected.
+
+Expected: terminal score, `--fail-at`, and JSON-derived score should agree.
+
+### 98. Terminal says "Surviving mutants: none" when `NoCoverage` mutants exist
+
+**STATUS: FIXED.** Terminal summaries now list no-coverage mutants in the
+undetected block and mark them with `(no coverage)`.
+
+Severity: P3
+Surface: Terminal report usability
+
+Observed before fix: no-coverage mutants were counted only in the footer, while
+the actionable undetected list said none.
+
+Expected: no-coverage mutants should be surfaced with file/line details.
+
+### 99. History writer can delete a user-visible `.tmp` sibling
+
+**STATUS: FIXED.** History writes now use a unique same-directory temp filename,
+matching the Stryker JSON writer fix.
+
+Severity: P2
+Surface: Incremental history data safety
+
+Reproduction: pre-create `<history_path>.tmp`, then call
+`Mut.History.Store.write/2`.
+
+Observed before fix: the sibling `.tmp` file was overwritten and renamed away.
+
+Expected: internal temp files should not collide with user-visible files.
+
+### 100. Malformed configured history stores are silently ignored before overwrite
+
+**STATUS: FIXED.** When an explicit `history_path` is present and the existing
+store is unusable, the run now warns that it is starting cold.
+
+Severity: P2
+Surface: Incremental history data safety
+
+Observed before fix: `Mut.History.Store.load/1` returned `{:cold, :malformed}`,
+but the caller dropped the reason and later wrote a fresh store to the same
+configured path.
+
+Expected: explicit malformed history should be visible before it is replaced.
+
+### 101. Invalid `MUT_ACTIVE` silently selects mutant 0
+
+**STATUS: FIXED.** Startup now warns to stderr when `MUT_ACTIVE` is invalid and
+falls back to 0.
+
+Severity: P3
+Surface: Public runtime diagnostics
+
+Reproduction:
+
+```sh
+MIX_ENV=test MUT_ACTIVE=abc mix run --no-start -e '{:ok, pid} = Mut.Application.start(:normal, []); IO.inspect(Mutalisk.get_active()); Supervisor.stop(pid)'
+```
+
+Observed before fix: invalid content silently selected mutant 0.
+
+Expected: diagnostics should not silently disable selected-mutant behavior.
+
+### 102. `coverage_timeout_ms` is listed but not explained in help
+
+**STATUS: FIXED.** `mix help mut` now documents units, scope, and fallback
+interaction for `coverage_timeout_ms`, and clarifies that `history_path` is
+written by every run for future incremental reuse.
+
+Severity: P3
+Surface: Help/docs usability
+
+Observed before fix: `coverage_timeout_ms` appeared in the config key list but
+had no units or behavior explanation.
+
+Expected: config-only knobs should explain what values mean and when they
+matter.
+
+### 103. Existing `runtime: false` Mutalisk deps make schema mutants inert
+
+**STATUS: FIXED.** The generated overlay now rewrites any existing `:mutalisk`
+dep to the host path dependency with `runtime: true`, instead of preserving a
+user's `runtime: false` setting.
+
+Severity: P1
+Surface: External project dependency integration
+
+Reproduction: In a fresh library, depend on Mutalisk with
+`{:mutalisk, path: "...", only: [:test], runtime: false}` and run schema-capable
+mutants.
+
+Observed before fix: schema mutants survived because the Mutalisk runtime app
+did not start in worker test processes; `MUT_ACTIVE` had no effect.
+
+Expected: mutation workers must have the runtime selector active regardless of
+how the user declared the dependency in their normal project.
+
+### 104. Empty per-engine scores render as `0/0 detected (100.0%)`
+
+**STATUS: FIXED.** Empty engine sections now render
+`0/0 detected (no scorable mutants)` instead of a misleading 100%.
+
+Severity: P3
+Surface: Terminal report clarity
+
+Observed before fix:
+
+```text
+Schema:    0/0 detected (100.0%)   wall: 0.0s
+Fallback:  0/0 detected (100.0%)   wall: 0.0s
+```
+
+Expected: empty denominators should be explicit, not scored as perfect.
+
+### 105. HTML report presents skipped-only zero-scorable runs as clean
+
+**STATUS: FIXED.** HTML now uses skipped metrics from the Mutalisk extension and
+distinguishes skipped-only/no-scorable reports from clean runs.
+
+Severity: P2
+Surface: HTML report correctness
+
+Observed before fix: a skipped-only run with no scored mutants rendered
+`No surviving mutants` with the clean marker.
+
+Expected: no-scorable/skipped-only reports should say the run was not a clean
+mutation pass.
+
+### 106. Zero-executable plans still pay coverage and schema-build cost
+
+**STATUS: FIXED.** Empty executable plans now record skipped candidates and
+render reports immediately after planning, skipping coverage collection, schema
+build, and sandbox setup.
+
+Severity: P3
+Surface: Performance / empty-plan UX
+
+Observed on fresh generated projects: after planning found no executable
+mutants, runs could still proceed through coverage and schema-build phases
+before reporting no scorable mutants.
+
+Expected: once the executable plan is empty, skip coverage, incremental
+partitioning, schema build, and sandbox setup, then render/fail immediately.
+
+### 107. `--debug-plan` summary hides skipped/invalid counts
+
+**STATUS: FIXED.** Debug-plan output now reports executable, skipped, and
+invalid counts.
+
+Severity: P3
+Surface: Debug-plan usability
+
+Observed before fix:
+
+```text
+[mutalisk] --debug-plan: wrote plan.debug.json (0 mutants: 0 schema, 0 fallback)
+```
+
+Expected: console output should surface that candidates were skipped/invalid
+without requiring the user to open JSON.
+
+### 108. Report-writing phase timing excludes actual artifact writes
+
+**STATUS: FIXED.** The report-writing phase now encloses the actual
+`render_reports/5` call, including JSON/HTML/GitHub rendering and file/stdout
+writes.
+
+Severity: P3
+Surface: Metrics accuracy
+
+Observed by code inspection: `render_reports_with_timing/5` times a pre-render
+phase and then writes final JSON/HTML/GitHub artifacts after the phase closes.
+
+Expected: either include actual artifact rendering/writes in
+`report_writing_ms`, or rename the metric so users do not read it as full report
+cost.
+
+### 109. README score semantics omit `NoCoverage`
+
+**STATUS: FIXED.** README now documents `NoCoverage` as an undetected status
+and includes it in the score denominator.
+
+Severity: P2
+Surface: Release documentation / score interpretation
+
+Observed after fixing #97: code and reports count `NoCoverage` as undetected,
+but README still said the score was `detected / (detected + survived)` and did
+not mention `NoCoverage`.
+
+Expected: README score semantics should match terminal and Stryker JSON/HTML
+behavior.
+
+### 110. Packaged mutator docs point at unpacked internal decision records
+
+**STATUS: FIXED.** `docs/MUTATORS.md` now says detailed graduation records live
+in the source repository rather than implying they are included in the package.
+
+Severity: P3
+Surface: Hex package documentation
+
+Reproduction:
+
+```sh
+mix hex.build --unpack
+find mutalisk-0.1.0 -maxdepth 2 -type f | sort
+rg "docs/decisions" mutalisk-0.1.0/docs/MUTATORS.md
+```
+
+Observed before fix: the package includes `docs/MUTATORS.md`, but not
+`docs/decisions/`; the shipped docs referenced a missing local path.
+
+Expected: packaged docs should not point users at files omitted from the
+package without saying they are source-repository-only.
+
+### 111. HTML no-candidate reports render as a clean pass
+
+**STATUS: FIXED.** HTML now shows `0/0 (no scorable mutants)` and an incomplete
+message when a report has no mutants at all.
+
+Severity: P2
+Surface: HTML report correctness
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --files README.md --fail-at 0 --reporters html --output-path reports/empty_shortcut.html
+rg -n "No surviving|No scorable|clean" reports/empty_shortcut.html
+```
+
+Observed before fix: the HTML page said `No surviving mutants` with the clean
+marker, even though nothing was scored.
+
+Expected: no-candidate/no-scorable reports should not look like a clean
+mutation pass.
+
+### 112. HTML-only threshold failures omit score and threshold context
+
+**STATUS: FIXED.** HTML summary now includes the mutation score and threshold.
+
+Severity: P2
+Surface: HTML report / CI usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --selection static --max-mutants 2 --fail-at 100 \
+  --reporters html --output-path reports/fail_html.html
+rg -n "Mutation score|Threshold" reports/fail_html.html
+```
+
+Observed before fix: the command exited 1 and stderr printed the threshold
+failure, but the generated HTML page itself did not show the score or
+threshold, making saved CI artifacts less self-explanatory.
+
+Expected: the HTML artifact should explain why the run failed.
+
+### 113. NoCoverage-only runs still use the old fail-at denominator
+
+**STATUS: FIXED.** `set_exit_code/2` now includes `:no_coverage` in the
+scorable denominator, matching terminal/JSON scoring.
+
+Severity: P2
+Surface: CI threshold gate
+
+Observed by code inspection after #97: terminal score included no-coverage in
+the denominator, but the fail-at gate still computed `scorable` as
+`killed + timeout + survived`.
+
+Expected: the threshold gate should use the same scorable denominator as the
+reported mutation score.
+
+### 114. Multi-reporter `.html` output paths silently collide
+
+**STATUS: FIXED.** Output path validation now resolves all file-writing
+reporter targets up front and fails fast when two reporters would write the
+same artifact.
+
+Severity: P2
+Surface: Reporter artifacts / CLI usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --files README.md --fail-at 0 \
+  --reporters stryker-json,html --output-path reports/collide.html
+```
+
+Observed before fix: `stryker-json` targeted `reports/collide.html` and the
+HTML reporter also derived `reports/collide.html`, so one report could
+overwrite the other.
+
+Expected: a multi-reporter run should never silently map two file-writing
+reporters to the same destination.
+
+### 115. Reporter output collision errors used internal underscore names
+
+**STATUS: FIXED.** The collision diagnostic now renders reporter names in the
+same hyphenated CLI spelling as `mix help mut`.
+
+Severity: P3
+Surface: CLI diagnostics
+
+Observed while fixing #114: the new collision error printed
+`stryker_json, html`, even though the public CLI spelling is
+`stryker-json, html`.
+
+Expected: new user-facing diagnostics should use the same reporter spelling as
+the help text and parser errors.
+
+### 116. HexDocs source links point at moving `main`
+
+**STATUS: FIXED.** `mix.exs` now uses `source_ref: "v#{@version}"` so
+published docs link to the release tag.
+
+Severity: P2
+Surface: Release documentation / HexDocs
+
+Observed: package docs configuration used `source_ref: "main"`. For version
+`0.1.0`, HexDocs "View Source" links would drift as `main` changes after the
+release.
+
+Expected: versioned docs should point at the matching release tag or exact
+release commit.
+
+### 117. `variable_to_literal` is accepted but missing from the mutator catalogue
+
+**STATUS: FIXED.** `docs/MUTATORS.md` now lists `VariableToLiteral`, its
+`variable` target, and the explicit `--mutators variable_to_literal`
+requirement.
+
+Severity: P3
+Surface: Public mutator documentation
+
+Observed: the CLI accepts `variable_to_literal`, but the shipped mutator
+catalogue only listed `VariableReplace` under the `variable` target.
+
+Expected: every public mutator name accepted by the CLI should be discoverable
+from the shipped catalogue.
+
+### 118. Mutator catalogue overstates target-only enablement
+
+**STATUS: FIXED.** The catalogue now says target-only enablement runs the
+default mutator set unlocked by that target, and that some experimental
+mutators require `--mutators` explicitly.
+
+Severity: P3
+Surface: Public mutator documentation
+
+Observed: docs said enabling a target without naming a mutator runs every
+mutator gated by that target. `VariableToLiteral` is target-gated by
+`:variable`, but intentionally absent from `Mut.Mutator.Defaults.list/0`, so
+`--enable variable` does not run it.
+
+Expected: docs should describe the actual AND-gate and default-set behavior.
+
+### 119. Shipped package source references excluded internal docs
+
+**STATUS: FIXED.** Package-shipped module docs now avoid local references to
+excluded `docs/decisions` and `docs/spikes` files.
+
+Severity: P3
+Surface: Hex package source readability
+
+Reproduction:
+
+```sh
+mix hex.build --unpack
+rg -n "docs/(decisions|spikes)|PLAN\\.md" mutalisk-0.1.0/lib
+```
+
+Observed before fix: package source modules referenced internal design files
+that are intentionally excluded from the Hex package.
+
+Expected: source shipped in the package should not point at missing local files
+unless it uses repository URLs.
+
+### 120. `--output-path` is silently ignored for GitHub-Actions-only runs
+
+**STATUS: FIXED.** GitHub-Actions-only runs now warn when a non-default
+`--output-path` is supplied.
+
+Severity: P3
+Surface: CLI usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --selection static --max-mutants 1 --fail-at 100 \
+  --reporters github-actions --output-path /private/tmp/ignored_github.json
+```
+
+Observed before fix: the reporter emitted workflow annotations to stdout and
+created no file, but the accepted output path made it look like an artifact was
+configured.
+
+Expected: stdout-only reporter selections should warn when file-output options
+have no effect.
+
+### 121. Duplicate reporter names are accepted and preserved
+
+**STATUS: FIXED.** CLI reporter normalization now deduplicates parsed reporter
+atoms.
+
+Severity: P3
+Surface: CLI normalization
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse(["--reporters", "html,html"], []))'
+```
+
+Observed before fix: normalized options contained `reporters: [:html, :html]`.
+Current rendering mostly uses membership checks, but the public options shape
+was sloppy and future reporter iteration could duplicate output.
+
+Expected: normalized reporter lists should contain each selected reporter once.
+
+### 122. No-candidate HTML artifacts still title themselves "surviving mutants"
+
+**STATUS: FIXED.** HTML reports now use `Mutalisk — no scorable mutants` for
+no-candidate/skipped-only reports and `Mutalisk — incomplete mutation run` for
+error-only reports.
+
+Severity: P3
+Surface: HTML report wording
+
+Observed after #111: the body correctly said no scorable mutants were produced,
+but `<title>` and `<h1>` still said `Mutalisk — surviving mutants`.
+
+Expected: the page title should match the report state, especially for saved CI
+artifacts.
+
+### 123. `mix help mut` overstates target-only `--enable` behavior
+
+**STATUS: FIXED.** Help now says `--enable` selects the default selectable
+mutator set for the target, and notes explicit-only mutators.
+
+Severity: P3
+Surface: Public CLI help
+
+Observed after #118: `docs/MUTATORS.md` correctly described explicit-only
+mutators, but `mix help mut` still said `--enable` selects the full mutator set
+gated by a target.
+
+Expected: help and catalogue should describe the same gating model.
+
+### 124. README opt-in mutator count is stale
+
+**STATUS: FIXED.** README now says 17 more mutators are opt-in or
+explicit-only.
+
+Severity: P3
+Surface: README release documentation
+
+Observed: README still said `13 low-noise mutators run by default; 16 more are
+opt-in`, but the public catalogue now includes 30 real mutator names: 13
+default-on plus 17 opt-in/explicit-only.
+
+Expected: headline counts should match the documented public catalogue.
+
+### 125. `Defaults.list/0` claims to be the full set while excluding an accepted mutator
+
+**STATUS: FIXED.** `Mut.Mutator.Defaults` now exposes `explicit_only/0` and
+`all/0`; registration uses `all/0`, while `list/0` remains the
+target-selectable set.
+
+Severity: P2
+Surface: Internal public-ish API / mutator registry
+
+Observed: `Mut.Cli.resolve_mutators(["variable_to_literal"])` returned
+`Mut.Mutator.VariableToLiteral`, but `Mut.Mutator.Defaults.list/0` documented
+itself as the full set and excluded that mutator. `register_all/0` also used
+`list/0`.
+
+Expected: every accepted mutator should be part of the "all mutators" registry
+set without changing target-only selection semantics.
+
+### 126. `--output-path` is still silently ignored for other stdout-only reporter sets
+
+**STATUS: FIXED.** The Mix task now warns for any non-default `--output-path`
+when no file-writing reporter (`stryker-json` or `html`) is selected.
+
+Severity: P3
+Surface: CLI usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --files README.md --fail-at 0 \
+  --reporters terminal --output-path /private/tmp/terminal_ignored.json
+
+MIX_ENV=test mix mut --files README.md --fail-at 0 \
+  --reporters terminal,github-actions --output-path /private/tmp/stdout_combo_ignored.json
+```
+
+Observed before fix: both commands accepted the path, wrote no artifact, and
+printed no warning. #120 only covered the exact `github-actions`-only reporter
+list.
+
+Expected: every stdout-only reporter selection should warn when a file-output
+option is ignored.
+
+### 127. Terminal no-scorable runs still say "Surviving mutants: none"
+
+**STATUS: FIXED.** Terminal summaries now say `no scorable mutants were
+produced` in the surviving-mutants block when the score denominator is zero.
+
+Severity: P3
+Surface: Default terminal report wording
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --files README.md --fail-at 0 --reporters terminal
+```
+
+Observed before fix: the summary correctly printed
+`Mutation score: 0/0 (no scorable mutants)`, but the next block still said
+`Surviving mutants: none`, which reads like a clean mutation run.
+
+Expected: no-scorable terminal output should match the report state instead of
+using the clean no-survivor wording.
+
+### 128. README install snippet starts Mutalisk in the target app graph
+
+**STATUS: FIXED.** README now recommends `runtime: false` and explains that
+mutation workers enable the runtime dependency in their overlay.
+
+Severity: P2
+Surface: Install docs / target app runtime behavior
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix app.tree | rg "mutalisk|goal_lib"
+MIX_ENV=test mix mut --selection static --files lib/goal_lib.ex --max-mutants 1 --fail-at 0
+```
+
+Observed: with `runtime: false`, `mix app.tree` keeps Mutalisk out of the
+target app start graph and `mix mut` still works because the worker overlay
+rewrites the dependency to runtime-enabled.
+
+Expected: the copy-paste install snippet should use the least intrusive
+dependency shape that still supports mutation runs.
+
+### 129. Starter config examples disable default-on mutators
+
+**STATUS: FIXED.** README and `mix help mut` starter configs no longer include
+`enabled_targets: [:dispatch, :guard]`.
+
+Severity: P2
+Surface: README / help examples
+
+Observed: copied examples set `enabled_targets: [:dispatch, :guard]`, replacing
+the real defaults `[:dispatch, :guard, :env_walker, :pattern_shape]` and
+silently disabling default-on `AtomLiteral` and `Pin`.
+
+Expected: starter config should avoid overriding default target selection
+unless it explicitly teaches the replacement semantics.
+
+### 130. Mutator docs overstate that opt-in mutators always need both flags
+
+**STATUS: FIXED.** `docs/MUTATORS.md` now says `--enable` is needed only when
+the mutator's target is not already enabled by default.
+
+Severity: P3
+Surface: Public mutator documentation
+
+Observed: docs said selecting an opt-in mutator requires both its name and its
+target. That is false for opt-in mutators under default-enabled targets such as
+`bitwise_operator` and `membership` under `dispatch`.
+
+Expected: docs should describe the actual target gate: default-enabled targets
+do not need to be passed again.
+
+### 131. `pattern_literal` is advertised in help but absent from the catalogue
+
+**STATUS: FIXED.** `docs/MUTATORS.md` now has a `pattern_literal` row that
+explains the opt-in pattern literal mutators and distinguishes default-on
+pattern `IntegerLiteral`.
+
+Severity: P3
+Surface: Public mutator documentation
+
+Observed: `mix help mut` lists the `pattern_literal` target, and several
+mutators target it, but the catalogue had no row or example explaining what it
+unlocks.
+
+Expected: every advertised target should be explained in the mutator catalogue.
+
+### 132. README release docs link to moving `main` project documents without saying so
+
+**STATUS: FIXED.** README now labels those repository links as latest-on-main
+documents.
+
+Severity: P3
+Surface: Release documentation
+
+Observed: HexDocs source links are tag-pinned, but README project-document
+links pointed at `main` without saying they are moving references.
+
+Expected: release-facing README links should either be tag-pinned or clearly
+label moving `main` documents.
+
+### 133. Public runtime helper docs understate VM-global side effects
+
+**STATUS: FIXED.** `Mutalisk` docs now state that `set_active/1` writes
+VM-global `:persistent_term`, affects all instrumented code in the VM, and
+should be paired with `clear/0` in tests/tools.
+
+Severity: P2
+Surface: Public runtime helper API
+
+Observed: docs said `set_active/1` sets the active mutant id for the current
+BEAM, but did not spell out that it is global across processes until cleared.
+
+Expected: advanced public API docs should make the global side effect explicit.
+
+### 134. Hyphenated config `selection` atom is rejected while the CLI spelling works
+
+**STATUS: FIXED.** Atom normalization now uses the same hyphen-to-underscore
+normalization as string/CLI values.
+
+Severity: P3
+Surface: Public config normalization
+
+Reproduction:
+
+```sh
+MIX_ENV=test mix run -e 'IO.inspect(Mut.Cli.parse([], selection: :"coverage-with-static-fallback"))'
+```
+
+Observed before fix: config atom selection returned
+`unknown --selection mode :coverage-with-static-fallback`, while the equivalent
+CLI spelling `--selection coverage-with-static-fallback` parsed successfully.
+
+Expected: config atoms and CLI strings should normalize consistently for public
+enum names.
+
+### 135. Unquoted `--files` globs in umbrellas fail as unexpected arguments
+
+**STATUS: FIXED.** Help now shows `--files "PATTERN"` and explicitly says to
+quote globs so the shell does not expand them.
+
+Severity: P3
+Surface: CLI help / umbrella usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_umbrella
+MIX_ENV=test mix mut --selection static --max-mutants 2 --fail-at 0 \
+  --reporters terminal --files apps/*/lib/*.ex
+```
+
+Observed before fix: the shell expanded the glob into multiple arguments and
+Mix raised `unexpected arguments apps/web/lib/web.ex`.
+
+Expected: help examples should teach quoted globs for shell-safe file
+selection.
+
+### 136. Comma-separated `--files` values silently become one unmatched pattern
+
+**STATUS: FIXED.** CLI `--files` values now accept comma-separated patterns in
+addition to repeated flags.
+
+Severity: P3
+Surface: CLI file selection
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --selection static --debug-plan --fail-at 0 \
+  --reporters terminal --files lib/goal_lib.ex,lib/variable_probe.ex
+```
+
+Observed before fix: the comma-separated value was treated as one literal
+pattern and matched no files.
+
+Expected: since other list-valued CLI flags are comma-separated, `--files`
+should either accept commas or fail with a targeted hint. It now accepts them.
+
+### 137. Concurrent terminal progress can print non-monotonic indexes
+
+**STATUS: FIXED.** `Metrics.record_mutant/3` now returns the assigned
+completion index, and terminal streaming renders that index instead of
+recomputing it from a concurrent snapshot.
+
+Severity: P3
+Surface: Live terminal progress
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_goal_probe/goal_lib
+MIX_ENV=test mix mut --selection static --max-mutants 5 --fail-at 0 \
+  --reporters terminal --enable dispatch --mutators bitwise_operator \
+  --files lib/bitwise_probe.ex
+```
+
+Observed before fix: concurrent schema output could show `[2/2]` before
+`[1/2]` or duplicate progress indexes because each worker recomputed the index
+from a later metrics snapshot.
+
+Expected: live progress indexes should reflect the order in which results are
+recorded.
+
+### 138. `.mutalisk.exs` using `Config.config/2` crashes with a raw RuntimeError
+
+**STATUS: FIXED.** `.mutalisk.exs` loading now catches runtime errors from file
+evaluation and wraps them in the same `invalid <path>` Mix error as syntax
+failures.
+
+Severity: P2
+Surface: Config-file usability
+
+Reproduction:
+
+```elixir
+# .mutalisk.exs
+import Config
+config :mut, selection: :static
+```
+
+Observed before fix: Mutalisk surfaced the raw
+`could not set configuration via Config` RuntimeError and stacktrace.
+
+Expected: config loader errors should name `.mutalisk.exs` and explain the
+invalid file context rather than leaking an implementation stacktrace.
+
+### 139. Real-project runs are silent during long oracle/baseline/plan phases
+
+**STATUS: FIXED.** The Mix task now prints start/complete messages for oracle
+build, baseline tests, and plan generation before schema build starts.
+
+Severity: P2
+Surface: CLI progress on real projects
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_oss_probe/decimal
+MIX_ENV=test mix mut --selection static --files lib/decimal/context.ex \
+  --max-mutants 1 --fail-at 0 --concurrency 1 --reporters terminal
+```
+
+Observed before fix: the Decimal run printed nothing for roughly a minute while
+oracle build, baseline tests, and plan generation ran, then finally printed
+`Schema build starting`. The final phase timings showed 24s oracle build, 7s
+baseline tests, and 0.8s plan generation before the first visible progress.
+
+Expected: long pre-schema phases should be visible so users can distinguish
+real work from a hung command.
+
+### 140. `--keep-work-copy` prints retained oracle path after "run complete"
+
+**STATUS: FIXED.** The final `Mutalisk run complete` line is now printed by
+`run_pipeline/1` after both schema and oracle/baseline keep-work-copy messages.
+
+Severity: P3
+Surface: CLI completion / debug artifact paths
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_oss_probe/decimal
+MIX_ENV=test mix mut --selection static --files lib/decimal/context.ex \
+  --max-mutants 1 --fail-at 0 --concurrency 1 --reporters terminal \
+  --keep-work-copy
+```
+
+Observed before fix: the schema work-copy path printed, then
+`Mutalisk run complete`, then the oracle/baseline work-copy path printed after
+completion.
+
+Expected: retained artifact paths should be printed before the final completion
+line so the completion line is actually final.
+
+### 141. Tests that use `_build/test` fixtures fail under Mutalisk build paths
+
+**STATUS: FIXED.** Work-copy phases now alias `_build/test` to the active
+Mutalisk build path (`_build/mut_oracle`, `_build/mut_schema`, or
+`_build/mut_coverage`) before running target Mix commands.
+
+Severity: P1
+Surface: Real-project compatibility / public Mix conventions
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_build_path_probe
+MIX_ENV=test mix test
+MIX_ENV=test mix mut --selection static --files lib/mutalisk_build_path_probe.ex \
+  --max-mutants 1 --fail-at 0 --reporters terminal --concurrency 1
+```
+
+The probe test writes a fixture to
+`_build/test/lib/mutalisk_build_path_probe/fixture.txt` and then reads it via
+`Application.app_dir(:mutalisk_build_path_probe, "fixture.txt")`.
+
+Observed before fix: normal `mix test` passed, but Mutalisk aborted during
+baseline tests because `Application.app_dir/2` resolved under
+`_build/mut_oracle/lib/...` while the test-created file lived under
+`_build/test/lib/...`.
+
+Expected: target tests that follow Mix's conventional test build path should
+continue to pass inside Mutalisk's disposable build paths.
+
+### 142. `apps_path: @apps_path` crashes umbrella detection
+
+**STATUS: FIXED.** Umbrella `apps_path` parsing now resolves string module
+attributes and ignores unresolved AST values instead of passing them into path
+functions.
+
+Severity: P2
+Surface: Umbrella project detection / public Mix project config
+
+Reproduction:
+
+```elixir
+defmodule AttrUmbrella.MixProject do
+  use Mix.Project
+  @apps_path "apps"
+  def project, do: [apps_path: @apps_path, version: "0.1.0"]
+end
+```
+
+Then run:
+
+```sh
+MIX_ENV=test mix mut --selection static --debug-plan --fail-at 0 --reporters terminal
+```
+
+Observed before fix: Mutalisk crashed during oracle/plan setup with
+`FunctionClauseError` in `IO.chardata_to_string/1` because the raw
+`@apps_path` AST node reached `Path.join/2`.
+
+Expected: common umbrella module-attribute configuration should resolve the
+same way `@app` already does.
+
+### 143. Custom literal `apps_path` errors selected worker test execution
+
+**STATUS: FIXED.** For custom-`apps_path` umbrellas, selected tests that all
+belong to one child app are now run through that child app using child-relative
+test paths.
+
+Severity: P1
+Surface: Umbrella worker execution / selected test paths
+
+Reproduction:
+
+```sh
+mix new custom_umbrella --umbrella
+cd custom_umbrella
+mv apps packages
+# configure root mix.exs with apps_path: "packages"
+# create packages/core/lib/core.ex and packages/core/test/core_test.exs
+
+MIX_ENV=test mix mut --selection static --files 'packages/*/lib/*.ex' \
+  --max-mutants 1 --fail-at 0 --concurrency 1 --reporters terminal
+```
+
+Observed before fix: selected tests were passed as root-relative paths like
+`packages/core/test/core_test.exs`, and Mix rejected them with
+`Paths given to "mix test" did not match any directory/file`, causing scorable
+mutants to be reported as `error`.
+
+Expected: custom umbrella app paths should execute selected child tests instead
+of turning valid mutants into runtime errors.
+
+### 144. Phoenix/Jason-style no-scorable runs do not explain what to try next
+
+**STATUS: FIXED.** Terminal summaries for zero-scorable runs now include the
+top skipped reasons, concrete skipped file/line examples, and a next-step hint
+to broaden selection or run `--debug-plan`.
+
+Severity: P2
+Surface: Terminal report usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix mut --selection static \
+  --files lib/mutalisk_phx_probe_web/controllers/page_controller.ex \
+  --files lib/mutalisk_phx_probe_web/router.ex \
+  --files lib/mutalisk_phx_probe_web/controllers/error_json.ex \
+  --max-mutants 6 --fail-at 0 --reporters terminal --concurrency 2
+```
+
+Observed before fix: the run spent about 13 seconds building oracle/baseline
+state and then reported only `Mutation score: 0/0 (no scorable mutants)` plus
+grouped internal skip counters such as `unsupported_dispatch` and
+`no_applicable_mutator`.
+
+Expected: when no mutants are scorable, the terminal output should show enough
+specific skipped-site context for users to understand whether they pointed at
+DSL/generated code, selected unsupported dispatches, or need different
+`--files`/`--mutators`/`--enable` settings.
+
+### 145. Coverage timing labels use the same wording for different timings
+
+**STATUS: FIXED.** The terminal report now labels the outer metrics row as
+`coverage phase` and the selection metric as `coverage runner wall-clock`.
+
+Severity: P3
+Surface: Terminal report clarity
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_real_audit/decimal
+MIX_ENV=test mix mut --files lib/decimal/context.ex \
+  --max-mutants 1 --fail-at 0 --reporters terminal
+```
+
+Observed before fix: a downgraded coverage run could print two different
+durations with the same apparent label, for example `Coverage collection took
+23760ms`, `Phases: coverage collection: 47360 ms`, and
+`Selection: coverage collection: 23760 ms`.
+
+Expected: the report should distinguish the outer Mutalisk phase timing from
+the coverage runner's measured wall-clock duration.
+
+### 146. README points test-only installs at `mix help mut` without `MIX_ENV=test`
+
+**STATUS: FIXED.** README help references now use `MIX_ENV=test mix help mut`
+or `mix mut --help`.
+
+Severity: P3
+Surface: Install/discoverability docs
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix help mut
+MIX_ENV=test mix help mut
+mix mut --help
+```
+
+Observed before fix: Phoenix-style test-only installs can successfully run
+`mix mut --help` through the task/preferred-env path, while plain
+`mix help mut` may run in the default environment where the `:test`-only
+dependency task is unavailable.
+
+Expected: docs should show help commands that work with the recommended
+`only: [:test], runtime: false` dependency setup.
+
+### 147. `--files a b c` is rejected even though all values are file selections
+
+**STATUS: FIXED.** The CLI now expands multiple non-option tokens following a
+single `--files` flag into repeated `--files` entries, while preserving errors
+for unrelated trailing arguments after other flags.
+
+Severity: P2
+Surface: CLI option ergonomics
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix mut --selection static --files \
+  lib/mutalisk_phx_probe_web/controllers/page_controller.ex \
+  lib/mutalisk_phx_probe_web/router.ex \
+  lib/mutalisk_phx_probe_web/controllers/error_json.ex \
+  --max-mutants 6 --fail-at 0 --reporters terminal
+```
+
+Observed before fix: Mutalisk failed before running with
+`unexpected arguments lib/.../router.ex lib/.../error_json.ex`.
+
+Expected: common CLI usage should accept several file patterns after one
+`--files` flag, matching the intent of repeated and comma-separated file
+selection.
+
+### 148. Clean HTML report title says "surviving mutants"
+
+**STATUS: FIXED.** Clean HTML reports now use `Mutalisk — no surviving mutants`
+for the page title and H1.
+
+Severity: P3
+Surface: HTML reporter clarity
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+mix mut --selection static --files lib/mutalisk_phx_probe/billing.ex \
+  --max-mutants 3 --fail-at 0 \
+  --reporters terminal,stryker-json,html \
+  --output-path /private/tmp/mutalisk_phx_custom.json
+open /private/tmp/mutalisk_phx_custom.html
+```
+
+Observed before fix: the run was clean (`3/3 killed`, zero survivors), but the
+HTML document title and H1 were `Mutalisk — surviving mutants`.
+
+Expected: a clean HTML report should clearly say there are no surviving
+mutants; the "surviving mutants" heading should be reserved for reports that
+actually contain survivors.
+
+### 149. Full incremental reuse still pays schema-build cost
+
+**STATUS: FIXED.** After incremental pruning, if every executable mutant was
+reused from history, Mutalisk now renders reports immediately instead of
+building the schema-instrumented project.
+
+Severity: P2
+Surface: Incremental performance / real-project usability
+
+Reproduction:
+
+```sh
+cd /private/tmp/mutalisk_phx_probe
+cat > .mutalisk.exs <<'EOF'
+[
+  history_path: "/private/tmp/mutalisk_phx_history.json"
+]
+EOF
+
+rm -f /private/tmp/mutalisk_phx_history.json
+mix mut --selection static --files lib/mutalisk_phx_probe/billing.ex \
+  --max-mutants 3 --fail-at 0 --reporters stryker-json \
+  --output-path /private/tmp/mutalisk_phx_inc1.json
+mix mut --selection static --files lib/mutalisk_phx_probe/billing.ex \
+  --max-mutants 3 --fail-at 0 --reporters terminal,stryker-json \
+  --output-path /private/tmp/mutalisk_phx_inc2.json --incremental
+```
+
+Observed before fix: the warm run reused all 3 verdicts (`executed: 0`) but
+still printed `Schema build starting`/`complete` and spent about 11 seconds in
+`schema_build_ms`.
+
+Expected: a full-reuse incremental run should skip schema build and worker
+setup entirely; there are no mutants left to instrument or execute.
+
+### 150. First configured history_path run warns that missing history is unusable
+
+**STATUS: FIXED.** Missing configured history is now treated as the normal cold
+start it is; malformed or version-mismatched configured history still warns.
+
+Severity: P3
+Surface: Incremental usability / config-only API
+
+Reproduction:
+
+```sh
+cd /tmp/mut_config_history_probe
+cat > .mutalisk.exs <<'EOF'
+[
+  selection: :static,
+  files: "lib/arith.ex",
+  max_mutants: 1,
+  fail_at: 0.0,
+  reporters: [:terminal],
+  concurrency: 1,
+  history_path: "tmp/custom-history.json"
+]
+EOF
+
+MIX_ENV=test mix mut --incremental
+```
+
+Observed before fix: the first run printed the configured-history warning twice:
+`configured history_path ... is unusable (absent); starting cold`, even though a
+missing history file is expected on the first configured incremental run. The
+run then wrote the history file successfully.
+
+Expected: absent history should start cold silently. Only unusable existing
+configured history, such as malformed JSON or a version mismatch, should warn.
+
+### 151. Malformed configured history_path warns twice in one incremental run
+
+**STATUS: FIXED.** The reuse-side load still warns once for unusable configured
+history, but the write-side merge load is quiet and replaces the bad store.
+
+Severity: P3
+Surface: Incremental usability / warning quality
+
+Reproduction:
+
+```sh
+cd /tmp/mut_config_history_malformed
+mkdir -p tmp
+printf '{bad json' > tmp/custom-history.json
+cat > .mutalisk.exs <<'EOF'
+[
+  selection: :static,
+  files: "lib/arith.ex",
+  max_mutants: 1,
+  fail_at: 0.0,
+  reporters: [:terminal],
+  concurrency: 1,
+  history_path: "tmp/custom-history.json"
+]
+EOF
+
+MIX_ENV=test mix mut --incremental
+```
+
+Observed before fix: the same warning appeared before schema build and again at
+the end of the run:
+`configured history_path ... is unusable (malformed); starting cold`.
+
+Expected: one warning is enough to explain that reuse started cold. The final
+history write should quietly replace the malformed store with the new valid
+history file.
+
+### 152. --debug-plan silently ignores custom --output-path
+
+**STATUS: FIXED.** `--debug-plan` now warns when a custom `--output-path` is
+provided, because the plan always writes to `plan.debug.json` and no reporter
+output is produced.
+
+Severity: P3
+Surface: Debug plan / CLI option ergonomics
+
+Reproduction:
+
+```sh
+cd test/fixtures/demo_app
+MIX_ENV=test mix mut --debug-plan --selection static --files lib/arith.ex \
+  --max-mutants 1 --fail-at 0 \
+  --reporters stryker-json --output-path /tmp/should_not_exist.json
+```
+
+Observed before fix: the command exited successfully, wrote
+`plan.debug.json`, did not write `/tmp/should_not_exist.json`, and printed no
+warning that `--output-path` was ignored.
+
+Expected: because `--debug-plan` bypasses normal reporters, a custom
+`--output-path` should produce an explicit no-effect warning and point users to
+`plan.debug.json`.
+
+### 153. --debug-plan silently ignores --incremental
+
+**STATUS: FIXED.** `--debug-plan` now warns when `--incremental` is passed,
+because debug-plan exits after plan generation and does not read or write
+history.
+
+Severity: P3
+Surface: Debug plan / incremental option ergonomics
+
+Reproduction:
+
+```sh
+cd test/fixtures/demo_app
+rm -f _build/mut_history/history.json
+MIX_ENV=test mix mut --debug-plan --incremental --since HEAD \
+  --selection static --files lib/arith.ex --max-mutants 1 --fail-at 0
+```
+
+Observed before fix: the command exited successfully and wrote
+`plan.debug.json`, but did not read, reuse, or write history and printed no
+warning that `--incremental` was ignored.
+
+Expected: debug-plan users should be told that incremental mode is disabled for
+the debug-plan path and that history will not be read or written.
+
+### 154. Documented config :mut namespace triggers Mix unavailable-app warning
+
+**STATUS: FIXED.** Mutalisk now supports `config :mutalisk` as the documented
+application config namespace while preserving legacy `config :mut` as a lower
+precedence fallback.
+
+Severity: P2
+Surface: Configuration API / first-run usability
+
+Reproduction:
+
+```sh
+cd /tmp/mut_config_precedence_probe
+cat > config/config.exs <<'EOF'
+import Config
+import_config "#{config_env()}.exs"
+EOF
+cat > config/test.exs <<'EOF'
+import Config
+config :mut,
+  selection: :static,
+  files: "lib/beta.ex",
+  fail_at: 0.0,
+  reporters: [:stryker_json],
+  output_path: "tmp/app-config-report.json"
+EOF
+
+MIX_ENV=test mix mut
+```
+
+Observed before fix: the documented `config :mut` path worked, but Mix printed:
+`You have configured application :mut in your configuration file, but the
+application is not available.` The package application is `:mutalisk`, so the
+documented config namespace looked like a user mistake on every configured run.
+
+Expected: documented application config should not produce a Mix unavailable-app
+warning. Users should configure `config :mutalisk`; existing `config :mut`
+projects should continue to work for compatibility.
+
+### 155. config :exclude can silently remove every selected file
+
+**STATUS: FIXED.** When `exclude` removes explicitly selected source files,
+Mutalisk now warns which selected files were removed, including the all-removed
+case that leads to 0/0 no-scorable output.
+
+Severity: P3
+Surface: Configuration API / no-scorable diagnostics
+
+Reproduction:
+
+```sh
+cd /tmp/mut_exclude_config_probe
+cat > config/test.exs <<'EOF'
+import Config
+config :mutalisk,
+  selection: :static,
+  files: ["lib/drop_me.ex"],
+  exclude: [~r/drop_me\\.ex$/],
+  fail_at: 80.0,
+  reporters: [:terminal]
+EOF
+
+MIX_ENV=test mix mut
+```
+
+Observed before fix: the run failed with `Mutation score: 0/0 (no scorable
+mutants)` and the release-gate failure, but did not mention that the configured
+`exclude` pattern had removed the only explicitly selected source file.
+
+Expected: when `files` explicitly selects source files and `exclude` removes
+some or all of them, the terminal output should say so before the no-scorable
+summary.

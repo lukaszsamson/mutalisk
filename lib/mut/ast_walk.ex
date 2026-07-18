@@ -1534,14 +1534,31 @@ defmodule Mut.AstWalk do
   # `length(args) - 1`.
   defp maybe_guard_candidates({:when, _meta, args}, path, acc)
        when is_list(args) and length(args) >= 2 do
-    guard = List.last(args)
-    frame = %{kind: :when, path: path, next_index: length(args) - 1}
-    guard_acc = %{acc | frames: [frame], candidates: []}
-    {_guard, guard_acc} = Macro.traverse(guard, guard_acc, &guard_dispatch_pre/2, &post/2)
-    %{acc | candidates: Enum.reverse(guard_acc.candidates) ++ acc.candidates}
+    if in_macro_def_path?(path) do
+      # A `when` guard on a `defmacro`/`defmacrop` head runs at COMPILE time,
+      # not runtime. Mutating it (e.g. `is_atom` → `is_nil` on a `__using__/1`
+      # head) changes macro expansion and almost always yields a CompileError
+      # in every caller that `use`s the module — noise, not a behavioural test.
+      # This mirrors the documented "macro bodies are not mutated" limitation
+      # and the body-candidate exclusion in `refused_body_context?/1`.
+      acc
+    else
+      guard = List.last(args)
+      frame = %{kind: :when, path: path, next_index: length(args) - 1}
+      guard_acc = %{acc | frames: [frame], candidates: []}
+      {_guard, guard_acc} = Macro.traverse(guard, guard_acc, &guard_dispatch_pre/2, &post/2)
+      %{acc | candidates: Enum.reverse(guard_acc.candidates) ++ acc.candidates}
+    end
   end
 
   defp maybe_guard_candidates(_node, _path, acc), do: acc
+
+  defp in_macro_def_path?(path) do
+    Enum.any?(path, fn
+      {:elem, kind, _idx} when kind in [:defmacro, :defmacrop] -> true
+      _ -> false
+    end)
+  end
 
   defp guard_dispatch_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
@@ -1770,6 +1787,32 @@ defmodule Mut.AstWalk do
 
   defp fallback_source_text_span(_node, _meta, _acc), do: nil
 
+  @doc """
+  Compute a text-search `SourceSpan` for `node` against `source`.
+
+  Dispatch candidates are built without a source span (they normally route to
+  the schema engine, which addresses mutants by AST path, not byte range). When
+  such a mutant lands in a schema-refused context and is rerouted to the
+  fallback engine (see `Mut.SchemaBuild`), the fallback patcher needs a byte
+  span to splice. This recomputes one from the node's own `:line`/`:column`
+  metadata, matching the rendered node text on its source line. Returns `nil`
+  when no span can be located (caller should drop the mutant rather than emit a
+  guaranteed-`missing_source_span` invalid).
+  """
+  @spec fallback_span(Macro.t(), String.t() | nil, String.t()) :: Mut.SourceSpan.t() | nil
+  def fallback_span(_node, nil, _file), do: nil
+
+  def fallback_span(node, source, file) when is_binary(source) do
+    meta =
+      case node do
+        {_name, meta, _args} when is_list(meta) -> meta
+        _other -> []
+      end
+
+    acc = acc(file, source, Compute.line_offsets(source), true)
+    source_text_span(node, meta, acc)
+  end
+
   defp source_text_span(_node, _meta, %{source: nil}), do: nil
 
   defp source_text_span(node, meta, acc) do
@@ -1790,9 +1833,44 @@ defmodule Mut.AstWalk do
         end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
       }
     else
+      _missing -> operator_token_span(node, meta, acc)
+    end
+  end
+
+  # Fallback span for an infix/prefix OPERATOR when the whole-expression text
+  # search fails. `Macro.to_string/1` normalises operand literals (`0x7FF` →
+  # `2047`, `10_000` → `10000`, `?a` → `97`), so the rendered expression no
+  # longer matches the source bytes and `rendered_span/3` finds nothing — which
+  # dropped real guard/comparison mutants as `missing_source_span` invalids.
+  # The operator token itself is unaffected by operand formatting: anchor the
+  # span on it (the node meta column points at the operator). `Mut.FallbackPatch`
+  # detects an operator-only span and substitutes just the operator, so operand
+  # literals are preserved verbatim.
+  defp operator_token_span({op, _node_meta, args}, meta, acc)
+       when is_atom(op) and is_list(args) and length(args) in 1..2 do
+    with line when is_integer(line) <- Keyword.get(meta, :line),
+         column when is_integer(column) <- Keyword.get(meta, :column),
+         line_text when is_binary(line_text) <- source_line(acc.source, line),
+         op_str = Atom.to_string(op),
+         {_before, rest} <- String.split_at(line_text, column - 1),
+         true <- String.starts_with?(rest, op_str) do
+      end_column = column + String.length(op_str)
+
+      %Mut.SourceSpan{
+        file: acc.file,
+        start_line: line,
+        start_column: column,
+        end_line: line,
+        end_column: end_column,
+        start_byte: byte_offset(acc.source, acc.line_offsets, line, column),
+        end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
+      }
+    else
       _missing -> nil
     end
   end
+
+  defp operator_token_span(_node, _meta, _acc), do: nil
 
   defp rendered_span(line_text, rendered, column) do
     # T6: `:binary.matches/2` returns BYTE offsets; the parser's `column` (and

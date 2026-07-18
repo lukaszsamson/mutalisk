@@ -33,8 +33,16 @@ defmodule Mut.ApplicationTest do
     Supervisor.stop(pid)
   end
 
-  test "falls back to zero when MUT_ACTIVE is unset, empty, or garbage" do
-    for value <- [nil, "", "garbage"] do
+  test "trims MUT_ACTIVE before parsing" do
+    assert {:ok, pid} = start_with_env(" 42 ")
+    assert pid != self()
+    assert Process.alive?(pid)
+    assert Mut.Runtime.get_active() == 42
+    Supervisor.stop(pid)
+  end
+
+  test "falls back to zero when MUT_ACTIVE is unset or empty" do
+    for value <- [nil, ""] do
       assert {:ok, pid} = start_with_env(value)
       assert pid != self()
       assert Process.alive?(pid)
@@ -42,6 +50,18 @@ defmodule Mut.ApplicationTest do
       Supervisor.stop(pid)
       Mut.Runtime.clear()
     end
+  end
+
+  test "warns when MUT_ACTIVE is invalid" do
+    output =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert {:ok, pid} = start_with_env("not-an-id")
+        assert Mut.Runtime.get_active() == 0
+        Supervisor.stop(pid)
+      end)
+
+    assert output =~ "invalid MUT_ACTIVE"
+    assert output =~ "using 0"
   end
 
   defp start_with_env(nil) do

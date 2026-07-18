@@ -41,6 +41,23 @@ defmodule Mut.Umbrella do
   end
 
   @doc """
+  Default project-relative test directories for a work copy: `["test"]` for a
+  single app, or each child app's `<apps_path>/<app>/test` for an umbrella (the
+  umbrella root has no `test/` of its own). Mirrors the source-discovery split
+  in `Mut.Orchestrator`. Used when no explicit `test_paths` is configured.
+  """
+  @spec default_test_dirs(Path.t()) :: [Path.t()]
+  def default_test_dirs(work_copy) do
+    if umbrella?(work_copy) do
+      work_copy
+      |> app_dirs()
+      |> Enum.map(&Path.join(Path.relative_to(&1, work_copy), "test"))
+    else
+      ["test"]
+    end
+  end
+
+  @doc """
   OTP app names (as strings) for every umbrella child app, read from each
   app's project `:app`. `[]` for single-app projects.
   """
@@ -112,7 +129,8 @@ defmodule Mut.Umbrella do
     app
   end
 
-  # Module-attribute definitions with an atom-literal value: `@app :my_app`.
+  # Module-attribute definitions with an atom/string literal value:
+  # `@app :my_app`, `@apps_path "packages"`.
   # The definition node is `{:@, _, [{name, _, [value]}]}` (arg list); the
   # *read* node `{:@, _, [{name, _, nil}]}` carries `nil` not a list, so it
   # never matches here.
@@ -120,7 +138,7 @@ defmodule Mut.Umbrella do
     {_ast, map} =
       Macro.prewalk(ast, %{}, fn
         {:@, _, [{name, _, [value]}]} = node, acc
-        when is_atom(name) and is_atom(value) ->
+        when is_atom(name) and (is_atom(value) or is_binary(value)) ->
           # `Map.put` (not `put_new`): a re-defined attribute resolves to its
           # LAST value, matching Elixir's last-write-wins attribute semantics.
           {node, Map.put(acc, name, value)}
@@ -151,13 +169,32 @@ defmodule Mut.Umbrella do
   end
 
   defp apps_path_value(ast) do
+    attrs = collect_attr_literals(ast)
+
     {_ast, value} =
       Macro.prewalk(ast, nil, fn
-        {:apps_path, path}, nil when is_binary(path) -> {{:apps_path, path}, path}
-        list, nil when is_list(list) -> {list, Keyword.get(list, :apps_path)}
-        node, acc -> {node, acc}
+        {:apps_path, path} = node, nil ->
+          {node, resolve_apps_path_value(path, attrs)}
+
+        list, nil when is_list(list) ->
+          {list, resolve_apps_path_value(Keyword.get(list, :apps_path), attrs)}
+
+        node, acc ->
+          {node, acc}
       end)
 
     value
   end
+
+  defp resolve_apps_path_value(path, _attrs) when is_binary(path), do: path
+
+  defp resolve_apps_path_value({:@, _, [{attr, _, ctx}]}, attrs)
+       when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) do
+    case Map.fetch(attrs, attr) do
+      {:ok, path} when is_binary(path) -> path
+      _ -> nil
+    end
+  end
+
+  defp resolve_apps_path_value(_path, _attrs), do: nil
 end

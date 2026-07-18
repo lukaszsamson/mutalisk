@@ -83,6 +83,14 @@ defmodule Mut.Bootstrap.OverlayTest do
     assert Mut.Umbrella.app_names(work_copy) == []
   end
 
+  test "overlay rewrites an existing runtime-false mutalisk dep to a runtime-enabled path dep" do
+    rendered = Overlay.render(:schema)
+
+    assert rendered =~ "runtime: true"
+    refute rendered =~ "if Enum.any?"
+    assert rendered =~ "Enum.reject"
+  end
+
   # Each test gets a unique directory keyed on its line number to avoid
   # collisions under concurrent or repeated runs (R-isolation).
   defp tmp_dir(name, env) do

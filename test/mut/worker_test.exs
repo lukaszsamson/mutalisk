@@ -34,6 +34,25 @@ defmodule Mut.WorkerTest do
     assert Worker.args([]) |> List.last() == "Mut.Worker.Formatter"
   end
 
+  test "args can target a specific umbrella child app" do
+    assert Worker.args(["test/core_test.exs"], 10_000, umbrella_app: "core") == [
+             "do",
+             "--app",
+             "core",
+             "test",
+             "--no-compile",
+             "--no-deps-check",
+             "--no-archives-check",
+             "--max-failures",
+             "1",
+             "--timeout",
+             "10000",
+             "--formatter",
+             "Mut.Worker.Formatter",
+             "test/core_test.exs"
+           ]
+  end
+
   test "run_schema classifies killed and sends expected process inputs" do
     path = fake_sandbox("killed")
     mix = mix_shim("killed", 1)

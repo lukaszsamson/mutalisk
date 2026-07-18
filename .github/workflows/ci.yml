@@ -62,6 +62,7 @@ jobs:
 
       # The full layered gate: lint (format + warnings-as-errors + credo
       # --strict) -> unit -> dialyzer -> golden -> integration -> e2e mutation
-      # runs. Runs bash explicitly (set -euo pipefail + arrays).
+      # runs -> warning-free HexDocs -> Hex package build. Runs bash explicitly
+      # (set -euo pipefail + arrays).
       - name: bin/verify
         run: bash bin/verify

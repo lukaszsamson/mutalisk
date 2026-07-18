@@ -5,10 +5,9 @@ defmodule Mut.EnvOracle do
   as the fifth candidate source alongside dispatch / guard /
   attribute / body_literal candidates.
 
-  M39 design: `docs/spikes/M39_env_walker.md` — section "Data
-  Model" defines the wire shape, including the diagnostics
-  histogram. M40 commit 3 lands the in-memory index; commit 6
-  wires diagnostics through metrics.
+  The environment-walker data model defines the wire shape, including the
+  diagnostics histogram. The in-memory index and diagnostics wiring are kept
+  here so mutators can query snapshots without reparsing source.
 
   ## Shape
 

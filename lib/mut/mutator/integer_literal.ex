@@ -13,8 +13,8 @@ defmodule Mut.Mutator.IntegerLiteral do
 
   Only applies when the candidate is in body position (no env_context)
   and the engine is `:fallback`. Body literals route through the
-  fallback engine because schema instrumentation requires
-  `literal_encoder` parsing globally — see PLAN.md M23 notes.
+  fallback engine because schema instrumentation requires global literal
+  encoder parsing.
   """
   @behaviour Mut.Mutator
 

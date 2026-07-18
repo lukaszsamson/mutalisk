@@ -4,7 +4,7 @@ defmodule Mut.Reporter.Html do
   each survivor lives on plus the specific mutation (original → replacement) —
   so a team can act on them without a separate viewer.
 
-  Opt-in (`--reporters html` / `config :mut, reporters: [...]`). Consumes the
+  Opt-in (`--reporters html` / `config :mutalisk, reporters: [...]`). Consumes the
   Stryker JSON map the tool already builds (shared file/line/mutation data);
   never recomputes a score or changes the default reporters. Output is a
   single static `.html` file (inline CSS, no assets).
@@ -27,22 +27,81 @@ defmodule Mut.Reporter.Html do
     total_survivors =
       survivors_by_file |> Enum.map(fn {_f, _s, m} -> length(m) end) |> Enum.sum()
 
+    # A run whose mutants only errored (RuntimeError) or failed to compile
+    # (CompileError) has zero survivors but is NOT clean — surface the
+    # inconclusive count so an incomplete run is not presented as a pass
+    # (Exploratory #34; adversarial: include CompileError too).
+    inconclusive =
+      files
+      |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
+      |> Enum.count(&(Map.get(&1, "status") in ["RuntimeError", "CompileError"]))
+
+    skipped =
+      rendered
+      |> get_in(["mutalisk", "metrics", "skipped"])
+      |> skipped_count()
+
+    total_mutants =
+      files
+      |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
+      |> length()
+
+    score = score_summary(files, rendered)
+    heading = heading(total_survivors, inconclusive, skipped, total_mutants)
+
     """
     <!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="utf-8">
-    <title>Mutalisk — surviving mutants</title>
+    <title>#{heading}</title>
     <style>#{css()}</style>
     </head>
     <body>
-    <h1>Mutalisk — surviving mutants</h1>
-    <p class="summary">#{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.</p>
-    #{render_files(survivors_by_file)}
+    <h1>#{heading}</h1>
+    <p class="summary">#{score} #{total_survivors} surviving mutant#{plural(total_survivors)} across #{length(survivors_by_file)} file#{plural(length(survivors_by_file))}.#{inconclusive_note(inconclusive)}#{skipped_note(skipped)}</p>
+    #{render_body(survivors_by_file, inconclusive, skipped, total_mutants)}
     </body>
     </html>
     """
   end
+
+  defp inconclusive_note(0), do: ""
+  defp inconclusive_note(n), do: " #{n} mutant#{plural(n)} errored or failed to compile."
+
+  defp skipped_note(0), do: ""
+  defp skipped_note(n), do: " #{n} candidate#{plural(n)} skipped."
+
+  defp heading(_total_survivors, _inconclusive, skipped, 0) when skipped > 0,
+    do: "Mutalisk — no scorable mutants"
+
+  defp heading(_total_survivors, _inconclusive, _skipped, 0),
+    do: "Mutalisk — no scorable mutants"
+
+  defp heading(0, inconclusive, _skipped, _total_mutants) when inconclusive > 0,
+    do: "Mutalisk — incomplete mutation run"
+
+  defp heading(0, _inconclusive, _skipped, _total_mutants),
+    do: "Mutalisk — no surviving mutants"
+
+  defp heading(_total_survivors, _inconclusive, _skipped, _total_mutants),
+    do: "Mutalisk — surviving mutants"
+
+  # No survivors but inconclusive mutants present → incomplete, not clean.
+  defp render_body([], inconclusive, _skipped, _total_mutants) when inconclusive > 0 do
+    ~s(<p class="errored">No surviving mutants, but #{inconclusive} mutant#{plural(inconclusive)} errored or failed to compile — results are incomplete. See the terminal output or Stryker JSON for details.</p>)
+  end
+
+  defp render_body([], _inconclusive, skipped, 0) when skipped > 0 do
+    ~s(<p class="errored">No scorable mutants were produced; #{skipped} candidate#{plural(skipped)} skipped. This is not a clean mutation pass.</p>)
+  end
+
+  defp render_body([], _inconclusive, _skipped, 0) do
+    ~s(<p class="errored">No scorable mutants were produced. This is not a clean mutation pass.</p>)
+  end
+
+  defp render_body(survivors_by_file, _inconclusive, _skipped, _total_mutants),
+    do: render_files(survivors_by_file)
 
   @doc "Render and write the HTML report to `path`."
   @spec write(rendered :: map(), path :: Path.t()) :: :ok
@@ -54,6 +113,45 @@ defmodule Mut.Reporter.Html do
   defp survivor?(%{"status" => "Survived"}), do: true
   defp survivor?(%{"status" => "NoCoverage"}), do: true
   defp survivor?(_mutant), do: false
+
+  defp skipped_count(nil), do: 0
+
+  defp skipped_count(%{} = skipped) do
+    skipped
+    |> Map.values()
+    |> Enum.filter(&is_integer/1)
+    |> Enum.sum()
+  end
+
+  defp skipped_count(_other), do: 0
+
+  defp score_summary(files, rendered) do
+    statuses =
+      files
+      |> Enum.flat_map(fn {_file, data} -> Map.get(data, "mutants", []) end)
+      |> Enum.frequencies_by(&Map.get(&1, "status"))
+
+    detected = Map.get(statuses, "Killed", 0) + Map.get(statuses, "Timeout", 0)
+    denominator = detected + Map.get(statuses, "Survived", 0) + Map.get(statuses, "NoCoverage", 0)
+    threshold = get_in(rendered, ["thresholds", "high"])
+
+    score =
+      if denominator == 0 do
+        "Mutation score: 0/0 (no scorable mutants)."
+      else
+        "Mutation score: #{detected}/#{denominator} = #{format_pct(detected / denominator * 100.0)}."
+      end
+
+    score <> threshold_note(threshold)
+  end
+
+  defp threshold_note(threshold) when is_number(threshold),
+    do: " Threshold: #{format_pct(threshold)}."
+
+  defp threshold_note(_threshold), do: ""
+
+  defp format_pct(value) when is_number(value),
+    do: :erlang.float_to_binary(value * 1.0, decimals: 1) <> "%"
 
   defp render_files([]), do: ~s(<p class="clean">No surviving mutants. 🎉</p>)
 
@@ -109,7 +207,7 @@ defmodule Mut.Reporter.Html do
     """
     body{font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;margin:2rem;color:#1a1a1a;background:#fafafa}
     h1{font-size:1.4rem}h2{font-size:1rem;margin:1.5rem 0 .5rem;color:#444}
-    .summary{color:#666}.clean{color:#137333;font-size:1.1rem}
+    .summary{color:#666}.clean{color:#137333;font-size:1.1rem}.errored{color:#b06000;font-size:1.05rem}
     .file{margin-bottom:1.5rem}
     .mutant{border:1px solid #e0e0e0;border-left:4px solid #d93025;border-radius:4px;padding:.6rem .8rem;margin:.5rem 0;background:#fff}
     .loc{font-weight:600;color:#202124}.pos{color:#888;font-weight:400;margin-left:.4rem}

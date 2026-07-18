@@ -1,9 +1,9 @@
 # Releasing Mutalisk
 
-v1.30 made the repository **release-ready**: license, Hex metadata, HexDocs
-config, and a user-facing CHANGELOG are all in place, and every gate is green.
-Publishing itself is a deliberate **manual** step — this document is the
-checklist and the exact commands.
+The repository has automated release gates for lint, tests, Dialyzer, golden
+fixtures, integration/e2e runs, warning-free HexDocs, and the Hex package
+build. Publishing itself is a deliberate **manual** step — this document is
+the checklist and the exact commands.
 
 The published package version is **`0.1.0`** (pre-1.0: the public surface — CLI
 flags, config keys, report shape — is stable in practice but may still change
@@ -11,9 +11,11 @@ before `1.0.0`).
 
 ## Release-readiness checklist
 
-All of these are green as of v1.30 / M112 (re-run before publishing):
+All automated checks below run through `bin/verify` and CI. Re-run the full
+checklist against the exact commit before publishing:
 
-- [ ] `bin/verify` green (lint, unit, dialyzer, golden, integration, e2e).
+- [ ] `bin/verify` green (lint, unit, dialyzer, golden, integration, e2e,
+      docs, package).
 - [ ] `mix format --check-formatted` clean.
 - [ ] `mix compile --warnings-as-errors` clean.
 - [ ] `mix credo --strict` clean.
@@ -29,8 +31,8 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 
 ## One-time setup (before the first publish)
 
-1. **Confirm the public git remote.** The remote already exists, `main` is
-   pushed, and CI is green; this is a verification step, not setup. The
+1. **Confirm the public git remote.** The remote already exists; verify that
+   the release commit is merged to `main`, pushed, and green in CI. The
    `@source_url` in `mix.exs` and the absolute repo links in `README.md` assume
    `https://github.com/lukaszsamson/mutalisk` — confirm `git remote -v` matches,
    and if a different owner/URL is used, update `@source_url` in `mix.exs` and
@@ -46,10 +48,12 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 1. Re-run the readiness checklist above (especially `bin/verify`).
 2. Confirm the version in `mix.exs` (`@version`) and the matching
    `CHANGELOG.md` entry.
-3. Push the branch and tag the release:
+3. Update local `main`, verify the release commit, then tag and push it:
 
    ```sh
-   git push -u origin main
+   git switch main
+   git pull --ff-only origin main
+   git status --short --branch
    git tag v0.1.0
    git push origin v0.1.0
    ```
@@ -76,6 +80,5 @@ All of these are green as of v1.30 / M112 (re-run before publishing):
 - The `priv/plts/` Dialyzer PLT and the unused `priv/stryker_schema_v2.json`
   are **excluded** from the package (`files` in `mix.exs`) — Mutalisk reads no
   `priv/` at runtime.
-- `source_ref` in the docs config is `"main"`; the remote exists and `main` is
-  pushed, so source links resolve correctly. Bump to `"v<version>"` if you
-  prefer tag-pinned source links.
+- HexDocs source links are pinned to `"v<version>"` by `source_ref` in
+  `mix.exs`; create and push the matching tag before publishing docs.

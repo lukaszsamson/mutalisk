@@ -46,15 +46,14 @@ defmodule Mut.Bootstrap.Overlay do
     defp default_compilers, do: Mix.compilers()
 
     defp add_mutalisk_dep(deps) do
-      if Enum.any?(deps, fn
-           {:mutalisk, _} -> true
-           {:mutalisk, _, _} -> true
-           _ -> false
-         end) do
-        deps
-      else
-        [{:mutalisk, path: @mutalisk_path, only: [:test], runtime: true} | deps]
-      end
+      rewritten =
+        Enum.reject(deps, fn
+          {:mutalisk, _} -> true
+          {:mutalisk, _, _} -> true
+          _ -> false
+        end)
+
+      [{:mutalisk, path: @mutalisk_path, only: [:test], runtime: true} | rewritten]
     end
 
     defp maybe_prepend_oracle_compiler(compilers) do

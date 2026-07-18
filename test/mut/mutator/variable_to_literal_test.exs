@@ -2,7 +2,14 @@ defmodule Mut.Mutator.VariableToLiteralTest do
   use ExUnit.Case, async: true
 
   alias Mut.Context
+  alias Mut.Mutator.Defaults
   alias Mut.Mutator.VariableToLiteral
+
+  test "is explicit-only but included in the full registry set" do
+    refute VariableToLiteral in Defaults.list()
+    assert VariableToLiteral in Defaults.explicit_only()
+    assert VariableToLiteral in Defaults.all()
+  end
 
   defp ctx(overrides) do
     base = %Context{

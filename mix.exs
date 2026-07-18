@@ -87,26 +87,21 @@ defmodule Mutalisk.MixProject do
   end
 
   # ex_doc / HexDocs config. README is the landing page; the mutator catalogue
-  # and changelog ship as extras. Modules are grouped by role; engine internals
-  # fall under the default ungrouped list. `source_ref` is "main"; the remote
-  # exists and main is pushed, so source links resolve correctly. Bump to
-  # "v<version>" if tag-pinned source links are preferred.
+  # and changelog ship as extras. HexDocs should describe the supported public
+  # surface (the Mix task plus `Mutalisk` diagnostics helpers), not every engine
+  # module that must ship in the package for runtime execution. Pin source links
+  # to the release tag so published HexDocs stay tied to the package version
+  # instead of drifting with `main`.
   @spec docs() :: keyword
   defp docs do
     [
       main: "readme",
       extras: ["README.md", "docs/MUTATORS.md", "CHANGELOG.md"],
-      source_ref: "main",
+      source_ref: "v#{@version}",
+      filter_modules: fn module, _metadata -> module in [Mutalisk, Mix.Tasks.Mut] end,
       groups_for_modules: [
         Command: [Mix.Tasks.Mut],
-        Reporters: [
-          Mut.Reporter.StrykerJson,
-          Mut.Reporter.Terminal,
-          Mut.Reporter.Html,
-          Mut.Reporter.GitHubActions
-        ],
-        "Incremental history": [Mut.History.Store, Mut.History.Digest, Mut.History.Reuse],
-        Configuration: [Mut.Config]
+        "Runtime helpers": [Mutalisk]
       ]
     ]
   end

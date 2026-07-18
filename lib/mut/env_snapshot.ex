@@ -2,9 +2,8 @@ defmodule Mut.EnvSnapshot do
   @moduledoc """
   Per-AST-node environment classification produced by `Mut.EnvWalker`.
 
-  Designed by M39 (`docs/spikes/M39_env_walker.md`). Captures the
-  three classification axes a v2 mutator needs to decide whether a
-  node is mutable:
+  Captures the three classification axes an environment-walker mutator needs
+  to decide whether a node is mutable:
 
     * `context` — `nil` (normal expression), `:match` (pattern
       position), or `:guard` (guard expression).

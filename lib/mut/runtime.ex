@@ -9,6 +9,11 @@ defmodule Mut.Runtime do
     :persistent_term.put(active_key(), id)
   end
 
+  def set_active(id) do
+    raise ArgumentError,
+          "active mutant id must be a non-negative integer, got: #{inspect(id)}"
+  end
+
   @spec get_active() :: non_neg_integer
   def get_active do
     :persistent_term.get(active_key(), 0)

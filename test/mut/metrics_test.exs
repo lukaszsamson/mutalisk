@@ -10,9 +10,9 @@ defmodule Mut.MetricsTest do
   test "record_mutant increments counters and computes score" do
     {:ok, metrics} = Metrics.start_link([])
 
-    Metrics.record_mutant(metrics, mutant(:schema, "a", 1), result(:killed, 10))
-    Metrics.record_mutant(metrics, mutant(:fallback, "b", 2), result(:survived, 30))
-    Metrics.record_mutant(metrics, mutant(:fallback, "c", 3), result(:error, 5))
+    assert Metrics.record_mutant(metrics, mutant(:schema, "a", 1), result(:killed, 10)) == 1
+    assert Metrics.record_mutant(metrics, mutant(:fallback, "b", 2), result(:survived, 30)) == 2
+    assert Metrics.record_mutant(metrics, mutant(:fallback, "c", 3), result(:error, 5)) == 3
     Metrics.record_compile_rollback(metrics, "lib/a.ex", 2)
     Metrics.set_planned_total(metrics, 10)
 
@@ -109,6 +109,19 @@ defmodule Mut.MetricsTest do
 
     assert snapshot.score == 75.0
     assert snapshot.by_status == %{killed: 1, timeout: 2, survived: 1}
+  end
+
+  test "no_coverage counts as undetected in the mutation score" do
+    {:ok, metrics} = Metrics.start_link([])
+
+    Metrics.record_mutant(metrics, mutant(:schema, "k", 1), result(:killed, 10))
+    Metrics.record_mutant(metrics, mutant(:schema, "n", 2), result(:no_coverage, 10))
+
+    snapshot = Metrics.snapshot(metrics)
+
+    assert snapshot.total == 2
+    assert snapshot.score == 50.0
+    assert snapshot.by_status == %{killed: 1, no_coverage: 1}
   end
 
   test "snapshot is referentially transparent" do

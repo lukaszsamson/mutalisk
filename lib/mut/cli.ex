@@ -17,7 +17,7 @@ defmodule Mut.Cli do
             max_mutants: pos_integer | nil,
             debug_plan: boolean,
             selection: atom,
-            test_paths: [String.t()],
+            test_paths: [String.t()] | nil,
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
             exclude: [Regex.t()] | nil,
@@ -111,7 +111,8 @@ defmodule Mut.Cli do
   # runs the v1 dispatch+guard mutators PLUS AtomLiteral (M46 default_on
   # decision): the env walker runs by default but only AtomLiteral is
   # active. String/Float/Nil/Collection stay opt-in. Any explicit --enable
-  # or --mutators selects from the full set with v1.15 gating semantics.
+  # selects the target-selectable set; --mutators can also name explicit-only
+  # mutators such as VariableToLiteral.
   # @default_on_mutators mirrors `Mut.Mutator.Defaults.default_on/0` as CLI
   # names (a test asserts they resolve to the same modules).
   @default_on_mutators ~w(
@@ -122,6 +123,25 @@ defmodule Mut.Cli do
   # M83: :pattern_shape moves into the default enabled targets so Pin (the only
   # graduated :pattern_shape mutator) fires without `--enable pattern_shape`.
   @default_enabled_targets [:dispatch, :guard, :env_walker, :pattern_shape]
+  @min_explicit_concurrency_ceiling 16
+  @known_config_keys [
+    :files,
+    :test_paths,
+    :mutators,
+    :enabled_targets,
+    :selection,
+    :fail_at,
+    :concurrency,
+    :test_timeout_ms,
+    :reporters,
+    :output_path,
+    :exclude,
+    :max_mutants,
+    :since,
+    :incremental,
+    :history_path,
+    :coverage_timeout_ms
+  ]
 
   @spec parse([String.t()], keyword) :: {:ok, Options.t()} | {:error, String.t()}
   def parse(argv, config \\ []) when is_list(argv) and is_list(config) do
@@ -140,19 +160,36 @@ defmodule Mut.Cli do
     names
     |> Enum.flat_map(fn name ->
       key = normalize_name(name)
-
-      case Map.fetch(mapping, key) do
-        {:ok, modules} -> List.wrap(modules)
-        :error -> raise ArgumentError, unknown_mutator_message(key)
-      end
+      resolve_mutator_modules(mapping, key)
     end)
     |> Enum.uniq()
+  end
+
+  defp resolve_mutator_modules(mapping, key) do
+    case Map.fetch(mapping, key) do
+      {:ok, modules} ->
+        List.wrap(modules)
+
+      :error ->
+        resolve_mutator_modules_by_report_name(mapping, key)
+    end
+  end
+
+  defp resolve_mutator_modules_by_report_name(mapping, key) do
+    # The terminal/HTML reports display each mutator by its CamelCase module
+    # name. Accept that copied name before giving up.
+    case Map.fetch(mapping, Macro.underscore(key)) do
+      {:ok, modules} -> List.wrap(modules)
+      :error -> raise ArgumentError, unknown_mutator_message(key)
+    end
   end
 
   @spec known_mutator_names() :: [String.t()]
   def known_mutator_names, do: @known_mutators
 
   defp parse_argv(argv) do
+    argv = expand_multi_file_args(argv)
+
     {parsed, rest, invalid} =
       OptionParser.parse(argv,
         strict: [
@@ -190,8 +227,34 @@ defmodule Mut.Cli do
     end
   end
 
+  defp expand_multi_file_args(argv), do: expand_multi_file_args(argv, [])
+
+  defp expand_multi_file_args([], acc), do: Enum.reverse(acc)
+
+  defp expand_multi_file_args(["--files" | rest], acc) do
+    {files, rest} = Enum.split_while(rest, &not_option?/1)
+
+    case files do
+      [] ->
+        expand_multi_file_args(rest, ["--files" | acc])
+
+      [_one | _] ->
+        expanded =
+          files
+          |> Enum.reverse()
+          |> Enum.flat_map(&[&1, "--files"])
+
+        expand_multi_file_args(rest, expanded ++ acc)
+    end
+  end
+
+  defp expand_multi_file_args([arg | rest], acc), do: expand_multi_file_args(rest, [arg | acc])
+
+  defp not_option?(arg), do: not String.starts_with?(arg, "-")
+
   defp normalize(parsed, config) do
-    with {:ok, files} <- files(parsed, config),
+    with :ok <- validate_config_keys(config),
+         {:ok, files} <- files(parsed, config),
          {:ok, mutators} <- mutators(parsed, config),
          {:ok, enabled_targets} <- enabled_targets(parsed, config),
          {:ok, fail_at} <- fail_at(parsed, config),
@@ -203,7 +266,10 @@ defmodule Mut.Cli do
          {:ok, test_paths} <- test_paths(config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
          {:ok, coverage_timeout_ms} <- coverage_timeout_ms(config),
-         {:ok, exclude} <- exclude(config) do
+         {:ok, exclude} <- exclude(config),
+         {:ok, incremental} <- incremental(parsed, config),
+         {:ok, since} <- since(parsed, config),
+         {:ok, history_path} <- history_path(config) do
       {:ok,
        %Options{
          files: files,
@@ -220,20 +286,68 @@ defmodule Mut.Cli do
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          test_timeout_ms: test_timeout_ms,
          exclude: exclude,
-         incremental: Keyword.get(parsed, :incremental, Keyword.get(config, :incremental, false)),
-         # T10: CLI flag wins, config is the fallback — uniform with every other
-         # key. `--since`/`--max-mutants` previously ignored config entirely,
-         # silently dropping a value set in `.mutalisk.exs`.
-         since: Keyword.get(parsed, :since, Keyword.get(config, :since)),
-         history_path: Keyword.get(config, :history_path),
+         incremental: incremental,
+         since: since,
+         history_path: history_path,
          coverage_timeout_ms: coverage_timeout_ms
        }}
     end
   end
 
+  # `incremental` must be a real boolean. A config string like "false" is truthy
+  # and would silently enable reuse (Exploratory #16). CLI `--incremental` is
+  # always boolean (OptionParser); config wins fallback per the T10 rule.
+  defp incremental(parsed, config) do
+    case Keyword.get(parsed, :incremental, Keyword.get(config, :incremental, false)) do
+      value when is_boolean(value) -> {:ok, value}
+      other -> {:error, "incremental must be true or false; got #{inspect(other)}"}
+    end
+  end
+
+  # `since` is a git ref. Must be a non-empty string (or nil). A non-string value
+  # otherwise reaches `System.cmd/3` and crashes with a raw ArgumentError
+  # (Exploratory #20, #28). CLI flag wins, config is the fallback (T10).
+  defp since(parsed, config) do
+    case Keyword.get(parsed, :since, Keyword.get(config, :since)) do
+      nil ->
+        {:ok, nil}
+
+      value when is_binary(value) ->
+        trimmed = String.trim(value)
+
+        if trimmed == "" do
+          {:error, "since must be a non-empty string git ref; got #{inspect(value)}"}
+        else
+          {:ok, trimmed}
+        end
+
+      other ->
+        {:error, "since must be a non-empty string git ref; got #{inspect(other)}"}
+    end
+  end
+
+  # Config-only `history_path`. Must be a non-empty string (or nil). A non-string
+  # value otherwise crashes in `Path.expand`/history I/O (Exploratory #19, #27).
+  defp history_path(config) do
+    case Keyword.get(config, :history_path) do
+      nil ->
+        {:ok, nil}
+
+      value when is_binary(value) ->
+        if String.trim(value) == "" do
+          {:error, "config :history_path must be a non-empty string; got #{inspect(value)}"}
+        else
+          {:ok, value}
+        end
+
+      other ->
+        {:error, "config :history_path must be a non-empty string; got #{inspect(other)}"}
+    end
+  end
+
   # `exclude` is config-only (no CLI flag): a single Regex, a list of Regex, or
   # nil/[]. Compiled to one combined Regex (or nil) for file filtering. Comes
-  # from the merged `.mutalisk.exs` + `config :mut` map (file < app).
+  # from the merged `.mutalisk.exs` + application config map (file < app).
   defp exclude(config) do
     case Keyword.get(config, :exclude) do
       nil -> {:ok, nil}
@@ -289,12 +403,25 @@ defmodule Mut.Cli do
     # every `apps/<app>/lib/`. An explicit `--files`/config value is honoured
     # verbatim. (M71: a `["lib"]` default produced 0 mutants on umbrellas, whose
     # root has no lib/.)
-    # `--files` may be repeated to mutate several glob patterns in one run
-    # (M122); each occurrence is collected. Falls back to config, then nil.
+    # `--files` may be repeated or comma-separated to mutate several glob
+    # patterns in one run (M122/R130). Falls back to config, then nil.
     case Keyword.get_values(parsed, :files) do
-      [] -> {:ok, string_list(Keyword.get(config, :files, nil))}
-      values -> {:ok, string_list(values)}
+      # CLI `--files` values are strings (OptionParser :string) but may be blank
+      # (`--files ""` would expand to the whole project — #54; `--files " "` to a
+      # no-op — #53). Config values may be a typo (`files: 123`/`[123]` — #18/#24)
+      # or empty (`files: []` — #55). `path_list/2` rejects all of these.
+      [] -> path_list("config :files", Keyword.get(config, :files))
+      values -> path_list("--files", split_cli_paths(values))
     end
+  end
+
+  defp split_cli_paths(values) do
+    values
+    |> Enum.flat_map(fn value ->
+      value
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+    end)
   end
 
   defp mutators(parsed, config) do
@@ -303,12 +430,13 @@ defmodule Mut.Cli do
     cond do
       not is_nil(explicit) ->
         with {:ok, names} <- maybe_name_list(explicit),
+             :ok <- non_empty(names, "mutators"),
              :ok <- validate_mutators(names) do
           {:ok, names}
         end
 
-      # Explicit --enable (or config) selects from the full set with v1.15
-      # gating; nil resolves to Defaults.list/0.
+      # Explicit --enable (or config) selects the target-selectable set with
+      # v1.15 gating; nil resolves to Defaults.list/0.
       enable_given?(parsed, config) ->
         {:ok, nil}
 
@@ -326,7 +454,8 @@ defmodule Mut.Cli do
         Keyword.get(config, :enabled_targets, @default_enabled_targets)
       )
 
-    with {:ok, names} <- string_name_list(value),
+    with {:ok, names} <- string_name_list("enabled_targets", value),
+         :ok <- non_empty(names, "--enable targets"),
          :ok <- validate_target_names(names) do
       names_to_target_atoms(names)
     end
@@ -348,15 +477,31 @@ defmodule Mut.Cli do
   defp reporters(parsed, config) do
     value = Keyword.get(parsed, :reporters, Keyword.get(config, :reporters, @default_reporters))
 
-    with {:ok, names} <- string_name_list(value),
+    with {:ok, names} <- string_name_list("reporters", value),
+         :ok <- non_empty(names, "reporters"),
          :ok <- validate_reporter_names(names) do
-      names_to_reporter_atoms(names)
+      with {:ok, reporters} <- names_to_reporter_atoms(names) do
+        {:ok, Enum.uniq(reporters)}
+      end
     end
   end
 
   defp output_path(parsed, config) do
-    {:ok,
-     Keyword.get(parsed, :output_path, Keyword.get(config, :output_path, "stryker.report.json"))}
+    case Keyword.get(
+           parsed,
+           :output_path,
+           Keyword.get(config, :output_path, "stryker.report.json")
+         ) do
+      value when is_binary(value) ->
+        if String.trim(value) == "" do
+          {:error, "output_path must be a non-empty string; got #{inspect(value)}"}
+        else
+          {:ok, value}
+        end
+
+      other ->
+        {:error, "output_path must be a non-empty string; got #{inspect(other)}"}
+    end
   end
 
   defp concurrency(parsed, config) do
@@ -367,11 +512,18 @@ defmodule Mut.Cli do
     # bounded across hardware. Users with more cores can raise it
     # explicitly via `--concurrency 8` or higher.
     default = min(System.schedulers_online(), 4)
+    max = max(System.schedulers_online() * 4, @min_explicit_concurrency_ceiling)
     value = Keyword.get(parsed, :concurrency, Keyword.get(config, :concurrency, default))
 
     case value do
-      value when is_integer(value) and value >= 1 -> {:ok, value}
-      _invalid -> {:error, "--concurrency must be at least 1; run `mix help mut`"}
+      value when is_integer(value) and value >= 1 and value <= max ->
+        {:ok, value}
+
+      value when is_integer(value) and value > max ->
+        {:error, "--concurrency must be between 1 and #{max} on this machine; run `mix help mut`"}
+
+      _invalid ->
+        {:error, "--concurrency must be at least 1; run `mix help mut`"}
     end
   end
 
@@ -408,39 +560,81 @@ defmodule Mut.Cli do
 
     # Validate string FIRST, then convert to atom to avoid interning untrusted input.
     # For atoms (from config defaults), convert to string; for strings (from CLI), normalize.
-    name = normalize_name(value)
-    known_strings = Enum.map(@known_selection_modes, &Atom.to_string/1)
+    # A non-string/atom config value (e.g. `selection: 123`) must not crash
+    # `normalize_name/1` — reject it with a friendly error.
+    if is_binary(value) or is_atom(value) do
+      name = normalize_name(value)
+      known_strings = Enum.map(@known_selection_modes, &Atom.to_string/1)
 
-    if name in known_strings do
-      # Safe: every @known_selection_modes atom exists at compile time.
-      {:ok, String.to_existing_atom(name)}
+      if name in known_strings do
+        # Safe: every @known_selection_modes atom exists at compile time.
+        {:ok, String.to_existing_atom(name)}
+      else
+        # Render the rejected value in atom form (`:name`) without interning it.
+        {:error, "unknown --selection mode :#{name}; known: #{known(@known_selection_modes)}"}
+      end
     else
-      # Render the rejected value in atom form (`:name`) without interning it.
-      {:error, "unknown --selection mode :#{name}; known: #{known(@known_selection_modes)}"}
+      {:error,
+       "selection must be one of #{known(@known_selection_modes)}; got #{inspect(value, charlists: :as_lists)}"}
     end
   end
 
-  defp test_paths(config), do: {:ok, string_list(Keyword.get(config, :test_paths, ["test"]))}
+  # Default `nil` (not `["test"]`) so the orchestrator's umbrella-aware path
+  # resolution applies: a single app uses `test/`; an umbrella has no root
+  # `test/`, so each child app's `apps/<app>/test/` is used instead. An explicit
+  # config/CLI value is honoured verbatim. A hardcoded `["test"]` default found
+  # zero test files in umbrellas, so every mutant fell to the "all tests" bucket
+  # with a recorded selected-test count of 0 (Exploratory issue #3).
+  defp test_paths(config),
+    do: path_list("config :test_paths", Keyword.get(config, :test_paths))
 
   # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
-  # branch in `mutators/2`), so there is no nil clause.
-  defp maybe_name_list(value) do
-    {:ok, value |> name_list() |> Enum.map(&normalize_name/1)}
+  # branch in `mutators/2`). Reuses `string_name_list/2` so mutators get the same
+  # treatment as reporters/targets: non-string/atom entries are rejected with a
+  # friendly error rather than a raw FunctionClauseError (#24/#25 sibling), and a
+  # trailing-comma empty segment (`arithmetic,`) is rejected (#66).
+  defp maybe_name_list(value), do: string_name_list("mutators", value)
+
+  # Validator for path-valued keys (`files`, `test_paths`): `nil` (use the
+  # umbrella-aware default), a non-blank string, or a NON-EMPTY list of non-blank
+  # strings. Rejects, with a friendly error rather than a crash or silent no-op:
+  #   - non-string entries / wrong types (#18, #24, #25)
+  #   - empty list `[]` (#55, #56)
+  #   - empty string `""` (would expand to the whole project — #54)
+  #   - whitespace-only entries (no-op run — #53)
+  defp path_list(_label, nil), do: {:ok, nil}
+  defp path_list(label, value) when is_binary(value), do: path_list(label, [value])
+
+  defp path_list(label, value) when is_list(value) do
+    cond do
+      value == [] ->
+        {:error, "#{label} must not be empty; run `mix help mut`"}
+
+      not Enum.all?(value, &is_binary/1) ->
+        {:error,
+         "#{label} must be a string or list of strings; got #{inspect(value, charlists: :as_lists)}"}
+
+      Enum.any?(value, &(String.trim(&1) == "")) ->
+        {:error, "#{label} contains a blank path; run `mix help mut`"}
+
+      label == "config :test_paths" and Enum.any?(value, &(Path.type(&1) == :absolute)) ->
+        {:error, "#{label} must contain project-relative paths; got absolute path"}
+
+      true ->
+        {:ok, value}
+    end
   end
 
-  defp name_list(value) when is_binary(value) do
-    value
-    |> String.split(",", trim: true)
-    |> Enum.map(&String.trim/1)
-    |> Enum.reject(&(&1 == ""))
-  end
+  defp path_list(label, other),
+    do:
+      {:error,
+       "#{label} must be a string or list of strings; got #{inspect(other, charlists: :as_lists)}"}
 
-  defp name_list(value) when is_list(value), do: value
-  defp name_list(value), do: [value]
-
-  defp string_list(nil), do: nil
-  defp string_list(value) when is_binary(value), do: [value]
-  defp string_list(values) when is_list(values), do: Enum.map(values, &to_string/1)
+  # Reject an explicitly-empty selection (`--reporters ""`, `mutators: []`, …).
+  # Defaults are non-empty, so an empty list here always means the user asked for
+  # nothing, which would silently no-op the run (Exploratory #11–13, #21–23).
+  defp non_empty([], label), do: {:error, "#{label} must not be empty; run `mix help mut`"}
+  defp non_empty(_names, _label), do: :ok
 
   defp number(value) when is_number(value), do: value
   defp number(_value), do: nil
@@ -448,7 +642,11 @@ defmodule Mut.Cli do
   # Only called with a non-nil list (from `maybe_name_list/1` in the
   # `not is_nil(explicit)` branch), so there is no nil clause.
   defp validate_mutators(names) do
-    unknown = Enum.reject(names, &(&1 in @known_mutators))
+    # Reports display each mutator by its CamelCase module name (`Arithmetic`).
+    # Accept that form here too — `resolve_mutators/1` applies the same
+    # `Macro.underscore` fallback — so a name copied from a report validates.
+    unknown =
+      Enum.reject(names, &(&1 in @known_mutators or Macro.underscore(&1) in @known_mutators))
 
     if unknown == [] do
       :ok
@@ -464,9 +662,23 @@ defmodule Mut.Cli do
     argv
     |> Enum.filter(&String.starts_with?(&1, "--"))
     |> Enum.map(&(&1 |> String.trim_leading("--") |> String.split("=", parts: 2) |> List.first()))
+    |> Enum.map(&String.trim_leading(&1, "no-"))
     |> Enum.reject(&(&1 in @repeatable_flags))
     |> Enum.frequencies()
     |> Enum.any?(fn {_key, count} -> count > 1 end)
+  end
+
+  defp validate_config_keys(config) do
+    unknown = config |> Keyword.keys() |> Enum.reject(&(&1 in @known_config_keys))
+
+    case unknown do
+      [] ->
+        :ok
+
+      [key | _] ->
+        {:error,
+         "unknown config key #{inspect(key)}; known: #{Enum.map_join(@known_config_keys, ", ", &inspect/1)}"}
+    end
   end
 
   # Convert string name to target atom ONLY after validation of the string.
@@ -507,25 +719,45 @@ defmodule Mut.Cli do
   end
 
   # Coerce input (atom, string, or list) to a normalized list of strings.
-  defp string_name_list(value) when is_atom(value) do
+  # `label` is the config key name, used in friendly errors.
+  defp string_name_list(_label, value) when is_atom(value) do
     {:ok, [Atom.to_string(value) |> normalize_name()]}
   end
 
-  defp string_name_list(value) when is_binary(value) do
-    {:ok,
-     value
-     |> String.split(",", trim: true)
-     |> Enum.map(&String.trim/1)
-     |> Enum.reject(&(&1 == ""))
-     |> Enum.map(&normalize_name/1)}
+  defp string_name_list(label, value) when is_binary(value) do
+    segments = value |> String.split(",") |> Enum.map(&String.trim/1)
+    non_empty = Enum.reject(segments, &(&1 == ""))
+
+    cond do
+      # Whole value blank ("" / "  " / ","): yield [] so `non_empty/2` reports
+      # "must not be empty" with the right wording.
+      non_empty == [] ->
+        {:ok, []}
+
+      # A trailing/extra comma left an empty segment ("terminal,"): reject it
+      # rather than silently dropping it, so a typo is not hidden (#65, #66, #67).
+      length(non_empty) != length(segments) ->
+        {:error, "#{label} has an empty segment in #{inspect(value)}; remove the extra comma"}
+
+      true ->
+        {:ok, Enum.map(non_empty, &normalize_name/1)}
+    end
   end
 
-  defp string_name_list(value) when is_list(value) do
-    {:ok, Enum.map(value, &normalize_name(to_string(&1)))}
+  defp string_name_list(label, value) when is_list(value) do
+    # Config lists may carry non-string/atom entries (`reporters: [123]`); reject
+    # with a config-typed message instead of stringifying to a CLI-style unknown
+    # value error (#69, #70).
+    if Enum.all?(value, &(is_binary(&1) or is_atom(&1))) do
+      {:ok, Enum.map(value, &normalize_name(to_string(&1)))}
+    else
+      {:error,
+       "config :#{label} must contain only strings or atoms; got #{inspect(value, charlists: :as_lists)}"}
+    end
   end
 
-  defp string_name_list(_value) do
-    {:error, "invalid input type for target/reporter list"}
+  defp string_name_list(label, _value) do
+    {:error, "config :#{label} must be a string, atom, or list of strings/atoms"}
   end
 
   # Validate normalized target names against known list (string validation).
@@ -549,13 +781,17 @@ defmodule Mut.Cli do
     if unknown == [] do
       :ok
     else
-      # Render the rejected value in atom form (`:name`) without interning it.
-      {:error,
-       "unknown --reporters value :#{List.first(unknown)}; known: #{known(@known_reporters)}"}
+      # Show the known list in the documented CLI spelling (hyphenated:
+      # `stryker-json`, `github-actions`) rather than the internal underscore
+      # atoms, so the error matches `mix help mut` (#68). The rejected value is
+      # rendered in atom form (`:name`) without interning it.
+      known = Enum.map_join(@known_reporters, ", ", &String.replace(Atom.to_string(&1), "_", "-"))
+      {:error, "unknown --reporters value :#{List.first(unknown)}; known: #{known}"}
     end
   end
 
-  defp normalize_name(value) when is_atom(value), do: Atom.to_string(value)
+  defp normalize_name(value) when is_atom(value),
+    do: value |> Atom.to_string() |> normalize_name()
 
   defp normalize_name(value) when is_binary(value) do
     value

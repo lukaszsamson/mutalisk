@@ -354,12 +354,43 @@ defmodule Mut.SchemaPlacer do
   # is the body/enumerable, which stays placeable. We deliberately over-refuse
   # `cond` arrow heads (boolean expressions, not patterns) -- they simply route
   # to the fallback engine, which is always safe.
+  # Constructs whose `->` clause heads are PATTERNS (match position) — a schema
+  # gate (`case ... do ... end`) cannot be placed there. `cond` is deliberately
+  # absent: its clause heads are boolean EXPRESSIONS (body position), so a
+  # dispatch/literal there is schema-instrumentable exactly like an `if`
+  # condition. Treating `cond` heads as patterns refused them, rerouted the
+  # mutants to the fallback engine, and (since dispatch candidates carry no byte
+  # span) dropped them as `invalid` — hiding real survivors. This mirrors
+  # `Mut.AstWalk`'s `pattern_clause_head?/1`.
+  @pattern_clause_constructs [:case, :fn, :with, :try, :receive]
+  @clause_block_kinds [:do_block, :else_block, :rescue_block, :catch_block, :after_block]
+
   defp clause_head_pattern_path?(path) do
-    Enum.any?(path, fn
-      {:elem, :->, 0} -> true
-      {:elem, :<-, 0} -> true
+    generator_head_path?(path) or arrow_pattern_head_path?(path)
+  end
+
+  # `<-` heads (for/with generators) are always patterns.
+  defp generator_head_path?(path), do: Enum.any?(path, &match?({:elem, :<-, 0}, &1))
+
+  defp arrow_pattern_head_path?(path) do
+    path
+    |> Enum.with_index()
+    |> Enum.any?(fn
+      {{:elem, :->, 0}, idx} -> pattern_clause_head?(Enum.take(path, idx))
       _other -> false
     end)
+  end
+
+  defp pattern_clause_head?(prefix_before_arrow) do
+    prefix_before_arrow
+    |> Enum.reverse()
+    |> Enum.drop_while(fn {:elem, kind, _idx} ->
+      kind == :list or kind in @clause_block_kinds
+    end)
+    |> case do
+      [{:elem, construct, _idx} | _rest] -> construct in @pattern_clause_constructs
+      _other -> false
+    end
   end
 
   defp enclosing_function_body_path(path) do

@@ -7,9 +7,8 @@ defmodule Mut.Mutator.VariableToLiteral do
   M39 contract): `Mut.EnvWalker` threads a `type_hint` to a variable that is a
   DIRECT operand of a type-determining operator. The hint is shallow —
   `a + 1` hints `a` numeric, but `f(x) + 1` does NOT hint `x` (that would infer
-  through `f/1`). Hint coverage (LOCAL forms only — remote calls like
-  `String.length/1` are not walked yet; see the descent-gap note in
-  `docs/decisions/M56_variable_to_literal_PLAN.md`):
+  through `f/1`). Hint coverage is limited to local syntactic forms; remote
+  calls such as `String.length/1` are not walked yet.
 
     * `:number`  (`+ - * /`, `abs`/`round`/`trunc`/`ceil`/`floor`) -> `0`
     * `:binary`  (`<>`, `byte_size`/`bit_size`)                    -> `""`
@@ -22,7 +21,7 @@ defmodule Mut.Mutator.VariableToLiteral do
 
   Boundary literals are frequently *equivalent* when tests already exercise
   boundary-valued inputs; that equivalent rate is the keep/cut metric for this
-  mutator (see `docs/decisions/M56_variable_to_literal_PLAN.md`).
+  mutator.
   """
 
   @behaviour Mut.Mutator

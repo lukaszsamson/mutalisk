@@ -9,6 +9,7 @@ defmodule Mut.Reporter.Terminal do
     killed: :green,
     survived: :red,
     timeout: :yellow,
+    no_coverage: :red,
     error: :magenta,
     invalid: :magenta,
     skipped: :light_black
@@ -16,7 +17,12 @@ defmodule Mut.Reporter.Terminal do
 
   @spec stream_event(Snapshot.t(), Mutant.t(), Result.t()) :: :ok
   def stream_event(%Snapshot{} = snapshot, %Mutant{} = mutant, %Result{} = result) do
-    index = Enum.count(snapshot.ledger, &executed?/1)
+    stream_event(snapshot, mutant, result, Enum.count(snapshot.ledger, &executed?/1))
+  end
+
+  @spec stream_event(Snapshot.t(), Mutant.t(), Result.t(), pos_integer()) :: :ok
+  def stream_event(%Snapshot{} = snapshot, %Mutant{} = mutant, %Result{} = result, index)
+      when is_integer(index) and index >= 1 do
     status = Atom.to_string(result.status)
 
     line =
@@ -40,15 +46,19 @@ defmodule Mut.Reporter.Terminal do
     killed = status_count(snapshot, :killed)
     survived = status_count(snapshot, :survived)
     timeout = status_count(snapshot, :timeout)
+    no_coverage = status_count(snapshot, :no_coverage)
     # Timeouts are detections (see Mut.Metrics score/3), so the displayed
     # fraction is detected/total = (killed + timeout) / (killed + timeout +
-    # survived) — consistent with snapshot.score and the Stryker HTML viewer.
+    # survived + no_coverage) — consistent with snapshot.score and the Stryker
+    # HTML viewer.
     detected = killed + timeout
-    denominator = detected + survived
+    denominator = detected + survived + no_coverage
 
     [
-      "Mutation score: #{detected}/#{denominator} = #{format_pct(snapshot.score)}\n\n",
+      score_line(detected, denominator, snapshot.score),
       surviving_block(snapshot),
+      no_scorable_guidance_block(snapshot),
+      errored_block(snapshot),
       "\n",
       engine_line(snapshot, :schema, "Schema:   "),
       "\n",
@@ -74,7 +84,7 @@ defmodule Mut.Reporter.Terminal do
       "\n",
       count_line("No coverage", status_count(snapshot, :no_coverage), ""),
       "\n\n",
-      "Run time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
+      "Mutant execution time: #{format_seconds(snapshot.wall_clock_ms.total)}\n",
       "Fallback wall-clock: #{fallback_wall_pct(snapshot)} of total\n",
       "Fallback mutants: #{fallback_count_pct(snapshot)} of executed\n",
       phase_block(snapshot),
@@ -122,11 +132,18 @@ defmodule Mut.Reporter.Terminal do
   defp concurrency_block(%Snapshot{concurrency: c}) do
     suffix =
       cond do
-        c.configured > c.schedulers_online ->
-          " (capped at #{c.schedulers_online} schedulers_online)"
+        # Effective < configured: the pool was capped to the mutant count (no
+        # point in more workers than mutants).
+        c.effective < c.configured ->
+          " (#{c.configured} requested, capped to #{c.effective} — no more workers than mutants)"
 
-        c.configured == 1 ->
+        c.effective == 1 ->
           " (sequential)"
+
+        # Oversubscribed past CPU count but NOT capped — say so without the
+        # misleading word "capped" (Exploratory #58).
+        c.effective > c.schedulers_online ->
+          " (above #{c.schedulers_online} schedulers_online)"
 
         true ->
           ""
@@ -135,22 +152,140 @@ defmodule Mut.Reporter.Terminal do
     "\nConcurrency: #{c.effective} workers#{suffix}\n"
   end
 
-  defp surviving_block(snapshot) do
-    survivors = Enum.filter(snapshot.ledger, &(&1.status == :survived))
+  # A run with no scorable mutants (denominator 0) has no meaningful score: the
+  # underlying `score/3` returns 100.0 as a neutral default, but printing
+  # "0/0 = 100.0%" reads as a passing run when nothing was scored. Surface it
+  # explicitly instead. "Scorable" rather than "evaluated" because errored /
+  # invalid / skipped mutants may still be present (and listed below) — they just
+  # don't contribute to the score. (Exploratory issue #4.)
+  defp score_line(_detected, 0, _score),
+    do: "Mutation score: 0/0 (no scorable mutants)\n\n"
 
-    if survivors == [] do
-      "Surviving mutants:\n  none\n"
+  defp score_line(detected, denominator, score),
+    do: "Mutation score: #{detected}/#{denominator} = #{format_pct(score)}\n\n"
+
+  defp no_scorable_guidance_block(snapshot) do
+    if scorable_count(snapshot) == 0 do
+      skipped = Enum.filter(snapshot.ledger, &(&1.status == :skipped))
+
+      if skipped == [] do
+        ""
+      else
+        [
+          "\nNo scorable mutants were produced. Most likely reasons:\n",
+          no_scorable_reason_lines(snapshot),
+          "Examples of skipped sites:\n",
+          skipped |> Enum.take(5) |> Enum.map(&skipped_example_line/1),
+          "Next steps: broaden --files/--mutators/--enable, or run --debug-plan for the full skipped-site list.\n"
+        ]
+      end
+    else
+      ""
+    end
+  end
+
+  defp no_scorable_reason_lines(snapshot) do
+    snapshot.skipped_by_reason
+    |> Enum.sort_by(fn {_reason, count} -> -count end)
+    |> Enum.take(3)
+    |> Enum.map(fn {reason, count} -> "  - #{group_key(reason)}: #{count}\n" end)
+  end
+
+  defp skipped_example_line(entry) do
+    location = skipped_location(entry)
+    reason = entry |> Map.get(:skip_reason, Map.get(entry, :reason)) |> group_key()
+    syntactic = entry |> Map.get(:syntactic_name) |> skipped_syntactic()
+
+    "  - #{location}: #{reason}#{syntactic}\n"
+  end
+
+  defp skipped_location(%{file: file, line: line, column: column})
+       when is_integer(line) and is_integer(column),
+       do: "#{file}:#{line}:#{column}"
+
+  defp skipped_location(%{file: file, line: line}) when is_integer(line), do: "#{file}:#{line}"
+  defp skipped_location(%{file: file}), do: file
+  defp skipped_location(_entry), do: "(unknown location)"
+
+  defp skipped_syntactic(nil), do: ""
+  defp skipped_syntactic(name), do: " (#{inspect(name)})"
+
+  # Errored mutants carry an actionable reason (compile error or test output) in
+  # the ledger; the headline only counts them. Surface a concise, single-line
+  # reason here so users don't have to open the JSON report. (Exploratory #6.)
+  defp errored_block(snapshot) do
+    errored = Enum.filter(snapshot.ledger, &(&1.status == :error))
+
+    if errored == [] do
+      ""
     else
       [
-        "Surviving mutants:\n",
-        Enum.map(survivors, fn entry ->
+        "\nErrored mutants:\n",
+        Enum.map(errored, fn entry ->
           mutant = entry.mutant
 
-          "  #{String.pad_trailing(location(mutant), 13)} #{String.pad_trailing(mutant.mutator_name, 24)} #{mutant.description}\n"
+          "  #{String.pad_trailing(location(mutant), 16)} #{String.pad_trailing(mutant.mutator_name, 24)} #{error_reason(entry)}\n"
         end)
       ]
     end
   end
+
+  defp error_reason(entry) do
+    reason =
+      cond do
+        not is_nil(Map.get(entry.mutant, :compile_error)) ->
+          inspect(entry.mutant.compile_error)
+
+        match?(%{raw_output: out} when is_binary(out), Map.get(entry, :result)) ->
+          entry.result.raw_output
+
+        true ->
+          "(see stryker.report.json for the full reason)"
+      end
+
+    reason
+    |> String.split("\n", trim: true)
+    |> List.first("")
+    |> String.trim()
+    |> truncate(100)
+  end
+
+  # Codepoint-based slice so truncation never splits a multibyte UTF-8 char.
+  defp truncate(text, max) do
+    if String.length(text) > max, do: String.slice(text, 0, max) <> "…", else: text
+  end
+
+  defp surviving_block(snapshot) do
+    survivors = Enum.filter(snapshot.ledger, &(&1.status in [:survived, :no_coverage]))
+
+    cond do
+      survivors != [] ->
+        [
+          "Surviving mutants:\n",
+          Enum.map(survivors, fn entry ->
+            mutant = entry.mutant
+
+            "  #{String.pad_trailing(location(mutant), 16)} #{String.pad_trailing(mutant.mutator_name, 24)} #{survivor_description(entry)}\n"
+          end)
+        ]
+
+      scorable_count(snapshot) == 0 ->
+        "Surviving mutants:\n  no scorable mutants were produced\n"
+
+      true ->
+        "Surviving mutants:\n  none\n"
+    end
+  end
+
+  defp scorable_count(snapshot) do
+    status_count(snapshot, :killed) + status_count(snapshot, :timeout) +
+      status_count(snapshot, :survived) + status_count(snapshot, :no_coverage)
+  end
+
+  defp survivor_description(%{status: :no_coverage, mutant: mutant}),
+    do: mutant.description <> " (no coverage)"
+
+  defp survivor_description(%{mutant: mutant}), do: mutant.description
 
   defp planned_total(%Snapshot{planned_total: total}) when is_integer(total), do: total
   defp planned_total(%Snapshot{total: total}), do: total
@@ -165,22 +300,29 @@ defmodule Mut.Reporter.Terminal do
 
   defp progress_total(snapshot), do: planned_total(snapshot)
 
-  defp executed?(%{status: status}), do: status not in [:skipped, :invalid, :no_coverage]
+  defp executed?(%{status: status}), do: status not in [:skipped, :invalid]
 
   defp engine_line(snapshot, engine, label) do
     # Use the SAME score arithmetic as the headline mutation score: detected
-    # (killed + timeout) over scored (detected + survived). The old `killed /
-    # engine_total` counted :invalid/:error in the denominator and dropped
-    # :timeout from the numerator, so per-engine lines disagreed with the total.
+    # (killed + timeout) over scored (detected + survived + no_coverage). The
+    # old `killed / engine_total` counted :invalid/:error in the denominator and
+    # dropped :timeout from the numerator, so per-engine lines disagreed with
+    # the total.
     killed = engine_status_count(snapshot, engine, :killed)
     timeout = engine_status_count(snapshot, engine, :timeout)
     survived = engine_status_count(snapshot, engine, :survived)
+    no_coverage = engine_status_count(snapshot, engine, :no_coverage)
     detected = killed + timeout
-    scored = detected + survived
-    score = if scored == 0, do: 100.0, else: detected / scored * 100.0
+    scored = detected + survived + no_coverage
     wall_ms = Map.get(snapshot.wall_clock_ms, engine, 0)
 
-    "#{label} #{detected}/#{scored} detected (#{format_pct(score)})   wall: #{format_seconds(wall_ms)}"
+    if scored == 0 do
+      "#{label} 0/0 detected (no scorable mutants)   wall: #{format_seconds(wall_ms)}"
+    else
+      score = detected / scored * 100.0
+
+      "#{label} #{detected}/#{scored} detected (#{format_pct(score)})   wall: #{format_seconds(wall_ms)}"
+    end
   end
 
   defp engine_status_count(snapshot, engine, status),
@@ -253,7 +395,7 @@ defmodule Mut.Reporter.Terminal do
       {:oracle_build_ms, "oracle build"},
       {:baseline_tests_ms, "baseline tests"},
       {:plan_generation_ms, "plan generation"},
-      {:coverage_collection_ms, "coverage collection"},
+      {:coverage_collection_ms, "coverage phase"},
       {:schema_build_ms, "schema build"},
       {:schema_workers_ms, "schema workers"},
       {:fallback_workers_ms, "fallback workers"},
@@ -298,13 +440,18 @@ defmodule Mut.Reporter.Terminal do
       "    all tests:          #{Map.get(distribution, :all_tests, 0)}\n",
       "  avg tests/mutant: #{format_float(Map.get(selection, :selected_tests_avg, 0.0))}\n",
       "  median tests/mutant: #{Map.get(selection, :selected_tests_median, 0)}\n",
-      "  coverage collection: #{Map.get(selection, :coverage_collection_wall_ms, 0)} ms\n"
+      "  coverage runner wall-clock: #{Map.get(selection, :coverage_collection_wall_ms, 0)} ms\n"
     ]
   end
 
   defp format_seconds(ms), do: :erlang.float_to_binary(ms / 1000, decimals: 1) <> "s"
   defp format_pct(value), do: :erlang.float_to_binary(value, decimals: 1) <> "%"
   defp format_float(value), do: :erlang.float_to_binary(value * 1.0, decimals: 1)
+
+  # Include the column when known: same-line mutants (e.g. two operators on one
+  # line) are otherwise indistinguishable in terminal rows. (Exploratory #5.)
+  defp location(%Mutant{file: file, line: line, column: column}) when is_integer(column),
+    do: "#{file}:#{line}:#{column}"
 
   defp location(%Mutant{file: file, line: line}), do: "#{file}:#{line}"
 

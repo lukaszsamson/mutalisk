@@ -5,6 +5,24 @@ defmodule Mut.TestSelection.StaticTest do
 
   alias Mut.TestSelection.Static
 
+  test "explicit test file paths are discovered and indexed" do
+    path =
+      write_test("explicit_file", """
+      defmodule ExplicitFileTest do
+        use ExUnit.Case, async: true
+
+        test "refs" do
+          Sample.ExplicitFile.value()
+        end
+      end
+      """)
+
+    assert Mut.TestSelection.discover_test_files([path]) == [path]
+
+    analysis = Static.analyze([path])
+    assert Map.fetch!(analysis.index, Sample.ExplicitFile) == MapSet.new([path])
+  end
+
   test "analyze captures static module reference shapes" do
     path =
       write_test("references", """

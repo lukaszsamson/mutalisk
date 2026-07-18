@@ -32,7 +32,7 @@ defmodule Mut.Reporter.TerminalTest do
     assert output =~ "[1/33]"
     assert output =~ IO.ANSI.green()
     assert output =~ "killed"
-    assert output =~ "lib/arith.ex:5"
+    assert output =~ "lib/arith.ex:5:8"
     assert output =~ "Arithmetic"
     assert output =~ "replace + with -"
   end
@@ -54,6 +54,25 @@ defmodule Mut.Reporter.TerminalTest do
     assert output =~ "[1/32]"
   end
 
+  test "stream_event can use the recorded event index instead of snapshot ledger count" do
+    System.put_env("NO_COLOR", "1")
+    on_exit(fn -> System.delete_env("NO_COLOR") end)
+
+    first = mutant(:schema, :killed, "a", 1)
+    second = mutant(:schema, :survived, "b", 2)
+    result = %Result{status: :survived, duration_ms: 12}
+
+    snapshot =
+      snapshot([entry(first, %Result{status: :killed, duration_ms: 1}), entry(second, result)],
+        total: 2
+      )
+
+    output =
+      ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, second, result, 1) end)
+
+    assert output =~ "[1/2]"
+  end
+
   test "stream_event honors NO_COLOR" do
     System.put_env("NO_COLOR", "1")
 
@@ -65,7 +84,7 @@ defmodule Mut.Reporter.TerminalTest do
       ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
 
     refute output =~ "\e["
-    assert output == "[1/1] survived  lib/arith.ex:5  Arithmetic  replace + with -\n"
+    assert output == "[1/1] survived  lib/arith.ex:5:8  Arithmetic  replace + with -\n"
   end
 
   test "render_summary is byte stable" do
@@ -128,8 +147,8 @@ defmodule Mut.Reporter.TerminalTest do
            Mutation score: 3/5 = 60.0%
 
            Surviving mutants:
-             lib/arith.ex:5 Arithmetic               replace + with -
-             lib/arith.ex:5 Arithmetic               replace + with -
+             lib/arith.ex:5:8 Arithmetic               replace + with -
+             lib/arith.ex:5:8 Arithmetic               replace + with -
 
            Schema:    1/2 detected (50.0%)   wall: 3.0s
            Fallback:  1/2 detected (50.0%)   wall: 7.0s
@@ -140,7 +159,7 @@ defmodule Mut.Reporter.TerminalTest do
            Timeouts:  1
            No coverage: 0
 
-           Run time: 10.0s
+           Mutant execution time: 10.0s
            Fallback wall-clock: 70.0% of total
            Fallback mutants: 50.0% of executed
 
@@ -163,7 +182,7 @@ defmodule Mut.Reporter.TerminalTest do
                all tests:          0
              avg tests/mutant: 1.5
              median tests/mutant: 1
-             coverage collection: 5832 ms
+             coverage runner wall-clock: 5832 ms
            """
   end
 
@@ -188,6 +207,119 @@ defmodule Mut.Reporter.TerminalTest do
     # The old `killed / engine_total` would have reported 1/7 (invalid + error in
     # the denominator, timeout dropped), disagreeing with the headline score.
     assert summary =~ "2/3 detected (66.7%)"
+  end
+
+  test "empty per-engine score is not shown as 100 percent" do
+    summary =
+      []
+      |> snapshot(by_status: %{}, by_engine_status: %{}, score: 100.0)
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Schema:    0/0 detected (no scorable mutants)"
+    assert summary =~ "Fallback:  0/0 detected (no scorable mutants)"
+    refute summary =~ "0/0 detected (100.0%)"
+  end
+
+  test "render_summary reports no-score when no mutants were evaluated (issue #4)" do
+    summary =
+      [
+        skipped_entry(%{
+          file: "lib/web/router.ex",
+          line: 12,
+          column: 5,
+          reason: :unsupported_dispatch,
+          syntactic_name: :scope
+        }),
+        skipped_entry(%{
+          file: "lib/web/router.ex",
+          line: 15,
+          column: 7,
+          reason: :no_applicable_mutator,
+          syntactic_name: :pipe_through
+        })
+      ]
+      |> snapshot(
+        by_status: %{skipped: 2},
+        skipped_by_reason: %{unsupported_dispatch: 1, no_applicable_mutator: 1},
+        score: 100.0
+      )
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Mutation score: 0/0 (no scorable mutants)"
+    assert summary =~ "Surviving mutants:\n  no scorable mutants were produced"
+    assert summary =~ "No scorable mutants were produced. Most likely reasons:"
+    assert summary =~ "unsupported_dispatch: 1"
+    assert summary =~ "lib/web/router.ex:12:5: unsupported_dispatch (:scope)"
+    assert summary =~ "Next steps: broaden --files/--mutators/--enable"
+    refute summary =~ "Surviving mutants:\n  none"
+    refute summary =~ "= 100.0%"
+  end
+
+  test "render_summary lists no-coverage mutants as undetected" do
+    no_coverage = mutant(:schema, :no_coverage, "no-cov", 12)
+
+    summary =
+      [entry(no_coverage, %Result{status: :no_coverage, duration_ms: 5})]
+      |> snapshot(by_status: %{no_coverage: 1}, score: 0.0)
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Mutation score: 0/1 = 0.0%"
+    assert summary =~ "Surviving mutants:"
+    assert summary =~ "lib/arith.ex:5:8"
+    assert summary =~ "(no coverage)"
+    refute summary =~ "Surviving mutants:\n  none"
+  end
+
+  test "stream_event handles no_coverage status" do
+    mutant = mutant(:schema, :no_coverage, "no-cov", 12)
+    result = %Result{status: :no_coverage, duration_ms: 12}
+    snapshot = snapshot([entry(mutant, result)], total: 1)
+
+    output =
+      ExUnit.CaptureIO.capture_io(fn -> Terminal.stream_event(snapshot, mutant, result) end)
+
+    assert output =~ "[1/1]"
+    assert output =~ "no_coverage"
+  end
+
+  test "render_summary reports requested and effective concurrency accurately" do
+    summary =
+      []
+      |> snapshot(
+        concurrency: %{configured: 999, effective: 1, schedulers_online: 12},
+        by_status: %{},
+        score: 100.0
+      )
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Concurrency: 1 workers (999 requested, capped to 1"
+    refute summary =~ "capped at 12 schedulers_online"
+  end
+
+  test "render_summary surfaces a concise reason for errored mutants (issue #6)" do
+    errored = mutant(:fallback, :error, "errored", 9)
+
+    result = %Result{
+      status: :error,
+      duration_ms: 5,
+      raw_output: "** (FunctionClauseError) no clause matching\n    long stack trace here\n"
+    }
+
+    summary =
+      [entry(errored, result)]
+      |> snapshot(by_status: %{error: 1})
+      |> Terminal.render_summary()
+      |> IO.iodata_to_binary()
+
+    assert summary =~ "Errored mutants:"
+    assert summary =~ "lib/arith.ex:5:8"
+    assert summary =~ "FunctionClauseError"
+    # Only the first line of the reason is shown (no multi-line stack dump).
+    refute summary =~ "long stack trace here"
   end
 
   defp snapshot(entries, opts) do
@@ -227,6 +359,19 @@ defmodule Mut.Reporter.TerminalTest do
       mutant: mutant,
       result: result
     }
+  end
+
+  defp skipped_entry(attrs) do
+    Map.merge(
+      %{
+        id: nil,
+        stable_id: nil,
+        engine: nil,
+        status: :skipped,
+        mutation_kind: nil
+      },
+      attrs
+    )
   end
 
   defp mutant(engine, status, stable_id, id) do

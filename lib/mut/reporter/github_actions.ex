@@ -3,7 +3,7 @@ defmodule Mut.Reporter.GitHubActions do
   M101: emit GitHub Actions workflow `::warning` commands for surviving
   mutants, so they appear as inline annotations on the PR's changed files.
 
-  Opt-in (`--reporters github_actions` / `config :mut, reporters: [...]`).
+  Opt-in (`--reporters github_actions` / `config :mutalisk, reporters: [...]`).
   Consumes the Stryker JSON map the tool already builds, so it shares the
   file/line/mutation data with the other reporters and never recomputes a
   score or changes the default reporters.
@@ -28,10 +28,13 @@ defmodule Mut.Reporter.GitHubActions do
     |> Map.get("files", %{})
     |> Enum.sort_by(fn {file, _data} -> file end)
     |> Enum.flat_map(fn {file, data} ->
-      data
-      |> Map.get("mutants", [])
-      |> Enum.filter(&survivor?/1)
-      |> Enum.map(&annotation(file, &1))
+      mutants = Map.get(data, "mutants", [])
+
+      # Surviving mutants are warnings; errored / failed-to-compile mutants are
+      # emitted as `::error` so an error-only run is not silent in CI
+      # (Exploratory #33; adversarial: include CompileError too).
+      Enum.map(Enum.filter(mutants, &survivor?/1), &annotation(file, &1)) ++
+        Enum.map(Enum.filter(mutants, &inconclusive?/1), &error_annotation(file, &1))
     end)
   end
 
@@ -45,6 +48,12 @@ defmodule Mut.Reporter.GitHubActions do
   defp survivor?(%{"status" => "NoCoverage"}), do: true
   defp survivor?(_mutant), do: false
 
+  # `:error` mutants serialize to "RuntimeError", `:invalid` to "CompileError".
+  # Both failed to produce a verdict and are surfaced as CI errors.
+  defp inconclusive?(%{"status" => "RuntimeError"}), do: true
+  defp inconclusive?(%{"status" => "CompileError"}), do: true
+  defp inconclusive?(_mutant), do: false
+
   defp annotation(file, mutant) do
     %{"line" => line, "column" => col} = start_location(mutant)
     mutator = Map.get(mutant, "mutatorName", "Mutation")
@@ -54,7 +63,18 @@ defmodule Mut.Reporter.GitHubActions do
     message =
       "Mutalisk: surviving mutant [#{mutator}] #{description} — replacement: `#{replacement}`"
 
-    "::warning file=#{file},line=#{line},col=#{col}::#{escape(message)}"
+    "::warning file=#{escape_property(file)},line=#{line},col=#{col}::#{escape_message(message)}"
+  end
+
+  defp error_annotation(file, mutant) do
+    %{"line" => line, "column" => col} = start_location(mutant)
+    mutator = Map.get(mutant, "mutatorName", "Mutation")
+    description = Map.get(mutant, "description", "")
+    kind = if Map.get(mutant, "status") == "CompileError", do: "invalid", else: "errored"
+
+    message = "Mutalisk: #{kind} mutant [#{mutator}] #{description}"
+
+    "::error file=#{escape_property(file)},line=#{line},col=#{col}::#{escape_message(message)}"
   end
 
   defp start_location(mutant) do
@@ -68,10 +88,18 @@ defmodule Mut.Reporter.GitHubActions do
   end
 
   # Workflow-command message escaping (GitHub spec): %, CR, LF.
-  defp escape(message) do
+  defp escape_message(message) do
     message
     |> String.replace("%", "%25")
     |> String.replace("\r", "%0D")
     |> String.replace("\n", "%0A")
+  end
+
+  # Workflow-command property escaping also needs comma and colon escaping.
+  defp escape_property(value) do
+    value
+    |> escape_message()
+    |> String.replace(":", "%3A")
+    |> String.replace(",", "%2C")
   end
 end

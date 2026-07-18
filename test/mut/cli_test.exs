@@ -32,7 +32,10 @@ defmodule Mut.CliTest do
     assert opts.debug_plan == false
     # M65: default selection flipped to coverage_with_static_fallback.
     assert opts.selection == :coverage_with_static_fallback
-    assert opts.test_paths == ["test"]
+    # Default is nil so test-path resolution is umbrella-aware at runtime
+    # (single app -> "test"; umbrella -> each app's "apps/<app>/test"). An
+    # explicit config value is still honoured verbatim (see "spec" test below).
+    assert opts.test_paths == nil
   end
 
   test "M48: default-on tier resolves to v1 dispatch+guard mutators + AtomLiteral" do
@@ -147,9 +150,45 @@ defmodule Mut.CliTest do
     assert message =~ "conflicting duplicate flags"
   end
 
+  test "rejects contradictory boolean flag forms" do
+    for argv <- [
+          ["--incremental", "--no-incremental"],
+          ["--debug-plan", "--no-debug-plan"],
+          ["--keep-work-copy", "--no-keep-work-copy"]
+        ] do
+      assert {:error, message} = Cli.parse(argv)
+      assert message =~ "conflicting duplicate flags"
+    end
+  end
+
   test "accepts repeated --files and collects every pattern (M122)" do
     assert {:ok, opts} = Cli.parse(["--files", "lib/a.ex", "--files", "lib/b.ex"])
     assert opts.files == ["lib/a.ex", "lib/b.ex"]
+  end
+
+  test "accepts multiple path tokens after one --files flag" do
+    assert {:ok, opts} =
+             Cli.parse([
+               "--files",
+               "lib/a.ex",
+               "lib/b.ex",
+               "lib/c.ex",
+               "--reporters",
+               "terminal"
+             ])
+
+    assert opts.files == ["lib/a.ex", "lib/b.ex", "lib/c.ex"]
+    assert opts.reporters == [:terminal]
+  end
+
+  test "accepts comma-separated --files patterns" do
+    assert {:ok, opts} = Cli.parse(["--files", "lib/a.ex, lib/b.ex"])
+    assert opts.files == ["lib/a.ex", "lib/b.ex"]
+  end
+
+  test "still rejects unexpected arguments after non-files flags" do
+    assert {:error, message} = Cli.parse(["--reporters", "terminal", "lib/a.ex"])
+    assert message =~ "unexpected arguments lib/a.ex"
   end
 
   test "exclude preserves each regex's flags (R17)" do
@@ -173,6 +212,10 @@ defmodule Mut.CliTest do
 
     assert {:error, message} = Cli.parse(["--concurrency", "0"])
     assert message =~ "--concurrency must be at least 1"
+
+    too_high = max(System.schedulers_online() * 4, 16) + 1
+    assert {:error, message} = Cli.parse(["--concurrency", Integer.to_string(too_high)])
+    assert message =~ "--concurrency must be between 1 and"
   end
 
   test "test_timeout_ms defaults to 10_000 and accepts overrides" do
@@ -193,6 +236,185 @@ defmodule Mut.CliTest do
     assert message =~ "--test-timeout-ms must be an integer between"
   end
 
+  describe "input validation (exploratory #11-28)" do
+    test "rejects empty --reporters / --mutators / --enable" do
+      assert {:error, m} = Cli.parse(["--reporters", ""])
+      assert m =~ "reporters must not be empty"
+
+      assert {:error, m} = Cli.parse(["--mutators", ""])
+      assert m =~ "mutators must not be empty"
+
+      assert {:error, m} = Cli.parse(["--enable", ""])
+      assert m =~ "--enable targets must not be empty"
+    end
+
+    test "rejects empty config reporters / mutators / enabled_targets lists" do
+      assert {:error, m} = Cli.parse([], reporters: [])
+      assert m =~ "reporters must not be empty"
+
+      assert {:error, m} = Cli.parse([], mutators: [])
+      assert m =~ "mutators must not be empty"
+
+      assert {:error, m} = Cli.parse([], enabled_targets: [])
+      assert m =~ "--enable targets must not be empty"
+    end
+
+    test "rejects non-boolean config :incremental" do
+      assert {:error, m} = Cli.parse([], incremental: "false")
+      assert m =~ "incremental must be true or false"
+    end
+
+    test "rejects non-string / empty config :since" do
+      assert {:error, m} = Cli.parse([], since: 123)
+      assert m =~ "since must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], since: [])
+      assert m =~ "since must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], since: " ")
+      assert m =~ "since must be a non-empty string"
+    end
+
+    test "rejects non-string config :output_path and :history_path" do
+      assert {:error, m} = Cli.parse([], output_path: 123)
+      assert m =~ "output_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], output_path: [])
+      assert m =~ "output_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse(["--output-path", " "])
+      assert m =~ "output_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], history_path: 123)
+      assert m =~ "history_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], history_path: [])
+      assert m =~ "history_path must be a non-empty string"
+
+      assert {:error, m} = Cli.parse([], history_path: " ")
+      assert m =~ "history_path must be a non-empty string"
+    end
+
+    test "rejects unknown config keys" do
+      assert {:error, m} = Cli.parse([], fail_att: 0)
+      assert m =~ "unknown config key :fail_att"
+
+      assert {:error, m} = Cli.parse([], reporter: [:html])
+      assert m =~ "unknown config key :reporter"
+    end
+
+    test "rejects non-string config :files / :test_paths (no silent coercion)" do
+      assert {:error, m} = Cli.parse([], files: 123)
+      assert m =~ "config :files must be a string or list of strings"
+
+      assert {:error, m} = Cli.parse([], files: [123])
+      assert m =~ "config :files must be a string or list of strings"
+
+      assert {:error, m} = Cli.parse([], test_paths: [123])
+      assert m =~ "config :test_paths must be a string or list of strings"
+    end
+
+    test "rejects non-string/atom :mutators entries without crashing" do
+      assert {:error, m} = Cli.parse([], mutators: [123])
+      assert m =~ "config :mutators must contain only strings or atoms"
+
+      assert {:error, m} = Cli.parse([], mutators: 123)
+      assert m =~ "config :mutators must be a string, atom, or list"
+
+      # atoms are still accepted
+      assert {:ok, _} = Cli.parse([], mutators: [:arithmetic])
+    end
+
+    test "rejects non-string/atom :selection without crashing" do
+      assert {:error, m} = Cli.parse([], selection: 123)
+      assert m =~ "selection must be one of"
+
+      # atom + string still accepted
+      assert {:ok, %{selection: :coverage}} = Cli.parse([], selection: :coverage)
+      assert {:ok, %{selection: :static}} = Cli.parse(["--selection", "static"])
+
+      assert {:ok, %{selection: :coverage_with_static_fallback}} =
+               Cli.parse([], selection: :"coverage-with-static-fallback")
+    end
+
+    test "still accepts valid string/list values" do
+      assert {:ok, %Options{files: ["lib/a.ex"], test_paths: ["test"]}} =
+               Cli.parse([], files: "lib/a.ex", test_paths: ["test"])
+
+      assert {:ok, %Options{incremental: true, since: "HEAD~1", history_path: "h.json"}} =
+               Cli.parse([], incremental: true, since: "HEAD~1", history_path: "h.json")
+    end
+  end
+
+  describe "input validation (exploratory #51-70)" do
+    test "rejects empty / blank / empty-list --files (no whole-project or no-op run)" do
+      # #54: "" would expand to the whole project
+      assert {:error, m} = Cli.parse(["--files", ""])
+      assert m =~ "--files contains a blank path"
+
+      # #53: whitespace-only
+      assert {:error, m} = Cli.parse(["--files", " "])
+      assert m =~ "--files contains a blank path"
+
+      # #55: config files: []
+      assert {:error, m} = Cli.parse([], files: [])
+      assert m =~ "config :files must not be empty"
+    end
+
+    test "rejects empty config :test_paths (#56)" do
+      assert {:error, m} = Cli.parse([], test_paths: [])
+      assert m =~ "config :test_paths must not be empty"
+    end
+
+    test "rejects absolute config :test_paths" do
+      assert {:error, m} = Cli.parse([], test_paths: [Path.expand("test")])
+      assert m =~ "config :test_paths must contain project-relative paths"
+    end
+
+    test "rejects trailing-comma empty segments in reporters/mutators/enable (#65-67)" do
+      assert {:error, m} = Cli.parse(["--reporters", "terminal,"])
+      assert m =~ "empty segment"
+
+      assert {:error, m} = Cli.parse(["--mutators", "arithmetic,"])
+      assert m =~ "empty segment"
+
+      assert {:error, m} = Cli.parse(["--enable", "dispatch,"])
+      assert m =~ "empty segment"
+    end
+
+    test "unknown reporter error uses documented hyphen spelling (#68)" do
+      assert {:error, m} = Cli.parse(["--reporters", "nope"])
+      assert m =~ "stryker-json"
+      assert m =~ "github-actions"
+      refute m =~ "stryker_json"
+    end
+
+    test "config reporters/enabled_targets non-string entries get a config type error (#69,#70)" do
+      assert {:error, m} = Cli.parse([], reporters: [123])
+      assert m =~ "config :reporters must contain only strings or atoms"
+
+      assert {:error, m} = Cli.parse([], enabled_targets: [123])
+      assert m =~ "config :enabled_targets must contain only strings or atoms"
+    end
+
+    test "valid comma lists and atom config still parse" do
+      assert {:ok, %Options{reporters: [:terminal, :html]}} =
+               Cli.parse(["--reporters", "terminal,html"])
+
+      assert {:ok, %Options{reporters: [:terminal]}} = Cli.parse([], reporters: [:terminal])
+
+      assert {:ok, %Options{files: ["lib/a.ex", "lib/b.ex"]}} =
+               Cli.parse([], files: ["lib/a.ex", "lib/b.ex"])
+    end
+
+    test "deduplicates repeated reporters" do
+      assert {:ok, %Options{reporters: [:html]}} = Cli.parse(["--reporters", "html,html"])
+
+      assert {:ok, %Options{reporters: [:terminal]}} =
+               Cli.parse([], reporters: [:terminal, :terminal])
+    end
+  end
+
   test "resolves mutators and aliases" do
     assert Cli.resolve_mutators(["arithmetic"]) == [Mut.Mutator.Arithmetic]
 
@@ -201,6 +423,21 @@ defmodule Mut.CliTest do
              Mut.Mutator.ComparisonNegation,
              Mut.Mutator.GuardComparisonBoundary,
              Mut.Mutator.GuardComparisonNegation
+           ]
+  end
+
+  test "accepts CamelCase mutator names as shown in reports" do
+    # The terminal/HTML reports label mutators by their CamelCase module name;
+    # a name copied from a report must validate (parse) and resolve.
+    assert {:ok, opts} = Cli.parse(["--mutators", "Arithmetic,ComparisonBoundary"])
+
+    assert Cli.resolve_mutators(opts.mutators) == [
+             Mut.Mutator.Arithmetic,
+             Mut.Mutator.ComparisonBoundary
+           ]
+
+    assert Cli.resolve_mutators(["GuardComparisonBoundary"]) == [
+             Mut.Mutator.GuardComparisonBoundary
            ]
   end
 end

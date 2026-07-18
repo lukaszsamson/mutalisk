@@ -56,6 +56,28 @@ defmodule Mut.Reporter.GitHubActionsTest do
     assert GitHubActions.render(killed_only) == []
   end
 
+  test "emits ::error annotations for errored mutants (issue #33)" do
+    errored = %{
+      "files" => %{
+        "lib/foo.ex" => %{
+          "source" => "x",
+          "mutants" => [
+            %{
+              "status" => "RuntimeError",
+              "mutatorName" => "Arithmetic",
+              "description" => "replace + with -",
+              "location" => %{"start" => %{"line" => 6, "column" => 3}}
+            }
+          ]
+        }
+      }
+    }
+
+    [line] = GitHubActions.render(errored)
+    assert line =~ "::error file=lib/foo.ex,line=6,col=3::"
+    assert line =~ "errored mutant [Arithmetic]"
+  end
+
   test "escapes %, CR, LF in the message per the workflow-command spec" do
     map = %{
       "files" => %{
@@ -81,5 +103,28 @@ defmodule Mut.Reporter.GitHubActionsTest do
     refute message =~ "\n"
     assert message =~ "100%25 off"
     assert message =~ "%0A"
+  end
+
+  test "escapes workflow-command property values" do
+    map = %{
+      "files" => %{
+        "lib/weird%,:\nname.ex" => %{
+          "source" => "x",
+          "mutants" => [
+            %{
+              "status" => "Survived",
+              "mutatorName" => "M",
+              "description" => "d",
+              "replacement" => "r",
+              "location" => %{"start" => %{"line" => 1, "column" => 1}}
+            }
+          ]
+        }
+      }
+    }
+
+    [line] = GitHubActions.render(map)
+    assert line =~ "file=lib/weird%25%2C%3A%0Aname.ex"
+    refute line =~ "file=lib/weird%,:"
   end
 end

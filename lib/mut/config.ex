@@ -3,13 +3,14 @@ defmodule Mut.Config do
   Resolves the effective `mix mut` configuration by layering, lowest to
   highest precedence:
 
-      `.mutalisk.exs` project file  <  `config :mut`  <  CLI flags
+      `.mutalisk.exs` project file  <  legacy `config :mut`  <  `config :mutalisk`  <  CLI flags
 
-  This module produces the merged `.mutalisk.exs` + `config :mut` keyword list;
-  `Mut.Cli.parse/2` layers CLI flags on top (a CLI flag always wins over both).
+  This module produces the merged `.mutalisk.exs` + application config keyword
+  list; `Mut.Cli.parse/2` layers CLI flags on top (a CLI flag always wins over
+  all config layers).
 
   `.mutalisk.exs` lives in the project root (the cwd of `mix mut`) and must
-  evaluate to a keyword list of the same keys accepted under `config :mut`,
+  evaluate to a keyword list of the same keys accepted under `config :mutalisk`,
   e.g.:
 
       # .mutalisk.exs
@@ -22,22 +23,26 @@ defmodule Mut.Config do
       ]
 
   Keeping the file as a plain keyword-list term (not `Config.config/2`) means it
-  needs no `Config` runtime and is trivially mergeable with `config :mut`.
+  needs no `Config` runtime and is trivially mergeable with application config.
   """
 
   @config_file ".mutalisk.exs"
 
   @doc """
-  The effective `.mutalisk.exs` + `config :mut` keyword list (file entries
-  overridden by `config :mut`). CLI flags are layered on later by
+  The effective `.mutalisk.exs` + application config keyword list. The
+  documented namespace is `config :mutalisk`; legacy `config :mut` is still
+  accepted below it for compatibility. CLI flags are layered on later by
   `Mut.Cli.parse/2`.
   """
   @spec load(root :: Path.t()) :: keyword()
   def load(root \\ File.cwd!()) do
     file_config = load_file(Path.join(root, @config_file))
-    app_config = Application.get_all_env(:mut)
-    # `config :mut` (app) overrides the file; CLI overrides both (in Cli.parse).
-    Keyword.merge(file_config, app_config)
+    legacy_config = Application.get_all_env(:mut)
+    app_config = Application.get_all_env(:mutalisk)
+
+    file_config
+    |> Keyword.merge(legacy_config)
+    |> Keyword.merge(app_config)
   end
 
   @doc "Name of the project-level config file."
@@ -57,7 +62,13 @@ defmodule Mut.Config do
         # rather than `e.message`: CompileError has no :message key (only
         # :description/:line/:file) and `e.message` would raise a confusing
         # KeyError over the friendly error we are trying to produce.
-        e in [CompileError, SyntaxError, TokenMissingError, MismatchedDelimiterError] ->
+        e in [
+          CompileError,
+          SyntaxError,
+          TokenMissingError,
+          MismatchedDelimiterError,
+          RuntimeError
+        ] ->
           Mix.raise("invalid #{path}:\n#{Exception.message(e)}")
       end
     else
