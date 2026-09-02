@@ -159,7 +159,10 @@ defmodule Mut.Mutator.ClauseDelete do
 
     case Keyword.get(kw, section_key) do
       clauses when is_list(clauses) and length(clauses) > i ->
-        new_kw = Keyword.put(kw, section_key, List.delete_at(clauses, i))
+        # `Keyword.put/3` would move the edited section in front of `:do`, which
+        # renders as `try(rescue: ..., do: ...)` instead of a `do`/`end` block
+        # (B11); replace it in place so section order survives.
+        new_kw = Keyword.replace!(kw, section_key, List.delete_at(clauses, i))
         mutation(node, {:try, meta, [new_kw]}, "try #{section_key} clause #{i}")
 
       _ ->

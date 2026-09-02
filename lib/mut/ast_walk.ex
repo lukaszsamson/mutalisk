@@ -1760,16 +1760,24 @@ defmodule Mut.AstWalk do
          column when is_integer(column) <- Keyword.get(attr_meta, :column),
          end_meta when is_list(end_meta) <- Keyword.get(attr_meta, :end_of_expression),
          end_column when is_integer(end_column) <- Keyword.get(end_meta, :column),
+         # A multi-line value ends on `end_of_expression[:line]`, not on the
+         # attribute's own line; pairing the end column with the start line gave
+         # an inverted/truncated byte range (B12/D3).
+         end_line when is_integer(end_line) <- Keyword.get(end_meta, :line, line),
+         true <- Map.has_key?(acc.line_offsets, end_line),
          line_text when is_binary(line_text) <- source_line(acc.source, line),
-         {:ok, start_column} <- attribute_value_column(line_text, column, name) do
+         {:ok, start_column} <- attribute_value_column(line_text, column, name),
+         start_byte = byte_offset(acc.source, acc.line_offsets, line, start_column),
+         end_byte = byte_offset(acc.source, acc.line_offsets, end_line, end_column),
+         true <- end_byte >= start_byte do
       %Mut.SourceSpan{
         file: acc.file,
         start_line: line,
         start_column: start_column,
-        end_line: line,
+        end_line: end_line,
         end_column: end_column,
-        start_byte: byte_offset(acc.source, acc.line_offsets, line, start_column),
-        end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
+        start_byte: start_byte,
+        end_byte: end_byte
       }
     else
       _missing -> nil

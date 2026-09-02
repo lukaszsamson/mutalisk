@@ -297,6 +297,47 @@ defmodule Mut.Mutator.ClauseDeleteTest do
       [_i, section | _] = Enum.reverse(hd(cands).ast_path)
       assert section == :try_else
     end
+
+    # B11: `Keyword.put/3` moved the edited section in front of `:do`, so the
+    # mutant rendered as `try(rescue: ..., do: ...)` instead of a do/end block.
+    test "renders every mutated try section as a reparseable do/end block" do
+      src = """
+      defmodule M do
+        def f(x) do
+          try do
+            x + 1
+          rescue
+            ArgumentError -> :ae
+            RuntimeError -> :re
+          catch
+            :throw, v -> {:caught, v}
+            :exit, v -> {:exited, v}
+          else
+            n when is_integer(n) -> n
+            other -> other
+          end
+        end
+      end
+      """
+
+      cands = candidates(src)
+
+      sections =
+        for c <- cands, into: %{} do
+          [_i, section | _] = Enum.reverse(c.ast_path)
+          [m] = ClauseDelete.mutate(c.node, ctx(c.ast_path))
+          rendered = Macro.to_string(m.mutated_ast)
+
+          assert {:ok, _ast} = Code.string_to_quoted(rendered)
+          assert String.starts_with?(rendered, "try do")
+          assert {:try, _, [kw]} = m.mutated_ast
+          assert Keyword.keys(kw) == [:do, :rescue, :catch, :else]
+
+          {section, rendered}
+        end
+
+      assert Map.keys(sections) |> Enum.sort() == [:try_catch, :try_else, :try_rescue]
+    end
   end
 
   describe "M89 error-only clause hazard" do

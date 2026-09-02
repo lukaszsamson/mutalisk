@@ -84,6 +84,34 @@ defmodule Mut.AstWalk.AttributeCandidatesTest do
     assert [] = candidates("defmodule M do\n  @c {1, 2}\nend\n")
   end
 
+  # B12/D3: the span used `end_of_expression[:column]` with the attribute's
+  # START line, so a multi-line value produced an inverted (or truncated) range.
+  test "spans a multi-line attribute value to its last line" do
+    source = "defmodule M do\n  @opts [\n    1,\n    2\n  ]\nend\n"
+
+    assert [%{syntactic_name: :opts, source_span: span}] = candidates(source)
+    assert span.start_line == 2
+    assert span.end_line == 5
+    assert span.start_byte < span.end_byte
+
+    assert binary_part(source, span.start_byte, span.end_byte - span.start_byte) ==
+             "[\n    1,\n    2\n  ]"
+  end
+
+  # Stable ids include `end_byte`: single-line attribute spans must not move.
+  test "single-line attribute span is unchanged" do
+    source = "defmodule M do\n  @c [1, 2]\nend\n"
+
+    assert [%{source_span: span}] = candidates(source)
+    assert span.start_line == 2
+    assert span.end_line == 2
+    assert span.start_column == 6
+    assert span.end_column == 12
+    assert span.start_byte == 20
+    assert span.end_byte == 26
+    assert binary_part(source, span.start_byte, span.end_byte - span.start_byte) == "[1, 2]"
+  end
+
   defp candidates(source) do
     assert {:ok, ast} = Mut.SourceParse.parse_string(source, "sample.ex")
     Mut.AstWalk.attribute_candidates(ast, file: "sample.ex", source: source)

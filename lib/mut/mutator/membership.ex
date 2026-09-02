@@ -1,12 +1,17 @@
 defmodule Mut.Mutator.Membership do
   @moduledoc """
   M69 operator-expansion mutator. Negates membership tests: `x in y` becomes
-  `x not in y` (and vice-versa — `not in` desugars to `not(x in y)`, so negating
-  the inner `in` toggles it back).
+  `x not in y`, and `x not in y` becomes `x in y`.
 
-  Unlike the arithmetic/bitwise swaps this is a STRUCTURAL mutation (wrap the
-  `in` node in `not`), not an operator-name swap. Opt-in, schema-routed
-  (dispatch on `Kernel.in/2`).
+  `x not in y` parses as `not(x in y)`, so the two directions target different
+  nodes: the plain `in` node is wrapped in `not` (dispatch on `Kernel.in/2`),
+  while a `not`-wrapped `in` is mutated by *unwrapping* it (dispatch on
+  `Kernel.not/1`). Negating the inner `in` of a `not in` instead would render
+  `not(not(x in y))` on the schema path and splice `x not not(x in y)` on the
+  fallback span path (B20), so that inner candidate is suppressed.
+
+  Unlike the arithmetic/bitwise swaps this is a STRUCTURAL mutation (wrap or
+  unwrap a `not` node), not an operator-name swap. Opt-in, schema-routed.
   """
   @behaviour Mut.Mutator
 
@@ -15,6 +20,7 @@ defmodule Mut.Mutator.Membership do
   alias Mut.Oracle.DispatchSite
 
   @accepted_modules [Kernel]
+  @accepted_not_modules [Kernel, :erlang]
   @accepted_names [:in]
   @arity 2
   @kind :membership_op
@@ -30,7 +36,8 @@ defmodule Mut.Mutator.Membership do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and shape_matches?(node) and oracle_compatible?(node, ctx)
+    ctx.env_context == nil and shape_matches?(node, ctx.ast_path) and
+      oracle_compatible?(node, ctx)
   end
 
   @impl true
@@ -45,12 +52,30 @@ defmodule Mut.Mutator.Membership do
   def compatible?(%AstCandidate{} = candidate, %DispatchSite{} = site) do
     candidate.syntactic_name == site.resolved_name and
       candidate.syntactic_arity == site.resolved_arity and
-      site.resolved_module in @accepted_modules and
-      site.resolved_name in @accepted_names
+      accepted_site?(site, candidate)
   end
 
-  defp shape_matches?({:in, _meta, args}) when length(args) == @arity, do: true
-  defp shape_matches?(_node), do: false
+  defp accepted_site?(%DispatchSite{resolved_name: :not} = site, candidate) do
+    site.resolved_module in @accepted_not_modules and not_in_node?(candidate.node)
+  end
+
+  defp accepted_site?(%DispatchSite{} = site, _candidate) do
+    site.resolved_module in @accepted_modules and site.resolved_name in @accepted_names
+  end
+
+  defp not_in_node?({:not, _meta, [{:in, _in_meta, args}]}) when length(args) == @arity, do: true
+  defp not_in_node?(_node), do: false
+
+  # The `in` of a `not in` is skipped: the enclosing `not` carries the mutation.
+  defp shape_matches?({:in, _meta, args}, ast_path) when length(args) == @arity,
+    do: not negated_in_path?(ast_path)
+
+  defp shape_matches?(node, _ast_path), do: not_in_node?(node)
+
+  defp negated_in_path?(ast_path) when is_list(ast_path),
+    do: List.last(ast_path) == {:elem, :not, 0}
+
+  defp negated_in_path?(_ast_path), do: false
 
   defp oracle_compatible?(node, %Mut.Context{oracle_site: %DispatchSite{} = site} = ctx) do
     compatible?(candidate(node, ctx), site)
@@ -82,6 +107,19 @@ defmodule Mut.Mutator.Membership do
         mutation_kind: @kind,
         guard_safe?: true,
         metadata: %{operator: :in, replacement: :not_in}
+      }
+    ]
+  end
+
+  defp build_mutations({:not, _meta, [{:in, _in_meta, _args} = in_node]} = node) do
+    [
+      %Mutation{
+        original_ast: node,
+        mutated_ast: in_node,
+        description: "negate membership (not in -> in)",
+        mutation_kind: @kind,
+        guard_safe?: true,
+        metadata: %{operator: :not_in, replacement: :in}
       }
     ]
   end
