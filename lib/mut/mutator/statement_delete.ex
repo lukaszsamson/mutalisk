@@ -20,6 +20,15 @@ defmodule Mut.Mutator.StatementDelete do
       the candidate statement is its only reader (no later reader), deletion
       makes the prior binding unused — under `--warnings-as-errors` this is
       the Invalid class. Skip.
+    * **Lexical-directive hazard (T15).** `alias` / `import` / `require` /
+      `use` are lexical-scope directives, not value-producing statements: the
+      binding analysis above cannot see that a later `Helper.run/1` resolves
+      through an earlier `alias`, that a bare `first/1` comes from an
+      `import`, or that a macro call needs its `require`. Deleting a non-last
+      one is a systematically compile-invalid mutant. Never deleted.
+    * **Code generation (T14).** `quote`/`unquote` subtrees and
+      `defmacro`/`defmacrop` bodies are pruned by the walker's shared codegen
+      refusal, so a generated `def`'s statements are never offered.
 
   Fallback-routed: the candidate's `source_span` is the whole `def` node
   (block-form, `:end` metadata); the mutation re-emits the def with the
