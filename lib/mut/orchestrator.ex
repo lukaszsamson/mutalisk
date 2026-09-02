@@ -152,7 +152,8 @@ defmodule Mut.Orchestrator do
 
     {matched, diagnostics} = Mut.Match.attach(dispatch_candidates, oracle, mutators)
 
-    {dispatch_schema, dispatch_skips} = dispatch_results(matched, mutators, source)
+    {dispatch_schema, dispatch_skips} =
+      dispatch_results(matched, enabled_targets, mutators, source)
 
     # M52: scalar body literals (integer/boolean/string/float/atom/nil)
     # carry plain-AST positional paths and route through the SCHEMA engine
@@ -574,6 +575,18 @@ defmodule Mut.Orchestrator do
     Enum.any?(path, &match?({:elem, :when, _idx}, &1))
   end
 
+  # T02: dispatch mutators are gated on the `:dispatch` target like every other
+  # walker, so `--enable env_walker` no longer runs the full dispatch set.
+  # Candidates that were oracle-matched but not enabled are dropped silently
+  # (they are not "unsupported", the surface is simply off).
+  defp dispatch_results(matched, enabled_targets, mutators, source) do
+    if :dispatch in enabled_targets do
+      dispatch_results(matched, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
   defp dispatch_results(matched, mutators, source) do
     matched
     |> Enum.map(&dispatch_mutants(&1, mutators, source))
@@ -604,7 +617,9 @@ defmodule Mut.Orchestrator do
   end
 
   defp guard_fallback_results(candidates, oracle, enabled_targets, mutators, source) do
-    if :guard in enabled_targets do
+    # T02: `--enable guard_boolean` alone must still run the guard walk, so the
+    # leaf target activates the walk without pulling in the `:guard` mutators.
+    if :guard in enabled_targets or :guard_boolean in enabled_targets do
       # M90: `:guard_boolean` is an opt-in companion target to `:guard` — it
       # shares the guard walk + env_context but is gated separately so
       # adding `GuardBoolean` to `@opt_in` doesn't fire on the default
@@ -615,7 +630,12 @@ defmodule Mut.Orchestrator do
           do: Enum.filter(mutators, &target?(&1, :guard_boolean)),
           else: []
 
-      guard_mutators = Enum.filter(mutators, &target?(&1, :guard)) ++ extra
+      base =
+        if :guard in enabled_targets,
+          do: Enum.filter(mutators, &target?(&1, :guard)),
+          else: []
+
+      guard_mutators = base ++ extra
       guard_enabled_results(candidates, oracle, guard_mutators, source)
     else
       {[], Enum.map(candidates, &skip(&1, :guard_engine_disabled, nil))}

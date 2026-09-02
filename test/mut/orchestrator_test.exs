@@ -49,6 +49,58 @@ defmodule Mut.OrchestratorTest do
     assert skip_reasons(plan) == %{missing_oracle_site: 1}
   end
 
+  test "T02: dispatch mutants are gated on the :dispatch target" do
+    plan =
+      Mut.Orchestrator.plan(@fixture_root, oracle(),
+        files: ["lib/sample.ex"],
+        enabled_targets: [:module_attribute]
+      )
+
+    assert [] = plan.schema
+    assert Enum.all?(plan.fallback, &(&1.mutator == Mut.Mutator.AttributeLiteral))
+    refute Map.has_key?(skip_reasons(plan), :unsupported_dispatch)
+  end
+
+  test "T02: --enable guard_boolean alone runs the guard walk without :guard mutators" do
+    path = Path.join(@fixture_root, "lib/guarded.ex")
+
+    File.write!(path, """
+    defmodule Guarded do
+      def g(x) when is_integer(x) and x > 0, do: x
+    end
+    """)
+
+    on_exit(fn -> File.rm_rf!(path) end)
+
+    src = File.read!(path)
+
+    col = fn needle ->
+      (src |> String.split("\n") |> Enum.at(1) |> :binary.match(needle) |> elem(0)) + 1
+    end
+
+    oracle =
+      FixtureOracleHelper.oracle([
+        %{
+          site(2, col.("and"), :and, 2)
+          | file: "lib/guarded.ex",
+            dispatch_kind: :imported_macro,
+            env_context: :guard
+        },
+        %{site(2, col.(">"), :>, 2) | file: "lib/guarded.ex", env_context: :guard}
+      ])
+
+    plan =
+      Mut.Orchestrator.plan(@fixture_root, oracle,
+        files: ["lib/guarded.ex"],
+        enabled_targets: [:guard_boolean],
+        mutators: [Mut.Mutator.GuardBoolean, Mut.Mutator.GuardComparisonNegation]
+      )
+
+    assert [] = plan.schema
+    assert plan.fallback != []
+    assert Enum.all?(plan.fallback, &(&1.mutator == Mut.Mutator.GuardBoolean))
+  end
+
   test "an unparsable file is skipped with a :parse_error diagnostic, not a crash (M118)" do
     bad = Path.join(@fixture_root, "lib/broken.ex")
     File.write!(bad, "defmodule Broken do def f( end\n")
