@@ -27,7 +27,8 @@ chat. Every claim below was verified against the source.
    resolution.** `EnvSnapshot` declares `aliases`, `imports`, `requires` fields,
    but the walker **never populates them** (verified: no `:alias`/`:import`/
    `:require` handling in `descend/2`; `resolve_module_alias/2` just
-   `Module.concat`s literal AST parts). `EnvWalker` is a *context + trust +
+   `Module.concat`s literal AST parts onto the enclosing module).
+   `EnvWalker` is a *context + trust +
    binding-scope* walker, not a `Macro.Env` resolver.
 
 3. **There are three trust tiers, not two walkers.** This is the real model:
@@ -99,14 +100,20 @@ is satisfied **here**, not in any walker.
 
 It does **not** resolve modules. `EnvSnapshot.aliases/imports/requires` are
 declared (`lib/mut/env_snapshot.ex:71-73`) and **defaulted empty and never
-written**. `resolve_module_alias/2` (env_walker.ex:1351) is:
+written**. `resolve_module_alias/2` is:
 
 ```elixir
-defp resolve_module_alias({:__aliases__, _meta, parts}, _current), do: Module.concat(parts)
-defp resolve_module_alias(_, current), do: current
+defp resolve_module_alias({:__aliases__, _meta, parts}, current),
+  do: Mut.AstWalk.qualify_module_parts(parts, current) || current
+
+defp resolve_module_alias(_node, current), do: current
 ```
 
-i.e. `Foo.Bar` → `Foo.Bar` syntactically, with no alias table. So the
+i.e. `Foo.Bar` → `Foo.Bar` syntactically, with no alias table; a *nested*
+`defmodule` is qualified against its enclosing module (T13 — `defmodule Inner`
+inside `Outer` is `Outer.Inner`, the same name `AstWalk.ignored_modules/1`
+records, so `@mutalisk_ignore` matches it). That is nesting arithmetic, not
+alias resolution. So the
 `EnvSnapshot` env fields are **dead structure** — a vestige of the M39 design
 sketch that was never wired (M39 explicitly *forbade* the `Macro.Env` resolver
 internals it would have needed).

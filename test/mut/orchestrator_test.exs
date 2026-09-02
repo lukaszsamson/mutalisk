@@ -127,6 +127,56 @@ defmodule Mut.OrchestratorTest do
            )
   end
 
+  test "T13: @mutalisk_ignore true on a NESTED module suppresses its env-walker mutants" do
+    path = Path.join(@fixture_root, "lib/nested.ex")
+    on_exit(fn -> File.rm_rf!(path) end)
+
+    plan_for = fn source ->
+      File.write!(path, source)
+
+      Mut.Orchestrator.plan(@fixture_root, FixtureOracleHelper.oracle([]),
+        files: ["lib/nested.ex"],
+        enabled_targets: [:env_walker],
+        mutators: [Mut.Mutator.CollectionEmpty]
+      )
+    end
+
+    baseline =
+      plan_for.("""
+      defmodule Outer do
+        defmodule Inner do
+          def items do
+            [1, 2, 3]
+          end
+        end
+      end
+      """)
+
+    # The candidate must be attributed to the FULLY-QUALIFIED nested module —
+    # that is the name `AstWalk.ignored_modules/1` records, and
+    # `apply_module_ignores/2` matches exactly.
+    assert baseline.fallback != []
+    assert Enum.all?(baseline.fallback, &(&1.module == Outer.Inner))
+
+    ignored =
+      plan_for.("""
+      defmodule Outer do
+        defmodule Inner do
+          @mutalisk_ignore true
+
+          def items do
+            [1, 2, 3]
+          end
+        end
+      end
+      """)
+
+    assert ignored.fallback == [], "nested-module mutants must be dropped by @mutalisk_ignore"
+
+    assert Enum.count(ignored.skipped, &(&1.reason == :mutalisk_ignore)) ==
+             length(baseline.fallback)
+  end
+
   defp oracle do
     [
       site(7, 7, :+, 2),

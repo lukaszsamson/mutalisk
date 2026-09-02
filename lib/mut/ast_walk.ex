@@ -39,27 +39,30 @@ defmodule Mut.AstWalk do
     # fully-qualified name (raw-AST aliases are relative: `defmodule Inner`
     # inside `Outer` has parts `[:Inner]`, but the module is `Outer.Inner` —
     # which is what `mutant.module` carries, so the filter must match it).
+    # The stack holds one frame per `defmodule` (`nil` for a dynamic name), so
+    # push/pop stay balanced and qualification runs through the same
+    # `qualify_module_parts/2` the candidate walks use.
     {_ast, {ignored, _stack}} =
       Macro.traverse(
         ast,
         {MapSet.new(), []},
         fn
-          {:defmodule, _meta, [{:__aliases__, _am, parts}, body]} = node, {acc, stack}
-          when is_list(parts) ->
-            full = stack ++ parts
+          {:defmodule, _meta, [name_ast, body]} = node, {acc, stack} ->
+            qualified = qualified_module_name(name_ast, Enum.find(stack, & &1))
 
             acc =
-              if module_self_ignored?(body), do: MapSet.put(acc, Module.concat(full)), else: acc
+              if qualified && module_self_ignored?(body),
+                do: MapSet.put(acc, qualified),
+                else: acc
 
-            {node, {acc, full}}
+            {node, {acc, [qualified | stack]}}
 
           node, state ->
             {node, state}
         end,
         fn
-          {:defmodule, _meta, [{:__aliases__, _am, parts}, _body]} = node, {acc, stack}
-          when is_list(parts) ->
-            {node, {acc, Enum.drop(stack, -length(parts))}}
+          {:defmodule, _meta, [_name_ast, _body]} = node, {acc, stack} ->
+            {node, {acc, safe_tl(stack)}}
 
           node, state ->
             {node, state}
@@ -68,6 +71,41 @@ defmodule Mut.AstWalk do
 
     ignored
   end
+
+  @doc """
+  Fully-qualifies the `__aliases__` parts of a `defmodule` name against the
+  nearest enclosing *static* module (`nil` at the top level).
+
+  `defmodule Inner` inside `Outer` is `Outer.Inner`; an already-qualified
+  `Outer.Inner` at the top level stays `Outer.Inner`; `__MODULE__.X` resolves
+  through `parent`. Returns `nil` when the name cannot be resolved
+  syntactically (an `unquote`d part, or `__MODULE__.X` with no known parent) —
+  callers then treat the frame as dynamic.
+
+  Shared by `ignored_modules/1`, the candidate walks' module stack, and
+  `Mut.EnvWalker`, so an `enclosing_module` always matches the names
+  `ignored_modules/1` records and `@mutalisk_ignore` filters on.
+  """
+  @spec qualify_module_parts([term()], module() | nil) :: module() | nil
+  def qualify_module_parts([{:__MODULE__, _meta, ctx} | rest], parent) when is_atom(ctx) do
+    if parent, do: qualify_module_parts(rest, parent), else: nil
+  end
+
+  def qualify_module_parts(parts, parent) when is_list(parts) do
+    cond do
+      parts == [] -> nil
+      not Enum.all?(parts, &is_atom/1) -> nil
+      is_nil(parent) -> Module.concat(parts)
+      true -> Module.concat([parent | parts])
+    end
+  end
+
+  def qualify_module_parts(_parts, _parent), do: nil
+
+  defp qualified_module_name({:__aliases__, _meta, parts}, parent) when is_list(parts),
+    do: qualify_module_parts(parts, parent)
+
+  defp qualified_module_name(_other, _parent), do: nil
 
   # True iff the module's OWN direct body statements contain `@mutalisk_ignore
   # true` (does not descend into nested `defmodule` bodies — those are single
@@ -1866,17 +1904,13 @@ defmodule Mut.AstWalk do
 
   defp enter_module({:defmodule, _meta, [{:__aliases__, _alias_meta, parts}, _body]}, acc) do
     # Fully-qualify nested modules so a fallback-engine candidate's
-    # `enclosing_module` matches `ignored_modules/1` (which builds
-    # `Module.concat(stack ++ parts)`): `defmodule Inner` inside `Outer` is
+    # `enclosing_module` matches `ignored_modules/1` (which qualifies through
+    # the same `qualify_module_parts/2`): `defmodule Inner` inside `Outer` is
     # `Outer.Inner`, not `Inner`. Qualify against the nearest *static* ancestor —
     # dynamic-name frames are `nil` and, like `ignored_modules/1`, contribute
     # nothing to the qualified name. (R11: only the push/pop *balance* was fixed
     # before; the unqualified name made `@mutalisk_ignore` miss nested modules.)
-    qualified =
-      case Enum.find(acc.module_stack, & &1) do
-        nil -> Module.concat(parts)
-        parent -> Module.concat([parent | parts])
-      end
+    qualified = qualify_module_parts(parts, Enum.find(acc.module_stack, & &1))
 
     %{acc | module_stack: [qualified | acc.module_stack]}
   end
