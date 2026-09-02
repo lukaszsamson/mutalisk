@@ -271,9 +271,62 @@ defmodule Mut.Orchestrator do
       matched_pairs: matched
     }
 
+    plan
     # M100: `@mutalisk_ignore true` excludes every mutant in the marked module.
-    apply_module_ignores(plan, Mut.AstWalk.ignored_modules(ast))
+    |> apply_module_ignores(Mut.AstWalk.ignored_modules(ast))
+    |> reject_identity_mutations()
   end
+
+  # T06 global safety net: a mutant whose rendered replacement is byte-identical
+  # to the source it replaces cannot change behaviour, so executing it burns a
+  # sandbox run and reports a guaranteed survivor. Several mutators can produce
+  # one — an operator-token span that only covers a prefix operator (`!!x`), a
+  # float literal whose `:token` metadata renders the original text back, ... —
+  # so the check lives here, after both engines' candidates are collected,
+  # rather than in each mutator. Rejected mutants become skips (reason
+  # `:identity_mutation`) so the count is visible in the debug plan and the
+  # terminal summary. Stable IDs are span/metadata-derived and unaffected.
+  defp reject_identity_mutations(%Plan{} = plan) do
+    {kept_schema, identity_schema} = Enum.split_with(plan.schema, &(not identity_mutation?(&1)))
+
+    {kept_fallback, identity_fallback} =
+      Enum.split_with(plan.fallback, &(not identity_mutation?(&1)))
+
+    case identity_schema ++ identity_fallback do
+      [] ->
+        plan
+
+      identity ->
+        skips = Enum.map(identity, &mutant_skip(&1, :identity_mutation))
+
+        %{plan | schema: kept_schema, fallback: kept_fallback, skipped: plan.skipped ++ skips}
+    end
+  end
+
+  @spec identity_mutation?(Mutant.t()) :: boolean
+  defp identity_mutation?(%Mutant{original_source: original} = mutant) when is_binary(original) do
+    rendered = Macro.to_string(mutant.mutated_ast)
+
+    cond do
+      rendered == original -> true
+      comparable(rendered) != comparable(original) -> false
+      true -> Mut.FallbackPatch.replacement(mutant, original) == original
+    end
+  rescue
+    # An un-renderable/un-formattable mutant is not our problem here: it is
+    # already reported as `invalid` when its patch is built.
+    _error -> false
+  end
+
+  defp identity_mutation?(%Mutant{}), do: false
+
+  # Cheap prefilter so the (comparatively expensive) `Code.format_string!/1`
+  # round-trip in `Mut.FallbackPatch.replacement/2` runs only for the handful of
+  # candidates that could still collapse to the original: relative to
+  # `Macro.to_string/1` the formatter only rewrites whitespace and redundant
+  # parentheses (`not(not(x))` -> `not not x`), so two strings that differ once
+  # both are stripped can never format to the same bytes.
+  defp comparable(text), do: String.replace(text, ~r/[\s()]/, "")
 
   # Drop mutants whose enclosing module is `@mutalisk_ignore true`, recording
   # them as skipped (reason `:mutalisk_ignore`) so the metric is visible rather
@@ -288,7 +341,8 @@ defmodule Mut.Orchestrator do
       {kept_fallback, dropped_fallback} =
         Enum.split_with(plan.fallback, &(not MapSet.member?(ignored, &1.module)))
 
-      ignore_skips = Enum.map(dropped_schema ++ dropped_fallback, &mutant_ignore_skip/1)
+      ignore_skips =
+        Enum.map(dropped_schema ++ dropped_fallback, &mutant_skip(&1, :mutalisk_ignore))
 
       %{
         plan
@@ -299,13 +353,13 @@ defmodule Mut.Orchestrator do
     end
   end
 
-  defp mutant_ignore_skip(%Mutant{} = mutant) do
+  defp mutant_skip(%Mutant{} = mutant, reason) do
     %{
       file: mutant.file,
       line: mutant.line,
       column: mutant.column,
       syntactic_name: mutant.mutation_kind,
-      reason: :mutalisk_ignore,
+      reason: reason,
       detail: nil
     }
   end

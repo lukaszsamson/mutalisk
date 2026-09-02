@@ -26,6 +26,18 @@ defmodule Mut.FallbackPatchTest do
     assert patch.end_column == 46
   end
 
+  test "replacement/2 exposes the rendered replacement text (T06 identity check)" do
+    mutant = mutant(start_byte: 0, end_byte: 5, mutated_ast: quote(do: x >= 0))
+    assert FallbackPatch.replacement(mutant, "x > 0") == "x >= 0"
+
+    # A mutated AST whose `:token` metadata renders the original text back
+    # produces a byte-identical replacement — what `Mut.Orchestrator` rejects.
+    identity =
+      mutant(start_byte: 0, end_byte: 4, mutated_ast: {:__block__, [token: "3.14"], [0.0]})
+
+    assert FallbackPatch.replacement(identity, "3.14") == "3.14"
+  end
+
   test "operator-only span substitutes just the operator, preserving operand literals" do
     # Regression: a guard/comparison whose operand is a non-decimal literal
     # (hex 0x7FF, underscored 10_000, char ?a) gets an OPERATOR-only span (the

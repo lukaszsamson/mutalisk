@@ -10,7 +10,7 @@ defmodule Mut.FallbackPatch do
 
   def render(%Mutant{} = mutant, source_text) when is_binary(source_text) do
     original = binary_part(source_text, mutant.start_byte, mutant.end_byte - mutant.start_byte)
-    replacement = operator_only_replacement(mutant, original) || rendered_replacement(mutant)
+    replacement = replacement(mutant, original)
 
     {:ok,
      %SourcePatch{
@@ -24,6 +24,16 @@ defmodule Mut.FallbackPatch do
        original: original,
        replacement: replacement
      }}
+  end
+
+  @doc """
+  Renders the source text that replaces `original` (the bytes of the mutant's
+  span). Exposed so `Mut.Orchestrator` can detect byte-identical (no-op)
+  mutants without building a full `Mut.SourcePatch`.
+  """
+  @spec replacement(Mutant.t(), String.t()) :: String.t()
+  def replacement(%Mutant{} = mutant, original) when is_binary(original) do
+    operator_only_replacement(mutant, original) || rendered_replacement(mutant)
   end
 
   defp rendered_replacement(mutant) do

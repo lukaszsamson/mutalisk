@@ -80,16 +80,37 @@ defmodule Mut.Mutator.StringLiteral do
   defp non_empty_string_literal?(_), do: false
 
   defp build_mutations({:__block__, meta, [value]} = node) when is_binary(value) do
+    replacement_meta = strip_heredoc_meta(meta)
+
     Enum.map(replacements(), fn {to, description} ->
       %Mutation{
         original_ast: node,
-        mutated_ast: {:__block__, meta, [to]},
+        mutated_ast: {:__block__, replacement_meta, [to]},
         description: description,
         mutation_kind: :string_literal,
         guard_safe?: false,
         metadata: %{from: value, to: to}
       }
     end)
+  end
+
+  # B17: a plain heredoc literal carries `delimiter: "\"\"\""` (plus
+  # `:indentation`) token metadata, and `Macro.to_string/1` honors it when
+  # re-emitting the *replacement* value. A single-line replacement then renders
+  # as `"""\nx"""` — the closing delimiter lands on the content line and neither
+  # `Code.format_string!/1` nor `Code.string_to_quoted/1` can parse it
+  # ("missing terminator"). `Mut.SchemaPlacer` already strips the same metadata
+  # for interpolated strings; do it here so the replacement renders as a normal
+  # `"x"`. Only the *mutated* AST is stripped — the original node (and therefore
+  # every span/stable-id input) is untouched.
+  defp strip_heredoc_meta(meta) do
+    case Keyword.get(meta, :delimiter) do
+      d when d in ["\"\"\"", "'''"] ->
+        meta |> Keyword.delete(:delimiter) |> Keyword.delete(:indentation)
+
+      _other ->
+        meta
+    end
   end
 
   # The `→ ""` and `→ "x"` rows are unchanged so their metadata — and
