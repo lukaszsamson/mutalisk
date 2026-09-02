@@ -1,17 +1,18 @@
 defmodule Mut.Mutator.Membership do
   @moduledoc """
   M69 operator-expansion mutator. Negates membership tests: `x in y` becomes
-  `x not in y`, and `x not in y` becomes `x in y`.
+  `x not in y`.
 
-  `x not in y` parses as `not(x in y)`, so the two directions target different
-  nodes: the plain `in` node is wrapped in `not` (dispatch on `Kernel.in/2`),
-  while a `not`-wrapped `in` is mutated by *unwrapping* it (dispatch on
-  `Kernel.not/1`). Negating the inner `in` of a `not in` instead would render
-  `not(not(x in y))` on the schema path and splice `x not not(x in y)` on the
-  fallback span path (B20), so that inner candidate is suppressed.
+  `x not in y` parses as `not(x in y)`. Negating the inner `in` of a `not in`
+  would render `not(not(x in y))` on the schema path and splice
+  `x not not(x in y)` on the fallback span path (B20), so that inner candidate
+  is suppressed. The reverse direction (`not in` -> `in`) is already covered by
+  `Mut.Mutator.UnaryNot` removing the enclosing `not`; emitting it here too
+  would double-count every `not in` site.
 
-  Unlike the arithmetic/bitwise swaps this is a STRUCTURAL mutation (wrap or
-  unwrap a `not` node), not an operator-name swap. Opt-in, schema-routed.
+  Unlike the arithmetic/bitwise swaps this is a STRUCTURAL mutation (wrap the
+  `in` node in `not`), not an operator-name swap. Opt-in, schema-routed
+  (dispatch on `Kernel.in/2`).
   """
   @behaviour Mut.Mutator
 
@@ -20,7 +21,6 @@ defmodule Mut.Mutator.Membership do
   alias Mut.Oracle.DispatchSite
 
   @accepted_modules [Kernel]
-  @accepted_not_modules [Kernel, :erlang]
   @accepted_names [:in]
   @arity 2
   @kind :membership_op
@@ -52,25 +52,15 @@ defmodule Mut.Mutator.Membership do
   def compatible?(%AstCandidate{} = candidate, %DispatchSite{} = site) do
     candidate.syntactic_name == site.resolved_name and
       candidate.syntactic_arity == site.resolved_arity and
-      accepted_site?(site, candidate)
+      site.resolved_module in @accepted_modules and
+      site.resolved_name in @accepted_names
   end
 
-  defp accepted_site?(%DispatchSite{resolved_name: :not} = site, candidate) do
-    site.resolved_module in @accepted_not_modules and not_in_node?(candidate.node)
-  end
-
-  defp accepted_site?(%DispatchSite{} = site, _candidate) do
-    site.resolved_module in @accepted_modules and site.resolved_name in @accepted_names
-  end
-
-  defp not_in_node?({:not, _meta, [{:in, _in_meta, args}]}) when length(args) == @arity, do: true
-  defp not_in_node?(_node), do: false
-
-  # The `in` of a `not in` is skipped: the enclosing `not` carries the mutation.
+  # The `in` of a `not in` is skipped: UnaryNot on the enclosing `not` covers it.
   defp shape_matches?({:in, _meta, args}, ast_path) when length(args) == @arity,
     do: not negated_in_path?(ast_path)
 
-  defp shape_matches?(node, _ast_path), do: not_in_node?(node)
+  defp shape_matches?(_node, _ast_path), do: false
 
   defp negated_in_path?(ast_path) when is_list(ast_path),
     do: List.last(ast_path) == {:elem, :not, 0}
@@ -107,19 +97,6 @@ defmodule Mut.Mutator.Membership do
         mutation_kind: @kind,
         guard_safe?: true,
         metadata: %{operator: :in, replacement: :not_in}
-      }
-    ]
-  end
-
-  defp build_mutations({:not, _meta, [{:in, _in_meta, _args} = in_node]} = node) do
-    [
-      %Mutation{
-        original_ast: node,
-        mutated_ast: in_node,
-        description: "negate membership (not in -> in)",
-        mutation_kind: @kind,
-        guard_safe?: true,
-        metadata: %{operator: :not_in, replacement: :in}
       }
     ]
   end

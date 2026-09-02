@@ -26,6 +26,35 @@ defmodule Mut.FallbackPatchTest do
     assert patch.end_column == 46
   end
 
+  test "render refuses an operator-only span for a non-operator-swap mutation" do
+    # `not (x in y)` -> `x in y`: the whole-expression text search fails and the
+    # span covers only `not`. Splicing "x in y" over it would corrupt the source.
+    source = "def c(x, y), do: not (x in y)\n"
+    start_byte = :binary.match(source, "not") |> elem(0)
+    in_node = {:in, [], [{:x, [], nil}, {:y, [], nil}]}
+
+    mutant =
+      mutant(
+        start_byte: start_byte,
+        end_byte: start_byte + 3,
+        original_ast: {:not, [], [in_node]},
+        mutated_ast: in_node
+      )
+
+    assert {:error, :missing_source_span} = FallbackPatch.render(mutant, source)
+
+    # A same-operand operator swap on the same kind of span still renders.
+    swap =
+      mutant(
+        start_byte: 0,
+        end_byte: 1,
+        original_ast: {:>, [], [{:x, [], nil}, 0]},
+        mutated_ast: {:>=, [], [{:x, [], nil}, 0]}
+      )
+
+    assert {:ok, %SourcePatch{replacement: ">="}} = FallbackPatch.render(swap, "> 0\n")
+  end
+
   test "replacement/2 exposes the rendered replacement text (T06 identity check)" do
     mutant = mutant(start_byte: 0, end_byte: 5, mutated_ast: quote(do: x >= 0))
     assert FallbackPatch.replacement(mutant, "x > 0") == "x >= 0"

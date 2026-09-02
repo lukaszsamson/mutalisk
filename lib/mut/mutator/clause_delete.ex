@@ -133,7 +133,7 @@ defmodule Mut.Mutator.ClauseDelete do
          else_clauses when is_list(else_clauses) <- Keyword.get(last, :else),
          true <- length(else_clauses) > i do
       new_else = List.delete_at(else_clauses, i)
-      new_kw = Keyword.put(last, :else, new_else)
+      new_kw = Keyword.replace!(last, :else, new_else)
       mutation(node, {:with, meta, leading ++ [new_kw]}, "with else clause #{i}")
     else
       _ -> []

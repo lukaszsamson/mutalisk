@@ -10,20 +10,32 @@ defmodule Mut.FallbackPatch do
 
   def render(%Mutant{} = mutant, source_text) when is_binary(source_text) do
     original = binary_part(source_text, mutant.start_byte, mutant.end_byte - mutant.start_byte)
-    replacement = replacement(mutant, original)
 
-    {:ok,
-     %SourcePatch{
-       file: mutant.file,
-       start_byte: mutant.start_byte,
-       end_byte: mutant.end_byte,
-       start_line: mutant.line,
-       start_column: mutant.column,
-       end_line: end_line(mutant),
-       end_column: end_column(mutant),
-       original: original,
-       replacement: replacement
-     }}
+    if operator_token_span?(mutant, original) and
+         is_nil(operator_only_replacement(mutant, original)) do
+      # The span covers only the operator token but the mutation is not a
+      # same-operand operator swap (e.g. `not (x in y)` -> `x in y`, where the
+      # rendered replacement is the whole expression). Splicing the full
+      # rendering over the bare operator would corrupt the source
+      # (`x in y (x in y)`), so refuse rather than build a wrong patch.
+      {:error, :missing_source_span}
+    else
+      {:ok, build_patch(mutant, original, replacement(mutant, original))}
+    end
+  end
+
+  defp build_patch(mutant, original, replacement) do
+    %SourcePatch{
+      file: mutant.file,
+      start_byte: mutant.start_byte,
+      end_byte: mutant.end_byte,
+      start_line: mutant.line,
+      start_column: mutant.column,
+      end_line: end_line(mutant),
+      end_column: end_column(mutant),
+      original: original,
+      replacement: replacement
+    }
   end
 
   @doc """
@@ -62,6 +74,14 @@ defmodule Mut.FallbackPatch do
   end
 
   defp operator_only_replacement(_mutant, _original), do: nil
+
+  # True when the span bytes are exactly the original node's operator token
+  # (the `operator_token_span/3` shape).
+  defp operator_token_span?(%Mutant{original_ast: {op, _meta, args}}, original)
+       when is_atom(op) and is_list(args) and length(args) in 1..2,
+       do: original == Atom.to_string(op)
+
+  defp operator_token_span?(_mutant, _original), do: false
 
   @spec apply(SourcePatch.t(), Path.t()) :: :ok
   def apply(%SourcePatch{} = patch, sandbox_root) when is_binary(sandbox_root) do

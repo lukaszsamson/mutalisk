@@ -94,47 +94,18 @@ defmodule Mut.Mutator.OperatorExpansionTest do
 
     # B20: `x not in y` parses as `not(x in y)`. Negating the inner `in` would
     # render `not(not(x in y))` (schema) / splice `x not not(x in y)`
-    # (fallback); the enclosing `not` carries the mutation instead.
-    test "unwraps not in -> in and suppresses the inner in candidate" do
-      [m] = Membership.mutate(not_in_node(), not_context())
-      assert {:in, _, [{:x, _, _}, {:y, _, _}]} = m.mutated_ast
-      assert m.mutation_kind == :membership_op
-      assert m.metadata == %{operator: :not_in, replacement: :in}
-
+    # (fallback); UnaryNot on the enclosing `not` covers that direction.
+    test "suppresses the inner in candidate of a not in" do
       inner_ctx = context_for(:in, ast_path: [{:elem, :=, 1}, {:elem, :not, 0}])
       assert Membership.mutate(in_node(), inner_ctx) == []
+      assert Membership.mutate(not_in_node(), not_context()) == []
     end
 
-    test "not dispatch accepted only for a not-wrapped in node" do
-      assert Membership.compatible?(not_in_candidate(), site(:not, resolved_arity: 1))
-
-      assert Membership.compatible?(
-               not_in_candidate(),
-               site(:not, resolved_arity: 1, resolved_module: :erlang)
-             )
-
-      refute Membership.compatible?(
-               %{not_in_candidate() | node: unary_node(:not)},
-               site(:not, resolved_arity: 1)
-             )
-
-      refute Membership.compatible?(
-               not_in_candidate(),
-               site(:not, resolved_arity: 1, resolved_module: Enum)
-             )
-    end
-
-    test "both directions render to valid, different source" do
+    test "in -> not in renders to valid, different source" do
       [wrapped] = Membership.mutate(in_node(), context_for(:in))
-      [unwrapped] = Membership.mutate(not_in_node(), not_context())
-
       assert Macro.to_string(wrapped.mutated_ast) == "x not in y"
-      assert Macro.to_string(unwrapped.mutated_ast) == "x in y"
       assert {:ok, _} = Code.string_to_quoted(Macro.to_string(wrapped.mutated_ast))
-      assert {:ok, _} = Code.string_to_quoted(Macro.to_string(unwrapped.mutated_ast))
-
       assert Macro.to_string(wrapped.mutated_ast) != Macro.to_string(wrapped.original_ast)
-      assert Macro.to_string(unwrapped.mutated_ast) != Macro.to_string(unwrapped.original_ast)
     end
   end
 
@@ -147,9 +118,5 @@ defmodule Mut.Mutator.OperatorExpansionTest do
       oracle_site: site(:not, resolved_arity: 1),
       ast_path: [{:elem, :=, 1}]
     )
-  end
-
-  defp not_in_candidate do
-    %{candidate(:not, 1) | node: not_in_node()}
   end
 end

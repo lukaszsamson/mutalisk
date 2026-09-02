@@ -277,16 +277,18 @@ defmodule Mut.Orchestrator do
     |> reject_identity_mutations()
   end
 
+  @doc false
   # T06 global safety net: a mutant whose rendered replacement is byte-identical
   # to the source it replaces cannot change behaviour, so executing it burns a
-  # sandbox run and reports a guaranteed survivor. Several mutators can produce
-  # one — an operator-token span that only covers a prefix operator (`!!x`), a
-  # float literal whose `:token` metadata renders the original text back, ... —
-  # so the check lives here, after both engines' candidates are collected,
-  # rather than in each mutator. Rejected mutants become skips (reason
-  # `:identity_mutation`) so the count is visible in the debug plan and the
-  # terminal summary. Stable IDs are span/metadata-derived and unaffected.
-  defp reject_identity_mutations(%Plan{} = plan) do
+  # sandbox run and reports a guaranteed survivor (e.g. a literal whose parser
+  # `:token` metadata renders the original text back). The check needs the
+  # span bytes (`original_source`), which only fallback-engine mutants carry at
+  # plan time; schema mutants that are rerouted to fallback get theirs in
+  # `Mut.SchemaBuild`, which calls this again. Rejected mutants become skips
+  # (reason `:identity_mutation`) so the count is visible in the debug plan and
+  # the terminal summary. Stable IDs are span/metadata-derived and unaffected.
+  @spec reject_identity_mutations(Plan.t()) :: Plan.t()
+  def reject_identity_mutations(%Plan{} = plan) do
     {kept_schema, identity_schema} = Enum.split_with(plan.schema, &(not identity_mutation?(&1)))
 
     {kept_fallback, identity_fallback} =
