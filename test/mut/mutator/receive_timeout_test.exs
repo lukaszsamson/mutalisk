@@ -109,6 +109,51 @@ defmodule Mut.Mutator.ReceiveTimeoutTest do
       assert changes == [{:set_timeout, 0}, {:set_timeout, :infinity}]
     end
 
+    test "skips the identity swap when the after timeout is already 0" do
+      src = """
+      defmodule M do
+        def f do
+          receive do
+            msg -> msg
+          after
+            0 -> :timeout
+          end
+        end
+      end
+      """
+
+      [c] = candidates(src)
+      changes = c.node |> ReceiveTimeout.mutate(ctx(c.ast_path)) |> Enum.map(& &1.metadata.change)
+      assert changes == [{:set_timeout, :infinity}, :drop_after]
+    end
+
+    test "skips the identity swap when the after timeout is already :infinity" do
+      src = """
+      defmodule M do
+        def f do
+          receive do
+            msg -> msg
+          after
+            :infinity -> :timeout
+          end
+        end
+      end
+      """
+
+      [c] = candidates(src)
+      changes = c.node |> ReceiveTimeout.mutate(ctx(c.ast_path)) |> Enum.map(& &1.metadata.change)
+      assert changes == [{:set_timeout, 0}, :drop_after]
+    end
+
+    test "skips the identity swap for a __block__-wrapped timeout literal" do
+      node =
+        {:receive, [line: 1],
+         [[after: [{:->, [line: 1], [[{:__block__, [token: "0", line: 1], [0]}], :timeout]}]]]}
+
+      changes = node |> ReceiveTimeout.mutate(ctx([])) |> Enum.map(& &1.metadata.change)
+      assert changes == [{:set_timeout, :infinity}]
+    end
+
     test "not applicable in schema engine or on non-receive nodes" do
       [c] = candidates(@src)
       schema_ctx = %{ctx(c.ast_path) | engine: :schema}
