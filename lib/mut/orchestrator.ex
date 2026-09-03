@@ -484,7 +484,13 @@ defmodule Mut.Orchestrator do
       end)
 
     if literal_mutators == [] do
-      {[], []}
+      # T44: neither :body_literal nor :env_walker is enabled, so no literal
+      # mutator can ever apply to these candidates. Emit a
+      # `body_literal_engine_disabled` skip per candidate (mirroring
+      # `attribute_engine_disabled`/`guard_engine_disabled` above) instead of
+      # silently dropping them — otherwise debug plans and skip counts
+      # under-report schema literal candidates when the engine is off.
+      {[], Enum.map(candidates, &skip(&1, :body_literal_engine_disabled, nil))}
     else
       candidates
       |> Enum.map(&schema_literal_mutants(&1, literal_mutators, source))

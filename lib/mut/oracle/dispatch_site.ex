@@ -64,9 +64,15 @@ defimpl JSON.Encoder, for: Mut.Oracle.DispatchSite do
   defp encode_function(nil), do: nil
   defp encode_function({name, arity}), do: [name, arity]
 
+  # T41: a bare meta value that happens to be a 2-element list (e.g. `[1, 2]`)
+  # is indistinguishable, on the wire, from a `{key, value}` pair encoded as
+  # `[key, value]`. Encode pairs as an unambiguous `%{"k" => key, "v" =>
+  # value}` map instead so only a real pair round-trips as one; see
+  # `Mut.Oracle.decode_meta/1` for the matching (and backward-compatible)
+  # decode side.
   defp encode_meta(meta) when is_list(meta) do
     Enum.map(meta, fn
-      {key, value} -> [key, value]
+      {key, value} -> %{"k" => key, "v" => value}
       value -> value
     end)
   end

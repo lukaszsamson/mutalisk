@@ -18,6 +18,7 @@ defmodule Mut.Reporter.StrykerJsonTest do
              "files",
              "mutalisk",
              "schemaVersion",
+             "testFiles",
              "thresholds"
            ]
 
@@ -30,6 +31,34 @@ defmodule Mut.Reporter.StrykerJsonTest do
     assert rendered["mutalisk"]["engine"] == %{"stable-killed" => "schema"}
     assert rendered["mutalisk"]["phase_timings"]["oracle_build_ms"] == 1000
     assert rendered["mutalisk"]["selection"]["mode"] == "coverage_with_static_fallback"
+
+    # T43: coveredBy/killedBy both reference test FILE ids that resolve in
+    # testFiles, so a Stryker-schema consumer can join them.
+    assert mutant["coveredBy"] == ["test/a_test.exs"]
+    assert mutant["killedBy"] == ["test/a_test.exs"]
+
+    assert rendered["testFiles"]["test/a_test.exs"]["tests"] == [
+             %{"id" => "test/a_test.exs", "name" => "test/a_test.exs"}
+           ]
+
+    # The raw ExUnit "Module test name" is preserved separately.
+    assert rendered["mutalisk"]["killed_by_raw"] == %{"stable-killed" => "A.Test fails"}
+  end
+
+  test "T43: killedBy is omitted when the killing test's module maps to more than one covered file" do
+    {snapshot, plan} = fixture_snapshot_and_plan([:killed])
+    [mutant] = plan.schema
+    mutant = %{mutant | covering_tests: ["test/a_test.exs", "test/other/a_test.exs"]}
+    plan = %{plan | schema: [mutant]}
+    snapshot = %{snapshot | ledger: [%{entry(mutant) | mutant: mutant}]}
+
+    rendered = StrykerJson.render(snapshot, plan, source_loader(), [])
+
+    assert [result] = rendered["files"]["lib/a.ex"]["mutants"]
+    assert result["killedBy"] == []
+    assert result["coveredBy"] == ["test/a_test.exs", "test/other/a_test.exs"]
+    # The raw name still survives even when the file-level id is ambiguous.
+    assert rendered["mutalisk"]["killed_by_raw"] == %{"stable-killed" => "A.Test fails"}
   end
 
   test "M99: terminal score (snapshot.score) and Stryker-viewer-derived score agree" do
@@ -222,7 +251,7 @@ defmodule Mut.Reporter.StrykerJsonTest do
       mutated_ast: quote(do: a - b),
       description: "replace + with -",
       status: status,
-      covering_tests: ["A.Test:passes"],
+      covering_tests: ["test/a_test.exs"],
       killing_test: "A.Test fails",
       duration_ms: 7
     }

@@ -101,6 +101,33 @@ defmodule Mut.OrchestratorTest do
     assert Enum.all?(plan.fallback, &(&1.mutator == Mut.Mutator.GuardBoolean))
   end
 
+  test "T44: schema literal candidates are skipped with :body_literal_engine_disabled when neither :body_literal nor :env_walker is enabled" do
+    path = Path.join(@fixture_root, "lib/literal.ex")
+    on_exit(fn -> File.rm_rf!(path) end)
+
+    File.write!(path, """
+    defmodule Literal do
+      @moduledoc false
+
+      def answer, do: 42
+    end
+    """)
+
+    plan =
+      Mut.Orchestrator.plan(@fixture_root, FixtureOracleHelper.oracle([]),
+        files: ["lib/literal.ex"],
+        enabled_targets: [:dispatch]
+      )
+
+    assert plan.schema == []
+    assert Map.get(skip_reasons(plan), :body_literal_engine_disabled) == 1
+
+    assert Enum.any?(
+             plan.skipped,
+             &(&1.reason == :body_literal_engine_disabled and &1.file == "lib/literal.ex")
+           )
+  end
+
   test "an unparsable file is skipped with a :parse_error diagnostic, not a crash (M118)" do
     bad = Path.join(@fixture_root, "lib/broken.ex")
     File.write!(bad, "defmodule Broken do def f( end\n")

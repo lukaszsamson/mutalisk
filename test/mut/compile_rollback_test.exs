@@ -44,6 +44,48 @@ defmodule Mut.CompileRollbackTest do
     refute Enum.any?(anchors, &(&1.file == "lib/bar.ex"))
   end
 
+  test "diagnostic_anchors resets severity to non-error on a blank line (T42)" do
+    output = """
+    error: undefined function x/0
+      │
+      5 │   x()
+      │
+      └─ lib/foo.ex:5:3
+
+    lib/bar.ex:9
+    """
+
+    anchors = CompileRollback.diagnostic_anchors(output)
+    assert Enum.any?(anchors, &(&1.file == "lib/foo.ex" and &1.line == 5))
+
+    refute Enum.any?(anchors, &(&1.file == "lib/bar.ex")),
+           "a bare file:line after a blank line must not inherit the prior error severity"
+  end
+
+  test "diagnostic_anchors still collects anchors within an error block (T42)" do
+    output = """
+    error: undefined function x/0
+      │
+      5 │   x()
+      │
+      └─ lib/foo.ex:5:3
+    """
+
+    assert [%{file: "lib/foo.ex", line: 5}] = CompileRollback.diagnostic_anchors(output)
+  end
+
+  test "diagnostic_anchors ignores anchors within a warning block (T42)" do
+    output = """
+    warning: variable "y" is unused
+      │
+      7 │   y = compute()
+      │
+      └─ lib/bar.ex:7:3
+    """
+
+    assert CompileRollback.diagnostic_anchors(output) == []
+  end
+
   test "locate_mutants returns innermost matching range" do
     map = %PlacementMap{
       file: "lib/foo.ex",

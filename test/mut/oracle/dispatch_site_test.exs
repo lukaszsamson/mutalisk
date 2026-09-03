@@ -50,7 +50,9 @@ defmodule Mut.Oracle.DispatchSiteTest do
              ~w(column dispatch_kind end_column end_line env_context event_file file function line meta module resolved_arity resolved_module resolved_name)
 
     assert decoded["function"] == ["sum", 2]
-    assert decoded["meta"] == [["line", 1], ["column", 3]]
+    # T41: pairs encode unambiguously as %{"k" => key, "v" => value} so a
+    # bare 2-element list meta value is never mistaken for a {key, value} pair.
+    assert decoded["meta"] == [%{"k" => "line", "v" => 1}, %{"k" => "column", "v" => 3}]
   end
 
   @spec dispatch_site() :: Mut.Oracle.DispatchSite.t()

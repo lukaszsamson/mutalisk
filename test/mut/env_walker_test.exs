@@ -471,6 +471,50 @@ defmodule Mut.EnvWalkerTest do
     end
   end
 
+  describe "T50: collection_span nil-guard" do
+    test "a collection literal whose meta line has no tracked byte offset yields a nil span instead of crashing" do
+      src = ~S'''
+      defmodule Foo do
+        def x do
+          [1, 2]
+        end
+      end
+      '''
+
+      {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+      # Patch the list literal's `:line` metadata to a line far beyond the
+      # source, so `byte_offset/3` (Enum.at(line_offsets, line - 1)) misses
+      # and returns `nil` — the scenario `collection_span/2` must guard.
+      bogus_ast =
+        Macro.prewalk(ast, fn
+          {:__block__, meta, [list]} when is_list(list) ->
+            {:__block__, Keyword.put(meta, :line, 9999), [list]}
+
+          list when is_list(list) ->
+            list
+
+          other ->
+            other
+        end)
+
+      candidates =
+        EnvWalker.collect_literal_candidates(bogus_ast,
+          file: "lib/foo.ex",
+          source: src,
+          macro_index: nil
+        )
+
+      collection_candidate =
+        Enum.find(candidates, fn {candidate, _snap} ->
+          candidate.syntactic_name == :__list_literal__
+        end)
+
+      assert {candidate, _snap} = collection_candidate
+      assert candidate.source_span == nil
+    end
+  end
+
   describe "generated code" do
     test "AST node with generated: true metadata is :generated trust" do
       src = ~S'''

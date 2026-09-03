@@ -536,12 +536,17 @@ defmodule Mut.EnvWalker do
   # carries `:delimiter` and NO `:closing`, so the old code fell to a 1-byte
   # span (just the opening `'`) and the fallback patch spliced over only that
   # byte — corrupt (T1). Scan to the matching close delimiter for that case.
+  # T50: mirrors `literal_span/3`/`variable_span/3` — `byte_offset/3` can
+  # return `nil` (e.g. a line/column pair outside the tracked line offsets),
+  # and without this guard that `nil` would reach `collection_end_byte/5` and
+  # `byte_to_line_col/2`'s integer arithmetic and crash. Return a `nil` span
+  # instead, same as the sibling helpers.
   defp collection_span(state, meta) do
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
 
-    if is_integer(line) and is_integer(column) do
-      start_byte = byte_offset(state, line, column)
+    with true <- is_integer(line) and is_integer(column),
+         start_byte when is_integer(start_byte) <- byte_offset(state, line, column) do
       end_byte = collection_end_byte(state, meta, line, column, start_byte)
       {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
 
@@ -554,6 +559,8 @@ defmodule Mut.EnvWalker do
         start_byte: start_byte,
         end_byte: end_byte
       }
+    else
+      _ -> nil
     end
   end
 

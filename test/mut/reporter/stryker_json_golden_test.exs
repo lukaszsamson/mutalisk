@@ -118,7 +118,7 @@ defmodule Mut.Reporter.StrykerJsonGoldenTest do
       status: status,
       skip_reason: skip_reason(status),
       compile_error: compile_error(status),
-      covering_tests: ["SyntheticTest:case_#{id}"],
+      covering_tests: ["test/synthetic_test.exs:case_#{id}"],
       killing_test: killing_test(status, id),
       duration_ms: id * 10
     }

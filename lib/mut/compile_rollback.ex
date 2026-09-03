@@ -51,17 +51,26 @@ defmodule Mut.CompileRollback do
     # compile error) must not be invalidated. Elixir groups diagnostics under a
     # `warning:`/`error:` header and prints the `file:line` on a following line,
     # so we carry the current severity as we scan and keep only error anchors.
+    #
+    # T42: the carried severity must reset to :none on a blank line — a blank
+    # line ends the current diagnostic block, and the next block starts fresh
+    # with a `warning:`/`error:` header or a `** (` exception. Without the
+    # reset, every bare `file:line` line after an error block (even ones that
+    # belong to a later warning-only block, or no block at all) was wrongly
+    # treated as an error anchor. Starting the scan at :none (rather than
+    # :error) means anchors before any header are ignored too; a single-line
+    # `** (CompileError) file.ex:5: ...` still anchors because `severity_for`
+    # is applied to each line before `error_anchors` reads it.
     output
     |> String.split("\n")
-    |> Enum.reduce({:error, []}, fn line, {severity, acc} ->
+    |> Enum.map_reduce(:none, fn line, severity ->
       severity = severity_for(line, severity)
-      {severity, acc ++ error_anchors(line, severity)}
+      {error_anchors(line, severity), severity}
     end)
-    |> elem(1)
+    |> elem(0)
+    |> Enum.concat()
     |> Enum.uniq_by(&{&1.file, &1.line, &1.diagnostic})
   end
-
-  defp error_anchors(_line, :warning), do: []
 
   defp error_anchors(line, :error) do
     @anchor
@@ -71,11 +80,17 @@ defmodule Mut.CompileRollback do
     end)
   end
 
+  defp error_anchors(_line, _severity), do: []
+
   # Track the severity of the current diagnostic block. A `warning:` header
   # opens a warning region (its `file:line` lines are ignored for rollback); an
   # `error:` header or an `** (…Error)` exception line opens an error region.
+  # A blank line ends whatever block was open, resetting to the neutral
+  # :none state so a later un-headered `file:line` line is never mistaken for
+  # an error anchor left over from a previous block.
   defp severity_for(line, current) do
     cond do
+      String.trim(line) == "" -> :none
       Regex.match?(~r/(^|\s)warning:/, line) -> :warning
       Regex.match?(~r/(^|\s)error:/, line) -> :error
       String.contains?(line, "** (") -> :error

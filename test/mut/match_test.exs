@@ -94,6 +94,28 @@ defmodule Mut.MatchTest do
     assert sites == [first, second]
   end
 
+  test "T40 duplicated tracer events (same candidate hash, meta-only difference) collapse to one match" do
+    candidate = candidate(ast_path_hash: "same", source_span: span(1, 1, 1, 10))
+    first = site(column: 3, meta: [call_id: 1])
+    second = site(column: 3, meta: [call_id: 2])
+
+    assert {[{^candidate, matched_site}], []} =
+             Mut.Match.attach([candidate], oracle([first, second]))
+
+    assert matched_site.column == 3
+  end
+
+  test "T40 genuinely different candidates/sites still yield the ambiguity diagnostic" do
+    candidate = candidate(ast_path_hash: "same", source_span: span(1, 1, 1, 10))
+    first = site(column: 3, resolved_module: Kernel)
+    second = site(column: 3, resolved_module: :erlang)
+
+    assert {[], [{:ambiguous_oracle_match, ^candidate, sites}]} =
+             Mut.Match.attach([candidate], oracle([first, second]))
+
+    assert sites == [first, second]
+  end
+
   test "step 6 still ambiguous same-column matches emit diagnostics" do
     candidate = candidate(source_span: span(1, 1, 1, 10))
     first = site(column: 3)
