@@ -143,6 +143,21 @@ mutant dominates wall-clock. If a test legitimately needs longer under no
 mutation, tag it (`@tag timeout: 60_000`); ExUnit per-test tags override the
 global default.
 
+### Whole-suite (host) deadline
+
+The per-test timeout bounds one test; the host also bounds the **whole selected
+suite** for a mutant and kills the test port when that budget elapses. Because
+several individually valid slow tests can exceed a budget sized for one test —
+and the resulting host timeout would be scored as a detection, inflating the
+score — the host deadline is derived from the measured baseline run:
+
+    max(test_timeout_ms, baseline_wall_ms * 2) + 10 000 ms
+
+Set `--suite-timeout-ms N` (or `config :mutalisk, suite_timeout_ms: N`, range
+1 000..3 600 000) to pin it explicitly; the same 10 000 ms drain buffer is added
+so ExUnit can report its own timeout first. Each run prints the deadline it
+derived and why.
+
 ## Limitations
 
 - Mutalisk does not mutate DSL-emitted code, macro bodies, or generated code.

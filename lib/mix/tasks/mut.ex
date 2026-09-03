@@ -56,6 +56,14 @@ defmodule Mix.Tasks.Mut do
       exit and print their retained paths (debug aid; default: false)
     - `--test-timeout-ms N` — Per-test ExUnit timeout in milliseconds.
       Default 10000. Range 1000..600000.
+    - `--suite-timeout-ms N` — Whole-suite host budget, in milliseconds, for one
+      mutant's selected tests (range 1000..3600000). The host kills the mutant's
+      test port after this budget plus a 10000 ms drain buffer. Unset (the
+      default) it is derived from the measured baseline run:
+      `max(test_timeout_ms, baseline_wall_ms * 2) + 10000`. Deriving it matters
+      because several individually valid slow tests can otherwise exceed a budget
+      sized for a single test, and the resulting host timeout counts as a
+      detection and inflates the score.
     - `--incremental` — Reuse verdicts from a prior run's history for
       unchanged mutants instead of re-executing them
       (opt-in; see `history_path` config). Materially
@@ -74,8 +82,9 @@ defmodule Mix.Tasks.Mut do
   A CLI flag always wins; `config :mutalisk` overrides the file; the file is the
   base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
   `enabled_targets`, `selection`, `fail_at`, `concurrency`, `test_timeout_ms`,
-  `reporters`, `output_path`, `exclude`, `max_mutants`, `since`, `incremental`,
-  `history_path`, and `coverage_timeout_ms`. `exclude`, `history_path`, and
+  `suite_timeout_ms`, `reporters`, `output_path`, `exclude`, `max_mutants`,
+  `since`, `incremental`, `history_path`, and
+  `coverage_timeout_ms`. `exclude`, `history_path`, and
   `coverage_timeout_ms` are config-only (no CLI flag); the rest accept a CLI
   flag that overrides config. `history_path` controls where every run writes
   reusable verdict history for future `--incremental` runs. `coverage_timeout_ms`
@@ -125,6 +134,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Cli
   alias Mut.Coverage.Runner, as: CoverageRunner
   alias Mut.CoverageOracle
+  alias Mut.Deadline
   alias Mut.History
   alias Mut.Metrics
   alias Mut.Reporter.GitHubActions
@@ -133,16 +143,12 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Reporter.Terminal
   alias Mut.Sandbox
   alias Mut.Selection.DowngradeHint
+  alias Mut.StageError
   alias Mut.TestSelection.Coverage, as: CoverageSelection
   alias Mut.TestSelection.Static
   alias Mut.Worker
 
   @requirements ["app.config"]
-  # Buffer added on top of `--test-timeout-ms` for the host-side
-  # deadline. ExUnit fires its per-test timeout first and emits a
-  # MUT_RESULT line; the host then needs time to drain the port and
-  # classify. 10s matches v1.8 (the old 70 000 = 60 000 + 10 000).
-  @host_deadline_buffer_ms 10_000
   @coverage_pathology_floor_ms 10_000
   # R5: finite backstop for the baseline suite (includes an implicit compile);
   # generous enough not to false-fail a large suite, finite enough to recover
@@ -200,22 +206,25 @@ defmodule Mix.Tasks.Mut do
     try do
       IO.puts("Oracle build starting")
 
-      {:ok, oracle} =
-        Metrics.with_phase(metrics_pid, :oracle_build, fn ->
-          # The `File.cd!(mutalisk_root, ...)` here is NOT for steering artifact
-          # locations (those are passed explicitly via `:root`); it makes the
-          # `File.cwd!()`-derived `MUTALISK_PATH` in `Mut.OracleBuild`'s child mix
-          # env resolve to the mutalisk checkout, so the work copy's overlay pins
-          # `{:mutalisk, path: <checkout>}`.
-          File.cd!(mutalisk_root, fn ->
-            Mut.OracleBuild.run(target_root,
-              run_id: run_id,
-              force: true,
-              keep: true,
-              root: artifact_root
-            )
+      oracle =
+        unwrap_stage!(
+          :oracle_build,
+          Metrics.with_phase(metrics_pid, :oracle_build, fn ->
+            # The `File.cd!(mutalisk_root, ...)` here is NOT for steering artifact
+            # locations (those are passed explicitly via `:root`); it makes the
+            # `File.cwd!()`-derived `MUTALISK_PATH` in `Mut.OracleBuild`'s child mix
+            # env resolve to the mutalisk checkout, so the work copy's overlay pins
+            # `{:mutalisk, path: <checkout>}`.
+            File.cd!(mutalisk_root, fn ->
+              Mut.OracleBuild.run(target_root,
+                run_id: run_id,
+                force: true,
+                keep: true,
+                root: artifact_root
+              )
+            end)
           end)
-        end)
+        )
 
       IO.puts("Oracle build complete")
 
@@ -303,8 +312,11 @@ defmodule Mix.Tasks.Mut do
                 run_id,
                 opts,
                 metrics_pid,
-                coverage_oracle,
-                selection_mode
+                %{
+                  coverage_oracle: coverage_oracle,
+                  selection_mode: selection_mode,
+                  baseline_tests_ms: baseline_tests_ms
+                }
               )
             end)
           end
@@ -313,14 +325,11 @@ defmodule Mix.Tasks.Mut do
     after
       Mut.MemoryWatchdog.stop(watchdog_pid)
 
-      if opts.keep_work_copy do
-        IO.puts(
-          :stderr,
-          "[mutalisk] --keep-work-copy: retaining oracle/baseline work copy #{Path.join([artifact_root, "mut_work", run_id])}"
-        )
-      else
-        File.rm_rf!(Path.join([artifact_root, "mut_work", run_id]))
-      end
+      cleanup_work_copy(
+        Path.join([artifact_root, "mut_work", run_id]),
+        opts,
+        "oracle/baseline"
+      )
     end
 
     unless opts.debug_plan do
@@ -350,48 +359,77 @@ defmodule Mix.Tasks.Mut do
   # cross-module opaqueness check — the prior `final_pool` came back through the
   # run functions with a looser type. `Sandbox` already exempts `destroy_pool/1`
   # via `{:no_opaque, ...}`; mirror that at this call site.
-  @dialyzer {:no_opaque, execute_plan: 8}
-  defp execute_plan(
-         plan,
-         target_root,
-         artifact_root,
-         run_id,
-         opts,
-         metrics_pid,
-         coverage_oracle,
-         selection_mode
-       ) do
+  @dialyzer {:no_opaque, run_with_pool: 7}
+  defp execute_plan(plan, target_root, artifact_root, run_id, opts, metrics_pid, selection) do
     IO.puts("Schema build starting")
 
-    {:ok, schema_result} =
-      Metrics.with_phase(metrics_pid, :schema_build, fn ->
-        Mut.SchemaBuild.build(plan,
-          user_project_root: target_root,
-          run_id: "#{run_id}-schema",
-          force: true,
-          keep: true,
-          root: artifact_root
+    # T27: the schema build's work copy sits at a path we can predict, so the
+    # cleanup below covers a FAILED build too — `keep: true` means SchemaBuild
+    # itself never removes it, and a raise used to leave it behind forever.
+    schema_work_copy = Path.expand(Path.join([artifact_root, "mut_work", "#{run_id}-schema"]))
+
+    snapshot =
+      try do
+        schema_result =
+          unwrap_stage!(
+            :schema_build,
+            Metrics.with_phase(metrics_pid, :schema_build, fn ->
+              Mut.SchemaBuild.build(plan,
+                user_project_root: target_root,
+                run_id: "#{run_id}-schema",
+                force: true,
+                keep: true,
+                root: artifact_root
+              )
+            end)
+          )
+
+        IO.puts("Schema build complete")
+
+        # Never materialize more sandboxes than there are mutants to run: a tiny
+        # run with a large `--concurrency` (e.g. `--concurrency 999
+        # --max-mutants 1`) otherwise spends minutes creating/tearing down a huge
+        # pool for no benefit (Exploratory #57). The capped value also drives the
+        # reported "effective" worker count so the summary is accurate (#58).
+        mutant_count = executable_count(schema_result.plan)
+        effective_concurrency = max(1, min(opts.concurrency, mutant_count))
+        Metrics.set_effective_concurrency(metrics_pid, effective_concurrency)
+
+        pool =
+          unwrap_stage!(
+            :sandbox_pool,
+            Sandbox.create_pool(schema_result, effective_concurrency,
+              run_id: run_id,
+              force: true,
+              root: artifact_root
+            )
+          )
+
+        run_with_pool(
+          pool,
+          schema_result,
+          target_root,
+          opts,
+          metrics_pid,
+          selection,
+          effective_concurrency
         )
-      end)
+      after
+        cleanup_work_copy(schema_work_copy, opts, "schema-build")
+      end
 
-    IO.puts("Schema build complete")
+    set_exit_code(snapshot, opts.fail_at)
+  end
 
-    # Never materialize more sandboxes than there are mutants to run: a tiny run
-    # with a large `--concurrency` (e.g. `--concurrency 999 --max-mutants 1`)
-    # otherwise spends minutes creating/tearing down a huge pool for no benefit
-    # (Exploratory #57). The capped value also drives the reported "effective"
-    # worker count so the summary is accurate (#58).
-    mutant_count = executable_count(schema_result.plan)
-    effective_concurrency = max(1, min(opts.concurrency, mutant_count))
-    Metrics.set_effective_concurrency(metrics_pid, effective_concurrency)
-
-    {:ok, pool} =
-      Sandbox.create_pool(schema_result, effective_concurrency,
-        run_id: run_id,
-        force: true,
-        root: artifact_root
-      )
-
+  defp run_with_pool(
+         pool,
+         schema_result,
+         target_root,
+         opts,
+         metrics_pid,
+         selection,
+         effective_concurrency
+       ) do
     {:ok, last_killer} = Mut.LastKiller.start_link([])
     progress_pid = start_progress(opts)
 
@@ -403,6 +441,16 @@ defmodule Mix.Tasks.Mut do
 
         source_root = schema_result.work_copy_root
 
+        baseline_ms = selection.baseline_tests_ms
+
+        host_deadline_ms =
+          Deadline.host_deadline_ms(opts.test_timeout_ms, opts.suite_timeout_ms, baseline_ms)
+
+        IO.puts(
+          "[mutalisk] " <>
+            Deadline.explain(opts.test_timeout_ms, opts.suite_timeout_ms, baseline_ms)
+        )
+
         all_test_files =
           Mut.TestSelection.discover_test_files(absolute_test_paths(source_root, opts))
 
@@ -411,8 +459,8 @@ defmodule Mix.Tasks.Mut do
             schema_result.plan,
             source_root,
             opts,
-            coverage_oracle,
-            selection_mode,
+            selection.coverage_oracle,
+            selection.selection_mode,
             last_killer,
             all_test_files
           )
@@ -426,7 +474,7 @@ defmodule Mix.Tasks.Mut do
           progress_pid: progress_pid,
           concurrency: effective_concurrency,
           test_timeout_ms: opts.test_timeout_ms,
-          host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms,
+          host_deadline_ms: host_deadline_ms,
           # Resolved once: the dir->OTP-app map every fallback mutant needs.
           app_context: Mut.Umbrella.app_context(source_root)
         }
@@ -478,18 +526,23 @@ defmodule Mix.Tasks.Mut do
         # fixed paths under the run's pool dir, so destroying the original
         # `pool` reclaims them regardless of checkout state on the failure path.
         Sandbox.destroy_pool(pool)
-
-        if opts.keep_work_copy do
-          IO.puts(
-            :stderr,
-            "[mutalisk] --keep-work-copy: retaining schema-build work copy #{schema_result.work_copy_root}"
-          )
-        else
-          File.rm_rf!(schema_result.work_copy_root)
-        end
       end
 
-    set_exit_code(snapshot, opts.fail_at)
+    snapshot
+  end
+
+  # T27: every setup stage's `{:error, reason}` is a legitimate return (an
+  # uncompilable project, a stale artifact dir). Turn it into a `Mix.raise` with
+  # a readable message instead of letting it explode as a bare `MatchError`.
+  defp unwrap_stage!(_stage, {:ok, value}), do: value
+  defp unwrap_stage!(stage, {:error, reason}), do: Mix.raise(StageError.message(stage, reason))
+
+  defp cleanup_work_copy(path, opts, label) do
+    if opts.keep_work_copy do
+      IO.puts(:stderr, "[mutalisk] --keep-work-copy: retaining #{label} work copy #{path}")
+    else
+      File.rm_rf!(path)
+    end
   end
 
   # M105: write the incremental-history verdict store from the run ledger.
@@ -1237,49 +1290,8 @@ defmodule Mix.Tasks.Mut do
     maybe_stream_event(ctx.progress_pid, ctx.metrics_pid, mutant, result)
   end
 
-  defp run_with_concurrency(pool, mutants, 1, run_one) do
-    mutants
-    |> Enum.sort_by(& &1.id)
-    |> Enum.reduce(pool, fn mutant, pool ->
-      {:ok, sandbox, checked_out} = Sandbox.checkout(pool)
-      run_one.(mutant, sandbox)
-      Sandbox.checkin(sandbox, checked_out)
-    end)
-  end
-
-  defp run_with_concurrency(pool, mutants, concurrency, run_one) do
-    {:ok, queue} = Mut.SandboxQueue.start_link(pool)
-
-    try do
-      mutants
-      |> Enum.sort_by(& &1.id)
-      |> Task.async_stream(
-        fn mutant ->
-          {:ok, sandbox} = Mut.SandboxQueue.checkout(queue)
-
-          # R6: check the sandbox back in ONLY on normal completion. The fallback
-          # path resets the sandbox in its own `after`; if that reset fails twice
-          # it raises (a poisoned sandbox would yield false verdicts for every
-          # later mutant). On that raise we deliberately do NOT check it back in,
-          # so no concurrent worker can pick up the contaminated sandbox before
-          # the run tears down. It stays in the pool's `checked_out` set and is
-          # still reclaimed by `destroy_pool`, so nothing leaks.
-          run_one.(mutant, sandbox)
-          Mut.SandboxQueue.checkin(queue, sandbox)
-        end,
-        max_concurrency: concurrency,
-        ordered: false,
-        timeout: :infinity
-      )
-      |> Stream.run()
-
-      Mut.SandboxQueue.finalize(queue)
-    rescue
-      exception ->
-        _ = Mut.SandboxQueue.finalize(queue)
-        reraise exception, __STACKTRACE__
-    end
-  end
+  defp run_with_concurrency(pool, mutants, concurrency, run_one),
+    do: Mut.PoolRunner.run(pool, mutants, concurrency, run_one)
 
   defp start_progress(%{reporters: reporters}) do
     if :terminal in reporters do

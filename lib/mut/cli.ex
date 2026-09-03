@@ -20,6 +20,7 @@ defmodule Mut.Cli do
             test_paths: [String.t()] | nil,
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
+            suite_timeout_ms: pos_integer | nil,
             exclude: [Regex.t()] | nil,
             incremental: boolean,
             since: String.t() | nil,
@@ -41,6 +42,7 @@ defmodule Mut.Cli do
       :test_paths,
       :keep_work_copy,
       :test_timeout_ms,
+      :suite_timeout_ms,
       :exclude,
       :since,
       :history_path,
@@ -133,6 +135,7 @@ defmodule Mut.Cli do
     :fail_at,
     :concurrency,
     :test_timeout_ms,
+    :suite_timeout_ms,
     :reporters,
     :output_path,
     :exclude,
@@ -205,6 +208,7 @@ defmodule Mut.Cli do
           debug_plan: :boolean,
           keep_work_copy: :boolean,
           test_timeout_ms: :integer,
+          suite_timeout_ms: :integer,
           incremental: :boolean,
           since: :string
         ],
@@ -265,6 +269,7 @@ defmodule Mut.Cli do
          {:ok, selection} <- selection(parsed, config),
          {:ok, test_paths} <- test_paths(config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
+         {:ok, suite_timeout_ms} <- suite_timeout_ms(parsed, config),
          {:ok, coverage_timeout_ms} <- coverage_timeout_ms(config),
          {:ok, exclude} <- exclude(config),
          {:ok, incremental} <- incremental(parsed, config),
@@ -285,6 +290,7 @@ defmodule Mut.Cli do
          test_paths: test_paths,
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          test_timeout_ms: test_timeout_ms,
+         suite_timeout_ms: suite_timeout_ms,
          exclude: exclude,
          incremental: incremental,
          since: since,
@@ -394,6 +400,34 @@ defmodule Mut.Cli do
       _other ->
         {:error,
          "--test-timeout-ms must be an integer between #{@test_timeout_min_ms} and #{@test_timeout_max_ms}; run `mix help mut`"}
+    end
+  end
+
+  # Whole-suite (host) budget for ONE mutant's selected tests. Unset (nil) means
+  # "derive it from the measured baseline" — see `Mut.Deadline`. The upper bound
+  # is an hour: a single mutant that needs longer makes mutation testing
+  # impractical long before the timeout matters.
+  @suite_timeout_min_ms 1_000
+  @suite_timeout_max_ms 3_600_000
+
+  defp suite_timeout_ms(parsed, config) do
+    value =
+      Keyword.get(
+        parsed,
+        :suite_timeout_ms,
+        Keyword.get(config, :suite_timeout_ms)
+      )
+
+    case value do
+      nil ->
+        {:ok, nil}
+
+      n when is_integer(n) and n >= @suite_timeout_min_ms and n <= @suite_timeout_max_ms ->
+        {:ok, n}
+
+      _other ->
+        {:error,
+         "--suite-timeout-ms must be an integer between #{@suite_timeout_min_ms} and #{@suite_timeout_max_ms}; run `mix help mut`"}
     end
   end
 

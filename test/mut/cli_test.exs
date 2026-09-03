@@ -228,6 +228,30 @@ defmodule Mut.CliTest do
              Cli.parse(["--test-timeout-ms", "20000"], test_timeout_ms: 5_000)
   end
 
+  test "suite_timeout_ms defaults to nil and accepts overrides" do
+    assert {:ok, %Options{suite_timeout_ms: nil}} = Cli.parse([])
+
+    assert {:ok, %Options{suite_timeout_ms: 120_000}} =
+             Cli.parse(["--suite-timeout-ms", "120000"])
+
+    assert {:ok, %Options{suite_timeout_ms: 45_000}} = Cli.parse([], suite_timeout_ms: 45_000)
+
+    # CLI overrides config.
+    assert {:ok, %Options{suite_timeout_ms: 90_000}} =
+             Cli.parse(["--suite-timeout-ms", "90000"], suite_timeout_ms: 45_000)
+  end
+
+  test "rejects out-of-range --suite-timeout-ms" do
+    assert {:error, message} = Cli.parse(["--suite-timeout-ms", "100"])
+    assert message =~ "--suite-timeout-ms must be an integer between"
+
+    assert {:error, message} = Cli.parse(["--suite-timeout-ms", "3600001"])
+    assert message =~ "--suite-timeout-ms must be an integer between"
+
+    assert {:error, message} = Cli.parse([], suite_timeout_ms: "nope")
+    assert message =~ "--suite-timeout-ms must be an integer between"
+  end
+
   test "rejects out-of-range --test-timeout-ms" do
     assert {:error, message} = Cli.parse(["--test-timeout-ms", "100"])
     assert message =~ "--test-timeout-ms must be an integer between"
