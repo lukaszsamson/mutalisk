@@ -162,12 +162,14 @@ defmodule Mut.Mutator.FunctionReplace do
   # [filter: 2]` does not bring `reject/2` into scope), so a bare rename can
   # produce a mutant that fails to compile for a reason unrelated to the
   # mutation itself. Emit a fully-qualified call instead — it compiles
-  # regardless of what was imported.
+  # regardless of what was imported. Only functions: a qualified MACRO call
+  # would additionally need `require`, and the swap allowlist contains no
+  # macros anyway.
   defp rename({_name, m, args}, replacement, %DispatchSite{
-         dispatch_kind: kind,
+         dispatch_kind: :imported_function,
          resolved_module: module
        })
-       when kind in [:imported_function, :imported_macro] and not is_nil(module) do
+       when not is_nil(module) do
     target = {:__aliases__, [alias: false], Module.split(module) |> Enum.map(&String.to_atom/1)}
     {{:., [], [target, replacement]}, m, args}
   end

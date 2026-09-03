@@ -250,6 +250,36 @@ defmodule Mut.AstWalkCodegenRefusalTest do
     end
   end
 
+  describe "T14: `&` captures are runtime code, not codegen" do
+    @capture_fixture """
+    defmodule Fx do
+      def a(x, list), do: Enum.filter(list, &match?({:ok, ^x}, &1))
+      def b(l), do: Enum.map(l, &(&1 |> foo() |> bar() |> baz()))
+      def c(l, m), do: Enum.map(l, &%{m | k: &1})
+    end
+    """
+
+    test "pin, pipeline-drop and map-update candidates inside &(...) are kept" do
+      {:ok, ast} = Mut.SourceParse.parse_string(@capture_fixture, "lib/fx.ex")
+      opts = [file: "lib/fx.ex", source: @capture_fixture]
+
+      assert [_] = Mut.AstWalk.pin_candidates(ast, opts)
+      assert [_ | _] = Mut.AstWalk.pipeline_drop_candidates(ast, opts)
+      assert [_] = Mut.AstWalk.map_update_drop_candidates(ast, opts)
+    end
+  end
+
+  describe "T13: qualify_module_parts/2 edge cases" do
+    test "an absolute Elixir.Foo alias is not prefixed by the parent" do
+      assert Mut.AstWalk.qualify_module_parts([:"Elixir", :Foo], App) == Foo
+    end
+
+    test "a bare __MODULE__ resolves to the parent" do
+      assert Mut.AstWalk.qualify_module_parts([{:__MODULE__, [], nil}], App) == App
+      assert Mut.AstWalk.qualify_module_parts([{:__MODULE__, [], nil}], nil) == nil
+    end
+  end
+
   describe "T15: statement-delete never deletes a lexical-scope directive" do
     test "alias / import / require / use statements are hazards" do
       source = """

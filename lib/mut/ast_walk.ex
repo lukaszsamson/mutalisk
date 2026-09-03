@@ -14,6 +14,7 @@ defmodule Mut.AstWalk do
   )a
 
   @no_descend ~w(& quote unquote unquote_splicing)a
+  @quote_forms ~w(quote unquote unquote_splicing)a
   @function_defs ~w(def defp defmacro defmacrop defguard defguardp)a
   @reserved_attributes ~w(
     moduledoc doc typedoc behaviour impl spec type typep opaque callback macrocallback
@@ -87,8 +88,15 @@ defmodule Mut.AstWalk do
   `ignored_modules/1` records and `@mutalisk_ignore` filters on.
   """
   @spec qualify_module_parts([term()], module() | nil) :: module() | nil
+  def qualify_module_parts([{:__MODULE__, _meta, ctx}], parent) when is_atom(ctx), do: parent
+
   def qualify_module_parts([{:__MODULE__, _meta, ctx} | rest], parent) when is_atom(ctx) do
     if parent, do: qualify_module_parts(rest, parent), else: nil
+  end
+
+  # `defmodule Elixir.Foo` is absolute: nesting does not prefix it.
+  def qualify_module_parts([:"Elixir" | rest] = parts, _parent) when rest != [] do
+    if Enum.all?(parts, &is_atom/1), do: Module.concat(parts), else: nil
   end
 
   def qualify_module_parts(parts, parent) when is_list(parts) do
@@ -199,7 +207,9 @@ defmodule Mut.AstWalk do
     acc = enter_module(node, acc)
     acc = maybe_conditional_candidate(node, path, acc)
 
-    if refuse_codegen?(node) do
+    # Keeps its pre-T14 `no_descend?/1` pruning (incl. `&`) so existing
+    # conditional ids do not move; T14 only adds the defmacro-body rule.
+    if no_descend?(node) or macro_def?(node) do
       {prune(node), push_frame(node, path, acc)}
     else
       {node, push_frame(node, path, acc)}
@@ -1878,22 +1888,31 @@ defmodule Mut.AstWalk do
   defp no_descend?({name, _meta, _args}) when name in @no_descend, do: true
   defp no_descend?(_node), do: false
 
-  # T14 (B19): the ONE shared code-generation refusal policy every collector
-  # applies. Two rules, both already enforced piecemeal by the dispatch/guard
-  # walkers:
+  # T14 (B19): the shared code-generation refusal policy applied by the
+  # pin/conditional walkers and the opt-in structural walkers (statement-
+  # delete, clause-delete, pipeline-drop, map-update-drop, receive-timeout).
+  # Two rules:
   #
-  #   * `quote` / `unquote` / `unquote_splicing` (plus `&` captures) subtrees
-  #     are PRUNED — that is expansion-time code, and the tool deliberately
-  #     does not mutate what a macro *generates* (`no_descend?/1`).
+  #   * `quote` / `unquote` / `unquote_splicing` subtrees are PRUNED — that is
+  #     expansion-time code, and the tool deliberately does not mutate what a
+  #     macro *generates*.
   #   * `defmacro` / `defmacrop` bodies are code generators too: a mutation
   #     there changes expansion in every caller and is noise, not a
   #     behavioural test (the guard walker's `in_macro_def_path?/1` rule,
   #     generalised to the whole subtree).
   #
+  # `&` captures are NOT refused here: `&(&1 |> a() |> b())` is ordinary
+  # runtime code. The dispatch/guard/attribute/body-literal pre-functions keep
+  # their own `no_descend?/1` (which does prune `&`, for oracle-matching
+  # reasons) unchanged, so their stable ids do not move.
+  #
   # Callers prune the node (`prune/1`) so neither the pre- nor the post-fn
   # ever visits the refused subtree; module-stack / frame balance is
   # preserved because the children are removed before descent.
-  defp refuse_codegen?(node), do: no_descend?(node) or macro_def?(node)
+  defp refuse_codegen?(node), do: quote_form?(node) or macro_def?(node)
+
+  defp quote_form?({name, _meta, _args}) when name in @quote_forms, do: true
+  defp quote_form?(_node), do: false
 
   defp macro_def?({name, _meta, args}) when name in [:defmacro, :defmacrop] and is_list(args),
     do: true
