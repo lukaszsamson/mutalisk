@@ -1411,23 +1411,40 @@ defmodule Mix.Tasks.Mut do
       # rendering or writing the file reports (an unencodable byte, a full disk,
       # a read-only output dir) must NOT vaporise an hours-long run: log it
       # loudly on stderr and let the run finish normally.
-      safe_render(fn -> write_file_reports(snapshot, plan, work_copy, host_root, opts) end)
+      # Each writer is wrapped on its own so one failing reporter does not
+      # take the others down; any failure still fails the process exit code
+      # (a CI job must not go green with a missing report artifact).
+      results = write_file_reports(snapshot, plan, work_copy, host_root, opts)
+
+      if :error in results do
+        IO.puts(:stderr, "mutalisk: one or more report files could not be written; exiting 1")
+        fail_run()
+      end
     end
   end
 
   defp write_file_reports(snapshot, plan, work_copy, host_root, opts) do
-    rendered = render_stryker_report(snapshot, plan, work_copy, opts)
+    case safe_render(fn -> render_stryker_report(snapshot, plan, work_copy, opts) end) do
+      {:ok, rendered} ->
+        writers = [
+          {:stryker_json,
+           fn -> StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path)) end},
+          {:html,
+           fn -> Html.write(rendered, resolve_output_path(host_root, html_output_path(opts))) end},
+          {:github_actions, fn -> GitHubActions.emit(rendered) end}
+        ]
 
-    if :stryker_json in opts.reporters do
-      StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path))
+        for {reporter, write} <- writers, reporter in opts.reporters, do: write_status(write)
+
+      :error ->
+        [:error]
     end
+  end
 
-    if :html in opts.reporters do
-      Html.write(rendered, resolve_output_path(host_root, html_output_path(opts)))
-    end
-
-    if :github_actions in opts.reporters do
-      GitHubActions.emit(rendered)
+  defp write_status(write) do
+    case safe_render(write) do
+      {:ok, _} -> :ok
+      :error -> :error
     end
   end
 
@@ -1435,8 +1452,7 @@ defmodule Mix.Tasks.Mut do
   # Run the file-report writers, downgrading any crash to a stderr diagnostic.
   # Public-ish (via @doc false) only so the failure path is directly testable.
   def safe_render(fun) when is_function(fun, 0) do
-    fun.()
-    :ok
+    {:ok, fun.()}
   rescue
     exception ->
       IO.puts(

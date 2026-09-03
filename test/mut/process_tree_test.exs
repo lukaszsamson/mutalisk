@@ -56,7 +56,7 @@ defmodule Mut.ProcessTreeTest do
     # exited by the time the timeout path runs cleanup. `kill_port/2` is only
     # told about it via `known_os_pid`.
     decoy_port = Port.open({:spawn_executable, sleep}, [:binary, :exit_status, args: ["60"]])
-    {:os_pid, decoy_pid} = Port.info(decoy_port, :os_pid)
+    {decoy_pid, _start} = decoy = ProcessTree.identify(decoy_port)
     assert alive?(decoy_pid), "decoy process should be running before the kill"
 
     # A real port whose own OS process has already exited, so Port.info/2
@@ -73,7 +73,16 @@ defmodule Mut.ProcessTreeTest do
 
     assert Port.info(port, :os_pid) == nil
 
+    # A bare pid (no start-time snapshot) must never be signalled: the OS may
+    # have recycled it (review W4-1).
     :ok = ProcessTree.kill_port(port, decoy_pid)
+    assert alive?(decoy_pid), "an unverifiable bare pid must not be killed"
+
+    # A stale identity (right pid, wrong start time) must not be signalled either.
+    :ok = ProcessTree.kill_port(port, {decoy_pid, "Thu Jan  1 00:00:00 1970"})
+    assert alive?(decoy_pid), "a pid whose start time no longer matches must not be killed"
+
+    :ok = ProcessTree.kill_port(port, decoy)
 
     assert eventually(fn -> not alive?(decoy_pid) end),
            "kill_port/2 must reap the known_os_pid process even though " <>

@@ -27,9 +27,16 @@ defmodule Mut.DeadlineTest do
     assert Deadline.host_deadline_ms(30_000, nil, 1_000) == 30_000 + @buffer
   end
 
-  test "an explicit suite_timeout_ms wins over both the per-test timeout and the baseline" do
-    assert Deadline.host_deadline_ms(30_000, 5_000, 600_000) == 5_000 + @buffer
+  test "an explicit suite_timeout_ms wins over the baseline (floored by the per-test timeout)" do
+    assert Deadline.host_deadline_ms(3_000, 5_000, 600_000) == 5_000 + @buffer
     assert Deadline.host_deadline_ms(10_000, 300_000, nil) == 300_000 + @buffer
+  end
+
+  test "the derived baseline budget is capped and the per-test timeout floors an explicit suite budget" do
+    cap = Deadline.derived_cap_ms()
+    assert Deadline.host_deadline_ms(10_000, nil, 1_200_000) == cap + Deadline.buffer_ms()
+    # suite_timeout_ms below test_timeout_ms must not shorten the deadline.
+    assert Deadline.host_deadline_ms(600_000, 1_000, nil) == 600_000 + Deadline.buffer_ms()
   end
 
   test "explain names the source of the budget" do

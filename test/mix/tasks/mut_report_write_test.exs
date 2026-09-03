@@ -44,7 +44,10 @@ defmodule Mix.Tasks.MutReportWriteTest do
   end
 
   test "successful writers return :ok without touching stderr" do
-    stderr = capture_io(:stderr, fn -> assert MutTask.safe_render(fn -> :written end) == :ok end)
+    stderr =
+      capture_io(:stderr, fn ->
+        assert MutTask.safe_render(fn -> :written end) == {:ok, :written}
+      end)
 
     assert stderr == ""
   end

@@ -127,12 +127,7 @@ defmodule Mut.ChildProcess do
     }
   end
 
-  defp port_os_pid(port) do
-    case Port.info(port, :os_pid) do
-      {:os_pid, pid} when is_integer(pid) -> pid
-      _unknown -> nil
-    end
-  end
+  defp port_os_pid(port), do: Mut.ProcessTree.identify(port)
 
   # Absolute monotonic deadline (R2): the budget is wall-clock from port open,
   # not an inactivity timer. The previous `after timeout_ms` reset on every

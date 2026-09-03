@@ -408,10 +408,14 @@ defmodule Mut.Sandbox do
   # from) because a stat fingerprint is only meaningful against the mtimes the
   # copy actually produced — `cp`/`File.cp_r` do not preserve the source's.
   defp capture_priv_baseline(path, mode) do
+    # Same lstat walker as the stray sweep: `Path.wildcard/2` would follow a
+    # symlinked directory (`priv/static -> ../../assets`) and record baseline
+    # entries whose real target lives OUTSIDE the sandbox, which a restore
+    # would then write through.
     path
     |> priv_dirs()
-    |> Enum.flat_map(&Path.wildcard(Path.join(&1, "**/*"), match_dot: true))
-    |> Enum.filter(&File.regular?/1)
+    |> Enum.filter(&File.dir?/1)
+    |> Enum.flat_map(&all_files/1)
     |> Map.new(fn file -> {Path.relative_to(file, path), priv_fingerprint(file, mode)} end)
   end
 

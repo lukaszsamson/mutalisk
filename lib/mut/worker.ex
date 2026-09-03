@@ -412,12 +412,7 @@ defmodule Mut.Worker do
     end
   end
 
-  defp port_os_pid(port) do
-    case Port.info(port, :os_pid) do
-      {:os_pid, pid} when is_integer(pid) -> pid
-      _unknown -> nil
-    end
-  end
+  defp port_os_pid(port), do: Mut.ProcessTree.identify(port)
 
   # T31: after closing a timed-out port, drain any {port, {:data, _}} /
   # {port, {:exit_status, _}} messages already queued for it in this worker's
@@ -463,10 +458,12 @@ defmodule Mut.Worker do
       # R9/T30: zero tests *executed* (tag excludes / path filters matched
       # nothing, or every selected test was skipped/excluded) is NOT a surviving
       # mutant — no test had the chance to detect it. Classifying it `:survived`
-      # manufactures false survivors that drag the score down and imply
-      # test-suite gaps that don't exist. `:no_coverage` is excluded from the
-      # score denominator, like `:skipped`. Note `total` counts skipped and
-      # excluded tests too, so it cannot answer this on its own — `ran` can.
+      # manufactures false survivors that imply test-suite gaps that don't
+      # exist. Note that `:no_coverage` still counts as UNDETECTED in the
+      # documented score (`Mut.Metrics.score/4` puts it in the denominator, like
+      # `:survived`); the distinction is diagnostic, not a score change. `total`
+      # counts skipped and excluded tests too, so it cannot answer this on its
+      # own — `ran` can.
       %{summary: %{"failed" => 0} = summary} when code == 0 ->
         if ran_count(summary) == 0 do
           %Result{status: :no_coverage, duration_ms: duration_ms}
