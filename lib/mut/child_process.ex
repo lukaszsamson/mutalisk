@@ -42,7 +42,11 @@ defmodule Mut.ChildProcess do
     result =
       try do
         port = open_port(path, args, opts)
-        collect(port, init_state(opts, log_io), Keyword.get(opts, :timeout_ms, :infinity))
+        # T32: capture the os_pid right after open, before it can go nil (a
+        # non-exec asdf/mise-style wrapper can exit, closing this info, well
+        # before its beam.smp descendant does) — see Mut.ProcessTree.kill_port/2.
+        os_pid = port_os_pid(port)
+        collect(port, init_state(opts, log_io, os_pid), Keyword.get(opts, :timeout_ms, :infinity))
       after
         close_log(log_io)
       end
@@ -113,13 +117,21 @@ defmodule Mut.ChildProcess do
     end
   end
 
-  defp init_state(opts, log_io) do
+  defp init_state(opts, log_io, os_pid) do
     %{
       output: "",
       bytes: 0,
       max_bytes: Keyword.get(opts, :max_output_bytes, @default_max_output_bytes),
-      log_io: log_io
+      log_io: log_io,
+      os_pid: os_pid
     }
+  end
+
+  defp port_os_pid(port) do
+    case Port.info(port, :os_pid) do
+      {:os_pid, pid} when is_integer(pid) -> pid
+      _unknown -> nil
+    end
   end
 
   # Absolute monotonic deadline (R2): the budget is wall-clock from port open,
@@ -139,7 +151,8 @@ defmodule Mut.ChildProcess do
         {:exit, code, captured_output(state)}
     after
       remaining(deadline) ->
-        kill_port(port)
+        kill_port(port, state.os_pid)
+        drain_port_messages(port)
         {:timeout, captured_output(state)}
     end
   end
@@ -150,6 +163,22 @@ defmodule Mut.ChildProcess do
   # accumulated output (rather than each chunk) keeps codepoints split across
   # port chunks intact. The raw bytes still reach the optional log file.
   defp captured_output(%{output: output}), do: Mut.Text.scrub_utf8(output)
+
+  # T31: after closing a timed-out port, drain any {port, {:data, _}} /
+  # {port, {:exit_status, _}} messages already queued in this process's
+  # mailbox (the child can write/exit in the race right before Port.close/1)
+  # so a long-lived caller mailbox doesn't accumulate stale junk for later
+  # unrelated receives to scan past. `after 0` bounds this to what's already
+  # queued — it never waits for new messages.
+  defp drain_port_messages(port) do
+    receive do
+      {^port, {:data, _data}} -> drain_port_messages(port)
+      {^port, {:exit_status, _code}} -> drain_port_messages(port)
+      {:EXIT, ^port, _reason} -> drain_port_messages(port)
+    after
+      0 -> :ok
+    end
+  end
 
   defp deadline_from(:infinity), do: :infinity
   defp deadline_from(ms) when is_integer(ms), do: System.monotonic_time(:millisecond) + ms
@@ -206,5 +235,5 @@ defmodule Mut.ChildProcess do
 
   # Tree-kill (TERM then KILL across the descendant tree) lives in
   # Mut.ProcessTree, shared with Mut.Worker so the two paths can't drift.
-  defp kill_port(port), do: Mut.ProcessTree.kill_port(port)
+  defp kill_port(port, os_pid), do: Mut.ProcessTree.kill_port(port, os_pid)
 end

@@ -163,6 +163,23 @@ defmodule Mut.WorkerTest do
     assert result.status == :timeout
   end
 
+  test "T31: run_schema does not leave stale port messages after repeated timeouts" do
+    path = fake_sandbox("timeout_drain")
+    File.write!(Path.join(path, "mix.exs"), "mix")
+    mix = timeout_shim()
+
+    for _ <- 1..2 do
+      result =
+        Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, timeout_ms: 50)
+
+      assert result.status == :timeout
+    end
+
+    Process.sleep(100)
+
+    assert {:message_queue_len, 0} = Process.info(self(), :message_queue_len)
+  end
+
   test "run_schema returns clear error when sandbox is missing mix.exs" do
     path = fake_sandbox("missing_mix")
     File.rm!(Path.join(path, "mix.exs"))

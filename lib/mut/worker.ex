@@ -244,8 +244,14 @@ defmodule Mut.Worker do
             env(mutant_id)
           )
 
+        # T32: snapshot the os_pid right after open — a wrapper `mix` (asdf/mise
+        # shim, not exec'd) can have already exited by the time the timeout path
+        # runs cleanup, at which point Port.info/2 returns nil even though the
+        # real beam.smp descendant is still alive.
+        os_pid = port_os_pid(port)
+
         port
-        |> collect(Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> collect(os_pid, Keyword.get(opts, :timeout_ms, @default_timeout_ms))
         |> classify(elapsed(started))
 
       {:error, reason} ->
@@ -264,8 +270,10 @@ defmodule Mut.Worker do
             fallback_env()
           )
 
+        os_pid = port_os_pid(port)
+
         port
-        |> collect(Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> collect(os_pid, Keyword.get(opts, :timeout_ms, @default_timeout_ms))
         |> classify(elapsed(started))
 
       {:error, reason} ->
@@ -379,9 +387,9 @@ defmodule Mut.Worker do
   # restart + Logger) never tripped it and wedged the run (Task.async_stream is
   # timeout: :infinity). The deadline is fixed once and the `after` shrinks as
   # time passes, so a chatty hang is killed at the budget like a silent one.
-  defp collect(port, timeout_ms) do
+  defp collect(port, os_pid, timeout_ms) do
     deadline = System.monotonic_time(:millisecond) + timeout_ms
-    collect(port, "", deadline)
+    collect(port, os_pid, "", deadline)
   end
 
   # T24: the mutant's output is arbitrary bytes (a truncated latin-1 log line, a
@@ -390,16 +398,39 @@ defmodule Mut.Worker do
   # rejects invalid UTF-8 — one stray byte would crash the final write and
   # destroy the whole run. Scrub once, here at capture, on the *whole*
   # accumulated output so codepoints split across port chunks stay intact.
-  defp collect(port, output, deadline) do
+  defp collect(port, os_pid, output, deadline) do
     remaining = max(deadline - System.monotonic_time(:millisecond), 0)
 
     receive do
-      {^port, {:data, data}} -> collect(port, bounded_output(output, data), deadline)
+      {^port, {:data, data}} -> collect(port, os_pid, bounded_output(output, data), deadline)
       {^port, {:exit_status, code}} -> {:exit, code, Mut.Text.scrub_utf8(output)}
     after
       remaining ->
-        kill_port(port)
+        kill_port(port, os_pid)
+        drain_port_messages(port)
         {:timeout, Mut.Text.scrub_utf8(output)}
+    end
+  end
+
+  defp port_os_pid(port) do
+    case Port.info(port, :os_pid) do
+      {:os_pid, pid} when is_integer(pid) -> pid
+      _unknown -> nil
+    end
+  end
+
+  # T31: after closing a timed-out port, drain any {port, {:data, _}} /
+  # {port, {:exit_status, _}} messages already queued for it in this worker's
+  # (long-lived, one-per-slot) mailbox so repeated timeouts don't accumulate
+  # stale junk for a later unrelated `receive` to scan past. `after 0` only
+  # drains what's already queued — it never waits for new messages.
+  defp drain_port_messages(port) do
+    receive do
+      {^port, {:data, _data}} -> drain_port_messages(port)
+      {^port, {:exit_status, _code}} -> drain_port_messages(port)
+      {:EXIT, ^port, _reason} -> drain_port_messages(port)
+    after
+      0 -> :ok
     end
   end
 
@@ -489,7 +520,7 @@ defmodule Mut.Worker do
   # version manager / wrapper `mix`, the immediate child forks the real BEAM,
   # so `kill -9 <immediate>` orphans the (often infinite-looping) mutant VM on
   # the timeout path. Shared with Mut.ChildProcess via Mut.ProcessTree.
-  defp kill_port(port), do: Mut.ProcessTree.kill_port(port)
+  defp kill_port(port, os_pid), do: Mut.ProcessTree.kill_port(port, os_pid)
 
   defp elapsed(started), do: System.monotonic_time(:millisecond) - started
 end

@@ -130,4 +130,29 @@ defmodule Mut.ChildProcessTest do
     # Killed near the budget, not running unbounded.
     assert elapsed < 3_000
   end
+
+  test "T31: a timeout does not leave stale port messages in the caller's mailbox" do
+    dir = tmp_script_dir()
+
+    script =
+      write_script(dir, "chatty2.sh", """
+      #!/bin/sh
+      while true; do
+        echo "still working"
+        sleep 0.02
+      done
+      """)
+
+    # Run twice: a leak on the first call would show up as extra messages
+    # sitting in this (long-lived, ExUnit test) process's mailbox by the time
+    # the second call returns.
+    assert {:timeout, _} = ChildProcess.run(script, [], timeout_ms: 150)
+    assert {:timeout, _} = ChildProcess.run(script, [], timeout_ms: 150)
+
+    # Give any straggling scheduled deliveries a moment to land before
+    # asserting the mailbox is clean.
+    Process.sleep(100)
+
+    assert {:message_queue_len, 0} = Process.info(self(), :message_queue_len)
+  end
 end

@@ -18,16 +18,39 @@ defmodule Mut.ProcessTree do
   @doc """
   Close `port` and terminate its OS process tree. Best-effort: never raises
   (a closed port / already-dead pid / missing `pgrep` all degrade to `:ok`).
+
+  `known_os_pid`, when given, is used if `Port.info(port, :os_pid)` returns
+  `nil` (T32: a non-exec asdf/mise-style wrapper can have already exited —
+  and the port along with it — by the time cleanup runs, even though its
+  descendant, e.g. the real `beam.smp`, is still alive). Callers that know the
+  port's os_pid up front (captured right after `Port.open/2`) should pass it
+  so descendant cleanup still runs in that case.
   """
-  @spec kill_port(port()) :: :ok
-  def kill_port(port) do
-    os_pid = Port.info(port, :os_pid)
-    Port.close(port)
+  @spec kill_port(port(), non_neg_integer() | nil) :: :ok
+  def kill_port(port, known_os_pid \\ nil) do
+    os_pid =
+      case Port.info(port, :os_pid) do
+        {:os_pid, pid} when is_integer(pid) -> pid
+        _unknown -> known_os_pid
+      end
+
+    # Port.close/1 raises if the port already auto-closed (e.g. its
+    # :exit_status was already delivered) — that must NOT skip the
+    # process-tree kill below, or `known_os_pid` cleanup (the whole point of
+    # T32) would be defeated by the very close call meant to precede it.
+    safe_close(port)
 
     case os_pid do
-      {:os_pid, pid} when is_integer(pid) -> kill_process_tree(pid)
+      pid when is_integer(pid) -> kill_process_tree(pid)
       _unknown -> :ok
     end
+  catch
+    _kind, _reason -> :ok
+  end
+
+  defp safe_close(port) do
+    Port.close(port)
+    :ok
   catch
     _kind, _reason -> :ok
   end
