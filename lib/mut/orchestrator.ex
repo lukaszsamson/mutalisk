@@ -483,21 +483,31 @@ defmodule Mut.Orchestrator do
           (target?(mutator, :env_walker) and :env_walker in enabled_targets)
       end)
 
-    if literal_mutators == [] do
+    engine_on? = :body_literal in enabled_targets or :env_walker in enabled_targets
+
+    cond do
       # T44: neither :body_literal nor :env_walker is enabled, so no literal
       # mutator can ever apply to these candidates. Emit a
       # `body_literal_engine_disabled` skip per candidate (mirroring
       # `attribute_engine_disabled`/`guard_engine_disabled` above) instead of
       # silently dropping them — otherwise debug plans and skip counts
       # under-report schema literal candidates when the engine is off.
-      {[], Enum.map(candidates, &skip(&1, :body_literal_engine_disabled, nil))}
-    else
-      candidates
-      |> Enum.map(&schema_literal_mutants(&1, literal_mutators, source))
-      |> Enum.reduce({[], []}, fn
-        {:mutants, mutants}, {all, skips} -> {all ++ mutants, skips}
-        {:skip, skip}, {all, skips} -> {all, skips ++ [skip]}
-      end)
+      not engine_on? ->
+        {[], Enum.map(candidates, &skip(&1, :body_literal_engine_disabled, nil))}
+
+      # Engine on, but the selected `--mutators` contain no literal mutator:
+      # that is a mutator-set gap, not a disabled engine (same distinction the
+      # guard engine makes).
+      literal_mutators == [] ->
+        {[], Enum.map(candidates, &skip(&1, :no_applicable_mutator, nil))}
+
+      true ->
+        candidates
+        |> Enum.map(&schema_literal_mutants(&1, literal_mutators, source))
+        |> Enum.reduce({[], []}, fn
+          {:mutants, mutants}, {all, skips} -> {all ++ mutants, skips}
+          {:skip, skip}, {all, skips} -> {all, skips ++ [skip]}
+        end)
     end
   end
 

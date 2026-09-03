@@ -258,8 +258,17 @@ defmodule Mut.Cli do
     end
   end
 
-  defp invalid_option_error(flag, _value),
-    do: {:error, "unknown option #{flag}; run `mix help mut`"}
+  # OptionParser reports a KNOWN flag with an unparsable value as
+  # `{flag, value}` too; say so instead of calling the flag unknown.
+  defp invalid_option_error(flag, value) do
+    normalized = flag |> String.trim_leading("--") |> String.replace("-", "_")
+
+    if normalized in @known_switch_names do
+      {:error, "invalid value #{inspect(value)} for #{flag}; run `mix help mut`"}
+    else
+      {:error, "unknown option #{flag}; run `mix help mut`"}
+    end
+  end
 
   defp expand_multi_file_args(argv), do: expand_multi_file_args(argv, [])
 
@@ -758,10 +767,10 @@ defmodule Mut.Cli do
     |> Enum.filter(&String.starts_with?(&1, "--"))
     |> Enum.map(&(&1 |> String.trim_leading("--") |> String.split("=", parts: 2) |> List.first()))
     |> Enum.map(&String.trim_leading(&1, "no-"))
-    # OptionParser treats `-` and `_` interchangeably in flag names (`--fail-at`
-    # and `--fail_at` both set `:fail_at`), so normalise both spellings before
-    # comparing — otherwise `--fail-at 80 --fail_at 90` bypasses this check
-    # entirely (T46).
+    # Normalise `-`/`_` so the dash-spelled `--test-paths` matches the
+    # underscore-spelled `@repeatable_flags` entry (T46). (An underscore-spelled
+    # flag like `--fail_at` is rejected by OptionParser as invalid before this
+    # check runs, so it cannot itself create a duplicate.)
     |> Enum.map(&String.replace(&1, "-", "_"))
     |> Enum.reject(&(&1 in @repeatable_flags))
     |> Enum.frequencies()

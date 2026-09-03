@@ -93,6 +93,7 @@ defmodule Mut.Reporter.StrykerJson do
       |> validate_schema_version(rendered)
       |> validate_thresholds(rendered)
       |> validate_files(rendered)
+      |> validate_test_references(rendered)
       |> Enum.reverse()
 
     if violations == [], do: :ok, else: {:error, violations}
@@ -315,10 +316,25 @@ defmodule Mut.Reporter.StrykerJson do
   # `mutalisk.killed_by_raw` (see `mutalisk_extension/3`).
   defp killed_by(%Mutant{killing_test: nil}), do: []
 
+  # The worker records the failing test's file verbatim (`killing_test_file`);
+  # that is authoritative and needs no guessing. The module-name heuristic
+  # below is only a fallback for older ledgers/history without it.
+  defp killed_by(%Mutant{killing_test_file: file, covering_tests: covering})
+       when is_binary(file) do
+    covering = covering || []
+
+    cond do
+      file in covering -> [test_id(file)]
+      # Absolute/work-copy path vs. relative covering path: match on suffix.
+      match = Enum.find(covering, &String.ends_with?(file, &1)) -> [test_id(match)]
+      true -> [test_id(file)]
+    end
+  end
+
   defp killed_by(%Mutant{killing_test: killing_test, covering_tests: covering_tests}) do
     case killing_test_file(killing_test, covering_tests || []) do
       nil -> []
-      file -> [file]
+      file -> [test_id(file)]
     end
   end
 
@@ -347,7 +363,7 @@ defmodule Mut.Reporter.StrykerJson do
   # file gets a single file-level test entry whose id IS the file path.
   defp test_files(mutants) do
     mutants
-    |> Enum.flat_map(&covered_by/1)
+    |> Enum.flat_map(&(covered_by(&1) ++ killed_by(&1)))
     |> Enum.uniq()
     |> Enum.sort()
     |> Map.new(fn file -> {file, %{"tests" => [%{"id" => file, "name" => file}]}} end)
@@ -408,6 +424,28 @@ defmodule Mut.Reporter.StrykerJson do
   end
 
   defp validate_files(violations, _rendered), do: ["files must be a map" | violations]
+
+  # T43: every `coveredBy`/`killedBy` id must resolve to a `testFiles[*].tests[].id`.
+  defp validate_test_references(violations, %{"files" => files} = rendered) when is_map(files) do
+    known =
+      rendered
+      |> Map.get("testFiles", %{})
+      |> Enum.flat_map(fn {_file, %{"tests" => tests}} -> Enum.map(tests, & &1["id"]) end)
+      |> MapSet.new()
+
+    files
+    |> Enum.flat_map(fn {_path, %{"mutants" => mutants}} -> mutants end)
+    |> Enum.flat_map(fn mutant ->
+      Map.get(mutant, "coveredBy", []) ++ Map.get(mutant, "killedBy", [])
+    end)
+    |> Enum.reject(&MapSet.member?(known, &1))
+    |> Enum.uniq()
+    |> Enum.reduce(violations, fn id, acc ->
+      ["test id #{inspect(id)} referenced by coveredBy/killedBy is missing from testFiles" | acc]
+    end)
+  end
+
+  defp validate_test_references(violations, _rendered), do: violations
 
   defp validate_file(violations, file, %{
          "language" => language,

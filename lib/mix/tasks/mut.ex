@@ -638,6 +638,7 @@ defmodule Mix.Tasks.Mut do
       entry.mutant
       | status: entry.status,
         killing_test: entry.killing_test,
+        killing_test_file: Map.get(entry, :killing_test_file),
         covering_tests: entry.covering_tests
     }
   end
@@ -1150,10 +1151,8 @@ defmodule Mix.Tasks.Mut do
   def pathological_coverage_abort_message(wall_ms, baseline_ms) do
     threshold_ms = pathological_threshold_ms(baseline_ms)
 
-    ratio =
-      if threshold_ms == 0,
-        do: "inf",
-        else: :erlang.float_to_binary(wall_ms / threshold_ms, decimals: 1)
+    # `threshold_ms` has a 10s floor, so the division is always defined.
+    ratio = :erlang.float_to_binary(wall_ms / threshold_ms, decimals: 1)
 
     "Coverage collection took #{wall_ms}ms vs baseline #{baseline_ms}ms " <>
       "(threshold #{threshold_ms}ms, #{ratio}x threshold). Rerun with " <>

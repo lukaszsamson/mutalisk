@@ -45,6 +45,7 @@ defmodule Mut.Metrics do
             optional(:description) => String.t(),
             optional(:duration_ms) => non_neg_integer() | nil,
             optional(:killing_test) => String.t() | nil,
+            optional(:killing_test_file) => String.t() | nil,
             optional(:covering_tests) => [String.t()] | nil,
             optional(:skip_reason) => atom() | nil,
             optional(:compile_error) => term(),
@@ -404,6 +405,7 @@ defmodule Mut.Metrics do
   defp ledger_entry(%Mutant{} = mutant, result, status) do
     duration_ms = if result, do: result.duration_ms, else: mutant.duration_ms
     killing_test = if result, do: result.killing_test, else: mutant.killing_test
+    killing_test_file = if result, do: result.killing_test_file, else: mutant.killing_test_file
 
     %{
       id: mutant.id,
@@ -420,6 +422,7 @@ defmodule Mut.Metrics do
       description: mutant.description,
       duration_ms: duration_ms,
       killing_test: killing_test,
+      killing_test_file: killing_test_file,
       covering_tests: mutant.covering_tests,
       skip_reason: mutant.skip_reason,
       compile_error: mutant.compile_error,
