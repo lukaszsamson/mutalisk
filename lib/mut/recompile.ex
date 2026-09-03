@@ -60,6 +60,34 @@ defmodule Mut.Recompile do
   # M84: transient BEAM-startup signatures observed at `--concurrency 4` (the
   # v1.23 ops note); recover via retry rather than mis-classify as a real
   # compile failure. Never matches on real CompileError/syntax/dep-path output.
+  #
+  # T35 — does a retried compile run on top of beams a dead first attempt
+  # partially wrote? No, on three independent grounds:
+  #
+  #   1. Every signature here is emitted BEFORE any Elixir code runs. The
+  #      first two are emulator boot failures; the eval (and therefore
+  #      `Kernel.ParallelCompiler.compile/2`, the only thing that writes
+  #      beams, via `:each_module`) never starts, so attempt 1 writes
+  #      nothing. The crash-dump line cannot appear at all: `Mut.ChildProcess`
+  #      injects `ERL_CRASH_DUMP_SECONDS=0` into every child, and the emulator
+  #      then skips both the dump and its message (verified: `erl -eval
+  #      'erlang:halt("boom")'` prints "Crash dump is being written to:"
+  #      only without that variable).
+  #   2. Even if an attempt did write beams, the retry compiles the IDENTICAL
+  #      file list in one pass, so every module of those files is rewritten;
+  #      residue would need a module attempt 1 wrote and attempt 2 does not —
+  #      i.e. attempt 2 failed, which returns `{:recompile_failed, ...}`, marks
+  #      the mutant `:invalid`, and makes `Mut.Worker.run_fallback/4` reset the
+  #      sandbox in its `after` block.
+  #   3. That reset covers the destination: `each_module` writes only into
+  #      `_build/mut_schema/lib/<otp_app>/ebin`, and the sandbox baseline spans
+  #      every app's ebin (`Mut.SchemaBuild.snapshot_for/2` unions all umbrella
+  #      children; single-app snapshots the whole build path). Modified beams
+  #      are restored by hash and new ones are swept as strays, since
+  #      `_build/mut_schema/lib/<app>` is a tracked root.
+  #
+  # Retrying therefore adds no residue class that a single failed attempt does
+  # not already have. No scratch-ebin staging is needed.
   @beam_startup_transients [
     "Failed to load module 'elixir'",
     "Runtime terminating during boot",

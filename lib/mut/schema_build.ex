@@ -87,7 +87,11 @@ defmodule Mut.SchemaBuild do
   defp materialize(user_project_root, opts) do
     Mut.WorkCopy.materialize(user_project_root, Keyword.get_lazy(opts, :run_id, &run_id/0),
       force: Keyword.get(opts, :force, false),
-      root: Keyword.get(opts, :root)
+      root: Keyword.get(opts, :root),
+      # T29: `--keep-failed` debugging keeps a half-materialized copy too;
+      # otherwise WorkCopy deletes it rather than leaking it (nothing else can:
+      # `maybe_remove_work_copy/3` only runs once materialize has succeeded).
+      keep_failed: Keyword.get(opts, :keep, false) or Keyword.get(opts, :keep_failed, false)
     )
   end
 

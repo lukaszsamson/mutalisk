@@ -132,6 +132,180 @@ defmodule Mut.SandboxTest do
     Sandbox.destroy_pool(final_pool)
   end
 
+  test "reset restores test-written priv/ state (T26)" do
+    schema_result = schema_result("priv")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv/repo"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/repo/seed.sql"), "seed\n")
+
+    {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv", force: true)
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    seed = Path.join(sandbox.path, "priv/repo/seed.sql")
+    assert File.read!(seed) == "seed\n"
+
+    # A test writing under priv/: a new database plus a mutated baseline file.
+    db = Path.join(sandbox.path, "priv/repo/app.db")
+    File.write!(db, "sqlite-bytes")
+    File.write!(seed, "clobbered by mutant A\n")
+
+    assert :ok = Sandbox.reset(sandbox)
+    refute File.exists?(db)
+    assert File.read!(seed) == "seed\n"
+
+    # Reset is idempotent: the restored file's fingerprint matches the baseline
+    # again (the stat baseline's mtime is stamped back on).
+    assert :ok = Sandbox.reset(sandbox)
+    assert File.read!(seed) == "seed\n"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset_priv restores priv/ for schema workers without touching the build (T26)" do
+    schema_result = schema_result("priv_only")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/asset.txt"), "asset\n")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-only", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    asset = Path.join(sandbox.path, "priv/asset.txt")
+    stray = Path.join(sandbox.path, "priv/mnesia.DCD")
+    File.write!(asset, "clobbered\n")
+    File.write!(stray, "mnesia")
+
+    # A beam left dirty by something else is NOT this call's business.
+    beam = Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")
+    File.write!(beam, "dirty")
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert File.read!(asset) == "asset\n"
+    refute File.exists?(stray)
+    assert File.read!(beam) == "dirty"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "priv_fingerprint: :hash detects same-size same-second rewrites (T26)" do
+    schema_result = schema_result("priv_hash")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/asset.txt"), "aaaa")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1,
+        run_id: "unit-sandbox-priv-hash",
+        force: true,
+        priv_fingerprint: :hash
+      )
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+    asset = Path.join(sandbox.path, "priv/asset.txt")
+
+    # Same size, and forced back to the original mtime: only a content hash
+    # can see this.
+    {:ok, %File.Stat{mtime: mtime}} = File.stat(asset, time: :posix)
+    File.write!(asset, "bbbb")
+    File.touch!(asset, mtime)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert File.read!(asset) == "aaaa"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset sweeps umbrella apps/<app>/priv (T26)" do
+    schema_result = umbrella_schema_result("umbrella_priv")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-umbrella-priv", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    seed = Path.join(sandbox.path, "apps/child/priv/seed.sql")
+    assert File.read!(seed) == "seed\n"
+
+    stray = Path.join(sandbox.path, "apps/child/priv/repo/app.db")
+    File.mkdir_p!(Path.dirname(stray))
+    File.write!(stray, "sqlite-bytes")
+    File.write!(seed, "clobbered\n")
+
+    # An untracked sibling root under apps/<app> must survive the sweep.
+    keep = Path.join(sandbox.path, "apps/child/test/child_test.exs")
+    assert File.exists?(keep)
+
+    assert :ok = Sandbox.reset(sandbox)
+    refute File.exists?(stray)
+    assert File.read!(seed) == "seed\n"
+    assert File.exists?(keep)
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "create_pool removes the partial pool when a sandbox fails (T28)" do
+    schema_result = schema_result("partial")
+
+    # Fail on the third of three sandboxes; the first two are fully created.
+    copy_fun = fn source, destination ->
+      if Path.basename(destination) == "3" do
+        {:error, :injected_copy_failure}
+      else
+        Mut.FileCopy.copy_tree(source, destination)
+      end
+    end
+
+    parent = Path.expand("tmp/mut_sandboxes/unit-sandbox-partial")
+
+    assert {:error, :injected_copy_failure} =
+             Sandbox.create_pool(schema_result, 3,
+               run_id: "unit-sandbox-partial",
+               force: true,
+               copy_fun: copy_fun
+             )
+
+    refute File.exists?(Path.join(parent, "1"))
+    refute File.exists?(Path.join(parent, "2"))
+    refute File.exists?(parent)
+  end
+
+  defp umbrella_schema_result(name) do
+    root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
+    File.rm_rf!(Path.dirname(root))
+    app = Path.join(root, "apps/child")
+    File.mkdir_p!(Path.join(app, "lib"))
+    File.mkdir_p!(Path.join(app, "priv"))
+    File.mkdir_p!(Path.join(app, "test"))
+    File.mkdir_p!(Path.join(root, "_build/mut_schema/lib/child/ebin"))
+
+    File.write!(
+      Path.join(root, "mix.exs"),
+      "defmodule Umb.MixProject do\n  use Mix.Project\n  def project, do: [apps_path: \"apps\"]\nend\n"
+    )
+
+    File.write!(
+      Path.join(app, "mix.exs"),
+      "defmodule Child.MixProject do\n  use Mix.Project\n  def project, do: [app: :child, version: \"0.1.0\"]\nend\n"
+    )
+
+    File.write!(Path.join(app, "lib/child.ex"), "defmodule Child, do: :ok\n")
+    File.write!(Path.join(app, "priv/seed.sql"), "seed\n")
+    File.write!(Path.join(app, "test/child_test.exs"), "# test\n")
+    File.write!(Path.join(root, "_build/mut_schema/lib/child/ebin/Elixir.Child.beam"), "beam")
+
+    %SchemaBuild.Result{
+      work_copy_root: root,
+      build_path: Path.join(root, "_build/mut_schema"),
+      plan: %Mut.Plan{schema: [], fallback: [], skipped: []},
+      placement_maps: %{},
+      snapshot: %{
+        "lib/child/ebin/Elixir.Child.beam" =>
+          sha256(Path.join(root, "_build/mut_schema/lib/child/ebin/Elixir.Child.beam"))
+      },
+      rollback_iterations: 0,
+      invalid_mutants: []
+    }
+  end
+
   defp schema_result(name) do
     root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
     File.rm_rf!(Path.dirname(root))
