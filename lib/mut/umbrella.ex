@@ -32,6 +32,7 @@ defmodule Mut.Umbrella do
         work_copy
         |> Path.join(apps_path_glob(apps_dir))
         |> Path.wildcard()
+        |> Enum.filter(&mix_project_dir?/1)
         |> Enum.uniq()
         |> Enum.sort()
 
@@ -95,39 +96,76 @@ defmodule Mut.Umbrella do
   @doc """
   The OTP app name (as a string) from a mix.exs AST, or `nil`.
 
-  Reads the `:app` entry of the project keyword list. The value may be an
-  atom literal (`app: :my_app`) or a module-attribute read (`app: @app`,
-  with `@app :my_app` defined earlier in the file) — the common idiom that
-  the previous 3-tuple clause mis-matched as the attribute-read node
-  `{:app, _, nil}` and returned the string `"nil"` (R1).
+  Reads the `:app` entry of the keyword list returned by the project's
+  `project/0`. The value may be an atom literal (`app: :my_app`) or a
+  module-attribute read (`app: @app`, with `@app :my_app` defined earlier in
+  the file) — the common idiom that the previous 3-tuple clause mis-matched as
+  the attribute-read node `{:app, _, nil}` and returned the string `"nil"`
+  (R1).
+
+  T21: the lookup is STRUCTURAL — it locates the `def project` clause and
+  reads the `:app` key of the keyword list it returns. A blind AST walk
+  accepted the first `{:app, atom}` pair anywhere in the file, so an `app:
+  false` inside a dep (or any unrelated keyword with an `:app` key) declared
+  before `project/0` won the race and named the app `"false"`.
   """
   @spec app_from_ast(Macro.t()) :: String.t() | nil
   def app_from_ast(ast) do
     attrs = collect_attr_literals(ast)
 
-    {_ast, app} =
-      Macro.prewalk(ast, nil, fn
-        # keyword entry `app: :my_app`
-        {:app, value} = node, nil when is_atom(value) and not is_nil(value) ->
-          {node, Atom.to_string(value)}
+    case project_keyword_lists(ast) do
+      [] -> nil
+      lists -> Enum.find_value(lists, &app_from_keyword(&1, attrs))
+    end
+  end
 
-        # keyword entry `app: @app` (module-attribute read)
-        {:app, {:@, _, [{attr, _, ctx}]}} = node, nil
-        when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) ->
-          case Map.fetch(attrs, attr) do
-            {:ok, value} when is_atom(value) and not is_nil(value) ->
-              {node, Atom.to_string(value)}
+  # `app: :my_app` / `app: @app`, read only from the project keyword list.
+  defp app_from_keyword(list, attrs) do
+    Enum.find_value(list, fn
+      {:app, value} when is_atom(value) and not is_nil(value) ->
+        Atom.to_string(value)
 
-            _ ->
-              {node, nil}
-          end
+      {:app, {:@, _, [{attr, _, ctx}]}} when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) ->
+        case Map.fetch(attrs, attr) do
+          {:ok, value} when is_atom(value) and not is_nil(value) -> Atom.to_string(value)
+          _ -> nil
+        end
 
-        node, app ->
-          {node, app}
+      _entry ->
+        nil
+    end)
+  end
+
+  # Candidate keyword lists returned by `def project` (arity 0). `nil` args is
+  # the `def project` (no parens) form; `[]` is `def project()`.
+  defp project_keyword_lists(ast) do
+    {_ast, clauses} =
+      Macro.prewalk(ast, [], fn
+        {:def, _, [{:project, _, args}, body]} = node, acc when args in [nil, []] ->
+          {node, acc ++ return_keyword_lists(body_expr(body))}
+
+        node, acc ->
+          {node, acc}
       end)
 
-    app
+    clauses
   end
+
+  defp body_expr([{{:__block__, _, [:do]}, expr} | _rest]), do: expr
+  defp body_expr([{:do, expr} | _rest]), do: expr
+  defp body_expr(_body), do: nil
+
+  # The keyword list(s) a `project/0` body can evaluate to: a literal list, the
+  # last expression of a block, or either side of a `++` concatenation
+  # (`[app: :x] ++ shared()`). Anything else (a bare helper call) yields none.
+  defp return_keyword_lists({:__block__, _, exprs}) when exprs != [],
+    do: exprs |> List.last() |> return_keyword_lists()
+
+  defp return_keyword_lists({:++, _, [left, right]}),
+    do: return_keyword_lists(left) ++ return_keyword_lists(right)
+
+  defp return_keyword_lists(list) when is_list(list), do: [list]
+  defp return_keyword_lists(_expr), do: []
 
   # Module-attribute definitions with an atom/string literal value:
   # `@app :my_app`, `@apps_path "packages"`.
@@ -151,6 +189,18 @@ defmodule Mut.Umbrella do
   end
 
   defp apps_path_glob(apps_dir), do: Path.join([apps_dir, "*"])
+
+  # T20: `<apps_path>/*` also matches stray files (a README, a build artifact,
+  # an editor scratch file) and directories that are not Mix projects. Those
+  # used to reach the overlay installer, which aborted the whole run with
+  # `:not_a_mix_project`; they also polluted app names, test dirs and source
+  # globs. A child app is a DIRECTORY carrying a `mix.exs` — or the overlay's
+  # renamed `mix_user.exs`, so the predicate keeps holding after installation.
+  defp mix_project_dir?(dir) do
+    File.dir?(dir) and
+      (File.regular?(Path.join(dir, "mix.exs")) or
+         File.regular?(Path.join(dir, "mix_user.exs")))
+  end
 
   defp root_project_ast(work_copy), do: project_ast(user_mix_path(work_copy))
 

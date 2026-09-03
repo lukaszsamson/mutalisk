@@ -29,6 +29,7 @@ defmodule Mut.CompileRollback do
       work_copy_root: work_copy_root,
       plan: plan,
       placement_maps: placement_maps,
+      file_aliases: file_aliases(work_copy_root, placement_maps),
       invalid_mutants: [],
       invalid_by_file: initial_invalid_by_file(plan),
       iteration: 0,
@@ -106,7 +107,7 @@ defmodule Mut.CompileRollback do
           rollback_iterations: iteration
         }}}
     else
-      with {:ok, located} <- locate_output(state.placement_maps, output),
+      with {:ok, located} <- locate_output(state, output),
            {:ok, state} <- invalidate_and_render(state, located) do
         compile_and_loop(%{state | iteration: iteration + 1})
       end
@@ -140,8 +141,14 @@ defmodule Mut.CompileRollback do
      }}
   end
 
-  defp locate_output(placement_maps, output) do
-    anchors = diagnostic_anchors(output)
+  defp locate_output(state, output) do
+    placement_maps = state.placement_maps
+
+    anchors =
+      output
+      |> diagnostic_anchors()
+      |> Enum.map(&canonicalize_anchor(&1, placement_maps, state.file_aliases))
+
     instrumented_anchors = Enum.filter(anchors, &Map.has_key?(placement_maps, &1.file))
 
     cond do
@@ -373,6 +380,70 @@ defmodule Mut.CompileRollback do
 
   defp normalize_file("./" <> file), do: file
   defp normalize_file(file), do: file
+
+  @doc """
+  Alias index mapping each app-relative source path to its unique root-relative
+  placement-map key. Empty for a single-app work copy.
+
+  T22: in an umbrella, `mix compile` runs at the work-copy ROOT but Mix
+  delegates to each child app, which compiles with its OWN directory as cwd
+  and therefore reports diagnostics as `lib/bar.ex:12`. The placement maps are
+  keyed by plan paths, which are root-relative (`apps/foo/lib/bar.ex`), so a
+  direct lookup never matched: a compile-invalid schema mutant was
+  misclassified as a user-code compile failure and aborted the whole schema
+  build. Index each root-relative key under its app-relative alias so those
+  diagnostics resolve.
+
+  An alias claimed by more than one app (`apps/a/lib/x.ex` and
+  `apps/b/lib/x.ex` both alias to `lib/x.ex`) is AMBIGUOUS — the diagnostic
+  line alone cannot say which app emitted it. We drop such aliases entirely
+  rather than guess: the anchor is then treated as not found, which is the
+  conservative outcome (an unrelated mutant is never invalidated).
+  """
+  @spec file_aliases(Path.t(), %{Path.t() => PlacementMap.t()}) :: %{Path.t() => Path.t()}
+  def file_aliases(work_copy_root, placement_maps) do
+    if is_binary(work_copy_root) and Mut.Umbrella.umbrella?(work_copy_root) do
+      apps_segments = Path.split(Mut.Umbrella.apps_path_name(work_copy_root))
+
+      placement_maps
+      |> Map.keys()
+      |> Enum.flat_map(&alias_for_key(&1, apps_segments))
+      |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+      |> Enum.flat_map(fn
+        {alias_path, [key]} -> [{alias_path, key}]
+        {_alias_path, _ambiguous} -> []
+      end)
+      |> Map.new()
+    else
+      %{}
+    end
+  end
+
+  defp alias_for_key(key, apps_segments) do
+    depth = length(apps_segments)
+    segments = Path.split(key)
+
+    case Enum.split(segments, depth) do
+      {^apps_segments, [_app | rest]} when rest != [] -> [{Path.join(rest), key}]
+      _other -> []
+    end
+  end
+
+  @doc """
+  Rewrites an anchor's app-relative `file` to its root-relative placement-map
+  key when the alias index resolves it unambiguously; otherwise the anchor is
+  returned unchanged (and stays un-instrumented for the caller). See
+  `file_aliases/2` for why an ambiguous alias is deliberately not resolved.
+  """
+  @spec canonicalize_anchor(anchor, %{Path.t() => PlacementMap.t()}, %{Path.t() => Path.t()}) ::
+          anchor
+  def canonicalize_anchor(anchor, placement_maps, file_aliases) do
+    cond do
+      Map.has_key?(placement_maps, anchor.file) -> anchor
+      key = Map.get(file_aliases, anchor.file) -> %{anchor | file: key}
+      true -> anchor
+    end
+  end
 
   defp initial_invalid_by_file(%Plan{} = plan) do
     Enum.reduce(plan.invalid, %{}, fn mutant, acc ->
