@@ -121,6 +121,38 @@ defmodule Mut.WorkerTest do
     assert result.status == :no_coverage
   end
 
+  test "run_schema classifies an all-skipped suite as :no_coverage, not :survived (T30)" do
+    path = fake_sandbox("all_skipped")
+    mix = skipped_shim("all", 2, 2)
+
+    result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix)
+
+    assert result.status == :no_coverage
+  end
+
+  test "run_schema still classifies :survived when some selected tests ran (T30)" do
+    path = fake_sandbox("some_skipped")
+    mix = skipped_shim("some", 2, 1)
+
+    result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix)
+
+    assert result.status == :survived
+  end
+
+  test "run_schema scrubs invalid UTF-8 from child output so the report encodes (T24)" do
+    path = fake_sandbox("invalid_utf8")
+    mix = invalid_utf8_shim()
+
+    result =
+      Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, retry_on_error: false)
+
+    assert result.status == :error
+    assert String.valid?(result.raw_output)
+    assert result.raw_output =~ "ok"
+    assert result.raw_output =~ "�"
+    assert {:ok, _json} = Mut.JSON.encode(%{"reason" => result.raw_output})
+  end
+
   test "run_schema closes timed out ports" do
     path = fake_sandbox("timeout")
     File.write!(Path.join(path, "mix.exs"), "mix")
@@ -222,6 +254,35 @@ defmodule Mut.WorkerTest do
     #!/usr/bin/env bash
     printf '%s\\n' '{"event":"suite_finished","total":0,"failed":0,"passed":0,"skipped":0}'
     exit 0
+    """)
+
+    File.chmod!(path, 0o755)
+    path
+  end
+
+  defp skipped_shim(name, total, skipped) do
+    path = Path.expand(Path.join(["tmp", "tests", "worker", "mix_skipped_#{name}.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+    ran = total - skipped
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    printf '%s\\n' '{"event":"suite_finished","total":#{total},"ran":#{ran},"failed":0,"passed":#{ran},"skipped":#{skipped}}'
+    exit 0
+    """)
+
+    File.chmod!(path, 0o755)
+    path
+  end
+
+  defp invalid_utf8_shim do
+    path = Path.expand(Path.join(["tmp", "tests", "worker", "mix_invalid_utf8.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    printf '\\xff\\xfeok\\n'
+    exit 3
     """)
 
     File.chmod!(path, 0o755)

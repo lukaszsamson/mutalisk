@@ -40,9 +40,14 @@ defmodule Mut.Worker.Formatter do
   end
 
   def handle_cast({:suite_finished, _times_us}, state) do
+    # T30: `total` counts every test ExUnit *saw*, skipped/excluded included.
+    # `ran` is the number that actually executed — the only figure that can tell
+    # "the suite passed" apart from "nothing ran", which the classifier needs so
+    # an all-skipped selection isn't reported as a surviving mutant.
     emit(%{
       event: "suite_finished",
       total: state.tests,
+      ran: state.tests - state.skipped,
       failed: state.failed,
       passed: state.tests - state.failed - state.skipped,
       skipped: state.skipped

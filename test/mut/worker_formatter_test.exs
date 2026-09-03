@@ -26,6 +26,20 @@ defmodule Mut.Worker.FormatterTest do
     assert passed["test"] == "strict"
   end
 
+  # T30: `total` includes skipped/excluded tests, so it cannot distinguish a
+  # green suite from one where nothing executed. `ran` can, and is summed across
+  # umbrella child suites like the other counters.
+  test "parse_output surfaces the ran count and merges it across umbrella suites" do
+    raw =
+      [
+        ~s({"event":"suite_finished","total":3,"ran":1,"failed":0,"passed":1,"skipped":2}),
+        ~s({"event":"suite_finished","total":2,"ran":0,"failed":0,"passed":0,"skipped":2})
+      ]
+      |> Enum.join("\n")
+
+    assert %{summary: %{"total" => 5, "ran" => 1, "skipped" => 4}} = Formatter.parse_output(raw)
+  end
+
   test "parse_output returns error without suite_finished" do
     assert :error = Formatter.parse_output(~s({"event":"test_finished"}\n))
   end

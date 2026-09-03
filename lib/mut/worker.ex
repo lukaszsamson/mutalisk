@@ -357,16 +357,22 @@ defmodule Mut.Worker do
     collect(port, "", deadline)
   end
 
+  # T24: the mutant's output is arbitrary bytes (a truncated latin-1 log line, a
+  # binary payload, a sequence cut by an OOM kill). It ends up verbatim in
+  # `Result.raw_output` and from there in the Stryker JSON report, whose encoder
+  # rejects invalid UTF-8 — one stray byte would crash the final write and
+  # destroy the whole run. Scrub once, here at capture, on the *whole*
+  # accumulated output so codepoints split across port chunks stay intact.
   defp collect(port, output, deadline) do
     remaining = max(deadline - System.monotonic_time(:millisecond), 0)
 
     receive do
       {^port, {:data, data}} -> collect(port, bounded_output(output, data), deadline)
-      {^port, {:exit_status, code}} -> {:exit, code, output}
+      {^port, {:exit_status, code}} -> {:exit, code, Mut.Text.scrub_utf8(output)}
     after
       remaining ->
         kill_port(port)
-        {:timeout, output}
+        {:timeout, Mut.Text.scrub_utf8(output)}
     end
   end
 
@@ -396,16 +402,19 @@ defmodule Mut.Worker do
 
   defp classify({:exit, code, output}, duration_ms) do
     case Formatter.parse_output(output) do
-      # R9: zero tests ran (tag excludes / path filters matched nothing) is NOT
-      # a surviving mutant — no test had the chance to detect it. Classifying it
-      # `:survived` manufactures false survivors that drag the score down and
-      # imply test-suite gaps that don't exist. `:no_coverage` is excluded from
-      # the score denominator, like `:skipped`.
-      %{summary: %{"total" => 0}} when code == 0 ->
-        %Result{status: :no_coverage, duration_ms: duration_ms}
-
-      %{summary: %{"failed" => 0}} when code == 0 ->
-        %Result{status: :survived, duration_ms: duration_ms}
+      # R9/T30: zero tests *executed* (tag excludes / path filters matched
+      # nothing, or every selected test was skipped/excluded) is NOT a surviving
+      # mutant — no test had the chance to detect it. Classifying it `:survived`
+      # manufactures false survivors that drag the score down and imply
+      # test-suite gaps that don't exist. `:no_coverage` is excluded from the
+      # score denominator, like `:skipped`. Note `total` counts skipped and
+      # excluded tests too, so it cannot answer this on its own — `ran` can.
+      %{summary: %{"failed" => 0} = summary} when code == 0 ->
+        if ran_count(summary) == 0 do
+          %Result{status: :no_coverage, duration_ms: duration_ms}
+        else
+          %Result{status: :survived, duration_ms: duration_ms}
+        end
 
       %{summary: %{"failed" => failed}, tests: tests} when code != 0 and failed >= 1 ->
         failing = Enum.find(tests, &(&1["status"] == "failed"))
@@ -432,6 +441,18 @@ defmodule Mut.Worker do
       _crash ->
         %Result{status: :error, duration_ms: duration_ms, raw_output: output}
     end
+  end
+
+  # Tests that actually executed. The formatter emits `ran` directly; fall back
+  # to `total - skipped` so an older/partial summary still classifies correctly
+  # (`total` alone counts skipped and excluded tests).
+  defp ran_count(%{"ran" => ran}) when is_integer(ran), do: ran
+
+  defp ran_count(summary) do
+    total = Map.get(summary, "total", 0)
+    skipped = Map.get(summary, "skipped", 0)
+
+    max(total - skipped, 0)
   end
 
   defp killing_test(nil), do: nil

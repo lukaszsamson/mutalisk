@@ -136,13 +136,20 @@ defmodule Mut.ChildProcess do
         collect(port, append_output(state, data), :deadline, deadline)
 
       {^port, {:exit_status, code}} ->
-        {:exit, code, state.output}
+        {:exit, code, captured_output(state)}
     after
       remaining(deadline) ->
         kill_port(port)
-        {:timeout, state.output}
+        {:timeout, captured_output(state)}
     end
   end
+
+  # T24: child output is arbitrary bytes. Normalise it to valid UTF-8 exactly
+  # once, here at capture time, so every consumer (Result.raw_output -> Stryker
+  # JSON, history, terminal) gets an encodable binary. Scrubbing the *whole*
+  # accumulated output (rather than each chunk) keeps codepoints split across
+  # port chunks intact. The raw bytes still reach the optional log file.
+  defp captured_output(%{output: output}), do: Mut.Text.scrub_utf8(output)
 
   defp deadline_from(:infinity), do: :infinity
   defp deadline_from(ms) when is_integer(ms), do: System.monotonic_time(:millisecond) + ms

@@ -1394,20 +1394,47 @@ defmodule Mix.Tasks.Mut do
     # The Stryker JSON map is the shared data source for the JSON, HTML, and
     # GitHub-Actions reporters — render it once if any of them is enabled.
     if Enum.any?([:stryker_json, :html, :github_actions], &(&1 in opts.reporters)) do
-      rendered = render_stryker_report(snapshot, plan, work_copy, opts)
-
-      if :stryker_json in opts.reporters do
-        StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path))
-      end
-
-      if :html in opts.reporters do
-        Html.write(rendered, resolve_output_path(host_root, html_output_path(opts)))
-      end
-
-      if :github_actions in opts.reporters do
-        GitHubActions.emit(rendered)
-      end
+      # T24: the run is already over by the time we get here — the terminal
+      # summary is printed and the exit code is decided. A failure while
+      # rendering or writing the file reports (an unencodable byte, a full disk,
+      # a read-only output dir) must NOT vaporise an hours-long run: log it
+      # loudly on stderr and let the run finish normally.
+      safe_render(fn -> write_file_reports(snapshot, plan, work_copy, host_root, opts) end)
     end
+  end
+
+  defp write_file_reports(snapshot, plan, work_copy, host_root, opts) do
+    rendered = render_stryker_report(snapshot, plan, work_copy, opts)
+
+    if :stryker_json in opts.reporters do
+      StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path))
+    end
+
+    if :html in opts.reporters do
+      Html.write(rendered, resolve_output_path(host_root, html_output_path(opts)))
+    end
+
+    if :github_actions in opts.reporters do
+      GitHubActions.emit(rendered)
+    end
+  end
+
+  @doc false
+  # Run the file-report writers, downgrading any crash to a stderr diagnostic.
+  # Public-ish (via @doc false) only so the failure path is directly testable.
+  def safe_render(fun) when is_function(fun, 0) do
+    fun.()
+    :ok
+  rescue
+    exception ->
+      IO.puts(
+        :stderr,
+        "mutalisk: failed to write the mutation report: " <>
+          Exception.format(:error, exception, __STACKTRACE__) <>
+          "\nThe run itself completed; the terminal summary and exit code above are valid."
+      )
+
+      :error
   end
 
   # HTML report path: the Stryker JSON output path with a `.html` extension
