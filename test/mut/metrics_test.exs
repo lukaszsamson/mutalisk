@@ -153,6 +153,28 @@ defmodule Mut.MetricsTest do
     assert Metrics.snapshot(metrics).phase_timings.schema_build_ms == 0
   end
 
+  test "recompile_categories always reports every category, including :parse_error and :timeout (T53)" do
+    {:ok, metrics} = Metrics.start_link([])
+
+    assert Metrics.snapshot(metrics).recompile_categories == %{
+             compile_error: 0,
+             parse_error: 0,
+             dep_path_error: 0,
+             unknown: 0,
+             timeout: 0
+           }
+
+    invalid_result = %Result{
+      status: :invalid,
+      duration_ms: 1,
+      recompile_category: :parse_error
+    }
+
+    Metrics.record_mutant(metrics, mutant(:schema, "a", 1), invalid_result)
+
+    assert Metrics.snapshot(metrics).recompile_categories.parse_error == 1
+  end
+
   defp result(status, duration_ms) do
     %Result{status: status, duration_ms: duration_ms, killing_test: "DemoTest test"}
   end

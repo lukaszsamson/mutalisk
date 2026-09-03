@@ -245,7 +245,17 @@ defmodule Mut.Metrics do
        fallback_reason_distribution: %{},
        selected_test_counts: [],
        concurrency: nil,
-       recompile_categories: %{compile_error: 0, dep_path_error: 0, unknown: 0},
+       # T53: seed every `Mut.Worker.Result.recompile_category` value (except
+       # `nil`, which is not a category) so `:parse_error` and `:timeout`
+       # always appear in reports at 0 rather than being absent until the
+       # first occurrence.
+       recompile_categories: %{
+         compile_error: 0,
+         parse_error: 0,
+         dep_path_error: 0,
+         unknown: 0,
+         timeout: 0
+       },
        test_timeout_ms: nil,
        started_ms: monotonic_ms(),
        ledger: [],

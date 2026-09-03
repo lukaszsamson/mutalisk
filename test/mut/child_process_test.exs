@@ -155,4 +155,53 @@ defmodule Mut.ChildProcessTest do
 
     assert {:message_queue_len, 0} = Process.info(self(), :message_queue_len)
   end
+
+  describe "write_log/2 (T52)" do
+    test "a successful write is silent" do
+      dir = tmp_script_dir()
+      path = Path.join(dir, "ok.log")
+      {:ok, io} = :file.open(path, [:write, :binary, :raw])
+
+      stderr = ExUnit.CaptureIO.capture_io(:stderr, fn -> ChildProcess.write_log(io, "hello") end)
+
+      :file.close(io)
+      assert stderr == ""
+      assert File.read!(path) == "hello"
+    end
+
+    # A deliberately closed `:file` IO device makes `:file.write/2` fail with
+    # `{:error, :einval}` deterministically, without needing a real OS-level
+    # failure (disk full, permission revoked) that a portable, sandboxed test
+    # can't reliably provoke.
+    test "a write failure prints a one-line stderr notice instead of being silently dropped" do
+      dir = tmp_script_dir()
+      path = Path.join(dir, "closed.log")
+      {:ok, io} = :file.open(path, [:write, :binary, :raw])
+      :file.close(io)
+
+      stderr = ExUnit.CaptureIO.capture_io(:stderr, fn -> ChildProcess.write_log(io, "hello") end)
+
+      assert stderr =~ "[mutalisk] failed to write to the run log"
+      assert stderr =~ "run log is incomplete"
+    end
+
+    test "a write failure is reported once per log, not once per chunk" do
+      dir = tmp_script_dir()
+      path = Path.join(dir, "closed2.log")
+      {:ok, io} = :file.open(path, [:write, :binary, :raw])
+      :file.close(io)
+
+      stderr =
+        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+          for _ <- 1..5, do: ChildProcess.write_log(io, "chunk")
+        end)
+
+      assert length(String.split(stderr, "failed to write to the run log")) == 2
+    end
+
+    test "nil log device is always a silent no-op" do
+      stderr = ExUnit.CaptureIO.capture_io(:stderr, fn -> ChildProcess.write_log(nil, "x") end)
+      assert stderr == ""
+    end
+  end
 end

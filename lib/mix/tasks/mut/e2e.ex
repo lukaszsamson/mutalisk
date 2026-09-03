@@ -350,10 +350,14 @@ defmodule Mix.Tasks.Mut.E2e do
   end
 
   defp assert_score_range!(run, min, max) do
-    score = score(run.counts.statuses)
+    case score(run.counts.statuses) do
+      nil ->
+        raise "#{run.label} no mutant was scored (0 killed/survived); cannot check score range #{min}..#{max}"
 
-    unless score >= min and score <= max do
-      raise "#{run.label} score #{score} outside #{min}..#{max}"
+      score ->
+        unless score >= min and score <= max do
+          raise "#{run.label} score #{score} outside #{min}..#{max}"
+        end
     end
   end
 
@@ -389,17 +393,38 @@ defmodule Mix.Tasks.Mut.E2e do
     |> Enum.sort()
   end
 
-  defp score(statuses) do
+  # T38: `killed + survived == 0` (every mutant errored/invalid/skipped, or
+  # there simply were none) previously crashed here with a raw
+  # `ArithmeticError: bad argument in arithmetic expression` from the `/ 0`
+  # rather than a diagnostic pointing at the actual problem. Return `nil` (no
+  # score to report) instead; callers say so explicitly. Public (not `defp`)
+  # so it is directly unit-testable rather than only through a full e2e run.
+  @doc false
+  @spec score(%{optional(String.t()) => non_neg_integer()}) :: float() | nil
+  def score(statuses) do
     killed = Map.get(statuses, "Killed", 0)
     survived = Map.get(statuses, "Survived", 0)
-    Float.round(killed / (killed + survived) * 100, 1)
+    scorable = killed + survived
+
+    if scorable == 0 do
+      nil
+    else
+      Float.round(killed / scorable * 100, 1)
+    end
+  end
+
+  defp score_display(statuses) do
+    case score(statuses) do
+      nil -> "n/a (no mutant scored)"
+      score -> score
+    end
   end
 
   defp summary_line(run) do
     statuses = run.counts.statuses
     engines = run.counts.engines
 
-    "score=#{score(statuses)} schema=#{Map.get(engines, "schema", 0)} fallback=#{Map.get(engines, "fallback", 0)} statuses=#{inspect(statuses)} wall_ms=#{run.wall_ms}"
+    "score=#{score_display(statuses)} schema=#{Map.get(engines, "schema", 0)} fallback=#{Map.get(engines, "fallback", 0)} statuses=#{inspect(statuses)} wall_ms=#{run.wall_ms}"
   end
 
   defp child_env do

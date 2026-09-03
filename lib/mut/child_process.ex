@@ -200,16 +200,50 @@ defmodule Mut.ChildProcess do
     end
   end
 
-  defp write_log(nil, _data), do: :ok
+  # T52: a write failure here (disk full, permission revoked mid-run, etc.)
+  # used to be silently dropped (`_ = :file.write(...)`), so the run log
+  # quietly truncates while the caller still reports the run as a success.
+  # Surface it once per log — not once per chunk, which would spam stderr for
+  # the rest of a long run once the disk fills — via the process dictionary:
+  # this function is only ever called from the single process driving one
+  # `collect/3` loop, so it needs no cross-process state. Public (`@doc
+  # false`) so the failure path is directly unit-testable with a deliberately
+  # closed `:file` IO device, without needing to provoke a real OS-level
+  # write failure (disk full, permission revoked) in a test.
+  @doc false
+  @spec write_log(:file.io_device() | nil, iodata()) :: :ok
+  def write_log(nil, _data), do: :ok
 
-  defp write_log(io, data) do
-    _ = :file.write(io, data)
+  def write_log(io, data) do
+    case :file.write(io, data) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        warn_log_write_failure_once(io, reason)
+        :ok
+    end
+  end
+
+  defp warn_log_write_failure_once(io, reason) do
+    key = {:mut_child_process_log_write_failed, io}
+
+    unless Process.get(key) do
+      Process.put(key, true)
+
+      IO.puts(
+        :stderr,
+        "[mutalisk] failed to write to the run log (#{inspect(reason)}); the run log is incomplete"
+      )
+    end
+
     :ok
   end
 
   defp close_log(nil), do: :ok
 
   defp close_log(io) do
+    Process.delete({:mut_child_process_log_write_failed, io})
     _ = File.close(io)
     :ok
   end

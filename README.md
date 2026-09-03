@@ -100,7 +100,10 @@ mutant in that module:
 
 Settings layer, lowest to highest precedence:
 
-    .mutalisk.exs project file  <  config :mutalisk  <  CLI flags
+    .mutalisk.exs project file  <  legacy config :mut  <  config :mutalisk  <  CLI flags
+
+(`config :mut` is a deprecated namespace kept for compatibility; prefer
+`config :mutalisk`.)
 
 `.mutalisk.exs` (project root, optional) is a plain keyword list:
 
