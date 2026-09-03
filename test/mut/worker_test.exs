@@ -53,6 +53,41 @@ defmodule Mut.WorkerTest do
            ]
   end
 
+  # B4: the manifest lives under the child's OTP app name in `_build`, while
+  # the sources it records are prefixed with the child's DIRECTORY name.
+  test "manifest_entries pairs the child directory with the OTP app's manifest path" do
+    root = Path.join(System.tmp_dir!(), "mut_worker_b4_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join([root, "apps", "web-ui"]))
+    File.mkdir_p!(Path.join([root, "apps", "backoffice"]))
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule Up.MixProject do
+      use Mix.Project
+      def project, do: [apps_path: "apps", version: "0.1.0"]
+    end
+    """)
+
+    File.write!(Path.join([root, "apps", "web-ui", "mix.exs"]), """
+    defmodule WebUi.MixProject do
+      use Mix.Project
+      def project, do: [app: :web_ui, version: "0.1.0"]
+    end
+    """)
+
+    File.write!(Path.join([root, "apps", "backoffice", "mix.exs"]), """
+    defmodule Bo.MixProject do
+      use Mix.Project
+      def project, do: [app: :bo, version: "0.1.0"]
+    end
+    """)
+
+    assert Worker.manifest_entries(root) == [
+             {"backoffice", Path.join(root, "_build/mut_schema/lib/bo/.mix/compile.elixir")},
+             {"web-ui", Path.join(root, "_build/mut_schema/lib/web_ui/.mix/compile.elixir")}
+           ]
+  end
+
   test "run_schema classifies killed and sends expected process inputs" do
     path = fake_sandbox("killed")
     mix = mix_shim("killed", 1)

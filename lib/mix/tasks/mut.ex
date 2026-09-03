@@ -1619,15 +1619,20 @@ defmodule Mix.Tasks.Mut do
     apps_path = Mut.Umbrella.apps_path_name(work_copy)
 
     if Mut.Umbrella.umbrella?(work_copy) and apps_path != "apps" do
-      normalize_custom_umbrella_tests(tests, work_copy, apps_path)
+      normalize_custom_umbrella_tests(
+        tests,
+        work_copy,
+        apps_path,
+        Mut.Umbrella.app_map(work_copy)
+      )
     else
       %{files: Enum.map(tests, &Path.relative_to(&1, work_copy)), umbrella_app: nil}
     end
   end
 
-  defp normalize_custom_umbrella_tests(tests, work_copy, apps_path) do
+  defp normalize_custom_umbrella_tests(tests, work_copy, apps_path, app_map) do
     tests
-    |> Enum.map(&custom_umbrella_test(&1, work_copy, apps_path))
+    |> Enum.map(&custom_umbrella_test(&1, work_copy, apps_path, app_map))
     |> case do
       [{app, _file} | _rest] = entries when not is_nil(app) ->
         if Enum.all?(entries, &(elem(&1, 0) == app)) do
@@ -1641,10 +1646,20 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp custom_umbrella_test(test, work_copy, apps_path) do
+  # `mix do --app <app>` filters umbrella children by their OTP `:app`, so the
+  # `<apps_path>/<dir>/test/...` directory segment is translated through the
+  # dir->app map; a child whose directory name differs from its `:app` would
+  # otherwise select no app at all (B4).
+  defp custom_umbrella_test(test, work_copy, apps_path, app_map) do
     case test |> Path.relative_to(work_copy) |> Path.split() do
-      [^apps_path, app, "test" | rest] -> {app, Path.join(["test" | rest])}
-      _other -> {nil, nil}
+      [^apps_path, dir, "test" | rest] ->
+        case Map.fetch(app_map, dir) do
+          {:ok, app} -> {app, Path.join(["test" | rest])}
+          :error -> {nil, nil}
+        end
+
+      _other ->
+        {nil, nil}
     end
   end
 
@@ -1790,16 +1805,13 @@ defmodule Mix.Tasks.Mut do
     fn file -> File.read!(Path.join(root, file)) end
   end
 
-  # The OTP app a fallback mutant belongs to. For umbrellas it is the second
-  # segment of the mutant's `apps/<app>/lib/...` path (umbrella app dir names
-  # must equal their app names); single-app reads the project's :app. M68.
+  # The OTP app a fallback mutant belongs to. This value names `_build`
+  # locations (the manifest read and the recompile ebin fallback), so it must
+  # be the OTP app name, NOT the `<apps_path>/<dir>/lib/...` directory segment
+  # of the mutant path — the two differ when a child app's directory is named
+  # differently from its `:app` (B4). Single-app reads the project's :app. M68.
   defp fallback_app(work_copy, mutant) do
-    apps_dir = Mut.Umbrella.apps_path_name(work_copy)
-
-    case Path.split(mutant.file) do
-      [^apps_dir, app | _] -> app
-      _ -> app_name(work_copy)
-    end
+    Mut.Umbrella.otp_app_for_file(work_copy, mutant.file) || app_name(work_copy)
   end
 
   defp app_name(work_copy) do

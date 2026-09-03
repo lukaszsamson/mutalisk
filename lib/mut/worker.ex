@@ -255,9 +255,15 @@ defmodule Mut.Worker do
     if Mut.Umbrella.umbrella?(sandbox.path) do
       # Union every app's manifest so the dependent walk crosses app
       # boundaries (a module mutated in app A yields dependent files in B). M68.
+      #
+      # The manifest lives under the OTP app name (`_build/<env>/lib/<app>`)
+      # while the sources it records are re-prefixed with the child's
+      # DIRECTORY name so they line up with mutant file paths
+      # (`<apps_path>/<dir>/lib/...`). Conflating the two makes every
+      # cross-app dependent lookup miss on umbrellas whose directory name
+      # differs from `:app` (B4).
       sandbox.path
-      |> Mut.Umbrella.app_names()
-      |> Enum.map(&{&1, manifest_path(sandbox, &1)})
+      |> manifest_entries()
       |> Mut.MixManifest.read_combined(Mut.Umbrella.apps_path_name(sandbox.path))
     else
       sandbox
@@ -266,8 +272,21 @@ defmodule Mut.Worker do
     end
   end
 
-  defp manifest_path(sandbox, app) do
-    Path.join([sandbox.path, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
+  @doc false
+  # Exposed for testing. `{child directory, manifest path under the OTP app}`
+  # for every umbrella child, sorted for a deterministic merge order.
+  @spec manifest_entries(Path.t()) :: [{String.t(), Path.t()}]
+  def manifest_entries(sandbox_path) do
+    sandbox_path
+    |> Mut.Umbrella.app_map()
+    |> Enum.sort()
+    |> Enum.map(fn {dir, otp_app} -> {dir, manifest_path(sandbox_path, otp_app)} end)
+  end
+
+  defp manifest_path(%Sandbox{path: path}, app), do: manifest_path(path, app)
+
+  defp manifest_path(sandbox_path, app) when is_binary(sandbox_path) do
+    Path.join([sandbox_path, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
   end
 
   # Require an explicit `:app` — the old `"demo_app"` fixture default silently

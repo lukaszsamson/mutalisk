@@ -84,6 +84,61 @@ defmodule Mut.Umbrella do
     end
   end
 
+  @doc """
+  Maps each umbrella child's DIRECTORY basename to its OTP `:app` name.
+
+  The two differ whenever a child app is checked out under a directory named
+  differently from its application (`apps/web-ui/mix.exs` with `app: :web_ui`,
+  `apps/backoffice` with `app: :bo`). Source paths are always
+  `<apps_path>/<dir>/lib/...` while Mix writes build artefacts to
+  `_build/<env>/lib/<otp_app>/`, so every call site that crosses between the
+  two MUST translate through this map rather than reusing a path segment.
+
+  `%{}` for single-app projects and for children whose `:app` cannot be read.
+  """
+  @spec app_map(Path.t()) :: %{String.t() => String.t()}
+  def app_map(work_copy) do
+    work_copy
+    |> app_dirs()
+    |> Enum.flat_map(fn dir ->
+      case app_name(dir) do
+        nil -> []
+        app -> [{Path.basename(dir), app}]
+      end
+    end)
+    |> Map.new()
+  end
+
+  @typedoc """
+  Pre-resolved umbrella context: the apps-directory name plus the
+  directory->OTP-app map. Build it once with `app_context/1` when resolving
+  many files, or pass a work copy path and let `otp_app_for_file/2` do it.
+  """
+  @type app_context :: {String.t(), %{String.t() => String.t()}}
+
+  @doc "The `{apps_path_name, app_map}` pair for a work copy."
+  @spec app_context(Path.t()) :: app_context()
+  def app_context(work_copy), do: {apps_path_name(work_copy), app_map(work_copy)}
+
+  @doc """
+  The OTP app name owning `file`, or `nil` when the file is not under a known
+  umbrella child.
+
+  `file` may be work-copy-relative or absolute: the `<apps_path>/<dir>`
+  segment pair is located anywhere in the path. The first argument is either a
+  work copy path or a pre-built `app_context/1` pair.
+  """
+  @spec otp_app_for_file(Path.t() | app_context(), Path.t()) :: String.t() | nil
+  def otp_app_for_file(work_copy, file) when is_binary(work_copy),
+    do: otp_app_for_file(app_context(work_copy), file)
+
+  def otp_app_for_file({apps_path, map}, file) when is_binary(apps_path) and is_map(map) do
+    case file |> Path.split() |> Enum.drop_while(&(&1 != apps_path)) do
+      [^apps_path, dir | _rest] -> Map.get(map, dir)
+      _other -> nil
+    end
+  end
+
   @doc "The `:app` atom of a single app dir, as a string, or `nil`."
   @spec app_name(Path.t()) :: String.t() | nil
   def app_name(app_dir) do

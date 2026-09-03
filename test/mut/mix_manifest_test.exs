@@ -102,6 +102,16 @@ defmodule Mut.MixManifestTest do
              MapSet.new(["apps/web/lib/web.ex"])
   end
 
+  test "read_combined prefixes sources with the child DIRECTORY, not the OTP app (B4)" do
+    # The manifest was read from `_build/<env>/lib/web_ui/`, but the sources it
+    # records live under `apps/web-ui/` — the entry key is the directory.
+    manifest =
+      write_manifest("web_ui", %{WebUiMod => "lib/web_ui.ex"}, %{"lib/web_ui.ex" => deps()})
+
+    assert {:ok, combined} = MixManifest.read_combined([{"web-ui", manifest}])
+    assert combined.modules[WebUiMod] == "apps/web-ui/lib/web_ui.ex"
+  end
+
   defp write_manifest(app, modules, sources) do
     module_records =
       Map.new(modules, fn {mod, src} -> {mod, {:module, :module, [src], nil, false, 0}} end)

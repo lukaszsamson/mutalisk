@@ -146,8 +146,9 @@ defmodule Mut.Recompile do
   # ordered correctly in-process — compiling per-app groups separately loses
   # that ordering and breaks macro/import resolution between dependents (M68).
   # The `:each_module` callback then routes every module's beam to its own
-  # app's ebin (`_build/mut_schema/lib/<app>/ebin`), derived from the source
-  # path: `apps/<app>/...` for umbrella children, else `default_app`. Without
+  # app's ebin (`_build/mut_schema/lib/<otp_app>/ebin`), derived from the source
+  # path: `<apps_path>/<dir>/...` mapped through `Mut.Umbrella.app_map/1` for
+  # umbrella children, else `default_app` (single-app). Without
   # this, cross-app dependents' beams would land in the mutated app's ebin and
   # shadow the real ones at test time.
   def elixir_args(sandbox_path, files, default_app) do
@@ -168,19 +169,27 @@ defmodule Mut.Recompile do
     # (false-invalids). `Mix.start/0` only boots Mix's agents — it does NOT
     # load the project or run the deps lock-check (the thing this module
     # avoids by skipping `mix`), so it is safe and side-effect-free here.
-    # `file` may arrive absolute, so locate the `<apps_path>/<app>` segment
+    # `file` may arrive absolute, so locate the `<apps_path>/<dir>` segment
     # anywhere in the path (umbrella child); fall back to default_app
     # (single-app). `apps_path` honors a custom `:apps_path` (default "apps");
     # `Path.split` (not `String.split(_, "/")`) handles the host separator.
+    #
+    # The source segment is the child's DIRECTORY name, but Mix writes beams
+    # to `_build/<env>/lib/<OTP app>/ebin`, so it is translated through the
+    # dir->app map. Using the directory name directly wrote mutated beams to
+    # an ebin that is off the code path (the unmutated baseline then "survives")
+    # and that the sandbox reset never sweeps, leaking across mutants (B4).
     # `\#{...}` stays literal so it is interpolated in the child BEAM.
     apps_path = Mut.Umbrella.apps_path_name(sandbox_path)
+    app_map = Mut.Umbrella.app_map(sandbox_path)
 
     eval = ~s"""
     Mix.start()
+    app_map = #{inspect(app_map)}
     ebin_of = fn file ->
       app =
         case Enum.drop_while(Path.split(file), &(&1 != #{inspect(apps_path)})) do
-          [#{inspect(apps_path)}, a | _] -> a
+          [#{inspect(apps_path)}, dir | _] -> Map.get(app_map, dir, #{inspect(default_app)})
           _ -> #{inspect(default_app)}
         end
 
