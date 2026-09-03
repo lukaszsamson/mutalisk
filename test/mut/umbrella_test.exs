@@ -99,14 +99,39 @@ defmodule Mut.UmbrellaTest do
              """) == "my_app"
     end
 
-    test "T21: a missing project/0 returns nil" do
+    test "T21: no project/0 and no real app: pair returns nil" do
       assert app("""
              defmodule My.MixProject do
                use Mix.Project
                @deps [{:plug, "~> 1.0", app: false}]
-               def application, do: [app: :not_the_project]
+               def application, do: [extra_applications: [:logger]]
              end
              """) == nil
+    end
+
+    test "T21: project/0 bodies the structural lookup cannot read fall back to the first real app: pair" do
+      assert app("""
+             defmodule My.MixProject do
+               use Mix.Project
+               @deps [{:plug, "~> 1.0", app: false}]
+               def project, do: Keyword.merge(shared(), app: :merged_app)
+               defp shared, do: [version: "1.0.0"]
+             end
+             """) == "merged_app"
+
+      assert app("""
+             defmodule My.MixProject do
+               use Shared.MixProject, app: :macro_app
+             end
+             """) == "macro_app"
+
+      assert app("""
+             defmodule My.MixProject do
+               use Mix.Project
+               @project [app: :attr_app]
+               def project, do: @project
+             end
+             """) == "attr_app"
     end
 
     test "T21: project/0 returning `[app: ...] ++ shared` still resolves" do
@@ -379,7 +404,7 @@ defmodule Mut.UmbrellaTest do
     test "nil for unknown children and non-umbrella paths", %{root: root} do
       write_umbrella(root, "apps", [{"web-ui", "web_ui"}])
 
-      assert Umbrella.otp_app_for_file(root, "apps/nope/lib/a.ex") == nil
+      assert Umbrella.otp_app_for_file(root, "apps/nope/lib/a.ex") == "nope"
       assert Umbrella.otp_app_for_file(root, "lib/a.ex") == nil
     end
 
@@ -387,7 +412,7 @@ defmodule Mut.UmbrellaTest do
       context = {"apps", %{"web-ui" => "web_ui"}}
 
       assert Umbrella.otp_app_for_file(context, "apps/web-ui/lib/a.ex") == "web_ui"
-      assert Umbrella.otp_app_for_file(context, "apps/other/lib/a.ex") == nil
+      assert Umbrella.otp_app_for_file(context, "apps/other/lib/a.ex") == "other"
     end
 
     test "empty map for a single-app project", %{root: root} do

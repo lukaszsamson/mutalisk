@@ -101,10 +101,11 @@ defmodule Mut.Umbrella do
     work_copy
     |> app_dirs()
     |> Enum.flat_map(fn dir ->
-      case app_name(dir) do
-        nil -> []
-        app -> [{Path.basename(dir), app}]
-      end
+      # A child whose `:app` cannot be read syntactically degrades to its
+      # directory name (the pre-B4 behaviour) rather than vanishing from the
+      # map, so umbrella runs never lose an app over an exotic mix.exs.
+      basename = Path.basename(dir)
+      [{basename, app_name(dir) || basename}]
     end)
     |> Map.new()
   end
@@ -121,22 +122,32 @@ defmodule Mut.Umbrella do
   def app_context(work_copy), do: {apps_path_name(work_copy), app_map(work_copy)}
 
   @doc """
-  The OTP app name owning `file`, or `nil` when the file is not under a known
-  umbrella child.
+  The OTP app name owning `file`, or `nil` when the file is not under an
+  umbrella child directory.
 
-  `file` may be work-copy-relative or absolute: the `<apps_path>/<dir>`
-  segment pair is located anywhere in the path. The first argument is either a
-  work copy path or a pre-built `app_context/1` pair.
+  `file` may be work-copy-relative or absolute. With a work copy path as the
+  first argument an absolute `file` is made work-copy-relative first (so a
+  work copy that itself lives under a directory named like the apps path is
+  handled); with a pre-built `app_context/1` pair the first `<apps_path>/<dir>`
+  segment pair in the path is used. A child directory missing from the map
+  resolves to its directory name (the pre-B4 behaviour); a single-app project
+  (empty map) always yields `nil`.
   """
   @spec otp_app_for_file(Path.t() | app_context(), Path.t()) :: String.t() | nil
   def otp_app_for_file(work_copy, file) when is_binary(work_copy),
-    do: otp_app_for_file(app_context(work_copy), file)
+    do: otp_app_for_file(app_context(work_copy), relative_to_root(file, work_copy))
+
+  def otp_app_for_file({_apps_path, map}, _file) when map == %{}, do: nil
 
   def otp_app_for_file({apps_path, map}, file) when is_binary(apps_path) and is_map(map) do
     case file |> Path.split() |> Enum.drop_while(&(&1 != apps_path)) do
-      [^apps_path, dir | _rest] -> Map.get(map, dir)
+      [^apps_path, dir | _rest] -> Map.get(map, dir, dir)
       _other -> nil
     end
+  end
+
+  defp relative_to_root(file, root) do
+    if Path.type(file) == :absolute, do: Path.relative_to(file, root), else: file
   end
 
   @doc "The `:app` atom of a single app dir, as a string, or `nil`."
@@ -169,15 +180,34 @@ defmodule Mut.Umbrella do
     attrs = collect_attr_literals(ast)
 
     case project_keyword_lists(ast) do
-      [] -> nil
-      lists -> Enum.find_value(lists, &app_from_keyword(&1, attrs))
+      [] ->
+        app_from_any_keyword(ast, attrs)
+
+      lists ->
+        Enum.find_value(lists, &app_from_keyword(&1, attrs)) || app_from_any_keyword(ast, attrs)
     end
+  end
+
+  # Fallback for `project/0` bodies the structural lookup cannot read
+  # (`Keyword.merge(shared(), app: :x)`, `use Shared.MixProject, app: :x`,
+  # `def project, do: @project`, pipelines, conditionals ...): the first
+  # `app:` pair anywhere in the file whose value is a real atom. `app: false`
+  # (a dep option) and non-atom values are rejected, which is what the old
+  # blind walk got wrong (T21).
+  defp app_from_any_keyword(ast, attrs) do
+    {_ast, app} =
+      Macro.prewalk(ast, nil, fn
+        {:app, _value} = pair, nil -> {pair, app_from_keyword([pair], attrs)}
+        node, acc -> {node, acc}
+      end)
+
+    app
   end
 
   # `app: :my_app` / `app: @app`, read only from the project keyword list.
   defp app_from_keyword(list, attrs) do
     Enum.find_value(list, fn
-      {:app, value} when is_atom(value) and not is_nil(value) ->
+      {:app, value} when is_atom(value) and value not in [nil, false, true] ->
         Atom.to_string(value)
 
       {:app, {:@, _, [{attr, _, ctx}]}} when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) ->

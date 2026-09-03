@@ -73,7 +73,11 @@ defmodule Mut.Worker do
              manifest
              |> Mut.Recompile.dependents(dependent_modules(mutant), dep_kinds(mutant))
              |> Enum.to_list(),
-           :ok <- Mut.Recompile.recompile(sandbox, [patch.file], dependents, app: app(opts)) do
+           :ok <-
+             Mut.Recompile.recompile(sandbox, [patch.file], dependents,
+               app: app(opts),
+               app_context: Keyword.get(opts, :app_context)
+             ) do
         spawn_fallback_mix(sandbox, test_files, opts, started)
       else
         {:error, :missing_source_span} ->

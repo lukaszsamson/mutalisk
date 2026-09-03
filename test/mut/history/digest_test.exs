@@ -305,10 +305,12 @@ defmodule Mut.History.DigestTest do
 
     test "editing a .heex template's content changes the project digest", %{root: root} do
       template = Path.join(root, "lib/page.html.heex")
-      File.write!(template, "<div class=\"a\">1.50</div>\n")
+      # Both bodies parse as Elixir and AST-normalise to the same string, so
+      # the old parse-then-Macro.to_string path collapsed them.
+      File.write!(template, "Hello  world\n")
 
       before = Digest.project_digest(root)
-      File.write!(template, "<div class=\"a\">1.5</div>\n")
+      File.write!(template, "Hello world\n")
 
       refute Digest.project_digest(root) == before,
              "a behaviour-affecting .heex byte edit must change the fingerprint even though it AST-normalizes to the same Elixir literal"

@@ -80,7 +80,9 @@ defmodule Mut.Recompile do
     default_app = Keyword.fetch!(opts, :app)
     files = Enum.uniq(mutated_files ++ dependent_files)
 
-    case Mut.ChildProcess.run("elixir", elixir_args(sandbox.path, files, default_app),
+    case Mut.ChildProcess.run(
+           "elixir",
+           elixir_args(sandbox.path, files, default_app, Keyword.take(opts, [:app_context])),
            cd: sandbox.path,
            env: env(),
            timeout_ms: Keyword.get(opts, :compile_timeout_ms, @compile_timeout_ms),
@@ -151,7 +153,7 @@ defmodule Mut.Recompile do
   # umbrella children, else `default_app` (single-app). Without
   # this, cross-app dependents' beams would land in the mutated app's ebin and
   # shadow the real ones at test time.
-  def elixir_args(sandbox_path, files, default_app) do
+  def elixir_args(sandbox_path, files, default_app, opts \\ []) do
     pa_flags =
       sandbox_path
       |> Path.join("_build/mut_schema/lib/*/ebin")
@@ -180,16 +182,25 @@ defmodule Mut.Recompile do
     # an ebin that is off the code path (the unmutated baseline then "survives")
     # and that the sandbox reset never sweeps, leaking across mutants (B4).
     # `\#{...}` stays literal so it is interpolated in the child BEAM.
-    apps_path = Mut.Umbrella.apps_path_name(sandbox_path)
-    app_map = Mut.Umbrella.app_map(sandbox_path)
+    # `:app_context` is resolved once per run by the caller (parsing every
+    # child mix.exs per mutant would be quadratic on large umbrellas).
+    {apps_path, app_map} =
+      Keyword.get(opts, :app_context) || Mut.Umbrella.app_context(sandbox_path)
 
     eval = ~s"""
     Mix.start()
     app_map = #{inspect(app_map)}
     ebin_of = fn file ->
+      relative =
+        if Path.type(file) == :absolute,
+          do: Path.relative_to(file, #{inspect(sandbox_path)}),
+          else: file
+
       app =
-        case Enum.drop_while(Path.split(file), &(&1 != #{inspect(apps_path)})) do
-          [#{inspect(apps_path)}, dir | _] -> Map.get(app_map, dir, #{inspect(default_app)})
+        case Enum.drop_while(Path.split(relative), &(&1 != #{inspect(apps_path)})) do
+          # Umbrella: unknown child dir degrades to its directory name (the
+          # pre-B4 behaviour); single-app (empty map): always default_app.
+          [#{inspect(apps_path)}, dir | _] when app_map != %{} -> Map.get(app_map, dir, dir)
           _ -> #{inspect(default_app)}
         end
 

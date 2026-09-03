@@ -426,7 +426,9 @@ defmodule Mix.Tasks.Mut do
           progress_pid: progress_pid,
           concurrency: effective_concurrency,
           test_timeout_ms: opts.test_timeout_ms,
-          host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
+          host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms,
+          # Resolved once: the dir->OTP-app map every fallback mutant needs.
+          app_context: Mut.Umbrella.app_context(source_root)
         }
 
         # M109: the `--incremental` reuse partition + reused-verdict recording
@@ -1169,7 +1171,7 @@ defmodule Mix.Tasks.Mut do
   defp warn_if_fallback_manifest_unreadable([], _ctx), do: :ok
 
   defp warn_if_fallback_manifest_unreadable([mutant | _rest], ctx) do
-    app = fallback_app(ctx.work_copy, mutant)
+    app = fallback_app(ctx, mutant)
 
     manifest_path =
       Path.join([ctx.work_copy, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
@@ -1214,7 +1216,8 @@ defmodule Mix.Tasks.Mut do
 
     result =
       Worker.run_fallback(sandbox, mutant, worker_tests.files,
-        app: fallback_app(sandbox.path, mutant),
+        app: fallback_app(ctx, mutant),
+        app_context: ctx.app_context,
         timeout_ms: ctx.host_deadline_ms,
         test_timeout_ms: ctx.test_timeout_ms,
         umbrella_app: worker_tests.umbrella_app
@@ -1810,8 +1813,8 @@ defmodule Mix.Tasks.Mut do
   # be the OTP app name, NOT the `<apps_path>/<dir>/lib/...` directory segment
   # of the mutant path — the two differ when a child app's directory is named
   # differently from its `:app` (B4). Single-app reads the project's :app. M68.
-  defp fallback_app(work_copy, mutant) do
-    Mut.Umbrella.otp_app_for_file(work_copy, mutant.file) || app_name(work_copy)
+  defp fallback_app(ctx, mutant) do
+    Mut.Umbrella.otp_app_for_file(ctx.app_context, mutant.file) || app_name(ctx.work_copy)
   end
 
   defp app_name(work_copy) do
