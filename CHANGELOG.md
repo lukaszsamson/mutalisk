@@ -7,6 +7,30 @@ and Mutalisk aims to adhere to [Semantic Versioning](https://semver.org/).
 > Mutalisk is pre-1.0 (`0.x`): the public surface (CLI flags, config keys,
 > report shape) is stable in practice but may still change before `1.0.0`.
 
+## Unreleased
+
+### Changed
+- Incremental history format version 2: records now carry `suite_timeout_ms`
+  and the killing test file; version-1 stores are rebuilt cold.
+- Mutant test runs are reaped by process group as well as by descendant walk,
+  so a wrapper `mix`/`elixir` that exits early no longer leaks the mutant BEAM.
+- Sandbox resets restore directories and symlinks under `priv/` and `lib/`,
+  not only regular files.
+
+### Added
+- `--suite-timeout-ms` / `suite_timeout_ms`: explicit whole-suite host budget;
+  otherwise derived from the baseline wall time (capped) and the per-test timeout.
+- `--priv-fingerprint stat|hash` / `priv_fingerprint`: how `priv/` files are
+  compared on reset.
+- `--test-paths` CLI switch.
+- Stryker report `testFiles` table; `killedBy` references the killing test file.
+
+### Fixed
+- Dozens of correctness fixes from the September 2026 audit (BUGS_TRIAGED.txt):
+  identity/invalid mutants, EnvWalker recall, umbrella app-name mapping and
+  rollback paths, incremental digests, UTF-8 in reports, setup error handling,
+  sandbox and work-copy leaks.
+
 ## 0.1.0 — first release
 
 The initial public release. Mutalisk is a mutation-testing engine for Elixir:
