@@ -32,8 +32,6 @@ defmodule Mut.Text do
     end
   end
 
-  def scrub_utf8(other), do: other
-
   defp scrub(<<>>, acc), do: IO.iodata_to_binary(acc)
 
   defp scrub(binary, acc) do

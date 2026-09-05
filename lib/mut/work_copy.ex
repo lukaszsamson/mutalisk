@@ -60,6 +60,9 @@ defmodule Mut.WorkCopy do
       {:ok, work_copy}
     else
       {:error, reason} -> discard_work_copy(work_copy, opts, reason)
+      # A post-copy step returning anything but :ok / {:error, _} is a bug in
+      # that step; still treat it as a failure so the copy is never leaked.
+      other -> discard_work_copy(work_copy, opts, {:unexpected_post_copy_result, other})
     end
   rescue
     exception ->
