@@ -39,10 +39,9 @@ defmodule Mut.Worker do
   def run_schema(%Sandbox{} = sandbox, mutant_id, test_files, opts \\ [])
       when is_integer(mutant_id) and mutant_id >= 0 and is_list(test_files) and is_list(opts) do
     retry? = Keyword.get(opts, :retry_on_error, true)
+    result = do_run_schema(sandbox, mutant_id, test_files, opts)
 
-    try do
-      result = do_run_schema(sandbox, mutant_id, test_files, opts)
-
+    retried =
       if retry? and result.status == :error do
         case Sandbox.reset(sandbox) do
           :ok ->
@@ -64,16 +63,46 @@ defmodule Mut.Worker do
       else
         result
       end
-    after
-      # T26: a schema run never dirties sources or beams (the mutant is
-      # selected at runtime via MUT_ACTIVE), but its TESTS can still write
-      # under `priv/` — SQLite/Mnesia files, generated assets — which the next
-      # mutant on this sandbox would then observe. `reset_priv/1` restores just
-      # that (a stat-only walk of `priv/`), so the cheap part of a reset runs
-      # here while the expensive beam hashing stays on the fallback path.
-      reset_priv!(sandbox)
+
+    retried |> settle_priv(sandbox) |> relativize_killer(sandbox)
+  end
+
+  # T26: a schema run never dirties sources or beams (the mutant is selected at
+  # runtime via MUT_ACTIVE), but its TESTS can still write under `priv/` —
+  # SQLite/Mnesia files, generated assets — which the next mutant on this
+  # sandbox would then observe. `reset_priv/1` restores just that (a stat-only
+  # walk of `priv/`), so the cheap part of a reset runs here while the
+  # expensive beam hashing stays on the fallback path. A failed reset is
+  # retried once (a test's background process may still be writing); if it
+  # still fails the verdict is downgraded to `:error` rather than raising —
+  # raising here would replace a valid verdict and abort the whole run.
+  defp settle_priv(%Result{} = result, sandbox) do
+    with {:error, _first} <- Sandbox.reset_priv(sandbox),
+         {:error, reason} <- Sandbox.reset_priv(sandbox) do
+      %Result{
+        status: :error,
+        duration_ms: result.duration_ms,
+        raw_output:
+          "sandbox #{sandbox.id} priv/ could not be reset after the schema run " <>
+            "(would contaminate later mutants): #{inspect(reason)}\n#{result.raw_output}"
+      }
+    else
+      :ok -> result
     end
   end
+
+  # ExUnit reports the failing test's file as an absolute path inside the
+  # per-run sandbox; the report and the incremental history need it relative
+  # to the project (it must line up with `covering_tests` and outlive the
+  # sandbox).
+  defp relativize_killer(%Result{killing_test_file: file} = result, %Sandbox{path: root})
+       when is_binary(file) do
+    if Path.type(file) == :absolute,
+      do: %Result{result | killing_test_file: Path.relative_to(file, root)},
+      else: result
+  end
+
+  defp relativize_killer(result, _sandbox), do: result
 
   @spec run_fallback(Sandbox.t(), Mutant.t(), [String.t()], keyword) :: Result.t()
   def run_fallback(%Sandbox{} = sandbox, %Mutant{} = mutant, test_files, opts \\ [])
@@ -94,7 +123,7 @@ defmodule Mut.Worker do
                app: app(opts),
                app_context: Keyword.get(opts, :app_context)
              ) do
-        spawn_fallback_mix(sandbox, test_files, opts, started)
+        sandbox |> spawn_fallback_mix(test_files, opts, started) |> relativize_killer(sandbox)
       else
         {:error, :missing_source_span} ->
           %Result{
@@ -132,17 +161,6 @@ defmodule Mut.Worker do
       # wrong answers). Schema runs never dirty the sandbox (the mutant is
       # selected at runtime via MUT_ACTIVE), so only this path resets.
       reset_sandbox!(sandbox)
-    end
-  end
-
-  defp reset_priv!(sandbox) do
-    case Sandbox.reset_priv(sandbox) do
-      :ok ->
-        :ok
-
-      {:error, reason} ->
-        raise "sandbox #{sandbox.id} priv/ could not be reset after a schema run " <>
-                "(would contaminate later mutants): #{inspect(reason)}"
     end
   end
 

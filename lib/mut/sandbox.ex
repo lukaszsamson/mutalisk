@@ -494,7 +494,7 @@ defmodule Mut.Sandbox do
     end)
     # The `priv` roots themselves, so a test that deletes a whole `priv/` tree
     # has it recreated even when it is empty.
-    |> Map.merge(Map.new(roots, &{Path.relative_to(&1, path), :directory}))
+    |> Map.merge(Map.new(roots, &{Path.relative_to(&1, path), root_fingerprint(&1, mode)}))
   end
 
   # Single-app: `priv/`. Umbrella: the root's own `priv/` (rare but harmless)
@@ -507,6 +507,16 @@ defmodule Mut.Sandbox do
     end
     |> Enum.map(&Path.join(&1, "priv"))
     |> Enum.filter(&File.dir?/1)
+  end
+
+  # A root selected with `File.dir?/1` may itself be a symlink to a directory
+  # (`apps/<app>/priv -> ../../shared_priv`); record it by its lstat type so a
+  # reset restores the LINK rather than replacing it with a real directory.
+  defp root_fingerprint(root, mode) do
+    case File.lstat(root) do
+      {:ok, %File.Stat{type: :symlink}} -> entry_fingerprint(root, :symlink, mode)
+      _directory -> :directory
+    end
   end
 
   defp entry_fingerprint(_entry, :directory, _mode), do: :directory
@@ -580,7 +590,9 @@ defmodule Mut.Sandbox do
     end)
     # The `lib` roots themselves: recorded so the sweep does not see them as
     # stray directories, and so a deleted one is recreated.
-    |> Map.merge(Map.new(roots, &{Path.relative_to(&1, baseline_source), :directory}))
+    |> Map.merge(
+      Map.new(roots, &{Path.relative_to(&1, baseline_source), root_fingerprint(&1, :hash)})
+    )
   end
 
   # Single-app: the project's own lib/. Umbrella: every child app's lib/, so a

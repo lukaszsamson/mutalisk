@@ -831,8 +831,8 @@ defmodule Mix.Tasks.Mut do
       result = %Worker.Result{
         status: status,
         duration_ms: 0,
-        # JSON null decodes to the atom `:null`; the reporter expects a binary
-        # or nil killing test, so coerce anything non-binary to nil.
+        # The reporter expects a binary or nil killing test, so coerce anything
+        # non-binary (older records) to nil.
         killing_test: binary_or_nil(stored["killing_test"]),
         # F2: carry the authoritative killing test FILE through reuse too —
         # without it a reused `killed` verdict loses its `killedBy` in the

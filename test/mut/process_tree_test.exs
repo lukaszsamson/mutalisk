@@ -23,8 +23,23 @@ defmodule Mut.ProcessTreeTest do
           assert File.exists?(path)
 
         :none ->
-          refute System.find_executable("perl") || System.find_executable("setsid"),
-                 "a launcher exists on this machine but was not detected"
+          # Either no launcher exists, or a plain spawn already leads its own
+          # process group (modern OTP's erl_child_setup), making one redundant.
+          sh = System.find_executable("sh")
+
+          port =
+            Port.open({:spawn_executable, sh}, [
+              :binary,
+              :exit_status,
+              args: ["-c", "ps -o pgid= -p $$"]
+            ])
+
+          {:os_pid, pid} = Port.info(port, :os_pid)
+          pgid = collect_output(port, "") |> String.trim()
+
+          assert pgid == Integer.to_string(pid) or
+                   is_nil(System.find_executable("perl") || System.find_executable("setsid")),
+                 "a launcher exists and a plain spawn does not lead its group, yet none was detected"
       end
 
       assert ProcessTree.launcher() == launcher, "launcher detection must be cached"
@@ -185,10 +200,49 @@ defmodule Mut.ProcessTreeTest do
     drain(port)
   end
 
+  test "spawn_command/2 preserves argv byte-for-byte through the launcher" do
+    args = [
+      "a b",
+      ~s(quo"te),
+      "sin'gle",
+      "ünïcødé 日本",
+      "",
+      "-x",
+      "--flag",
+      "*",
+      "$HOME",
+      "back\\slash"
+    ]
+
+    script = "printf '%s\\n' \"$@\""
+
+    {exe, argv} =
+      ProcessTree.spawn_command(System.find_executable("sh"), ["-c", script, "sh" | args])
+
+    port = Port.open({:spawn_executable, exe}, [:binary, :exit_status, args: argv])
+    output = collect_output(port, "")
+    assert String.split(output, "\n", trim: true) == Enum.reject(args, &(&1 == ""))
+    assert output =~ "a b\n\n-x" or output =~ "sin'gle\nünïcødé 日本\n\n-x"
+  end
+
+  defp collect_output(port, acc) do
+    receive do
+      {^port, {:data, data}} -> collect_output(port, acc <> data)
+      {^port, {:exit_status, _}} -> acc
+    after
+      5_000 -> flunk("child did not exit")
+    end
+  end
+
   @tag :tmp_processes
   test "the pgrep -P fallback still reaps the tree when no launcher is used" do
     sh = System.find_executable("sh")
     assert sh, "sh required for this test"
+
+    # Force the no-launcher path regardless of what detection picked.
+    previous = :persistent_term.get({ProcessTree, :launcher}, :undetected)
+    :persistent_term.put({ProcessTree, :launcher}, :none)
+    on_exit(fn -> :persistent_term.put({ProcessTree, :launcher}, previous) end)
 
     # Spawned WITHOUT spawn_command/2 — the no-launcher path. The wrapper is
     # still alive, so the descendant walk is the mechanism under test.

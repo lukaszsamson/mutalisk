@@ -117,6 +117,38 @@ defmodule Mut.ProcessTree do
   end
 
   defp detect_launcher do
+    # Modern OTP (`erl_child_setup`) already places every port child in its
+    # own process group, in which case the launcher only adds ~3 ms per spawn
+    # and a `perl` dependency for nothing. Probe a plain spawn first.
+    if plain_spawn_leads_group?(), do: :none, else: detect_wrapper_launcher()
+  end
+
+  defp plain_spawn_leads_group? do
+    sh = System.find_executable("sh")
+
+    port =
+      Port.open({:spawn_executable, sh}, [
+        :binary,
+        :exit_status,
+        args: ["-c", "ps -o pgid= -p $$"]
+      ])
+
+    {:os_pid, pid} = Port.info(port, :os_pid)
+    collect_probe(port, "") == Integer.to_string(pid)
+  catch
+    _kind, _reason -> false
+  end
+
+  defp collect_probe(port, acc) do
+    receive do
+      {^port, {:data, data}} -> collect_probe(port, acc <> data)
+      {^port, {:exit_status, _}} -> String.trim(acc)
+    after
+      5_000 -> ""
+    end
+  end
+
+  defp detect_wrapper_launcher do
     Enum.find_value(
       [
         {:perl, "perl", fn _perl -> ["-e", @perl_script, "/bin/sh", "-c", "exit 42"] end},
@@ -179,11 +211,15 @@ defmodule Mut.ProcessTree do
     # T32) would be defeated by the very close call meant to precede it.
     safe_close(port)
 
-    cond do
-      is_integer(pgid) -> kill_process_group(pgid)
-      is_integer(os_pid) -> kill_process_tree(os_pid)
-      true -> :ok
-    end
+    # Both mechanisms, not either/or: a descendant that re-groups itself
+    # (`setsid`/`setpgid` — and OTP's own `erl_child_setup` does exactly that
+    # for every Port the mutant's tests spawn) leaves our group, so the
+    # `pgrep -P` walk from the still-verifiable leader is what reaches it;
+    # conversely the group kill is what reaches reparented descendants once
+    # the leader is gone. Each is best-effort and idempotent.
+    if is_integer(pgid), do: kill_process_group(pgid)
+    if is_integer(os_pid), do: kill_process_tree(os_pid)
+    :ok
   catch
     _kind, _reason -> :ok
   end

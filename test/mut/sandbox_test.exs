@@ -377,6 +377,34 @@ defmodule Mut.SandboxTest do
     refute File.exists?(parent)
   end
 
+  test "a priv/ root that is itself a symlink is restored as a link, not a directory" do
+    schema_result = schema_result("priv_symlink_root")
+    work_copy = schema_result.work_copy_root
+    File.mkdir_p!(Path.join(work_copy, "shared_priv"))
+    File.write!(Path.join(work_copy, "shared_priv/asset.txt"), "asset\n")
+    :ok = File.ln_s("shared_priv", Path.join(work_copy, "priv"))
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-symroot", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+    priv = Path.join(sandbox.path, "priv")
+
+    case File.read_link(priv) do
+      {:ok, "shared_priv"} ->
+        assert :ok = Sandbox.reset_priv(sandbox)
+        assert {:ok, "shared_priv"} = File.read_link(priv), "reset replaced the priv link"
+        assert :ok = Sandbox.reset(sandbox)
+        assert {:ok, "shared_priv"} = File.read_link(priv), "reset replaced the priv link"
+
+      _copied_as_dir ->
+        # The copy step dereferenced the link; nothing to protect here.
+        assert :ok = Sandbox.reset_priv(sandbox)
+    end
+
+    Sandbox.destroy_pool(Sandbox.checkin(sandbox, pool))
+  end
+
   defp umbrella_schema_result(name) do
     root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
     File.rm_rf!(Path.dirname(root))
