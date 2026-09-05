@@ -132,6 +132,317 @@ defmodule Mut.SandboxTest do
     Sandbox.destroy_pool(final_pool)
   end
 
+  test "reset restores test-written priv/ state (T26)" do
+    schema_result = schema_result("priv")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv/repo"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/repo/seed.sql"), "seed\n")
+
+    {:ok, pool} = Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv", force: true)
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    seed = Path.join(sandbox.path, "priv/repo/seed.sql")
+    assert File.read!(seed) == "seed\n"
+
+    # A test writing under priv/: a new database plus a mutated baseline file.
+    db = Path.join(sandbox.path, "priv/repo/app.db")
+    File.write!(db, "sqlite-bytes")
+    File.write!(seed, "clobbered by mutant A\n")
+
+    assert :ok = Sandbox.reset(sandbox)
+    refute File.exists?(db)
+    assert File.read!(seed) == "seed\n"
+
+    # Reset is idempotent: the restored file's fingerprint matches the baseline
+    # again (the stat baseline's mtime is stamped back on).
+    assert :ok = Sandbox.reset(sandbox)
+    assert File.read!(seed) == "seed\n"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset_priv restores priv/ for schema workers without touching the build (T26)" do
+    schema_result = schema_result("priv_only")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/asset.txt"), "asset\n")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-only", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    asset = Path.join(sandbox.path, "priv/asset.txt")
+    stray = Path.join(sandbox.path, "priv/mnesia.DCD")
+    File.write!(asset, "clobbered\n")
+    File.write!(stray, "mnesia")
+
+    # A beam left dirty by something else is NOT this call's business.
+    beam = Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")
+    File.write!(beam, "dirty")
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert File.read!(asset) == "asset\n"
+    refute File.exists?(stray)
+    assert File.read!(beam) == "dirty"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "priv_fingerprint: :hash detects same-size same-second rewrites (T26)" do
+    schema_result = schema_result("priv_hash")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/asset.txt"), "aaaa")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1,
+        run_id: "unit-sandbox-priv-hash",
+        force: true,
+        priv_fingerprint: :hash
+      )
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+    asset = Path.join(sandbox.path, "priv/asset.txt")
+
+    # Same size, and forced back to the original mtime: only a content hash
+    # can see this.
+    {:ok, %File.Stat{mtime: mtime}} = File.stat(asset, time: :posix)
+    File.write!(asset, "bbbb")
+    File.touch!(asset, mtime)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert File.read!(asset) == "aaaa"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset_priv removes stray priv/ directories and symlinks (T26)" do
+    schema_result = schema_result("priv_entries")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/asset.txt"), "asset\n")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-entries", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    # A test creating an EMPTY directory, a nested directory holding a file,
+    # and a symlink under priv/.
+    empty_dir = Path.join(sandbox.path, "priv/cache")
+    nested_file = Path.join(sandbox.path, "priv/nested/deep/app.db")
+    link = Path.join(sandbox.path, "priv/link.txt")
+    outside = Path.join(sandbox.path, "outside.txt")
+    File.write!(outside, "outside\n")
+    File.mkdir_p!(empty_dir)
+    File.mkdir_p!(Path.dirname(nested_file))
+    File.write!(nested_file, "sqlite-bytes")
+    :ok = File.ln_s(outside, link)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+
+    refute File.exists?(empty_dir)
+    refute File.exists?(Path.join(sandbox.path, "priv/nested"))
+    refute File.exists?(link)
+    # The symlink is removed, never followed: its target is untouched.
+    assert File.read!(outside) == "outside\n"
+    assert File.read!(Path.join(sandbox.path, "priv/asset.txt")) == "asset\n"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset_priv restores deleted, retargeted and removed baseline priv/ entries (T26)" do
+    schema_result = schema_result("priv_restore")
+    work_copy = schema_result.work_copy_root
+    File.mkdir_p!(Path.join(work_copy, "priv/empty"))
+    File.write!(Path.join(work_copy, "priv/asset.txt"), "asset\n")
+    File.write!(Path.join(work_copy, "priv/other.txt"), "other\n")
+    :ok = File.ln_s("asset.txt", Path.join(work_copy, "priv/current.txt"))
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-restore", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    link = Path.join(sandbox.path, "priv/current.txt")
+    empty = Path.join(sandbox.path, "priv/empty")
+    assert {:ok, "asset.txt"} = File.read_link(link)
+
+    # A test deletes the baseline symlink and the baseline (empty) directory.
+    File.rm!(link)
+    File.rm_rf!(empty)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert {:ok, "asset.txt"} = File.read_link(link)
+    assert File.dir?(empty)
+
+    # A test retargets the baseline symlink.
+    File.rm!(link)
+    :ok = File.ln_s("other.txt", link)
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert {:ok, "asset.txt"} = File.read_link(link)
+
+    # Restoring never writes THROUGH the link: both targets keep their bytes.
+    assert File.read!(Path.join(sandbox.path, "priv/asset.txt")) == "asset\n"
+    assert File.read!(Path.join(sandbox.path, "priv/other.txt")) == "other\n"
+
+    # Idempotent: a second reset finds nothing to do.
+    assert :ok = Sandbox.reset_priv(sandbox)
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset restores a deleted priv/ tree and sweeps stray lib/ entries (T26)" do
+    schema_result = schema_result("priv_tree")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv/repo"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/repo/seed.sql"), "seed\n")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-tree", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    # The whole priv/ tree is deleted by a test...
+    File.rm_rf!(Path.join(sandbox.path, "priv"))
+    # ...and a stray directory plus a stray symlink appear under lib/.
+    stray_dir = Path.join(sandbox.path, "lib/generated")
+    stray_link = Path.join(sandbox.path, "lib/alias.ex")
+    File.mkdir_p!(stray_dir)
+    File.write!(Path.join(stray_dir, "gen.ex"), "# generated\n")
+    :ok = File.ln_s("arith.ex", stray_link)
+
+    assert :ok = Sandbox.reset(sandbox)
+
+    assert File.dir?(Path.join(sandbox.path, "priv/repo"))
+    assert File.read!(Path.join(sandbox.path, "priv/repo/seed.sql")) == "seed\n"
+    refute File.exists?(stray_dir)
+    refute File.exists?(stray_link)
+    assert File.read!(Path.join(sandbox.path, "lib/arith.ex")) == "defmodule Arith, do: :ok\n"
+    # The build tree is untouched by the source sweep.
+    assert File.exists?(
+             Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")
+           )
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset sweeps umbrella apps/<app>/priv (T26)" do
+    schema_result = umbrella_schema_result("umbrella_priv")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-umbrella-priv", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    seed = Path.join(sandbox.path, "apps/child/priv/seed.sql")
+    assert File.read!(seed) == "seed\n"
+
+    stray = Path.join(sandbox.path, "apps/child/priv/repo/app.db")
+    File.mkdir_p!(Path.dirname(stray))
+    File.write!(stray, "sqlite-bytes")
+    File.write!(seed, "clobbered\n")
+
+    # An untracked sibling root under apps/<app> must survive the sweep.
+    keep = Path.join(sandbox.path, "apps/child/test/child_test.exs")
+    assert File.exists?(keep)
+
+    assert :ok = Sandbox.reset(sandbox)
+    refute File.exists?(stray)
+    assert File.read!(seed) == "seed\n"
+    assert File.exists?(keep)
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "create_pool removes the partial pool when a sandbox fails (T28)" do
+    schema_result = schema_result("partial")
+
+    # Fail on the third of three sandboxes; the first two are fully created.
+    copy_fun = fn source, destination ->
+      if Path.basename(destination) == "3" do
+        {:error, :injected_copy_failure}
+      else
+        Mut.FileCopy.copy_tree(source, destination)
+      end
+    end
+
+    parent = Path.expand("tmp/mut_sandboxes/unit-sandbox-partial")
+
+    assert {:error, :injected_copy_failure} =
+             Sandbox.create_pool(schema_result, 3,
+               run_id: "unit-sandbox-partial",
+               force: true,
+               copy_fun: copy_fun
+             )
+
+    refute File.exists?(Path.join(parent, "1"))
+    refute File.exists?(Path.join(parent, "2"))
+    refute File.exists?(parent)
+  end
+
+  test "a priv/ root that is itself a symlink is restored as a link, not a directory" do
+    schema_result = schema_result("priv_symlink_root")
+    work_copy = schema_result.work_copy_root
+    File.mkdir_p!(Path.join(work_copy, "shared_priv"))
+    File.write!(Path.join(work_copy, "shared_priv/asset.txt"), "asset\n")
+    :ok = File.ln_s("shared_priv", Path.join(work_copy, "priv"))
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-symroot", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+    priv = Path.join(sandbox.path, "priv")
+
+    case File.read_link(priv) do
+      {:ok, "shared_priv"} ->
+        assert :ok = Sandbox.reset_priv(sandbox)
+        assert {:ok, "shared_priv"} = File.read_link(priv), "reset replaced the priv link"
+        assert :ok = Sandbox.reset(sandbox)
+        assert {:ok, "shared_priv"} = File.read_link(priv), "reset replaced the priv link"
+
+      _copied_as_dir ->
+        # The copy step dereferenced the link; nothing to protect here.
+        assert :ok = Sandbox.reset_priv(sandbox)
+    end
+
+    Sandbox.destroy_pool(Sandbox.checkin(sandbox, pool))
+  end
+
+  defp umbrella_schema_result(name) do
+    root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
+    File.rm_rf!(Path.dirname(root))
+    app = Path.join(root, "apps/child")
+    File.mkdir_p!(Path.join(app, "lib"))
+    File.mkdir_p!(Path.join(app, "priv"))
+    File.mkdir_p!(Path.join(app, "test"))
+    File.mkdir_p!(Path.join(root, "_build/mut_schema/lib/child/ebin"))
+
+    File.write!(
+      Path.join(root, "mix.exs"),
+      "defmodule Umb.MixProject do\n  use Mix.Project\n  def project, do: [apps_path: \"apps\"]\nend\n"
+    )
+
+    File.write!(
+      Path.join(app, "mix.exs"),
+      "defmodule Child.MixProject do\n  use Mix.Project\n  def project, do: [app: :child, version: \"0.1.0\"]\nend\n"
+    )
+
+    File.write!(Path.join(app, "lib/child.ex"), "defmodule Child, do: :ok\n")
+    File.write!(Path.join(app, "priv/seed.sql"), "seed\n")
+    File.write!(Path.join(app, "test/child_test.exs"), "# test\n")
+    File.write!(Path.join(root, "_build/mut_schema/lib/child/ebin/Elixir.Child.beam"), "beam")
+
+    %SchemaBuild.Result{
+      work_copy_root: root,
+      build_path: Path.join(root, "_build/mut_schema"),
+      plan: %Mut.Plan{schema: [], fallback: [], skipped: []},
+      placement_maps: %{},
+      snapshot: %{
+        "lib/child/ebin/Elixir.Child.beam" =>
+          sha256(Path.join(root, "_build/mut_schema/lib/child/ebin/Elixir.Child.beam"))
+      },
+      rollback_iterations: 0,
+      invalid_mutants: []
+    }
+  end
+
   defp schema_result(name) do
     root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
     File.rm_rf!(Path.dirname(root))

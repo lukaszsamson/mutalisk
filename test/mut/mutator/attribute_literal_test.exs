@@ -54,6 +54,16 @@ defmodule Mut.Mutator.AttributeLiteralTest do
     assert entries([]) == []
   end
 
+  test "never emits identity or duplicate replacements" do
+    assert entries(0) == [
+             {:attribute_int_replace, 1, %{original_value: 0, replacement_value: 1}}
+           ]
+
+    assert entries(0.0) == [
+             {:attribute_float_replace, 1.0, %{original_value: 0.0, replacement_value: 1.0}}
+           ]
+  end
+
   test "compatible callback is always false" do
     refute AttributeLiteral.compatible?(candidate(:some_const), site(:+))
   end

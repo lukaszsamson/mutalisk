@@ -236,5 +236,84 @@ defmodule Mut.History.DigestTest do
       refute Digest.project_digest(root) == before,
              "editing a test fixture must change the fingerprint"
     end
+
+    test "a standard apps/ umbrella (default apps_path) still fingerprints child-app source (T18)",
+         %{root: root} do
+      # `Digest.project_digest` must not regress for the common case: an
+      # umbrella with no `:apps_path` override (or an explicit `apps_path:
+      # "apps"`) resolves to the same "apps" globs as before this change.
+      File.write!(
+        Path.join(root, "mix.exs"),
+        "defmodule Root.MixProject do\n  def project, do: [apps_path: \"apps\"]\nend\n"
+      )
+
+      app_lib = Path.join(root, "apps/a/lib")
+      File.mkdir_p!(app_lib)
+      File.write!(Path.join(app_lib, "helper.ex"), "defmodule A.Helper do\n  def g, do: 1\nend\n")
+
+      before = Digest.project_digest(root)
+      File.write!(Path.join(app_lib, "helper.ex"), "defmodule A.Helper do\n  def g, do: 2\nend\n")
+
+      refute Digest.project_digest(root) == before,
+             "editing apps/a/lib/helper.ex under a default-valued apps_path must change the fingerprint"
+    end
+
+    test "a non-umbrella project's digest is unaffected by apps_path resolution (T18)", %{
+      root: root
+    } do
+      # No mix.exs declaring :apps_path at all (the common single-app case) —
+      # `Mut.Umbrella.apps_path_name/1` must default to "apps" without raising,
+      # and the digest must depend only on the files that actually exist.
+      before = Digest.project_digest(root)
+      assert Digest.project_digest(root) == before
+    end
+
+    test "editing a file under a custom apps_path (mix.exs apps_path: \"packages\") changes the digest (T18)",
+         %{root: root} do
+      File.write!(
+        Path.join(root, "mix.exs"),
+        "defmodule Root.MixProject do\n  def project, do: [apps_path: \"packages\"]\nend\n"
+      )
+
+      app_lib = Path.join(root, "packages/foo/lib")
+      File.mkdir_p!(app_lib)
+
+      File.write!(
+        Path.join(app_lib, "helper.ex"),
+        "defmodule Foo.Helper do\n  def g, do: 1\nend\n"
+      )
+
+      before = Digest.project_digest(root)
+
+      File.write!(
+        Path.join(app_lib, "helper.ex"),
+        "defmodule Foo.Helper do\n  def g, do: 2\nend\n"
+      )
+
+      refute Digest.project_digest(root) == before,
+             "editing packages/foo/lib/helper.ex (custom apps_path) must change the fingerprint"
+    end
+  end
+
+  describe "input_digest (T19: .eex/.heex are hashed byte-exact, not AST-normalized)" do
+    setup do
+      root = Path.join(System.tmp_dir!(), "mut_proj_digest_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(Path.join(root, "lib"))
+      on_exit(fn -> File.rm_rf!(root) end)
+      {:ok, root: root}
+    end
+
+    test "editing a .heex template's content changes the project digest", %{root: root} do
+      template = Path.join(root, "lib/page.html.heex")
+      # Both bodies parse as Elixir and AST-normalise to the same string, so
+      # the old parse-then-Macro.to_string path collapsed them.
+      File.write!(template, "Hello  world\n")
+
+      before = Digest.project_digest(root)
+      File.write!(template, "Hello world\n")
+
+      refute Digest.project_digest(root) == before,
+             "a behaviour-affecting .heex byte edit must change the fingerprint even though it AST-normalizes to the same Elixir literal"
+    end
   end
 end

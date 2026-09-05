@@ -41,23 +41,68 @@ defmodule Mut.Worker do
     retry? = Keyword.get(opts, :retry_on_error, true)
     result = do_run_schema(sandbox, mutant_id, test_files, opts)
 
-    if retry? and result.status == :error do
-      case Sandbox.reset(sandbox) do
-        :ok ->
-          do_run_schema(sandbox, mutant_id, test_files, Keyword.put(opts, :retry_on_error, false))
+    retried =
+      if retry? and result.status == :error do
+        case Sandbox.reset(sandbox) do
+          :ok ->
+            do_run_schema(
+              sandbox,
+              mutant_id,
+              test_files,
+              Keyword.put(opts, :retry_on_error, false)
+            )
 
-        {:error, reason} ->
-          %Result{
-            status: :error,
-            duration_ms: result.duration_ms,
-            raw_output:
-              "sandbox reset before retry failed: #{inspect(reason)}\n#{result.raw_output}"
-          }
+          {:error, reason} ->
+            %Result{
+              status: :error,
+              duration_ms: result.duration_ms,
+              raw_output:
+                "sandbox reset before retry failed: #{inspect(reason)}\n#{result.raw_output}"
+            }
+        end
+      else
+        result
       end
+
+    retried |> settle_priv(sandbox) |> relativize_killer(sandbox)
+  end
+
+  # T26: a schema run never dirties sources or beams (the mutant is selected at
+  # runtime via MUT_ACTIVE), but its TESTS can still write under `priv/` —
+  # SQLite/Mnesia files, generated assets — which the next mutant on this
+  # sandbox would then observe. `reset_priv/1` restores just that (a stat-only
+  # walk of `priv/`), so the cheap part of a reset runs here while the
+  # expensive beam hashing stays on the fallback path. A failed reset is
+  # retried once (a test's background process may still be writing); if it
+  # still fails the verdict is downgraded to `:error` rather than raising —
+  # raising here would replace a valid verdict and abort the whole run.
+  defp settle_priv(%Result{} = result, sandbox) do
+    with {:error, _first} <- Sandbox.reset_priv(sandbox),
+         {:error, reason} <- Sandbox.reset_priv(sandbox) do
+      %Result{
+        status: :error,
+        duration_ms: result.duration_ms,
+        raw_output:
+          "sandbox #{sandbox.id} priv/ could not be reset after the schema run " <>
+            "(would contaminate later mutants): #{inspect(reason)}\n#{result.raw_output}"
+      }
     else
-      result
+      :ok -> result
     end
   end
+
+  # ExUnit reports the failing test's file as an absolute path inside the
+  # per-run sandbox; the report and the incremental history need it relative
+  # to the project (it must line up with `covering_tests` and outlive the
+  # sandbox).
+  defp relativize_killer(%Result{killing_test_file: file} = result, %Sandbox{path: root})
+       when is_binary(file) do
+    if Path.type(file) == :absolute,
+      do: %Result{result | killing_test_file: Path.relative_to(file, root)},
+      else: result
+  end
+
+  defp relativize_killer(result, _sandbox), do: result
 
   @spec run_fallback(Sandbox.t(), Mutant.t(), [String.t()], keyword) :: Result.t()
   def run_fallback(%Sandbox{} = sandbox, %Mutant{} = mutant, test_files, opts \\ [])
@@ -73,8 +118,12 @@ defmodule Mut.Worker do
              manifest
              |> Mut.Recompile.dependents(dependent_modules(mutant), dep_kinds(mutant))
              |> Enum.to_list(),
-           :ok <- Mut.Recompile.recompile(sandbox, [patch.file], dependents, app: app(opts)) do
-        spawn_fallback_mix(sandbox, test_files, opts, started)
+           :ok <-
+             Mut.Recompile.recompile(sandbox, [patch.file], dependents,
+               app: app(opts),
+               app_context: Keyword.get(opts, :app_context)
+             ) do
+        sandbox |> spawn_fallback_mix(test_files, opts, started) |> relativize_killer(sandbox)
       else
         {:error, :missing_source_span} ->
           %Result{
@@ -213,8 +262,14 @@ defmodule Mut.Worker do
             env(mutant_id)
           )
 
+        # T32: snapshot the os_pid right after open — a wrapper `mix` (asdf/mise
+        # shim, not exec'd) can have already exited by the time the timeout path
+        # runs cleanup, at which point Port.info/2 returns nil even though the
+        # real beam.smp descendant is still alive.
+        os_pid = port_os_pid(port)
+
         port
-        |> collect(Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> collect(os_pid, Keyword.get(opts, :timeout_ms, @default_timeout_ms))
         |> classify(elapsed(started))
 
       {:error, reason} ->
@@ -233,8 +288,10 @@ defmodule Mut.Worker do
             fallback_env()
           )
 
+        os_pid = port_os_pid(port)
+
         port
-        |> collect(Keyword.get(opts, :timeout_ms, @default_timeout_ms))
+        |> collect(os_pid, Keyword.get(opts, :timeout_ms, @default_timeout_ms))
         |> classify(elapsed(started))
 
       {:error, reason} ->
@@ -255,9 +312,15 @@ defmodule Mut.Worker do
     if Mut.Umbrella.umbrella?(sandbox.path) do
       # Union every app's manifest so the dependent walk crosses app
       # boundaries (a module mutated in app A yields dependent files in B). M68.
+      #
+      # The manifest lives under the OTP app name (`_build/<env>/lib/<app>`)
+      # while the sources it records are re-prefixed with the child's
+      # DIRECTORY name so they line up with mutant file paths
+      # (`<apps_path>/<dir>/lib/...`). Conflating the two makes every
+      # cross-app dependent lookup miss on umbrellas whose directory name
+      # differs from `:app` (B4).
       sandbox.path
-      |> Mut.Umbrella.app_names()
-      |> Enum.map(&{&1, manifest_path(sandbox, &1)})
+      |> manifest_entries()
       |> Mut.MixManifest.read_combined(Mut.Umbrella.apps_path_name(sandbox.path))
     else
       sandbox
@@ -266,8 +329,21 @@ defmodule Mut.Worker do
     end
   end
 
-  defp manifest_path(sandbox, app) do
-    Path.join([sandbox.path, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
+  @doc false
+  # Exposed for testing. `{child directory, manifest path under the OTP app}`
+  # for every umbrella child, sorted for a deterministic merge order.
+  @spec manifest_entries(Path.t()) :: [{String.t(), Path.t()}]
+  def manifest_entries(sandbox_path) do
+    sandbox_path
+    |> Mut.Umbrella.app_map()
+    |> Enum.sort()
+    |> Enum.map(fn {dir, otp_app} -> {dir, manifest_path(sandbox_path, otp_app)} end)
+  end
+
+  defp manifest_path(%Sandbox{path: path}, app), do: manifest_path(path, app)
+
+  defp manifest_path(sandbox_path, app) when is_binary(sandbox_path) do
+    Path.join([sandbox_path, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
   end
 
   # Require an explicit `:app` — the old `"demo_app"` fixture default silently
@@ -312,8 +388,14 @@ defmodule Mut.Worker do
   end
 
   defp open_mix_port(mix_path, args, cd, env) do
-    Port.open({:spawn_executable, mix_path}, [
-      {:args, args},
+    # T32: launch through Mut.ProcessTree's group launcher so the mutant BEAM
+    # lands in its own process group and can be reaped as a group even after a
+    # non-exec `mix` shim has exited. The launcher `exec`s, so :exit_status,
+    # :stderr_to_stdout, :cd and :env all still describe the real child.
+    {executable, spawn_args} = Mut.ProcessTree.spawn_command(mix_path, args)
+
+    Port.open({:spawn_executable, executable}, [
+      {:args, spawn_args},
       {:cd, cd},
       {:env,
        Enum.map(env, fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)},
@@ -329,21 +411,45 @@ defmodule Mut.Worker do
   # restart + Logger) never tripped it and wedged the run (Task.async_stream is
   # timeout: :infinity). The deadline is fixed once and the `after` shrinks as
   # time passes, so a chatty hang is killed at the budget like a silent one.
-  defp collect(port, timeout_ms) do
+  defp collect(port, os_pid, timeout_ms) do
     deadline = System.monotonic_time(:millisecond) + timeout_ms
-    collect(port, "", deadline)
+    collect(port, os_pid, "", deadline)
   end
 
-  defp collect(port, output, deadline) do
+  # T24: the mutant's output is arbitrary bytes (a truncated latin-1 log line, a
+  # binary payload, a sequence cut by an OOM kill). It ends up verbatim in
+  # `Result.raw_output` and from there in the Stryker JSON report, whose encoder
+  # rejects invalid UTF-8 — one stray byte would crash the final write and
+  # destroy the whole run. Scrub once, here at capture, on the *whole*
+  # accumulated output so codepoints split across port chunks stay intact.
+  defp collect(port, os_pid, output, deadline) do
     remaining = max(deadline - System.monotonic_time(:millisecond), 0)
 
     receive do
-      {^port, {:data, data}} -> collect(port, bounded_output(output, data), deadline)
-      {^port, {:exit_status, code}} -> {:exit, code, output}
+      {^port, {:data, data}} -> collect(port, os_pid, bounded_output(output, data), deadline)
+      {^port, {:exit_status, code}} -> {:exit, code, Mut.Text.scrub_utf8(output)}
     after
       remaining ->
-        kill_port(port)
-        {:timeout, output}
+        kill_port(port, os_pid)
+        drain_port_messages(port)
+        {:timeout, Mut.Text.scrub_utf8(output)}
+    end
+  end
+
+  defp port_os_pid(port), do: Mut.ProcessTree.identify(port)
+
+  # T31: after closing a timed-out port, drain any {port, {:data, _}} /
+  # {port, {:exit_status, _}} messages already queued for it in this worker's
+  # (long-lived, one-per-slot) mailbox so repeated timeouts don't accumulate
+  # stale junk for a later unrelated `receive` to scan past. `after 0` only
+  # drains what's already queued — it never waits for new messages.
+  defp drain_port_messages(port) do
+    receive do
+      {^port, {:data, _data}} -> drain_port_messages(port)
+      {^port, {:exit_status, _code}} -> drain_port_messages(port)
+      {:EXIT, ^port, _reason} -> drain_port_messages(port)
+    after
+      0 -> :ok
     end
   end
 
@@ -373,16 +479,21 @@ defmodule Mut.Worker do
 
   defp classify({:exit, code, output}, duration_ms) do
     case Formatter.parse_output(output) do
-      # R9: zero tests ran (tag excludes / path filters matched nothing) is NOT
-      # a surviving mutant — no test had the chance to detect it. Classifying it
-      # `:survived` manufactures false survivors that drag the score down and
-      # imply test-suite gaps that don't exist. `:no_coverage` is excluded from
-      # the score denominator, like `:skipped`.
-      %{summary: %{"total" => 0}} when code == 0 ->
-        %Result{status: :no_coverage, duration_ms: duration_ms}
-
-      %{summary: %{"failed" => 0}} when code == 0 ->
-        %Result{status: :survived, duration_ms: duration_ms}
+      # R9/T30: zero tests *executed* (tag excludes / path filters matched
+      # nothing, or every selected test was skipped/excluded) is NOT a surviving
+      # mutant — no test had the chance to detect it. Classifying it `:survived`
+      # manufactures false survivors that imply test-suite gaps that don't
+      # exist. Note that `:no_coverage` still counts as UNDETECTED in the
+      # documented score (`Mut.Metrics.score/4` puts it in the denominator, like
+      # `:survived`); the distinction is diagnostic, not a score change. `total`
+      # counts skipped and excluded tests too, so it cannot answer this on its
+      # own — `ran` can.
+      %{summary: %{"failed" => 0} = summary} when code == 0 ->
+        if ran_count(summary) == 0 do
+          %Result{status: :no_coverage, duration_ms: duration_ms}
+        else
+          %Result{status: :survived, duration_ms: duration_ms}
+        end
 
       %{summary: %{"failed" => failed}, tests: tests} when code != 0 and failed >= 1 ->
         failing = Enum.find(tests, &(&1["status"] == "failed"))
@@ -411,6 +522,18 @@ defmodule Mut.Worker do
     end
   end
 
+  # Tests that actually executed. The formatter emits `ran` directly; fall back
+  # to `total - skipped` so an older/partial summary still classifies correctly
+  # (`total` alone counts skipped and excluded tests).
+  defp ran_count(%{"ran" => ran}) when is_integer(ran), do: ran
+
+  defp ran_count(summary) do
+    total = Map.get(summary, "total", 0)
+    skipped = Map.get(summary, "skipped", 0)
+
+    max(total - skipped, 0)
+  end
+
   defp killing_test(nil), do: nil
   defp killing_test(test), do: "#{test["module"]} #{test["test"]}"
 
@@ -418,7 +541,7 @@ defmodule Mut.Worker do
   # version manager / wrapper `mix`, the immediate child forks the real BEAM,
   # so `kill -9 <immediate>` orphans the (often infinite-looping) mutant VM on
   # the timeout path. Shared with Mut.ChildProcess via Mut.ProcessTree.
-  defp kill_port(port), do: Mut.ProcessTree.kill_port(port)
+  defp kill_port(port, os_pid), do: Mut.ProcessTree.kill_port(port, os_pid)
 
   defp elapsed(started), do: System.monotonic_time(:millisecond) - started
 end

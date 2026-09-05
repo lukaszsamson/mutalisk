@@ -9,6 +9,11 @@ defmodule Mix.Tasks.Mut do
       globs so your shell does not expand them first. Repeat the flag, pass
       multiple path tokens after it, or use comma-separated patterns to mutate
       several paths.
+    - `--test-paths "PATH"` — Restrict test discovery to these paths (default:
+      `test/` for a single app, every child app's `apps/<app>/test/` for an
+      umbrella). Repeat the flag, pass multiple path tokens after it, or use
+      comma-separated paths, exactly like `--files`. Paths must be
+      project-relative.
     - `--mutators NAMES` — Comma-separated mutator name list
     - `--enable TARGETS` — Comma-separated enabled targets. Defaults:
       `dispatch`, `guard`, `env_walker` (only
@@ -56,6 +61,20 @@ defmodule Mix.Tasks.Mut do
       exit and print their retained paths (debug aid; default: false)
     - `--test-timeout-ms N` — Per-test ExUnit timeout in milliseconds.
       Default 10000. Range 1000..600000.
+    - `--suite-timeout-ms N` — Whole-suite host budget, in milliseconds, for one
+      mutant's selected tests (range 1000..3600000). The host kills the mutant's
+      test port after this budget plus a 10000 ms drain buffer. Unset (the
+      default) it is derived from the measured baseline run:
+      `max(test_timeout_ms, baseline_wall_ms * 2) + 10000`. Deriving it matters
+      because several individually valid slow tests can otherwise exceed a budget
+      sized for a single test, and the resulting host timeout counts as a
+      detection and inflates the score.
+    - `--priv-fingerprint stat|hash` — How each sandbox's copied `priv/` tree is
+      fingerprinted for the between-mutant reset. `stat` (the default) compares
+      size + mtime: cheap, but it misses a rewrite that keeps the byte size AND
+      lands in the same mtime second. `hash` compares content: exact, at the
+      cost of reading every `priv/` file on every reset (per mutant, per
+      worker). Use `hash` when tests rewrite fixtures under `priv/` in place.
     - `--incremental` — Reuse verdicts from a prior run's history for
       unchanged mutants instead of re-executing them
       (opt-in; see `history_path` config). Materially
@@ -67,15 +86,17 @@ defmodule Mix.Tasks.Mut do
 
   ## Configuration
 
-  Settings can come from three layers, lowest to highest precedence:
+  Settings can come from four layers, lowest to highest precedence:
 
-      .mutalisk.exs project file  <  config :mutalisk  <  CLI flags
+      .mutalisk.exs project file  <  legacy `config :mut`  <  config :mutalisk  <  CLI flags
 
-  A CLI flag always wins; `config :mutalisk` overrides the file; the file is the
-  base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
+  A CLI flag always wins; `config :mutalisk` overrides both `config :mut` (a
+  deprecated, still-accepted namespace kept for compatibility) and the file;
+  the file is the base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
   `enabled_targets`, `selection`, `fail_at`, `concurrency`, `test_timeout_ms`,
-  `reporters`, `output_path`, `exclude`, `max_mutants`, `since`, `incremental`,
-  `history_path`, and `coverage_timeout_ms`. `exclude`, `history_path`, and
+  `suite_timeout_ms`, `priv_fingerprint`, `reporters`, `output_path`, `exclude`, `max_mutants`,
+  `since`, `incremental`, `history_path`, and
+  `coverage_timeout_ms`. `exclude`, `history_path`, and
   `coverage_timeout_ms` are config-only (no CLI flag); the rest accept a CLI
   flag that overrides config. `history_path` controls where every run writes
   reusable verdict history for future `--incremental` runs. `coverage_timeout_ms`
@@ -125,6 +146,7 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Cli
   alias Mut.Coverage.Runner, as: CoverageRunner
   alias Mut.CoverageOracle
+  alias Mut.Deadline
   alias Mut.History
   alias Mut.Metrics
   alias Mut.Reporter.GitHubActions
@@ -133,16 +155,12 @@ defmodule Mix.Tasks.Mut do
   alias Mut.Reporter.Terminal
   alias Mut.Sandbox
   alias Mut.Selection.DowngradeHint
+  alias Mut.StageError
   alias Mut.TestSelection.Coverage, as: CoverageSelection
   alias Mut.TestSelection.Static
   alias Mut.Worker
 
   @requirements ["app.config"]
-  # Buffer added on top of `--test-timeout-ms` for the host-side
-  # deadline. ExUnit fires its per-test timeout first and emits a
-  # MUT_RESULT line; the host then needs time to drain the port and
-  # classify. 10s matches v1.8 (the old 70 000 = 60 000 + 10 000).
-  @host_deadline_buffer_ms 10_000
   @coverage_pathology_floor_ms 10_000
   # R5: finite backstop for the baseline suite (includes an implicit compile);
   # generous enough not to false-fail a large suite, finite enough to recover
@@ -197,143 +215,180 @@ defmodule Mix.Tasks.Mut do
     {:ok, watchdog_pid} =
       Mut.MemoryWatchdog.start(Path.join(artifact_root, "mut_memory.log"))
 
-    try do
-      IO.puts("Oracle build starting")
+    gate_result =
+      try do
+        IO.puts("Oracle build starting")
 
-      {:ok, oracle} =
-        Metrics.with_phase(metrics_pid, :oracle_build, fn ->
-          # The `File.cd!(mutalisk_root, ...)` here is NOT for steering artifact
-          # locations (those are passed explicitly via `:root`); it makes the
-          # `File.cwd!()`-derived `MUTALISK_PATH` in `Mut.OracleBuild`'s child mix
-          # env resolve to the mutalisk checkout, so the work copy's overlay pins
-          # `{:mutalisk, path: <checkout>}`.
-          File.cd!(mutalisk_root, fn ->
-            Mut.OracleBuild.run(target_root,
-              run_id: run_id,
-              force: true,
-              keep: true,
-              root: artifact_root
-            )
+        oracle =
+          unwrap_stage!(
+            :oracle_build,
+            Metrics.with_phase(metrics_pid, :oracle_build, fn ->
+              # The `File.cd!(mutalisk_root, ...)` here is NOT for steering artifact
+              # locations (those are passed explicitly via `:root`); it makes the
+              # `File.cwd!()`-derived `MUTALISK_PATH` in `Mut.OracleBuild`'s child mix
+              # env resolve to the mutalisk checkout, so the work copy's overlay pins
+              # `{:mutalisk, path: <checkout>}`.
+              File.cd!(mutalisk_root, fn ->
+                Mut.OracleBuild.run(target_root,
+                  run_id: run_id,
+                  force: true,
+                  keep: true,
+                  root: artifact_root
+                )
+              end)
+            end)
+          )
+
+        IO.puts("Oracle build complete")
+
+        work_copy = Path.join([artifact_root, "mut_work", run_id])
+
+        IO.puts("Baseline tests starting")
+
+        Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
+          baseline_tests!(work_copy, mutalisk_root, artifact_root, opts, run_id)
+        end)
+
+        IO.puts("Baseline tests complete")
+
+        baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
+
+        IO.puts("Plan generation starting")
+
+        plan =
+          Metrics.with_phase(metrics_pid, :plan_generation, fn ->
+            build_plan(work_copy, oracle, opts, target_root)
           end)
-        end)
 
-      IO.puts("Oracle build complete")
+        plan = maybe_limit_plan(plan, opts.max_mutants)
+        IO.puts("Plan generation complete")
 
-      work_copy = Path.join([artifact_root, "mut_work", run_id])
+        if opts.debug_plan do
+          plan_path = Path.join(target_root, "plan.debug.json")
+          Mut.Plan.dump_json(plan, plan_path)
+          # #43: confirm the write + counts rather than exiting silently.
+          schema_n = length(plan.schema)
+          fallback_n = length(plan.fallback)
+          skipped_n = length(plan.skipped)
+          invalid_n = Enum.count(plan.skipped, &(&1.reason in [:invalid, "invalid"]))
 
-      IO.puts("Baseline tests starting")
+          IO.puts(
+            "[mutalisk] --debug-plan: wrote #{plan_path} " <>
+              "(#{schema_n + fallback_n} executable: #{schema_n} schema, #{fallback_n} fallback; " <>
+              "#{skipped_n} skipped, #{invalid_n} invalid)"
+          )
 
-      Metrics.with_phase(metrics_pid, :baseline_tests, fn ->
-        baseline_tests!(work_copy, mutalisk_root, artifact_root, opts, run_id)
-      end)
-
-      IO.puts("Baseline tests complete")
-
-      baseline_tests_ms = Metrics.snapshot(metrics_pid).phase_timings.baseline_tests_ms
-
-      IO.puts("Plan generation starting")
-
-      plan =
-        Metrics.with_phase(metrics_pid, :plan_generation, fn ->
-          build_plan(work_copy, oracle, opts, target_root)
-        end)
-
-      plan = maybe_limit_plan(plan, opts.max_mutants)
-      IO.puts("Plan generation complete")
-
-      if opts.debug_plan do
-        plan_path = Path.join(target_root, "plan.debug.json")
-        Mut.Plan.dump_json(plan, plan_path)
-        # #43: confirm the write + counts rather than exiting silently.
-        schema_n = length(plan.schema)
-        fallback_n = length(plan.fallback)
-        skipped_n = length(plan.skipped)
-        invalid_n = Enum.count(plan.skipped, &(&1.reason in [:invalid, "invalid"]))
-
-        IO.puts(
-          "[mutalisk] --debug-plan: wrote #{plan_path} " <>
-            "(#{schema_n + fallback_n} executable: #{schema_n} schema, #{fallback_n} fallback; " <>
-            "#{skipped_n} skipped, #{invalid_n} invalid)"
-        )
-
-        set_debug_plan_exit_code(plan, opts.fail_at)
-      else
-        if executable_count(plan) == 0 do
-          execute_empty_plan(plan, work_copy, target_root, opts, metrics_pid)
+          set_debug_plan_exit_code(plan, opts.fail_at)
         else
-          {coverage_oracle, selection_mode} =
-            collect_coverage_for_selection(
-              target_root,
-              work_copy,
-              opts,
-              metrics_pid,
-              baseline_tests_ms
-            )
-
-          # M109: under `--incremental`, partition + record reused verdicts BEFORE
-          # schema build so reused mutants are pruned from instrumentation. The
-          # plan handed to `execute_plan` is the to-execute subset; reused verdicts
-          # are already recorded in the ledger and appear in the report/score.
-          # Non-incremental: no-op (full plan, nothing recorded) → v1.29-identical.
-          exec_plan =
-            prune_reused_for_incremental(
-              plan,
-              work_copy,
-              opts,
-              coverage_oracle,
-              selection_mode,
-              metrics_pid,
-              target_root
-            )
-
-          if executable_count(exec_plan) == 0 do
-            execute_empty_plan(exec_plan, work_copy, target_root, opts, metrics_pid)
+          if executable_count(plan) == 0 do
+            execute_empty_plan(plan, work_copy, target_root, opts, metrics_pid)
           else
-            # As with the oracle build, this `File.cd!(mutalisk_root, ...)` exists
-            # only so the `File.cwd!()`-derived `MUTALISK_PATH` in the schema-build
-            # and worker child mix envs points at the mutalisk checkout. Artifact
-            # locations (schema work copy, sandbox pool) are passed explicitly via
-            # `artifact_root`, so they land under the target-scoped temp root
-            # regardless of cwd.
-            File.cd!(mutalisk_root, fn ->
-              execute_plan(
-                exec_plan,
+            {coverage_oracle, selection_mode} =
+              collect_coverage_for_selection(
                 target_root,
-                artifact_root,
-                run_id,
+                work_copy,
                 opts,
                 metrics_pid,
-                coverage_oracle,
-                selection_mode
+                baseline_tests_ms
               )
-            end)
+
+            # M109: under `--incremental`, partition + record reused verdicts BEFORE
+            # schema build so reused mutants are pruned from instrumentation. The
+            # plan handed to `execute_plan` is the to-execute subset; reused verdicts
+            # are already recorded in the ledger and appear in the report/score.
+            # Non-incremental: no-op (full plan, nothing recorded) → v1.29-identical.
+            exec_plan =
+              prune_reused_for_incremental(
+                plan,
+                work_copy,
+                opts,
+                coverage_oracle,
+                selection_mode,
+                metrics_pid,
+                target_root
+              )
+
+            if executable_count(exec_plan) == 0 do
+              execute_empty_plan(exec_plan, work_copy, target_root, opts, metrics_pid)
+            else
+              # As with the oracle build, this `File.cd!(mutalisk_root, ...)` exists
+              # only so the `File.cwd!()`-derived `MUTALISK_PATH` in the schema-build
+              # and worker child mix envs points at the mutalisk checkout. Artifact
+              # locations (schema work copy, sandbox pool) are passed explicitly via
+              # `artifact_root`, so they land under the target-scoped temp root
+              # regardless of cwd.
+              File.cd!(mutalisk_root, fn ->
+                execute_plan(
+                  exec_plan,
+                  target_root,
+                  artifact_root,
+                  run_id,
+                  opts,
+                  metrics_pid,
+                  %{
+                    coverage_oracle: coverage_oracle,
+                    selection_mode: selection_mode,
+                    baseline_tests_ms: baseline_tests_ms
+                  }
+                )
+              end)
+            end
           end
         end
-      end
-    after
-      Mut.MemoryWatchdog.stop(watchdog_pid)
+      after
+        Mut.MemoryWatchdog.stop(watchdog_pid)
 
-      if opts.keep_work_copy do
-        IO.puts(
-          :stderr,
-          "[mutalisk] --keep-work-copy: retaining oracle/baseline work copy #{Path.join([artifact_root, "mut_work", run_id])}"
+        cleanup_work_copy(
+          Path.join([artifact_root, "mut_work", run_id]),
+          opts,
+          "oracle/baseline"
         )
-      else
-        File.rm_rf!(Path.join([artifact_root, "mut_work", run_id]))
       end
-    end
 
+    # T39: `set_exit_code/2` (via `execute_plan`/`execute_empty_plan`) already
+    # registered an `at_exit` process failure when the run failed the
+    # `--fail-at` gate — printing a success-style banner regardless made a
+    # failing CI run look identical to a passing one in the log tail.
     unless opts.debug_plan do
-      IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
+      IO.puts(banner(gate_result, elapsed(started)))
     end
   end
+
+  @doc false
+  # Fold the report-writing outcome into the `--fail-at` gate outcome. Both
+  # already registered their own `at_exit` failure, but the closing banner is
+  # driven solely by this value — a report that could not be written must not
+  # be announced as a clean run (the process still exits 1).
+  @spec run_result(:passed | :failed, :ok | :error) ::
+          :passed | :failed | :report_failed | :both_failed
+  def run_result(:failed, :error), do: :both_failed
+  def run_result(:failed, :ok), do: :failed
+  def run_result(:passed, :error), do: :report_failed
+  def run_result(:passed, :ok), do: :passed
+
+  @doc false
+  # The closing banner for a finished run.
+  @spec banner(:passed | :failed | :report_failed | :both_failed, non_neg_integer()) :: String.t()
+  def banner(result, elapsed_ms) do
+    "Mutalisk run complete in #{elapsed_ms}ms" <> banner_suffix(result)
+  end
+
+  defp banner_suffix(:passed), do: ""
+  defp banner_suffix(:failed), do: " — failed the --fail-at gate, exiting 1"
+
+  defp banner_suffix(:report_failed),
+    do: " — one or more report files could not be written, exiting 1"
+
+  defp banner_suffix(:both_failed),
+    do:
+      " — failed the --fail-at gate and one or more report files could not be written, exiting 1"
 
   defp execute_empty_plan(plan, work_copy, target_root, opts, metrics_pid) do
     Metrics.set_effective_concurrency(metrics_pid, 1)
     Metrics.set_planned_total(metrics_pid, 0)
     record_skipped_plan(metrics_pid, plan)
 
-    snapshot =
+    {snapshot, report_result} =
       render_reports_with_timing(
         metrics_pid,
         plan,
@@ -342,7 +397,7 @@ defmodule Mix.Tasks.Mut do
         opts
       )
 
-    set_exit_code(snapshot, opts.fail_at)
+    run_result(set_exit_code(snapshot, opts.fail_at), report_result)
   end
 
   # R15: destroying the original `pool` (the precisely-typed opaque
@@ -350,58 +405,104 @@ defmodule Mix.Tasks.Mut do
   # cross-module opaqueness check — the prior `final_pool` came back through the
   # run functions with a looser type. `Sandbox` already exempts `destroy_pool/1`
   # via `{:no_opaque, ...}`; mirror that at this call site.
-  @dialyzer {:no_opaque, execute_plan: 8}
-  defp execute_plan(
-         plan,
-         target_root,
-         artifact_root,
-         run_id,
-         opts,
-         metrics_pid,
-         coverage_oracle,
-         selection_mode
-       ) do
+  @dialyzer {:no_opaque, run_with_pool: 7}
+  defp execute_plan(plan, target_root, artifact_root, run_id, opts, metrics_pid, selection) do
     IO.puts("Schema build starting")
 
-    {:ok, schema_result} =
-      Metrics.with_phase(metrics_pid, :schema_build, fn ->
-        Mut.SchemaBuild.build(plan,
-          user_project_root: target_root,
-          run_id: "#{run_id}-schema",
-          force: true,
-          keep: true,
-          root: artifact_root
+    # T27: the schema build's work copy sits at a path we can predict, so the
+    # cleanup below covers a FAILED build too — `keep: true` means SchemaBuild
+    # itself never removes it, and a raise used to leave it behind forever.
+    schema_work_copy = Path.expand(Path.join([artifact_root, "mut_work", "#{run_id}-schema"]))
+
+    {snapshot, report_result} =
+      try do
+        schema_result =
+          unwrap_stage!(
+            :schema_build,
+            Metrics.with_phase(metrics_pid, :schema_build, fn ->
+              Mut.SchemaBuild.build(plan,
+                user_project_root: target_root,
+                run_id: "#{run_id}-schema",
+                force: true,
+                keep: true,
+                root: artifact_root
+              )
+            end)
+          )
+
+        IO.puts("Schema build complete")
+
+        # Never materialize more sandboxes than there are mutants to run: a tiny
+        # run with a large `--concurrency` (e.g. `--concurrency 999
+        # --max-mutants 1`) otherwise spends minutes creating/tearing down a huge
+        # pool for no benefit (Exploratory #57). The capped value also drives the
+        # reported "effective" worker count so the summary is accurate (#58).
+        mutant_count = executable_count(schema_result.plan)
+        effective_concurrency = max(1, min(opts.concurrency, mutant_count))
+        Metrics.set_effective_concurrency(metrics_pid, effective_concurrency)
+
+        pool =
+          unwrap_stage!(
+            :sandbox_pool,
+            Sandbox.create_pool(schema_result, effective_concurrency,
+              run_id: run_id,
+              force: true,
+              root: artifact_root,
+              priv_fingerprint: opts.priv_fingerprint
+            )
+          )
+
+        run_with_pool(
+          pool,
+          schema_result,
+          target_root,
+          opts,
+          metrics_pid,
+          selection,
+          effective_concurrency
         )
-      end)
+      after
+        cleanup_work_copy(schema_work_copy, opts, "schema-build")
+      end
 
-    IO.puts("Schema build complete")
+    run_result(set_exit_code(snapshot, opts.fail_at), report_result)
+  end
 
-    # Never materialize more sandboxes than there are mutants to run: a tiny run
-    # with a large `--concurrency` (e.g. `--concurrency 999 --max-mutants 1`)
-    # otherwise spends minutes creating/tearing down a huge pool for no benefit
-    # (Exploratory #57). The capped value also drives the reported "effective"
-    # worker count so the summary is accurate (#58).
-    mutant_count = executable_count(schema_result.plan)
-    effective_concurrency = max(1, min(opts.concurrency, mutant_count))
-    Metrics.set_effective_concurrency(metrics_pid, effective_concurrency)
-
-    {:ok, pool} =
-      Sandbox.create_pool(schema_result, effective_concurrency,
-        run_id: run_id,
-        force: true,
-        root: artifact_root
-      )
-
+  defp run_with_pool(
+         pool,
+         schema_result,
+         target_root,
+         opts,
+         metrics_pid,
+         selection,
+         effective_concurrency
+       ) do
     {:ok, last_killer} = Mut.LastKiller.start_link([])
-    progress_pid = start_progress(opts)
+    # T45: `Terminal.progress_total/1` displays `planned_total + reused` (the
+    # reused verdicts were already recorded into `metrics_pid` before this
+    # point — see `record_reused/2`), but the streamed counter only ticks for
+    # mutants this run actually executes. Starting it at the reused count
+    # keeps `[index/total]` consistent with that displayed total instead of
+    # always finishing short by exactly the reused count.
+    progress_pid = start_progress(opts, Metrics.snapshot(metrics_pid).reused)
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
-    {snapshot, _final_pool} =
+    {snapshot, report_result} =
       try do
         record_schema_build_metadata(metrics_pid, schema_result)
 
         source_root = schema_result.work_copy_root
+
+        baseline_ms = selection.baseline_tests_ms
+
+        host_deadline_ms =
+          Deadline.host_deadline_ms(opts.test_timeout_ms, opts.suite_timeout_ms, baseline_ms)
+
+        IO.puts(
+          "[mutalisk] " <>
+            Deadline.explain(opts.test_timeout_ms, opts.suite_timeout_ms, baseline_ms)
+        )
 
         all_test_files =
           Mut.TestSelection.discover_test_files(absolute_test_paths(source_root, opts))
@@ -411,8 +512,8 @@ defmodule Mix.Tasks.Mut do
             schema_result.plan,
             source_root,
             opts,
-            coverage_oracle,
-            selection_mode,
+            selection.coverage_oracle,
+            selection.selection_mode,
             last_killer,
             all_test_files
           )
@@ -426,7 +527,9 @@ defmodule Mix.Tasks.Mut do
           progress_pid: progress_pid,
           concurrency: effective_concurrency,
           test_timeout_ms: opts.test_timeout_ms,
-          host_deadline_ms: opts.test_timeout_ms + @host_deadline_buffer_ms
+          host_deadline_ms: host_deadline_ms,
+          # Resolved once: the dir->OTP-app map every fallback mutant needs.
+          app_context: Mut.Umbrella.app_context(source_root)
         }
 
         # M109: the `--incremental` reuse partition + reused-verdict recording
@@ -440,21 +543,18 @@ defmodule Mix.Tasks.Mut do
             run_schema_mutants(pool, schema_result.plan, ctx)
           end)
 
-        final_pool =
+        _final_pool =
           Metrics.with_phase(metrics_pid, :fallback_workers, fn ->
             run_fallback_mutants(pool, schema_result.plan, ctx)
           end)
 
-        snapshot =
-          render_reports_with_timing(
-            metrics_pid,
-            schema_result.plan,
-            source_root,
-            target_root,
-            opts
-          )
-
-        {snapshot, final_pool}
+        render_reports_with_timing(
+          metrics_pid,
+          schema_result.plan,
+          source_root,
+          target_root,
+          opts
+        )
       after
         # T14: persist incremental history in `after`, snapshotting the live
         # metrics ledger — so a mid-run abort (worker crash, Ctrl-C, render
@@ -476,18 +576,23 @@ defmodule Mix.Tasks.Mut do
         # fixed paths under the run's pool dir, so destroying the original
         # `pool` reclaims them regardless of checkout state on the failure path.
         Sandbox.destroy_pool(pool)
-
-        if opts.keep_work_copy do
-          IO.puts(
-            :stderr,
-            "[mutalisk] --keep-work-copy: retaining schema-build work copy #{schema_result.work_copy_root}"
-          )
-        else
-          File.rm_rf!(schema_result.work_copy_root)
-        end
       end
 
-    set_exit_code(snapshot, opts.fail_at)
+    {snapshot, report_result}
+  end
+
+  # T27: every setup stage's `{:error, reason}` is a legitimate return (an
+  # uncompilable project, a stale artifact dir). Turn it into a `Mix.raise` with
+  # a readable message instead of letting it explode as a bare `MatchError`.
+  defp unwrap_stage!(_stage, {:ok, value}), do: value
+  defp unwrap_stage!(stage, {:error, reason}), do: Mix.raise(StageError.message(stage, reason))
+
+  defp cleanup_work_copy(path, opts, label) do
+    if opts.keep_work_copy do
+      IO.puts(:stderr, "[mutalisk] --keep-work-copy: retaining #{label} work copy #{path}")
+    else
+      File.rm_rf!(path)
+    end
   end
 
   # M105: write the incremental-history verdict store from the run ledger.
@@ -497,7 +602,8 @@ defmodule Mix.Tasks.Mut do
   # history is an optimization, not a correctness input.
   defp write_history(snapshot, source_root, target_root, opts) do
     project_digest = History.Digest.project_digest(source_root)
-    records = history_records(snapshot.ledger, source_root, opts.test_timeout_ms, project_digest)
+    timeouts = {opts.test_timeout_ms, opts.suite_timeout_ms}
+    records = history_records(snapshot.ledger, source_root, timeouts, project_digest)
     # P2: honor a configured :history_path on WRITE too (load_verdicts already
     # reads it) — otherwise a custom-path user writes the default store while
     # reading the custom one, and never warms either.
@@ -537,7 +643,7 @@ defmodule Mix.Tasks.Mut do
   # Reusable verdicts (killed/survived/timeout) from the ledger, digested per
   # file (function index built once per file). `project_digest` is the coarse
   # whole-project fingerprint, identical for every verdict in this run.
-  defp history_records(ledger, source_root, test_timeout_ms, project_digest) do
+  defp history_records(ledger, source_root, timeouts, project_digest) do
     reusable =
       Enum.filter(ledger, fn entry ->
         Map.has_key?(entry, :mutant) and History.Store.reusable_status?(entry.status)
@@ -550,7 +656,7 @@ defmodule Mix.Tasks.Mut do
     |> Enum.map(fn entry ->
       mutant = final_mutant(entry)
       index = Map.fetch!(indexes, mutant.file)
-      History.Store.record_for(mutant, index, read_test, test_timeout_ms, project_digest)
+      History.Store.record_for(mutant, index, read_test, timeouts, project_digest)
     end)
     |> Enum.reject(&is_nil/1)
   end
@@ -560,6 +666,7 @@ defmodule Mix.Tasks.Mut do
       entry.mutant
       | status: entry.status,
         killing_test: entry.killing_test,
+        killing_test_file: Map.get(entry, :killing_test_file),
         covering_tests: entry.covering_tests
     }
   end
@@ -696,7 +803,11 @@ defmodule Mix.Tasks.Mut do
       source_digest: History.Digest.source_digest(index, mutant.line),
       selected_tests_digest: History.Digest.selected_tests_digest(entries),
       project_digest: project_digest,
-      test_timeout_ms: opts.test_timeout_ms
+      test_timeout_ms: opts.test_timeout_ms,
+      # Wave 4's `--suite-timeout-ms` feeds the host deadline the same way
+      # `--test-timeout-ms` feeds the per-test one, so it is part of the reuse
+      # key: changing it can flip timeout/killed/survived verdicts.
+      suite_timeout_ms: opts.suite_timeout_ms
     }
   end
 
@@ -720,9 +831,13 @@ defmodule Mix.Tasks.Mut do
       result = %Worker.Result{
         status: status,
         duration_ms: 0,
-        # JSON null decodes to the atom `:null`; the reporter expects a binary
-        # or nil killing test, so coerce anything non-binary to nil.
-        killing_test: binary_or_nil(stored["killing_test"])
+        # The reporter expects a binary or nil killing test, so coerce anything
+        # non-binary (older records) to nil.
+        killing_test: binary_or_nil(stored["killing_test"]),
+        # F2: carry the authoritative killing test FILE through reuse too —
+        # without it a reused `killed` verdict loses its `killedBy` in the
+        # Stryker report and falls back to the module-name heuristic.
+        killing_test_file: binary_or_nil(stored["killing_test_file"])
       }
 
       record_result(ctx.metrics_pid, %{mutant | covering_tests: rel}, result)
@@ -969,7 +1084,16 @@ defmodule Mix.Tasks.Mut do
   @spec pathological_coverage_collection?(non_neg_integer(), non_neg_integer()) :: boolean()
   def pathological_coverage_collection?(coverage_wall_ms, baseline_tests_ms)
       when is_integer(coverage_wall_ms) and is_integer(baseline_tests_ms) do
-    coverage_wall_ms > max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)
+    coverage_wall_ms > pathological_threshold_ms(baseline_tests_ms)
+  end
+
+  # T48: the actual pathological-coverage abort threshold is
+  # `max(baseline * 2, 10_000)`ms, NOT `baseline` — shared so the abort
+  # message (`handle_pathological_coverage/6`) reports the real threshold and
+  # the real ratio against it instead of quietly comparing to `baseline` alone.
+  @spec pathological_threshold_ms(non_neg_integer()) :: pos_integer()
+  def pathological_threshold_ms(baseline_tests_ms) when is_integer(baseline_tests_ms) do
+    max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)
   end
 
   defp run_coverage!(work_copy, opts, baseline_tests_ms) do
@@ -998,7 +1122,7 @@ defmodule Mix.Tasks.Mut do
   defp coverage_timeout_opt(_opts), do: []
 
   defp coverage_budget_opt(:coverage_with_static_fallback, baseline_tests_ms) do
-    [collection_budget_ms: max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)]
+    [collection_budget_ms: pathological_threshold_ms(baseline_tests_ms)]
   end
 
   defp coverage_budget_opt(_selection, _baseline_tests_ms), do: []
@@ -1049,14 +1173,27 @@ defmodule Mix.Tasks.Mut do
          _oracle,
          _target_root
        ) do
-    ratio =
-      if baseline_ms == 0,
-        do: "inf",
-        else: :erlang.float_to_binary(wall_ms / baseline_ms, decimals: 1)
+    Mix.raise(pathological_coverage_abort_message(wall_ms, baseline_ms))
+  end
 
-    Mix.raise(
-      "Coverage collection took #{wall_ms}ms vs baseline #{baseline_ms}ms (#{ratio}x threshold). Rerun with --selection coverage_with_static_fallback to fall back automatically, or --selection static to skip coverage entirely."
-    )
+  # T48: previously reported `wall_ms / baseline_ms` as "Nx threshold", but the
+  # actual abort threshold (`pathological_coverage_collection?/2`) is
+  # `max(baseline * 2, 10_000)`ms, not `baseline_ms` alone — so the printed
+  # ratio did not match the threshold that was actually enforced (e.g. a 3s
+  # baseline has an effective 10s floor threshold, not a 6s one). Report the
+  # real threshold and the ratio against it. Public + a plain non-negative-int
+  # spec so the message text is independently testable.
+  @spec pathological_coverage_abort_message(non_neg_integer(), non_neg_integer()) :: String.t()
+  def pathological_coverage_abort_message(wall_ms, baseline_ms) do
+    threshold_ms = pathological_threshold_ms(baseline_ms)
+
+    # `threshold_ms` has a 10s floor, so the division is always defined.
+    ratio = :erlang.float_to_binary(wall_ms / threshold_ms, decimals: 1)
+
+    "Coverage collection took #{wall_ms}ms vs baseline #{baseline_ms}ms " <>
+      "(threshold #{threshold_ms}ms, #{ratio}x threshold). Rerun with " <>
+      "--selection coverage_with_static_fallback to fall back automatically, " <>
+      "or --selection static to skip coverage entirely."
   end
 
   # #64: persist the downgrade so a future `coverage_with_static_fallback` run
@@ -1169,7 +1306,7 @@ defmodule Mix.Tasks.Mut do
   defp warn_if_fallback_manifest_unreadable([], _ctx), do: :ok
 
   defp warn_if_fallback_manifest_unreadable([mutant | _rest], ctx) do
-    app = fallback_app(ctx.work_copy, mutant)
+    app = fallback_app(ctx, mutant)
 
     manifest_path =
       Path.join([ctx.work_copy, "_build/mut_schema/lib", app, ".mix/compile.elixir"])
@@ -1214,7 +1351,8 @@ defmodule Mix.Tasks.Mut do
 
     result =
       Worker.run_fallback(sandbox, mutant, worker_tests.files,
-        app: fallback_app(sandbox.path, mutant),
+        app: fallback_app(ctx, mutant),
+        app_context: ctx.app_context,
         timeout_ms: ctx.host_deadline_ms,
         test_timeout_ms: ctx.test_timeout_ms,
         umbrella_app: worker_tests.umbrella_app
@@ -1234,53 +1372,12 @@ defmodule Mix.Tasks.Mut do
     maybe_stream_event(ctx.progress_pid, ctx.metrics_pid, mutant, result)
   end
 
-  defp run_with_concurrency(pool, mutants, 1, run_one) do
-    mutants
-    |> Enum.sort_by(& &1.id)
-    |> Enum.reduce(pool, fn mutant, pool ->
-      {:ok, sandbox, checked_out} = Sandbox.checkout(pool)
-      run_one.(mutant, sandbox)
-      Sandbox.checkin(sandbox, checked_out)
-    end)
-  end
+  defp run_with_concurrency(pool, mutants, concurrency, run_one),
+    do: Mut.PoolRunner.run(pool, mutants, concurrency, run_one)
 
-  defp run_with_concurrency(pool, mutants, concurrency, run_one) do
-    {:ok, queue} = Mut.SandboxQueue.start_link(pool)
-
-    try do
-      mutants
-      |> Enum.sort_by(& &1.id)
-      |> Task.async_stream(
-        fn mutant ->
-          {:ok, sandbox} = Mut.SandboxQueue.checkout(queue)
-
-          # R6: check the sandbox back in ONLY on normal completion. The fallback
-          # path resets the sandbox in its own `after`; if that reset fails twice
-          # it raises (a poisoned sandbox would yield false verdicts for every
-          # later mutant). On that raise we deliberately do NOT check it back in,
-          # so no concurrent worker can pick up the contaminated sandbox before
-          # the run tears down. It stays in the pool's `checked_out` set and is
-          # still reclaimed by `destroy_pool`, so nothing leaks.
-          run_one.(mutant, sandbox)
-          Mut.SandboxQueue.checkin(queue, sandbox)
-        end,
-        max_concurrency: concurrency,
-        ordered: false,
-        timeout: :infinity
-      )
-      |> Stream.run()
-
-      Mut.SandboxQueue.finalize(queue)
-    rescue
-      exception ->
-        _ = Mut.SandboxQueue.finalize(queue)
-        reraise exception, __STACKTRACE__
-    end
-  end
-
-  defp start_progress(%{reporters: reporters}) do
+  defp start_progress(%{reporters: reporters}, starting_index) do
     if :terminal in reporters do
-      {:ok, pid} = Agent.start_link(fn -> 0 end)
+      {:ok, pid} = Agent.start_link(fn -> starting_index end)
       pid
     end
   end
@@ -1383,6 +1480,10 @@ defmodule Mix.Tasks.Mut do
 
   defp killer_file(_result, [first | _]), do: first
 
+  # Returns `:ok`, or `:error` when a file reporter could not be written — the
+  # caller folds that into the run's gate result so the closing banner (and the
+  # exit code) report the failure instead of claiming success (T24 follow-up).
+  @spec render_reports(map(), map(), Path.t(), Path.t(), map()) :: :ok | :error
   defp render_reports(snapshot, plan, work_copy, host_root, opts) do
     if :terminal in opts.reporters do
       IO.puts(Terminal.render_summary(snapshot))
@@ -1391,20 +1492,68 @@ defmodule Mix.Tasks.Mut do
     # The Stryker JSON map is the shared data source for the JSON, HTML, and
     # GitHub-Actions reporters — render it once if any of them is enabled.
     if Enum.any?([:stryker_json, :html, :github_actions], &(&1 in opts.reporters)) do
-      rendered = render_stryker_report(snapshot, plan, work_copy, opts)
+      # T24: the run is already over by the time we get here — the terminal
+      # summary is printed and the exit code is decided. A failure while
+      # rendering or writing the file reports (an unencodable byte, a full disk,
+      # a read-only output dir) must NOT vaporise an hours-long run: log it
+      # loudly on stderr and let the run finish normally.
+      # Each writer is wrapped on its own so one failing reporter does not
+      # take the others down; any failure still fails the process exit code
+      # (a CI job must not go green with a missing report artifact).
+      results = write_file_reports(snapshot, plan, work_copy, host_root, opts)
 
-      if :stryker_json in opts.reporters do
-        StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path))
+      if :error in results do
+        IO.puts(:stderr, "mutalisk: one or more report files could not be written; exiting 1")
+        fail_run()
+        :error
+      else
+        :ok
       end
-
-      if :html in opts.reporters do
-        Html.write(rendered, resolve_output_path(host_root, html_output_path(opts)))
-      end
-
-      if :github_actions in opts.reporters do
-        GitHubActions.emit(rendered)
-      end
+    else
+      :ok
     end
+  end
+
+  defp write_file_reports(snapshot, plan, work_copy, host_root, opts) do
+    case safe_render(fn -> render_stryker_report(snapshot, plan, work_copy, opts) end) do
+      {:ok, rendered} ->
+        writers = [
+          {:stryker_json,
+           fn -> StrykerJson.write(rendered, resolve_output_path(host_root, opts.output_path)) end},
+          {:html,
+           fn -> Html.write(rendered, resolve_output_path(host_root, html_output_path(opts))) end},
+          {:github_actions, fn -> GitHubActions.emit(rendered) end}
+        ]
+
+        for {reporter, write} <- writers, reporter in opts.reporters, do: write_status(write)
+
+      :error ->
+        [:error]
+    end
+  end
+
+  defp write_status(write) do
+    case safe_render(write) do
+      {:ok, _} -> :ok
+      :error -> :error
+    end
+  end
+
+  @doc false
+  # Run the file-report writers, downgrading any crash to a stderr diagnostic.
+  # Public-ish (via @doc false) only so the failure path is directly testable.
+  def safe_render(fun) when is_function(fun, 0) do
+    {:ok, fun.()}
+  rescue
+    exception ->
+      IO.puts(
+        :stderr,
+        "mutalisk: failed to write the mutation report: " <>
+          Exception.format(:error, exception, __STACKTRACE__) <>
+          "\nThe run itself completed; the terminal summary and exit code above are valid."
+      )
+
+      :error
   end
 
   # HTML report path: the Stryker JSON output path with a `.html` extension
@@ -1525,9 +1674,9 @@ defmodule Mix.Tasks.Mut do
     Metrics.start_phase(metrics_pid, :report_writing)
     snapshot = Metrics.snapshot(metrics_pid)
 
-    render_reports(snapshot, plan, work_copy, host_root, opts)
+    report_result = render_reports(snapshot, plan, work_copy, host_root, opts)
     Metrics.end_phase(metrics_pid, :report_writing)
-    Metrics.snapshot(metrics_pid)
+    {Metrics.snapshot(metrics_pid), report_result}
   end
 
   # Render + validate the Stryker JSON without writing it (used to time the
@@ -1619,15 +1768,20 @@ defmodule Mix.Tasks.Mut do
     apps_path = Mut.Umbrella.apps_path_name(work_copy)
 
     if Mut.Umbrella.umbrella?(work_copy) and apps_path != "apps" do
-      normalize_custom_umbrella_tests(tests, work_copy, apps_path)
+      normalize_custom_umbrella_tests(
+        tests,
+        work_copy,
+        apps_path,
+        Mut.Umbrella.app_map(work_copy)
+      )
     else
       %{files: Enum.map(tests, &Path.relative_to(&1, work_copy)), umbrella_app: nil}
     end
   end
 
-  defp normalize_custom_umbrella_tests(tests, work_copy, apps_path) do
+  defp normalize_custom_umbrella_tests(tests, work_copy, apps_path, app_map) do
     tests
-    |> Enum.map(&custom_umbrella_test(&1, work_copy, apps_path))
+    |> Enum.map(&custom_umbrella_test(&1, work_copy, apps_path, app_map))
     |> case do
       [{app, _file} | _rest] = entries when not is_nil(app) ->
         if Enum.all?(entries, &(elem(&1, 0) == app)) do
@@ -1641,10 +1795,20 @@ defmodule Mix.Tasks.Mut do
     end
   end
 
-  defp custom_umbrella_test(test, work_copy, apps_path) do
+  # `mix do --app <app>` filters umbrella children by their OTP `:app`, so the
+  # `<apps_path>/<dir>/test/...` directory segment is translated through the
+  # dir->app map; a child whose directory name differs from its `:app` would
+  # otherwise select no app at all (B4).
+  defp custom_umbrella_test(test, work_copy, apps_path, app_map) do
     case test |> Path.relative_to(work_copy) |> Path.split() do
-      [^apps_path, app, "test" | rest] -> {app, Path.join(["test" | rest])}
-      _other -> {nil, nil}
+      [^apps_path, dir, "test" | rest] ->
+        case Map.fetch(app_map, dir) do
+          {:ok, app} -> {app, Path.join(["test" | rest])}
+          :error -> {nil, nil}
+        end
+
+      _other ->
+        {nil, nil}
     end
   end
 
@@ -1790,16 +1954,13 @@ defmodule Mix.Tasks.Mut do
     fn file -> File.read!(Path.join(root, file)) end
   end
 
-  # The OTP app a fallback mutant belongs to. For umbrellas it is the second
-  # segment of the mutant's `apps/<app>/lib/...` path (umbrella app dir names
-  # must equal their app names); single-app reads the project's :app. M68.
-  defp fallback_app(work_copy, mutant) do
-    apps_dir = Mut.Umbrella.apps_path_name(work_copy)
-
-    case Path.split(mutant.file) do
-      [^apps_dir, app | _] -> app
-      _ -> app_name(work_copy)
-    end
+  # The OTP app a fallback mutant belongs to. This value names `_build`
+  # locations (the manifest read and the recompile ebin fallback), so it must
+  # be the OTP app name, NOT the `<apps_path>/<dir>/lib/...` directory segment
+  # of the mutant path — the two differ when a child app's directory is named
+  # differently from its `:app` (B4). Single-app reads the project's :app. M68.
+  defp fallback_app(ctx, mutant) do
+    Mut.Umbrella.otp_app_for_file(ctx.app_context, mutant.file) || app_name(ctx.work_copy)
   end
 
   defp app_name(work_copy) do
@@ -1835,6 +1996,7 @@ defmodule Mix.Tasks.Mut do
         )
 
         fail_run()
+        :failed
 
       # Compare the score at the SAME precision it is reported (1 decimal). A raw
       # comparison failed `--fail-at 80` for a 79.96% run that the terminal prints
@@ -1848,9 +2010,10 @@ defmodule Mix.Tasks.Mut do
         )
 
         fail_run()
+        :failed
 
       true ->
-        :ok
+        :passed
     end
   end
 

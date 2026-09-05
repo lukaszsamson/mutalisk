@@ -91,6 +91,44 @@ defmodule Mut.Mutator.StringLiteralTest do
       assert tos == [""]
     end
 
+    test "B17: heredoc replacements render as regular strings and reparse" do
+      src = ~s(x = """\nhello\n""")
+
+      {:ok, {:=, _, [_var, literal]}} =
+        Code.string_to_quoted(src,
+          columns: true,
+          token_metadata: true,
+          literal_encoder: &{:ok, {:__block__, &2, [&1]}}
+        )
+
+      # The parsed literal really is heredoc-delimited.
+      {:__block__, meta, ["hello\n"]} = literal
+      assert Keyword.get(meta, :delimiter) == ~s(""")
+
+      mutations = StringLiteral.mutate(literal, ctx(engine: :fallback, env_context: nil))
+      assert length(mutations) == 2
+
+      for mutation <- mutations do
+        {:__block__, mutated_meta, [_value]} = mutation.mutated_ast
+        refute Keyword.has_key?(mutated_meta, :delimiter)
+        refute Keyword.has_key?(mutated_meta, :indentation)
+
+        rendered = Macro.to_string(mutation.mutated_ast)
+        assert {:ok, _} = Code.string_to_quoted(rendered)
+        assert is_binary(IO.iodata_to_binary(Code.format_string!(rendered)))
+      end
+
+      # The `→ "x"` row is the one that used to render `"""\nx"""`.
+      assert Enum.map(mutations, &Macro.to_string(&1.mutated_ast)) == [~s(""), ~s("x")]
+    end
+
+    test "non-heredoc string metadata is left untouched" do
+      node = {:__block__, [delimiter: "\"", line: 1, column: 5], ["hello"]}
+      [empty, x] = StringLiteral.mutate(node, ctx(engine: :fallback, env_context: nil))
+      assert {:__block__, [delimiter: "\"", line: 1, column: 5], [""]} = empty.mutated_ast
+      assert {:__block__, [delimiter: "\"", line: 1, column: 5], ["x"]} = x.mutated_ast
+    end
+
     test "produces no mutations for ineligible nodes" do
       assert StringLiteral.mutate(
                {:__block__, [], [""]},

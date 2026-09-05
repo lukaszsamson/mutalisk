@@ -9,7 +9,7 @@ defmodule Mut.MixManifestTest do
     manifest_path = real_manifest_path()
 
     assert {:ok, %MixManifest{} = manifest} = MixManifest.read(manifest_path)
-    assert manifest.version in [29, 34, 35, 36]
+    assert manifest.version in [29, 34, 35, 36, 37]
     assert manifest.modules[Guards] == "lib/guards.ex"
     assert manifest.sources["lib/guards.ex"].compile_deps == [Module, Kernel]
 
@@ -23,7 +23,7 @@ defmodule Mut.MixManifestTest do
   end
 
   test "version_assertion raises clearly on unknown shape" do
-    assert_raise ArgumentError, ~r/supports manifest versions \[29, 34, 35, 36\]/, fn ->
+    assert_raise ArgumentError, ~r/supports manifest versions \[29, 34, 35, 36, 37\]/, fn ->
       MixManifest.version_assertion({33, %{}, %{}})
     end
   end
@@ -36,7 +36,7 @@ defmodule Mut.MixManifestTest do
     File.write!(path, :erlang.term_to_binary({33, %{}, %{}}))
 
     assert {:error, {ArgumentError, message}} = MixManifest.read(path)
-    assert message =~ "manifest versions [29, 34, 35, 36]"
+    assert message =~ "manifest versions [29, 34, 35, 36, 37]"
   end
 
   test "dependents traverses compile deps transitively and direct export/struct deps only" do
@@ -100,6 +100,16 @@ defmodule Mut.MixManifestTest do
     # A module mutated in `core` yields a dependent source file in `web`.
     assert MixManifest.dependents(combined, [CoreMod], [:compile]) ==
              MapSet.new(["apps/web/lib/web.ex"])
+  end
+
+  test "read_combined prefixes sources with the child DIRECTORY, not the OTP app (B4)" do
+    # The manifest was read from `_build/<env>/lib/web_ui/`, but the sources it
+    # records live under `apps/web-ui/` — the entry key is the directory.
+    manifest =
+      write_manifest("web_ui", %{WebUiMod => "lib/web_ui.ex"}, %{"lib/web_ui.ex" => deps()})
+
+    assert {:ok, combined} = MixManifest.read_combined([{"web-ui", manifest}])
+    assert combined.modules[WebUiMod] == "apps/web-ui/lib/web_ui.ex"
   end
 
   defp write_manifest(app, modules, sources) do

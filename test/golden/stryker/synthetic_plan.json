@@ -5,7 +5,7 @@
       "mutants": [
         {
           "coveredBy": [
-            "SyntheticTest:case_4"
+            "test/synthetic_test.exs:case_4"
           ],
           "description": "replace guard > with >=",
           "duration": 40,
@@ -27,7 +27,7 @@
         },
         {
           "coveredBy": [
-            "SyntheticTest:case_6"
+            "test/synthetic_test.exs:case_6"
           ],
           "description": "replace + with -",
           "duration": 60,
@@ -50,13 +50,13 @@
         },
         {
           "coveredBy": [
-            "SyntheticTest:case_1"
+            "test/synthetic_test.exs:case_1"
           ],
           "description": "replace + with -",
           "duration": 10,
           "id": "stable-killed",
           "killedBy": [
-            "SyntheticTest:case_1"
+            "test/synthetic_test.exs:case_1"
           ],
           "location": {
             "end": {
@@ -74,7 +74,7 @@
         },
         {
           "coveredBy": [
-            "SyntheticTest:case_5"
+            "test/synthetic_test.exs:case_5"
           ],
           "description": "replace guard > with >=",
           "duration": 50,
@@ -97,7 +97,7 @@
         },
         {
           "coveredBy": [
-            "SyntheticTest:case_2"
+            "test/synthetic_test.exs:case_2"
           ],
           "description": "replace + with -",
           "duration": 20,
@@ -119,7 +119,7 @@
         },
         {
           "coveredBy": [
-            "SyntheticTest:case_3"
+            "test/synthetic_test.exs:case_3"
           ],
           "description": "replace + with -",
           "duration": 30,
@@ -156,6 +156,9 @@
       "stable-skipped": "fallback",
       "stable-survived": "schema",
       "stable-timeout": "schema"
+    },
+    "killed_by_raw": {
+      "stable-killed": "SyntheticTest case_1"
     },
     "metrics": {
       "fallback_count": 2,
@@ -227,6 +230,56 @@
     "test_timeout_ms": 10000
   },
   "schemaVersion": "2",
+  "testFiles": {
+    "test/synthetic_test.exs:case_1": {
+      "tests": [
+        {
+          "id": "test/synthetic_test.exs:case_1",
+          "name": "test/synthetic_test.exs:case_1"
+        }
+      ]
+    },
+    "test/synthetic_test.exs:case_2": {
+      "tests": [
+        {
+          "id": "test/synthetic_test.exs:case_2",
+          "name": "test/synthetic_test.exs:case_2"
+        }
+      ]
+    },
+    "test/synthetic_test.exs:case_3": {
+      "tests": [
+        {
+          "id": "test/synthetic_test.exs:case_3",
+          "name": "test/synthetic_test.exs:case_3"
+        }
+      ]
+    },
+    "test/synthetic_test.exs:case_4": {
+      "tests": [
+        {
+          "id": "test/synthetic_test.exs:case_4",
+          "name": "test/synthetic_test.exs:case_4"
+        }
+      ]
+    },
+    "test/synthetic_test.exs:case_5": {
+      "tests": [
+        {
+          "id": "test/synthetic_test.exs:case_5",
+          "name": "test/synthetic_test.exs:case_5"
+        }
+      ]
+    },
+    "test/synthetic_test.exs:case_6": {
+      "tests": [
+        {
+          "id": "test/synthetic_test.exs:case_6",
+          "name": "test/synthetic_test.exs:case_6"
+        }
+      ]
+    }
+  },
   "thresholds": {
     "high": 80,
     "low": 60

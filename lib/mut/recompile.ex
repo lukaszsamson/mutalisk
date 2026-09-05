@@ -60,6 +60,34 @@ defmodule Mut.Recompile do
   # M84: transient BEAM-startup signatures observed at `--concurrency 4` (the
   # v1.23 ops note); recover via retry rather than mis-classify as a real
   # compile failure. Never matches on real CompileError/syntax/dep-path output.
+  #
+  # T35 — does a retried compile run on top of beams a dead first attempt
+  # partially wrote? No, on three independent grounds:
+  #
+  #   1. Every signature here is emitted BEFORE any Elixir code runs. The
+  #      first two are emulator boot failures; the eval (and therefore
+  #      `Kernel.ParallelCompiler.compile/2`, the only thing that writes
+  #      beams, via `:each_module`) never starts, so attempt 1 writes
+  #      nothing. The crash-dump line cannot appear at all: `Mut.ChildProcess`
+  #      injects `ERL_CRASH_DUMP_SECONDS=0` into every child, and the emulator
+  #      then skips both the dump and its message (verified: `erl -eval
+  #      'erlang:halt("boom")'` prints "Crash dump is being written to:"
+  #      only without that variable).
+  #   2. Even if an attempt did write beams, the retry compiles the IDENTICAL
+  #      file list in one pass, so every module of those files is rewritten;
+  #      residue would need a module attempt 1 wrote and attempt 2 does not —
+  #      i.e. attempt 2 failed, which returns `{:recompile_failed, ...}`, marks
+  #      the mutant `:invalid`, and makes `Mut.Worker.run_fallback/4` reset the
+  #      sandbox in its `after` block.
+  #   3. That reset covers the destination: `each_module` writes only into
+  #      `_build/mut_schema/lib/<otp_app>/ebin`, and the sandbox baseline spans
+  #      every app's ebin (`Mut.SchemaBuild.snapshot_for/2` unions all umbrella
+  #      children; single-app snapshots the whole build path). Modified beams
+  #      are restored by hash and new ones are swept as strays, since
+  #      `_build/mut_schema/lib/<app>` is a tracked root.
+  #
+  # Retrying therefore adds no residue class that a single failed attempt does
+  # not already have. No scratch-ebin staging is needed.
   @beam_startup_transients [
     "Failed to load module 'elixir'",
     "Runtime terminating during boot",
@@ -80,7 +108,9 @@ defmodule Mut.Recompile do
     default_app = Keyword.fetch!(opts, :app)
     files = Enum.uniq(mutated_files ++ dependent_files)
 
-    case Mut.ChildProcess.run("elixir", elixir_args(sandbox.path, files, default_app),
+    case Mut.ChildProcess.run(
+           "elixir",
+           elixir_args(sandbox.path, files, default_app, Keyword.take(opts, [:app_context])),
            cd: sandbox.path,
            env: env(),
            timeout_ms: Keyword.get(opts, :compile_timeout_ms, @compile_timeout_ms),
@@ -146,11 +176,12 @@ defmodule Mut.Recompile do
   # ordered correctly in-process — compiling per-app groups separately loses
   # that ordering and breaks macro/import resolution between dependents (M68).
   # The `:each_module` callback then routes every module's beam to its own
-  # app's ebin (`_build/mut_schema/lib/<app>/ebin`), derived from the source
-  # path: `apps/<app>/...` for umbrella children, else `default_app`. Without
+  # app's ebin (`_build/mut_schema/lib/<otp_app>/ebin`), derived from the source
+  # path: `<apps_path>/<dir>/...` mapped through `Mut.Umbrella.app_map/1` for
+  # umbrella children, else `default_app` (single-app). Without
   # this, cross-app dependents' beams would land in the mutated app's ebin and
   # shadow the real ones at test time.
-  def elixir_args(sandbox_path, files, default_app) do
+  def elixir_args(sandbox_path, files, default_app, opts \\ []) do
     pa_flags =
       sandbox_path
       |> Path.join("_build/mut_schema/lib/*/ebin")
@@ -168,19 +199,36 @@ defmodule Mut.Recompile do
     # (false-invalids). `Mix.start/0` only boots Mix's agents — it does NOT
     # load the project or run the deps lock-check (the thing this module
     # avoids by skipping `mix`), so it is safe and side-effect-free here.
-    # `file` may arrive absolute, so locate the `<apps_path>/<app>` segment
+    # `file` may arrive absolute, so locate the `<apps_path>/<dir>` segment
     # anywhere in the path (umbrella child); fall back to default_app
     # (single-app). `apps_path` honors a custom `:apps_path` (default "apps");
     # `Path.split` (not `String.split(_, "/")`) handles the host separator.
+    #
+    # The source segment is the child's DIRECTORY name, but Mix writes beams
+    # to `_build/<env>/lib/<OTP app>/ebin`, so it is translated through the
+    # dir->app map. Using the directory name directly wrote mutated beams to
+    # an ebin that is off the code path (the unmutated baseline then "survives")
+    # and that the sandbox reset never sweeps, leaking across mutants (B4).
     # `\#{...}` stays literal so it is interpolated in the child BEAM.
-    apps_path = Mut.Umbrella.apps_path_name(sandbox_path)
+    # `:app_context` is resolved once per run by the caller (parsing every
+    # child mix.exs per mutant would be quadratic on large umbrellas).
+    {apps_path, app_map} =
+      Keyword.get(opts, :app_context) || Mut.Umbrella.app_context(sandbox_path)
 
     eval = ~s"""
     Mix.start()
+    app_map = #{inspect(app_map)}
     ebin_of = fn file ->
+      relative =
+        if Path.type(file) == :absolute,
+          do: Path.relative_to(file, #{inspect(sandbox_path)}),
+          else: file
+
       app =
-        case Enum.drop_while(Path.split(file), &(&1 != #{inspect(apps_path)})) do
-          [#{inspect(apps_path)}, a | _] -> a
+        case Enum.drop_while(Path.split(relative), &(&1 != #{inspect(apps_path)})) do
+          # Umbrella: unknown child dir degrades to its directory name (the
+          # pre-B4 behaviour); single-app (empty map): always default_app.
+          [#{inspect(apps_path)}, dir | _] when app_map != %{} -> Map.get(app_map, dir, dir)
           _ -> #{inspect(default_app)}
         end
 

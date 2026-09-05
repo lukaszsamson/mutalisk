@@ -152,7 +152,8 @@ defmodule Mut.Orchestrator do
 
     {matched, diagnostics} = Mut.Match.attach(dispatch_candidates, oracle, mutators)
 
-    {dispatch_schema, dispatch_skips} = dispatch_results(matched, mutators, source)
+    {dispatch_schema, dispatch_skips} =
+      dispatch_results(matched, enabled_targets, mutators, source)
 
     # M52: scalar body literals (integer/boolean/string/float/atom/nil)
     # carry plain-AST positional paths and route through the SCHEMA engine
@@ -270,9 +271,64 @@ defmodule Mut.Orchestrator do
       matched_pairs: matched
     }
 
+    plan
     # M100: `@mutalisk_ignore true` excludes every mutant in the marked module.
-    apply_module_ignores(plan, Mut.AstWalk.ignored_modules(ast))
+    |> apply_module_ignores(Mut.AstWalk.ignored_modules(ast))
+    |> reject_identity_mutations()
   end
+
+  @doc false
+  # T06 global safety net: a mutant whose rendered replacement is byte-identical
+  # to the source it replaces cannot change behaviour, so executing it burns a
+  # sandbox run and reports a guaranteed survivor (e.g. a literal whose parser
+  # `:token` metadata renders the original text back). The check needs the
+  # span bytes (`original_source`), which only fallback-engine mutants carry at
+  # plan time; schema mutants that are rerouted to fallback get theirs in
+  # `Mut.SchemaBuild`, which calls this again. Rejected mutants become skips
+  # (reason `:identity_mutation`) so the count is visible in the debug plan and
+  # the terminal summary. Stable IDs are span/metadata-derived and unaffected.
+  @spec reject_identity_mutations(Plan.t()) :: Plan.t()
+  def reject_identity_mutations(%Plan{} = plan) do
+    {kept_schema, identity_schema} = Enum.split_with(plan.schema, &(not identity_mutation?(&1)))
+
+    {kept_fallback, identity_fallback} =
+      Enum.split_with(plan.fallback, &(not identity_mutation?(&1)))
+
+    case identity_schema ++ identity_fallback do
+      [] ->
+        plan
+
+      identity ->
+        skips = Enum.map(identity, &mutant_skip(&1, :identity_mutation))
+
+        %{plan | schema: kept_schema, fallback: kept_fallback, skipped: plan.skipped ++ skips}
+    end
+  end
+
+  @spec identity_mutation?(Mutant.t()) :: boolean
+  defp identity_mutation?(%Mutant{original_source: original} = mutant) when is_binary(original) do
+    rendered = Macro.to_string(mutant.mutated_ast)
+
+    cond do
+      rendered == original -> true
+      comparable(rendered) != comparable(original) -> false
+      true -> Mut.FallbackPatch.replacement(mutant, original) == original
+    end
+  rescue
+    # An un-renderable/un-formattable mutant is not our problem here: it is
+    # already reported as `invalid` when its patch is built.
+    _error -> false
+  end
+
+  defp identity_mutation?(%Mutant{}), do: false
+
+  # Cheap prefilter so the (comparatively expensive) `Code.format_string!/1`
+  # round-trip in `Mut.FallbackPatch.replacement/2` runs only for the handful of
+  # candidates that could still collapse to the original: relative to
+  # `Macro.to_string/1` the formatter only rewrites whitespace and redundant
+  # parentheses (`not(not(x))` -> `not not x`), so two strings that differ once
+  # both are stripped can never format to the same bytes.
+  defp comparable(text), do: String.replace(text, ~r/[\s()]/, "")
 
   # Drop mutants whose enclosing module is `@mutalisk_ignore true`, recording
   # them as skipped (reason `:mutalisk_ignore`) so the metric is visible rather
@@ -287,7 +343,8 @@ defmodule Mut.Orchestrator do
       {kept_fallback, dropped_fallback} =
         Enum.split_with(plan.fallback, &(not MapSet.member?(ignored, &1.module)))
 
-      ignore_skips = Enum.map(dropped_schema ++ dropped_fallback, &mutant_ignore_skip/1)
+      ignore_skips =
+        Enum.map(dropped_schema ++ dropped_fallback, &mutant_skip(&1, :mutalisk_ignore))
 
       %{
         plan
@@ -298,13 +355,13 @@ defmodule Mut.Orchestrator do
     end
   end
 
-  defp mutant_ignore_skip(%Mutant{} = mutant) do
+  defp mutant_skip(%Mutant{} = mutant, reason) do
     %{
       file: mutant.file,
       line: mutant.line,
       column: mutant.column,
       syntactic_name: mutant.mutation_kind,
-      reason: :mutalisk_ignore,
+      reason: reason,
       detail: nil
     }
   end
@@ -426,15 +483,31 @@ defmodule Mut.Orchestrator do
           (target?(mutator, :env_walker) and :env_walker in enabled_targets)
       end)
 
-    if literal_mutators == [] do
-      {[], []}
-    else
-      candidates
-      |> Enum.map(&schema_literal_mutants(&1, literal_mutators, source))
-      |> Enum.reduce({[], []}, fn
-        {:mutants, mutants}, {all, skips} -> {all ++ mutants, skips}
-        {:skip, skip}, {all, skips} -> {all, skips ++ [skip]}
-      end)
+    engine_on? = :body_literal in enabled_targets or :env_walker in enabled_targets
+
+    cond do
+      # T44: neither :body_literal nor :env_walker is enabled, so no literal
+      # mutator can ever apply to these candidates. Emit a
+      # `body_literal_engine_disabled` skip per candidate (mirroring
+      # `attribute_engine_disabled`/`guard_engine_disabled` above) instead of
+      # silently dropping them — otherwise debug plans and skip counts
+      # under-report schema literal candidates when the engine is off.
+      not engine_on? ->
+        {[], Enum.map(candidates, &skip(&1, :body_literal_engine_disabled, nil))}
+
+      # Engine on, but the selected `--mutators` contain no literal mutator:
+      # that is a mutator-set gap, not a disabled engine (same distinction the
+      # guard engine makes).
+      literal_mutators == [] ->
+        {[], Enum.map(candidates, &skip(&1, :no_applicable_mutator, nil))}
+
+      true ->
+        candidates
+        |> Enum.map(&schema_literal_mutants(&1, literal_mutators, source))
+        |> Enum.reduce({[], []}, fn
+          {:mutants, mutants}, {all, skips} -> {all ++ mutants, skips}
+          {:skip, skip}, {all, skips} -> {all, skips ++ [skip]}
+        end)
     end
   end
 
@@ -574,6 +647,18 @@ defmodule Mut.Orchestrator do
     Enum.any?(path, &match?({:elem, :when, _idx}, &1))
   end
 
+  # T02: dispatch mutators are gated on the `:dispatch` target like every other
+  # walker, so `--enable env_walker` no longer runs the full dispatch set.
+  # Candidates that were oracle-matched but not enabled are dropped silently
+  # (they are not "unsupported", the surface is simply off).
+  defp dispatch_results(matched, enabled_targets, mutators, source) do
+    if :dispatch in enabled_targets do
+      dispatch_results(matched, mutators, source)
+    else
+      {[], []}
+    end
+  end
+
   defp dispatch_results(matched, mutators, source) do
     matched
     |> Enum.map(&dispatch_mutants(&1, mutators, source))
@@ -604,7 +689,9 @@ defmodule Mut.Orchestrator do
   end
 
   defp guard_fallback_results(candidates, oracle, enabled_targets, mutators, source) do
-    if :guard in enabled_targets do
+    # T02: `--enable guard_boolean` alone must still run the guard walk, so the
+    # leaf target activates the walk without pulling in the `:guard` mutators.
+    if :guard in enabled_targets or :guard_boolean in enabled_targets do
       # M90: `:guard_boolean` is an opt-in companion target to `:guard` — it
       # shares the guard walk + env_context but is gated separately so
       # adding `GuardBoolean` to `@opt_in` doesn't fire on the default
@@ -615,7 +702,12 @@ defmodule Mut.Orchestrator do
           do: Enum.filter(mutators, &target?(&1, :guard_boolean)),
           else: []
 
-      guard_mutators = Enum.filter(mutators, &target?(&1, :guard)) ++ extra
+      base =
+        if :guard in enabled_targets,
+          do: Enum.filter(mutators, &target?(&1, :guard)),
+          else: []
+
+      guard_mutators = base ++ extra
       guard_enabled_results(candidates, oracle, guard_mutators, source)
     else
       {[], Enum.map(candidates, &skip(&1, :guard_engine_disabled, nil))}

@@ -87,7 +87,11 @@ defmodule Mut.SchemaBuild do
   defp materialize(user_project_root, opts) do
     Mut.WorkCopy.materialize(user_project_root, Keyword.get_lazy(opts, :run_id, &run_id/0),
       force: Keyword.get(opts, :force, false),
-      root: Keyword.get(opts, :root)
+      root: Keyword.get(opts, :root),
+      # T29: `--keep-failed` debugging keeps a half-materialized copy too;
+      # otherwise WorkCopy deletes it rather than leaking it (nothing else can:
+      # `maybe_remove_work_copy/3` only runs once materialize has succeeded).
+      keep_failed: Keyword.get(opts, :keep, false) or Keyword.get(opts, :keep_failed, false)
     )
   end
 
@@ -160,7 +164,10 @@ defmodule Mut.SchemaBuild do
     # runtime (its prior behaviour — never silently dropped).
     rerouted = Enum.map(refused, &reroute_to_fallback(&1, original_sources))
 
+    # T06: a rerouted mutant only now has its span/original_source, so the
+    # byte-identical check runs again here for the rerouted set.
     %{plan | schema: kept_schema, fallback: plan.fallback ++ rerouted}
+    |> Mut.Orchestrator.reject_identity_mutations()
   end
 
   defp reroute_to_fallback(mutant, original_sources) do

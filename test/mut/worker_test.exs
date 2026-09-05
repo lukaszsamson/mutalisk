@@ -53,6 +53,41 @@ defmodule Mut.WorkerTest do
            ]
   end
 
+  # B4: the manifest lives under the child's OTP app name in `_build`, while
+  # the sources it records are prefixed with the child's DIRECTORY name.
+  test "manifest_entries pairs the child directory with the OTP app's manifest path" do
+    root = Path.join(System.tmp_dir!(), "mut_worker_b4_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join([root, "apps", "web-ui"]))
+    File.mkdir_p!(Path.join([root, "apps", "backoffice"]))
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule Up.MixProject do
+      use Mix.Project
+      def project, do: [apps_path: "apps", version: "0.1.0"]
+    end
+    """)
+
+    File.write!(Path.join([root, "apps", "web-ui", "mix.exs"]), """
+    defmodule WebUi.MixProject do
+      use Mix.Project
+      def project, do: [app: :web_ui, version: "0.1.0"]
+    end
+    """)
+
+    File.write!(Path.join([root, "apps", "backoffice", "mix.exs"]), """
+    defmodule Bo.MixProject do
+      use Mix.Project
+      def project, do: [app: :bo, version: "0.1.0"]
+    end
+    """)
+
+    assert Worker.manifest_entries(root) == [
+             {"backoffice", Path.join(root, "_build/mut_schema/lib/bo/.mix/compile.elixir")},
+             {"web-ui", Path.join(root, "_build/mut_schema/lib/web_ui/.mix/compile.elixir")}
+           ]
+  end
+
   test "run_schema classifies killed and sends expected process inputs" do
     path = fake_sandbox("killed")
     mix = mix_shim("killed", 1)
@@ -86,6 +121,38 @@ defmodule Mut.WorkerTest do
     assert result.status == :no_coverage
   end
 
+  test "run_schema classifies an all-skipped suite as :no_coverage, not :survived (T30)" do
+    path = fake_sandbox("all_skipped")
+    mix = skipped_shim("all", 2, 2)
+
+    result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix)
+
+    assert result.status == :no_coverage
+  end
+
+  test "run_schema still classifies :survived when some selected tests ran (T30)" do
+    path = fake_sandbox("some_skipped")
+    mix = skipped_shim("some", 2, 1)
+
+    result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix)
+
+    assert result.status == :survived
+  end
+
+  test "run_schema scrubs invalid UTF-8 from child output so the report encodes (T24)" do
+    path = fake_sandbox("invalid_utf8")
+    mix = invalid_utf8_shim()
+
+    result =
+      Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, retry_on_error: false)
+
+    assert result.status == :error
+    assert String.valid?(result.raw_output)
+    assert result.raw_output =~ "ok"
+    assert result.raw_output =~ "�"
+    assert {:ok, _json} = Mut.JSON.encode(%{"reason" => result.raw_output})
+  end
+
   test "run_schema closes timed out ports" do
     path = fake_sandbox("timeout")
     File.write!(Path.join(path, "mix.exs"), "mix")
@@ -94,6 +161,23 @@ defmodule Mut.WorkerTest do
     result = Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, timeout_ms: 50)
 
     assert result.status == :timeout
+  end
+
+  test "T31: run_schema does not leave stale port messages after repeated timeouts" do
+    path = fake_sandbox("timeout_drain")
+    File.write!(Path.join(path, "mix.exs"), "mix")
+    mix = timeout_shim()
+
+    for _ <- 1..2 do
+      result =
+        Worker.run_schema(%Sandbox{id: 1, path: path}, 7, [], mix_path: mix, timeout_ms: 50)
+
+      assert result.status == :timeout
+    end
+
+    Process.sleep(100)
+
+    assert {:message_queue_len, 0} = Process.info(self(), :message_queue_len)
   end
 
   test "run_schema returns clear error when sandbox is missing mix.exs" do
@@ -187,6 +271,35 @@ defmodule Mut.WorkerTest do
     #!/usr/bin/env bash
     printf '%s\\n' '{"event":"suite_finished","total":0,"failed":0,"passed":0,"skipped":0}'
     exit 0
+    """)
+
+    File.chmod!(path, 0o755)
+    path
+  end
+
+  defp skipped_shim(name, total, skipped) do
+    path = Path.expand(Path.join(["tmp", "tests", "worker", "mix_skipped_#{name}.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+    ran = total - skipped
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    printf '%s\\n' '{"event":"suite_finished","total":#{total},"ran":#{ran},"failed":0,"passed":#{ran},"skipped":#{skipped}}'
+    exit 0
+    """)
+
+    File.chmod!(path, 0o755)
+    path
+  end
+
+  defp invalid_utf8_shim do
+    path = Path.expand(Path.join(["tmp", "tests", "worker", "mix_invalid_utf8.sh"]))
+    File.mkdir_p!(Path.dirname(path))
+
+    File.write!(path, """
+    #!/usr/bin/env bash
+    printf '\\xff\\xfeok\\n'
+    exit 3
     """)
 
     File.chmod!(path, 0o755)

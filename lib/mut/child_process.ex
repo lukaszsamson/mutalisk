@@ -42,7 +42,11 @@ defmodule Mut.ChildProcess do
     result =
       try do
         port = open_port(path, args, opts)
-        collect(port, init_state(opts, log_io), Keyword.get(opts, :timeout_ms, :infinity))
+        # T32: capture the os_pid right after open, before it can go nil (a
+        # non-exec asdf/mise-style wrapper can exit, closing this info, well
+        # before its beam.smp descendant does) — see Mut.ProcessTree.kill_port/2.
+        os_pid = port_os_pid(port)
+        collect(port, init_state(opts, log_io, os_pid), Keyword.get(opts, :timeout_ms, :infinity))
       after
         close_log(log_io)
       end
@@ -80,8 +84,14 @@ defmodule Mut.ChildProcess do
   end
 
   defp open_port(path, args, opts) do
+    # T32: see Mut.ProcessTree — the launcher `exec`s the real executable, so
+    # exit status, merged stdout/stderr, cwd and env are unchanged; it only
+    # puts the child in its own process group so cleanup can signal the whole
+    # tree by group after a wrapper has exited.
+    {executable, spawn_args} = Mut.ProcessTree.spawn_command(path, args)
+
     port_opts = [
-      {:args, args},
+      {:args, spawn_args},
       :stderr_to_stdout,
       :exit_status,
       :binary
@@ -90,7 +100,7 @@ defmodule Mut.ChildProcess do
     port_opts = maybe_put(port_opts, :cd, Keyword.get(opts, :cd))
     port_opts = maybe_put(port_opts, :env, port_env(Keyword.get(opts, :env, [])))
 
-    Port.open({:spawn_executable, path}, port_opts)
+    Port.open({:spawn_executable, executable}, port_opts)
   end
 
   defp maybe_put(opts, _key, nil), do: opts
@@ -113,14 +123,17 @@ defmodule Mut.ChildProcess do
     end
   end
 
-  defp init_state(opts, log_io) do
+  defp init_state(opts, log_io, os_pid) do
     %{
       output: "",
       bytes: 0,
       max_bytes: Keyword.get(opts, :max_output_bytes, @default_max_output_bytes),
-      log_io: log_io
+      log_io: log_io,
+      os_pid: os_pid
     }
   end
+
+  defp port_os_pid(port), do: Mut.ProcessTree.identify(port)
 
   # Absolute monotonic deadline (R2): the budget is wall-clock from port open,
   # not an inactivity timer. The previous `after timeout_ms` reset on every
@@ -136,11 +149,35 @@ defmodule Mut.ChildProcess do
         collect(port, append_output(state, data), :deadline, deadline)
 
       {^port, {:exit_status, code}} ->
-        {:exit, code, state.output}
+        {:exit, code, captured_output(state)}
     after
       remaining(deadline) ->
-        kill_port(port)
-        {:timeout, state.output}
+        kill_port(port, state.os_pid)
+        drain_port_messages(port)
+        {:timeout, captured_output(state)}
+    end
+  end
+
+  # T24: child output is arbitrary bytes. Normalise it to valid UTF-8 exactly
+  # once, here at capture time, so every consumer (Result.raw_output -> Stryker
+  # JSON, history, terminal) gets an encodable binary. Scrubbing the *whole*
+  # accumulated output (rather than each chunk) keeps codepoints split across
+  # port chunks intact. The raw bytes still reach the optional log file.
+  defp captured_output(%{output: output}), do: Mut.Text.scrub_utf8(output)
+
+  # T31: after closing a timed-out port, drain any {port, {:data, _}} /
+  # {port, {:exit_status, _}} messages already queued in this process's
+  # mailbox (the child can write/exit in the race right before Port.close/1)
+  # so a long-lived caller mailbox doesn't accumulate stale junk for later
+  # unrelated receives to scan past. `after 0` bounds this to what's already
+  # queued — it never waits for new messages.
+  defp drain_port_messages(port) do
+    receive do
+      {^port, {:data, _data}} -> drain_port_messages(port)
+      {^port, {:exit_status, _code}} -> drain_port_messages(port)
+      {:EXIT, ^port, _reason} -> drain_port_messages(port)
+    after
+      0 -> :ok
     end
   end
 
@@ -169,16 +206,50 @@ defmodule Mut.ChildProcess do
     end
   end
 
-  defp write_log(nil, _data), do: :ok
+  # T52: a write failure here (disk full, permission revoked mid-run, etc.)
+  # used to be silently dropped (`_ = :file.write(...)`), so the run log
+  # quietly truncates while the caller still reports the run as a success.
+  # Surface it once per log — not once per chunk, which would spam stderr for
+  # the rest of a long run once the disk fills — via the process dictionary:
+  # this function is only ever called from the single process driving one
+  # `collect/3` loop, so it needs no cross-process state. Public (`@doc
+  # false`) so the failure path is directly unit-testable with a deliberately
+  # closed `:file` IO device, without needing to provoke a real OS-level
+  # write failure (disk full, permission revoked) in a test.
+  @doc false
+  @spec write_log(:file.io_device() | nil, iodata()) :: :ok
+  def write_log(nil, _data), do: :ok
 
-  defp write_log(io, data) do
-    _ = :file.write(io, data)
+  def write_log(io, data) do
+    case :file.write(io, data) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        warn_log_write_failure_once(io, reason)
+        :ok
+    end
+  end
+
+  defp warn_log_write_failure_once(io, reason) do
+    key = {:mut_child_process_log_write_failed, io}
+
+    unless Process.get(key) do
+      Process.put(key, true)
+
+      IO.puts(
+        :stderr,
+        "[mutalisk] failed to write to the run log (#{inspect(reason)}); the run log is incomplete"
+      )
+    end
+
     :ok
   end
 
   defp close_log(nil), do: :ok
 
   defp close_log(io) do
+    Process.delete({:mut_child_process_log_write_failed, io})
     _ = File.close(io)
     :ok
   end
@@ -199,5 +270,5 @@ defmodule Mut.ChildProcess do
 
   # Tree-kill (TERM then KILL across the descendant tree) lives in
   # Mut.ProcessTree, shared with Mut.Worker so the two paths can't drift.
-  defp kill_port(port), do: Mut.ProcessTree.kill_port(port)
+  defp kill_port(port, os_pid), do: Mut.ProcessTree.kill_port(port, os_pid)
 end

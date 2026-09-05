@@ -43,9 +43,19 @@ defmodule Mut.FixtureOracleHelper do
       resolved_name: decode_atom(map["resolved_name"]),
       resolved_arity: map["resolved_arity"],
       event_file: map["event_file"],
-      meta: Enum.map(map["meta"] || [], fn [key, value] -> {decode_atom(key), value} end)
+      meta: Enum.map(map["meta"] || [], &decode_meta_entry/1)
     }
   end
+
+  # T41: mirrors Mut.Oracle.decode_meta/1 — a pair is encoded unambiguously as
+  # %{"k" => key, "v" => value}; the old [key, value] shape is still accepted
+  # for backward compatibility.
+  defp decode_meta_entry(%{"k" => key, "v" => value}), do: {decode_atom(key), value}
+
+  defp decode_meta_entry([key, value]) when is_binary(key) or is_atom(key),
+    do: {decode_atom(key), value}
+
+  defp decode_meta_entry(value), do: value
 
   defp decode_function(nil), do: nil
   defp decode_function([name, arity]), do: {decode_atom(name), arity}

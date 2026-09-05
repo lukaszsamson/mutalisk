@@ -43,6 +43,7 @@ defmodule Mut.Reporter.StrykerJson do
       "schemaVersion" => "2",
       "thresholds" => thresholds,
       "files" => files(mutants, ledger_index, source_loader),
+      "testFiles" => test_files(mutants),
       "mutalisk" => mutalisk_extension(plan, mutants, snapshot)
     }
   end
@@ -92,6 +93,7 @@ defmodule Mut.Reporter.StrykerJson do
       |> validate_schema_version(rendered)
       |> validate_thresholds(rendered)
       |> validate_files(rendered)
+      |> validate_test_references(rendered)
       |> Enum.reverse()
 
     if violations == [], do: :ok, else: {:error, violations}
@@ -125,7 +127,7 @@ defmodule Mut.Reporter.StrykerJson do
       "replacement" => replacement(mutant),
       "location" => location(mutant),
       "status" => status(status),
-      "killedBy" => killed_by(entry),
+      "killedBy" => killed_by(mutant),
       "coveredBy" => covered_by(mutant),
       "duration" => duration(mutant, entry),
       "description" => mutant.description
@@ -145,6 +147,14 @@ defmodule Mut.Reporter.StrykerJson do
           planned_mutant = Map.get(by_stable_id, mutant.stable_id, mutant)
           {mutant.stable_id, atom_string(planned_mutant.mutation_kind)}
         end),
+      # T43: `killedBy` in the schema payload is now the killing test's FILE
+      # id (see `killed_by/1`), which loses the raw ExUnit "Module test name"
+      # when the module->file mapping is ambiguous. Preserve it here,
+      # unconditionally, in this non-schema extras key.
+      "killed_by_raw" =>
+        mutants
+        |> Enum.reject(&is_nil(&1.killing_test))
+        |> Map.new(&{&1.stable_id, &1.killing_test}),
       "phase_timings" => stringify_keys(snapshot.phase_timings || %{}),
       "selection" => selection_extension(snapshot.selection || %{}),
       "metrics" => metrics_extension(snapshot),
@@ -293,12 +303,71 @@ defmodule Mut.Reporter.StrykerJson do
   defp status_reason(mutant, _entry, :skipped), do: atom_string(mutant.skip_reason)
   defp status_reason(_mutant, _entry, _status), do: nil
 
-  defp killed_by(%{killing_test: nil}), do: []
-  defp killed_by(%{killing_test: killing_test}), do: [test_id(killing_test)]
-  defp killed_by(_entry), do: []
+  # T43: `coveredBy` holds test FILE-path ids (see `covered_by/1`) while
+  # `killing_test` is an ExUnit "Module test name" identifier — a different
+  # namespace the schema's `testFiles[<file>].tests[].id` entries can't
+  # resolve, leaving Stryker-schema consumers unable to join `killedBy`
+  # against `coveredBy`/`testFiles`. Derive the killing test's FILE id
+  # instead: turn its module into the underscored path segment Elixir/Mix
+  # convention gives that module's test file (`MyApp.FooTest` ->
+  # `my_app/foo_test`) and look for the ONE covering file whose path
+  # contains that segment. Ambiguous (0 or >1 matches) => omit `killedBy`
+  # rather than guess wrong; the raw ExUnit name is preserved separately in
+  # `mutalisk.killed_by_raw` (see `mutalisk_extension/3`).
+  defp killed_by(%Mutant{killing_test: nil}), do: []
+
+  # The worker records the failing test's file verbatim (`killing_test_file`);
+  # that is authoritative and needs no guessing. The module-name heuristic
+  # below is only a fallback for older ledgers/history without it.
+  defp killed_by(%Mutant{killing_test_file: file, covering_tests: covering})
+       when is_binary(file) do
+    covering = covering || []
+
+    cond do
+      file in covering -> [test_id(file)]
+      # Absolute/work-copy path vs. relative covering path: match on suffix.
+      match = Enum.find(covering, &String.ends_with?(file, &1)) -> [test_id(match)]
+      true -> [test_id(file)]
+    end
+  end
+
+  defp killed_by(%Mutant{killing_test: killing_test, covering_tests: covering_tests}) do
+    case killing_test_file(killing_test, covering_tests || []) do
+      nil -> []
+      file -> [test_id(file)]
+    end
+  end
+
+  defp killing_test_file(killing_test, covering_tests) do
+    with [module | _] <- String.split(killing_test, " ", parts: 2),
+         segment when is_binary(segment) <- module_path_segment(module),
+         [file] <- Enum.filter(covering_tests, &String.contains?(&1, segment)) do
+      file
+    else
+      _ -> nil
+    end
+  end
+
+  defp module_path_segment(module) do
+    module
+    |> Macro.underscore()
+    |> Path.basename()
+  end
 
   defp covered_by(%Mutant{covering_tests: nil}), do: []
   defp covered_by(%Mutant{covering_tests: tests}), do: Enum.map(tests, &test_id/1)
+
+  # T43: top-level TestFileDefinitionDictionary the Stryker schema requires
+  # for `coveredBy`/`killedBy` ids to resolve against. We only have
+  # file-level granularity (no per-test id from the runner), so each covered
+  # file gets a single file-level test entry whose id IS the file path.
+  defp test_files(mutants) do
+    mutants
+    |> Enum.flat_map(&(covered_by(&1) ++ killed_by(&1)))
+    |> Enum.uniq()
+    |> Enum.sort()
+    |> Map.new(fn file -> {file, %{"tests" => [%{"id" => file, "name" => file}]}} end)
+  end
 
   defp duration(mutant, entry), do: Map.get(entry, :duration_ms) || mutant.duration_ms || 0
 
@@ -315,6 +384,10 @@ defmodule Mut.Reporter.StrykerJson do
       mutant
       | status: Map.get(entry, :status, mutant.status),
         killing_test: Map.get(entry, :killing_test, mutant.killing_test),
+        # The ledger's `killing_test_file` is the authoritative killer file the
+        # runner reported; without copying it here `killed_by/1` never sees it
+        # and falls back to the module-name heuristic (or omits `killedBy`).
+        killing_test_file: Map.get(entry, :killing_test_file, mutant.killing_test_file),
         duration_ms: Map.get(entry, :duration_ms, mutant.duration_ms)
     }
   end
@@ -355,6 +428,28 @@ defmodule Mut.Reporter.StrykerJson do
   end
 
   defp validate_files(violations, _rendered), do: ["files must be a map" | violations]
+
+  # T43: every `coveredBy`/`killedBy` id must resolve to a `testFiles[*].tests[].id`.
+  defp validate_test_references(violations, %{"files" => files} = rendered) when is_map(files) do
+    known =
+      rendered
+      |> Map.get("testFiles", %{})
+      |> Enum.flat_map(fn {_file, %{"tests" => tests}} -> Enum.map(tests, & &1["id"]) end)
+      |> MapSet.new()
+
+    files
+    |> Enum.flat_map(fn {_path, %{"mutants" => mutants}} -> mutants end)
+    |> Enum.flat_map(fn mutant ->
+      Map.get(mutant, "coveredBy", []) ++ Map.get(mutant, "killedBy", [])
+    end)
+    |> Enum.reject(&MapSet.member?(known, &1))
+    |> Enum.uniq()
+    |> Enum.reduce(violations, fn id, acc ->
+      ["test id #{inspect(id)} referenced by coveredBy/killedBy is missing from testFiles" | acc]
+    end)
+  end
+
+  defp validate_test_references(violations, _rendered), do: violations
 
   defp validate_file(violations, file, %{
          "language" => language,

@@ -134,10 +134,39 @@ defmodule Mut.Match do
 
   defp ends_after_or_at?(_span, _site, _site_column), do: true
 
+  # T40: `compatible_pairs/4` already `Enum.uniq/1`s the oracle sites by
+  # *whole-struct* equality, so two `DispatchSite` records that describe the
+  # very same dispatch but were emitted as two separate tracer events (e.g. a
+  # macro expansion that fires the same call twice, differing only in
+  # incidental `meta`) survive as distinct pairs. Grouping the old key on the
+  # full `site` struct meant every such pair kept its own key, so this dedupe
+  # step never actually collapsed anything and every multi-site span fell
+  # through to `:ambiguous_oracle_match`. Group on the *semantic* identity of
+  # the site instead (everything but `meta`, which is genuinely incidental to
+  # which dispatch a site denotes) combined with the candidate's AST path
+  # hash, so duplicated tracer events for the same AST node collapse to one
+  # match while sites that are genuinely different (different resolved
+  # module/name/column/etc.) still yield the ambiguity diagnostic.
   defp dedupe_by_path_hash(pairs) do
     pairs
-    |> Enum.group_by(fn {candidate, site} -> {candidate.ast_path_hash, site} end)
-    |> Enum.map(fn {_key, [pair | _duplicates]} -> pair end)
+    |> Enum.group_by(fn {candidate, site} -> {candidate.ast_path_hash, site_identity(site)} end)
+    |> Enum.map(fn {_key, group} -> pick_canonical(group) end)
+  end
+
+  defp site_identity(%DispatchSite{} = site) do
+    {site.file, site.line, site.column, site.end_line, site.end_column, site.env_context,
+     site.module, site.function, site.dispatch_kind, site.resolved_module, site.resolved_name,
+     site.resolved_arity, site.event_file}
+  end
+
+  defp pick_canonical([pair]), do: pair
+
+  defp pick_canonical(group) do
+    # Deterministic tie-break among duplicates: earliest line/column, then the
+    # smallest (structurally comparable) meta as a final stable tie-break.
+    Enum.min_by(group, fn {_candidate, site} ->
+      {site.line, site.column || 0, inspect(site.meta)}
+    end)
   end
 
   defp candidate_key(candidate) do

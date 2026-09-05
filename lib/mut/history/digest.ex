@@ -112,7 +112,7 @@ defmodule Mut.History.Digest do
   # (`apps/*/{lib,test,config}`, each app's `mix.exs`) is fingerprinted
   # explicitly. `.heex`/`.eex` templates, `lib/**/*.exs`, and `priv` (compiled
   # or read at runtime/compile time) were also unfingerprinted.
-  @project_globs [
+  @root_project_globs [
     "lib/**/*.ex",
     "lib/**/*.exs",
     "lib/**/*.heex",
@@ -123,22 +123,37 @@ defmodule Mut.History.Digest do
     # `_test.exs` is rejected below (covered per-mutant by selected_tests_digest).
     "test/**/*",
     "config/**/*.exs",
+    "priv/**/*"
+  ]
+  @project_files ["mix.exs", "mix.lock", "mix_user.exs"]
+
+  # Child-app-relative globs, joined under the umbrella's configured apps
+  # directory (see `apps_project_globs/1`). Hard-coding the `apps/*` prefix
+  # here left umbrellas with a custom `:apps_path` (e.g. `apps_path:
+  # "packages"`) unfingerprinted: an edit under `packages/foo/lib` changed
+  # nothing the wildcard matched, so a stale verdict was reused (T18).
+  @apps_child_globs [
+    "lib/**/*.ex",
+    "lib/**/*.exs",
+    "lib/**/*.heex",
+    "lib/**/*.eex",
+    "test/**/*",
+    "config/**/*.exs",
     "priv/**/*",
-    "apps/*/lib/**/*.ex",
-    "apps/*/lib/**/*.exs",
-    "apps/*/lib/**/*.heex",
-    "apps/*/lib/**/*.eex",
-    "apps/*/test/**/*",
-    "apps/*/config/**/*.exs",
-    "apps/*/priv/**/*",
-    "apps/*/mix.exs",
+    "mix.exs",
     # In an overlayed work copy the user's real `mix.exs` is renamed to
     # `mix_user.exs` (the generated overlay takes the `mix.exs` name). Fingerprint
     # it so a dep/config/application change in the user's mix.exs invalidates
     # reuse even when it doesn't touch `mix.lock`.
-    "apps/*/mix_user.exs"
+    "mix_user.exs"
   ]
-  @project_files ["mix.exs", "mix.lock", "mix_user.exs"]
+
+  # Globs for umbrella child apps, rooted at the work copy's configured
+  # `:apps_path` (default `"apps"`) rather than the literal `"apps"` prefix.
+  defp apps_project_globs(root) do
+    apps_dir = Mut.Umbrella.apps_path_name(root)
+    Enum.map(@apps_child_globs, &Path.join([apps_dir, "*", &1]))
+  end
 
   @doc """
   Coarse project fingerprint: a digest over every project input that can change
@@ -160,7 +175,8 @@ defmodule Mut.History.Digest do
     # (`priv/.migrations/*`, `config/.runtime/*.exs`, `priv/.gz_assets/*`) are
     # fingerprinted too — otherwise an edit to one leaves the project digest
     # unchanged and a stale verdict is reused (R4 soundness gap).
-    globbed = Enum.flat_map(@project_globs, &Path.wildcard(Path.join(root, &1), match_dot: true))
+    all_globs = @root_project_globs ++ apps_project_globs(root)
+    globbed = Enum.flat_map(all_globs, &Path.wildcard(Path.join(root, &1), match_dot: true))
     extra = Enum.map(@project_files, &Path.join(root, &1))
 
     (globbed ++ extra)
@@ -175,16 +191,23 @@ defmodule Mut.History.Digest do
 
   # Elixir source is AST-normalized (via `content_digest`) so cosmetic churn —
   # comments, reformatting — doesn't needlessly invalidate reuse. Every other
-  # input (priv assets, data files) is hashed BYTE-EXACT: a file the app reads
-  # verbatim has no "irrelevant formatting", and AST-normalizing one that happens
-  # to parse as Elixir (`priv/rates.txt` = `1.50` -> `1.5`) would silently
-  # collapse a behaviour-affecting change and reuse a stale verdict (R4).
+  # input (priv assets, data files, and `.eex`/`.heex` templates) is hashed
+  # BYTE-EXACT: a file the app reads verbatim has no "irrelevant formatting",
+  # and AST-normalizing one that happens to parse as Elixir (`priv/rates.txt` =
+  # `1.50` -> `1.5`) would silently collapse a behaviour-affecting change and
+  # reuse a stale verdict (R4). `.eex`/`.heex` templates are EEx source, not
+  # Elixir source: `Code.string_to_quoted/2` only sees the literal (non-`<%
+  # %>`) text as an Elixir-ish token stream and `Macro.to_string/1` can
+  # re-print it losing whitespace/attribute-quoting that is significant in
+  # HTML/EEx (e.g. `1.50` -> `1.5` inside a tag, or collapsed inter-tag
+  # whitespace) — a behaviour-affecting byte edit collapsing to the same
+  # digest and reusing a stale verdict (T19).
   defp input_digest(path) do
     content = File.read!(path)
     if elixir_source?(path), do: content_digest(content), else: sha(content)
   end
 
-  defp elixir_source?(path), do: String.ends_with?(path, [".ex", ".exs", ".heex", ".eex"])
+  defp elixir_source?(path), do: String.ends_with?(path, [".ex", ".exs"])
 
   # ---- internals ----
 

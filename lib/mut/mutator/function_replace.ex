@@ -140,7 +140,7 @@ defmodule Mut.Mutator.FunctionReplace do
     [
       %Mutation{
         original_ast: node,
-        mutated_ast: rename(node, replacement),
+        mutated_ast: rename(node, replacement, site),
         description: "replace #{site.resolved_name} with #{replacement}",
         mutation_kind: @kind,
         guard_safe?: true,
@@ -153,8 +153,27 @@ defmodule Mut.Mutator.FunctionReplace do
     ]
   end
 
-  defp rename({{:., dm, [target, _name]}, m, args}, replacement),
+  # Remote call `Mod.fun(args)`: rename in place, target untouched.
+  defp rename({{:., dm, [target, _name]}, m, args}, replacement, _site),
     do: {{:., dm, [target, replacement]}, m, args}
 
-  defp rename({_name, m, args}, replacement), do: {replacement, m, args}
+  # Bare imported call `fun(args)` resolved via an `import`: the replacement
+  # name may not be in the caller's import list (e.g. `import Enum, only:
+  # [filter: 2]` does not bring `reject/2` into scope), so a bare rename can
+  # produce a mutant that fails to compile for a reason unrelated to the
+  # mutation itself. Emit a fully-qualified call instead — it compiles
+  # regardless of what was imported. Only functions: a qualified MACRO call
+  # would additionally need `require`, and the swap allowlist contains no
+  # macros anyway.
+  defp rename({_name, m, args}, replacement, %DispatchSite{
+         dispatch_kind: :imported_function,
+         resolved_module: module
+       })
+       when not is_nil(module) do
+    target = {:__aliases__, [alias: false], Module.split(module) |> Enum.map(&String.to_atom/1)}
+    {{:., [], [target, replacement]}, m, args}
+  end
+
+  # Any other bare call (e.g. local function): rename in place, as before.
+  defp rename({_name, m, args}, replacement, _site), do: {replacement, m, args}
 end

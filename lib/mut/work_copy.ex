@@ -15,6 +15,24 @@ defmodule Mut.WorkCopy do
   @symlink_entries ["deps", "config"]
   @transient_entries ["_build", "tmp"]
 
+  @doc """
+  Materializes an isolated work copy of `user_project_root`.
+
+  ## Options
+
+    * `:root` - base directory for the copy.
+    * `:force` - overwrite an existing copy at the target path.
+    * `:keep_failed` - keep a partially built copy for debugging when a
+      post-copy step fails (default `false`).
+
+  T29: a failure AFTER the project has been copied (overlay/symlink/transient
+  cleanup, or an exception in any of them) used to return `{:error, reason}`
+  while leaving a full project copy behind that nothing ever removes — the
+  caller has no path to clean up. The copy is deleted before the error is
+  returned unless `:keep_failed` asks for it. Failures BEFORE the copy
+  (`:not_a_mix_project`, `:already_exists`) never delete anything: the path
+  either does not exist or belongs to someone else.
+  """
   @spec materialize(Path.t(), String.t(), keyword) :: {:ok, Path.t()} | {:error, term}
   def materialize(user_project_root, run_id, opts \\ [])
       when is_binary(run_id) and is_list(opts) do
@@ -28,13 +46,49 @@ defmodule Mut.WorkCopy do
 
     with :ok <- assert_mix_project(user_project_root),
          :ok <- prepare_destination(work_copy, Keyword.get(opts, :force, false)),
-         :ok <- copy_project(user_project_root, work_copy),
-         :ok <- remove_transient_entries(work_copy),
-         :ok <- symlink_project_entries(user_project_root, work_copy) do
-      {:ok, work_copy}
+         :ok <- copy_project(user_project_root, work_copy) do
+      finish_materialize(user_project_root, work_copy, opts)
     end
   rescue
     exception -> {:error, {exception.__struct__, Exception.message(exception)}}
+  end
+
+  defp finish_materialize(user_project_root, work_copy, opts) do
+    with :ok <- remove_transient_entries(work_copy),
+         :ok <- symlink_project_entries(user_project_root, work_copy),
+         :ok <- post_copy_hook(opts).(work_copy) do
+      {:ok, work_copy}
+    else
+      {:error, reason} -> discard_work_copy(work_copy, opts, reason)
+      # A post-copy step returning anything but :ok / {:error, _} is a bug in
+      # that step; still treat it as a failure so the copy is never leaked.
+      other -> discard_work_copy(work_copy, opts, {:unexpected_post_copy_result, other})
+    end
+  rescue
+    exception ->
+      discard_work_copy(
+        work_copy,
+        opts,
+        {exception.__struct__, Exception.message(exception)}
+      )
+  end
+
+  # Test seam: injects an extra post-copy step so the cleanup-on-failure path
+  # can be exercised. (Provoking a real link failure needs permission tricks
+  # that would defeat the cleanup itself, hiding the very thing under test.)
+  defp post_copy_hook(opts) do
+    case Keyword.get(opts, :post_copy) do
+      fun when is_function(fun, 1) -> fun
+      nil -> fn _work_copy -> :ok end
+    end
+  end
+
+  defp discard_work_copy(work_copy, opts, reason) do
+    unless Keyword.get(opts, :keep_failed, false) do
+      File.rm_rf(work_copy)
+    end
+
+    {:error, reason}
   end
 
   @spec install_overlay(Path.t(), Overlay.role()) :: :ok | {:error, term}

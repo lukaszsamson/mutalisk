@@ -106,6 +106,10 @@ defmodule Mut.EnvWalker do
   @list_hint_ops ~w(++ -- length hd tl)a
   @boolean_hint_ops ~w(and or not)a
 
+  # Wave 6: `for` comprehension options whose value is an ordinary expression
+  # (`:do` is handled separately as the comprehension body).
+  @for_option_keys ~w(into uniq reduce)a
+
   @doc """
   Parses source with the literal-encoder option, returning an AST
   that wraps each literal in `{:__block__, meta, [value]}` so the
@@ -536,12 +540,17 @@ defmodule Mut.EnvWalker do
   # carries `:delimiter` and NO `:closing`, so the old code fell to a 1-byte
   # span (just the opening `'`) and the fallback patch spliced over only that
   # byte — corrupt (T1). Scan to the matching close delimiter for that case.
+  # T50: mirrors `literal_span/3`/`variable_span/3` — `byte_offset/3` can
+  # return `nil` (e.g. a line/column pair outside the tracked line offsets),
+  # and without this guard that `nil` would reach `collection_end_byte/5` and
+  # `byte_to_line_col/2`'s integer arithmetic and crash. Return a `nil` span
+  # instead, same as the sibling helpers.
   defp collection_span(state, meta) do
     line = Keyword.get(meta, :line)
     column = Keyword.get(meta, :column)
 
-    if is_integer(line) and is_integer(column) do
-      start_byte = byte_offset(state, line, column)
+    with true <- is_integer(line) and is_integer(column),
+         start_byte when is_integer(start_byte) <- byte_offset(state, line, column) do
       end_byte = collection_end_byte(state, meta, line, column, start_byte)
       {end_line, end_column} = byte_to_line_col(state.line_offsets, end_byte)
 
@@ -554,6 +563,8 @@ defmodule Mut.EnvWalker do
         start_byte: start_byte,
         end_byte: end_byte
       }
+    else
+      _ -> nil
     end
   end
 
@@ -809,12 +820,67 @@ defmodule Mut.EnvWalker do
     classify_call(name, meta, args, state)
   end
 
-  # Two-tuple (e.g. {:do, body} keyword entries).
+  # T11: remote / anonymous-function call — `Mod.fun(args)`, `mod.fun(args)`,
+  # `:erlang.fun(args)`, `f.(args)`. The head is a `{:., _, _}` node, so these
+  # never matched the atom-name clause above and fell through to the leaf
+  # clause: NOTHING inside a remote call (receiver or arguments) was visited,
+  # systematically hiding every literal / collection / variable candidate in
+  # `Enum.map(items, fn x -> ... end)`-shaped code. Descend the receiver and
+  # every argument with the same scope/trust handling an ordinary user call
+  # gets. A remote call is never a trusted Kernel control-flow macro, so
+  # `classify_user_call/4` (not `classify_kernel_control_flow/4`) is correct.
+  defp descend_expr({{:., _dot_meta, dot_args}, meta, args}, state)
+       when is_list(dot_args) and is_list(args) do
+    classify_user_call(:., meta, remote_receivers(dot_args) ++ args, state)
+  end
+
+  # Wave 6: a two-element tuple in EXPRESSION position. This shape covers a
+  # tuple literal (`{:ok, "tag"}`, `{key, value}`), a plain map-literal pair
+  # (`%{mode: "fast"}` — map pairs are the `args` of the `%{}` call node and
+  # reach here one at a time via `descend_args/2`), a struct field pair, and a
+  # keyword entry. All of them used to die here as a leaf: the tuple emitted a
+  # CollectionEmpty candidate but nothing inside it was ever visited, so inner
+  # literals produced no candidates and inner variable reads were not counted
+  # (skewing `other_uses?` for VariableReplace elsewhere in the function).
+  #
+  # A keyword-shaped key (a bare atom or its `{:__block__, _, [atom]}` literal
+  # encoding) is NEVER a candidate, so only its value is walked, in an
+  # isolated state — the Wave 2 treatment, unchanged. Any other key (a
+  # variable, a string, a nested expression) is an ordinary sub-expression and
+  # is walked before the value, in source order.
+  defp descend_expr({key, value}, %{context: nil} = state) do
+    if keyword_key?(key) do
+      walk_isolated(value, state)
+    else
+      walk(value, walk(key, state))
+    end
+  end
+
+  # Pattern (`:match`) and guard positions keep the historical leaf behaviour.
+  # Pattern pairs are routed by their enclosing form through
+  # `walk_in_context(…, :match)`; descending them here would emit
+  # VariableReplace candidates on freshly bound names.
   defp descend_expr({_a, _b}, state), do: state
 
-  # List of children.
+  # List of children. T12: a keyword-syntax entry (`do:`/`else:`/`opt:`) is a
+  # bare 2-tuple whose key is an atom (literal-encoded as
+  # `{:__block__, _, [atom]}`). The key is never a candidate, but the VALUE is
+  # an ordinary expression — before this, `if`/`unless` bodies and every
+  # keyword argument of a user call died at the 2-tuple leaf clause above.
+  # Each value is walked in an isolated state so branch-local bindings do not
+  # leak into later entries, mirroring `walk_clauses/2`.
+  #
+  # Map pairs do NOT reach here: they are the `args` of a `%{}` call node and
+  # are walked one-by-one by `descend_args/2` (which routes each pair through
+  # the two-tuple clause above), so nothing is double-visited.
   defp descend_expr(list, state) when is_list(list) do
-    Enum.reduce(list, state, &walk(&1, &2))
+    Enum.reduce(list, state, fn
+      {key, value}, acc ->
+        if keyword_key?(key), do: walk_isolated(value, acc), else: walk({key, value}, acc)
+
+      node, acc ->
+        walk(node, acc)
+    end)
   end
 
   # M54: variable node. `{name, meta, ctx}` with an atom context is a
@@ -830,6 +896,32 @@ defmodule Mut.EnvWalker do
 
   defp descend_args(args, state) when is_list(args) do
     Enum.reduce(args, state, &walk(&1, &2))
+  end
+
+  # The walkable part of a dot head. `Mod.fun` → `[Mod, :fun]`, `f.()` → `[f]`.
+  # Drop the trailing bare-atom function name (never a candidate) and any
+  # receiver that is a plain module reference — an `__aliases__` node or a
+  # literal-encoded atom (`:erlang.foo`). Mutating those would retarget the
+  # call rather than mutate a value, so only a variable / expression receiver
+  # (`mod.fun(x)`, `state.conn.fun(x)`, `f.(x)`) is descended.
+  defp remote_receivers(dot_args) do
+    Enum.reject(dot_args, &(is_atom(&1) or module_reference?(&1)))
+  end
+
+  defp module_reference?({:__aliases__, _meta, _parts}), do: true
+  defp module_reference?({:__block__, _meta, [value]}), do: is_atom(value)
+  defp module_reference?(_node), do: false
+
+  # A keyword-list key: a bare atom, or the literal-encoder's wrapping of one.
+  defp keyword_key?({:__block__, _meta, [key]}) when is_atom(key), do: true
+  defp keyword_key?(key) when is_atom(key), do: true
+  defp keyword_key?(_other), do: false
+
+  # Walk `node`, keeping only the discovered snapshots/candidates: scope,
+  # context, trust and `bound_vars` changes made inside stay inside.
+  defp walk_isolated(node, state) do
+    inner = walk(node, state)
+    %{state | snapshots: inner.snapshots, candidates: inner.candidates}
   end
 
   ## --- per-form helpers --------------------------------------------------
@@ -999,12 +1091,28 @@ defmodule Mut.EnvWalker do
       kw when is_list(kw) ->
         clauses = Enum.drop(args, -1)
         state = Enum.reduce(clauses, state, &walk_for_clause/2)
+        state = walk_for_options(kw, state)
         do_body = fetch_block(kw, :do)
         if do_body, do: walk(do_body, state), else: state
 
       _ ->
         Enum.reduce(args, state, &walk_for_clause/2)
     end
+  end
+
+  # Wave 6(c): `for x <- xs, into: %{}, uniq: true, reduce: 0, do: …`. Only
+  # `:do` was ever fetched, so the option VALUES — ordinary expressions
+  # evaluated in the enclosing body context — were invisible to the walker.
+  # Walk each in an isolated state (an option value binds nothing the
+  # comprehension body may see), in source order ahead of the `:do` block.
+  # Keys are options, never candidates.
+  defp walk_for_options(kw, state) do
+    Enum.reduce(@for_option_keys, state, fn key, acc ->
+      case fetch_block(kw, key) do
+        nil -> acc
+        value -> walk_isolated(value, acc)
+      end
+    end)
   end
 
   defp walk_for_clause({:<-, _meta, [pattern, expr]}, state) do
@@ -1374,10 +1482,19 @@ defmodule Mut.EnvWalker do
   defp function_name_arity({name, _meta, nil}) when is_atom(name), do: {name, 0}
   defp function_name_arity(_), do: nil
 
-  defp resolve_module_alias({:__aliases__, _meta, parts}, _current) when is_list(parts),
-    do: Module.concat(parts)
+  # T13: qualify a nested `defmodule` against its enclosing module.
+  # `defmodule Outer do defmodule Inner do ... end end` defines `Outer.Inner`,
+  # and that is the name `Mut.AstWalk.ignored_modules/1` records and the
+  # orchestrator's `@mutalisk_ignore` filter matches exactly — recording plain
+  # `Inner` here silently bypassed the ignore. Mirrors
+  # `Mut.AstWalk.enter_module/2`: qualify against the nearest static ancestor,
+  # `__MODULE__.X` resolves through it, and an unresolvable (dynamic /
+  # `unquote`d) name keeps the enclosing module.
+  defp resolve_module_alias({:__aliases__, _meta, parts}, current) when is_list(parts) do
+    Mut.AstWalk.qualify_module_parts(parts, current) || current
+  end
 
-  defp resolve_module_alias(_, current), do: current
+  defp resolve_module_alias(_node, current), do: current
 
   defp compute_line_offsets(""), do: [0]
 

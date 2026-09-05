@@ -11,11 +11,27 @@ defmodule Mut.History.Store do
   History is an optimization: a missing, corrupt, or version-mismatched store
   is treated as **cold** (no history) — it must never abort a run or be
   partially trusted ("incorrect reuse is worse than a slow run").
+
+  ## Format versions
+
+    * `1` — the original shape; verdict entries carry `test_timeout_ms` only.
+    * `2` (current) — entries additionally carry `suite_timeout_ms` (the
+      `--suite-timeout-ms` host deadline budget, `nil` when unset) and
+      `killing_test_file` (the authoritative killing test file, `nil` when the
+      runner did not report one).
+
+  A store written by an older format version is rejected wholesale by
+  `load/1` (`{:cold, :format_version_mismatch}`), so an upgrade simply starts
+  cold. Independently of that, an individual entry that lacks
+  `suite_timeout_ms` is treated as `nil` by `Mut.History.Reuse` — i.e. it is
+  reusable only while the current run has NO `--suite-timeout-ms` set, and is
+  rejected as soon as one is configured. Never assume a missing field means
+  "matches"; that is the difference between a slow run and an incorrect one.
   """
 
   alias Mut.History.Digest
 
-  @format_version 1
+  @format_version 2
   @default_retention_generations 3
 
   @typedoc """
@@ -29,7 +45,9 @@ defmodule Mut.History.Store do
           selected_tests_digest: String.t(),
           project_digest: String.t(),
           killing_test: String.t() | nil,
-          test_timeout_ms: pos_integer() | nil
+          killing_test_file: String.t() | nil,
+          test_timeout_ms: pos_integer() | nil,
+          suite_timeout_ms: pos_integer() | nil
         }
 
   @type store :: %{
@@ -139,16 +157,28 @@ defmodule Mut.History.Store do
   `killing_test` is stored as the ExUnit identifier (`"Module test name"`) for
   diagnostics only — it is not a file path, so the reuse gate uses
   `selected_tests_digest` (which, under coverage selection, *is* the covering
-  tests) rather than a per-killing-test digest.
+  tests) rather than a per-killing-test digest. `killing_test_file` is the
+  authoritative test FILE the killer lived in (when the runner reported one);
+  it is what the Stryker reporter turns into `killedBy`, so a reused verdict
+  keeps its `killedBy` instead of falling back to the module-name heuristic.
+
+  `timeouts` is `{test_timeout_ms, suite_timeout_ms}` — BOTH deadline budgets,
+  because either one can change a verdict (see `Mut.History.Reuse`).
   """
   @spec record_for(
           Mut.Mutant.t(),
           Digest.index(),
           (Path.t() -> String.t() | nil),
-          pos_integer() | nil,
+          {pos_integer() | nil, pos_integer() | nil},
           String.t()
         ) :: verdict_record() | nil
-  def record_for(%Mut.Mutant{} = mutant, source_index, read_test, test_timeout_ms, project_digest) do
+  def record_for(
+        %Mut.Mutant{} = mutant,
+        source_index,
+        read_test,
+        {test_timeout_ms, suite_timeout_ms},
+        project_digest
+      ) do
     if reusable_status?(mutant.status) do
       selected = mutant.covering_tests || []
 
@@ -162,7 +192,9 @@ defmodule Mut.History.Store do
         selected_tests_digest: Digest.selected_tests_digest(selected_entries),
         project_digest: project_digest,
         killing_test: mutant.killing_test,
-        test_timeout_ms: test_timeout_ms
+        killing_test_file: mutant.killing_test_file,
+        test_timeout_ms: test_timeout_ms,
+        suite_timeout_ms: suite_timeout_ms
       }
     end
   end
@@ -190,7 +222,9 @@ defmodule Mut.History.Store do
       "selected_tests_digest" => record.selected_tests_digest,
       "project_digest" => record.project_digest,
       "killing_test" => record.killing_test,
-      "test_timeout_ms" => record.test_timeout_ms
+      "killing_test_file" => record.killing_test_file,
+      "test_timeout_ms" => record.test_timeout_ms,
+      "suite_timeout_ms" => record.suite_timeout_ms
     }
   end
 

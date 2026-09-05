@@ -154,9 +154,19 @@ defmodule Mut.Oracle do
   defp decode_function(nil), do: nil
   defp decode_function([name, arity]), do: {decode_atom(name), arity}
 
+  # T41: a bare meta value that is itself a 2-element list (e.g. `[1, 2]`) is
+  # indistinguishable from the old `[key, value]` pair encoding, so decoding
+  # every 2-element list as a pair silently corrupted such values. Pairs are
+  # now encoded unambiguously as `%{"k" => key, "v" => value}` (see
+  # `encode_meta/1` below and the `DispatchSite` JSON.Encoder), so decode only
+  # treats a map as a pair. The old `[key, value]` shape is still accepted
+  # here for backward compatibility with pre-existing trace/oracle data, but
+  # ONLY when `key` looks like a pair key (a string or atom) — a bare
+  # 2-element list value is otherwise passed through unchanged.
   defp decode_meta(meta) do
     Enum.map(meta, fn
-      [key, value] -> {decode_atom(key), value}
+      %{"k" => key, "v" => value} -> {decode_atom(key), value}
+      [key, value] when is_binary(key) or is_atom(key) -> {decode_atom(key), value}
       value -> value
     end)
   end
@@ -209,7 +219,7 @@ defmodule Mut.Oracle do
 
   defp encode_meta(meta) do
     Enum.map(meta, fn
-      {key, value} -> [key, value]
+      {key, value} -> %{"k" => key, "v" => value}
       value -> value
     end)
   end

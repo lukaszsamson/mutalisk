@@ -58,13 +58,17 @@ defmodule Mut.Mutator.FloatLiteral do
   defp float_literal?({:__block__, _meta, [value]}) when is_float(value), do: true
   defp float_literal?(_), do: false
 
-  defp build_mutations({:__block__, meta, [value]} = node) do
+  defp build_mutations({:__block__, _meta, [value]} = node) do
     value
     |> replacements()
     |> Enum.map(fn replacement ->
       %Mutation{
         original_ast: node,
-        mutated_ast: {:__block__, meta, [replacement]},
+        # Strip parser meta (especially `:token`, e.g. `token: "3.14"`,
+        # which `Macro.to_string/1` echoes verbatim and would render the
+        # mutant byte-identical to the original source). Mirrors
+        # `Mut.Mutator.IntegerLiteral`.
+        mutated_ast: {:__block__, [], [replacement]},
         description: "replace float literal #{value} with #{replacement}",
         mutation_kind: :float_literal,
         guard_safe?: false,

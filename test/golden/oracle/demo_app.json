@@ -14,10 +14,10 @@
     "resolved_arity": 0,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -35,10 +35,10 @@
     "resolved_arity": 5,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -56,14 +56,14 @@
     "resolved_arity": 1,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -81,10 +81,10 @@
     "resolved_arity": 3,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -102,14 +102,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -130,14 +130,14 @@
     "resolved_arity": 6,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -158,14 +158,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        8
-      ]
+      {
+        "k": "line",
+        "v": 5
+      },
+      {
+        "k": "column",
+        "v": 8
+      }
     ]
   },
   {
@@ -186,14 +186,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        13
-      ]
+      {
+        "k": "line",
+        "v": 5
+      },
+      {
+        "k": "column",
+        "v": 13
+      }
     ]
   },
   {
@@ -214,14 +214,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        18
-      ]
+      {
+        "k": "line",
+        "v": 5
+      },
+      {
+        "k": "column",
+        "v": 18
+      }
     ]
   },
   {
@@ -239,10 +239,10 @@
     "resolved_arity": 3,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        8
-      ]
+      {
+        "k": "line",
+        "v": 8
+      }
     ]
   },
   {
@@ -260,14 +260,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -288,14 +288,14 @@
     "resolved_arity": 6,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -316,14 +316,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        6
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 6
+      }
     ]
   },
   {
@@ -344,14 +344,14 @@
     "resolved_arity": 2,
     "event_file": "lib/arith.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        17
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 17
+      }
     ]
   },
   {
@@ -369,10 +369,10 @@
     "resolved_arity": 0,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -390,10 +390,10 @@
     "resolved_arity": 5,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -411,14 +411,14 @@
     "resolved_arity": 1,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -436,10 +436,10 @@
     "resolved_arity": 5,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -457,14 +457,14 @@
     "resolved_arity": 1,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -482,10 +482,10 @@
     "resolved_arity": 3,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        6
-      ]
+      {
+        "k": "line",
+        "v": 6
+      }
     ]
   },
   {
@@ -503,14 +503,14 @@
     "resolved_arity": 2,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        6
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 6
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -531,14 +531,14 @@
     "resolved_arity": 6,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        6
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 6
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -559,14 +559,14 @@
     "resolved_arity": 1,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        7
-      ],
-      [
-        "column",
-        5
-      ]
+      {
+        "k": "line",
+        "v": 7
+      },
+      {
+        "k": "column",
+        "v": 5
+      }
     ]
   },
   {
@@ -587,14 +587,14 @@
     "resolved_arity": 2,
     "event_file": "lib/attrs.ex",
     "meta": [
-      [
-        "line",
-        7
-      ],
-      [
-        "column",
-        17
-      ]
+      {
+        "k": "line",
+        "v": 7
+      },
+      {
+        "k": "column",
+        "v": 17
+      }
     ]
   },
   {
@@ -612,10 +612,10 @@
     "resolved_arity": 0,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -633,10 +633,10 @@
     "resolved_arity": 5,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -654,14 +654,14 @@
     "resolved_arity": 1,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -679,10 +679,10 @@
     "resolved_arity": 3,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -700,14 +700,14 @@
     "resolved_arity": 2,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -728,14 +728,14 @@
     "resolved_arity": 6,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -756,14 +756,14 @@
     "resolved_arity": 2,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 5
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -784,14 +784,14 @@
     "resolved_arity": 1,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        11
-      ]
+      {
+        "k": "line",
+        "v": 5
+      },
+      {
+        "k": "column",
+        "v": 11
+      }
     ]
   },
   {
@@ -809,10 +809,10 @@
     "resolved_arity": 3,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        8
-      ]
+      {
+        "k": "line",
+        "v": 8
+      }
     ]
   },
   {
@@ -830,14 +830,14 @@
     "resolved_arity": 2,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -858,14 +858,14 @@
     "resolved_arity": 6,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -886,14 +886,14 @@
     "resolved_arity": 2,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -914,14 +914,14 @@
     "resolved_arity": 2,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        12
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 12
+      }
     ]
   },
   {
@@ -942,14 +942,14 @@
     "resolved_arity": 1,
     "event_file": "lib/bool.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        15
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 15
+      }
     ]
   },
   {
@@ -967,10 +967,10 @@
     "resolved_arity": 0,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -988,10 +988,10 @@
     "resolved_arity": 5,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -1009,14 +1009,14 @@
     "resolved_arity": 1,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1034,10 +1034,10 @@
     "resolved_arity": 3,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -1055,14 +1055,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1083,14 +1083,14 @@
     "resolved_arity": 6,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -1111,14 +1111,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        5
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 5
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -1136,10 +1136,10 @@
     "resolved_arity": 3,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        8
-      ]
+      {
+        "k": "line",
+        "v": 8
+      }
     ]
   },
   {
@@ -1157,14 +1157,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1185,14 +1185,14 @@
     "resolved_arity": 6,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -1213,14 +1213,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -1241,14 +1241,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        11
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 11
+      }
     ]
   },
   {
@@ -1269,14 +1269,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        16
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 16
+      }
     ]
   },
   {
@@ -1297,14 +1297,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        21
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 21
+      }
     ]
   },
   {
@@ -1325,14 +1325,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        26
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 26
+      }
     ]
   },
   {
@@ -1353,14 +1353,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        31
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 31
+      }
     ]
   },
   {
@@ -1381,14 +1381,14 @@
     "resolved_arity": 2,
     "event_file": "lib/cmp.ex",
     "meta": [
-      [
-        "line",
-        9
-      ],
-      [
-        "column",
-        36
-      ]
+      {
+        "k": "line",
+        "v": 9
+      },
+      {
+        "k": "column",
+        "v": 36
+      }
     ]
   },
   {
@@ -1406,10 +1406,10 @@
     "resolved_arity": 0,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -1427,10 +1427,10 @@
     "resolved_arity": 5,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -1448,14 +1448,14 @@
     "resolved_arity": 1,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1473,10 +1473,10 @@
     "resolved_arity": 3,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -1494,14 +1494,14 @@
     "resolved_arity": 2,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1522,14 +1522,14 @@
     "resolved_arity": 6,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        12
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 12
+      }
     ]
   },
   {
@@ -1546,18 +1546,18 @@
     ],
     "dispatch_kind": "remote_function",
     "resolved_module": "elixir_quote",
-    "resolved_name": "shallow_validate_ast",
+    "resolved_name": "unquote",
     "resolved_arity": 1,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        6
-      ],
-      [
-        "column",
-        11
-      ]
+      {
+        "k": "line",
+        "v": 6
+      },
+      {
+        "k": "column",
+        "v": 11
+      }
     ]
   },
   {
@@ -1575,10 +1575,10 @@
     "resolved_arity": 3,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        10
-      ]
+      {
+        "k": "line",
+        "v": 10
+      }
     ]
   },
   {
@@ -1596,14 +1596,14 @@
     "resolved_arity": 2,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        10
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 10
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1624,14 +1624,14 @@
     "resolved_arity": 6,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        10
-      ],
-      [
-        "column",
-        12
-      ]
+      {
+        "k": "line",
+        "v": 10
+      },
+      {
+        "k": "column",
+        "v": 12
+      }
     ]
   },
   {
@@ -1648,18 +1648,18 @@
     ],
     "dispatch_kind": "remote_function",
     "resolved_module": "elixir_quote",
-    "resolved_name": "shallow_validate_ast",
+    "resolved_name": "unquote",
     "resolved_arity": 1,
     "event_file": "lib/dsl_def.ex",
     "meta": [
-      [
-        "line",
-        12
-      ],
-      [
-        "column",
-        11
-      ]
+      {
+        "k": "line",
+        "v": 12
+      },
+      {
+        "k": "column",
+        "v": 11
+      }
     ]
   },
   {
@@ -1677,10 +1677,10 @@
     "resolved_arity": 0,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -1698,10 +1698,10 @@
     "resolved_arity": 5,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -1719,14 +1719,14 @@
     "resolved_arity": 1,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1744,10 +1744,10 @@
     "resolved_arity": 3,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        6
-      ]
+      {
+        "k": "line",
+        "v": 6
+      }
     ]
   },
   {
@@ -1765,14 +1765,14 @@
     "resolved_arity": 1,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        6
-      ],
-      [
-        "column",
-        10
-      ]
+      {
+        "k": "line",
+        "v": 6
+      },
+      {
+        "k": "column",
+        "v": 10
+      }
     ]
   },
   {
@@ -1790,10 +1790,10 @@
     "resolved_arity": 3,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 7
+      }
     ]
   },
   {
@@ -1811,14 +1811,14 @@
     "resolved_arity": 1,
     "event_file": "lib/dsl_user.ex",
     "meta": [
-      [
-        "line",
-        7
-      ],
-      [
-        "column",
-        10
-      ]
+      {
+        "k": "line",
+        "v": 7
+      },
+      {
+        "k": "column",
+        "v": 10
+      }
     ]
   },
   {
@@ -1836,10 +1836,10 @@
     "resolved_arity": 0,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -1857,10 +1857,10 @@
     "resolved_arity": 5,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -1878,14 +1878,14 @@
     "resolved_arity": 1,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1906,10 +1906,10 @@
     "resolved_arity": 2,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -1927,10 +1927,10 @@
     "resolved_arity": 3,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ]
+      {
+        "k": "line",
+        "v": 4
+      }
     ]
   },
   {
@@ -1948,14 +1948,14 @@
     "resolved_arity": 2,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -1976,14 +1976,14 @@
     "resolved_arity": 6,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -2004,14 +2004,14 @@
     "resolved_arity": 1,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        25
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 25
+      }
     ]
   },
   {
@@ -2032,14 +2032,14 @@
     "resolved_arity": 2,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        39
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 39
+      }
     ]
   },
   {
@@ -2060,14 +2060,14 @@
     "resolved_arity": 2,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        4
-      ],
-      [
-        "column",
-        45
-      ]
+      {
+        "k": "line",
+        "v": 4
+      },
+      {
+        "k": "column",
+        "v": 45
+      }
     ]
   },
   {
@@ -2085,10 +2085,10 @@
     "resolved_arity": 3,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        8
-      ]
+      {
+        "k": "line",
+        "v": 8
+      }
     ]
   },
   {
@@ -2106,14 +2106,14 @@
     "resolved_arity": 2,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -2134,14 +2134,14 @@
     "resolved_arity": 6,
     "event_file": "lib/guards.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -2159,10 +2159,10 @@
     "resolved_arity": 0,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        1
-      ]
+      {
+        "k": "line",
+        "v": 1
+      }
     ]
   },
   {
@@ -2180,10 +2180,10 @@
     "resolved_arity": 5,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        2
-      ]
+      {
+        "k": "line",
+        "v": 2
+      }
     ]
   },
   {
@@ -2201,14 +2201,14 @@
     "resolved_arity": 1,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        2
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 2
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -2226,10 +2226,10 @@
     "resolved_arity": 3,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        8
-      ]
+      {
+        "k": "line",
+        "v": 8
+      }
     ]
   },
   {
@@ -2247,14 +2247,14 @@
     "resolved_arity": 2,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -2275,14 +2275,14 @@
     "resolved_arity": 6,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        8
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 8
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -2300,10 +2300,10 @@
     "resolved_arity": 3,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        10
-      ]
+      {
+        "k": "line",
+        "v": 10
+      }
     ]
   },
   {
@@ -2321,14 +2321,14 @@
     "resolved_arity": 2,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        10
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 10
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -2349,14 +2349,14 @@
     "resolved_arity": 6,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        10
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 10
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   },
   {
@@ -2374,10 +2374,10 @@
     "resolved_arity": 3,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        12
-      ]
+      {
+        "k": "line",
+        "v": 12
+      }
     ]
   },
   {
@@ -2395,14 +2395,14 @@
     "resolved_arity": 2,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        12
-      ],
-      [
-        "column",
-        3
-      ]
+      {
+        "k": "line",
+        "v": 12
+      },
+      {
+        "k": "column",
+        "v": 3
+      }
     ]
   },
   {
@@ -2423,14 +2423,14 @@
     "resolved_arity": 6,
     "event_file": "lib/literals.ex",
     "meta": [
-      [
-        "line",
-        12
-      ],
-      [
-        "column",
-        7
-      ]
+      {
+        "k": "line",
+        "v": 12
+      },
+      {
+        "k": "column",
+        "v": 7
+      }
     ]
   }
 ]

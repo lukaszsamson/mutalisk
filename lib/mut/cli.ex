@@ -20,6 +20,8 @@ defmodule Mut.Cli do
             test_paths: [String.t()] | nil,
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
+            suite_timeout_ms: pos_integer | nil,
+            priv_fingerprint: :stat | :hash,
             exclude: [Regex.t()] | nil,
             incremental: boolean,
             since: String.t() | nil,
@@ -41,11 +43,13 @@ defmodule Mut.Cli do
       :test_paths,
       :keep_work_copy,
       :test_timeout_ms,
+      :suite_timeout_ms,
       :exclude,
       :since,
       :history_path,
       :coverage_timeout_ms,
-      incremental: false
+      incremental: false,
+      priv_fingerprint: :stat
     ]
   end
 
@@ -54,6 +58,7 @@ defmodule Mut.Cli do
   @default_reporters [:terminal, :stryker_json]
   @known_reporters [:terminal, :stryker_json, :html, :github_actions]
   @known_selection_modes [:static, :coverage, :coverage_with_static_fallback]
+  @known_priv_fingerprints [:stat, :hash]
   @known_targets [
     :dispatch,
     :guard,
@@ -133,6 +138,8 @@ defmodule Mut.Cli do
     :fail_at,
     :concurrency,
     :test_timeout_ms,
+    :suite_timeout_ms,
+    :priv_fingerprint,
     :reporters,
     :output_path,
     :exclude,
@@ -142,6 +149,26 @@ defmodule Mut.Cli do
     :history_path,
     :coverage_timeout_ms
   ]
+  @strict_switches [
+    files: [:string, :keep],
+    test_paths: [:string, :keep],
+    mutators: :string,
+    enable: :string,
+    fail_at: :float,
+    reporters: :string,
+    output_path: :string,
+    concurrency: :integer,
+    max_mutants: :integer,
+    selection: :string,
+    debug_plan: :boolean,
+    keep_work_copy: :boolean,
+    test_timeout_ms: :integer,
+    suite_timeout_ms: :integer,
+    priv_fingerprint: :string,
+    incremental: :boolean,
+    since: :string
+  ]
+  @known_switch_names @strict_switches |> Keyword.keys() |> Enum.map(&Atom.to_string/1)
 
   @spec parse([String.t()], keyword) :: {:ok, Options.t()} | {:error, String.t()}
   def parse(argv, config \\ []) when is_list(argv) and is_list(config) do
@@ -191,30 +218,12 @@ defmodule Mut.Cli do
     argv = expand_multi_file_args(argv)
 
     {parsed, rest, invalid} =
-      OptionParser.parse(argv,
-        strict: [
-          files: [:string, :keep],
-          mutators: :string,
-          enable: :string,
-          fail_at: :float,
-          reporters: :string,
-          output_path: :string,
-          concurrency: :integer,
-          max_mutants: :integer,
-          selection: :string,
-          debug_plan: :boolean,
-          keep_work_copy: :boolean,
-          test_timeout_ms: :integer,
-          incremental: :boolean,
-          since: :string
-        ],
-        aliases: []
-      )
+      OptionParser.parse(argv, strict: @strict_switches, aliases: [])
 
     cond do
       invalid != [] ->
-        [{flag, _value} | _] = invalid
-        {:error, "unknown option #{flag}; run `mix help mut`"}
+        [{flag, value} | _] = invalid
+        invalid_option_error(flag, value)
 
       rest != [] ->
         {:error, "unexpected arguments #{Enum.join(rest, " ")}; run `mix help mut`"}
@@ -227,22 +236,61 @@ defmodule Mut.Cli do
     end
   end
 
+  @multi_value_flags ["--files", "--test-paths"]
+
+  # OptionParser's strict mode reports both "this flag doesn't exist" and "this
+  # flag exists but its value is missing" (e.g. `--output-path` at end of argv,
+  # or immediately followed by another flag) the same way: `{flag, nil}` in the
+  # invalid list. Distinguish them by checking whether the flag name is one of
+  # ours (T47) — an unknown flag with a value attached (`--bogus 1`) also comes
+  # back as `{"--bogus", nil}`, so a known-name match is the only reliable signal.
+  defp invalid_option_error(flag, nil) do
+    bare = String.trim_leading(flag, "--")
+
+    # A switch name containing "_" is always invalid per OptionParser (switches
+    # may only use "-"), so it is never a "missing value" case — treat it as
+    # unknown rather than mislabeling it as one of our known switches.
+    if String.contains?(bare, "_") do
+      {:error, "unknown option #{flag}; run `mix help mut`"}
+    else
+      normalized = String.replace(bare, "-", "_")
+
+      if normalized in @known_switch_names do
+        {:error, "missing value for #{flag}; run `mix help mut`"}
+      else
+        {:error, "unknown option #{flag}; run `mix help mut`"}
+      end
+    end
+  end
+
+  # OptionParser reports a KNOWN flag with an unparsable value as
+  # `{flag, value}` too; say so instead of calling the flag unknown.
+  defp invalid_option_error(flag, value) do
+    normalized = flag |> String.trim_leading("--") |> String.replace("-", "_")
+
+    if normalized in @known_switch_names do
+      {:error, "invalid value #{inspect(value)} for #{flag}; run `mix help mut`"}
+    else
+      {:error, "unknown option #{flag}; run `mix help mut`"}
+    end
+  end
+
   defp expand_multi_file_args(argv), do: expand_multi_file_args(argv, [])
 
   defp expand_multi_file_args([], acc), do: Enum.reverse(acc)
 
-  defp expand_multi_file_args(["--files" | rest], acc) do
+  defp expand_multi_file_args([flag | rest], acc) when flag in @multi_value_flags do
     {files, rest} = Enum.split_while(rest, &not_option?/1)
 
     case files do
       [] ->
-        expand_multi_file_args(rest, ["--files" | acc])
+        expand_multi_file_args(rest, [flag | acc])
 
       [_one | _] ->
         expanded =
           files
           |> Enum.reverse()
-          |> Enum.flat_map(&[&1, "--files"])
+          |> Enum.flat_map(&[&1, flag])
 
         expand_multi_file_args(rest, expanded ++ acc)
     end
@@ -263,8 +311,10 @@ defmodule Mut.Cli do
          {:ok, concurrency} <- concurrency(parsed, config),
          {:ok, max_mutants} <- max_mutants(parsed, config),
          {:ok, selection} <- selection(parsed, config),
-         {:ok, test_paths} <- test_paths(config),
+         {:ok, test_paths} <- test_paths(parsed, config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
+         {:ok, suite_timeout_ms} <- suite_timeout_ms(parsed, config),
+         {:ok, priv_fingerprint} <- priv_fingerprint(parsed, config),
          {:ok, coverage_timeout_ms} <- coverage_timeout_ms(config),
          {:ok, exclude} <- exclude(config),
          {:ok, incremental} <- incremental(parsed, config),
@@ -285,6 +335,8 @@ defmodule Mut.Cli do
          test_paths: test_paths,
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          test_timeout_ms: test_timeout_ms,
+         suite_timeout_ms: suite_timeout_ms,
+         priv_fingerprint: priv_fingerprint,
          exclude: exclude,
          incremental: incremental,
          since: since,
@@ -397,6 +449,63 @@ defmodule Mut.Cli do
     end
   end
 
+  # Whole-suite (host) budget for ONE mutant's selected tests. Unset (nil) means
+  # "derive it from the measured baseline" — see `Mut.Deadline`. The upper bound
+  # is an hour: a single mutant that needs longer makes mutation testing
+  # impractical long before the timeout matters.
+  @suite_timeout_min_ms 1_000
+  @suite_timeout_max_ms 3_600_000
+
+  defp suite_timeout_ms(parsed, config) do
+    value =
+      Keyword.get(
+        parsed,
+        :suite_timeout_ms,
+        Keyword.get(config, :suite_timeout_ms)
+      )
+
+    case value do
+      nil ->
+        {:ok, nil}
+
+      n when is_integer(n) and n >= @suite_timeout_min_ms and n <= @suite_timeout_max_ms ->
+        {:ok, n}
+
+      _other ->
+        {:error,
+         "--suite-timeout-ms must be an integer between #{@suite_timeout_min_ms} and #{@suite_timeout_max_ms}; run `mix help mut`"}
+    end
+  end
+
+  # How the copied `priv/` baseline is fingerprinted for the between-mutant
+  # reset. `:stat` (default) compares size + mtime and is cheap; `:hash` reads
+  # every `priv/` file on every reset but catches a same-size rewrite landing
+  # in the same mtime second. See `Mut.Sandbox.reset/1`.
+  defp priv_fingerprint(parsed, config) do
+    value =
+      Keyword.get(
+        parsed,
+        :priv_fingerprint,
+        Keyword.get(config, :priv_fingerprint, :stat)
+      )
+
+    # Validate the string form FIRST, then map to a known atom, so a bad value
+    # is never interned (same rule as `selection/2`).
+    if is_binary(value) or is_atom(value) do
+      name = normalize_name(value)
+
+      if name in Enum.map(@known_priv_fingerprints, &Atom.to_string/1) do
+        {:ok, String.to_existing_atom(name)}
+      else
+        {:error,
+         "unknown --priv-fingerprint mode :#{name}; known: #{known(@known_priv_fingerprints)}"}
+      end
+    else
+      {:error,
+       "priv_fingerprint must be one of #{known(@known_priv_fingerprints)}; got #{inspect(value, charlists: :as_lists)}"}
+    end
+  end
+
   defp files(parsed, config) do
     # Default `nil` (not `["lib"]`) so file discovery falls to the orchestrator's
     # umbrella-aware `discover_files`: single-app globs `lib/`, umbrella globs
@@ -411,7 +520,7 @@ defmodule Mut.Cli do
       # no-op — #53). Config values may be a typo (`files: 123`/`[123]` — #18/#24)
       # or empty (`files: []` — #55). `path_list/2` rejects all of these.
       [] -> path_list("config :files", Keyword.get(config, :files))
-      values -> path_list("--files", split_cli_paths(values))
+      values -> cli_path_list("--files", values)
     end
   end
 
@@ -422,6 +531,29 @@ defmodule Mut.Cli do
       |> String.split(",")
       |> Enum.map(&String.trim/1)
     end)
+  end
+
+  # `--files`/`--test-paths` accept comma-separated patterns. An extra/trailing
+  # comma (`"a.ex,,b.ex"`) previously fell through to `path_list/2`'s generic
+  # "contains a blank path" message, which doesn't hint at the actual typo.
+  # Reuse `string_name_list/2`'s wording — names the option and says to remove
+  # the extra comma — for that specific case (T51); a genuinely blank
+  # single-segment value (`--files ""`) still falls through to the generic
+  # blank-path message below.
+  defp cli_path_list(label, raw_values) do
+    case Enum.find(raw_values, &comma_blank_segment?/1) do
+      nil ->
+        path_list(label, split_cli_paths(raw_values))
+
+      value ->
+        {:error, "#{label} has an empty segment in #{inspect(value)}; remove the extra comma"}
+    end
+  end
+
+  defp comma_blank_segment?(value) do
+    segments = String.split(value, ",")
+    non_empty = Enum.reject(segments, &(String.trim(&1) == ""))
+    length(segments) > 1 and length(non_empty) != length(segments)
   end
 
   defp mutators(parsed, config) do
@@ -585,8 +717,15 @@ defmodule Mut.Cli do
   # config/CLI value is honoured verbatim. A hardcoded `["test"]` default found
   # zero test files in umbrellas, so every mutant fell to the "all tests" bucket
   # with a recorded selected-test count of 0 (Exploratory issue #3).
-  defp test_paths(config),
-    do: path_list("config :test_paths", Keyword.get(config, :test_paths))
+  # `--test-paths` mirrors `--files`: repeatable or comma-separated, CLI wins
+  # over config (T10 rule), and both spellings reject absolute paths so a
+  # project-relative test tree isn't silently confused with a host path.
+  defp test_paths(parsed, config) do
+    case Keyword.get_values(parsed, :test_paths) do
+      [] -> path_list("config :test_paths", Keyword.get(config, :test_paths))
+      values -> cli_path_list("--test-paths", values)
+    end
+  end
 
   # Only called for a non-nil `explicit` value (the `not is_nil(explicit)`
   # branch in `mutators/2`). Reuses `string_name_list/2` so mutators get the same
@@ -617,7 +756,8 @@ defmodule Mut.Cli do
       Enum.any?(value, &(String.trim(&1) == "")) ->
         {:error, "#{label} contains a blank path; run `mix help mut`"}
 
-      label == "config :test_paths" and Enum.any?(value, &(Path.type(&1) == :absolute)) ->
+      label in ["config :test_paths", "--test-paths"] and
+          Enum.any?(value, &(Path.type(&1) == :absolute)) ->
         {:error, "#{label} must contain project-relative paths; got absolute path"}
 
       true ->
@@ -656,13 +796,18 @@ defmodule Mut.Cli do
   end
 
   # Flags that may legitimately appear more than once (collected into a list).
-  @repeatable_flags ["files"]
+  @repeatable_flags ["files", "test_paths"]
 
   defp duplicate_cli_option?(argv) do
     argv
     |> Enum.filter(&String.starts_with?(&1, "--"))
     |> Enum.map(&(&1 |> String.trim_leading("--") |> String.split("=", parts: 2) |> List.first()))
     |> Enum.map(&String.trim_leading(&1, "no-"))
+    # Normalise `-`/`_` so the dash-spelled `--test-paths` matches the
+    # underscore-spelled `@repeatable_flags` entry (T46). (An underscore-spelled
+    # flag like `--fail_at` is rejected by OptionParser as invalid before this
+    # check runs, so it cannot itself create a duplicate.)
+    |> Enum.map(&String.replace(&1, "-", "_"))
     |> Enum.reject(&(&1 in @repeatable_flags))
     |> Enum.frequencies()
     |> Enum.any?(fn {_key, count} -> count > 1 end)

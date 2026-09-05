@@ -32,6 +32,7 @@ defmodule Mut.Umbrella do
         work_copy
         |> Path.join(apps_path_glob(apps_dir))
         |> Path.wildcard()
+        |> Enum.filter(&mix_project_dir?/1)
         |> Enum.uniq()
         |> Enum.sort()
 
@@ -83,6 +84,72 @@ defmodule Mut.Umbrella do
     end
   end
 
+  @doc """
+  Maps each umbrella child's DIRECTORY basename to its OTP `:app` name.
+
+  The two differ whenever a child app is checked out under a directory named
+  differently from its application (`apps/web-ui/mix.exs` with `app: :web_ui`,
+  `apps/backoffice` with `app: :bo`). Source paths are always
+  `<apps_path>/<dir>/lib/...` while Mix writes build artefacts to
+  `_build/<env>/lib/<otp_app>/`, so every call site that crosses between the
+  two MUST translate through this map rather than reusing a path segment.
+
+  `%{}` for single-app projects and for children whose `:app` cannot be read.
+  """
+  @spec app_map(Path.t()) :: %{String.t() => String.t()}
+  def app_map(work_copy) do
+    work_copy
+    |> app_dirs()
+    |> Enum.flat_map(fn dir ->
+      # A child whose `:app` cannot be read syntactically degrades to its
+      # directory name (the pre-B4 behaviour) rather than vanishing from the
+      # map, so umbrella runs never lose an app over an exotic mix.exs.
+      basename = Path.basename(dir)
+      [{basename, app_name(dir) || basename}]
+    end)
+    |> Map.new()
+  end
+
+  @typedoc """
+  Pre-resolved umbrella context: the apps-directory name plus the
+  directory->OTP-app map. Build it once with `app_context/1` when resolving
+  many files, or pass a work copy path and let `otp_app_for_file/2` do it.
+  """
+  @type app_context :: {String.t(), %{String.t() => String.t()}}
+
+  @doc "The `{apps_path_name, app_map}` pair for a work copy."
+  @spec app_context(Path.t()) :: app_context()
+  def app_context(work_copy), do: {apps_path_name(work_copy), app_map(work_copy)}
+
+  @doc """
+  The OTP app name owning `file`, or `nil` when the file is not under an
+  umbrella child directory.
+
+  `file` may be work-copy-relative or absolute. With a work copy path as the
+  first argument an absolute `file` is made work-copy-relative first (so a
+  work copy that itself lives under a directory named like the apps path is
+  handled); with a pre-built `app_context/1` pair the first `<apps_path>/<dir>`
+  segment pair in the path is used. A child directory missing from the map
+  resolves to its directory name (the pre-B4 behaviour); a single-app project
+  (empty map) always yields `nil`.
+  """
+  @spec otp_app_for_file(Path.t() | app_context(), Path.t()) :: String.t() | nil
+  def otp_app_for_file(work_copy, file) when is_binary(work_copy),
+    do: otp_app_for_file(app_context(work_copy), relative_to_root(file, work_copy))
+
+  def otp_app_for_file({_apps_path, map}, _file) when map == %{}, do: nil
+
+  def otp_app_for_file({apps_path, map}, file) when is_binary(apps_path) and is_map(map) do
+    case file |> Path.split() |> Enum.drop_while(&(&1 != apps_path)) do
+      [^apps_path, dir | _rest] -> Map.get(map, dir, dir)
+      _other -> nil
+    end
+  end
+
+  defp relative_to_root(file, root) do
+    if Path.type(file) == :absolute, do: Path.relative_to(file, root), else: file
+  end
+
   @doc "The `:app` atom of a single app dir, as a string, or `nil`."
   @spec app_name(Path.t()) :: String.t() | nil
   def app_name(app_dir) do
@@ -95,39 +162,95 @@ defmodule Mut.Umbrella do
   @doc """
   The OTP app name (as a string) from a mix.exs AST, or `nil`.
 
-  Reads the `:app` entry of the project keyword list. The value may be an
-  atom literal (`app: :my_app`) or a module-attribute read (`app: @app`,
-  with `@app :my_app` defined earlier in the file) — the common idiom that
-  the previous 3-tuple clause mis-matched as the attribute-read node
-  `{:app, _, nil}` and returned the string `"nil"` (R1).
+  Reads the `:app` entry of the keyword list returned by the project's
+  `project/0`. The value may be an atom literal (`app: :my_app`) or a
+  module-attribute read (`app: @app`, with `@app :my_app` defined earlier in
+  the file) — the common idiom that the previous 3-tuple clause mis-matched as
+  the attribute-read node `{:app, _, nil}` and returned the string `"nil"`
+  (R1).
+
+  T21: the lookup is STRUCTURAL — it locates the `def project` clause and
+  reads the `:app` key of the keyword list it returns. A blind AST walk
+  accepted the first `{:app, atom}` pair anywhere in the file, so an `app:
+  false` inside a dep (or any unrelated keyword with an `:app` key) declared
+  before `project/0` won the race and named the app `"false"`.
   """
   @spec app_from_ast(Macro.t()) :: String.t() | nil
   def app_from_ast(ast) do
     attrs = collect_attr_literals(ast)
 
+    case project_keyword_lists(ast) do
+      [] ->
+        app_from_any_keyword(ast, attrs)
+
+      lists ->
+        Enum.find_value(lists, &app_from_keyword(&1, attrs)) || app_from_any_keyword(ast, attrs)
+    end
+  end
+
+  # Fallback for `project/0` bodies the structural lookup cannot read
+  # (`Keyword.merge(shared(), app: :x)`, `use Shared.MixProject, app: :x`,
+  # `def project, do: @project`, pipelines, conditionals ...): the first
+  # `app:` pair anywhere in the file whose value is a real atom. `app: false`
+  # (a dep option) and non-atom values are rejected, which is what the old
+  # blind walk got wrong (T21).
+  defp app_from_any_keyword(ast, attrs) do
     {_ast, app} =
       Macro.prewalk(ast, nil, fn
-        # keyword entry `app: :my_app`
-        {:app, value} = node, nil when is_atom(value) and not is_nil(value) ->
-          {node, Atom.to_string(value)}
-
-        # keyword entry `app: @app` (module-attribute read)
-        {:app, {:@, _, [{attr, _, ctx}]}} = node, nil
-        when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) ->
-          case Map.fetch(attrs, attr) do
-            {:ok, value} when is_atom(value) and not is_nil(value) ->
-              {node, Atom.to_string(value)}
-
-            _ ->
-              {node, nil}
-          end
-
-        node, app ->
-          {node, app}
+        {:app, _value} = pair, nil -> {pair, app_from_keyword([pair], attrs)}
+        node, acc -> {node, acc}
       end)
 
     app
   end
+
+  # `app: :my_app` / `app: @app`, read only from the project keyword list.
+  defp app_from_keyword(list, attrs) do
+    Enum.find_value(list, fn
+      {:app, value} when is_atom(value) and value not in [nil, false, true] ->
+        Atom.to_string(value)
+
+      {:app, {:@, _, [{attr, _, ctx}]}} when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) ->
+        case Map.fetch(attrs, attr) do
+          {:ok, value} when is_atom(value) and not is_nil(value) -> Atom.to_string(value)
+          _ -> nil
+        end
+
+      _entry ->
+        nil
+    end)
+  end
+
+  # Candidate keyword lists returned by `def project` (arity 0). `nil` args is
+  # the `def project` (no parens) form; `[]` is `def project()`.
+  defp project_keyword_lists(ast) do
+    {_ast, clauses} =
+      Macro.prewalk(ast, [], fn
+        {:def, _, [{:project, _, args}, body]} = node, acc when args in [nil, []] ->
+          {node, acc ++ return_keyword_lists(body_expr(body))}
+
+        node, acc ->
+          {node, acc}
+      end)
+
+    clauses
+  end
+
+  defp body_expr([{{:__block__, _, [:do]}, expr} | _rest]), do: expr
+  defp body_expr([{:do, expr} | _rest]), do: expr
+  defp body_expr(_body), do: nil
+
+  # The keyword list(s) a `project/0` body can evaluate to: a literal list, the
+  # last expression of a block, or either side of a `++` concatenation
+  # (`[app: :x] ++ shared()`). Anything else (a bare helper call) yields none.
+  defp return_keyword_lists({:__block__, _, exprs}) when exprs != [],
+    do: exprs |> List.last() |> return_keyword_lists()
+
+  defp return_keyword_lists({:++, _, [left, right]}),
+    do: return_keyword_lists(left) ++ return_keyword_lists(right)
+
+  defp return_keyword_lists(list) when is_list(list), do: [list]
+  defp return_keyword_lists(_expr), do: []
 
   # Module-attribute definitions with an atom/string literal value:
   # `@app :my_app`, `@apps_path "packages"`.
@@ -151,6 +274,18 @@ defmodule Mut.Umbrella do
   end
 
   defp apps_path_glob(apps_dir), do: Path.join([apps_dir, "*"])
+
+  # T20: `<apps_path>/*` also matches stray files (a README, a build artifact,
+  # an editor scratch file) and directories that are not Mix projects. Those
+  # used to reach the overlay installer, which aborted the whole run with
+  # `:not_a_mix_project`; they also polluted app names, test dirs and source
+  # globs. A child app is a DIRECTORY carrying a `mix.exs` — or the overlay's
+  # renamed `mix_user.exs`, so the predicate keeps holding after installation.
+  defp mix_project_dir?(dir) do
+    File.dir?(dir) and
+      (File.regular?(Path.join(dir, "mix.exs")) or
+         File.regular?(Path.join(dir, "mix_user.exs")))
+  end
 
   defp root_project_ast(work_copy), do: project_ast(user_mix_path(work_copy))
 

@@ -165,17 +165,25 @@ defmodule Mut.Coverage.Runner do
     end
   end
 
-  defp discover_test_files(root, test_paths) do
+  # Exposed for testing (T33: relative test paths must resolve against the
+  # work-copy root before falling back to the bare/host-cwd-relative path).
+  @spec discover_test_files(Path.t(), [String.t()]) :: [String.t()]
+  def discover_test_files(root, test_paths) do
     test_paths
     |> Enum.flat_map(fn test_path ->
       path = if Path.type(test_path) == :absolute, do: test_path, else: Path.join(root, test_path)
 
       cond do
-        File.regular?(test_path) and String.ends_with?(test_path, "_test.exs") ->
-          [test_path]
-
+        # Resolve relative paths against the work-copy root FIRST. Falling
+        # back to the bare (host-cwd-relative) path only when the
+        # root-joined path does not exist avoids silently picking up a
+        # same-named file from the host project's cwd, which would produce
+        # `../..`-style ids and could resolve the wrong test-helper.
         File.regular?(path) and String.ends_with?(path, "_test.exs") ->
           [path]
+
+        File.regular?(test_path) and String.ends_with?(test_path, "_test.exs") ->
+          [test_path]
 
         true ->
           path

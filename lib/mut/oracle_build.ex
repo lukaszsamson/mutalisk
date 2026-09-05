@@ -8,7 +8,8 @@ defmodule Mut.OracleBuild do
 
     case Mut.WorkCopy.materialize(user_project_root, run_id,
            force: Keyword.get(opts, :force, false),
-           root: Keyword.get(opts, :root)
+           root: Keyword.get(opts, :root),
+           keep_failed: keep?
          ) do
       {:ok, work_copy} ->
         result = build_oracle(work_copy)

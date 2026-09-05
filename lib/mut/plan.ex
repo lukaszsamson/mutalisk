@@ -18,6 +18,7 @@ defmodule Mut.Plan do
           | :guard_engine_disabled
           | :attribute_engine_disabled
           | :body_literal_engine_disabled
+          | :identity_mutation
 
   @type skipped_entry :: %{
           file: Path.t(),

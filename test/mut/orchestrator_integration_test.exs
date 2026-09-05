@@ -16,10 +16,16 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert plan.invalid == []
 
     # M52: scalar literals route through the schema engine, gated by the
-    # active mutator set — no more body_literal_engine_disabled skips.
+    # active mutator set.
+    # T44: with neither :body_literal nor :env_walker enabled (the default
+    # targets here are [:dispatch, :guard]), the schema-literal candidates
+    # discovered in the fixture are now recorded as
+    # body_literal_engine_disabled skips instead of silently dropped — the
+    # executable mutant counts above are unchanged.
     assert Enum.frequencies_by(plan.skipped, & &1.reason) == %{
              attribute_engine_disabled: 1,
-             unsupported_dispatch: 3
+             unsupported_dispatch: 3,
+             body_literal_engine_disabled: 5
            }
 
     opt_in_plan =
@@ -31,8 +37,11 @@ defmodule Mut.OrchestratorIntegrationTest do
     assert length(opt_in_plan.fallback) == 6
     assert opt_in_plan.invalid == []
 
+    # T44: :module_attribute is enabled here but :body_literal/:env_walker
+    # still are not, so the same 5 schema-literal candidates are skipped.
     assert Enum.frequencies_by(opt_in_plan.skipped, & &1.reason) == %{
-             unsupported_dispatch: 3
+             unsupported_dispatch: 3,
+             body_literal_engine_disabled: 5
            }
 
     stable_ids =

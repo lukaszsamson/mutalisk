@@ -100,7 +100,10 @@ mutant in that module:
 
 Settings layer, lowest to highest precedence:
 
-    .mutalisk.exs project file  <  config :mutalisk  <  CLI flags
+    .mutalisk.exs project file  <  legacy config :mut  <  config :mutalisk  <  CLI flags
+
+(`config :mut` is a deprecated namespace kept for compatibility; prefer
+`config :mutalisk`.)
 
 `.mutalisk.exs` (project root, optional) is a plain keyword list:
 
@@ -142,6 +145,32 @@ Mutation-introduced bugs are usually infinite loops or unbounded recursion —
 mutant dominates wall-clock. If a test legitimately needs longer under no
 mutation, tag it (`@tag timeout: 60_000`); ExUnit per-test tags override the
 global default.
+
+### Whole-suite (host) deadline
+
+The per-test timeout bounds one test; the host also bounds the **whole selected
+suite** for a mutant and kills the test port when that budget elapses. Because
+several individually valid slow tests can exceed a budget sized for one test —
+and the resulting host timeout would be scored as a detection, inflating the
+score — the host deadline is derived from the measured baseline run:
+
+    max(test_timeout_ms, baseline_wall_ms * 2) + 10 000 ms
+
+Set `--suite-timeout-ms N` (or `config :mutalisk, suite_timeout_ms: N`, range
+1 000..3 600 000) to pin it explicitly; the same 10 000 ms drain buffer is added
+so ExUnit can report its own timeout first. Each run prints the deadline it
+derived and why.
+
+### Sandbox `priv/` reset
+
+Every mutant runs in a sandbox whose `priv/` tree is restored between mutants,
+so a database, generated asset, directory or symlink a test writes there never
+leaks into the next mutant. Baseline `priv/` files are compared by size + mtime
+(`priv_fingerprint: :stat`, the default) — cheap, but blind to a rewrite that
+keeps the byte size **and** lands in the same mtime second. Set
+`--priv-fingerprint hash` (or `config :mutalisk, priv_fingerprint: :hash`) for a
+content-exact comparison; it costs one content read per `priv/` file per reset,
+per worker.
 
 ## Limitations
 

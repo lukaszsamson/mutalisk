@@ -203,6 +203,69 @@ defmodule Mix.Tasks.MutE2ETest do
     assert {:ok, _decoded} = Mut.JSON.decode(File.read!(history_path))
   end
 
+  @tag timeout: 240_000
+  test "incremental progress counter reaches its own total when some verdicts are reused (T45)" do
+    root = tmp_project!("incremental_progress")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    write_incremental_progress_probe!(root)
+
+    run = fn ->
+      System.cmd(
+        "mix",
+        ~w(mut --incremental),
+        cd: root,
+        env: [{"MIX_ENV", "test"}, {"MUTALISK_PATH", @checkout}],
+        stderr_to_stdout: true
+      )
+    end
+
+    # First run: cold history, every mutant executes (nothing to reuse yet).
+    {output1, exit_status1} = run.()
+    assert exit_status1 == 0, output1
+    {_detected1, denominator} = parse_score(output1)
+    assert denominator > 1, output1
+
+    # Invalidate exactly ONE stored verdict's `source_digest` (rather than
+    # editing a project source file, which would bust the coarse
+    # `project_digest` fingerprint and invalidate every verdict, defeating the
+    # partial-reuse scenario below). This forces exactly one mutant to
+    # re-execute on the second run while every other verdict is reused as-is.
+    history_path = Path.join(root, "_build/mut_history/history.json")
+    {:ok, history} = history_path |> File.read!() |> Mut.JSON.decode()
+    [{stable_id, entry} | rest] = Map.to_list(history["verdicts"])
+    corrupted_entry = Map.put(entry, "source_digest", "corrupted-for-t45-test")
+    history = %{history | "verdicts" => Map.new([{stable_id, corrupted_entry} | rest])}
+    File.write!(history_path, Mut.JSON.encode!(history))
+
+    {output2, exit_status2} = run.()
+    assert exit_status2 == 0, output2
+    {_detected2, denominator2} = parse_score(output2)
+    # The denominator (planned + reused) is the same plan re-run: only its
+    # composition (executed vs. reused) changes.
+    assert denominator2 == denominator, output2
+
+    progress_lines = Regex.scan(~r/\[(\d+)\/(\d+)\]/, output2)
+
+    assert progress_lines != [],
+           "expected at least one streamed progress line\n\n#{output2}"
+
+    # Some (but not all) mutants must have been reused for this to be a real
+    # regression test of the bug: partial reuse is what desynchronized the
+    # counter from the displayed total.
+    assert length(progress_lines) < denominator2,
+           "expected at least one mutant to be reused from history, not all re-executed\n\n#{output2}"
+
+    # Before T45, the streamed index counted only executed mutants (starting
+    # at 0), so the LAST progress line under-shot the displayed total
+    # (`planned + reused`) by exactly the reused count. After T45, the
+    # counter starts at the reused count, so the final line reaches the total.
+    [last_index, last_total] = List.last(progress_lines) |> tl()
+
+    assert last_index == last_total,
+           "expected the final progress line to reach its own total\n\n#{output2}"
+  end
+
   @tag timeout: 180_000
   test "debug plan warns that custom output_path is ignored" do
     root = tmp_project!("debug_plan_output_path")
@@ -467,6 +530,65 @@ defmodule Mix.Tasks.MutE2ETest do
         assert Core.flag?(true, false)
       end
     end
+    """)
+  end
+
+  defp write_incremental_progress_probe!(root) do
+    File.mkdir_p!(Path.join(root, "lib"))
+    File.mkdir_p!(Path.join(root, "test"))
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule IncrementalProgressProbe.MixProject do
+      use Mix.Project
+
+      def project do
+        [
+          app: :incremental_progress_probe,
+          version: "0.1.0",
+          elixir: "~> 1.19",
+          deps: deps()
+        ]
+      end
+
+      defp deps do
+        [
+          {:mutalisk, path: #{inspect(@checkout)}, only: :test, runtime: false}
+        ]
+      end
+    end
+    """)
+
+    File.write!(Path.join(root, "lib/incremental_progress_probe.ex"), """
+    defmodule IncrementalProgressProbe do
+      def add(a, b), do: a + b
+      def sub(a, b), do: a - b
+    end
+    """)
+
+    File.write!(Path.join(root, "test/test_helper.exs"), "ExUnit.start()\n")
+
+    File.write!(Path.join(root, "test/incremental_progress_probe_test.exs"), """
+    defmodule IncrementalProgressProbeTest do
+      use ExUnit.Case
+
+      test "add" do
+        assert IncrementalProgressProbe.add(2, 3) == 5
+      end
+
+      test "sub" do
+        assert IncrementalProgressProbe.sub(5, 3) == 2
+      end
+    end
+    """)
+
+    File.write!(Path.join(root, ".mutalisk.exs"), """
+    [
+      selection: :static,
+      files: "lib/incremental_progress_probe.ex",
+      fail_at: 0.0,
+      reporters: [:terminal],
+      concurrency: 1
+    ]
     """)
   end
 

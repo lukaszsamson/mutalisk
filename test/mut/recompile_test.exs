@@ -27,6 +27,72 @@ defmodule Mut.RecompileTest do
     assert :binary.match(eval, "Mix.start()") < :binary.match(eval, "ParallelCompiler.compile")
   end
 
+  # B4: the ebin target must be `_build/<env>/lib/<OTP app>/ebin`, not
+  # `.../lib/<child directory>/ebin` — mutated beams written to the latter are
+  # off the code path (the unmutated baseline then "survives") and the sandbox
+  # reset never sweeps them.
+  test "eval routes umbrella beams to the OTP app's ebin, not the child directory" do
+    root = Path.join(System.tmp_dir!(), "mut_b4_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join([root, "apps", "web-ui"]))
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule Up.MixProject do
+      use Mix.Project
+      def project, do: [apps_path: "apps", version: "0.1.0"]
+    end
+    """)
+
+    File.write!(Path.join([root, "apps", "web-ui", "mix.exs"]), """
+    defmodule WebUi.MixProject do
+      use Mix.Project
+      def project, do: [app: :web_ui, version: "0.1.0"]
+    end
+    """)
+
+    ["--eval", eval] =
+      root
+      |> Recompile.elixir_args(["apps/web-ui/lib/web_ui.ex"], "web_ui")
+      |> Enum.take(-2)
+
+    assert eval =~ ~s(app_map = %{"web-ui" => "web_ui"})
+
+    # Evaluate the generated `ebin_of` the way the child BEAM would.
+    ebin_of = extract_ebin_of(eval)
+
+    assert ebin_of.("apps/web-ui/lib/web_ui.ex") == "_build/mut_schema/lib/web_ui/ebin"
+
+    assert ebin_of.(Path.join(root, "apps/web-ui/lib/web_ui.ex")) ==
+             "_build/mut_schema/lib/web_ui/ebin"
+
+    # Unknown child / non-umbrella path falls back to the default app.
+    assert ebin_of.("lib/other.ex") == "_build/mut_schema/lib/web_ui/ebin"
+  end
+
+  test "eval keeps the single-app ebin target on the default app" do
+    ["--eval", eval] =
+      Recompile.elixir_args("/tmp/sandbox", ["lib/foo.ex"], "demo_app") |> Enum.take(-2)
+
+    ebin_of = extract_ebin_of(eval)
+
+    assert ebin_of.("lib/foo.ex") == "_build/mut_schema/lib/demo_app/ebin"
+    assert ebin_of.("apps/anything/lib/foo.ex") == "_build/mut_schema/lib/demo_app/ebin"
+  end
+
+  # Runs just the `app_map = ...` and `ebin_of = ...` prelude of the generated
+  # eval (everything up to the compile call) and returns the closure.
+  defp extract_ebin_of(eval) do
+    [prelude, _rest] = String.split(eval, "case Kernel.ParallelCompiler", parts: 2)
+
+    {ebin_of, _binding} =
+      prelude
+      |> String.replace("Mix.start()", "")
+      |> Kernel.<>("\nebin_of")
+      |> Code.eval_string()
+
+    ebin_of
+  end
+
   @tag :integration
   test "M58: compile-time Mix.Project access recompiles WITH the eval's Mix bootstrap" do
     # Mirrors the credo `use Credo.Check` -> `Mix.ProjectStack` crash class:

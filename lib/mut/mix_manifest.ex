@@ -2,12 +2,12 @@ defmodule Mut.MixManifest do
   @moduledoc "Reads pinned Mix Elixir compiler manifests for fallback recompilation."
 
   # Elixir 1.20.0 bumped the manifest version 34 -> 35, and 1.21.0-dev bumped
-  # 35 -> 36, each with a byte-identical tuple shape (verified against real v35
-  # and v36 manifests: same 11-tuple outer, `{:module, kind, [source], ...}`
-  # 6-tuple module records, `{:source, size, mtime, digest, compile_refs,
-  # export_refs, runtime_refs, ...}` 12-tuple source records, refs still module
-  # lists). 34 = 1.20-rc.4, 29 = 1.19.
-  @supported_manifest_versions [29, 34, 35, 36]
+  # 35 -> 36 and later 36 -> 37, each with a byte-identical tuple shape
+  # (verified against real v35, v36 and v37 manifests: same 11-tuple outer,
+  # `{:module, kind, [source], ...}` 6-tuple module records, `{:source, size,
+  # mtime, digest, compile_refs, export_refs, runtime_refs, ...}` 12-tuple
+  # source records, refs still module lists). 34 = 1.20-rc.4, 29 = 1.19.
+  @supported_manifest_versions [29, 34, 35, 36, 37]
 
   defstruct version: nil, modules: %{}, sources: %{}
 
@@ -53,24 +53,29 @@ defmodule Mut.MixManifest do
 
   @doc """
   Reads and merges every umbrella app's manifest into one cross-app graph
-  (M68). Each app's source paths are prefixed with `apps/<app>/` so they are
-  globally unique and root-relative (matching mutant file paths); module
+  (M68). Each app's source paths are prefixed with `<apps_path>/<dir>/` so they
+  are globally unique and root-relative (matching mutant file paths); module
   references inside the dep lists are global identifiers and stay unprefixed,
   so `dependents/3` on the merged manifest spans app boundaries — a module
   mutated in app A yields dependent source files in app B.
+
+  Each entry is `{dir, manifest_path}` where `dir` is the child's DIRECTORY
+  basename (the source-path segment) — NOT its OTP app name, which only names
+  the `_build/<env>/lib/<app>` location the manifest itself was read from. The
+  two differ whenever `apps/<dir>/mix.exs` declares a different `:app` (B4).
   """
   @spec read_combined([{String.t(), Path.t()}], String.t()) :: {:ok, t} | {:error, term}
   def read_combined(entries, apps_path \\ "apps") when is_list(entries) do
-    Enum.reduce_while(entries, {:ok, %__MODULE__{}}, fn {app, path}, {:ok, acc} ->
+    Enum.reduce_while(entries, {:ok, %__MODULE__{}}, fn {dir, path}, {:ok, acc} ->
       case read(path) do
-        {:ok, manifest} -> {:cont, {:ok, merge(acc, prefix_sources(manifest, app, apps_path))}}
+        {:ok, manifest} -> {:cont, {:ok, merge(acc, prefix_sources(manifest, dir, apps_path))}}
         {:error, _reason} = error -> {:halt, error}
       end
     end)
   end
 
-  defp prefix_sources(%__MODULE__{} = m, app, apps_path) do
-    prefix = fn source -> Path.join([apps_path, app, source]) end
+  defp prefix_sources(%__MODULE__{} = m, dir, apps_path) do
+    prefix = fn source -> Path.join([apps_path, dir, source]) end
 
     %__MODULE__{
       version: m.version,

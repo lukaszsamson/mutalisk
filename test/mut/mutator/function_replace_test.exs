@@ -68,9 +68,37 @@ defmodule Mut.Mutator.FunctionReplaceTest do
       refute FunctionReplace.equivalent?(m)
     end
 
-    test "swaps imported filter/2 -> reject (bare form)" do
+    test "swaps imported filter/2 -> reject as a fully-qualified remote call" do
+      # A bare call resolved via `import Enum, only: [filter: 2]` must not be
+      # renamed to a bare `reject/2` — that name may not be imported, so the
+      # mutant would fail to compile for a reason unrelated to the mutation.
+      # Emit `Enum.reject(...)` instead, which compiles regardless of import.
       node = bare(:filter, [[1, 2], fn x -> x > 1 end])
       [m] = FunctionReplace.mutate(node, ctx(Enum, :filter, 2))
+      assert {{:., _, [{:__aliases__, _, [:Enum]}, :reject]}, _, [_, _]} = m.mutated_ast
+      assert Macro.to_string(m.mutated_ast) =~ "Enum.reject("
+      assert m.metadata.replacement == :reject
+      assert m.metadata.module == Enum
+      assert m.metadata.function == :filter
+      # The original AST is left untouched (still the bare call) so the
+      # fallback span text search can still locate it in the source.
+      assert node == m.original_ast
+    end
+
+    test "bare local call (not an import) still renames in place" do
+      node = bare(:filter, [[1, 2], fn x -> x > 1 end])
+
+      local_ctx =
+        context_for(:filter,
+          oracle_site:
+            site(:filter,
+              resolved_module: Enum,
+              resolved_arity: 2,
+              dispatch_kind: :local_function
+            )
+        )
+
+      [m] = FunctionReplace.mutate(node, local_ctx)
       assert {:reject, _, [_, _]} = m.mutated_ast
     end
 

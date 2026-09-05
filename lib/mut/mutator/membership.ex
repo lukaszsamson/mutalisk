@@ -1,8 +1,14 @@
 defmodule Mut.Mutator.Membership do
   @moduledoc """
   M69 operator-expansion mutator. Negates membership tests: `x in y` becomes
-  `x not in y` (and vice-versa — `not in` desugars to `not(x in y)`, so negating
-  the inner `in` toggles it back).
+  `x not in y`.
+
+  `x not in y` parses as `not(x in y)`. Negating the inner `in` of a `not in`
+  would render `not(not(x in y))` on the schema path and splice
+  `x not not(x in y)` on the fallback span path (B20), so that inner candidate
+  is suppressed. The reverse direction (`not in` -> `in`) is already covered by
+  `Mut.Mutator.UnaryNot` removing the enclosing `not`; emitting it here too
+  would double-count every `not in` site.
 
   Unlike the arithmetic/bitwise swaps this is a STRUCTURAL mutation (wrap the
   `in` node in `not`), not an operator-name swap. Opt-in, schema-routed
@@ -30,7 +36,8 @@ defmodule Mut.Mutator.Membership do
 
   @impl true
   def applicable?(node, %Mut.Context{} = ctx) do
-    ctx.env_context == nil and shape_matches?(node) and oracle_compatible?(node, ctx)
+    ctx.env_context == nil and shape_matches?(node, ctx.ast_path) and
+      oracle_compatible?(node, ctx)
   end
 
   @impl true
@@ -49,8 +56,16 @@ defmodule Mut.Mutator.Membership do
       site.resolved_name in @accepted_names
   end
 
-  defp shape_matches?({:in, _meta, args}) when length(args) == @arity, do: true
-  defp shape_matches?(_node), do: false
+  # The `in` of a `not in` is skipped: UnaryNot on the enclosing `not` covers it.
+  defp shape_matches?({:in, _meta, args}, ast_path) when length(args) == @arity,
+    do: not negated_in_path?(ast_path)
+
+  defp shape_matches?(_node, _ast_path), do: false
+
+  defp negated_in_path?(ast_path) when is_list(ast_path),
+    do: List.last(ast_path) == {:elem, :not, 0}
+
+  defp negated_in_path?(_ast_path), do: false
 
   defp oracle_compatible?(node, %Mut.Context{oracle_site: %DispatchSite{} = site} = ctx) do
     compatible?(candidate(node, ctx), site)

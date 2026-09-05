@@ -91,5 +91,32 @@ defmodule Mut.Mutator.OperatorExpansionTest do
       assert Membership.compatible?(candidate(:in), site(:in, resolved_module: Kernel))
       refute Membership.compatible?(candidate(:in), site(:in, resolved_module: Enum))
     end
+
+    # B20: `x not in y` parses as `not(x in y)`. Negating the inner `in` would
+    # render `not(not(x in y))` (schema) / splice `x not not(x in y)`
+    # (fallback); UnaryNot on the enclosing `not` covers that direction.
+    test "suppresses the inner in candidate of a not in" do
+      inner_ctx = context_for(:in, ast_path: [{:elem, :=, 1}, {:elem, :not, 0}])
+      assert Membership.mutate(in_node(), inner_ctx) == []
+      assert Membership.mutate(not_in_node(), not_context()) == []
+    end
+
+    test "in -> not in renders to valid, different source" do
+      [wrapped] = Membership.mutate(in_node(), context_for(:in))
+      assert Macro.to_string(wrapped.mutated_ast) == "x not in y"
+      assert {:ok, _} = Code.string_to_quoted(Macro.to_string(wrapped.mutated_ast))
+      assert Macro.to_string(wrapped.mutated_ast) != Macro.to_string(wrapped.original_ast)
+    end
+  end
+
+  defp in_node, do: Code.string_to_quoted!("x in y")
+
+  defp not_in_node, do: Code.string_to_quoted!("x not in y")
+
+  defp not_context do
+    context(
+      oracle_site: site(:not, resolved_arity: 1),
+      ast_path: [{:elem, :=, 1}]
+    )
   end
 end

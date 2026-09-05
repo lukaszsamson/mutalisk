@@ -150,6 +150,20 @@ defmodule Mut.CliTest do
     assert message =~ "conflicting duplicate flags"
   end
 
+  test "does not mistake a repeated multi-word flag for a duplicate conflict (T46)" do
+    # `--test-paths` (raw dash spelling) must match the underscore-spelled
+    # `@repeatable_flags` entry ("test_paths") once normalised, or every
+    # legitimately repeated `--test-paths` run is rejected as a duplicate-flag
+    # conflict — exactly like `--files` already is.
+    assert {:ok, opts} = Cli.parse(["--test-paths", "test/a", "--test-paths", "test/b"])
+    assert opts.test_paths == ["test/a", "test/b"]
+  end
+
+  test "still rejects a genuinely duplicated non-repeatable flag after normalisation (T46)" do
+    assert {:error, message} = Cli.parse(["--output-path", "a.json", "--output-path", "b.json"])
+    assert message =~ "conflicting duplicate flags"
+  end
+
   test "rejects contradictory boolean flag forms" do
     for argv <- [
           ["--incremental", "--no-incremental"],
@@ -186,6 +200,26 @@ defmodule Mut.CliTest do
     assert opts.files == ["lib/a.ex", "lib/b.ex"]
   end
 
+  test "accepts --test-paths as a CLI switch mirroring --files (T37)" do
+    assert {:ok, opts} = Cli.parse(["--test-paths", "test/a", "test/b"])
+    assert opts.test_paths == ["test/a", "test/b"]
+
+    assert {:ok, opts} = Cli.parse(["--test-paths", "test/a", "--test-paths", "test/b"])
+    assert opts.test_paths == ["test/a", "test/b"]
+
+    assert {:ok, opts} = Cli.parse(["--test-paths", "test/a, test/b"])
+    assert opts.test_paths == ["test/a", "test/b"]
+
+    # CLI overrides config, mirroring --files.
+    assert {:ok, opts} = Cli.parse(["--test-paths", "test/cli"], test_paths: ["test/config"])
+    assert opts.test_paths == ["test/cli"]
+  end
+
+  test "rejects absolute --test-paths, mirroring config :test_paths" do
+    assert {:error, m} = Cli.parse(["--test-paths", Path.expand("test")])
+    assert m =~ "--test-paths must contain project-relative paths"
+  end
+
   test "still rejects unexpected arguments after non-files flags" do
     assert {:error, message} = Cli.parse(["--reporters", "terminal", "lib/a.ex"])
     assert message =~ "unexpected arguments lib/a.ex"
@@ -204,6 +238,29 @@ defmodule Mut.CliTest do
     assert {:error, message} = Cli.parse(["--bogus"])
     assert message =~ "unknown option --bogus"
     assert message =~ "mix help mut"
+  end
+
+  test "reports a missing value distinctly from an unknown option (T47)" do
+    # `--output-path` with no following argument used to be reported as
+    # "unknown option --output-path", which is misleading — the flag is known,
+    # it's just missing its value.
+    assert {:error, message} = Cli.parse(["--output-path"])
+    assert message =~ "missing value for --output-path"
+    refute message =~ "unknown option"
+
+    # Immediately followed by another flag (no value in between) is the same
+    # case.
+    assert {:error, message} = Cli.parse(["--output-path", "--concurrency", "2"])
+    assert message =~ "missing value for --output-path"
+
+    # An unrecognized flag (even with an underscore, which OptionParser always
+    # treats as invalid) stays "unknown option", not "missing value".
+    assert {:error, message} = Cli.parse(["--bogus"])
+    assert message =~ "unknown option --bogus"
+
+    assert {:error, message} = Cli.parse(["--fail_at", "80"])
+    assert message =~ "unknown option --fail_at"
+    refute message =~ "missing value"
   end
 
   test "rejects bad enable target and concurrency" do
@@ -226,6 +283,54 @@ defmodule Mut.CliTest do
     # CLI overrides config.
     assert {:ok, %Options{test_timeout_ms: 20_000}} =
              Cli.parse(["--test-timeout-ms", "20000"], test_timeout_ms: 5_000)
+  end
+
+  test "suite_timeout_ms defaults to nil and accepts overrides" do
+    assert {:ok, %Options{suite_timeout_ms: nil}} = Cli.parse([])
+
+    assert {:ok, %Options{suite_timeout_ms: 120_000}} =
+             Cli.parse(["--suite-timeout-ms", "120000"])
+
+    assert {:ok, %Options{suite_timeout_ms: 45_000}} = Cli.parse([], suite_timeout_ms: 45_000)
+
+    # CLI overrides config.
+    assert {:ok, %Options{suite_timeout_ms: 90_000}} =
+             Cli.parse(["--suite-timeout-ms", "90000"], suite_timeout_ms: 45_000)
+  end
+
+  test "rejects out-of-range --suite-timeout-ms" do
+    assert {:error, message} = Cli.parse(["--suite-timeout-ms", "100"])
+    assert message =~ "--suite-timeout-ms must be an integer between"
+
+    assert {:error, message} = Cli.parse(["--suite-timeout-ms", "3600001"])
+    assert message =~ "--suite-timeout-ms must be an integer between"
+
+    assert {:error, message} = Cli.parse([], suite_timeout_ms: "nope")
+    assert message =~ "--suite-timeout-ms must be an integer between"
+  end
+
+  test "priv_fingerprint defaults to :stat and accepts overrides" do
+    assert {:ok, %Options{priv_fingerprint: :stat}} = Cli.parse([])
+
+    assert {:ok, %Options{priv_fingerprint: :hash}} =
+             Cli.parse(["--priv-fingerprint", "hash"])
+
+    assert {:ok, %Options{priv_fingerprint: :hash}} = Cli.parse([], priv_fingerprint: :hash)
+
+    # CLI overrides config.
+    assert {:ok, %Options{priv_fingerprint: :stat}} =
+             Cli.parse(["--priv-fingerprint", "stat"], priv_fingerprint: :hash)
+  end
+
+  test "rejects an unknown --priv-fingerprint mode" do
+    assert {:error, message} = Cli.parse(["--priv-fingerprint", "sha1"])
+    assert message =~ "unknown --priv-fingerprint mode :sha1"
+
+    assert {:error, message} = Cli.parse([], priv_fingerprint: :sha1)
+    assert message =~ "unknown --priv-fingerprint mode :sha1"
+
+    assert {:error, message} = Cli.parse([], priv_fingerprint: 123)
+    assert message =~ "priv_fingerprint must be one of stat, hash"
   end
 
   test "rejects out-of-range --test-timeout-ms" do
@@ -369,6 +474,16 @@ defmodule Mut.CliTest do
     test "rejects absolute config :test_paths" do
       assert {:error, m} = Cli.parse([], test_paths: [Path.expand("test")])
       assert m =~ "config :test_paths must contain project-relative paths"
+    end
+
+    test "names the option and blames the extra comma for a blank --files segment (T51)" do
+      assert {:error, m} = Cli.parse(["--files", "a.ex,,b.ex"])
+      assert m =~ "--files has an empty segment in"
+      assert m =~ "remove the extra comma"
+
+      assert {:error, m} = Cli.parse(["--test-paths", "test/a,,test/b"])
+      assert m =~ "--test-paths has an empty segment in"
+      assert m =~ "remove the extra comma"
     end
 
     test "rejects trailing-comma empty segments in reporters/mutators/enable (#65-67)" do

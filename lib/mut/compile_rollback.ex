@@ -29,6 +29,7 @@ defmodule Mut.CompileRollback do
       work_copy_root: work_copy_root,
       plan: plan,
       placement_maps: placement_maps,
+      file_aliases: file_aliases(work_copy_root, placement_maps),
       invalid_mutants: [],
       invalid_by_file: initial_invalid_by_file(plan),
       iteration: 0,
@@ -50,17 +51,26 @@ defmodule Mut.CompileRollback do
     # compile error) must not be invalidated. Elixir groups diagnostics under a
     # `warning:`/`error:` header and prints the `file:line` on a following line,
     # so we carry the current severity as we scan and keep only error anchors.
+    #
+    # T42: the carried severity must reset to :none on a blank line — a blank
+    # line ends the current diagnostic block, and the next block starts fresh
+    # with a `warning:`/`error:` header or a `** (` exception. Without the
+    # reset, every bare `file:line` line after an error block (even ones that
+    # belong to a later warning-only block, or no block at all) was wrongly
+    # treated as an error anchor. Starting the scan at :none (rather than
+    # :error) means anchors before any header are ignored too; a single-line
+    # `** (CompileError) file.ex:5: ...` still anchors because `severity_for`
+    # is applied to each line before `error_anchors` reads it.
     output
     |> String.split("\n")
-    |> Enum.reduce({:error, []}, fn line, {severity, acc} ->
+    |> Enum.map_reduce(:none, fn line, severity ->
       severity = severity_for(line, severity)
-      {severity, acc ++ error_anchors(line, severity)}
+      {error_anchors(line, severity), severity}
     end)
-    |> elem(1)
+    |> elem(0)
+    |> Enum.concat()
     |> Enum.uniq_by(&{&1.file, &1.line, &1.diagnostic})
   end
-
-  defp error_anchors(_line, :warning), do: []
 
   defp error_anchors(line, :error) do
     @anchor
@@ -70,11 +80,17 @@ defmodule Mut.CompileRollback do
     end)
   end
 
+  defp error_anchors(_line, _severity), do: []
+
   # Track the severity of the current diagnostic block. A `warning:` header
   # opens a warning region (its `file:line` lines are ignored for rollback); an
   # `error:` header or an `** (…Error)` exception line opens an error region.
+  # A blank line ends whatever block was open, resetting to the neutral
+  # :none state so a later un-headered `file:line` line is never mistaken for
+  # an error anchor left over from a previous block.
   defp severity_for(line, current) do
     cond do
+      String.trim(line) == "" -> :none
       Regex.match?(~r/(^|\s)warning:/, line) -> :warning
       Regex.match?(~r/(^|\s)error:/, line) -> :error
       String.contains?(line, "** (") -> :error
@@ -106,7 +122,7 @@ defmodule Mut.CompileRollback do
           rollback_iterations: iteration
         }}}
     else
-      with {:ok, located} <- locate_output(state.placement_maps, output),
+      with {:ok, located} <- locate_output(state, output),
            {:ok, state} <- invalidate_and_render(state, located) do
         compile_and_loop(%{state | iteration: iteration + 1})
       end
@@ -140,8 +156,14 @@ defmodule Mut.CompileRollback do
      }}
   end
 
-  defp locate_output(placement_maps, output) do
-    anchors = diagnostic_anchors(output)
+  defp locate_output(state, output) do
+    placement_maps = state.placement_maps
+
+    anchors =
+      output
+      |> diagnostic_anchors()
+      |> Enum.map(&canonicalize_anchor(&1, placement_maps, state.file_aliases))
+
     instrumented_anchors = Enum.filter(anchors, &Map.has_key?(placement_maps, &1.file))
 
     cond do
@@ -373,6 +395,70 @@ defmodule Mut.CompileRollback do
 
   defp normalize_file("./" <> file), do: file
   defp normalize_file(file), do: file
+
+  @doc """
+  Alias index mapping each app-relative source path to its unique root-relative
+  placement-map key. Empty for a single-app work copy.
+
+  T22: in an umbrella, `mix compile` runs at the work-copy ROOT but Mix
+  delegates to each child app, which compiles with its OWN directory as cwd
+  and therefore reports diagnostics as `lib/bar.ex:12`. The placement maps are
+  keyed by plan paths, which are root-relative (`apps/foo/lib/bar.ex`), so a
+  direct lookup never matched: a compile-invalid schema mutant was
+  misclassified as a user-code compile failure and aborted the whole schema
+  build. Index each root-relative key under its app-relative alias so those
+  diagnostics resolve.
+
+  An alias claimed by more than one app (`apps/a/lib/x.ex` and
+  `apps/b/lib/x.ex` both alias to `lib/x.ex`) is AMBIGUOUS — the diagnostic
+  line alone cannot say which app emitted it. We drop such aliases entirely
+  rather than guess: the anchor is then treated as not found, which is the
+  conservative outcome (an unrelated mutant is never invalidated).
+  """
+  @spec file_aliases(Path.t(), %{Path.t() => PlacementMap.t()}) :: %{Path.t() => Path.t()}
+  def file_aliases(work_copy_root, placement_maps) do
+    if is_binary(work_copy_root) and Mut.Umbrella.umbrella?(work_copy_root) do
+      apps_segments = Path.split(Mut.Umbrella.apps_path_name(work_copy_root))
+
+      placement_maps
+      |> Map.keys()
+      |> Enum.flat_map(&alias_for_key(&1, apps_segments))
+      |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+      |> Enum.flat_map(fn
+        {alias_path, [key]} -> [{alias_path, key}]
+        {_alias_path, _ambiguous} -> []
+      end)
+      |> Map.new()
+    else
+      %{}
+    end
+  end
+
+  defp alias_for_key(key, apps_segments) do
+    depth = length(apps_segments)
+    segments = Path.split(key)
+
+    case Enum.split(segments, depth) do
+      {^apps_segments, [_app | rest]} when rest != [] -> [{Path.join(rest), key}]
+      _other -> []
+    end
+  end
+
+  @doc """
+  Rewrites an anchor's app-relative `file` to its root-relative placement-map
+  key when the alias index resolves it unambiguously; otherwise the anchor is
+  returned unchanged (and stays un-instrumented for the caller). See
+  `file_aliases/2` for why an ambiguous alias is deliberately not resolved.
+  """
+  @spec canonicalize_anchor(anchor, %{Path.t() => PlacementMap.t()}, %{Path.t() => Path.t()}) ::
+          anchor
+  def canonicalize_anchor(anchor, placement_maps, file_aliases) do
+    cond do
+      Map.has_key?(placement_maps, anchor.file) -> anchor
+      key = Map.get(file_aliases, anchor.file) -> %{anchor | file: key}
+      true -> anchor
+    end
+  end
 
   defp initial_invalid_by_file(%Plan{} = plan) do
     Enum.reduce(plan.invalid, %{}, fn mutant, acc ->

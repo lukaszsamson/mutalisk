@@ -40,6 +40,7 @@ defmodule Mut.Mutant do
     :skip_reason,
     :covering_tests,
     :killing_test,
+    :killing_test_file,
     :duration_ms,
     :compile_error,
     status: :pending
@@ -79,6 +80,7 @@ defmodule Mut.Mutant do
           skip_reason: atom() | nil,
           covering_tests: [Path.t()] | nil,
           killing_test: Path.t() | nil,
+          killing_test_file: Path.t() | nil,
           duration_ms: non_neg_integer() | nil,
           compile_error: term() | nil
         }

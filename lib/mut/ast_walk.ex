@@ -14,6 +14,7 @@ defmodule Mut.AstWalk do
   )a
 
   @no_descend ~w(& quote unquote unquote_splicing)a
+  @quote_forms ~w(quote unquote unquote_splicing)a
   @function_defs ~w(def defp defmacro defmacrop defguard defguardp)a
   @reserved_attributes ~w(
     moduledoc doc typedoc behaviour impl spec type typep opaque callback macrocallback
@@ -39,27 +40,30 @@ defmodule Mut.AstWalk do
     # fully-qualified name (raw-AST aliases are relative: `defmodule Inner`
     # inside `Outer` has parts `[:Inner]`, but the module is `Outer.Inner` —
     # which is what `mutant.module` carries, so the filter must match it).
+    # The stack holds one frame per `defmodule` (`nil` for a dynamic name), so
+    # push/pop stay balanced and qualification runs through the same
+    # `qualify_module_parts/2` the candidate walks use.
     {_ast, {ignored, _stack}} =
       Macro.traverse(
         ast,
         {MapSet.new(), []},
         fn
-          {:defmodule, _meta, [{:__aliases__, _am, parts}, body]} = node, {acc, stack}
-          when is_list(parts) ->
-            full = stack ++ parts
+          {:defmodule, _meta, [name_ast, body]} = node, {acc, stack} ->
+            qualified = qualified_module_name(name_ast, Enum.find(stack, & &1))
 
             acc =
-              if module_self_ignored?(body), do: MapSet.put(acc, Module.concat(full)), else: acc
+              if qualified && module_self_ignored?(body),
+                do: MapSet.put(acc, qualified),
+                else: acc
 
-            {node, {acc, full}}
+            {node, {acc, [qualified | stack]}}
 
           node, state ->
             {node, state}
         end,
         fn
-          {:defmodule, _meta, [{:__aliases__, _am, parts}, _body]} = node, {acc, stack}
-          when is_list(parts) ->
-            {node, {acc, Enum.drop(stack, -length(parts))}}
+          {:defmodule, _meta, [_name_ast, _body]} = node, {acc, stack} ->
+            {node, {acc, safe_tl(stack)}}
 
           node, state ->
             {node, state}
@@ -68,6 +72,48 @@ defmodule Mut.AstWalk do
 
     ignored
   end
+
+  @doc """
+  Fully-qualifies the `__aliases__` parts of a `defmodule` name against the
+  nearest enclosing *static* module (`nil` at the top level).
+
+  `defmodule Inner` inside `Outer` is `Outer.Inner`; an already-qualified
+  `Outer.Inner` at the top level stays `Outer.Inner`; `__MODULE__.X` resolves
+  through `parent`. Returns `nil` when the name cannot be resolved
+  syntactically (an `unquote`d part, or `__MODULE__.X` with no known parent) —
+  callers then treat the frame as dynamic.
+
+  Shared by `ignored_modules/1`, the candidate walks' module stack, and
+  `Mut.EnvWalker`, so an `enclosing_module` always matches the names
+  `ignored_modules/1` records and `@mutalisk_ignore` filters on.
+  """
+  @spec qualify_module_parts([term()], module() | nil) :: module() | nil
+  def qualify_module_parts([{:__MODULE__, _meta, ctx}], parent) when is_atom(ctx), do: parent
+
+  def qualify_module_parts([{:__MODULE__, _meta, ctx} | rest], parent) when is_atom(ctx) do
+    if parent, do: qualify_module_parts(rest, parent), else: nil
+  end
+
+  # `defmodule Elixir.Foo` is absolute: nesting does not prefix it.
+  def qualify_module_parts([:"Elixir" | rest] = parts, _parent) when rest != [] do
+    if Enum.all?(parts, &is_atom/1), do: Module.concat(parts), else: nil
+  end
+
+  def qualify_module_parts(parts, parent) when is_list(parts) do
+    cond do
+      parts == [] -> nil
+      not Enum.all?(parts, &is_atom/1) -> nil
+      is_nil(parent) -> Module.concat(parts)
+      true -> Module.concat([parent | parts])
+    end
+  end
+
+  def qualify_module_parts(_parts, _parent), do: nil
+
+  defp qualified_module_name({:__aliases__, _meta, parts}, parent) when is_list(parts),
+    do: qualify_module_parts(parts, parent)
+
+  defp qualified_module_name(_other, _parent), do: nil
 
   # True iff the module's OWN direct body statements contain `@mutalisk_ignore
   # true` (does not descend into nested `defmodule` bodies — those are single
@@ -161,7 +207,9 @@ defmodule Mut.AstWalk do
     acc = enter_module(node, acc)
     acc = maybe_conditional_candidate(node, path, acc)
 
-    if no_descend?(node) do
+    # Keeps its pre-T14 `no_descend?/1` pruning (incl. `&`) so existing
+    # conditional ids do not move; T14 only adds the defmacro-body rule.
+    if no_descend?(node) or macro_def?(node) do
       {prune(node), push_frame(node, path, acc)}
     else
       {node, push_frame(node, path, acc)}
@@ -228,6 +276,12 @@ defmodule Mut.AstWalk do
   mutation re-renders the def with the statement removed. Body-position only:
   the walk visits the file's `defmodule` -> def/defp nodes directly, so
   pattern/guard contexts and `case`/`with` scrutinee blocks are never reached.
+
+  T15: `alias` / `import` / `require` / `use` statements are lexical-scope
+  directives and are never deletable — see `lexical_directive_hazard?/1`.
+  T14: `quote`/`unquote` subtrees and `defmacro`/`defmacrop` bodies are pruned
+  by the shared `refuse_codegen?/1` policy.
+
   Requires `:source`.
   """
   @spec statement_delete_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
@@ -256,9 +310,16 @@ defmodule Mut.AstWalk do
   # those pre-fns do via the shared module helpers).
   defp md_post(node, acc), do: {node, exit_module(node, acc)}
 
-  defp sd_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+  # T14: shared quote/codegen refusal — prune before anything else so no
+  # statement inside a `quote` block or a `defmacro`/`defmacrop` body is ever
+  # offered for deletion.
+  defp sd_visit(node, acc) do
+    if refuse_codegen?(node), do: {prune(node), acc}, else: sd_collect(node, acc)
+  end
 
-  defp sd_visit({name, meta, [_head, body_kw]} = node, acc) when name in [:def, :defp] do
+  defp sd_collect({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+
+  defp sd_collect({name, meta, [_head, body_kw]} = node, acc) when name in [:def, :defp] do
     with true <- Keyword.keyword?(body_kw),
          {:__block__, _bm, stmts} <- Keyword.get(body_kw, :do),
          true <- length(stmts) >= 2,
@@ -269,7 +330,7 @@ defmodule Mut.AstWalk do
     end
   end
 
-  defp sd_visit(node, acc), do: {node, acc}
+  defp sd_collect(node, acc), do: {node, acc}
 
   defp emit_statement_delete_candidates(def_node, stmts, span, acc) do
     indexed = Enum.with_index(stmts)
@@ -287,6 +348,9 @@ defmodule Mut.AstWalk do
       later = Enum.drop(stmts, i + 1)
 
       cond do
+        lexical_directive_hazard?(stmt) ->
+          acc
+
         orphan_binding_hazard?(stmt, later) ->
           acc
 
@@ -323,6 +387,23 @@ defmodule Mut.AstWalk do
       node: def_node
     }
   end
+
+  # T15 (B22) lexical-directive hazard: `alias` / `import` / `require` / `use`
+  # are lexical-scope directives, not value-producing statements. The
+  # binding-based hazard analysis below models `=` bindings and variable reads
+  # only, so it never sees that a later `Foo.bar()` resolves through an earlier
+  # `alias A.B.Foo`, that a bare `bar()` comes from an `import`, or that a macro
+  # call needs its `require`. Deleting a non-final one is therefore a
+  # systematically compile-invalid mutant (unknown alias / undefined function /
+  # "you must require ... before invoking the macro"). `use` additionally
+  # injects arbitrary code at expansion time. None of these are ever deletable.
+  @lexical_directives ~w(alias import require use)a
+
+  defp lexical_directive_hazard?({name, _meta, args})
+       when name in @lexical_directives and is_list(args),
+       do: true
+
+  defp lexical_directive_hazard?(_stmt), do: false
 
   # Orphan-binding hazard: any name bound by an `=` LHS in `stmt` that is
   # read by any `later` statement -> deleting `stmt` makes it undefined.
@@ -463,23 +544,28 @@ defmodule Mut.AstWalk do
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp cd_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+  # T14: shared quote/codegen refusal (see `refuse_codegen?/1`).
+  defp cd_visit(node, acc) do
+    if refuse_codegen?(node), do: {prune(node), acc}, else: cd_collect(node, acc)
+  end
 
-  defp cd_visit({:case, meta, [_scrutinee, [{:do, clauses}]]} = node, acc)
+  defp cd_collect({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+
+  defp cd_collect({:case, meta, [_scrutinee, [{:do, clauses}]]} = node, acc)
        when is_list(clauses) do
     {node, emit_clause_candidates(node, clauses, :case, meta, acc)}
   end
 
-  defp cd_visit({:cond, meta, [[{:do, clauses}]]} = node, acc) when is_list(clauses) do
+  defp cd_collect({:cond, meta, [[{:do, clauses}]]} = node, acc) when is_list(clauses) do
     {node, emit_clause_candidates(node, clauses, :cond, meta, acc)}
   end
 
-  defp cd_visit({:with, meta, args} = node, acc) when is_list(args) do
+  defp cd_collect({:with, meta, args} = node, acc) when is_list(args) do
     {node, emit_with_else_candidates(node, args, meta, acc)}
   end
 
   # M90 receive: same shape as cond ({:receive, meta, [[do: clauses, ...]]}).
-  defp cd_visit({:receive, meta, [args]} = node, acc) when is_list(args) do
+  defp cd_collect({:receive, meta, [args]} = node, acc) when is_list(args) do
     case Keyword.get(args, :do) do
       clauses when is_list(clauses) ->
         {node, emit_clause_candidates(node, clauses, :receive, meta, acc)}
@@ -490,7 +576,7 @@ defmodule Mut.AstWalk do
   end
 
   # M90 try: {:try, meta, [[do: body, rescue: clauses, catch: clauses, ...]]}.
-  defp cd_visit({:try, meta, [args]} = node, acc) when is_list(args) do
+  defp cd_collect({:try, meta, [args]} = node, acc) when is_list(args) do
     {node,
      acc
      |> emit_try_section(node, args, :rescue, meta)
@@ -498,7 +584,7 @@ defmodule Mut.AstWalk do
      |> emit_try_section(node, args, :else, meta)}
   end
 
-  defp cd_visit(node, acc), do: {node, acc}
+  defp cd_collect(node, acc), do: {node, acc}
 
   defp emit_clause_candidates(node, clauses, kind, meta, acc) do
     with span when not is_nil(span) <- block_node_span(meta, acc),
@@ -584,6 +670,17 @@ defmodule Mut.AstWalk do
   end = rightmost call's `:closing` (or fallback `:end_line`/`:end_column`).
   Skip candidate if either position is unrecoverable.
 
+  T17: a **literal** pipe head (`[1, 2, 3] |> …`, `5 |> …`, `{a, b} |> …`)
+  carries no metadata at all in a plain `Mut.SourceParse` parse (no
+  `literal_encoder`), so the leftmost position was unrecoverable and
+  literal-headed chains produced zero candidates while an otherwise identical
+  variable-headed chain produced one. The collector now falls back to a
+  `literal_encoder` re-parse of the same source — which wraps list / number /
+  string / 2-tuple heads as `{:__block__, meta, [literal]}` with the head
+  token's real `:line`/`:column` — and looks the chain up by its top `|>`
+  operator position (identical in both parses). Purely additive: chains whose
+  leftmost position was already recoverable keep their exact previous span.
+
   Requires `:source`.
   """
   @spec pipeline_drop_candidates(Macro.t(), opts :: keyword) :: [AstCandidate.t()]
@@ -597,7 +694,11 @@ defmodule Mut.AstWalk do
       file: file,
       source: source,
       line_offsets: line_offsets,
-      module_stack: []
+      module_stack: [],
+      # T17: lazily-built `{pipe_line, pipe_col} => {start_line, start_col}`
+      # map from a `literal_encoder` re-parse; only consulted when the plain
+      # AST cannot yield the chain's leftmost position (literal pipe head).
+      pipeline_starts: nil
     }
 
     # Use Macro.traverse with a pre-fn that processes pipeline tops and prunes
@@ -611,11 +712,18 @@ defmodule Mut.AstWalk do
   # module must resolve to `Outer.Inner`, else `@mutalisk_ignore` misses it. This
   # also keeps the R18 dynamic-defmodule frame (`enter_module` pushes a `nil`
   # frame for non-`__aliases__` names) so the post-walk pop stays balanced.
-  defp pipe_pre({:defmodule, _meta, _args} = node, acc) do
+  #
+  # T14: the shared quote/codegen refusal runs first — a `|>` chain inside a
+  # `quote` block or a `defmacro` body is expansion-time code.
+  defp pipe_pre(node, acc) do
+    if refuse_codegen?(node), do: {prune(node), acc}, else: pipe_collect(node, acc)
+  end
+
+  defp pipe_collect({:defmodule, _meta, _args} = node, acc) do
     {node, enter_module(node, acc)}
   end
 
-  defp pipe_pre({:|>, _meta, _args} = node, acc) do
+  defp pipe_collect({:|>, _meta, _args} = node, acc) do
     # This is the TOP of a pipeline chain (we prune the LHS so sub-pipes
     # never reach this clause). Process and replace with a leaf so the
     # post-walk + sub-tree traversal doesn't re-process.
@@ -623,7 +731,7 @@ defmodule Mut.AstWalk do
     {:__pipeline_pruned__, acc}
   end
 
-  defp pipe_pre(node, acc), do: {node, acc}
+  defp pipe_collect(node, acc), do: {node, acc}
 
   defp pipe_post({:defmodule, _meta, _args} = node, acc) do
     {node, %{acc | module_stack: safe_tl(acc.module_stack)}}
@@ -635,22 +743,25 @@ defmodule Mut.AstWalk do
   defp safe_tl([_ | rest]), do: rest
 
   defp emit_pipeline_candidates(top_node, acc) do
-    stages = flatten_pipeline(top_node)
-    n = length(stages)
+    n = top_node |> flatten_pipeline() |> length()
 
-    with true <- n >= 4,
-         span when not is_nil(span) <- pipeline_span(top_node, acc) do
-      # Middle stages: 0-indexed positions 2..n-2 (skip input=0, first stage=1,
-      # last stage=n-1).
-      indexes = Enum.to_list(2..(n - 2))
-
-      Enum.reduce(indexes, acc, fn i, acc ->
-        cand = build_pipeline_candidate(top_node, i, span, acc)
-        %{acc | candidates: [cand | acc.candidates]}
-      end)
+    if n >= 4 do
+      {span, acc} = pipeline_span(top_node, acc)
+      emit_pipeline_stages(top_node, n, span, acc)
     else
-      _ -> acc
+      acc
     end
+  end
+
+  defp emit_pipeline_stages(_top_node, _n, nil, acc), do: acc
+
+  defp emit_pipeline_stages(top_node, n, span, acc) do
+    # Middle stages: 0-indexed positions 2..n-2 (skip input=0, first stage=1,
+    # last stage=n-1).
+    Enum.reduce(2..(n - 2), acc, fn i, acc ->
+      cand = build_pipeline_candidate(top_node, i, span, acc)
+      %{acc | candidates: [cand | acc.candidates]}
+    end)
   end
 
   defp build_pipeline_candidate(top_node, stage_index, span, acc) do
@@ -678,20 +789,80 @@ defmodule Mut.AstWalk do
   defp flatten_pipeline(other), do: [other]
 
   # Span of a whole pipeline expression. start = leftmost leaf's
-  # `:line`/`:column`; end = rightmost call's `:closing` (or fallback
-  # `:end_line`/`:end_column`). nil if either is unrecoverable.
+  # `:line`/`:column` (T17: falling back to the literal_encoder re-parse for a
+  # bare-literal pipe head, which carries no metadata in the plain AST);
+  # end = rightmost call's `:closing` (or fallback `:end_line`/`:end_column`).
+  # nil if either is unrecoverable. Returns the (memo-updated) acc.
   defp pipeline_span(top_node, acc) do
-    with {start_line, start_col} <- leftmost_position(top_node),
+    {start_pos, acc} = pipeline_start_position(top_node, acc)
+
+    with {start_line, start_col} when is_integer(start_line) <- start_pos,
          {end_line, end_col} <- rightmost_end_position(top_node) do
-      %Mut.SourceSpan{
-        file: acc.file,
-        start_line: start_line,
-        start_column: start_col,
-        end_line: end_line,
-        end_column: end_col,
-        start_byte: byte_offset(acc.source, acc.line_offsets, start_line, start_col),
-        end_byte: byte_offset(acc.source, acc.line_offsets, end_line, end_col)
-      }
+      {%Mut.SourceSpan{
+         file: acc.file,
+         start_line: start_line,
+         start_column: start_col,
+         end_line: end_line,
+         end_column: end_col,
+         start_byte: byte_offset(acc.source, acc.line_offsets, start_line, start_col),
+         end_byte: byte_offset(acc.source, acc.line_offsets, end_line, end_col)
+       }, acc}
+    else
+      _ -> {nil, acc}
+    end
+  end
+
+  # T17: the plain parse has no `literal_encoder`, so a literal pipe head
+  # (`[1, 2, 3]`, `5`, `"s"`, `{a, b}`) is a bare term with no metadata and
+  # `leftmost_position/1` returns nil — literal-headed chains silently produced
+  # zero candidates. Fall back to a one-shot `literal_encoder` re-parse of the
+  # same source, in which every such head is `{:__block__, meta, [literal]}`
+  # carrying the head token's real position, and look the chain up by its top
+  # `|>` operator position (byte-identical between the two parses).
+  defp pipeline_start_position(top_node, acc) do
+    case leftmost_position(top_node) do
+      {_line, _col} = pos ->
+        {pos, acc}
+
+      nil ->
+        {lookup, acc} = pipeline_start_lookup(acc)
+        {Map.get(lookup, pipe_op_position(top_node)), acc}
+    end
+  end
+
+  defp pipeline_start_lookup(%{pipeline_starts: nil} = acc) do
+    lookup = build_pipeline_start_lookup(acc.source, acc.file)
+    {lookup, %{acc | pipeline_starts: lookup}}
+  end
+
+  defp pipeline_start_lookup(%{pipeline_starts: lookup} = acc), do: {lookup, acc}
+
+  defp build_pipeline_start_lookup(source, file) do
+    case parse_with_literal_encoder(source, file) do
+      {:ok, ast} ->
+        {_ast, lookup} = Macro.prewalk(ast, %{}, &note_pipeline_start/2)
+        lookup
+
+      {:error, _reason} ->
+        %{}
+    end
+  end
+
+  defp note_pipeline_start({:|>, _meta, [_lhs, _rhs]} = node, lookup) do
+    with {_l, _c} = key <- pipe_op_position(node),
+         {_sl, _sc} = start <- leftmost_position(node) do
+      {node, Map.put_new(lookup, key, start)}
+    else
+      _ -> {node, lookup}
+    end
+  end
+
+  defp note_pipeline_start(node, lookup), do: {node, lookup}
+
+  defp pipe_op_position({:|>, meta, _args}) do
+    with l when is_integer(l) <- Keyword.get(meta, :line),
+         c when is_integer(c) <- Keyword.get(meta, :column) do
+      {l, c}
     else
       _ -> nil
     end
@@ -751,7 +922,12 @@ defmodule Mut.AstWalk do
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp mu_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+  # T14: shared quote/codegen refusal (see `refuse_codegen?/1`).
+  defp mu_visit(node, acc) do
+    if refuse_codegen?(node), do: {prune(node), acc}, else: mu_collect(node, acc)
+  end
+
+  defp mu_collect({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
 
   # R8: a struct update `%S{base | updates}` is `{:%, _, [alias, {:%{}, _,
   # [{:|, ...}]}]}` — its INNER `%{}` has the exact shape the map-update clause
@@ -759,12 +935,12 @@ defmodule Mut.AstWalk do
   # dangling (`%S` + spliced base), invalid on every struct update. Tag the
   # inner map so the map-update clause skips it; plain `%{m | ...}` (no struct
   # wrapper) is untouched.
-  defp mu_visit({:%, meta, [alias_ast, {:%{}, inner_meta, [{:|, _, _} = upd]}]}, acc) do
+  defp mu_collect({:%, meta, [alias_ast, {:%{}, inner_meta, [{:|, _, _} = upd]}]}, acc) do
     tagged = {:%, meta, [alias_ast, {:%{}, [mut_struct_update: true] ++ inner_meta, [upd]}]}
     {tagged, acc}
   end
 
-  defp mu_visit({:%{}, meta, [{:|, _pipe_meta, [_base, updates]}]} = node, acc)
+  defp mu_collect({:%{}, meta, [{:|, _pipe_meta, [_base, updates]}]} = node, acc)
        when is_list(updates) do
     if Keyword.get(meta, :mut_struct_update) do
       {node, acc}
@@ -780,7 +956,7 @@ defmodule Mut.AstWalk do
     end
   end
 
-  defp mu_visit(node, acc), do: {node, acc}
+  defp mu_collect(node, acc), do: {node, acc}
 
   defp build_map_update_candidate(node, meta, span, acc) do
     line = Keyword.get(meta, :line)
@@ -830,9 +1006,14 @@ defmodule Mut.AstWalk do
     acc.candidates |> Enum.reverse() |> Enum.sort_by(&span_start_byte/1)
   end
 
-  defp rt_visit({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+  # T14: shared quote/codegen refusal (see `refuse_codegen?/1`).
+  defp rt_visit(node, acc) do
+    if refuse_codegen?(node), do: {prune(node), acc}, else: rt_collect(node, acc)
+  end
 
-  defp rt_visit({:receive, meta, [args]} = node, acc) when is_list(args) do
+  defp rt_collect({:defmodule, _meta, _args} = node, acc), do: {node, enter_module(node, acc)}
+
+  defp rt_collect({:receive, meta, [args]} = node, acc) when is_list(args) do
     with [{:->, _, [[_t], _body]} | _] <- Keyword.get(args, :after, nil),
          span when not is_nil(span) <- block_node_span(meta, acc) do
       cand = build_receive_timeout_candidate(node, meta, span, acc)
@@ -842,7 +1023,7 @@ defmodule Mut.AstWalk do
     end
   end
 
-  defp rt_visit(node, acc), do: {node, acc}
+  defp rt_collect(node, acc), do: {node, acc}
 
   defp build_receive_timeout_candidate(node, meta, span, acc) do
     line = Keyword.get(meta, :line)
@@ -915,9 +1096,16 @@ defmodule Mut.AstWalk do
   defp pin_pre(node, acc) do
     {path, acc} = enter_path(node, acc)
     acc = enter_module(node, acc)
-    acc = note_map_key_pins(node, acc)
-    acc = maybe_pin_candidate(node, path, acc)
-    {node, push_frame(node, path, acc)}
+
+    # T14: pin_pre was the only default sibling pre-fn without the shared
+    # quote/codegen refusal — `^x` inside `quote do` is expansion-time syntax.
+    if refuse_codegen?(node) do
+      {prune(node), push_frame(node, path, acc)}
+    else
+      acc = note_map_key_pins(node, acc)
+      acc = maybe_pin_candidate(node, path, acc)
+      {node, push_frame(node, path, acc)}
+    end
   end
 
   # M75 hazard rule: a pin used as a map-pattern KEY (`%{^k => v}`) cannot be
@@ -1700,21 +1888,48 @@ defmodule Mut.AstWalk do
   defp no_descend?({name, _meta, _args}) when name in @no_descend, do: true
   defp no_descend?(_node), do: false
 
+  # T14 (B19): the shared code-generation refusal policy applied by the
+  # pin/conditional walkers and the opt-in structural walkers (statement-
+  # delete, clause-delete, pipeline-drop, map-update-drop, receive-timeout).
+  # Two rules:
+  #
+  #   * `quote` / `unquote` / `unquote_splicing` subtrees are PRUNED — that is
+  #     expansion-time code, and the tool deliberately does not mutate what a
+  #     macro *generates*.
+  #   * `defmacro` / `defmacrop` bodies are code generators too: a mutation
+  #     there changes expansion in every caller and is noise, not a
+  #     behavioural test (the guard walker's `in_macro_def_path?/1` rule,
+  #     generalised to the whole subtree).
+  #
+  # `&` captures are NOT refused here: `&(&1 |> a() |> b())` is ordinary
+  # runtime code. The dispatch/guard/attribute/body-literal pre-functions keep
+  # their own `no_descend?/1` (which does prune `&`, for oracle-matching
+  # reasons) unchanged, so their stable ids do not move.
+  #
+  # Callers prune the node (`prune/1`) so neither the pre- nor the post-fn
+  # ever visits the refused subtree; module-stack / frame balance is
+  # preserved because the children are removed before descent.
+  defp refuse_codegen?(node), do: quote_form?(node) or macro_def?(node)
+
+  defp quote_form?({name, _meta, _args}) when name in @quote_forms, do: true
+  defp quote_form?(_node), do: false
+
+  defp macro_def?({name, _meta, args}) when name in [:defmacro, :defmacrop] and is_list(args),
+    do: true
+
+  defp macro_def?(_node), do: false
+
   defp prune({name, meta, _args}), do: {name, meta, []}
 
   defp enter_module({:defmodule, _meta, [{:__aliases__, _alias_meta, parts}, _body]}, acc) do
     # Fully-qualify nested modules so a fallback-engine candidate's
-    # `enclosing_module` matches `ignored_modules/1` (which builds
-    # `Module.concat(stack ++ parts)`): `defmodule Inner` inside `Outer` is
+    # `enclosing_module` matches `ignored_modules/1` (which qualifies through
+    # the same `qualify_module_parts/2`): `defmodule Inner` inside `Outer` is
     # `Outer.Inner`, not `Inner`. Qualify against the nearest *static* ancestor —
     # dynamic-name frames are `nil` and, like `ignored_modules/1`, contribute
     # nothing to the qualified name. (R11: only the push/pop *balance* was fixed
     # before; the unqualified name made `@mutalisk_ignore` miss nested modules.)
-    qualified =
-      case Enum.find(acc.module_stack, & &1) do
-        nil -> Module.concat(parts)
-        parent -> Module.concat([parent | parts])
-      end
+    qualified = qualify_module_parts(parts, Enum.find(acc.module_stack, & &1))
 
     %{acc | module_stack: [qualified | acc.module_stack]}
   end
@@ -1760,16 +1975,24 @@ defmodule Mut.AstWalk do
          column when is_integer(column) <- Keyword.get(attr_meta, :column),
          end_meta when is_list(end_meta) <- Keyword.get(attr_meta, :end_of_expression),
          end_column when is_integer(end_column) <- Keyword.get(end_meta, :column),
+         # A multi-line value ends on `end_of_expression[:line]`, not on the
+         # attribute's own line; pairing the end column with the start line gave
+         # an inverted/truncated byte range (B12/D3).
+         end_line when is_integer(end_line) <- Keyword.get(end_meta, :line, line),
+         true <- Map.has_key?(acc.line_offsets, end_line),
          line_text when is_binary(line_text) <- source_line(acc.source, line),
-         {:ok, start_column} <- attribute_value_column(line_text, column, name) do
+         {:ok, start_column} <- attribute_value_column(line_text, column, name),
+         start_byte = byte_offset(acc.source, acc.line_offsets, line, start_column),
+         end_byte = byte_offset(acc.source, acc.line_offsets, end_line, end_column),
+         true <- end_byte >= start_byte do
       %Mut.SourceSpan{
         file: acc.file,
         start_line: line,
         start_column: start_column,
-        end_line: line,
+        end_line: end_line,
         end_column: end_column,
-        start_byte: byte_offset(acc.source, acc.line_offsets, line, start_column),
-        end_byte: byte_offset(acc.source, acc.line_offsets, line, end_column)
+        start_byte: start_byte,
+        end_byte: end_byte
       }
     else
       _missing -> nil

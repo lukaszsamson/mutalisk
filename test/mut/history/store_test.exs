@@ -36,7 +36,9 @@ defmodule Mut.History.StoreTest do
       selected_tests_digest: Keyword.get(opts, :selected_tests_digest, "sel#{stable_id}"),
       project_digest: Keyword.get(opts, :project_digest, "proj"),
       killing_test: Keyword.get(opts, :killing_test),
-      test_timeout_ms: Keyword.get(opts, :test_timeout_ms, 10_000)
+      killing_test_file: Keyword.get(opts, :killing_test_file),
+      test_timeout_ms: Keyword.get(opts, :test_timeout_ms, 10_000),
+      suite_timeout_ms: Keyword.get(opts, :suite_timeout_ms)
     }
   end
 
@@ -56,7 +58,15 @@ defmodule Mut.History.StoreTest do
   describe "round-trip" do
     test "build -> write -> load reproduces every verdict + digest", %{dir: dir} do
       path = Store.path(dir)
-      records = [record("a", :killed, killing_test: "test/a_test.exs"), record("b", :survived)]
+
+      records = [
+        record("a", :killed,
+          killing_test: "ATest works",
+          killing_test_file: "test/a_test.exs",
+          suite_timeout_ms: 90_000
+        ),
+        record("b", :survived)
+      ]
 
       store = Store.build(:cold, records)
       assert :ok = Store.write(path, store)
@@ -69,8 +79,19 @@ defmodule Mut.History.StoreTest do
       assert a["status"] == "killed"
       assert a["source_digest"] == "srca"
       assert a["selected_tests_digest"] == "sela"
-      assert a["killing_test"] == "test/a_test.exs"
+      assert a["killing_test"] == "ATest works"
+      assert a["killing_test_file"] == "test/a_test.exs"
+      assert a["test_timeout_ms"] == 10_000
+      assert a["suite_timeout_ms"] == 90_000
       assert a["generation"] == 1
+
+      # An unset --suite-timeout-ms round-trips as an explicit null, not as a
+      # missing key: reuse must be able to tell "no suite timeout" apart from
+      # "unknown" (see the format-1 note in Mut.History.Store).
+      b = loaded.verdicts["b"]
+      assert Map.has_key?(b, "suite_timeout_ms")
+      assert b["suite_timeout_ms"] == nil
+      assert b["killing_test_file"] == nil
     end
 
     test "write does not overwrite a user-visible .tmp sibling", %{dir: dir} do
@@ -135,6 +156,20 @@ defmodule Mut.History.StoreTest do
       assert {:cold, :malformed} = Store.load(path)
     end
 
+    # A format-1 store predates `suite_timeout_ms`/`killing_test_file` in the
+    # verdict entries; it is rejected wholesale rather than partially trusted.
+    test "an older format_version (1) -> cold", %{dir: dir} do
+      path = Store.path(dir)
+      File.mkdir_p!(Path.dirname(path))
+
+      File.write!(
+        path,
+        ~s({"format_version": 1, "tool_version": "x", "generation": 1, "verdicts": {}})
+      )
+
+      assert {:cold, :format_version_mismatch} = Store.load(path)
+    end
+
     test "format_version mismatch -> cold", %{dir: dir} do
       path = Store.path(dir)
       File.mkdir_p!(Path.dirname(path))
@@ -153,7 +188,7 @@ defmodule Mut.History.StoreTest do
 
       File.write!(
         path,
-        ~s({"format_version": 1, "tool_version": "0.0.0-not-us", "generation": 1, "verdicts": {}})
+        ~s({"format_version": 2, "tool_version": "0.0.0-not-us", "generation": 1, "verdicts": {}})
       )
 
       assert {:cold, :tool_version_mismatch} = Store.load(path)
@@ -192,12 +227,16 @@ defmodule Mut.History.StoreTest do
           line: 2,
           status: :killed,
           killing_test: "MTest verifies f",
+          killing_test_file: "test/f_test.exs",
           covering_tests: ["test/f_test.exs"]
         )
 
-      rec = Store.record_for(killed, index, read, 10_000, "proj-digest")
+      rec = Store.record_for(killed, index, read, {10_000, 60_000}, "proj-digest")
       assert rec.status == "killed"
       assert rec.killing_test == "MTest verifies f"
+      assert rec.killing_test_file == "test/f_test.exs"
+      assert rec.test_timeout_ms == 10_000
+      assert rec.suite_timeout_ms == 60_000
       assert rec.project_digest == "proj-digest"
       assert rec.source_digest == Digest.source_digest(index, 2)
 
@@ -205,10 +244,27 @@ defmodule Mut.History.StoreTest do
                Digest.selected_tests_digest([{"test/f_test.exs", "assert f(1) == 1"}])
     end
 
+    test "record_for stores a nil suite_timeout_ms when --suite-timeout-ms is unset" do
+      index = Digest.function_index("defmodule M do\n  def f(x), do: x\nend\n")
+
+      m =
+        mutant(
+          stable_id: "s",
+          file: "lib/m.ex",
+          line: 2,
+          status: :survived,
+          covering_tests: []
+        )
+
+      rec = Store.record_for(m, index, fn _ -> nil end, {10_000, nil}, "proj")
+      assert rec.suite_timeout_ms == nil
+      assert rec.killing_test_file == nil
+    end
+
     test "record_for returns nil for non-reusable status" do
       index = Digest.function_index("defmodule M do\n  def f(x), do: x\nend\n")
       m = mutant(stable_id: "e", file: "lib/m.ex", line: 2, status: :error, covering_tests: [])
-      assert Store.record_for(m, index, fn _ -> nil end, 10_000, "proj") == nil
+      assert Store.record_for(m, index, fn _ -> nil end, {10_000, nil}, "proj") == nil
     end
   end
 end

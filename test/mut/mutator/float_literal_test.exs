@@ -54,6 +54,24 @@ defmodule Mut.Mutator.FloatLiteralTest do
     test "no mutations for ineligible nodes" do
       assert FloatLiteral.mutate({:__block__, [], [1]}, ctx([])) == []
     end
+
+    test "mutated_ast drops parser :token meta so it does not render as the original" do
+      {:ok, node} =
+        Code.string_to_quoted("3.14",
+          literal_encoder: &{:ok, {:__block__, &2, [&1]}},
+          token_metadata: true
+        )
+
+      assert {:__block__, meta, [3.14]} = node
+      assert Keyword.has_key?(meta, :token)
+
+      [zero, plus_one] = FloatLiteral.mutate(node, ctx([]))
+
+      assert Macro.to_string(zero.mutated_ast) == "0.0"
+      assert Macro.to_string(plus_one.mutated_ast) == Float.to_string(3.14 + 1.0)
+      refute Macro.to_string(zero.mutated_ast) == Macro.to_string(node)
+      refute Macro.to_string(plus_one.mutated_ast) == Macro.to_string(node)
+    end
   end
 
   describe "end-to-end via env walker" do

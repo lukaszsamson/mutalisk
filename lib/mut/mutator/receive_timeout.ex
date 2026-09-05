@@ -77,7 +77,7 @@ defmodule Mut.Mutator.ReceiveTimeout do
   defp receive_with_after?(_node), do: false
 
   defp build_mutations({:receive, meta, [args]} = node) do
-    [{:->, arrow_meta, [[_t], body]} | rest_after] = Keyword.fetch!(args, :after)
+    [{:->, arrow_meta, [[timeout], body]} | rest_after] = Keyword.fetch!(args, :after)
     base_clauses = Keyword.delete(args, :after)
 
     swap = fn new_t ->
@@ -94,7 +94,11 @@ defmodule Mut.Mutator.ReceiveTimeout do
       }
     end
 
-    mutations = [swap.(0), swap.(:infinity)]
+    # Skip a swap whose new timeout already matches the existing literal:
+    # `after 0` -> 0 and `after :infinity` -> :infinity are identity
+    # mutants that render byte-identical to the original source.
+    mutations =
+      for new_t <- [0, :infinity], not same_timeout?(timeout, new_t), do: swap.(new_t)
 
     if Keyword.has_key?(args, :do) do
       drop = %Mutation{
@@ -111,4 +115,9 @@ defmodule Mut.Mutator.ReceiveTimeout do
       mutations
     end
   end
+
+  # The existing timeout may be a raw literal or, under a literal encoder,
+  # wrapped as `{:__block__, meta, [literal]}`.
+  defp same_timeout?({:__block__, _meta, [value]}, new_t), do: value === new_t
+  defp same_timeout?(timeout, new_t), do: timeout === new_t
 end
