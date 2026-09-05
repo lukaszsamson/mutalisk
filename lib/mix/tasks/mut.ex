@@ -344,22 +344,45 @@ defmodule Mix.Tasks.Mut do
     # `--fail-at` gate — printing a success-style banner regardless made a
     # failing CI run look identical to a passing one in the log tail.
     unless opts.debug_plan do
-      if gate_result == :failed do
-        IO.puts(
-          "Mutalisk run complete in #{elapsed(started)}ms — failed the --fail-at gate, exiting 1"
-        )
-      else
-        IO.puts("Mutalisk run complete in #{elapsed(started)}ms")
-      end
+      IO.puts(banner(gate_result, elapsed(started)))
     end
   end
+
+  @doc false
+  # Fold the report-writing outcome into the `--fail-at` gate outcome. Both
+  # already registered their own `at_exit` failure, but the closing banner is
+  # driven solely by this value — a report that could not be written must not
+  # be announced as a clean run (the process still exits 1).
+  @spec run_result(:passed | :failed, :ok | :error) ::
+          :passed | :failed | :report_failed | :both_failed
+  def run_result(:failed, :error), do: :both_failed
+  def run_result(:failed, :ok), do: :failed
+  def run_result(:passed, :error), do: :report_failed
+  def run_result(:passed, :ok), do: :passed
+
+  @doc false
+  # The closing banner for a finished run.
+  @spec banner(:passed | :failed | :report_failed | :both_failed, non_neg_integer()) :: String.t()
+  def banner(result, elapsed_ms) do
+    "Mutalisk run complete in #{elapsed_ms}ms" <> banner_suffix(result)
+  end
+
+  defp banner_suffix(:passed), do: ""
+  defp banner_suffix(:failed), do: " — failed the --fail-at gate, exiting 1"
+
+  defp banner_suffix(:report_failed),
+    do: " — one or more report files could not be written, exiting 1"
+
+  defp banner_suffix(:both_failed),
+    do:
+      " — failed the --fail-at gate and one or more report files could not be written, exiting 1"
 
   defp execute_empty_plan(plan, work_copy, target_root, opts, metrics_pid) do
     Metrics.set_effective_concurrency(metrics_pid, 1)
     Metrics.set_planned_total(metrics_pid, 0)
     record_skipped_plan(metrics_pid, plan)
 
-    snapshot =
+    {snapshot, report_result} =
       render_reports_with_timing(
         metrics_pid,
         plan,
@@ -368,7 +391,7 @@ defmodule Mix.Tasks.Mut do
         opts
       )
 
-    set_exit_code(snapshot, opts.fail_at)
+    run_result(set_exit_code(snapshot, opts.fail_at), report_result)
   end
 
   # R15: destroying the original `pool` (the precisely-typed opaque
@@ -385,7 +408,7 @@ defmodule Mix.Tasks.Mut do
     # itself never removes it, and a raise used to leave it behind forever.
     schema_work_copy = Path.expand(Path.join([artifact_root, "mut_work", "#{run_id}-schema"]))
 
-    snapshot =
+    {snapshot, report_result} =
       try do
         schema_result =
           unwrap_stage!(
@@ -435,7 +458,7 @@ defmodule Mix.Tasks.Mut do
         cleanup_work_copy(schema_work_copy, opts, "schema-build")
       end
 
-    set_exit_code(snapshot, opts.fail_at)
+    run_result(set_exit_code(snapshot, opts.fail_at), report_result)
   end
 
   defp run_with_pool(
@@ -458,7 +481,7 @@ defmodule Mix.Tasks.Mut do
 
     Metrics.set_planned_total(metrics_pid, executable_count(schema_result.plan))
 
-    {snapshot, _final_pool} =
+    {snapshot, report_result} =
       try do
         record_schema_build_metadata(metrics_pid, schema_result)
 
@@ -513,21 +536,18 @@ defmodule Mix.Tasks.Mut do
             run_schema_mutants(pool, schema_result.plan, ctx)
           end)
 
-        final_pool =
+        _final_pool =
           Metrics.with_phase(metrics_pid, :fallback_workers, fn ->
             run_fallback_mutants(pool, schema_result.plan, ctx)
           end)
 
-        snapshot =
-          render_reports_with_timing(
-            metrics_pid,
-            schema_result.plan,
-            source_root,
-            target_root,
-            opts
-          )
-
-        {snapshot, final_pool}
+        render_reports_with_timing(
+          metrics_pid,
+          schema_result.plan,
+          source_root,
+          target_root,
+          opts
+        )
       after
         # T14: persist incremental history in `after`, snapshotting the live
         # metrics ledger — so a mid-run abort (worker crash, Ctrl-C, render
@@ -551,7 +571,7 @@ defmodule Mix.Tasks.Mut do
         Sandbox.destroy_pool(pool)
       end
 
-    snapshot
+    {snapshot, report_result}
   end
 
   # T27: every setup stage's `{:error, reason}` is a legitimate return (an
@@ -575,7 +595,8 @@ defmodule Mix.Tasks.Mut do
   # history is an optimization, not a correctness input.
   defp write_history(snapshot, source_root, target_root, opts) do
     project_digest = History.Digest.project_digest(source_root)
-    records = history_records(snapshot.ledger, source_root, opts.test_timeout_ms, project_digest)
+    timeouts = {opts.test_timeout_ms, opts.suite_timeout_ms}
+    records = history_records(snapshot.ledger, source_root, timeouts, project_digest)
     # P2: honor a configured :history_path on WRITE too (load_verdicts already
     # reads it) — otherwise a custom-path user writes the default store while
     # reading the custom one, and never warms either.
@@ -615,7 +636,7 @@ defmodule Mix.Tasks.Mut do
   # Reusable verdicts (killed/survived/timeout) from the ledger, digested per
   # file (function index built once per file). `project_digest` is the coarse
   # whole-project fingerprint, identical for every verdict in this run.
-  defp history_records(ledger, source_root, test_timeout_ms, project_digest) do
+  defp history_records(ledger, source_root, timeouts, project_digest) do
     reusable =
       Enum.filter(ledger, fn entry ->
         Map.has_key?(entry, :mutant) and History.Store.reusable_status?(entry.status)
@@ -628,7 +649,7 @@ defmodule Mix.Tasks.Mut do
     |> Enum.map(fn entry ->
       mutant = final_mutant(entry)
       index = Map.fetch!(indexes, mutant.file)
-      History.Store.record_for(mutant, index, read_test, test_timeout_ms, project_digest)
+      History.Store.record_for(mutant, index, read_test, timeouts, project_digest)
     end)
     |> Enum.reject(&is_nil/1)
   end
@@ -775,7 +796,11 @@ defmodule Mix.Tasks.Mut do
       source_digest: History.Digest.source_digest(index, mutant.line),
       selected_tests_digest: History.Digest.selected_tests_digest(entries),
       project_digest: project_digest,
-      test_timeout_ms: opts.test_timeout_ms
+      test_timeout_ms: opts.test_timeout_ms,
+      # Wave 4's `--suite-timeout-ms` feeds the host deadline the same way
+      # `--test-timeout-ms` feeds the per-test one, so it is part of the reuse
+      # key: changing it can flip timeout/killed/survived verdicts.
+      suite_timeout_ms: opts.suite_timeout_ms
     }
   end
 
@@ -801,7 +826,11 @@ defmodule Mix.Tasks.Mut do
         duration_ms: 0,
         # JSON null decodes to the atom `:null`; the reporter expects a binary
         # or nil killing test, so coerce anything non-binary to nil.
-        killing_test: binary_or_nil(stored["killing_test"])
+        killing_test: binary_or_nil(stored["killing_test"]),
+        # F2: carry the authoritative killing test FILE through reuse too —
+        # without it a reused `killed` verdict loses its `killedBy` in the
+        # Stryker report and falls back to the module-name heuristic.
+        killing_test_file: binary_or_nil(stored["killing_test_file"])
       }
 
       record_result(ctx.metrics_pid, %{mutant | covering_tests: rel}, result)
@@ -1444,6 +1473,10 @@ defmodule Mix.Tasks.Mut do
 
   defp killer_file(_result, [first | _]), do: first
 
+  # Returns `:ok`, or `:error` when a file reporter could not be written — the
+  # caller folds that into the run's gate result so the closing banner (and the
+  # exit code) report the failure instead of claiming success (T24 follow-up).
+  @spec render_reports(map(), map(), Path.t(), Path.t(), map()) :: :ok | :error
   defp render_reports(snapshot, plan, work_copy, host_root, opts) do
     if :terminal in opts.reporters do
       IO.puts(Terminal.render_summary(snapshot))
@@ -1465,7 +1498,12 @@ defmodule Mix.Tasks.Mut do
       if :error in results do
         IO.puts(:stderr, "mutalisk: one or more report files could not be written; exiting 1")
         fail_run()
+        :error
+      else
+        :ok
       end
+    else
+      :ok
     end
   end
 
@@ -1629,9 +1667,9 @@ defmodule Mix.Tasks.Mut do
     Metrics.start_phase(metrics_pid, :report_writing)
     snapshot = Metrics.snapshot(metrics_pid)
 
-    render_reports(snapshot, plan, work_copy, host_root, opts)
+    report_result = render_reports(snapshot, plan, work_copy, host_root, opts)
     Metrics.end_phase(metrics_pid, :report_writing)
-    Metrics.snapshot(metrics_pid)
+    {Metrics.snapshot(metrics_pid), report_result}
   end
 
   # Render + validate the Stryker JSON without writing it (used to time the

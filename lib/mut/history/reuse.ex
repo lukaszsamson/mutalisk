@@ -6,7 +6,7 @@ defmodule Mut.History.Reuse do
   Conservative by mandate ("incorrect reuse is worse than a slow run"): reuse
   only when **every** input that can affect the verdict is unchanged — the
   mutant's function source, its selected tests, the coarse project fingerprint
-  (all source + config + deps), and the timeout budget (see `reusable?/2`). Any
+  (all source + config + deps), and BOTH timeout budgets (see `reusable?/2`). Any
   missing entry, any digest mismatch, or — under `--since` — a changed source
   file → `:execute`.
   """
@@ -18,7 +18,8 @@ defmodule Mut.History.Reuse do
           source_digest: String.t(),
           selected_tests_digest: String.t(),
           project_digest: String.t(),
-          test_timeout_ms: pos_integer() | nil
+          test_timeout_ms: pos_integer() | nil,
+          suite_timeout_ms: pos_integer() | nil
         }
 
   @doc """
@@ -52,10 +53,18 @@ defmodule Mut.History.Reuse do
   #     (M-review P1b): lowering it can turn a previously `survived` mutant into
   #     a `timeout` detection, so a budget change must invalidate every verdict,
   #     not only stored `"timeout"` ones.
+  #   * `suite_timeout_ms` — the `--suite-timeout-ms` host deadline (Wave 4,
+  #     `Mut.Deadline`). It caps the wall clock a mutant's suite may burn, so
+  #     changing it can flip `timeout`/`killed`/`survived` exactly like
+  #     `test_timeout_ms` does. Format-1 entries (and any entry missing the
+  #     key) read back as `nil`, so they stay reusable only while the current
+  #     run leaves `--suite-timeout-ms` unset and are rejected the moment one
+  #     is configured.
   defp reusable?(stored, current) do
     stored["source_digest"] == current.source_digest and
       stored["selected_tests_digest"] == current.selected_tests_digest and
       stored["project_digest"] == current.project_digest and
-      stored["test_timeout_ms"] == current.test_timeout_ms
+      stored["test_timeout_ms"] == current.test_timeout_ms and
+      Map.get(stored, "suite_timeout_ms") == current.suite_timeout_ms
   end
 end

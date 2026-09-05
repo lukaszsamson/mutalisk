@@ -51,4 +51,30 @@ defmodule Mix.Tasks.MutReportWriteTest do
 
     assert stderr == ""
   end
+
+  # F3: the run *did* fail (the writers already registered exit 1), so the
+  # closing banner must not read like a clean run.
+  describe "run_result/2 + banner/2" do
+    test "a report-write failure fails the run even when the --fail-at gate passed" do
+      assert MutTask.run_result(:passed, :error) == :report_failed
+      assert MutTask.banner(:report_failed, 12) =~ "report files could not be written"
+      assert MutTask.banner(:report_failed, 12) =~ "exiting 1"
+    end
+
+    test "a passing gate with written reports is the only success" do
+      assert MutTask.run_result(:passed, :ok) == :passed
+      assert MutTask.banner(:passed, 12) == "Mutalisk run complete in 12ms"
+    end
+
+    test "a failing gate is reported regardless of the report outcome" do
+      assert MutTask.run_result(:failed, :ok) == :failed
+      assert MutTask.banner(:failed, 12) =~ "failed the --fail-at gate"
+
+      assert MutTask.run_result(:failed, :error) == :both_failed
+      both = MutTask.banner(:both_failed, 12)
+      assert both =~ "failed the --fail-at gate"
+      assert both =~ "report files could not be written"
+      assert both =~ "exiting 1"
+    end
+  end
 end

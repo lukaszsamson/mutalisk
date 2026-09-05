@@ -384,6 +384,10 @@ defmodule Mut.Reporter.StrykerJson do
       mutant
       | status: Map.get(entry, :status, mutant.status),
         killing_test: Map.get(entry, :killing_test, mutant.killing_test),
+        # The ledger's `killing_test_file` is the authoritative killer file the
+        # runner reported; without copying it here `killed_by/1` never sees it
+        # and falls back to the module-name heuristic (or omits `killedBy`).
+        killing_test_file: Map.get(entry, :killing_test_file, mutant.killing_test_file),
         duration_ms: Map.get(entry, :duration_ms, mutant.duration_ms)
     }
   end

@@ -61,6 +61,30 @@ defmodule Mut.Reporter.StrykerJsonTest do
     assert rendered["mutalisk"]["killed_by_raw"] == %{"stable-killed" => "A.Test fails"}
   end
 
+  # F2: the ledger's `killing_test_file` is authoritative. It must reach the
+  # reporter mutant, otherwise `killed_by/1` falls back to the module-name
+  # heuristic and drops `killedBy` whenever that heuristic is ambiguous.
+  test "an exact ledger killing_test_file wins over the ambiguous module heuristic" do
+    {snapshot, plan} = fixture_snapshot_and_plan([:killed])
+    [mutant] = plan.schema
+    mutant = %{mutant | covering_tests: ["test/a_test.exs", "test/other/a_test.exs"]}
+    plan = %{plan | schema: [mutant]}
+
+    ledger_entry =
+      mutant
+      |> entry()
+      |> Map.merge(%{mutant: mutant, killing_test_file: "test/other/a_test.exs"})
+
+    snapshot = %{snapshot | ledger: [ledger_entry]}
+
+    rendered = StrykerJson.render(snapshot, plan, source_loader(), [])
+
+    assert [result] = rendered["files"]["lib/a.ex"]["mutants"]
+    assert result["killedBy"] == ["test/other/a_test.exs"]
+    # The id resolves against the top-level testFiles dictionary.
+    assert Map.has_key?(rendered["testFiles"], "test/other/a_test.exs")
+  end
+
   test "M99: terminal score (snapshot.score) and Stryker-viewer-derived score agree" do
     # killed=1, timeout=1 (both detected), survived=1; error excluded.
     {snapshot, plan} = fixture_snapshot_and_plan([:killed, :timeout, :survived, :error])
