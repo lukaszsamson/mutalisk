@@ -161,6 +161,17 @@ Set `--suite-timeout-ms N` (or `config :mutalisk, suite_timeout_ms: N`, range
 so ExUnit can report its own timeout first. Each run prints the deadline it
 derived and why.
 
+### Sandbox `priv/` reset
+
+Every mutant runs in a sandbox whose `priv/` tree is restored between mutants,
+so a database, generated asset, directory or symlink a test writes there never
+leaks into the next mutant. Baseline `priv/` files are compared by size + mtime
+(`priv_fingerprint: :stat`, the default) — cheap, but blind to a rewrite that
+keeps the byte size **and** lands in the same mtime second. Set
+`--priv-fingerprint hash` (or `config :mutalisk, priv_fingerprint: :hash`) for a
+content-exact comparison; it costs one content read per `priv/` file per reset,
+per worker.
+
 ## Limitations
 
 - Mutalisk does not mutate DSL-emitted code, macro bodies, or generated code.

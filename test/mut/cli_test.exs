@@ -309,6 +309,30 @@ defmodule Mut.CliTest do
     assert message =~ "--suite-timeout-ms must be an integer between"
   end
 
+  test "priv_fingerprint defaults to :stat and accepts overrides" do
+    assert {:ok, %Options{priv_fingerprint: :stat}} = Cli.parse([])
+
+    assert {:ok, %Options{priv_fingerprint: :hash}} =
+             Cli.parse(["--priv-fingerprint", "hash"])
+
+    assert {:ok, %Options{priv_fingerprint: :hash}} = Cli.parse([], priv_fingerprint: :hash)
+
+    # CLI overrides config.
+    assert {:ok, %Options{priv_fingerprint: :stat}} =
+             Cli.parse(["--priv-fingerprint", "stat"], priv_fingerprint: :hash)
+  end
+
+  test "rejects an unknown --priv-fingerprint mode" do
+    assert {:error, message} = Cli.parse(["--priv-fingerprint", "sha1"])
+    assert message =~ "unknown --priv-fingerprint mode :sha1"
+
+    assert {:error, message} = Cli.parse([], priv_fingerprint: :sha1)
+    assert message =~ "unknown --priv-fingerprint mode :sha1"
+
+    assert {:error, message} = Cli.parse([], priv_fingerprint: 123)
+    assert message =~ "priv_fingerprint must be one of stat, hash"
+  end
+
   test "rejects out-of-range --test-timeout-ms" do
     assert {:error, message} = Cli.parse(["--test-timeout-ms", "100"])
     assert message =~ "--test-timeout-ms must be an integer between"

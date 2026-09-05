@@ -214,6 +214,115 @@ defmodule Mut.SandboxTest do
     sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
   end
 
+  test "reset_priv removes stray priv/ directories and symlinks (T26)" do
+    schema_result = schema_result("priv_entries")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/asset.txt"), "asset\n")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-entries", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    # A test creating an EMPTY directory, a nested directory holding a file,
+    # and a symlink under priv/.
+    empty_dir = Path.join(sandbox.path, "priv/cache")
+    nested_file = Path.join(sandbox.path, "priv/nested/deep/app.db")
+    link = Path.join(sandbox.path, "priv/link.txt")
+    outside = Path.join(sandbox.path, "outside.txt")
+    File.write!(outside, "outside\n")
+    File.mkdir_p!(empty_dir)
+    File.mkdir_p!(Path.dirname(nested_file))
+    File.write!(nested_file, "sqlite-bytes")
+    :ok = File.ln_s(outside, link)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+
+    refute File.exists?(empty_dir)
+    refute File.exists?(Path.join(sandbox.path, "priv/nested"))
+    refute File.exists?(link)
+    # The symlink is removed, never followed: its target is untouched.
+    assert File.read!(outside) == "outside\n"
+    assert File.read!(Path.join(sandbox.path, "priv/asset.txt")) == "asset\n"
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset_priv restores deleted, retargeted and removed baseline priv/ entries (T26)" do
+    schema_result = schema_result("priv_restore")
+    work_copy = schema_result.work_copy_root
+    File.mkdir_p!(Path.join(work_copy, "priv/empty"))
+    File.write!(Path.join(work_copy, "priv/asset.txt"), "asset\n")
+    File.write!(Path.join(work_copy, "priv/other.txt"), "other\n")
+    :ok = File.ln_s("asset.txt", Path.join(work_copy, "priv/current.txt"))
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-restore", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    link = Path.join(sandbox.path, "priv/current.txt")
+    empty = Path.join(sandbox.path, "priv/empty")
+    assert {:ok, "asset.txt"} = File.read_link(link)
+
+    # A test deletes the baseline symlink and the baseline (empty) directory.
+    File.rm!(link)
+    File.rm_rf!(empty)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert {:ok, "asset.txt"} = File.read_link(link)
+    assert File.dir?(empty)
+
+    # A test retargets the baseline symlink.
+    File.rm!(link)
+    :ok = File.ln_s("other.txt", link)
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert {:ok, "asset.txt"} = File.read_link(link)
+
+    # Restoring never writes THROUGH the link: both targets keep their bytes.
+    assert File.read!(Path.join(sandbox.path, "priv/asset.txt")) == "asset\n"
+    assert File.read!(Path.join(sandbox.path, "priv/other.txt")) == "other\n"
+
+    # Idempotent: a second reset finds nothing to do.
+    assert :ok = Sandbox.reset_priv(sandbox)
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
+  test "reset restores a deleted priv/ tree and sweeps stray lib/ entries (T26)" do
+    schema_result = schema_result("priv_tree")
+    File.mkdir_p!(Path.join(schema_result.work_copy_root, "priv/repo"))
+    File.write!(Path.join(schema_result.work_copy_root, "priv/repo/seed.sql"), "seed\n")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-tree", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    # The whole priv/ tree is deleted by a test...
+    File.rm_rf!(Path.join(sandbox.path, "priv"))
+    # ...and a stray directory plus a stray symlink appear under lib/.
+    stray_dir = Path.join(sandbox.path, "lib/generated")
+    stray_link = Path.join(sandbox.path, "lib/alias.ex")
+    File.mkdir_p!(stray_dir)
+    File.write!(Path.join(stray_dir, "gen.ex"), "# generated\n")
+    :ok = File.ln_s("arith.ex", stray_link)
+
+    assert :ok = Sandbox.reset(sandbox)
+
+    assert File.dir?(Path.join(sandbox.path, "priv/repo"))
+    assert File.read!(Path.join(sandbox.path, "priv/repo/seed.sql")) == "seed\n"
+    refute File.exists?(stray_dir)
+    refute File.exists?(stray_link)
+    assert File.read!(Path.join(sandbox.path, "lib/arith.ex")) == "defmodule Arith, do: :ok\n"
+    # The build tree is untouched by the source sweep.
+    assert File.exists?(
+             Path.join(sandbox.path, "_build/mut_schema/lib/demo_app/ebin/Elixir.Arith.beam")
+           )
+
+    sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
+  end
+
   test "reset sweeps umbrella apps/<app>/priv (T26)" do
     schema_result = umbrella_schema_result("umbrella_priv")
 

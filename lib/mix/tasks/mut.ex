@@ -69,6 +69,12 @@ defmodule Mix.Tasks.Mut do
       because several individually valid slow tests can otherwise exceed a budget
       sized for a single test, and the resulting host timeout counts as a
       detection and inflates the score.
+    - `--priv-fingerprint stat|hash` — How each sandbox's copied `priv/` tree is
+      fingerprinted for the between-mutant reset. `stat` (the default) compares
+      size + mtime: cheap, but it misses a rewrite that keeps the byte size AND
+      lands in the same mtime second. `hash` compares content: exact, at the
+      cost of reading every `priv/` file on every reset (per mutant, per
+      worker). Use `hash` when tests rewrite fixtures under `priv/` in place.
     - `--incremental` — Reuse verdicts from a prior run's history for
       unchanged mutants instead of re-executing them
       (opt-in; see `history_path` config). Materially
@@ -88,7 +94,7 @@ defmodule Mix.Tasks.Mut do
   deprecated, still-accepted namespace kept for compatibility) and the file;
   the file is the base. Keys (same names in all layers): `files`, `test_paths`, `mutators`,
   `enabled_targets`, `selection`, `fail_at`, `concurrency`, `test_timeout_ms`,
-  `suite_timeout_ms`, `reporters`, `output_path`, `exclude`, `max_mutants`,
+  `suite_timeout_ms`, `priv_fingerprint`, `reporters`, `output_path`, `exclude`, `max_mutants`,
   `since`, `incremental`, `history_path`, and
   `coverage_timeout_ms`. `exclude`, `history_path`, and
   `coverage_timeout_ms` are config-only (no CLI flag); the rest accept a CLI
@@ -441,7 +447,8 @@ defmodule Mix.Tasks.Mut do
             Sandbox.create_pool(schema_result, effective_concurrency,
               run_id: run_id,
               force: true,
-              root: artifact_root
+              root: artifact_root,
+              priv_fingerprint: opts.priv_fingerprint
             )
           )
 

@@ -14,12 +14,20 @@ defmodule Mut.Sandbox do
   ]
 
   @typedoc """
-  A baseline entry is either a content hash (hex sha256) or a stat
-  fingerprint `{:stat, size, mtime_posix}`. The stored value decides which
-  fingerprint is recomputed for the comparison, so both kinds coexist in one
-  baseline map (see `:priv_fingerprint`).
+  A baseline entry describes one filesystem entry:
+
+    * a regular file — a content hash (hex sha256) or a stat fingerprint
+      `{:stat, size, mtime_posix}` (see `:priv_fingerprint`),
+    * a symlink — `{:symlink, target}`, recorded with `File.read_link/1` and
+      never followed,
+    * a directory — `:directory` (so an EMPTY baseline directory is restored
+      and a stray one is swept).
+
+  The stored value decides which fingerprint is recomputed for the
+  comparison, so every kind coexists in one baseline map.
   """
-  @type fingerprint :: String.t() | {:stat, non_neg_integer, integer}
+  @type fingerprint ::
+          String.t() | {:stat, non_neg_integer, integer} | {:symlink, Path.t()} | :directory
 
   @type t :: %__MODULE__{
           id: pos_integer,
@@ -137,10 +145,17 @@ defmodule Mut.Sandbox do
   them on every reset (twice — source and sandbox) costs real wall-clock per
   mutant. Trade-off: a rewrite that keeps the byte size AND lands in the same
   mtime second (the resolution `:file.read_file_info/2` exposes) is not
-  detected. Pass `priv_fingerprint: :hash` to `create_pool/3` for
-  content-exact detection at full hashing cost. Restored `priv` files have
-  their mtime reset to the recorded baseline value so the fingerprint is
-  stable across resets.
+  detected. Pass `priv_fingerprint: :hash` to `create_pool/3` (config key
+  `priv_fingerprint`, flag `--priv-fingerprint`) for content-exact detection at
+  full hashing cost. Restored `priv` files have their mtime reset to the
+  recorded baseline value so the fingerprint is stable across resets.
+
+  The baseline records EVERY entry type, not just regular files: symlinks (by
+  target, read with `File.read_link/1` and never followed) and directories
+  (including empty ones). So a reset also removes a directory or symlink a
+  test created, recreates one it deleted, and re-points one it retargeted —
+  all of which a `File.exists?`/`File.dir?`/`File.ls` in the next mutant's
+  tests would otherwise observe (T26).
   """
   @spec reset(t) :: :ok | {:error, term}
   def reset(%__MODULE__{} = sandbox) do
@@ -261,18 +276,44 @@ defmodule Mut.Sandbox do
   end
 
   defp restore_baseline_files(sandbox, baseline) do
-    Enum.each(baseline, fn {relative, expected} ->
+    # Directories first (parents before children): a baseline file whose
+    # directory was replaced by a regular file can only be restored once that
+    # directory is back.
+    baseline
+    |> Enum.sort_by(fn {relative, expected} -> {restore_order(expected), relative} end)
+    |> Enum.each(fn {relative, expected} ->
       target = Path.join(sandbox.path, relative)
 
       if fingerprint(target, expected) != expected do
-        source = Path.join(sandbox.baseline_source, relative)
         File.mkdir_p!(Path.dirname(target))
-        File.rm_rf!(target)
-        :ok = Mut.FileCopy.copy_tree(source, target)
-        restore_mtime(target, expected)
+        restore_entry(sandbox, relative, target, expected)
       end
     end)
 
+    :ok
+  end
+
+  defp restore_order(:directory), do: 0
+  defp restore_order(_expected), do: 1
+
+  defp restore_entry(_sandbox, _relative, target, :directory) do
+    File.rm_rf!(target)
+    File.mkdir_p!(target)
+    :ok
+  end
+
+  # `File.rm_rf!/1` on a symlink removes the LINK, never its target, so a
+  # retargeted or clobbered link is replaced rather than written through.
+  defp restore_entry(_sandbox, _relative, target, {:symlink, link_target}) do
+    File.rm_rf!(target)
+    :ok = File.ln_s(link_target, target)
+  end
+
+  defp restore_entry(sandbox, relative, target, expected) do
+    source = Path.join(sandbox.baseline_source, relative)
+    File.rm_rf!(target)
+    :ok = Mut.FileCopy.copy_tree(source, target)
+    restore_mtime(target, expected)
     :ok
   end
 
@@ -285,32 +326,58 @@ defmodule Mut.Sandbox do
     baseline_paths = baseline(sandbox)
     apps_dir = Mut.Umbrella.apps_path_name(sandbox.path)
     baseline_roots = baseline_roots(sandbox, baseline_paths, apps_dir)
+    complete_roots = complete_roots(sandbox)
 
     sandbox.path
-    |> all_files()
-    |> Enum.each(fn file ->
-      relative = Path.relative_to(file, sandbox.path)
+    |> all_entries()
+    |> Enum.each(fn {path, type} ->
+      relative = Path.relative_to(path, sandbox.path)
+      root = path_root(relative, apps_dir)
 
-      if tracked_root?(relative, baseline_roots, apps_dir) and
-           not Map.has_key?(baseline_paths, relative) do
-        File.rm!(file)
+      if Map.has_key?(baseline_roots, root) and not Map.has_key?(baseline_paths, relative) and
+           sweepable?(type, Map.has_key?(complete_roots, root)) do
+        remove_stray_entry(path, type)
       end
     end)
 
     :ok
   end
 
+  # Only roots whose baseline records EVERY entry type — `priv/` and the
+  # source `lib/` trees — may have stray DIRECTORIES and SYMLINKS swept. The
+  # `_build/` snapshot lists regular files only, so a directory or link there
+  # is not "stray" merely because the snapshot lacks it (sweeping those would
+  # delete the build).
+  defp sweepable?(:regular, _complete?), do: true
+  defp sweepable?(_type, complete?), do: complete?
+
+  defp remove_stray_entry(path, :directory) do
+    File.rm_rf!(path)
+    :ok
+  end
+
+  # A stray file/symlink may already be gone with a stray parent directory
+  # removed earlier in the same walk. `File.rm!/1` on a symlink removes the
+  # link, not its target.
+  defp remove_stray_entry(path, _type) do
+    case File.lstat(path) do
+      {:ok, _stat} -> File.rm!(path)
+      {:error, _reason} -> :ok
+    end
+  end
+
   # The cheap counterpart of `remove_stray_files/1`: walks only the `priv`
-  # trees instead of the whole sandbox.
+  # trees instead of the whole sandbox. The `priv` baseline is complete (files,
+  # symlinks and directories), so every stray entry type is swept.
   defp remove_stray_priv_files(sandbox, baseline) do
     sandbox.path
     |> priv_dirs()
-    |> Enum.flat_map(&all_files/1)
-    |> Enum.each(fn file ->
-      relative = Path.relative_to(file, sandbox.path)
+    |> Enum.flat_map(&all_entries/1)
+    |> Enum.each(fn {path, type} ->
+      relative = Path.relative_to(path, sandbox.path)
 
       unless Map.has_key?(baseline, relative) do
-        File.rm!(file)
+        remove_stray_entry(path, type)
       end
     end)
 
@@ -330,22 +397,21 @@ defmodule Mut.Sandbox do
       else: {:error, {:reset_mismatch, Enum.map(mismatches, &elem(&1, 0))}}
   end
 
-  defp all_files(root) do
-    root
-    |> do_all_files()
-    |> Enum.filter(&File.regular?/1)
-  end
-
-  defp do_all_files(root) do
+  # Walks `root` with `lstat` (symlinks are NEVER followed) and returns every
+  # entry as `{path, :regular | :symlink | :directory}` — directories and empty
+  # directories included, so a baseline can record, and a sweep can remove,
+  # entries of every type (T26). Other types (devices, fifos) are ignored.
+  defp all_entries(root) do
     root
     |> File.ls!()
     |> Enum.flat_map(fn entry ->
       path = Path.join(root, entry)
 
       case File.lstat(path) do
-        {:ok, %File.Stat{type: :directory}} -> do_all_files(path)
-        {:ok, %File.Stat{type: :symlink}} -> []
-        {:ok, _stat} -> [path]
+        {:ok, %File.Stat{type: :directory}} -> [{path, :directory} | all_entries(path)]
+        {:ok, %File.Stat{type: :symlink}} -> [{path, :symlink}]
+        {:ok, %File.Stat{type: :regular}} -> [{path, :regular}]
+        {:ok, _stat} -> []
         {:error, _reason} -> []
       end
     end)
@@ -376,8 +442,15 @@ defmodule Mut.Sandbox do
     |> Map.new(&{Path.relative_to(&1, sandbox.path), true})
   end
 
-  defp tracked_root?(relative, roots, apps_dir),
-    do: Map.has_key?(roots, path_root(relative, apps_dir))
+  # Roots whose baseline records every entry type: `priv/` (captured by the
+  # lstat walker) and the source `lib/` trees (same walker, see
+  # `source_baseline/1`).
+  defp complete_roots(sandbox) do
+    sandbox.path
+    |> source_dirs()
+    |> Map.new(&{Path.relative_to(&1, sandbox.path), true})
+    |> Map.merge(priv_roots(sandbox))
+  end
 
   defp path_root(relative, apps_dir) do
     case Path.split(relative) do
@@ -412,11 +485,16 @@ defmodule Mut.Sandbox do
     # symlinked directory (`priv/static -> ../../assets`) and record baseline
     # entries whose real target lives OUTSIDE the sandbox, which a restore
     # would then write through.
-    path
-    |> priv_dirs()
-    |> Enum.filter(&File.dir?/1)
-    |> Enum.flat_map(&all_files/1)
-    |> Map.new(fn file -> {Path.relative_to(file, path), priv_fingerprint(file, mode)} end)
+    roots = priv_dirs(path)
+
+    roots
+    |> Enum.flat_map(&all_entries/1)
+    |> Map.new(fn {entry, type} ->
+      {Path.relative_to(entry, path), entry_fingerprint(entry, type, mode)}
+    end)
+    # The `priv` roots themselves, so a test that deletes a whole `priv/` tree
+    # has it recreated even when it is empty.
+    |> Map.merge(Map.new(roots, &{Path.relative_to(&1, path), :directory}))
   end
 
   # Single-app: `priv/`. Umbrella: the root's own `priv/` (rare but harmless)
@@ -430,6 +508,10 @@ defmodule Mut.Sandbox do
     |> Enum.map(&Path.join(&1, "priv"))
     |> Enum.filter(&File.dir?/1)
   end
+
+  defp entry_fingerprint(_entry, :directory, _mode), do: :directory
+  defp entry_fingerprint(entry, :symlink, _mode), do: link_fingerprint(entry)
+  defp entry_fingerprint(entry, :regular, mode), do: priv_fingerprint(entry, mode)
 
   defp priv_fingerprint(file, :hash), do: sha256(file)
   defp priv_fingerprint(file, :stat), do: stat_fingerprint(file)
@@ -451,48 +533,80 @@ defmodule Mut.Sandbox do
   end
 
   # The recorded value decides the comparison: hex hash -> content,
-  # `{:stat, size, mtime}` -> stat. Both return `nil` for a missing file.
+  # `{:stat, size, mtime}` -> stat, `{:symlink, target}` -> link target,
+  # `:directory` -> directory presence. All return `nil` for a missing entry
+  # (or one whose TYPE changed), which never equals the recorded value, so the
+  # entry is restored.
   defp fingerprint(path, expected) when is_binary(expected), do: sha256(path)
   defp fingerprint(path, {:stat, _size, _mtime}), do: stat_fingerprint(path)
+  defp fingerprint(path, {:symlink, _target}), do: link_fingerprint(path)
+  defp fingerprint(path, :directory), do: directory_fingerprint(path)
 
+  # `File.lstat/2`, never `File.stat/2` (W4-3): a baseline file replaced by a
+  # symlink must read as a mismatch, not as the link target's stat — otherwise
+  # the restore would write THROUGH the link, outside the sandbox.
   defp stat_fingerprint(path) do
-    case File.stat(path, time: :posix) do
+    case File.lstat(path, time: :posix) do
       {:ok, %File.Stat{type: :regular, size: size, mtime: mtime}} -> {:stat, size, mtime}
       _other -> nil
     end
   end
 
+  defp link_fingerprint(path) do
+    case File.read_link(path) do
+      {:ok, target} -> {:symlink, target}
+      {:error, _reason} -> nil
+    end
+  end
+
+  defp directory_fingerprint(path) do
+    case File.lstat(path) do
+      {:ok, %File.Stat{type: :directory}} -> :directory
+      _other -> nil
+    end
+  end
+
+  # Same lstat walker as `priv/`: every entry type is recorded (regular files by
+  # content hash, symlinks by target, directories by presence) so the source
+  # sweep can remove a stray directory or symlink a test created under `lib/`
+  # without mistaking a baseline one for a stray (T26).
   defp source_baseline(baseline_source) do
-    baseline_source
-    |> source_globs()
-    |> Enum.flat_map(&Path.wildcard(&1, match_dot: true))
-    |> Enum.filter(&File.regular?/1)
-    |> Map.new(fn file ->
-      relative = Path.relative_to(file, baseline_source)
-      {relative, sha256(file)}
+    roots = source_dirs(baseline_source)
+
+    roots
+    |> Enum.flat_map(&all_entries/1)
+    |> Map.new(fn {entry, type} ->
+      {Path.relative_to(entry, baseline_source), entry_fingerprint(entry, type, :hash)}
     end)
+    # The `lib` roots themselves: recorded so the sweep does not see them as
+    # stray directories, and so a deleted one is recreated.
+    |> Map.merge(Map.new(roots, &{Path.relative_to(&1, baseline_source), :directory}))
   end
 
   # Single-app: the project's own lib/. Umbrella: every child app's lib/, so a
   # fallback-patched source file under apps/<app>/lib resets between mutants
   # (the umbrella root has no lib/ of its own). M68.
-  defp source_globs(baseline_source) do
-    if Mut.Umbrella.umbrella?(baseline_source) do
-      baseline_source
+  defp source_dirs(root) do
+    if Mut.Umbrella.umbrella?(root) do
+      root
       |> Mut.Umbrella.app_dirs()
-      |> Enum.map(&Path.join(&1, "lib/**/*"))
+      |> Enum.map(&Path.join(&1, "lib"))
     else
-      [Path.join(baseline_source, "lib/**/*")]
+      [Path.join(root, "lib")]
     end
+    |> Enum.filter(&File.dir?/1)
   end
 
   defp sha256(path) do
-    if File.regular?(path) do
+    if regular?(path) do
       :sha256
       |> :crypto.hash(File.read!(path))
       |> Base.encode16(case: :lower)
     end
   end
+
+  # `File.regular?/1` follows symlinks; the baseline comparison must not.
+  defp regular?(path), do: match?({:ok, %File.Stat{type: :regular}}, File.lstat(path))
 
   defp pool_path(run_id, root),
     do: Path.expand(Path.join([root, @sandbox_dir, run_id]))

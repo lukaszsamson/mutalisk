@@ -21,6 +21,7 @@ defmodule Mut.Cli do
             keep_work_copy: boolean,
             test_timeout_ms: pos_integer,
             suite_timeout_ms: pos_integer | nil,
+            priv_fingerprint: :stat | :hash,
             exclude: [Regex.t()] | nil,
             incremental: boolean,
             since: String.t() | nil,
@@ -47,7 +48,8 @@ defmodule Mut.Cli do
       :since,
       :history_path,
       :coverage_timeout_ms,
-      incremental: false
+      incremental: false,
+      priv_fingerprint: :stat
     ]
   end
 
@@ -56,6 +58,7 @@ defmodule Mut.Cli do
   @default_reporters [:terminal, :stryker_json]
   @known_reporters [:terminal, :stryker_json, :html, :github_actions]
   @known_selection_modes [:static, :coverage, :coverage_with_static_fallback]
+  @known_priv_fingerprints [:stat, :hash]
   @known_targets [
     :dispatch,
     :guard,
@@ -136,6 +139,7 @@ defmodule Mut.Cli do
     :concurrency,
     :test_timeout_ms,
     :suite_timeout_ms,
+    :priv_fingerprint,
     :reporters,
     :output_path,
     :exclude,
@@ -160,6 +164,7 @@ defmodule Mut.Cli do
     keep_work_copy: :boolean,
     test_timeout_ms: :integer,
     suite_timeout_ms: :integer,
+    priv_fingerprint: :string,
     incremental: :boolean,
     since: :string
   ]
@@ -309,6 +314,7 @@ defmodule Mut.Cli do
          {:ok, test_paths} <- test_paths(parsed, config),
          {:ok, test_timeout_ms} <- test_timeout_ms(parsed, config),
          {:ok, suite_timeout_ms} <- suite_timeout_ms(parsed, config),
+         {:ok, priv_fingerprint} <- priv_fingerprint(parsed, config),
          {:ok, coverage_timeout_ms} <- coverage_timeout_ms(config),
          {:ok, exclude} <- exclude(config),
          {:ok, incremental} <- incremental(parsed, config),
@@ -330,6 +336,7 @@ defmodule Mut.Cli do
          keep_work_copy: Keyword.get(parsed, :keep_work_copy, false),
          test_timeout_ms: test_timeout_ms,
          suite_timeout_ms: suite_timeout_ms,
+         priv_fingerprint: priv_fingerprint,
          exclude: exclude,
          incremental: incremental,
          since: since,
@@ -467,6 +474,35 @@ defmodule Mut.Cli do
       _other ->
         {:error,
          "--suite-timeout-ms must be an integer between #{@suite_timeout_min_ms} and #{@suite_timeout_max_ms}; run `mix help mut`"}
+    end
+  end
+
+  # How the copied `priv/` baseline is fingerprinted for the between-mutant
+  # reset. `:stat` (default) compares size + mtime and is cheap; `:hash` reads
+  # every `priv/` file on every reset but catches a same-size rewrite landing
+  # in the same mtime second. See `Mut.Sandbox.reset/1`.
+  defp priv_fingerprint(parsed, config) do
+    value =
+      Keyword.get(
+        parsed,
+        :priv_fingerprint,
+        Keyword.get(config, :priv_fingerprint, :stat)
+      )
+
+    # Validate the string form FIRST, then map to a known atom, so a bad value
+    # is never interned (same rule as `selection/2`).
+    if is_binary(value) or is_atom(value) do
+      name = normalize_name(value)
+
+      if name in Enum.map(@known_priv_fingerprints, &Atom.to_string/1) do
+        {:ok, String.to_existing_atom(name)}
+      else
+        {:error,
+         "unknown --priv-fingerprint mode :#{name}; known: #{known(@known_priv_fingerprints)}"}
+      end
+    else
+      {:error,
+       "priv_fingerprint must be one of #{known(@known_priv_fingerprints)}; got #{inspect(value, charlists: :as_lists)}"}
     end
   end
 
