@@ -90,7 +90,9 @@ defmodule Mut.EnvWalkerVariableTest do
     end
     '''
 
-    assert vars(src) == [a: [:b]]
+    # Wave 6: the `{x, a}` clause body is a two-tuple in expression position,
+    # so both elements are now visited (they used to die at the leaf clause).
+    assert vars(src) == [x: [:a, :b], a: [:b, :x], a: [:b]]
   end
 
   test "descends struct field expressions without emptying the struct" do
@@ -102,10 +104,9 @@ defmodule Mut.EnvWalkerVariableTest do
     end
     '''
 
-    # `a`/`b` are sole struct-field reads (no swap alternative survives), so no
-    # candidate — but the struct body is descended (clause exercised), not
-    # treated as an opaque leaf.
-    assert vars(src) == []
+    # Wave 6: struct field VALUES are descended (the keyword-shaped field
+    # names are not), so both reads are found with each other as alternatives.
+    assert vars(src) == [a: [:b], b: [:a]]
   end
 
   # M108: exercise the `try do/rescue/after` descent (walk_try) — the walker
@@ -319,5 +320,96 @@ defmodule Mut.EnvWalkerVariableTest do
     {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
     pairs = EnvWalker.collect_variable_candidates(ast, file: "lib/foo.ex", source: src)
     assert Enum.all?(pairs, fn {c, _snap} -> c.env_context == nil end)
+  end
+
+  describe "two-tuple / map / for-option descent (Wave 6)" do
+    test "variable reads inside a two-tuple literal are found" do
+      src = ~S'''
+      defmodule Foo do
+        def run(a, b) do
+          {a, b}
+        end
+      end
+      '''
+
+      assert vars(src) == [a: [:b], b: [:a]]
+    end
+
+    test "variable reads inside map literal values are found; keys are not" do
+      src = ~S'''
+      defmodule Foo do
+        def run(a, b) do
+          %{first: a, second: b}
+        end
+      end
+      '''
+
+      assert vars(src) == [a: [:b], b: [:a]]
+    end
+
+    test "a read inside a tuple counts toward other_uses? (false -> true)" do
+      src = ~S'''
+      defmodule Foo do
+        def run(a, b) do
+          _ = a
+          {a, b}
+        end
+      end
+      '''
+
+      {:ok, ast} = EnvWalker.parse_string(src, "lib/foo.ex")
+
+      marks =
+        ast
+        |> EnvWalker.collect_variable_candidates(file: "lib/foo.ex", source: src)
+        |> Enum.map(fn {c, _} -> {elem(c.node, 0), c.other_uses?} end)
+
+      # Before Wave 6 the `{a, b}` reads were invisible, so `a` had a single
+      # counted use and `other_uses?` was false everywhere.
+      assert {:a, true} in marks
+      refute {:a, false} in marks
+    end
+
+    test "a for `uniq:` option value is walked" do
+      src = ~S'''
+      defmodule Foo do
+        def run(xs, flag) do
+          for x <- xs, uniq: flag, do: x
+        end
+      end
+      '''
+
+      # `xs` (generator source) and `x` (body) were already found; `flag` is
+      # the new one — the `uniq:` option value used to be unreachable.
+      assert vars(src) == [xs: [:flag], flag: [:xs], x: [:flag, :xs]]
+    end
+
+    test "pattern-position pairs bind, they do not emit read candidates" do
+      src = ~S'''
+      defmodule Foo do
+        def run(kw, m, t) do
+          [a: x] = kw
+          %{k: y} = m
+          {:ok, z} = t
+          {x, y, z}
+        end
+      end
+      '''
+
+      # Exactly six reads: `kw`/`m`/`t` on the right of each `=`, and
+      # `x`/`y`/`z` in the final (3-element, always-descended) tuple. The
+      # pattern sides contribute NOTHING — the two-tuple clause is
+      # expression-context only, so `[a: x]`, `%{k: y}` and `{:ok, z}` emit no
+      # read candidate on the names they bind. Body `=` bindings also stay out
+      # of every `bound_vars` set.
+      assert vars(src) == [
+               kw: [:m, :t],
+               m: [:kw, :t],
+               t: [:kw, :m],
+               x: [:kw, :m, :t],
+               y: [:kw, :m, :t],
+               z: [:kw, :m, :t]
+             ]
+    end
   end
 end

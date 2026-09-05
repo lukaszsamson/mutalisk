@@ -106,6 +106,10 @@ defmodule Mut.EnvWalker do
   @list_hint_ops ~w(++ -- length hd tl)a
   @boolean_hint_ops ~w(and or not)a
 
+  # Wave 6: `for` comprehension options whose value is an ordinary expression
+  # (`:do` is handled separately as the comprehension body).
+  @for_option_keys ~w(into uniq reduce)a
+
   @doc """
   Parses source with the literal-encoder option, returning an AST
   that wraps each literal in `{:__block__, meta, [value]}` so the
@@ -830,7 +834,32 @@ defmodule Mut.EnvWalker do
     classify_user_call(:., meta, remote_receivers(dot_args) ++ args, state)
   end
 
-  # Two-tuple (e.g. {:do, body} keyword entries).
+  # Wave 6: a two-element tuple in EXPRESSION position. This shape covers a
+  # tuple literal (`{:ok, "tag"}`, `{key, value}`), a plain map-literal pair
+  # (`%{mode: "fast"}` — map pairs are the `args` of the `%{}` call node and
+  # reach here one at a time via `descend_args/2`), a struct field pair, and a
+  # keyword entry. All of them used to die here as a leaf: the tuple emitted a
+  # CollectionEmpty candidate but nothing inside it was ever visited, so inner
+  # literals produced no candidates and inner variable reads were not counted
+  # (skewing `other_uses?` for VariableReplace elsewhere in the function).
+  #
+  # A keyword-shaped key (a bare atom or its `{:__block__, _, [atom]}` literal
+  # encoding) is NEVER a candidate, so only its value is walked, in an
+  # isolated state — the Wave 2 treatment, unchanged. Any other key (a
+  # variable, a string, a nested expression) is an ordinary sub-expression and
+  # is walked before the value, in source order.
+  defp descend_expr({key, value}, %{context: nil} = state) do
+    if keyword_key?(key) do
+      walk_isolated(value, state)
+    else
+      walk(value, walk(key, state))
+    end
+  end
+
+  # Pattern (`:match`) and guard positions keep the historical leaf behaviour.
+  # Pattern pairs are routed by their enclosing form through
+  # `walk_in_context(…, :match)`; descending them here would emit
+  # VariableReplace candidates on freshly bound names.
   defp descend_expr({_a, _b}, state), do: state
 
   # List of children. T12: a keyword-syntax entry (`do:`/`else:`/`opt:`) is a
@@ -842,7 +871,8 @@ defmodule Mut.EnvWalker do
   # leak into later entries, mirroring `walk_clauses/2`.
   #
   # Map pairs do NOT reach here: they are the `args` of a `%{}` call node and
-  # are walked one-by-one by `descend_args/2`, so nothing is double-visited.
+  # are walked one-by-one by `descend_args/2` (which routes each pair through
+  # the two-tuple clause above), so nothing is double-visited.
   defp descend_expr(list, state) when is_list(list) do
     Enum.reduce(list, state, fn
       {key, value}, acc ->
@@ -1061,12 +1091,28 @@ defmodule Mut.EnvWalker do
       kw when is_list(kw) ->
         clauses = Enum.drop(args, -1)
         state = Enum.reduce(clauses, state, &walk_for_clause/2)
+        state = walk_for_options(kw, state)
         do_body = fetch_block(kw, :do)
         if do_body, do: walk(do_body, state), else: state
 
       _ ->
         Enum.reduce(args, state, &walk_for_clause/2)
     end
+  end
+
+  # Wave 6(c): `for x <- xs, into: %{}, uniq: true, reduce: 0, do: …`. Only
+  # `:do` was ever fetched, so the option VALUES — ordinary expressions
+  # evaluated in the enclosing body context — were invisible to the walker.
+  # Walk each in an isolated state (an option value binds nothing the
+  # comprehension body may see), in source order ahead of the `:do` block.
+  # Keys are options, never candidates.
+  defp walk_for_options(kw, state) do
+    Enum.reduce(@for_option_keys, state, fn key, acc ->
+      case fetch_block(kw, key) do
+        nil -> acc
+        value -> walk_isolated(value, acc)
+      end
+    end)
   end
 
   defp walk_for_clause({:<-, _meta, [pattern, expr]}, state) do

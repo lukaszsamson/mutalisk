@@ -364,18 +364,19 @@ defmodule Mut.EnvWalkerTest do
       assert literal_texts(src) == [~s("fast")]
     end
 
-    test "keyword values in a map literal are still not descended (unchanged)" do
-      # Map pairs reach `descend_args/2` one at a time, not the list clause, so
-      # T12 does not change them.
+    test "map literal values are descended (Wave 6); keys are never candidates" do
+      # Map pairs reach `descend_args/2` one at a time, not the list clause;
+      # each pair now routes through the two-tuple expression clause, so the
+      # VALUE is walked (isolated) while the keyword-shaped KEY is not.
       src = ~S'''
       defmodule Foo do
         def run do
-          %{mode: "fast"}
+          %{mode: "fast", retries: 3}
         end
       end
       '''
 
-      assert literal_texts(src) == [~s(%{mode: "fast"})]
+      assert literal_texts(src) == [~s("fast"), ~s(%{mode: "fast", retries: 3})]
     end
 
     test "bindings inside an if branch do not leak to the next branch" do
@@ -527,6 +528,131 @@ defmodule Mut.EnvWalkerTest do
 
       [snap] = walk(src) |> Enum.filter(&(&1.scope == :function_body and &1.context == nil))
       assert snap.trust_level == :trusted
+    end
+  end
+
+  describe "two-tuple / map / for-option descent (Wave 6)" do
+    test "two-tuple literal elements are visited (value of a keyword-shaped key)" do
+      src = ~S'''
+      defmodule Foo do
+        def run do
+          {:ok, "tag"}
+        end
+      end
+      '''
+
+      # The tuple itself is still a CollectionEmpty candidate; the `:ok` key is
+      # keyword-shaped and never a candidate; the value is now discovered.
+      assert literal_texts(src) == [~s("tag"), ~s({:ok, "tag"})]
+    end
+
+    test "both elements of a non-keyword-keyed two-tuple are visited" do
+      src = ~S'''
+      defmodule Foo do
+        def run do
+          {"left", "right"}
+        end
+      end
+      '''
+
+      assert literal_texts(src) == [~s("left"), ~s("right"), ~s({"left", "right"})]
+    end
+
+    test "nested two-tuples inside a list are visited" do
+      src = ~S'''
+      defmodule Foo do
+        def run do
+          [{"k", "v"}]
+        end
+      end
+      '''
+
+      assert literal_texts(src) == [~s("k"), ~s("v"), ~s([{"k", "v"}]), ~s({"k", "v"})]
+    end
+
+    test "struct field values are descended, field names are not" do
+      src = ~S'''
+      defmodule Foo do
+        def run do
+          %Range{first: "a", last: "b"}
+        end
+      end
+      '''
+
+      # M50: the struct itself is never emptied, so only the field values show.
+      assert literal_texts(src) == [~s("a"), ~s("b")]
+    end
+
+    test "for `into:` and body literals are both discovered" do
+      src = ~S'''
+      defmodule Foo do
+        def run(xs) do
+          for x <- xs, into: %{key: "in"}, uniq: true, do: {x, "body"}
+        end
+      end
+      '''
+
+      assert literal_texts(src) == [
+               ~s("body"),
+               ~s("in"),
+               ~s(%{key: "in"}),
+               ~s({x, "body"})
+             ]
+    end
+
+    test "for `reduce:` initial value is discovered" do
+      src = ~S'''
+      defmodule Foo do
+        def run(xs) do
+          for x <- xs, reduce: "seed" do
+            acc -> acc <> x
+          end
+        end
+      end
+      '''
+
+      assert literal_texts(src) == [~s("seed")]
+    end
+
+    test "map pairs in a PATTERN stay leaves (no match-context candidates)" do
+      src = ~S'''
+      defmodule Foo do
+        def run(%{k: "lit"} = m), do: m
+      end
+      '''
+
+      assert literal_texts(src) == []
+    end
+
+    test "two-tuple pattern heads stay leaves in case clauses and with" do
+      src = ~S'''
+      defmodule Foo do
+        def run(a) do
+          case a do
+            {:ok, "hit"} -> a
+            _ -> a
+          end
+        end
+
+        def check(a) do
+          with {:ok, "hit"} <- a, do: a
+        end
+      end
+      '''
+
+      assert literal_texts(src) == []
+    end
+
+    test "keyword-list patterns keep their match-context literal candidates" do
+      src = ~S'''
+      defmodule Foo do
+        def run(kw) do
+          [a: "lit"] = kw
+        end
+      end
+      '''
+
+      assert literal_texts(src) == [~s("lit")]
     end
   end
 end

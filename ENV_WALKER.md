@@ -123,6 +123,61 @@ internals it would have needed).
 > populate or use real alias/import/require state" is **correct**. `EnvWalker` is
 > a context/trust walker, not a resolver.
 
+### Structural blind spots in `descend/2` (recall, not trust)
+
+Separate from the trust question above, `EnvWalker`'s hand-rolled descent has
+historically had *recall* gaps: AST shapes it treated as leaves, so nothing
+inside them was ever visited. A blind spot costs candidates twice over — inner
+literals produce none, and inner variable *reads* are not counted, which skews
+`AstCandidate.other_uses?` (the `>= 2 reads` gate on `VariableReplace`) for the
+rest of the enclosing function.
+
+**Closed:**
+
+- **Remote / anonymous calls** (`Mod.fun(args)`, `f.(args)`) — T11. The `{:., _,
+  _}` head fell through to the leaf clause, hiding everything inside
+  `Enum.map(items, fn x -> … end)`-shaped code.
+- **Keyword-syntax values** (`do:`/`else:`/`opt:`) — T12/Wave 2. The key is
+  never a candidate; the value is walked in an isolated state.
+- **Two-element tuples in expression position** — Wave 6. `{:ok, "tag"}`,
+  `{key, value}`: the tuple emitted its `CollectionEmpty` candidate but the
+  elements were never visited. (Three-or-more-element tuples are `{:{}, meta,
+  args}` call nodes and were always descended.)
+- **Plain map-literal values** — Wave 6. `%{mode: "fast"}` pairs are the `args`
+  of the `%{}` node and reach `descend_args/2` one at a time, so they missed
+  the Wave 2 list clause entirely. Struct literals (`%Mod{…}`) follow map
+  literals. Map *update* values (`%{m | k: v}`) already routed through the
+  Wave 2 list clause and are unchanged.
+- **`for` options** — Wave 6. `walk_for/2` fetched only the `:do` block, so the
+  `into:` / `uniq:` / `reduce:` values in the trailing keyword list were never
+  walked.
+
+**Open, and deliberately so:**
+
+- **Two-element tuples in `:match` / `:guard` position stay leaves.** The Wave 6
+  clause is expression-context only. Descending a pattern pair would emit
+  `VariableReplace` candidates on freshly *bound* names (`{:ok, v} ->` binds
+  `v`; it is not a read). Consequence: a pattern-position literal inside a
+  2-tuple (`def c({:tag, "x"})`) yields no `:match` literal candidate, while the
+  same literal in a 3-tuple or list does. Conservative under-approximation.
+- **Keyword-shaped keys are never candidates.** A bare atom key, or its
+  `{:__block__, _, [atom]}` literal encoding, is skipped in keyword lists, map
+  literals, struct fields — and, unavoidably, in a tuple literal whose first
+  element is an atom (`{:ok, x}` gives no `:ok` candidate), since the two are
+  the same AST shape.
+- **`quote` / `unquote` bodies** are refused outright (unchanged policy).
+- **`@reserved_vars`** (`__MODULE__`, `__ENV__`, …) are never variable
+  candidates.
+
+The Wave 6 additions are purely additive: no existing candidate lost its stable
+id, span, or `ast_path`. Expect `other_uses?` **false → true** flips wherever a
+newly visible read is the second use of a name — those *add* `VariableReplace`
+mutants that the `>= 2 reads` gate previously suppressed. Measured with
+`bench/biq/biq_gate.sh` + `biq_diff.sh` on `test/fixtures/demo_app` and on
+`elixir_oss/projects/jason`: **0 removed** in every flag set; added 8
+`CollectionEmpty` (jason, `env_walker`) and 227 + 4 `VariableReplace` (jason /
+demo_app, with `variable` also enabled).
+
 ### The one place `EnvWalker` *is* semantically anchored: `if`/`unless`
 
 `OpaquePolicy` (`lib/mut/opaque_policy.ex`) is binding (per M39): the walker does
