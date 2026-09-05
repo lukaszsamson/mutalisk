@@ -370,8 +370,14 @@ defmodule Mut.Worker do
   end
 
   defp open_mix_port(mix_path, args, cd, env) do
-    Port.open({:spawn_executable, mix_path}, [
-      {:args, args},
+    # T32: launch through Mut.ProcessTree's group launcher so the mutant BEAM
+    # lands in its own process group and can be reaped as a group even after a
+    # non-exec `mix` shim has exited. The launcher `exec`s, so :exit_status,
+    # :stderr_to_stdout, :cd and :env all still describe the real child.
+    {executable, spawn_args} = Mut.ProcessTree.spawn_command(mix_path, args)
+
+    Port.open({:spawn_executable, executable}, [
+      {:args, spawn_args},
       {:cd, cd},
       {:env,
        Enum.map(env, fn {key, value} -> {String.to_charlist(key), String.to_charlist(value)} end)},

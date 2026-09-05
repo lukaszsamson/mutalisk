@@ -84,8 +84,14 @@ defmodule Mut.ChildProcess do
   end
 
   defp open_port(path, args, opts) do
+    # T32: see Mut.ProcessTree — the launcher `exec`s the real executable, so
+    # exit status, merged stdout/stderr, cwd and env are unchanged; it only
+    # puts the child in its own process group so cleanup can signal the whole
+    # tree by group after a wrapper has exited.
+    {executable, spawn_args} = Mut.ProcessTree.spawn_command(path, args)
+
     port_opts = [
-      {:args, args},
+      {:args, spawn_args},
       :stderr_to_stdout,
       :exit_status,
       :binary
@@ -94,7 +100,7 @@ defmodule Mut.ChildProcess do
     port_opts = maybe_put(port_opts, :cd, Keyword.get(opts, :cd))
     port_opts = maybe_put(port_opts, :env, port_env(Keyword.get(opts, :env, [])))
 
-    Port.open({:spawn_executable, path}, port_opts)
+    Port.open({:spawn_executable, executable}, port_opts)
   end
 
   defp maybe_put(opts, _key, nil), do: opts
