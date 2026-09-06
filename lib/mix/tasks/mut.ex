@@ -1231,7 +1231,10 @@ defmodule Mix.Tasks.Mut do
          all_test_files
        ) do
     test_paths = absolute_test_paths(source_root, opts)
-    static_analysis = Static.analyze(test_paths)
+    # Transitive static selection: the source graph lets a test that reaches
+    # the target only through a facade module still be selected.
+    source_paths = Static.default_source_paths(source_root)
+    static_analysis = Static.analyze(test_paths, source_paths: source_paths)
     oracle = coverage_oracle || %CoverageOracle{}
 
     # Precompute the base (per-mutant) test selection ONCE per plan. The base
@@ -1265,9 +1268,9 @@ defmodule Mix.Tasks.Mut do
     }
   end
 
-  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files, _root)
+  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files, root)
        when mode in [:static, :downgraded_to_static] do
-    Mut.TestSelection.for_plan(plan, test_paths)
+    Mut.TestSelection.for_plan(plan, test_paths, source_paths: Static.default_source_paths(root))
   end
 
   defp base_selection(_mode, plan, _test_paths, oracle, static_analysis, all_test_files, root) do

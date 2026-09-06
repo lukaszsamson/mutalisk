@@ -70,7 +70,11 @@ defmodule Mut.TestSelection.CoverageTest do
 
   defp absolute?(path), do: String.starts_with?(path, "/")
 
-  test "M64: a degraded file unrelated to the mutant's module is not unioned" do
+  test "a degraded file is unioned in even without static evidence for the mutant" do
+    # Degraded coverage is UNKNOWN coverage. The static index only names
+    # modules referenced directly in test sources, so "no static evidence" is
+    # not proof of irrelevance — the degraded test may reach the mutant through
+    # a facade. Selecting it is the only sound answer.
     plan = plan([mutant("unrel", "lib/sample.ex", 10, Sample, {:run, 1})])
 
     oracle = %CoverageOracle{
@@ -80,7 +84,10 @@ defmodule Mut.TestSelection.CoverageTest do
 
     result = Coverage.for_plan(plan, oracle, %{Other => MapSet.new(["test/other_test.exs"])})
 
-    assert result["unrel"].test_files == ["test/exact_test.exs"]
+    assert Enum.sort(result["unrel"].test_files) == [
+             "test/exact_test.exs",
+             "test/other_test.exs"
+           ]
   end
 
   test "falls back to enclosing function coverage" do
@@ -157,9 +164,134 @@ defmodule Mut.TestSelection.CoverageTest do
            ]
   end
 
+  describe "clause-head mutations (finding 3)" do
+    # `def value(0), do: :zero` / `def value(_), do: :other`. :cover reports
+    # line 2 only for zero_test and line 3 only for one_test. Mutating the
+    # head's `0` to `1` reroutes `value(0)` to the second clause, so one_test
+    # is a killing test even though it never covered line 2. Exact-line
+    # coverage must not be allowed to drop it.
+    @zero {:file, "test/zero_test.exs"}
+    @one {:file, "test/one_test.exs"}
+
+    defp clause_head_oracle(by_function) do
+      %CoverageOracle{
+        by_line: %{
+          {"lib/astra_pattern.ex", 2} => MapSet.new([@zero]),
+          {"lib/astra_pattern.ex", 3} => MapSet.new([@one])
+        },
+        by_function: by_function
+      }
+    end
+
+    test "a pattern mutation widens to enclosing-function coverage" do
+      plan =
+        plan([
+          mutant("pattern", "lib/astra_pattern.ex", 2, AstraPattern, {:value, 1},
+            env_context: :match
+          )
+        ])
+
+      oracle =
+        clause_head_oracle(%{
+          {AstraPattern, :value, 1} => MapSet.new([@zero, @one])
+        })
+
+      result = Coverage.for_plan(plan, oracle, %{})
+
+      assert result["pattern"] == %{
+               test_files: ["test/one_test.exs", "test/zero_test.exs"],
+               match_kind: :enclosing_function
+             }
+    end
+
+    test "a guard mutation widens to enclosing-function coverage" do
+      plan =
+        plan([
+          mutant("guard", "lib/astra_pattern.ex", 2, AstraPattern, {:value, 1},
+            env_context: :guard
+          )
+        ])
+
+      oracle =
+        clause_head_oracle(%{
+          {AstraPattern, :value, 1} => MapSet.new([@zero, @one])
+        })
+
+      assert Coverage.for_plan(plan, oracle, %{})["guard"].match_kind == :enclosing_function
+    end
+
+    test "without function metadata a pattern mutation widens to file coverage" do
+      # The generated pattern mutant in the reported reproduction carried
+      # `function: nil`, so enclosing-function coverage was unavailable.
+      plan =
+        plan([
+          mutant("pattern", "lib/astra_pattern.ex", 2, AstraPattern, nil, env_context: :match)
+        ])
+
+      result = Coverage.for_plan(plan, clause_head_oracle(%{}), %{})
+
+      assert result["pattern"] == %{
+               test_files: ["test/one_test.exs", "test/zero_test.exs"],
+               match_kind: :enclosing_file
+             }
+    end
+
+    test "an ordinary expression mutation still uses exact-line coverage" do
+      plan = plan([mutant("expr", "lib/astra_pattern.ex", 2, AstraPattern, {:value, 1})])
+
+      result =
+        Coverage.for_plan(
+          plan,
+          clause_head_oracle(%{{AstraPattern, :value, 1} => MapSet.new([@zero, @one])}),
+          %{}
+        )
+
+      assert result["expr"] == %{
+               test_files: ["test/zero_test.exs"],
+               match_kind: :exact_line
+             }
+    end
+
+    test "a clause-head mutation with no coverage at all still reaches all tests" do
+      plan =
+        plan([mutant("pattern", "lib/other.ex", 2, Other, nil, env_context: :match)])
+
+      result =
+        Coverage.for_plan(plan, clause_head_oracle(%{}), %{},
+          all_test_files: ["test/one_test.exs", "test/zero_test.exs"]
+        )
+
+      assert result["pattern"].match_kind == :all_tests
+    end
+  end
+
+  test "finding 4: a degraded test file is selected even when static analysis misses it" do
+    # Degraded oracle reproduction: direct_test's coverage was collected,
+    # indirect_test's collection timed out. indirect_test only names the
+    # facade, so the static index has no entry for AstraHelper pointing at it —
+    # yet it is the only killing test. Unknown coverage must never be read as
+    # proof of irrelevance.
+    plan = plan([mutant("helper", "lib/astra_helper.ex", 2, AstraHelper, {:value, 1})])
+
+    oracle = %CoverageOracle{
+      by_line: %{
+        {"lib/astra_helper.ex", 2} => MapSet.new([{:file, "test/direct_test.exs"}])
+      },
+      degraded_test_files: [{"test/indirect_test.exs", :coverage_test_timeout}]
+    }
+
+    result =
+      Coverage.for_plan(plan, oracle, %{AstraHelper => MapSet.new(["test/direct_test.exs"])})
+
+    assert Enum.sort(result["helper"].test_files) == [
+             "test/direct_test.exs",
+             "test/indirect_test.exs"
+           ]
+  end
+
   defp plan(mutants), do: %Plan{schema: mutants, fallback: [], skipped: []}
 
-  defp mutant(stable_id, file, line, module, function) do
+  defp mutant(stable_id, file, line, module, function, opts \\ []) do
     %Mutant{
       id: 1,
       stable_id: stable_id,
@@ -170,6 +302,7 @@ defmodule Mut.TestSelection.CoverageTest do
       line: line,
       module: module,
       function: function,
+      env_context: Keyword.get(opts, :env_context),
       original_ast: quote(do: a + b),
       mutated_ast: quote(do: a - b),
       description: "replace + with -"

@@ -5,9 +5,10 @@ defmodule Mut.TestSelection do
 
   alias Mut.TestSelection.Static
 
-  @spec for_plan(Mut.Plan.t(), [Path.t()]) :: %{Mut.Mutant.stable_id() => [Path.t()]}
-  def for_plan(%Mut.Plan{} = plan, test_paths) when is_list(test_paths) do
-    analysis = Static.analyze(test_paths)
+  @spec for_plan(Mut.Plan.t(), [Path.t()], keyword()) :: %{Mut.Mutant.stable_id() => [Path.t()]}
+  def for_plan(%Mut.Plan{} = plan, test_paths, opts \\ [])
+      when is_list(test_paths) and is_list(opts) do
+    analysis = Static.analyze(test_paths, opts)
     all_test_files = discover_test_files(test_paths)
 
     for mutant <- plan.schema ++ plan.fallback, into: %{} do

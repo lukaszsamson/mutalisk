@@ -6,7 +6,8 @@ defmodule Mut.TestSelection.Coverage do
   alias Mut.Plan
   alias Mut.TestSelection.Static
 
-  @type match_kind :: :exact_line | :enclosing_function | :static_fallback | :all_tests
+  @type match_kind ::
+          :exact_line | :enclosing_function | :enclosing_file | :static_fallback | :all_tests
   @type selection_result :: %{test_files: [Path.t()], match_kind: match_kind()}
 
   @spec for_plan(
@@ -88,37 +89,79 @@ defmodule Mut.TestSelection.Coverage do
 
   defp select(%Mutant{} = mutant, oracle, analysis, all_test_files, degraded, root) do
     base =
-      with [] <- oracle_tests(oracle.by_line, {mutant.file, mutant.line}),
-           [] <- function_tests(mutant, oracle),
-           [] <- static_tests(analysis, mutant, all_test_files) do
-        %{test_files: all_test_files, match_kind: :all_tests}
-      else
-        tests when is_list(tests) ->
-          %{
-            test_files: tests,
-            match_kind: match_kind(mutant, oracle, tests, analysis, all_test_files)
-          }
-      end
+      mutant
+      |> selection_ladder(oracle, analysis, all_test_files)
+      |> Enum.find_value(fn {kind, produce} ->
+        case produce.() do
+          [] -> nil
+          tests -> %{test_files: tests, match_kind: kind}
+        end
+      end)
+      |> Kernel.||(%{test_files: all_test_files, match_kind: :all_tests})
 
-    # M64: a degraded (coverage-failed) test file still runs for the mutants it
-    # statically covers — union its static coverage so degradation never causes
-    # a false survivor.
-    unioned =
-      case degraded_cover(mutant, analysis, all_test_files, degraded, root) do
-        [] -> base
-        extra -> %{base | test_files: Enum.uniq(base.test_files ++ extra)}
-      end
-
-    # `base` may mix namespaces: oracle by_line/by_function tests are
+    # The selection may mix namespaces: oracle by_line/by_function tests are
     # relative-to-root, while static/all_tests selections are absolute. The
     # worker relativizes either form so verdicts are unchanged, but mixed
     # paths weaken the last-killer / runtime ordering heuristics and muddy the
-    # selection metrics. Canonicalize the final selection to the oracle's
-    # relative-to-root namespace so ordering and metrics compare like with
-    # like. (`match_kind` is already computed above in the original namespaces,
-    # so this does not affect classification.)
-    %{unioned | test_files: normalize_test_files(unioned.test_files, root)}
+    # selection metrics. Canonicalize to the oracle's relative-to-root
+    # namespace so ordering, the degraded union below, and metrics all compare
+    # like with like. (`match_kind` is already fixed above, so this does not
+    # affect classification.)
+    files = normalize_test_files(base.test_files, root)
+
+    # Degraded coverage is UNKNOWN coverage, not evidence of irrelevance: a
+    # test whose coverage collection timed out or failed may well exercise this
+    # mutant. Union every degraded file in unconditionally (the `degraded` list
+    # is already relative-to-root) so degradation can never cause a false
+    # survivor. Previously this intersected the degraded set with the (static,
+    # incomplete) covering set, which dropped exactly the tests it was meant to
+    # rescue.
+    %{base | test_files: Enum.uniq(files ++ degraded)}
   end
+
+  # Ordered selection strategies; the first that yields a non-empty test set
+  # wins, and the pair's key becomes the reported `match_kind`. Falls through
+  # to `:all_tests`.
+  #
+  # Clause-head mutations (`:match` patterns, `:guard`) are the exception to
+  # exact-line coverage: mutating a clause head can make that clause accept
+  # inputs that originally routed to a DIFFERENT clause, so the killing test
+  # need never have executed the mutated line. Those mutants start at
+  # enclosing-function scope (every clause of the function) and, when function
+  # metadata is unavailable, at whole-file scope. Exact-line coverage is never
+  # allowed to narrow them.
+  defp selection_ladder(mutant, oracle, analysis, all_test_files) do
+    exact_line =
+      if clause_head_mutation?(mutant),
+        do: [],
+        else: [
+          {:exact_line, fn -> oracle_tests(oracle.by_line, {mutant.file, mutant.line}) end}
+        ]
+
+    enclosing_file =
+      if clause_head_mutation?(mutant),
+        do: [{:enclosing_file, fn -> file_tests(mutant, oracle) end}],
+        else: []
+
+    exact_line ++
+      [{:enclosing_function, fn -> function_tests(mutant, oracle) end}] ++
+      enclosing_file ++
+      [{:static_fallback, fn -> static_tests(analysis, mutant, all_test_files) end}]
+  end
+
+  defp clause_head_mutation?(%Mutant{env_context: context}), do: context in [:match, :guard]
+
+  # Every test that covers ANY line of the mutant's file.
+  defp file_tests(%Mutant{file: file}, oracle) when is_binary(file) do
+    oracle.by_line
+    |> Enum.reduce(MapSet.new(), fn
+      {{^file, _line}, tests}, acc -> MapSet.union(acc, tests)
+      _entry, acc -> acc
+    end)
+    |> test_ids_to_files()
+  end
+
+  defp file_tests(_mutant, _oracle), do: []
 
   defp normalize_test_files(files, nil), do: files
 
@@ -126,59 +169,8 @@ defmodule Mut.TestSelection.Coverage do
     files |> Enum.map(&Path.relative_to(&1, root)) |> Enum.uniq()
   end
 
-  # Degraded files that have static evidence for this mutant — unioned into the
-  # selection so a coverage-failed file still runs for the mutants it
-  # statically covers (M64: degradation must never cause a false survivor).
-  #
-  # The degraded list is in the oracle's relative-to-root namespace, but
-  # `analysis` is keyed by the absolute paths the orchestrator passes as
-  # `all_test_files`. Previously this fed the relative `degraded` list to
-  # `covering_tests` as its known-files set, so the intersection against the
-  # absolute index was always empty and the union contributed nothing —
-  # silently defeating the guarantee. Fix: compute the mutant's static
-  # covering tests over the real (absolute) `all_test_files`, then keep only
-  # those whose relative-to-root form is degraded.
-  defp degraded_cover(_mutant, _analysis, _all_test_files, [], _root), do: []
-
-  defp degraded_cover(%Mutant{module: module} = mutant, analysis, all_test_files, degraded, root)
-       when is_atom(module) do
-    covering = Static.covering_tests(analysis, module, all_test_files)
-
-    cond do
-      covering == [] ->
-        []
-
-      # No real static evidence — `covering_tests` fell back to "all files".
-      # Don't union the whole degraded set onto an unrelated mutant.
-      covering == Enum.sort(all_test_files) and not static_evidence?(analysis, mutant, covering) ->
-        []
-
-      true ->
-        degraded_set = MapSet.new(degraded)
-        Enum.filter(covering, &(normalize_test_path(&1, root) in degraded_set))
-    end
-  end
-
-  defp degraded_cover(_mutant, _analysis, _all_test_files, _degraded, _root), do: []
-
   defp normalize_test_path(path, nil), do: path
   defp normalize_test_path(path, root), do: Path.relative_to(path, root)
-
-  defp match_kind(mutant, oracle, tests, analysis, all_test_files) do
-    cond do
-      tests == oracle_tests(oracle.by_line, {mutant.file, mutant.line}) ->
-        :exact_line
-
-      tests == function_tests(mutant, oracle) ->
-        :enclosing_function
-
-      tests == static_tests(analysis, mutant, all_test_files) ->
-        :static_fallback
-
-      true ->
-        :all_tests
-    end
-  end
 
   defp function_tests(%Mutant{module: module, function: {name, arity}}, oracle)
        when is_atom(module) and is_atom(name) and is_integer(arity) do
@@ -275,7 +267,7 @@ defmodule Mut.TestSelection.Coverage do
     do: analysis
 
   defp static_analysis(index) do
-    %{index: index, dynamic_dispatch_files: MapSet.new()}
+    %{index: index, dynamic_dispatch_files: MapSet.new(), source_graph: %{}}
   end
 
   defp all_test_files(oracle, static_index) do

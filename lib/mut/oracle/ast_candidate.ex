@@ -19,6 +19,11 @@ defmodule Mut.Oracle.AstCandidate do
     :source_span,
     :env_context,
     :enclosing_module,
+    # Enclosing `{name, arity}` for candidates that have no dispatch site
+    # (pattern/guard literals from the env walker). Test selection needs it to
+    # widen clause-head mutations to enclosing-function coverage; never enters
+    # stable-id identity.
+    :enclosing_function,
     :ast_path,
     :ast_path_hash,
     :node,
@@ -49,6 +54,7 @@ defmodule Mut.Oracle.AstCandidate do
           source_span: Mut.SourceSpan.t() | nil,
           env_context: nil | :guard | :match,
           enclosing_module: module() | nil,
+          enclosing_function: {atom(), arity()} | nil,
           ast_path: [term()],
           ast_path_hash: binary(),
           node: Macro.t(),

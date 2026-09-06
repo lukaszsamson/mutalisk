@@ -31,6 +31,11 @@ defmodule Mut.Mutant do
     :span,
     :module,
     :function,
+    # Syntactic position of the mutated node: `:match` (pattern), `:guard`, or
+    # `nil` (ordinary expression). Test selection widens clause-head mutations
+    # (`:match`/`:guard`) beyond exact-line coverage; never enters stable-id
+    # identity.
+    :env_context,
     :original_ast,
     :mutated_ast,
     :source_patch,
@@ -70,6 +75,7 @@ defmodule Mut.Mutant do
             {pos_integer(), pos_integer() | nil, pos_integer() | nil, pos_integer() | nil} | nil,
           module: module() | nil,
           function: {atom(), arity()} | nil,
+          env_context: nil | :match | :guard,
           original_ast: Macro.t(),
           mutated_ast: Macro.t(),
           source_patch: Mut.SourcePatch.t() | nil,

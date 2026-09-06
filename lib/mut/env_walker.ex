@@ -468,6 +468,7 @@ defmodule Mut.EnvWalker do
       source_span: literal_span(state, meta, value),
       env_context: env_context,
       enclosing_module: state.module,
+      enclosing_function: state.function,
       ast_path: state.ast_path,
       ast_path_hash: path_hash(state.ast_path),
       node: node
@@ -528,6 +529,7 @@ defmodule Mut.EnvWalker do
       source_span: collection_span(state, meta),
       env_context: nil,
       enclosing_module: state.module,
+      enclosing_function: state.function,
       ast_path: state.ast_path,
       ast_path_hash: path_hash(state.ast_path),
       node: node
@@ -1269,6 +1271,7 @@ defmodule Mut.EnvWalker do
       source_span: span,
       env_context: nil,
       enclosing_module: state.module,
+      enclosing_function: state.function,
       ast_path: state.ast_path,
       ast_path_hash: path_hash(state.ast_path),
       node: node,
