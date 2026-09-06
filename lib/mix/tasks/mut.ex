@@ -756,22 +756,44 @@ defmodule Mix.Tasks.Mut do
     if map_size(verdicts) == 0 do
       {plan, []}
     else
-      changed = changed_files_since(opts.since, target_root)
-      indexes = mutant_file_indexes(plan, source_root)
       # Coarse project fingerprint, computed ONCE (same for every mutant). A
       # change to any project source/test-support/config/dep invalidates all
-      # reuse (review P1a).
-      project_digest = History.Digest.project_digest(source_root)
+      # reuse (review P1a). F6: when an input cannot be fingerprinted at all —
+      # a `path:` dependency whose location is not a literal, an unparseable
+      # mix.exs — reuse is disabled outright for the run rather than decided
+      # against an incomplete digest.
+      case History.Digest.project_fingerprint(source_root) do
+        {:disable, reasons} ->
+          {reuse_disabled(plan, reasons), []}
 
-      {schema_exec, schema_reused} =
-        partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed, project_digest)
-
-      {fallback_exec, fallback_reused} =
-        partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed, project_digest)
-
-      exec_plan = %{plan | schema: schema_exec, fallback: fallback_exec}
-      {exec_plan, schema_reused ++ fallback_reused}
+        {:ok, project_digest} ->
+          reuse_partition(plan, ctx, opts, verdicts, project_digest, source_root, target_root)
+      end
     end
+  end
+
+  defp reuse_disabled(plan, reasons) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --incremental: history reuse disabled, every mutant will run " <>
+        "(#{Enum.join(reasons, "; ")})"
+    )
+
+    plan
+  end
+
+  defp reuse_partition(plan, ctx, opts, verdicts, project_digest, source_root, target_root) do
+    changed = changed_files_since(opts.since, target_root)
+    indexes = mutant_file_indexes(plan, source_root)
+
+    {schema_exec, schema_reused} =
+      partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed, project_digest)
+
+    {fallback_exec, fallback_reused} =
+      partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed, project_digest)
+
+    exec_plan = %{plan | schema: schema_exec, fallback: fallback_exec}
+    {exec_plan, schema_reused ++ fallback_reused}
   end
 
   defp partition_reuse(mutants, ctx, opts, verdicts, indexes, changed, project_digest) do

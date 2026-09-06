@@ -84,17 +84,25 @@ defmodule Mut.History.Store do
   parses, and its `format_version` + `tool_version` match the running tool.
   Any other condition (absent, unreadable, malformed, version mismatch) yields
   `{:cold, reason}` — the caller starts from an empty store.
+
+  The decoded store is validated in full (F8): a wrong top-level shape — a
+  non-integer `generation`, a `verdicts` that is not a map — is
+  `{:cold, :malformed}`, and individually invalid verdict entries are dropped
+  (their count printed once) so the rest of the store stays reusable. Nothing
+  unvalidated reaches the pipeline, which would otherwise crash on it long
+  after the expensive baseline and coverage phases.
   """
   @spec load(Path.t()) :: {:ok, store()} | {:cold, atom()}
   def load(path) do
     with {:ok, raw} <- read_file(path),
          {:ok, decoded} <- decode(raw),
          :ok <- check_versions(decoded) do
-      # R: from_json/1 can raise MatchError (missing "verdicts"/"generation" keys
-      # that passed check_versions) or ArgumentError (trunc/1 on a non-numeric
-      # "generation").  Any structural problem must yield cold-start, never crash.
+      # R/F8: any structural problem must yield cold-start, never crash — not
+      # here and not later in the pipeline. `from_json/1` validates the whole
+      # decoded store; the rescue stays as a backstop for an input shape that
+      # still surprises it.
       try do
-        {:ok, from_json(decoded)}
+        from_json(decoded)
       rescue
         _ -> {:cold, :malformed}
       end
@@ -253,14 +261,67 @@ defmodule Mut.History.Store do
 
   defp check_versions(_), do: {:cold, :format_version_mismatch}
 
-  defp from_json(%{"generation" => gen, "verdicts" => verdicts}) do
-    %{
-      format_version: @format_version,
-      tool_version: tool_version(),
-      generation: trunc(gen),
-      verdicts: verdicts
-    }
+  # F8: a store that is syntactically valid JSON with the right versions can
+  # still be structurally wrong (`"verdicts": []`, a string `"generation"`, an
+  # entry whose `status` is `"error"` or whose digests are numbers). Trusting
+  # it used to return `{:ok, store}` and crash the pipeline much later —
+  # `map_size/1` on a list — AFTER the expensive baseline and coverage phases,
+  # instead of the documented cold start. Everything is validated up front:
+  #
+  #   * a wrong top-level shape (missing/!integer `generation`, non-map
+  #     `verdicts`, non-binary keys) => `{:cold, :malformed}`, a cold start;
+  #   * an individually invalid ENTRY is DROPPED (the rest of the store is
+  #     still perfectly reusable), and the caller is told how many went.
+  defp from_json(%{"generation" => gen, "verdicts" => verdicts})
+       when is_integer(gen) and is_map(verdicts) do
+    kept = Map.filter(verdicts, fn {id, entry} -> is_binary(id) and valid_entry?(entry) end)
+    report_dropped(map_size(verdicts) - map_size(kept))
+
+    {:ok,
+     %{
+       format_version: @format_version,
+       tool_version: tool_version(),
+       generation: gen,
+       verdicts: kept
+     }}
   end
+
+  defp from_json(_decoded), do: {:cold, :malformed}
+
+  defp report_dropped(0), do: :ok
+
+  defp report_dropped(count) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] history: dropped #{count} malformed verdict " <>
+        "#{if count == 1, do: "entry", else: "entries"}"
+    )
+  end
+
+  # Every field `Mut.History.Reuse` compares and every field the reused result
+  # is rebuilt from. `status` must be one of the reusable statuses: anything
+  # else would blow up `String.to_existing_atom/1` (or silently record a bogus
+  # status) when the verdict is adopted. `generation` is the GC key, so a
+  # non-integer would make retention meaningless.
+  defp valid_entry?(entry) when is_map(entry) do
+    is_binary(entry["source_digest"]) and
+      is_binary(entry["selected_tests_digest"]) and
+      is_binary(entry["project_digest"]) and
+      entry["status"] in @reusable_statuses and
+      optional?(entry["killing_test"], &is_binary/1) and
+      optional?(entry["killing_test_file"], &is_binary/1) and
+      optional?(entry["test_timeout_ms"], &is_integer/1) and
+      optional?(entry["suite_timeout_ms"], &is_integer/1) and
+      optional?(entry["generation"], &is_integer/1)
+  end
+
+  defp valid_entry?(_entry), do: false
+
+  # A key that is absent or explicitly `null` is fine (format-1 entries carry
+  # no `suite_timeout_ms`; a mutant killed with no reported test carries no
+  # `killing_test`) — `Mut.History.Reuse` treats `nil` as "unset", not "match".
+  defp optional?(nil, _fun), do: true
+  defp optional?(value, fun), do: fun.(value)
 
   defp to_json(store) do
     %{

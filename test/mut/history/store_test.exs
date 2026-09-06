@@ -195,6 +195,133 @@ defmodule Mut.History.StoreTest do
     end
   end
 
+  # F8: a version-valid store whose SHAPE is wrong used to load as `{:ok, _}`
+  # and crash the pipeline (`map_size/1` on a list) after the expensive
+  # baseline + coverage phases, instead of starting cold.
+  defp write_store!(dir, body) do
+    path = Store.path(dir)
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, Mut.JSON.encode!(Map.merge(valid_envelope(), body)))
+    path
+  end
+
+  defp valid_envelope do
+    %{
+      "format_version" => 2,
+      "tool_version" => to_string(Application.spec(:mutalisk, :vsn)),
+      "generation" => 1,
+      "verdicts" => %{}
+    }
+  end
+
+  defp valid_entry do
+    %{
+      "status" => "killed",
+      "source_digest" => "s",
+      "selected_tests_digest" => "t",
+      "project_digest" => "p",
+      "killing_test" => nil,
+      "killing_test_file" => nil,
+      "test_timeout_ms" => 10_000,
+      "suite_timeout_ms" => nil,
+      "generation" => 1
+    }
+  end
+
+  describe "cold-start safety — structurally malformed stores (F8)" do
+    test "a valid envelope still loads (guards against over-rejection)", %{dir: dir} do
+      path = write_store!(dir, %{"verdicts" => %{"a" => valid_entry()}})
+      assert {:ok, store} = Store.load(path)
+      assert map_size(store.verdicts) == 1
+      assert store.generation == 1
+    end
+
+    test "verdicts as a list -> cold (the reported map_size/1 crash)", %{dir: dir} do
+      path = write_store!(dir, %{"verdicts" => []})
+      assert {:cold, :malformed} = Store.load(path)
+    end
+
+    test "verdicts as a string / number / null -> cold", %{dir: dir} do
+      for bad <- ["nope", 7, nil] do
+        path = write_store!(dir, %{"verdicts" => bad})
+        assert {:cold, :malformed} = Store.load(path), "expected #{inspect(bad)} to be rejected"
+      end
+    end
+
+    test "a non-integer generation -> cold", %{dir: dir} do
+      for bad <- ["1", 1.5, nil, %{}] do
+        path = write_store!(dir, %{"generation" => bad})
+        assert {:cold, :malformed} = Store.load(path), "expected #{inspect(bad)} to be rejected"
+      end
+    end
+
+    test "a missing generation / verdicts key -> cold", %{dir: dir} do
+      path = write_store!(dir, %{})
+      File.write!(path, Mut.JSON.encode!(Map.delete(valid_envelope(), "generation")))
+      assert {:cold, :malformed} = Store.load(path)
+
+      File.write!(path, Mut.JSON.encode!(Map.delete(valid_envelope(), "verdicts")))
+      assert {:cold, :malformed} = Store.load(path)
+    end
+
+    test "a top-level array (not an object) -> cold", %{dir: dir} do
+      path = Store.path(dir)
+      File.mkdir_p!(Path.dirname(path))
+      File.write!(path, "[]")
+      assert {:cold, :format_version_mismatch} = Store.load(path)
+    end
+  end
+
+  describe "entry validation (F8)" do
+    test "invalid entries are dropped, valid ones survive, and the count is printed", %{dir: dir} do
+      bad = %{
+        # not a map
+        "list" => [],
+        # non-reusable status: String.to_existing_atom/record_result would break
+        "error_status" => %{valid_entry() | "status" => "error"},
+        "unknown_status" => %{valid_entry() | "status" => "banana"},
+        # digests must be strings — a number would silently never match
+        "numeric_digest" => %{valid_entry() | "source_digest" => 7},
+        "missing_digest" => Map.delete(valid_entry(), "project_digest"),
+        "bad_timeout" => %{valid_entry() | "test_timeout_ms" => "10000"},
+        "bad_killing_test" => %{valid_entry() | "killing_test" => 42},
+        "bad_generation" => %{valid_entry() | "generation" => "1"}
+      }
+
+      good = %{"keep_me" => valid_entry()}
+      path = write_store!(dir, %{"verdicts" => Map.merge(bad, good)})
+
+      {result, stderr} =
+        ExUnit.CaptureIO.with_io(:stderr, fn -> Store.load(path) end)
+
+      assert {:ok, store} = result
+      assert Map.keys(store.verdicts) == ["keep_me"]
+      assert stderr =~ "dropped #{map_size(bad)} malformed verdict entries"
+      assert length(String.split(stderr, "dropped")) == 2, "expected the count printed once"
+    end
+
+    test "a null/absent optional field keeps an entry reusable", %{dir: dir} do
+      entry =
+        valid_entry()
+        |> Map.merge(%{"killing_test" => nil, "suite_timeout_ms" => nil})
+        |> Map.drop(["killing_test_file", "generation"])
+
+      path = write_store!(dir, %{"verdicts" => %{"a" => entry}})
+      assert {:ok, %{verdicts: %{"a" => _}}} = Store.load(path)
+    end
+
+    test "every reusable status is accepted", %{dir: dir} do
+      verdicts =
+        Map.new(~w(killed survived timeout), fn status ->
+          {status, %{valid_entry() | "status" => status}}
+        end)
+
+      path = write_store!(dir, %{"verdicts" => verdicts})
+      assert {:ok, store} = Store.load(path)
+      assert map_size(store.verdicts) == 3
+    end
+  end
+
   describe "path" do
     test "defaults under _build/mut_history", %{dir: dir} do
       assert Store.path(dir) == Path.join([dir, "_build", "mut_history", "history.json"])
