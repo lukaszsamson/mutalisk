@@ -184,17 +184,31 @@ defmodule Mut.SchemaPlacer do
   # Pick a textual identifier proven absent from the enclosing function's
   # variables. Functions without a collision keep the stable base name.
   defp hoist_variable(taken) do
-    {unused_name(taken, 0), [generated: true], nil}
+    {unused_name(taken), [generated: true], nil}
   end
 
-  defp unused_name(taken, index) do
-    candidate =
-      case index do
-        0 -> String.to_atom(@hoist_var_base)
-        n -> String.to_atom("#{@hoist_var_base}_#{n}")
-      end
+  # Compare as strings and create exactly ONE atom (the chosen name): probing
+  # candidates with String.to_atom/1 would mint an atom per collision.
+  defp unused_name(taken) do
+    taken_names = MapSet.new(taken, &Atom.to_string/1)
 
-    if MapSet.member?(taken, candidate), do: unused_name(taken, index + 1), else: candidate
+    if MapSet.member?(taken_names, @hoist_var_base),
+      do: String.to_atom("#{@hoist_var_base}_#{next_suffix(taken_names)}"),
+      else: String.to_atom(@hoist_var_base)
+  end
+
+  defp next_suffix(taken_names) do
+    suffix_re = ~r/^#{@hoist_var_base}_(\d+)$/
+
+    taken_names
+    |> Enum.flat_map(fn name ->
+      case Regex.run(suffix_re, name) do
+        [_, n] -> [String.to_integer(n)]
+        _ -> []
+      end
+    end)
+    |> Enum.max(fn -> 0 end)
+    |> Kernel.+(1)
   end
 
   # Every variable name appearing anywhere in the definition, including
@@ -573,8 +587,9 @@ defmodule Mut.SchemaPlacer do
 
   defp original_and_wildcard_arms?(_arms), do: false
 
+  # Exactly the names `unused_name/2` generates: the base or `base_N`.
   defp schema_scrutinee?({name, _meta, nil}) when is_atom(name),
-    do: String.starts_with?(Atom.to_string(name), @hoist_var_base)
+    do: Regex.match?(~r/^#{@hoist_var_base}(_\d+)?$/, Atom.to_string(name))
 
   defp schema_scrutinee?(
          {{:., _, [:persistent_term, :get]}, _,

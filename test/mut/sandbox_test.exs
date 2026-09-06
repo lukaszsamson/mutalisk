@@ -508,7 +508,7 @@ defmodule Mut.SandboxTest do
       id: 1,
       stable_id: "fallback-#{file}",
       engine: :fallback,
-      mutator: Mut.Mutators.IntegerLiteral,
+      mutator: Mut.Mutator.IntegerLiteral,
       mutator_name: "integer_literal",
       file: file,
       line: 1,
