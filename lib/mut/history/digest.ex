@@ -316,7 +316,7 @@ defmodule Mut.History.Digest do
 
     {deps, reasons} =
       ast
-      |> collect_path_deps(attrs)
+      |> collect_path_deps(attrs, dir)
       |> Enum.reduce({[], []}, fn {name, value}, {deps, reasons} ->
         case resolve_dep_root(value, dir, user_dir) do
           {:ok, dep_root} ->
@@ -362,7 +362,7 @@ defmodule Mut.History.Digest do
   # `:path` key) as path dependencies, and an unresolvable one DISABLES reuse
   # for the whole run — so this over-approximation is not harmless. A file
   # with no recognisable deps declaration falls back to the whole AST.
-  defp collect_path_deps(ast, attrs) do
+  defp collect_path_deps(ast, attrs, dir) do
     scope =
       case deps_declarations(ast) do
         [] -> ast
@@ -372,10 +372,10 @@ defmodule Mut.History.Digest do
     {_ast, acc} =
       Macro.prewalk(scope, [], fn
         {name, opts} = node, acc when is_atom(name) and is_list(opts) ->
-          {node, prepend_path_dep(acc, name, opts, attrs)}
+          {node, prepend_path_dep(acc, name, opts, attrs, dir)}
 
         {:{}, _meta, [name, _req, opts]} = node, acc when is_atom(name) and is_list(opts) ->
-          {node, prepend_path_dep(acc, name, opts, attrs)}
+          {node, prepend_path_dep(acc, name, opts, attrs, dir)}
 
         node, acc ->
           {node, acc}
@@ -400,12 +400,84 @@ defmodule Mut.History.Digest do
     Enum.reverse(found)
   end
 
-  defp prepend_path_dep(acc, name, opts, attrs) do
+  defp prepend_path_dep(acc, name, opts, attrs, dir) do
     case Enum.find(opts, fn entry -> match?({:path, _value}, entry) end) do
-      {:path, value} -> [{name, resolve_literal(value, attrs)} | acc]
+      {:path, value} -> [{name, resolve_path_expr(value, attrs, dir)} | acc]
       _other -> acc
     end
   end
+
+  # `path:` values are frequently small expressions rather than literals —
+  # `System.get_env("DEP_PATH") || Path.expand("../dep", __DIR__)` is the
+  # idiom for "local checkout if configured, else the vendored copy". A tiny
+  # evaluator covers that idiom (literals, `@attr`, `__DIR__`, `||`,
+  # `System.get_env/1,2`, `Path.expand/1,2`, `Path.join/1,2`) using THIS
+  # process's environment, which is the environment the run itself uses.
+  # Anything else stays `:unresolved` and disables reuse.
+  defp resolve_path_expr(value, attrs, dir) do
+    case eval_path_expr(value, attrs, dir) do
+      {:ok, path} when is_binary(path) -> {:ok, path}
+      _nil_or_unresolved -> :unresolved
+    end
+  end
+
+  defp eval_path_expr(value, attrs, _dir) when is_binary(value) or is_atom(value),
+    do: resolve_literal(value, attrs)
+
+  defp eval_path_expr({:@, _, _} = attr_read, attrs, _dir), do: resolve_literal(attr_read, attrs)
+  defp eval_path_expr({:__DIR__, _meta, ctx}, _attrs, dir) when is_atom(ctx), do: {:ok, dir}
+
+  defp eval_path_expr({:||, _meta, [left, right]}, attrs, dir) do
+    case eval_path_expr(left, attrs, dir) do
+      {:ok, value} when is_binary(value) -> {:ok, value}
+      {:ok, nil} -> eval_path_expr(right, attrs, dir)
+      :unresolved -> :unresolved
+    end
+  end
+
+  defp eval_path_expr({{:., _, [{:__aliases__, _, [:System]}, :get_env]}, _, args}, attrs, dir) do
+    case Enum.map(args, &eval_path_expr(&1, attrs, dir)) do
+      [{:ok, name}] when is_binary(name) -> {:ok, System.get_env(name)}
+      [{:ok, name}, {:ok, default}] when is_binary(name) -> {:ok, System.get_env(name, default)}
+      _other -> :unresolved
+    end
+  end
+
+  defp eval_path_expr({{:., _, [{:__aliases__, _, [:Path]}, fun]}, _, args}, attrs, dir)
+       when fun in [:expand, :join] do
+    args
+    |> Enum.map(&eval_path_expr(&1, attrs, dir))
+    |> path_call(fun, dir)
+  end
+
+  defp eval_path_expr(parts, attrs, dir) when is_list(parts) do
+    # `Path.join(["a", "b"])`'s list argument.
+    parts
+    |> Enum.map(&eval_path_expr(&1, attrs, dir))
+    |> Enum.reduce_while({:ok, []}, fn
+      {:ok, p}, {:ok, acc} when is_binary(p) -> {:cont, {:ok, [p | acc]}}
+      _other, _acc -> {:halt, :unresolved}
+    end)
+    |> case do
+      {:ok, acc} -> {:ok, Path.join(Enum.reverse(acc))}
+      :unresolved -> :unresolved
+    end
+  end
+
+  defp eval_path_expr(_other, _attrs, _dir), do: :unresolved
+
+  defp path_call([{:ok, path}], :expand, dir) when is_binary(path),
+    do: {:ok, Path.expand(path, dir)}
+
+  defp path_call([{:ok, path}, {:ok, base}], :expand, _dir)
+       when is_binary(path) and is_binary(base),
+       do: {:ok, Path.expand(path, base)}
+
+  defp path_call([{:ok, a}, {:ok, b}], :join, _dir) when is_binary(a) and is_binary(b),
+    do: {:ok, Path.join(a, b)}
+
+  defp path_call([{:ok, joined}], :join, _dir) when is_binary(joined), do: {:ok, joined}
+  defp path_call(_args, _fun, _dir), do: :unresolved
 
   defp resolve_dep_root(:unresolved, _dir, _user_dir),
     do: {:error, "has a non-literal `path:` expression, so its contents cannot be fingerprinted"}
@@ -516,6 +588,7 @@ defmodule Mut.History.Digest do
 
   # A literal string, or a module attribute bound to one (`@dep_path "x"`).
   defp resolve_literal(value, _attrs) when is_binary(value), do: {:ok, value}
+  defp resolve_literal(nil, _attrs), do: {:ok, nil}
 
   defp resolve_literal({:@, _meta, [{attr, _, ctx}]}, attrs)
        when is_atom(attr) and (is_nil(ctx) or is_atom(ctx)) do

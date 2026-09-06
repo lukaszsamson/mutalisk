@@ -594,6 +594,38 @@ defmodule Mut.History.DigestTest do
       assert before != after_edit
     end
 
+    test "the env-var-or-fallback path: idiom resolves through the process environment",
+         %{root: root} do
+      var = "MUT_DIGEST_TEST_DEP_#{System.unique_integer([:positive])}"
+      vendored = Path.join(root, "vendor/dep")
+      File.mkdir_p!(Path.join(vendored, "lib"))
+      File.write!(Path.join(vendored, "lib/dep.ex"), "defmodule Dep, do: def v, do: 1\n")
+
+      write_deps_mix!(
+        root,
+        ~s|[{:dep, path: System.get_env("#{var}") \|\| Path.expand("vendor/dep", __DIR__)}]|
+      )
+
+      # Unset: the fallback branch is the vendored copy.
+      System.delete_env(var)
+      assert {:ok, before} = Digest.project_fingerprint(root)
+      File.write!(Path.join(vendored, "lib/dep.ex"), "defmodule Dep, do: def v, do: 2\n")
+      assert {:ok, after_edit} = Digest.project_fingerprint(root)
+      assert before != after_edit
+
+      # Set: the env var wins and its contents are fingerprinted instead.
+      local = Path.join(root, "local_checkout")
+      File.mkdir_p!(Path.join(local, "lib"))
+      File.write!(Path.join(local, "lib/dep.ex"), "defmodule Dep, do: def v, do: 3\n")
+      System.put_env(var, local)
+      on_exit(fn -> System.delete_env(var) end)
+      assert {:ok, with_env} = Digest.project_fingerprint(root)
+      assert with_env != after_edit
+      File.write!(Path.join(local, "lib/dep.ex"), "defmodule Dep, do: def v, do: 4\n")
+      assert {:ok, with_env_edit} = Digest.project_fingerprint(root)
+      assert with_env != with_env_edit
+    end
+
     test "a non-literal path: expression disables reuse", %{root: root} do
       write_deps_mix!(root, ~s|[{:local_dep, path: System.get_env("DEP")}]|)
 
