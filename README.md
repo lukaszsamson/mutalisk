@@ -42,8 +42,13 @@ list):
     MIX_ENV=test mix mut --reporters terminal,html           # pick reporters
 
 Mutalisk runs your suite as-is (it does **not** pass `--warnings-as-errors`), so
-compiler warnings in the target do not affect the mutation score. Keep your own
-`mix compile --warnings-as-errors` gate in CI if you rely on it.
+compiler warnings in the target do not affect the mutation score. One exception:
+fallback-engine recompiles load your project and honour `elixirc_options:
+[warnings_as_errors: true]` from `mix.exs`, exactly as `mix compile` would — a
+mutation that introduces a warning on such a project is reported `CompileError`
+(invalid), not scored. Schema-engine mutants are compiled once with the real
+`mix compile` and are unaffected. Keep your own `mix compile
+--warnings-as-errors` gate in CI if you rely on it.
 
 ## Interpreting the score
 

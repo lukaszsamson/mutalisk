@@ -183,7 +183,7 @@ defmodule Mut.History.Digest do
   diff-scoped reuse are future work.
   """
   @spec project_digest(Path.t()) :: String.t()
-  def project_digest(root) when is_binary(root), do: digest_with(root, scan(root))
+  def project_digest(root) when is_binary(root), do: digest_with(root, scan(root, nil))
 
   @doc """
   The project fingerprint **plus the reuse gate**: `{:ok, digest}` when every
@@ -206,9 +206,9 @@ defmodule Mut.History.Digest do
   caller runs every mutant (printing the reasons). "Incorrect reuse is worse
   than a slow run."
   """
-  @spec project_fingerprint(Path.t()) :: {:ok, String.t()} | {:disable, [String.t()]}
-  def project_fingerprint(root) when is_binary(root) do
-    scan = scan(root)
+  @spec project_fingerprint(Path.t(), keyword) :: {:ok, String.t()} | {:disable, [String.t()]}
+  def project_fingerprint(root, opts \\ []) when is_binary(root) do
+    scan = scan(root, Keyword.get(opts, :user_root))
 
     case scan.reasons do
       [] -> {:ok, digest_with(root, scan)}
@@ -267,11 +267,11 @@ defmodule Mut.History.Digest do
   # `path:` dependency roots, the extra `:elixirc_paths` source-root globs, and
   # the reasons reuse must be disabled. An umbrella is scanned PER CHILD APP
   # (each child declares its own deps and elixirc_paths) plus the root.
-  defp scan(root) do
+  defp scan(root, user_root) do
     [root | umbrella_app_dirs(root)]
     |> Enum.uniq()
     |> Enum.reduce(%{deps: [], globs: [], reasons: []}, fn dir, acc ->
-      scanned = scan_mix(dir, root)
+      scanned = scan_mix(dir, root, user_root)
 
       %{
         deps: acc.deps ++ scanned.deps,
@@ -291,13 +291,13 @@ defmodule Mut.History.Digest do
     _ -> []
   end
 
-  defp scan_mix(dir, root) do
+  defp scan_mix(dir, root, user_root) do
     empty = %{deps: [], globs: [], reasons: []}
     mix_path = user_mix_path(dir)
 
     if File.regular?(mix_path) do
       case Code.string_to_quoted(File.read!(mix_path), emit_warnings: false) do
-        {:ok, ast} -> scan_ast(ast, dir, root, mix_path)
+        {:ok, ast} -> scan_ast(ast, dir, root, mix_path, user_root)
         _ -> %{empty | reasons: ["#{Path.relative_to(mix_path, root)} could not be parsed"]}
       end
     else
@@ -305,16 +305,20 @@ defmodule Mut.History.Digest do
     end
   end
 
-  defp scan_ast(ast, dir, root, mix_path) do
+  defp scan_ast(ast, dir, root, mix_path, user_root) do
     attrs = attr_literals(ast)
     owner = owner_prefix(dir, root)
     rel_mix = Path.relative_to(mix_path, root)
+    # A work copy is a tree copy of the project, so `path: "../shared"` (a
+    # sibling OUTSIDE the project) does not exist next to it; resolve such
+    # deps against the same directory in the user's real project instead.
+    user_dir = user_root && Path.join([user_root | owner])
 
     {deps, reasons} =
       ast
       |> collect_path_deps(attrs)
       |> Enum.reduce({[], []}, fn {name, value}, {deps, reasons} ->
-        case resolve_dep_root(value, dir) do
+        case resolve_dep_root(value, dir, user_dir) do
           {:ok, dep_root} ->
             {[{{owner, Atom.to_string(name)}, dep_root} | deps], reasons}
 
@@ -352,9 +356,21 @@ defmodule Mut.History.Digest do
   # structure-based rather than tied to `deps/0`: the list may live in `def
   # deps`, `defp deps`, a `@deps` attribute, or be spliced together — and an
   # over-approximation only ever fingerprints more than needed.
+  # Only the dependency declarations count: the bodies of `def(p) deps` and
+  # a `@deps` attribute value. Walking the whole file mis-read `escript:
+  # [path: ...]` / `releases: [x: [path: ...]]` (and any other keyword with a
+  # `:path` key) as path dependencies, and an unresolvable one DISABLES reuse
+  # for the whole run — so this over-approximation is not harmless. A file
+  # with no recognisable deps declaration falls back to the whole AST.
   defp collect_path_deps(ast, attrs) do
+    scope =
+      case deps_declarations(ast) do
+        [] -> ast
+        declarations -> declarations
+      end
+
     {_ast, acc} =
-      Macro.prewalk(ast, [], fn
+      Macro.prewalk(scope, [], fn
         {name, opts} = node, acc when is_atom(name) and is_list(opts) ->
           {node, prepend_path_dep(acc, name, opts, attrs)}
 
@@ -368,6 +384,22 @@ defmodule Mut.History.Digest do
     Enum.reverse(acc)
   end
 
+  defp deps_declarations(ast) do
+    {_ast, found} =
+      Macro.prewalk(ast, [], fn
+        {def_kind, _meta, [{:deps, _, _args}, body]} = node, acc when def_kind in [:def, :defp] ->
+          {node, [body | acc]}
+
+        {:@, _meta, [{:deps, _, [value]}]} = node, acc ->
+          {node, [value | acc]}
+
+        node, acc ->
+          {node, acc}
+      end)
+
+    Enum.reverse(found)
+  end
+
   defp prepend_path_dep(acc, name, opts, attrs) do
     case Enum.find(opts, fn entry -> match?({:path, _value}, entry) end) do
       {:path, value} -> [{name, resolve_literal(value, attrs)} | acc]
@@ -375,12 +407,17 @@ defmodule Mut.History.Digest do
     end
   end
 
-  defp resolve_dep_root(:unresolved, _dir),
+  defp resolve_dep_root(:unresolved, _dir, _user_dir),
     do: {:error, "has a non-literal `path:` expression, so its contents cannot be fingerprinted"}
 
-  defp resolve_dep_root({:ok, path}, dir) do
-    dep_root = Path.expand(path, dir)
-    if File.dir?(dep_root), do: {:ok, dep_root}, else: {:error, "points at missing #{path}"}
+  defp resolve_dep_root({:ok, path}, dir, user_dir) do
+    candidates =
+      [Path.expand(path, dir)] ++ if(user_dir, do: [Path.expand(path, user_dir)], else: [])
+
+    case Enum.find(candidates, &File.dir?/1) do
+      nil -> {:error, "points at missing #{path}"}
+      dep_root -> {:ok, dep_root}
+    end
   end
 
   # `{owner, dep_name, path_inside_dep} => byte digest` for every resolved path

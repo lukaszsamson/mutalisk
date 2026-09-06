@@ -141,12 +141,53 @@ defmodule Mut.Recompile do
            retry_on: @beam_startup_transients,
            max_retries: 2
          ) do
-      {:exit, 0, _output} -> :ok
-      {:exit, code, output} -> {:error, {:recompile_failed, categorize(output), code, output}}
-      {:timeout, output} -> {:error, {:recompile_failed, :timeout, 124, output}}
-      {:error, reason} -> {:error, reason}
+      {:exit, 0, output} ->
+        notice_bootstrap_failure(output)
+        :ok
+
+      {:exit, code, output} ->
+        notice_bootstrap_failure(output)
+        output = strip_bootstrap_failure(output)
+        {:error, {:recompile_failed, categorize(output), code, output}}
+
+      {:timeout, output} ->
+        {:error, {:recompile_failed, :timeout, 124, output}}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
+
+  @bootstrap_failure_re ~r/mut\.recompile: project bootstrap failed\n.*?mut\.recompile: end of bootstrap failure\n?/s
+  @bootstrap_notice_key {__MODULE__, :bootstrap_failure_reported}
+
+  # A bootstrap failure (a config file that raises, a project that cannot be
+  # loaded) makes the child fall back to the pre-bootstrap behaviour, which
+  # can silently change compile-time config for every fallback mutant. Tell
+  # the user once per run rather than never (success output is discarded).
+  defp notice_bootstrap_failure(output) do
+    case Regex.run(@bootstrap_failure_re, output) do
+      nil ->
+        :ok
+
+      [block] ->
+        unless :persistent_term.get(@bootstrap_notice_key, false) do
+          :persistent_term.put(@bootstrap_notice_key, true)
+
+          IO.puts(
+            :stderr,
+            "[mutalisk] fallback recompiles could not load the project/config; " <>
+              "compile-time configuration (Application.compile_env, Mix.Project.config) " <>
+              "may differ from the real build for every fallback mutant:\n" <> block
+          )
+        end
+    end
+  end
+
+  # Keep the bootstrap diagnostics out of `categorize/1`'s input: an
+  # exception name inside them (UndefinedFunctionError from a config file)
+  # would otherwise mislabel a genuine compile error.
+  defp strip_bootstrap_failure(output), do: Regex.replace(@bootstrap_failure_re, output, "")
 
   @doc """
   Classify the stderr/stdout from a failed recompile invocation.
@@ -294,7 +335,12 @@ defmodule Mut.Recompile do
           []
 
         {:error, formatted} ->
-          IO.puts(:stderr, "mut.recompile: project bootstrap failed\\n" <> formatted)
+          IO.puts(
+            :stderr,
+            "mut.recompile: project bootstrap failed\\n" <>
+              formatted <> "\\nmut.recompile: end of bootstrap failure"
+          )
+
           []
       end
 

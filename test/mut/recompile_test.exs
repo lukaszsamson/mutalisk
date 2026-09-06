@@ -341,6 +341,54 @@ defmodule Mut.RecompileTest do
              "{:configured, :mut_compile_env_probe}"
   end
 
+  # A bootstrap failure (a config file that raises) degrades to the old
+  # behaviour; it must be reported once per run and must not leak exception
+  # names into `categorize/1`'s input.
+  test "a raising config is reported once and does not mislabel compile errors" do
+    :persistent_term.erase({Recompile, :bootstrap_failure_reported})
+
+    dir =
+      work_copy("mut_bad_config", """
+      defmodule Probe.MixProject do
+        use Mix.Project
+        def project, do: [app: :mut_bad_config_probe, version: "0.1.0"]
+      end
+      """)
+
+    File.write!(Path.join(dir, "config/config.exs"), """
+    import Config
+    config :mut_bad_config_probe, :x, System.fetch_env!("MUT_DEFINITELY_UNSET_#{System.unique_integer([:positive])}")
+    """)
+
+    File.write!(Path.join(dir, "lib/probe.ex"), "defmodule Probe, do: def v, do: 1\n")
+    sandbox = %Sandbox{path: dir}
+
+    stderr =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert :ok =
+                 Recompile.recompile(sandbox, ["lib/probe.ex"], [], app: "mut_bad_config_probe")
+
+        assert :ok =
+                 Recompile.recompile(sandbox, ["lib/probe.ex"], [], app: "mut_bad_config_probe")
+      end)
+
+    assert stderr =~ "could not load the project/config"
+    assert length(String.split(stderr, "could not load the project/config")) == 2
+
+    # A genuine compile error is still classified as such, not as the
+    # UndefinedFunctionError/ArgumentError raised by the config bootstrap.
+    File.write!(
+      Path.join(dir, "lib/probe.ex"),
+      "defmodule Probe do\n  def v, do: undefined_local()\nend\n"
+    )
+
+    assert {:error, {:recompile_failed, category, _code, output}} =
+             Recompile.recompile(sandbox, ["lib/probe.ex"], [], app: "mut_bad_config_probe")
+
+    assert category == :compile_error
+    refute output =~ "project bootstrap failed"
+  end
+
   # `:warnings_as_errors` lives in `:elixirc_options` and is enforced by Mix
   # (not by the compiler), so the child has to apply it itself; otherwise a
   # mutant that only introduces a warning compiles here while the project's

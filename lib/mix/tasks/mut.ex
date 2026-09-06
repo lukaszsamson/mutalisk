@@ -762,7 +762,7 @@ defmodule Mix.Tasks.Mut do
       # a `path:` dependency whose location is not a literal, an unparseable
       # mix.exs — reuse is disabled outright for the run rather than decided
       # against an incomplete digest.
-      case History.Digest.project_fingerprint(source_root) do
+      case History.Digest.project_fingerprint(source_root, user_root: target_root) do
         {:disable, reasons} ->
           {reuse_disabled(plan, reasons), []}
 
@@ -1152,9 +1152,9 @@ defmodule Mix.Tasks.Mut do
   # M64: surface per-file coverage degradation (crash-tolerant fallback).
   defp report_degraded_coverage(%{degraded_test_files: [_ | _] = degraded}) do
     IO.puts(
-      "Coverage: #{length(degraded)} test file(s) degraded to static selection " <>
-        "(per-file collection failed; their tests still run for the mutants they " <>
-        "statically cover):"
+      "Coverage: #{length(degraded)} test file(s) have unknown coverage " <>
+        "(per-file collection failed or the coverage budget ran out); they run " <>
+        "for EVERY mutant, so selection is less effective for this run:"
     )
 
     for {path, reason} <- Enum.take(degraded, 10) do

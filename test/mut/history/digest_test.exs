@@ -548,6 +548,52 @@ defmodule Mut.History.DigestTest do
       assert {:ok, _digest} = Digest.project_fingerprint(root)
     end
 
+    test "path: keys outside the deps declaration (escript, releases) are not path deps",
+         %{root: root} do
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Sample.MixProject do
+        use Mix.Project
+
+        def project do
+          [
+            app: :sample,
+            version: "0.1.0",
+            escript: [main_module: Sample.CLI, path: "bin/sample"],
+            releases: [sample: [path: "rel/sample"]],
+            deps: deps()
+          ]
+        end
+
+        defp deps, do: [{:jason, "~> 1.4"}]
+      end
+      """)
+
+      assert {:ok, _digest} = Digest.project_fingerprint(root)
+    end
+
+    test "a sibling path: dep outside the (copied) project resolves via :user_root", %{root: root} do
+      # Unique sibling name: `root` lives in the shared tmp dir, so a fixed
+      # `../shared` could collide with another test's leftovers.
+      sibling = "mut_shared_#{System.unique_integer([:positive])}"
+      # `root` stands in for the work copy: the sibling does not exist next to it.
+      write_deps_mix!(root, ~s|[{:shared, path: "../#{sibling}"}]|)
+      assert {:disable, [reason]} = Digest.project_fingerprint(root)
+      assert reason =~ "points at missing ../#{sibling}"
+
+      base = Path.join(System.tmp_dir!(), "mut_user_base_#{System.unique_integer([:positive])}")
+      user_root = Path.join(base, "project")
+      shared = Path.join(base, sibling)
+      File.mkdir_p!(Path.join(shared, "lib"))
+      File.mkdir_p!(user_root)
+      on_exit(fn -> File.rm_rf!(base) end)
+      File.write!(Path.join(shared, "lib/shared.ex"), "defmodule Shared, do: def v, do: 1\n")
+
+      assert {:ok, before} = Digest.project_fingerprint(root, user_root: user_root)
+      File.write!(Path.join(shared, "lib/shared.ex"), "defmodule Shared, do: def v, do: 2\n")
+      assert {:ok, after_edit} = Digest.project_fingerprint(root, user_root: user_root)
+      assert before != after_edit
+    end
+
     test "a non-literal path: expression disables reuse", %{root: root} do
       write_deps_mix!(root, ~s|[{:local_dep, path: System.get_env("DEP")}]|)
 
