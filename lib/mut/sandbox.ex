@@ -10,7 +10,8 @@ defmodule Mut.Sandbox do
     :path,
     :baseline_snapshot,
     :baseline_source,
-    :priv_baseline
+    :priv_baseline,
+    source_extras: []
   ]
 
   @typedoc """
@@ -34,7 +35,8 @@ defmodule Mut.Sandbox do
           path: Path.t(),
           baseline_snapshot: %{Path.t() => String.t()},
           baseline_source: Path.t(),
-          priv_baseline: %{Path.t() => fingerprint} | nil
+          priv_baseline: %{Path.t() => fingerprint} | nil,
+          source_extras: [Path.t()]
         }
 
   defmodule Pool do
@@ -156,12 +158,27 @@ defmodule Mut.Sandbox do
   test created, recreates one it deleted, and re-points one it retargeted —
   all of which a `File.exists?`/`File.dir?`/`File.ls` in the next mutant's
   tests would otherwise observe (T26).
+
+  ## Sources outside `lib/`
+
+  The source baseline covers the `lib/` trees PLUS every distinct file named
+  by the plan's `fallback` bucket, so a project compiling `src/` or `web/` via
+  `elixirc_paths` still has every file a fallback run can patch restored and
+  verified (W5-5). Those extra files are tracked individually (by content
+  hash); their directories are NOT stray-swept, because they may hold
+  untracked user files no baseline records. A test that CREATES a file under
+  such a directory therefore leaks into the next mutant, exactly as it does
+  under any other untracked directory.
+
+  No root is ever traversed through a symlink: a `priv/` or `lib/` root that
+  is (or becomes) a symlink is treated as an ENTRY — restored, retargeted or
+  removed as a link — so a reset never deletes or writes through it (W5-1).
   """
   @spec reset(t) :: :ok | {:error, term}
   def reset(%__MODULE__{} = sandbox) do
     baseline = baseline(sandbox)
     :ok = restore_baseline_files(sandbox, baseline)
-    :ok = remove_stray_files(sandbox)
+    :ok = remove_stray_files(sandbox, baseline)
     verify_baseline(sandbox, baseline)
   rescue
     exception -> {:error, {exception.__struct__, Exception.message(exception)}}
@@ -232,6 +249,8 @@ defmodule Mut.Sandbox do
   end
 
   defp create_sandboxes(schema_result, concurrency, parent, {copy_fun, priv_mode}) do
+    source_extras = source_extras(schema_result)
+
     Enum.reduce_while(1..concurrency, {:ok, []}, fn id, {:ok, sandboxes} ->
       path = Path.join(parent, Integer.to_string(id))
 
@@ -242,7 +261,8 @@ defmodule Mut.Sandbox do
           path: path,
           baseline_snapshot: schema_result.snapshot,
           baseline_source: schema_result.work_copy_root,
-          priv_baseline: capture_priv_baseline(path, priv_mode)
+          priv_baseline: capture_priv_baseline(path, priv_mode),
+          source_extras: source_extras
         }
 
         {:cont, {:ok, [sandbox | sandboxes]}}
@@ -322,10 +342,12 @@ defmodule Mut.Sandbox do
   defp restore_mtime(target, {:stat, _size, mtime}), do: File.touch!(target, mtime)
   defp restore_mtime(_target, _expected), do: :ok
 
-  defp remove_stray_files(sandbox) do
-    baseline_paths = baseline(sandbox)
+  defp remove_stray_files(sandbox, baseline_paths) do
     apps_dir = Mut.Umbrella.apps_path_name(sandbox.path)
-    baseline_roots = baseline_roots(sandbox, baseline_paths, apps_dir)
+    # Roots come from the TRACKED entries only: an extra fallback source
+    # (`src/sample.ex`) must not turn its directory into a swept root.
+    tracked_paths = Map.drop(baseline_paths, sandbox.source_extras)
+    baseline_roots = baseline_roots(sandbox, tracked_paths, apps_dir)
     complete_roots = complete_roots(sandbox)
 
     sandbox.path
@@ -366,13 +388,16 @@ defmodule Mut.Sandbox do
     end
   end
 
-  # The cheap counterpart of `remove_stray_files/1`: walks only the `priv`
+  # The cheap counterpart of `remove_stray_files/2`: walks only the `priv`
   # trees instead of the whole sandbox. The `priv` baseline is complete (files,
-  # symlinks and directories), so every stray entry type is swept.
+  # symlinks and directories), so every stray entry type is swept — including
+  # the roots themselves, so a `priv` root a test created after checkout (a
+  # directory, or a SYMLINK pointing outside the sandbox) is removed rather
+  # than traversed (W5-1).
   defp remove_stray_priv_files(sandbox, baseline) do
     sandbox.path
-    |> priv_dirs()
-    |> Enum.flat_map(&all_entries/1)
+    |> priv_roots()
+    |> Enum.flat_map(&root_entries/1)
     |> Enum.each(fn {path, type} ->
       relative = Path.relative_to(path, sandbox.path)
 
@@ -433,24 +458,22 @@ defmodule Mut.Sandbox do
     |> Map.keys()
     |> Enum.map(&path_root(&1, apps_dir))
     |> Map.new(&{&1, true})
-    |> Map.merge(priv_roots(sandbox))
+    |> Map.merge(sandbox_priv_roots(sandbox))
   end
 
-  defp priv_roots(sandbox) do
-    sandbox.path
-    |> priv_dirs()
-    |> Map.new(&{Path.relative_to(&1, sandbox.path), true})
-  end
+  defp sandbox_priv_roots(sandbox), do: relative_roots(sandbox, priv_roots(sandbox.path))
 
   # Roots whose baseline records every entry type: `priv/` (captured by the
   # lstat walker) and the source `lib/` trees (same walker, see
   # `source_baseline/1`).
   defp complete_roots(sandbox) do
-    sandbox.path
-    |> source_dirs()
-    |> Map.new(&{Path.relative_to(&1, sandbox.path), true})
-    |> Map.merge(priv_roots(sandbox))
+    sandbox
+    |> relative_roots(source_roots(sandbox.path))
+    |> Map.merge(sandbox_priv_roots(sandbox))
   end
+
+  defp relative_roots(sandbox, roots),
+    do: Map.new(roots, &{relative_root(&1, sandbox.path), true})
 
   defp path_root(relative, apps_dir) do
     case Path.split(relative) do
@@ -469,11 +492,15 @@ defmodule Mut.Sandbox do
     end
   end
 
+  # The tracked ROOTS (`_build/mut_schema`, the `lib` trees, `priv`) plus the
+  # individually tracked extra fallback sources, which define no root of their
+  # own so their directories are never stray-swept (see `source_extras/1`).
   defp baseline(sandbox) do
     sandbox.baseline_snapshot
     |> Enum.into(%{}, fn {relative, hash} -> {Path.join("_build/mut_schema", relative), hash} end)
     |> Map.merge(source_baseline(sandbox.baseline_source))
     |> Map.merge(sandbox.priv_baseline || %{})
+    |> Map.merge(extra_source_baseline(sandbox))
   end
 
   # The `priv` baseline is captured from the sandbox itself at creation (the
@@ -485,39 +512,57 @@ defmodule Mut.Sandbox do
     # symlinked directory (`priv/static -> ../../assets`) and record baseline
     # entries whose real target lives OUTSIDE the sandbox, which a restore
     # would then write through.
-    roots = priv_dirs(path)
+    roots = priv_roots(path)
 
     roots
-    |> Enum.flat_map(&all_entries/1)
+    |> Enum.flat_map(&root_entries/1)
     |> Map.new(fn {entry, type} ->
       {Path.relative_to(entry, path), entry_fingerprint(entry, type, mode)}
     end)
-    # The `priv` roots themselves, so a test that deletes a whole `priv/` tree
-    # has it recreated even when it is empty.
-    |> Map.merge(Map.new(roots, &{Path.relative_to(&1, path), root_fingerprint(&1, mode)}))
   end
 
   # Single-app: `priv/`. Umbrella: the root's own `priv/` (rare but harmless)
   # plus every child app's `<apps_path>/<app>/priv`.
-  defp priv_dirs(root) do
+  defp priv_candidates(root) do
     if Mut.Umbrella.umbrella?(root) do
       [root | Mut.Umbrella.app_dirs(root)]
     else
       [root]
     end
     |> Enum.map(&Path.join(&1, "priv"))
-    |> Enum.filter(&File.dir?/1)
   end
 
-  # A root selected with `File.dir?/1` may itself be a symlink to a directory
-  # (`apps/<app>/priv -> ../../shared_priv`); record it by its lstat type so a
-  # reset restores the LINK rather than replacing it with a real directory.
-  defp root_fingerprint(root, mode) do
-    case File.lstat(root) do
-      {:ok, %File.Stat{type: :symlink}} -> entry_fingerprint(root, :symlink, mode)
-      _directory -> :directory
-    end
+  # W5-1 (data loss): roots were selected with `File.dir?/1`, which FOLLOWS
+  # symlinks, and `all_entries/1` then called `File.ls!` on the root itself.
+  # A `priv` root created as a symlink AFTER checkout (a test doing
+  # `ln_s "/somewhere/real", "priv"`) was therefore traversed and its target's
+  # files — outside the sandbox entirely — were deleted as strays, since the
+  # baseline of a root that did not exist at creation time cannot protect them.
+  #
+  # Every candidate root is now classified with `lstat`: a symlink root is an
+  # ENTRY (compared against the baseline as `{:symlink, target}`, swept as a
+  # stray LINK when absent from it, and restored/retargeted by the baseline),
+  # never a directory to walk into. Nothing is ever deleted or written through
+  # a symlink.
+  defp source_roots(root), do: root |> source_candidates() |> classify_roots()
+
+  defp priv_roots(root), do: root |> priv_candidates() |> classify_roots()
+
+  defp classify_roots(candidates) do
+    Enum.flat_map(candidates, fn path ->
+      case File.lstat(path) do
+        {:ok, %File.Stat{type: :directory}} -> [{path, :directory}]
+        {:ok, %File.Stat{type: :symlink}} -> [{path, :symlink}]
+        _other -> []
+      end
+    end)
   end
+
+  # A root and everything under it. The root is listed FIRST (so a stray root
+  # is removed before its descendants are visited) and a symlink root yields
+  # only itself — it is never enumerated.
+  defp root_entries({root, :symlink}), do: [{root, :symlink}]
+  defp root_entries({root, :directory}), do: [{root, :directory} | all_entries(root)]
 
   defp entry_fingerprint(_entry, :directory, _mode), do: :directory
   defp entry_fingerprint(entry, :symlink, _mode), do: link_fingerprint(entry)
@@ -581,24 +626,18 @@ defmodule Mut.Sandbox do
   # sweep can remove a stray directory or symlink a test created under `lib/`
   # without mistaking a baseline one for a stray (T26).
   defp source_baseline(baseline_source) do
-    roots = source_dirs(baseline_source)
-
-    roots
-    |> Enum.flat_map(&all_entries/1)
+    baseline_source
+    |> source_roots()
+    |> Enum.flat_map(&root_entries/1)
     |> Map.new(fn {entry, type} ->
       {Path.relative_to(entry, baseline_source), entry_fingerprint(entry, type, :hash)}
     end)
-    # The `lib` roots themselves: recorded so the sweep does not see them as
-    # stray directories, and so a deleted one is recreated.
-    |> Map.merge(
-      Map.new(roots, &{Path.relative_to(&1, baseline_source), root_fingerprint(&1, :hash)})
-    )
   end
 
   # Single-app: the project's own lib/. Umbrella: every child app's lib/, so a
   # fallback-patched source file under apps/<app>/lib resets between mutants
   # (the umbrella root has no lib/ of its own). M68.
-  defp source_dirs(root) do
+  defp source_candidates(root) do
     if Mut.Umbrella.umbrella?(root) do
       root
       |> Mut.Umbrella.app_dirs()
@@ -606,7 +645,56 @@ defmodule Mut.Sandbox do
     else
       [Path.join(root, "lib")]
     end
-    |> Enum.filter(&File.dir?/1)
+  end
+
+  # W5-5: `source_candidates/1` hardcodes `lib/`, but a project may compile any
+  # directory via `elixirc_paths` (`["src"]`, `["lib", "web"]`) and `--files`
+  # may select those `.ex` files, which `Mut.Worker.run_fallback/4` then
+  # PATCHES in the sandbox. Those files were absent from the source baseline,
+  # so `reset/1` neither restored nor verified them and the next mutant
+  # compiled the previous mutation too (and, once a replacement changed the
+  # byte length, addressed the wrong source span).
+  #
+  # `elixirc_paths` is deliberately NOT parsed: it is nearly always a private
+  # function branching on `Mix.env()`, so its value cannot be read statically.
+  # Instead the baseline covers the union of the `lib` roots and every distinct
+  # file named by `plan.fallback` — precisely the set a fallback run can patch.
+  #
+  # Trade-off: extra files are tracked INDIVIDUALLY (restored and verified by
+  # content hash) and their directories are NOT stray-swept. `src/` may hold
+  # untracked user files that no baseline records, and sweeping the root would
+  # delete them; a fallback run only rewrites files it patches, so restoring
+  # them is sufficient. A test that CREATES a file under such a root therefore
+  # leaks into the next mutant, exactly as it does under any other untracked
+  # directory (`config/`, the project root).
+  defp source_extras(%SchemaBuild.Result{} = schema_result) do
+    root = schema_result.work_copy_root
+    tracked_roots = Enum.map(source_roots(root) ++ priv_roots(root), &relative_root(&1, root))
+
+    schema_result.plan.fallback
+    |> Enum.map(& &1.file)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&Path.relative_to(&1, root))
+    |> Enum.uniq()
+    |> Enum.reject(fn relative -> Enum.any?(tracked_roots, &under_root?(relative, &1)) end)
+    |> Enum.filter(&regular?(Path.join(root, &1)))
+    |> Enum.sort()
+  end
+
+  defp relative_root({path, _type}, root), do: Path.relative_to(path, root)
+
+  defp under_root?(relative, root),
+    do: relative == root or String.starts_with?(relative, root <> "/")
+
+  # Hashed from the pristine `baseline_source` (the work copy is never patched;
+  # only its sandbox copies are), so a restore reproduces the original bytes.
+  defp extra_source_baseline(sandbox) do
+    sandbox.source_extras
+    |> Enum.map(fn relative ->
+      {relative, sha256(Path.join(sandbox.baseline_source, relative))}
+    end)
+    |> Enum.reject(&is_nil(elem(&1, 1)))
+    |> Map.new()
   end
 
   defp sha256(path) do
