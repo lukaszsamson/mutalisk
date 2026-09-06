@@ -8,6 +8,14 @@ defmodule Mut.SchemaPlacer do
   @definition_defs @function_defs ++ @macro_defs
   @no_descend ~w(quote unquote unquote_splicing)a
 
+  # Base name of the hoisted "which mutant is active" binding. The instrumented
+  # AST is rendered with `Macro.to_string/1` and recompiled from SOURCE, so any
+  # hygiene metadata (`Macro.unique_var/2`'s counter/context) is lost in the
+  # round-trip: only the textual name survives. The name is therefore chosen so
+  # that it is provably absent from the enclosing function's variables, falling
+  # back to `mutalisk_schema_active_1`, `_2`, ... on collision.
+  @hoist_var_base "mutalisk_schema_active"
+
   defmodule PlacementMap do
     @moduledoc "Maps rendered schema locations to mutant IDs for rollback."
 
@@ -160,16 +168,47 @@ defmodule Mut.SchemaPlacer do
   end
 
   defp hoist_plan(ast, groups) do
-    {_ast, acc} =
-      Macro.traverse(ast, %{frames: [], bodies: %{}, groups: groups}, &hoist_pre/2, &hoist_post/2)
+    initial = %{frames: [], bodies: %{}, body_vars: %{}, groups: groups}
+    {_ast, acc} = Macro.traverse(ast, initial, &hoist_pre/2, &hoist_post/2)
 
     Map.new(acc.bodies, fn {path, hashes} ->
       mode =
         if MapSet.size(hashes) >= 2,
-          do: {:hoisted, Macro.unique_var(:mutalisk_schema_active, __MODULE__)},
+          do: {:hoisted, hoist_variable(Map.get(acc.body_vars, path, MapSet.new()))},
           else: :inline
 
       {path, mode}
+    end)
+  end
+
+  # Pick a textual identifier proven absent from the enclosing function's
+  # variables. Functions without a collision keep the stable base name.
+  defp hoist_variable(taken) do
+    {unused_name(taken, 0), [generated: true], nil}
+  end
+
+  defp unused_name(taken, index) do
+    candidate =
+      case index do
+        0 -> String.to_atom(@hoist_var_base)
+        n -> String.to_atom("#{@hoist_var_base}_#{n}")
+      end
+
+    if MapSet.member?(taken, candidate), do: unused_name(taken, index + 1), else: candidate
+  end
+
+  # Every variable name appearing anywhere in the definition, including
+  # head patterns, nested `fn` clauses and comprehensions. Over-collecting is
+  # safe: it can only push the generated name to a numbered variant.
+  defp variable_names(ast) do
+    ast
+    |> Macro.prewalker()
+    |> Enum.reduce(MapSet.new(), fn
+      {name, _meta, context}, acc when is_atom(name) and is_atom(context) ->
+        MapSet.put(acc, name)
+
+      _node, acc ->
+        acc
     end)
   end
 
@@ -221,7 +260,20 @@ defmodule Mut.SchemaPlacer do
     {node, push_frame(node, path, acc)}
   end
 
-  defp hoist_post(node, acc), do: {node, pop_frame(acc)}
+  defp hoist_post(node, acc) do
+    path = hd(acc.frames).path
+    {node, pop_frame(record_body_vars(node, path, acc))}
+  end
+
+  defp record_body_vars({kind, _meta, [_head, [do: _body]]} = node, path, acc)
+       when kind in @function_defs do
+    %{acc | body_vars: Map.put(acc.body_vars, def_body_path(path, kind), variable_names(node))}
+  end
+
+  defp record_body_vars(_node, _path, acc), do: acc
+
+  defp def_body_path(path, kind),
+    do: path ++ [{:elem, kind, 1}, {:elem, :list, 0}, {:elem, :do_block, 1}]
 
   defp maybe_record_body_group(path, acc) do
     with [_ | _] <- path,
@@ -239,7 +291,7 @@ defmodule Mut.SchemaPlacer do
 
   defp maybe_push_def({kind, _meta, [_head, [do: _body]]}, path, acc)
        when kind in @function_defs do
-    body_path = path ++ [{:elem, kind, 1}, {:elem, :list, 0}, {:elem, :do_block, 1}]
+    body_path = def_body_path(path, kind)
     mode = Map.get(acc.hoist_plan, body_path, :inline)
 
     %{acc | def_stack: [%{path: path, body_path: body_path, mode: mode} | acc.def_stack]}
@@ -521,7 +573,8 @@ defmodule Mut.SchemaPlacer do
 
   defp original_and_wildcard_arms?(_arms), do: false
 
-  defp schema_scrutinee?({:mutalisk_schema_active, _meta, nil}), do: true
+  defp schema_scrutinee?({name, _meta, nil}) when is_atom(name),
+    do: String.starts_with?(Atom.to_string(name), @hoist_var_base)
 
   defp schema_scrutinee?(
          {{:., _, [:persistent_term, :get]}, _,
