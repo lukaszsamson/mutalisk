@@ -66,8 +66,10 @@ defmodule Mut.SchemaPlacerTest do
     instrumented = SchemaPlacer.place(ast, mutants)
     body = function_body(instrumented, :f)
     assert {:__block__, [], [{:=, [generated: true], [hoisted_var, hoist_call]}, _expr]} = body
-    assert {:mutalisk_schema_active, meta, Mut.SchemaPlacer} = hoisted_var
-    assert Keyword.has_key?(meta, :counter)
+    # The instrumented AST is rendered to source and recompiled, so the hoisted
+    # variable must be a plain (context-free) name -- hygiene metadata would be
+    # lost by the round-trip.
+    assert {:mutalisk_schema_active, _meta, nil} = hoisted_var
     assert persistent_term_get?(hoist_call)
 
     assert Enum.map(schema_cases(instrumented), fn {:case, _meta, [scrutinee, _arms]} ->
@@ -437,6 +439,163 @@ defmodule Mut.SchemaPlacerTest do
     assert length(schema_cases(placed)) == 1
     assert [%{mutant: %{id: 22}, reason: reason}] = refusals
     assert reason =~ "defmacro/defmacrop body"
+  end
+
+  describe "hoisted binding name selection (rendered-and-recompiled)" do
+    test "does not clobber a user variable of the same name" do
+      source = """
+      defmodule SchemaPlacerCollision do
+        def value(mutalisk_schema_active), do: {mutalisk_schema_active, 1, 2}
+      end
+      """
+
+      {rendered, [first_id, second_id]} = instrument_literals!("collision", source)
+
+      refute rendered =~ "mutalisk_schema_active = :persistent_term.get"
+      assert rendered =~ "mutalisk_schema_active_1 = :persistent_term.get"
+
+      module = compile_module!(rendered)
+
+      assert with_active(0, fn -> module.value(42) end) == {42, 1, 2}
+      assert with_active(first_id, fn -> module.value(42) end) == {42, 0, 2}
+      assert with_active(second_id, fn -> module.value(42) end) == {42, 1, 0}
+    end
+
+    test "avoids a name bound only inside a nested fn" do
+      source = """
+      defmodule SchemaPlacerNestedFn do
+        def value(list) do
+          mapped = Enum.map(list, fn mutalisk_schema_active -> mutalisk_schema_active + 1 end)
+          {mapped, 1, 2}
+        end
+      end
+      """
+
+      {rendered, [inner_id | _rest]} = instrument_literals!("nested_fn", source)
+
+      refute rendered =~ "mutalisk_schema_active = :persistent_term.get"
+      assert rendered =~ "mutalisk_schema_active_1 = :persistent_term.get"
+
+      module = compile_module!(rendered)
+
+      assert with_active(0, fn -> module.value([1, 2]) end) == {[2, 3], 1, 2}
+      assert with_active(inner_id, fn -> module.value([1, 2]) end) == {[1, 2], 1, 2}
+    end
+
+    test "keeps the base name when the function has no colliding variable" do
+      source = """
+      defmodule SchemaPlacerNoCollision do
+        def value(a), do: {a, 1, 2}
+      end
+      """
+
+      {rendered, [first_id, _second_id]} = instrument_literals!("no_collision", source)
+
+      assert rendered =~ "mutalisk_schema_active = :persistent_term.get"
+      refute rendered =~ "mutalisk_schema_active_1"
+
+      module = compile_module!(rendered)
+
+      assert with_active(0, fn -> module.value(:x) end) == {:x, 1, 2}
+      assert with_active(first_id, fn -> module.value(:x) end) == {:x, 0, 2}
+    end
+
+    test "a collision in one function does not rename the binding in another" do
+      source = """
+      defmodule SchemaPlacerPerFunction do
+        def tainted(mutalisk_schema_active), do: {mutalisk_schema_active, 1, 2}
+        def clean(a), do: {a, 3, 4}
+      end
+      """
+
+      {rendered, _ids} = instrument_literals!("per_function", source)
+
+      assert rendered =~ "mutalisk_schema_active_1 = :persistent_term.get"
+      assert rendered =~ "mutalisk_schema_active = :persistent_term.get"
+    end
+
+    test "skips numbered variants that are themselves taken" do
+      source = """
+      defmodule SchemaPlacerNumbered do
+        def value(mutalisk_schema_active, mutalisk_schema_active_1) do
+          {mutalisk_schema_active, mutalisk_schema_active_1, 1, 2}
+        end
+      end
+      """
+
+      {rendered, [first_id, _second_id]} = instrument_literals!("numbered", source)
+
+      assert rendered =~ "mutalisk_schema_active_2 = :persistent_term.get"
+
+      module = compile_module!(rendered)
+
+      assert with_active(0, fn -> module.value(:a, :b) end) == {:a, :b, 1, 2}
+      assert with_active(first_id, fn -> module.value(:a, :b) end) == {:a, :b, 0, 2}
+    end
+
+    test "the placement map still resolves arms behind a renamed scrutinee" do
+      source = """
+      defmodule SchemaPlacerRenamedMap do
+        def value(mutalisk_schema_active), do: {mutalisk_schema_active, 1, 2}
+      end
+      """
+
+      {file, mutants} = write_literal_mutants!("renamed_map", source)
+
+      assert {:ok, _rendered, placement_map, []} = SchemaPlacer.instrument_file(file, mutants)
+      assert Enum.flat_map(placement_map.entries, & &1.mut_ids) == Enum.map(mutants, & &1.id)
+    end
+  end
+
+  # Instruments every scalar literal in `source` as a schema mutant that
+  # rewrites the literal to `0`, then renders it exactly as the schema build
+  # does (source round-trip). Returns the rendered source and the mutant ids.
+  defp instrument_literals!(name, source) do
+    {file, mutants} = write_literal_mutants!(name, source)
+
+    assert {:ok, rendered, _placement_map, []} = SchemaPlacer.instrument_file(file, mutants)
+    {rendered, Enum.map(mutants, & &1.id)}
+  end
+
+  defp write_literal_mutants!(name, source) do
+    dir =
+      Path.join(["tmp", "schema_placer_test", "#{name}_#{System.unique_integer([:positive])}"])
+
+    File.mkdir_p!(dir)
+    on_exit(fn -> File.rm_rf(dir) end)
+
+    file = Path.join(dir, "#{name}.ex")
+    File.write!(file, source)
+
+    mutants =
+      [file: file, source: source]
+      |> Mut.AstWalk.schema_literal_candidates()
+      |> Enum.with_index(11)
+      |> Enum.map(fn {candidate, id} ->
+        %Mutant{
+          mutant(candidate.ast_path_hash, id, 0)
+          | mutator: Mut.Mutator.IntegerLiteral,
+            mutator_name: "IntegerLiteral",
+            mutation_kind: :integer_literal,
+            original_dispatch: nil,
+            file: file
+        }
+      end)
+
+    {file, mutants}
+  end
+
+  defp compile_module!(rendered) do
+    [{module, _binary}] = Code.compile_string(rendered, "rendered.ex")
+    on_exit(fn -> :code.purge(module) && :code.delete(module) end)
+    module
+  end
+
+  defp with_active(id, fun) do
+    Mut.Runtime.set_active(id)
+    fun.()
+  after
+    Mut.Runtime.clear()
   end
 
   defp parsed!(source) do

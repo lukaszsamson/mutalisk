@@ -405,6 +405,119 @@ defmodule Mut.SandboxTest do
     Sandbox.destroy_pool(Sandbox.checkin(sandbox, pool))
   end
 
+  test "reset_priv never follows a priv root symlink created after checkout (P1)" do
+    schema_result = schema_result("priv_new_symlink_root")
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-priv-new-symroot", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    external =
+      Path.expand(Path.join(["tmp", "tests", "sandbox", "priv_new_symlink_root", "external"]))
+
+    File.mkdir_p!(external)
+    keep = Path.join(external, "keep.txt")
+    File.write!(keep, "keep\n")
+
+    priv = Path.join(sandbox.path, "priv")
+    assert {:error, :enoent} = File.lstat(priv)
+    :ok = File.ln_s(external, priv)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert File.regular?(keep), "reset_priv deleted a file through a symlinked priv root"
+    assert {:error, :enoent} = File.lstat(priv), "the stray priv link was not swept"
+
+    :ok = File.ln_s(external, priv)
+    assert :ok = Sandbox.reset(sandbox)
+    assert File.regular?(keep), "reset deleted a file through a symlinked priv root"
+    assert {:error, :enoent} = File.lstat(priv), "the stray priv link was not swept"
+
+    Sandbox.destroy_pool(Sandbox.checkin(sandbox, pool))
+  end
+
+  test "reset_priv never follows an umbrella child priv root symlink (P1)" do
+    schema_result = umbrella_schema_result("umbrella_priv_new_symlink_root")
+    File.rm_rf!(Path.join(schema_result.work_copy_root, "apps/child/priv"))
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1,
+        run_id: "unit-sandbox-umbrella-priv-new-symroot",
+        force: true
+      )
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    external =
+      Path.expand(
+        Path.join(["tmp", "tests", "sandbox", "umbrella_priv_new_symlink_root", "external"])
+      )
+
+    File.mkdir_p!(external)
+    keep = Path.join(external, "keep.txt")
+    File.write!(keep, "keep\n")
+
+    priv = Path.join(sandbox.path, "apps/child/priv")
+    assert {:error, :enoent} = File.lstat(priv)
+    :ok = File.ln_s(external, priv)
+
+    assert :ok = Sandbox.reset_priv(sandbox)
+    assert File.regular?(keep), "reset_priv deleted a file through a symlinked priv root"
+    assert {:error, :enoent} = File.lstat(priv), "the stray priv link was not swept"
+
+    Sandbox.destroy_pool(Sandbox.checkin(sandbox, pool))
+  end
+
+  test "reset restores fallback sources outside lib/ (P1)" do
+    schema_result = schema_result("src_fallback")
+    work_copy = schema_result.work_copy_root
+    File.mkdir_p!(Path.join(work_copy, "src"))
+    original = "defmodule Sample, do: :ok\n"
+    File.write!(Path.join(work_copy, "src/sample.ex"), original)
+
+    schema_result = %{
+      schema_result
+      | plan: %Mut.Plan{
+          schema: [],
+          skipped: [],
+          fallback: [fallback_mutant("src/sample.ex")]
+        }
+    }
+
+    {:ok, pool} =
+      Sandbox.create_pool(schema_result, 1, run_id: "unit-sandbox-src-fallback", force: true)
+
+    {:ok, sandbox, pool} = Sandbox.checkout(pool)
+
+    patched = Path.join(sandbox.path, "src/sample.ex")
+    File.write!(patched, "defmodule Sample, do: :mutated\n")
+    untracked = Path.join(sandbox.path, "src/untracked.txt")
+    File.write!(untracked, "keep\n")
+
+    assert :ok = Sandbox.reset(sandbox)
+    assert File.read!(patched) == original, "a fallback source outside lib/ was not restored"
+
+    assert File.read!(untracked) == "keep\n",
+           "the extra source's directory must not be stray-swept"
+
+    Sandbox.destroy_pool(Sandbox.checkin(sandbox, pool))
+  end
+
+  defp fallback_mutant(file) do
+    %Mut.Mutant{
+      id: 1,
+      stable_id: "fallback-#{file}",
+      engine: :fallback,
+      mutator: Mut.Mutator.IntegerLiteral,
+      mutator_name: "integer_literal",
+      file: file,
+      line: 1,
+      original_ast: nil,
+      mutated_ast: nil,
+      description: "test fixture"
+    }
+  end
+
   defp umbrella_schema_result(name) do
     root = Path.expand(Path.join(["tmp", "tests", "sandbox", name, "schema"]))
     File.rm_rf!(Path.dirname(root))

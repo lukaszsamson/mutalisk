@@ -19,6 +19,21 @@ defmodule Mut.Recompile do
       runs in the spawned BEAM with the sandbox's app + dep ebins
       added to the code path via `-pa`.
 
+  Skipping `mix` does NOT mean skipping the project's compile-time
+  context. The child re-creates it before compiling (see
+  `elixir_args/4`): it pushes the sandbox's Mix project (the work-copy
+  `mix.exs` overlay, which wraps `mix_user.exs`), sets `Mix.env(:test)`
+  and runs `loadconfig` so `Application.compile_env/3` and
+  `Application.get_env/2` see the same values a real `MIX_ENV=test mix
+  compile` would, and applies the project's `:elixirc_options`. Without
+  that the fallback recompile changed behaviour beyond the mutation:
+  `Application.compile_env(:app, :key, :default)` fell back to the
+  default and `Mix.Project.config()[:app]` was `nil`, producing false
+  kills, false survivors, or false compile errors on unmodified source.
+  Crucially it still never runs `deps.loadpaths`/`deps.check`, so the
+  lock check stays out of the picture; dep code is reached purely via
+  the `-pa` ebin flags below.
+
   Sandbox.reset's `remove_stray_files` previously deleted dep ebins
   (mutalisk.app, jason.app, ...) from the sandbox because the schema
   baseline only tracks the user app's ebin. The mix-based recompile
@@ -102,6 +117,15 @@ defmodule Mut.Recompile do
   # via `:compile_timeout_ms` for pathologically large dependent sets.
   @compile_timeout_ms 300_000
 
+  # Separates the `ebin_of` prelude from the project-bootstrap section of the
+  # generated eval. Tests slice the prelude on it to exercise `ebin_of` without
+  # running the bootstrap.
+  @bootstrap_marker "# mut.recompile: project bootstrap"
+
+  @doc false
+  @spec bootstrap_marker() :: String.t()
+  def bootstrap_marker, do: @bootstrap_marker
+
   @spec recompile(Sandbox.t(), [Path.t()], [Path.t()], keyword) :: result
   def recompile(%Sandbox{} = sandbox, mutated_files, dependent_files, opts \\ [])
       when is_list(mutated_files) and is_list(dependent_files) and is_list(opts) do
@@ -117,12 +141,53 @@ defmodule Mut.Recompile do
            retry_on: @beam_startup_transients,
            max_retries: 2
          ) do
-      {:exit, 0, _output} -> :ok
-      {:exit, code, output} -> {:error, {:recompile_failed, categorize(output), code, output}}
-      {:timeout, output} -> {:error, {:recompile_failed, :timeout, 124, output}}
-      {:error, reason} -> {:error, reason}
+      {:exit, 0, output} ->
+        notice_bootstrap_failure(output)
+        :ok
+
+      {:exit, code, output} ->
+        notice_bootstrap_failure(output)
+        output = strip_bootstrap_failure(output)
+        {:error, {:recompile_failed, categorize(output), code, output}}
+
+      {:timeout, output} ->
+        {:error, {:recompile_failed, :timeout, 124, output}}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
+
+  @bootstrap_failure_re ~r/mut\.recompile: project bootstrap failed\n.*?mut\.recompile: end of bootstrap failure\n?/s
+  @bootstrap_notice_key {__MODULE__, :bootstrap_failure_reported}
+
+  # A bootstrap failure (a config file that raises, a project that cannot be
+  # loaded) makes the child fall back to the pre-bootstrap behaviour, which
+  # can silently change compile-time config for every fallback mutant. Tell
+  # the user once per run rather than never (success output is discarded).
+  defp notice_bootstrap_failure(output) do
+    case Regex.run(@bootstrap_failure_re, output) do
+      nil ->
+        :ok
+
+      [block] ->
+        unless :persistent_term.get(@bootstrap_notice_key, false) do
+          :persistent_term.put(@bootstrap_notice_key, true)
+
+          IO.puts(
+            :stderr,
+            "[mutalisk] fallback recompiles could not load the project/config; " <>
+              "compile-time configuration (Application.compile_env, Mix.Project.config) " <>
+              "may differ from the real build for every fallback mutant:\n" <> block
+          )
+        end
+    end
+  end
+
+  # Keep the bootstrap diagnostics out of `categorize/1`'s input: an
+  # exception name inside them (UndefinedFunctionError from a config file)
+  # would otherwise mislabel a genuine compile error.
+  defp strip_bootstrap_failure(output), do: Regex.replace(@bootstrap_failure_re, output, "")
 
   @doc """
   Classify the stderr/stdout from a failed recompile invocation.
@@ -191,14 +256,6 @@ defmodule Mut.Recompile do
         ["-pa", relative]
       end)
 
-    # Start the Mix application before compiling. Some projects (e.g. credo)
-    # run `Mix.Project`-dependent code at COMPILE time (`use Credo.Check`
-    # reaches `Mix.ProjectStack`), which exits with `(exit) ... no process`
-    # in this bare `elixir --eval` BEAM unless the Mix server is alive. This
-    # caused valid mutants to be mis-reported as compile failures
-    # (false-invalids). `Mix.start/0` only boots Mix's agents — it does NOT
-    # load the project or run the deps lock-check (the thing this module
-    # avoids by skipping `mix`), so it is safe and side-effect-free here.
     # `file` may arrive absolute, so locate the `<apps_path>/<dir>` segment
     # anywhere in the path (umbrella child); fall back to default_app
     # (single-app). `apps_path` honors a custom `:apps_path` (default "apps");
@@ -215,8 +272,9 @@ defmodule Mut.Recompile do
     {apps_path, app_map} =
       Keyword.get(opts, :app_context) || Mut.Umbrella.app_context(sandbox_path)
 
+    project_dir = project_dir(sandbox_path, files, apps_path)
+
     eval = ~s"""
-    Mix.start()
     app_map = #{inspect(app_map)}
     ebin_of = fn file ->
       relative =
@@ -235,6 +293,69 @@ defmodule Mut.Recompile do
       Path.join(["_build/mut_schema/lib", app, "ebin"])
     end
 
+    #{@bootstrap_marker}
+    # MIX_BUILD_PATH/MIX_DEPS_PATH arrive RELATIVE to the sandbox root, but the
+    # project load below may `cd` into an umbrella child; expand them first so
+    # Mix.Project resolves the same absolute build/deps paths either way.
+    for var <- ["MIX_BUILD_PATH", "MIX_DEPS_PATH"] do
+      case System.get_env(var) do
+        nil -> :ok
+        value -> System.put_env(var, Path.expand(value))
+      end
+    end
+
+    Mix.start()
+    Mix.env(:test)
+
+    project_dir = #{inspect(project_dir)}
+
+    bootstrap =
+      try do
+        if File.regular?(Path.join(project_dir, "mix.exs")) do
+          File.cd!(project_dir, fn ->
+            Code.require_file("mix.exs", project_dir)
+            Mix.Task.run("loadconfig")
+          end)
+
+          :ok
+        else
+          {:skipped, :no_mix_exs}
+        end
+      catch
+        kind, reason -> {:error, Exception.format(kind, reason, __STACKTRACE__)}
+      end
+
+    elixirc_options =
+      case bootstrap do
+        :ok ->
+          Mix.Project.config()[:elixirc_options] || []
+
+        {:skipped, reason} ->
+          IO.puts(:stderr, "mut.recompile: project bootstrap skipped (\#{inspect(reason)})")
+          []
+
+        {:error, formatted} ->
+          IO.puts(
+            :stderr,
+            "mut.recompile: project bootstrap failed\\n" <>
+              formatted <> "\\nmut.recompile: end of bootstrap failure"
+          )
+
+          []
+      end
+
+    # `:elixirc_options` mixes true `Code` compiler options (debug_info,
+    # no_warn_undefined, parser_options, ...) with Mix-level ones. Apply the
+    # former to this BEAM's compiler state; `:warnings_as_errors` is enforced
+    # by Mix.Compilers.Elixir, not by the compiler, so it is honored below.
+    compiler_keys = Map.keys(Code.compiler_options())
+
+    for {key, value} <- elixirc_options, key in compiler_keys do
+      Code.put_compiler_option(key, value)
+    end
+
+    warnings_as_errors? = Keyword.get(elixirc_options, :warnings_as_errors, false)
+
     case Kernel.ParallelCompiler.compile(#{inspect(files)},
            each_module: fn file, module, binary ->
              ebin = ebin_of.(file)
@@ -242,6 +363,16 @@ defmodule Mut.Recompile do
              File.write!(Path.join(ebin, Atom.to_string(module) <> ".beam"), binary)
            end
          ) do
+      {:ok, _modules, warnings} when warnings_as_errors? and warnings != [] ->
+        IO.puts(
+          :stderr,
+          "mut.recompile errors: compilation failed due to warnings while using the " <>
+            "--warnings-as-errors option"
+        )
+
+        IO.puts(:stderr, "mut.recompile warnings: \#{inspect(warnings, limit: :infinity)}")
+        System.halt(1)
+
       {:ok, _modules, _warnings} ->
         :ok
 
@@ -253,5 +384,28 @@ defmodule Mut.Recompile do
     """
 
     pa_flags ++ ["--eval", eval]
+  end
+
+  # The directory whose Mix project defines the compile-time context for this
+  # recompile: the sandbox root for a single app, or `<apps_path>/<dir>` when
+  # the primary (first) mutated file belongs to an umbrella child. The child's
+  # `mix.exs` is what carries its `:app`, `:elixirc_options` and — via a
+  # relative `:config_path` such as `"../../config/config.exs"` — the config
+  # the umbrella really compiles with.
+  defp project_dir(sandbox_path, files, apps_path) do
+    with file when is_binary(file) <- List.first(files),
+         relative = relative_to_sandbox(file, sandbox_path),
+         [^apps_path, dir | _rest] <-
+           relative |> Path.split() |> Enum.drop_while(&(&1 != apps_path)),
+         app_dir = Path.join([sandbox_path, apps_path, dir]),
+         true <- File.regular?(Path.join(app_dir, "mix.exs")) do
+      app_dir
+    else
+      _other -> sandbox_path
+    end
+  end
+
+  defp relative_to_sandbox(file, sandbox_path) do
+    if Path.type(file) == :absolute, do: Path.relative_to(file, sandbox_path), else: file
   end
 end

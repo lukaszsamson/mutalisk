@@ -282,6 +282,92 @@ defmodule Mut.TestSelection.StaticTest do
     refute Map.has_key?(analysis.index, :__MODULE__)
   end
 
+  describe "transitive source graph" do
+    test "a test that reaches the target only through a facade is selected" do
+      # Reproduction: the index only scans TEST files, so `indirect_test.exs`
+      # (which names AstraFacade and nothing else) used to be dropped from the
+      # selection for AstraHelper — a false survivor for any mutant in
+      # AstraHelper that only `indirect_test.exs` kills.
+      root = fixture_root("facade")
+      lib = Path.join(root, "lib")
+      tests = Path.join(root, "test")
+      File.mkdir_p!(lib)
+      File.mkdir_p!(tests)
+
+      File.write!(Path.join(lib, "astra_helper.ex"), """
+      defmodule AstraHelper do
+        def value(x), do: x * 1
+      end
+      """)
+
+      File.write!(Path.join(lib, "astra_facade.ex"), """
+      defmodule AstraFacade do
+        def value(x), do: AstraHelper.value(x)
+      end
+      """)
+
+      direct = Path.join(tests, "direct_test.exs")
+      indirect = Path.join(tests, "indirect_test.exs")
+
+      File.write!(direct, """
+      defmodule DirectTest do
+        use ExUnit.Case, async: true
+
+        test "direct" do
+          assert AstraHelper.value(0) == 0
+        end
+      end
+      """)
+
+      File.write!(indirect, """
+      defmodule IndirectTest do
+        use ExUnit.Case, async: true
+
+        test "indirect" do
+          assert AstraFacade.value(2) == 2
+        end
+      end
+      """)
+
+      all = [direct, indirect]
+
+      direct_only = Static.analyze([tests])
+      assert Static.covering_tests(direct_only, AstraHelper, all) == [direct]
+
+      transitive = Static.analyze([tests], source_paths: [lib])
+
+      assert Static.covering_tests(transitive, AstraHelper, all) == Enum.sort(all),
+             "a test reaching AstraHelper through AstraFacade must be selected"
+
+      # The facade itself is still selected exactly, and unrelated modules are
+      # not dragged in by the closure.
+      assert Static.covering_tests(transitive, AstraFacade, all) == [indirect]
+    end
+
+    test "default_source_paths finds lib and test/support, including umbrellas" do
+      root = fixture_root("source_paths")
+      File.mkdir_p!(Path.join(root, "lib"))
+      File.mkdir_p!(Path.join(root, "test/support"))
+      File.mkdir_p!(Path.join(root, "apps/child/lib"))
+
+      assert Enum.sort(Static.default_source_paths(root)) == [
+               Path.join(root, "apps/child/lib"),
+               Path.join(root, "lib"),
+               Path.join(root, "test/support")
+             ]
+
+      assert Static.default_source_paths(nil) == []
+    end
+  end
+
+  defp fixture_root(name) do
+    path = Path.expand(Path.join(["tmp", "tests", "test_selection", name]))
+    File.rm_rf!(path)
+    File.mkdir_p!(path)
+    on_exit(fn -> File.rm_rf!(path) end)
+    path
+  end
+
   defp write_test(name, source) do
     path = Path.expand(Path.join(["tmp", "tests", "test_selection", name, "sample_test.exs"]))
     File.rm_rf!(Path.dirname(path))

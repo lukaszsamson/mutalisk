@@ -316,4 +316,421 @@ defmodule Mut.History.DigestTest do
              "a behaviour-affecting .heex byte edit must change the fingerprint even though it AST-normalizes to the same Elixir literal"
     end
   end
+
+  # F6: `mix.exs`/`mix.lock` cannot identify the CONTENTS of a `path:`
+  # dependency, and the fixed `lib/**` globs miss custom `:elixirc_paths`
+  # source roots. Editing either used to leave every digest unchanged, so
+  # `Mut.History.Reuse.decide/4` handed back a stale `:killed` verdict.
+  describe "project_digest — path dependencies and extra source roots (F6)" do
+    setup do
+      root = Path.join(System.tmp_dir!(), "mut_path_dep_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(Path.join(root, "lib"))
+
+      File.write!(
+        Path.join(root, "lib/a.ex"),
+        "defmodule A do\n  def f, do: LocalDep.value(1)\nend\n"
+      )
+
+      File.write!(Path.join(root, "mix.lock"), "%{}\n")
+      on_exit(fn -> File.rm_rf!(root) end)
+      {:ok, root: root}
+    end
+
+    defp write_dep!(root, name, body) do
+      dep = Path.join(root, name)
+      File.mkdir_p!(Path.join(dep, "lib"))
+      File.write!(Path.join([dep, "lib", "#{name}.ex"]), body)
+
+      File.write!(Path.join(dep, "mix.exs"), """
+      defmodule Dep.MixProject do
+        use Mix.Project
+        def project, do: [app: :#{name}, version: "0.1.0"]
+      end
+      """)
+
+      dep
+    end
+
+    defp write_mix!(root, deps_body, extra \\ "") do
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Sample.MixProject do
+        use Mix.Project
+
+        def project do
+          [app: :sample, version: "0.1.0"#{extra}, deps: deps()]
+        end
+
+        defp deps do
+          #{deps_body}
+        end
+      end
+      """)
+    end
+
+    test "editing a path dependency's lib changes the digest", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do\n  def value(x), do: x\nend\n")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+
+      before = Digest.project_digest(root)
+
+      File.write!(
+        Path.join(dep, "lib/local_dep.ex"),
+        "defmodule LocalDep do\n  def value(_x), do: 0\nend\n"
+      )
+
+      refute Digest.project_digest(root) == before,
+             "editing local_dep/lib/local_dep.ex must invalidate reuse"
+    end
+
+    test "editing a path dependency's priv/config/mix.exs changes the digest", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do\n  def value(x), do: x\nend\n")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+      File.mkdir_p!(Path.join(dep, "priv"))
+      File.mkdir_p!(Path.join(dep, "config"))
+      File.write!(Path.join(dep, "priv/rates.txt"), "1.50\n")
+      File.write!(Path.join(dep, "config/config.exs"), "import Config\n")
+
+      for {rel, changed} <- [
+            {"priv/rates.txt", "1.5\n"},
+            {"config/config.exs", "import Config\nconfig :local_dep, x: 1\n"},
+            {"mix.exs", "# touched\n"}
+          ] do
+        before = Digest.project_digest(root)
+        File.write!(Path.join(dep, rel), changed)
+
+        refute Digest.project_digest(root) == before,
+               "expected local_dep/#{rel} to change the fingerprint"
+      end
+    end
+
+    test "a path dependency's _build and deps are pruned", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do\n  def value(x), do: x\nend\n")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+      File.mkdir_p!(Path.join(dep, "lib/_build"))
+      File.mkdir_p!(Path.join(dep, "priv/deps"))
+
+      before = Digest.project_digest(root)
+      File.write!(Path.join(dep, "lib/_build/artifact.ex"), "# build state\n")
+      File.write!(Path.join(dep, "priv/deps/vendored.txt"), "vendored\n")
+
+      assert Digest.project_digest(root) == before,
+             "build state and vendored deps inside a path dep are not project inputs"
+    end
+
+    test "a 3-tuple dep and an @attribute path are both resolved", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do\n  def value(x), do: x\nend\n")
+
+      for deps_body <- [
+            ~s([{:local_dep, ">= 0.0.0", path: "local_dep"}]),
+            ~s([{:local_dep, path: @dep_path}])
+          ] do
+        write_mix!(root, deps_body)
+
+        File.write!(
+          Path.join(root, "mix.exs"),
+          String.replace(
+            File.read!(Path.join(root, "mix.exs")),
+            "use Mix.Project",
+            ~s(use Mix.Project\n  @dep_path "local_dep")
+          )
+        )
+
+        assert {:ok, before} = Digest.project_fingerprint(root)
+
+        File.write!(
+          Path.join(dep, "lib/local_dep.ex"),
+          "defmodule LocalDep do\n  def value(_x), do: #{:erlang.unique_integer([:positive])}\nend\n"
+        )
+
+        assert {:ok, after_edit} = Digest.project_fingerprint(root)
+        refute after_edit == before, "expected #{deps_body} to be resolved and fingerprinted"
+      end
+    end
+
+    test "an extra elixirc_paths source root is fingerprinted (literal list form)", %{root: root} do
+      File.mkdir_p!(Path.join(root, "src"))
+      File.write!(Path.join(root, "src/other.ex"), "defmodule Other do\n  def g, do: 1\nend\n")
+      write_mix!(root, "[]", ~s(, elixirc_paths: ["lib", "src"]))
+
+      before = Digest.project_digest(root)
+      File.write!(Path.join(root, "src/other.ex"), "defmodule Other do\n  def g, do: 2\nend\n")
+
+      refute Digest.project_digest(root) == before,
+             "editing an elixirc_paths source root must change the fingerprint"
+    end
+
+    test "the elixirc_paths(Mix.env()) function form unions every clause's roots", %{root: root} do
+      for dir <- ["src", "gen"], do: File.mkdir_p!(Path.join(root, dir))
+      File.write!(Path.join(root, "src/other.ex"), "defmodule Other do\n  def g, do: 1\nend\n")
+      File.write!(Path.join(root, "gen/made.ex"), "defmodule Made do\n  def g, do: 1\nend\n")
+
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Sample.MixProject do
+        use Mix.Project
+
+        def project do
+          [app: :sample, version: "0.1.0", elixirc_paths: elixirc_paths(Mix.env())]
+        end
+
+        defp elixirc_paths(:test), do: ["lib", "src", "gen"]
+        defp elixirc_paths(_env), do: ["lib", "src"]
+      end
+      """)
+
+      for rel <- ["src/other.ex", "gen/made.ex"] do
+        before = Digest.project_digest(root)
+        File.write!(Path.join(root, rel), "# changed #{rel}\n")
+
+        refute Digest.project_digest(root) == before,
+               "expected #{rel} (a literal root in some elixirc_paths clause) to be fingerprinted"
+      end
+    end
+
+    test "umbrella child path deps are fingerprinted per app", %{root: root} do
+      child = Path.join(root, "apps/web")
+      File.mkdir_p!(Path.join(child, "lib"))
+
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Umbrella.MixProject do
+        use Mix.Project
+        def project, do: [apps_path: "apps", version: "0.1.0"]
+      end
+      """)
+
+      dep = write_dep!(child, "child_dep", "defmodule ChildDep do\n  def v, do: 1\nend\n")
+
+      File.write!(Path.join(child, "mix.exs"), """
+      defmodule Web.MixProject do
+        use Mix.Project
+        def project, do: [app: :web, version: "0.1.0", deps: deps()]
+        defp deps, do: [{:child_dep, path: "child_dep"}]
+      end
+      """)
+
+      before = Digest.project_digest(root)
+
+      File.write!(
+        Path.join(dep, "lib/child_dep.ex"),
+        "defmodule ChildDep do\n  def v, do: 2\nend\n"
+      )
+
+      refute Digest.project_digest(root) == before,
+             "editing apps/web/child_dep/lib/child_dep.ex must change the fingerprint"
+    end
+  end
+
+  describe "project_fingerprint — the reuse gate (F6)" do
+    setup do
+      root = Path.join(System.tmp_dir!(), "mut_fingerprint_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(Path.join(root, "lib"))
+      File.write!(Path.join(root, "lib/a.ex"), "defmodule A do\n  def f, do: 1\nend\n")
+      on_exit(fn -> File.rm_rf!(root) end)
+      {:ok, root: root}
+    end
+
+    defp write_deps_mix!(root, deps_body) do
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Sample.MixProject do
+        use Mix.Project
+        def project, do: [app: :sample, version: "0.1.0", deps: deps()]
+        defp deps, do: #{deps_body}
+      end
+      """)
+    end
+
+    test "a fully resolvable project yields {:ok, project_digest/1}", %{root: root} do
+      write_deps_mix!(root, ~s([{:jason, "~> 1.4"}]))
+      assert {:ok, digest} = Digest.project_fingerprint(root)
+      assert digest == Digest.project_digest(root)
+    end
+
+    test "a project with no mix.exs at all yields {:ok, _}", %{root: root} do
+      assert {:ok, _digest} = Digest.project_fingerprint(root)
+    end
+
+    test "path: keys outside the deps declaration (escript, releases) are not path deps",
+         %{root: root} do
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Sample.MixProject do
+        use Mix.Project
+
+        def project do
+          [
+            app: :sample,
+            version: "0.1.0",
+            escript: [main_module: Sample.CLI, path: "bin/sample"],
+            releases: [sample: [path: "rel/sample"]],
+            deps: deps()
+          ]
+        end
+
+        defp deps, do: [{:jason, "~> 1.4"}]
+      end
+      """)
+
+      assert {:ok, _digest} = Digest.project_fingerprint(root)
+    end
+
+    test "a sibling path: dep outside the (copied) project resolves via :user_root", %{root: root} do
+      # Unique sibling name: `root` lives in the shared tmp dir, so a fixed
+      # `../shared` could collide with another test's leftovers.
+      sibling = "mut_shared_#{System.unique_integer([:positive])}"
+      # `root` stands in for the work copy: the sibling does not exist next to it.
+      write_deps_mix!(root, ~s|[{:shared, path: "../#{sibling}"}]|)
+      assert {:disable, [reason]} = Digest.project_fingerprint(root)
+      assert reason =~ "points at missing ../#{sibling}"
+
+      base = Path.join(System.tmp_dir!(), "mut_user_base_#{System.unique_integer([:positive])}")
+      user_root = Path.join(base, "project")
+      shared = Path.join(base, sibling)
+      File.mkdir_p!(Path.join(shared, "lib"))
+      File.mkdir_p!(user_root)
+      on_exit(fn -> File.rm_rf!(base) end)
+      File.write!(Path.join(shared, "lib/shared.ex"), "defmodule Shared, do: def v, do: 1\n")
+
+      assert {:ok, before} = Digest.project_fingerprint(root, user_root: user_root)
+      File.write!(Path.join(shared, "lib/shared.ex"), "defmodule Shared, do: def v, do: 2\n")
+      assert {:ok, after_edit} = Digest.project_fingerprint(root, user_root: user_root)
+      assert before != after_edit
+    end
+
+    test "the env-var-or-fallback path: idiom resolves through the process environment",
+         %{root: root} do
+      var = "MUT_DIGEST_TEST_DEP_#{System.unique_integer([:positive])}"
+      vendored = Path.join(root, "vendor/dep")
+      File.mkdir_p!(Path.join(vendored, "lib"))
+      File.write!(Path.join(vendored, "lib/dep.ex"), "defmodule Dep, do: def v, do: 1\n")
+
+      write_deps_mix!(
+        root,
+        ~s|[{:dep, path: System.get_env("#{var}") \|\| Path.expand("vendor/dep", __DIR__)}]|
+      )
+
+      # Unset: the fallback branch is the vendored copy.
+      System.delete_env(var)
+      assert {:ok, before} = Digest.project_fingerprint(root)
+      File.write!(Path.join(vendored, "lib/dep.ex"), "defmodule Dep, do: def v, do: 2\n")
+      assert {:ok, after_edit} = Digest.project_fingerprint(root)
+      assert before != after_edit
+
+      # Set: the env var wins and its contents are fingerprinted instead.
+      local = Path.join(root, "local_checkout")
+      File.mkdir_p!(Path.join(local, "lib"))
+      File.write!(Path.join(local, "lib/dep.ex"), "defmodule Dep, do: def v, do: 3\n")
+      System.put_env(var, local)
+      on_exit(fn -> System.delete_env(var) end)
+      assert {:ok, with_env} = Digest.project_fingerprint(root)
+      assert with_env != after_edit
+      File.write!(Path.join(local, "lib/dep.ex"), "defmodule Dep, do: def v, do: 4\n")
+      assert {:ok, with_env_edit} = Digest.project_fingerprint(root)
+      assert with_env != with_env_edit
+    end
+
+    test "a non-literal path: expression disables reuse", %{root: root} do
+      write_deps_mix!(root, ~s|[{:local_dep, path: System.get_env("DEP")}]|)
+
+      assert {:disable, [reason]} = Digest.project_fingerprint(root)
+      assert reason =~ "path dependency :local_dep"
+      assert reason =~ "mix.exs"
+      assert reason =~ "non-literal"
+    end
+
+    test "a path: pointing at a missing directory disables reuse", %{root: root} do
+      write_deps_mix!(root, ~s([{:local_dep, path: "nowhere"}]))
+
+      assert {:disable, [reason]} = Digest.project_fingerprint(root)
+      assert reason =~ "points at missing nowhere"
+    end
+
+    test "an unparseable mix.exs disables reuse", %{root: root} do
+      File.write!(Path.join(root, "mix.exs"), "defmodule Broken do\n  def project, do: [\n")
+
+      assert {:disable, [reason]} = Digest.project_fingerprint(root)
+      assert reason =~ "could not be parsed"
+    end
+
+    test "an unresolvable path dep in an umbrella CHILD disables reuse", %{root: root} do
+      child = Path.join(root, "apps/web")
+      File.mkdir_p!(Path.join(child, "lib"))
+
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Umbrella.MixProject do
+        use Mix.Project
+        def project, do: [apps_path: "apps", version: "0.1.0"]
+      end
+      """)
+
+      write_deps_mix!(child, ~s|[{:child_dep, path: Path.expand("../child_dep", __DIR__)}]|)
+
+      assert {:disable, [reason]} = Digest.project_fingerprint(root)
+      assert reason =~ "path dependency :child_dep"
+      assert reason =~ Path.join("apps", "web")
+    end
+
+    test "the overlay's generated mix.exs is ignored in favour of mix_user.exs", %{root: root} do
+      # The work copy's `mix.exs` is Mutalisk's own overlay (it pins
+      # `{:mutalisk, path: <non-literal>}`); the user's real one is renamed to
+      # `mix_user.exs`. Reading the overlay would disable reuse on every run.
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Overlay.MixProject do
+        use Mix.Project
+        def project, do: [app: :sample, deps: deps()]
+        defp deps, do: [{:mutalisk, path: System.fetch_env!("MUTALISK_PATH")}]
+      end
+      """)
+
+      File.write!(Path.join(root, "mix_user.exs"), """
+      defmodule Sample.MixProject do
+        use Mix.Project
+        def project, do: [app: :sample, version: "0.1.0"]
+      end
+      """)
+
+      assert {:ok, _digest} = Digest.project_fingerprint(root)
+    end
+  end
+
+  # The F6 fingerprint must NOT perturb the digest of an ordinary project (no
+  # path deps, no custom source roots): a changed digest would cold-start every
+  # existing warm history on upgrade. This value was captured by running
+  # `Digest.project_digest/1` on exactly this fixture at the base commit
+  # (622fc93), before the F6 change.
+  describe "project_digest — byte identity with the pre-F6 fingerprint" do
+    @pre_f6_digest "9a3837806f2dc8284f0546631a4a8e12"
+
+    test "a project without path deps or extra source roots digests identically" do
+      root =
+        Path.join(System.tmp_dir!(), "mut_byte_identity_#{System.unique_integer([:positive])}")
+
+      on_exit(fn -> File.rm_rf!(root) end)
+
+      File.mkdir_p!(Path.join(root, "lib"))
+      File.mkdir_p!(Path.join(root, "test/support"))
+      File.mkdir_p!(Path.join(root, "config"))
+      File.mkdir_p!(Path.join(root, "priv"))
+      File.write!(Path.join(root, "lib/a.ex"), "defmodule A do\n  def f, do: 1\nend\n")
+      File.write!(Path.join(root, "test/support/helper.ex"), "defmodule H do\nend\n")
+      File.write!(Path.join(root, "test/a_test.exs"), "assert A.f() == 1\n")
+      File.write!(Path.join(root, "config/test.exs"), "import Config\n")
+      File.write!(Path.join(root, "priv/data.txt"), "1.50\n")
+      File.write!(Path.join(root, "mix.lock"), "%{}\n")
+
+      File.write!(Path.join(root, "mix.exs"), """
+      defmodule Baseline.MixProject do
+        use Mix.Project
+
+        def project do
+          [app: :baseline, version: "0.1.0", deps: deps()]
+        end
+
+        defp deps do
+          [{:jason, "~> 1.4"}]
+        end
+      end
+      """)
+
+      assert Digest.project_digest(root) == @pre_f6_digest
+      assert {:ok, @pre_f6_digest} = Digest.project_fingerprint(root)
+    end
+  end
 end

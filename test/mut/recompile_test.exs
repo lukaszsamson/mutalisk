@@ -3,6 +3,7 @@ defmodule Mut.RecompileTest do
 
   @moduledoc false
 
+  alias Mut.Bootstrap.Overlay
   alias Mut.FallbackPatch
   alias Mut.Recompile
   alias Mut.Sandbox
@@ -25,6 +26,64 @@ defmodule Mut.RecompileTest do
     assert eval =~ "Mix.start()"
     # Mix.start must precede the compile so Mix.ProjectStack is alive during it.
     assert :binary.match(eval, "Mix.start()") < :binary.match(eval, "ParallelCompiler.compile")
+  end
+
+  # A2: the child must reproduce the project's COMPILE-TIME context, not just
+  # start Mix — otherwise `Application.compile_env/3` silently takes its
+  # default and `Mix.Project.config()[:app]` is nil on unmodified source.
+  test "eval loads the project and its config before compiling" do
+    ["--eval", eval] =
+      Recompile.elixir_args("/tmp/sandbox", ["lib/foo.ex"], "demo_app") |> Enum.take(-2)
+
+    assert eval =~ "Mix.env(:test)"
+    assert eval =~ ~s|Code.require_file("mix.exs", project_dir)|
+    assert eval =~ ~s|Mix.Task.run("loadconfig")|
+    assert eval =~ ~s(project_dir = "/tmp/sandbox")
+    assert eval =~ "Code.put_compiler_option(key, value)"
+    assert eval =~ "warnings_as_errors?"
+
+    # Everything must happen before the compile pass.
+    for fragment <- ["Mix.env(:test)", "loadconfig", "Code.put_compiler_option"] do
+      assert :binary.match(eval, fragment) < :binary.match(eval, "ParallelCompiler.compile"),
+             "#{fragment} must precede the compile"
+    end
+
+    # The lock check stays skipped: no deps loading whatsoever.
+    refute eval =~ "deps.loadpaths"
+    refute eval =~ "deps.check"
+  end
+
+  test "eval pushes the umbrella child's project when the mutated file is under an app" do
+    root = Path.join(System.tmp_dir!(), "mut_a2_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join([root, "apps", "web-ui"]))
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule Up.MixProject do
+      use Mix.Project
+      def project, do: [apps_path: "apps", version: "0.1.0"]
+    end
+    """)
+
+    File.write!(Path.join([root, "apps", "web-ui", "mix.exs"]), """
+    defmodule WebUi.MixProject do
+      use Mix.Project
+      def project, do: [app: :web_ui, version: "0.1.0"]
+    end
+    """)
+
+    ["--eval", eval] =
+      root
+      |> Recompile.elixir_args(["apps/web-ui/lib/web_ui.ex"], "web_ui")
+      |> Enum.take(-2)
+
+    assert eval =~ ~s(project_dir = "#{Path.join([root, "apps", "web-ui"])}")
+
+    # A file outside any child falls back to the umbrella root.
+    ["--eval", root_eval] =
+      root |> Recompile.elixir_args(["lib/shared.ex"], "web_ui") |> Enum.take(-2)
+
+    assert root_eval =~ ~s(project_dir = "#{root}")
   end
 
   # B4: the ebin target must be `_build/<env>/lib/<OTP app>/ebin`, not
@@ -80,15 +139,12 @@ defmodule Mut.RecompileTest do
   end
 
   # Runs just the `app_map = ...` and `ebin_of = ...` prelude of the generated
-  # eval (everything up to the compile call) and returns the closure.
+  # eval (everything up to the project-bootstrap section) and returns the
+  # closure.
   defp extract_ebin_of(eval) do
-    [prelude, _rest] = String.split(eval, "case Kernel.ParallelCompiler", parts: 2)
+    [prelude, _rest] = String.split(eval, Recompile.bootstrap_marker(), parts: 2)
 
-    {ebin_of, _binding} =
-      prelude
-      |> String.replace("Mix.start()", "")
-      |> Kernel.<>("\nebin_of")
-      |> Code.eval_string()
+    {ebin_of, _binding} = Code.eval_string(prelude <> "\nebin_of")
 
     ebin_of
   end
@@ -247,6 +303,177 @@ defmodule Mut.RecompileTest do
 
     sandbox |> Sandbox.checkin(pool) |> Sandbox.destroy_pool()
     File.rm_rf!(schema_result.work_copy_root)
+  end
+
+  # A2 regression: before the project bootstrap, this recompile of UNMODIFIED
+  # source returned `{:default, nil}` — the compile-time environment differed
+  # from the real build, so a mutation elsewhere in the file could flip
+  # unrelated behaviour (false kills/survivors).
+  test "recompile reproduces compile_env and Mix.Project.config from the project" do
+    dir =
+      work_copy("mut_compile_env", """
+      defmodule Probe.MixProject do
+        use Mix.Project
+        def project, do: [app: :mut_compile_env_probe, version: "0.1.0"]
+      end
+      """)
+
+    File.write!(Path.join(dir, "config/config.exs"), """
+    import Config
+
+    config :mut_compile_env_probe, :label, :configured
+    """)
+
+    File.write!(Path.join(dir, "lib/probe.ex"), """
+    defmodule Probe do
+      @label Application.compile_env(:mut_compile_env_probe, :label, :default)
+      @app Mix.Project.config()[:app]
+      def value, do: {@label, @app}
+    end
+    """)
+
+    assert :ok =
+             Recompile.recompile(%Sandbox{path: dir}, ["lib/probe.ex"], [],
+               app: "mut_compile_env_probe"
+             )
+
+    assert eval_in_ebin(dir, "mut_compile_env_probe", "Probe.value()") ==
+             "{:configured, :mut_compile_env_probe}"
+  end
+
+  # A bootstrap failure (a config file that raises) degrades to the old
+  # behaviour; it must be reported once per run and must not leak exception
+  # names into `categorize/1`'s input.
+  test "a raising config is reported once and does not mislabel compile errors" do
+    :persistent_term.erase({Recompile, :bootstrap_failure_reported})
+
+    dir =
+      work_copy("mut_bad_config", """
+      defmodule Probe.MixProject do
+        use Mix.Project
+        def project, do: [app: :mut_bad_config_probe, version: "0.1.0"]
+      end
+      """)
+
+    File.write!(Path.join(dir, "config/config.exs"), """
+    import Config
+    config :mut_bad_config_probe, :x, System.fetch_env!("MUT_DEFINITELY_UNSET_#{System.unique_integer([:positive])}")
+    """)
+
+    File.write!(Path.join(dir, "lib/probe.ex"), "defmodule Probe, do: def v, do: 1\n")
+    sandbox = %Sandbox{path: dir}
+
+    stderr =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert :ok =
+                 Recompile.recompile(sandbox, ["lib/probe.ex"], [], app: "mut_bad_config_probe")
+
+        assert :ok =
+                 Recompile.recompile(sandbox, ["lib/probe.ex"], [], app: "mut_bad_config_probe")
+      end)
+
+    assert stderr =~ "could not load the project/config"
+    assert length(String.split(stderr, "could not load the project/config")) == 2
+
+    # A genuine compile error is still classified as such, not as the
+    # UndefinedFunctionError/ArgumentError raised by the config bootstrap.
+    File.write!(
+      Path.join(dir, "lib/probe.ex"),
+      "defmodule Probe do\n  def v, do: undefined_local()\nend\n"
+    )
+
+    assert {:error, {:recompile_failed, category, _code, output}} =
+             Recompile.recompile(sandbox, ["lib/probe.ex"], [], app: "mut_bad_config_probe")
+
+    assert category == :compile_error
+    refute output =~ "project bootstrap failed"
+  end
+
+  # `:warnings_as_errors` lives in `:elixirc_options` and is enforced by Mix
+  # (not by the compiler), so the child has to apply it itself; otherwise a
+  # mutant that only introduces a warning compiles here while the project's
+  # real build rejects it.
+  test "recompile honors elixirc_options: [warnings_as_errors: true]" do
+    warning_source = """
+    defmodule Warns do
+      def f(unused_on_purpose), do: :ok
+    end
+    """
+
+    strict =
+      work_copy("mut_waer_strict", """
+      defmodule Strict.MixProject do
+        use Mix.Project
+
+        def project do
+          [app: :mut_waer_strict, version: "0.1.0", elixirc_options: [warnings_as_errors: true]]
+        end
+      end
+      """)
+
+    File.write!(Path.join(strict, "lib/warns.ex"), warning_source)
+
+    assert {:error, {:recompile_failed, :compile_error, code, output}} =
+             Recompile.recompile(%Sandbox{path: strict}, ["lib/warns.ex"], [],
+               app: "mut_waer_strict"
+             )
+
+    assert code != 0
+    assert output =~ "warnings-as-errors"
+
+    # Control: the identical warning compiles when the project does not opt in.
+    lax =
+      work_copy("mut_waer_lax", """
+      defmodule Lax.MixProject do
+        use Mix.Project
+        def project, do: [app: :mut_waer_lax, version: "0.1.0"]
+      end
+      """)
+
+    File.write!(Path.join(lax, "lib/warns.ex"), warning_source)
+
+    assert :ok =
+             Recompile.recompile(%Sandbox{path: lax}, ["lib/warns.ex"], [], app: "mut_waer_lax")
+  end
+
+  test "recompile still succeeds when the work copy has no mix.exs to load" do
+    dir = Path.join(System.tmp_dir!(), "mut_nomix_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join(dir, "lib"))
+    File.mkdir_p!(Path.join(dir, "_build/mut_schema/lib/mut_nomix/ebin"))
+    on_exit(fn -> File.rm_rf!(dir) end)
+
+    File.write!(Path.join(dir, "lib/plain.ex"), "defmodule Plain do\n  def f, do: 1\nend\n")
+
+    assert :ok = Recompile.recompile(%Sandbox{path: dir}, ["lib/plain.ex"], [], app: "mut_nomix")
+    assert eval_in_ebin(dir, "mut_nomix", "Plain.f()") == "1"
+  end
+
+  # A minimal schema-shaped work copy: the user's `mix.exs` renamed to
+  # `mix_user.exs` and wrapped by the generated overlay, exactly as
+  # `Mut.Bootstrap.Overlay.materialize/2` leaves it, plus the `_build/mut_schema`
+  # ebin the recompile writes into. Deliberately avoids a full oracle/schema
+  # build: the child bootstrap is what is under test here.
+  defp work_copy(name, user_mix_exs) do
+    dir = Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(Path.join(dir, "lib"))
+    File.mkdir_p!(Path.join(dir, "config"))
+    on_exit(fn -> File.rm_rf!(dir) end)
+
+    File.write!(Path.join(dir, "mix_user.exs"), user_mix_exs)
+    File.write!(Path.join(dir, "mix.exs"), Overlay.render(:schema))
+
+    dir
+  end
+
+  defp eval_in_ebin(dir, app, expression) do
+    ebin = Path.join(dir, "_build/mut_schema/lib/#{app}/ebin")
+
+    {output, 0} =
+      System.cmd("elixir", ["-pa", ebin, "-e", "IO.write(inspect(#{expression}))"],
+        stderr_to_stdout: true
+      )
+
+    String.trim(output)
   end
 
   defp schema_result do

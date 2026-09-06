@@ -756,22 +756,44 @@ defmodule Mix.Tasks.Mut do
     if map_size(verdicts) == 0 do
       {plan, []}
     else
-      changed = changed_files_since(opts.since, target_root)
-      indexes = mutant_file_indexes(plan, source_root)
       # Coarse project fingerprint, computed ONCE (same for every mutant). A
       # change to any project source/test-support/config/dep invalidates all
-      # reuse (review P1a).
-      project_digest = History.Digest.project_digest(source_root)
+      # reuse (review P1a). F6: when an input cannot be fingerprinted at all —
+      # a `path:` dependency whose location is not a literal, an unparseable
+      # mix.exs — reuse is disabled outright for the run rather than decided
+      # against an incomplete digest.
+      case History.Digest.project_fingerprint(source_root, user_root: target_root) do
+        {:disable, reasons} ->
+          {reuse_disabled(plan, reasons), []}
 
-      {schema_exec, schema_reused} =
-        partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed, project_digest)
-
-      {fallback_exec, fallback_reused} =
-        partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed, project_digest)
-
-      exec_plan = %{plan | schema: schema_exec, fallback: fallback_exec}
-      {exec_plan, schema_reused ++ fallback_reused}
+        {:ok, project_digest} ->
+          reuse_partition(plan, ctx, opts, verdicts, project_digest, source_root, target_root)
+      end
     end
+  end
+
+  defp reuse_disabled(plan, reasons) do
+    IO.puts(
+      :stderr,
+      "[mutalisk] --incremental: history reuse disabled, every mutant will run " <>
+        "(#{Enum.join(reasons, "; ")})"
+    )
+
+    plan
+  end
+
+  defp reuse_partition(plan, ctx, opts, verdicts, project_digest, source_root, target_root) do
+    changed = changed_files_since(opts.since, target_root)
+    indexes = mutant_file_indexes(plan, source_root)
+
+    {schema_exec, schema_reused} =
+      partition_reuse(plan.schema, ctx, opts, verdicts, indexes, changed, project_digest)
+
+    {fallback_exec, fallback_reused} =
+      partition_reuse(plan.fallback, ctx, opts, verdicts, indexes, changed, project_digest)
+
+    exec_plan = %{plan | schema: schema_exec, fallback: fallback_exec}
+    {exec_plan, schema_reused ++ fallback_reused}
   end
 
   defp partition_reuse(mutants, ctx, opts, verdicts, indexes, changed, project_digest) do
@@ -1130,9 +1152,9 @@ defmodule Mix.Tasks.Mut do
   # M64: surface per-file coverage degradation (crash-tolerant fallback).
   defp report_degraded_coverage(%{degraded_test_files: [_ | _] = degraded}) do
     IO.puts(
-      "Coverage: #{length(degraded)} test file(s) degraded to static selection " <>
-        "(per-file collection failed; their tests still run for the mutants they " <>
-        "statically cover):"
+      "Coverage: #{length(degraded)} test file(s) have unknown coverage " <>
+        "(per-file collection failed or the coverage budget ran out); they run " <>
+        "for EVERY mutant, so selection is less effective for this run:"
     )
 
     for {path, reason} <- Enum.take(degraded, 10) do
@@ -1231,7 +1253,10 @@ defmodule Mix.Tasks.Mut do
          all_test_files
        ) do
     test_paths = absolute_test_paths(source_root, opts)
-    static_analysis = Static.analyze(test_paths)
+    # Transitive static selection: the source graph lets a test that reaches
+    # the target only through a facade module still be selected.
+    source_paths = Static.default_source_paths(source_root)
+    static_analysis = Static.analyze(test_paths, source_paths: source_paths)
     oracle = coverage_oracle || %CoverageOracle{}
 
     # Precompute the base (per-mutant) test selection ONCE per plan. The base
@@ -1265,9 +1290,9 @@ defmodule Mix.Tasks.Mut do
     }
   end
 
-  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files, _root)
+  defp base_selection(mode, plan, test_paths, _oracle, _static_analysis, _all_test_files, root)
        when mode in [:static, :downgraded_to_static] do
-    Mut.TestSelection.for_plan(plan, test_paths)
+    Mut.TestSelection.for_plan(plan, test_paths, source_paths: Static.default_source_paths(root))
   end
 
   defp base_selection(_mode, plan, _test_paths, oracle, static_analysis, all_test_files, root) do

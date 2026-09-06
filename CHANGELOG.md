@@ -17,6 +17,18 @@ and Mutalisk aims to adhere to [Semantic Versioning](https://semver.org/).
 - Sandbox resets restore directories and symlinks under `priv/` and `lib/`,
   not only regular files.
 
+### Changed (second audit round)
+- Fallback recompiles load the project and its config (`Application.compile_env`,
+  `Mix.Project.config`, `elixirc_options` incl. `warnings_as_errors`) like `mix compile`.
+- Test selection: clause-head (pattern/guard) mutants select at function or file
+  scope; tests with unknown (degraded) coverage always run; static selection
+  follows module references transitively.
+- Sandbox resets never traverse a symlinked root and restore fallback-patched
+  sources outside `lib/`.
+- Incremental history fingerprints path dependencies and extra `elixirc_paths`
+  roots, disables reuse when they cannot be resolved, and cold-starts on a
+  malformed store instead of crashing.
+
 ### Added
 - `--suite-timeout-ms` / `suite_timeout_ms`: explicit whole-suite host budget;
   otherwise derived from the baseline wall time (capped) and the per-test timeout.

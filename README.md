@@ -42,8 +42,13 @@ list):
     MIX_ENV=test mix mut --reporters terminal,html           # pick reporters
 
 Mutalisk runs your suite as-is (it does **not** pass `--warnings-as-errors`), so
-compiler warnings in the target do not affect the mutation score. Keep your own
-`mix compile --warnings-as-errors` gate in CI if you rely on it.
+compiler warnings in the target do not affect the mutation score. One exception:
+fallback-engine recompiles load your project and honour `elixirc_options:
+[warnings_as_errors: true]` from `mix.exs`, exactly as `mix compile` would — a
+mutation that introduces a warning on such a project is reported `CompileError`
+(invalid), not scored. Schema-engine mutants are compiled once with the real
+`mix compile` and are unaffected. Keep your own `mix compile
+--warnings-as-errors` gate in CI if you rely on it.
 
 ## Interpreting the score
 
@@ -172,12 +177,51 @@ keeps the byte size **and** lands in the same mtime second. Set
 content-exact comparison; it costs one content read per `priv/` file per reset,
 per worker.
 
+## Test selection
+
+Test selection decides which test files run for each mutant. It defaults to
+`coverage_with_static_fallback`; `--selection static` is the fully-portable
+escape hatch and `--selection coverage` is the strict (no-fallback) coverage
+mode. Selection only ever affects *which* tests run — it never enters a mutant's
+stable id — and every rule below errs towards running more tests, because
+under-selecting a killing test would report a false survivor.
+
+In the coverage modes each mutant takes the first non-empty scope from:
+
+1. **exact line** — tests whose coverage includes the mutated line.
+2. **enclosing function** — tests covering any line of the mutated function.
+3. **enclosing file** — tests covering any line of the mutated file.
+4. **static fallback** — tests statically referencing the mutant's module.
+5. **all tests**.
+
+Two rules deliberately widen that ladder:
+
+- **Clause-head mutations skip exact-line coverage.** A mutation in a pattern
+  or a guard can make its clause accept inputs that originally routed to a
+  *different* clause, so the killing test need never have executed the mutated
+  line. Those mutants start at enclosing-function scope (every clause of the
+  function) and fall back to whole-file scope when function metadata is
+  unavailable.
+- **Degraded coverage is unknown coverage.** Any test file whose coverage
+  collection timed out or failed is added to *every* mutant's selection. An
+  absent measurement is not evidence that the test is irrelevant.
+
+Static selection is **conservative and may select more tests than strictly
+necessary**. It indexes the modules each test file names, and then follows a
+module reference graph built over `lib/` and `test/support/` (plus `apps/*` for
+umbrellas): a test is selected for a target module when it references that
+module *or any module that transitively references it*. This is what makes a
+test that reaches the target only through a facade module still run. When the
+closure spans the whole project, selecting every test is the correct answer.
+The graph is built from statically visible aliases, so runtime-computed module
+names are still handled by the separate dynamic-dispatch escape hatch (a test
+file using `apply/3` on a variable module, or `Module.concat/1`, is selected for
+every mutant).
+
 ## Limitations
 
 - Mutalisk does not mutate DSL-emitted code, macro bodies, or generated code.
-- Test selection defaults to `coverage_with_static_fallback`; `--selection
-  static` is the fully-portable escape hatch and `--selection coverage` is the
-  strict (no-fallback) coverage mode.
+- Static test selection over-approximates; see [Test selection](#test-selection).
 - Mutants run via a fresh `mix test` worker each (one mutant per VM), in an
   isolated sandbox subprocess.
 

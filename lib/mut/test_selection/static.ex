@@ -14,13 +14,56 @@ defmodule Mut.TestSelection.Static do
           | :literal_apply
 
   @type index :: %{module() => MapSet.t(Path.t())}
-  @type analysis :: %{index: index(), dynamic_dispatch_files: MapSet.t(Path.t())}
 
-  @spec analyze(test_paths :: [Path.t()]) :: analysis()
-  def analyze(test_paths) when is_list(test_paths) do
-    test_paths
-    |> discover_test_files()
-    |> Enum.reduce(%{index: %{}, dynamic_dispatch_files: MapSet.new()}, &analyze_file/2)
+  @typedoc """
+  Reverse module-reference graph over production sources: `graph[b]` is the set
+  of modules whose source references module `b`. It makes static selection
+  transitive — a test that only names a facade still selects mutants in the
+  modules that facade calls.
+  """
+  @type source_graph :: %{module() => MapSet.t(module())}
+
+  @type analysis :: %{
+          index: index(),
+          dynamic_dispatch_files: MapSet.t(Path.t()),
+          source_graph: source_graph()
+        }
+
+  @doc """
+  Builds the static analysis.
+
+  `test_paths` are scanned for the module references made by test files.
+  `:source_paths` (option) are scanned for module-to-module references,
+  producing the reverse graph that makes `covering_tests/3` transitive. Passing
+  no source paths keeps the direct-reference-only behaviour.
+  """
+  @spec analyze(test_paths :: [Path.t()], opts :: keyword()) :: analysis()
+  def analyze(test_paths, opts \\ []) when is_list(test_paths) and is_list(opts) do
+    empty = %{index: %{}, dynamic_dispatch_files: MapSet.new(), source_graph: %{}}
+
+    analysis =
+      test_paths
+      |> discover_test_files()
+      |> Enum.reduce(empty, &analyze_file/2)
+
+    opts
+    |> Keyword.get(:source_paths, [])
+    |> discover_source_files()
+    |> Enum.reduce(analysis, &analyze_source_file/2)
+  end
+
+  @doc """
+  Conventional source roots under `root`: `lib/` and `test/support/`, plus the
+  same directories under `apps/*` for umbrellas.
+  """
+  @spec default_source_paths(Path.t() | nil) :: [Path.t()]
+  def default_source_paths(nil), do: []
+
+  def default_source_paths(root) when is_binary(root) do
+    ["lib", "test/support", "apps/*/lib", "apps/*/test/support"]
+    |> Enum.flat_map(&Path.wildcard(Path.join(root, &1)))
+    |> Enum.filter(&File.dir?/1)
+    |> Enum.uniq()
   end
 
   @spec covering_tests(analysis(), module() | nil, [Path.t()]) :: [Path.t()]
@@ -34,16 +77,18 @@ defmodule Mut.TestSelection.Static do
   end
 
   def covering_tests(
-        %{index: index, dynamic_dispatch_files: dynamic_files},
+        %{index: index, dynamic_dispatch_files: dynamic_files} = analysis,
         module,
         all_test_files
       )
       when is_atom(module) and is_list(all_test_files) do
     known_files = MapSet.new(all_test_files)
+    graph = Map.get(analysis, :source_graph, %{})
+    referencing = referencing_closure(graph, module_prefixes(module))
 
     selected =
       MapSet.new()
-      |> union_indexed(index, module_prefixes(module))
+      |> union_indexed(index, referencing)
       |> MapSet.union(suffix_convention_tests(index, module))
       |> MapSet.union(path_mirror_tests(module, known_files))
       |> MapSet.union(dynamic_files)
@@ -64,6 +109,87 @@ defmodule Mut.TestSelection.Static do
       {:ok, {ast, _source}} -> traverse(ast, analysis, file)
       {:error, _reason} -> analysis
     end
+  end
+
+  # Reverse-reachability over the source reference graph: every module that
+  # transitively references one of `seeds`, plus the seeds themselves. A test
+  # naming any of those modules can reach the target, so it must be selected.
+  # The closure is bounded by the project's module count; when it covers the
+  # whole project, selecting every test is the correct conservative answer.
+  defp referencing_closure(graph, seeds) when map_size(graph) == 0, do: seeds
+
+  defp referencing_closure(graph, seeds) do
+    seeds
+    |> Enum.reduce(MapSet.new(), &closure_walk(graph, &1, &2))
+    |> MapSet.to_list()
+  end
+
+  defp closure_walk(graph, module, seen) do
+    if MapSet.member?(seen, module) do
+      seen
+    else
+      graph
+      |> Map.get(module, MapSet.new())
+      |> Enum.reduce(MapSet.put(seen, module), &closure_walk(graph, &1, &2))
+    end
+  end
+
+  # Records `referenced -> {modules defined in this file}` edges. Source files
+  # never enter `index` (only test files run) and their dynamic dispatch is not
+  # recorded: the graph widens static selection on statically visible aliases,
+  # which is conservative but not exhaustive.
+  defp analyze_source_file(file, analysis) do
+    case Mut.SourceParse.parse(file) do
+      {:ok, {ast, _source}} -> record_source_refs(ast, analysis)
+      {:error, _reason} -> analysis
+    end
+  end
+
+  defp record_source_refs(ast, analysis) do
+    {defined, referenced} = collect_source_modules(ast)
+
+    for definer <- defined, target <- referenced, definer != target, reduce: analysis do
+      acc -> update_in(acc.source_graph, &add_edge(&1, target, definer))
+    end
+  end
+
+  defp add_edge(graph, target, definer) do
+    Map.update(graph, target, MapSet.new([definer]), &MapSet.put(&1, definer))
+  end
+
+  defp collect_source_modules(ast) do
+    {_ast, {defined, referenced}} =
+      Macro.prewalk(ast, {[], []}, fn node, {defined, referenced} ->
+        {node, {collect_defined(node, defined), collect_referenced(node, referenced)}}
+      end)
+
+    {Enum.uniq(defined), Enum.uniq(referenced)}
+  end
+
+  defp collect_defined({:defmodule, _meta, [{:__aliases__, _am, parts} | _]}, defined) do
+    case safe_module_concat(parts) do
+      nil -> defined
+      module -> [module | defined]
+    end
+  end
+
+  defp collect_defined(_node, defined), do: defined
+
+  defp collect_referenced(node, referenced) do
+    case grouped_alias_modules(node) || referenced_module(node) do
+      nil -> referenced
+      modules when is_list(modules) -> modules ++ referenced
+      module -> [module | referenced]
+    end
+  end
+
+  defp discover_source_files(source_paths) do
+    source_paths
+    |> Enum.flat_map(fn path ->
+      if File.regular?(path), do: [path], else: Path.wildcard(Path.join(path, "**/*.ex"))
+    end)
+    |> Enum.uniq()
+    |> Enum.sort()
   end
 
   defp traverse(node, analysis, _file) when is_atom(node) or is_number(node) or is_binary(node),
