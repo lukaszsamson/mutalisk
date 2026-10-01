@@ -142,8 +142,8 @@ defmodule IncrementalValidation do
     verdicts = Map.new(mutants, &{&1["id"], &1["status"]})
 
     killed = Enum.count(mutants, &(&1["status"] in ["Killed", "Timeout"]))
-    denom = Enum.count(mutants, &(&1["status"] in ["Killed", "Timeout", "Survived"]))
-    score = if denom > 0, do: Float.round(killed / denom * 100, 1), else: 0.0
+    denom = Enum.count(mutants, &(&1["status"] in ["Killed", "Timeout", "Survived", "NoCoverage"]))
+    score = if denom > 0, do: Float.round(killed / denom * 100, 1), else: 100.0
 
     %{
       verdicts: verdicts,

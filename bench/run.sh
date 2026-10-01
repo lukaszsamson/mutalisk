@@ -514,8 +514,10 @@ counts =
 
 score = fn bucket ->
   killed = Map.get(counts, {bucket, "Killed"}, 0)
-  survived = Map.get(counts, {bucket, "Survived"}, 0)
-  if killed + survived == 0, do: 100.0, else: Float.round(killed / (killed + survived) * 100, 1)
+  detected = killed + Map.get(counts, {bucket, "Timeout"}, 0)
+  undetected = Map.get(counts, {bucket, "Survived"}, 0) + Map.get(counts, {bucket, "NoCoverage"}, 0)
+  total = detected + undetected
+  if total == 0, do: 100.0, else: Float.round(detected / total * 100, 1)
 end
 
 line =
