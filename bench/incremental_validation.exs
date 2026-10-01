@@ -1,29 +1,10 @@
 #!/usr/bin/env elixir
-# M107: incremental-history validation harness (the trust gate).
-#
-# Proves the two properties the feature lives or dies on, against a temp copy of
-# the demo_app fixture (so the real fixture is never touched), plus a wall-clock
-# measurement:
-#
-#   (A) GROUND-TRUTH on an unchanged tree — a full (cold) run and an
-#       `--incremental` (warm) run produce IDENTICAL per-mutant verdicts and an
-#       identical score. Reuse must never change the answer.
-#
-#   (B) SOURCE-CHANGE INVALIDATION — edit ONE source file (a semantics-preserving
-#       `a + b` -> `b + a` in Arith.score: baseline stays green), run warm
-#       `--incremental`, and confirm reuse is FULLY invalidated (executed = all,
-#       reused = 0) and the warm verdicts still equal a fresh FULL run on the
-#       edited tree. The reuse key includes a coarse project fingerprint (review
-#       P1a), so ANY source/test-support/config/dep change invalidates every
-#       verdict — Mutalisk does not track per-mutant cross-file dependencies, so
-#       per-function diff-scoping would be unsound. (Dependency-aware reuse that
-#       restores diff-scoping is future work.)
-#
-# Run from the mutalisk root: elixir bench/m107_incremental_validation.exs
-#
-# Exit 0 = all properties hold. Non-zero = a divergence (the feature is unsafe).
+# Compare cold and warm verdicts on an isolated demo fixture, then verify that
+# a source edit invalidates reuse and matches a fresh run on the edited tree.
+# Run from the repository root: elixir bench/incremental_validation.exs
+# Exit zero when both properties hold.
 
-defmodule M107 do
+defmodule IncrementalValidation do
   @root Path.expand(".")
   @fixture Path.join(@root, "test/fixtures/demo_app")
 
@@ -31,7 +12,7 @@ defmodule M107 do
     a = ground_truth()
     b = source_change_invalidation()
 
-    IO.puts("\n==== M107 SUMMARY ====")
+    IO.puts("\n==== Incremental validation ====")
     IO.puts("A ground-truth (unchanged tree):    #{verdict(a.ok)}")
     IO.puts("B source-change invalidation:        #{verdict(b.ok)}")
 
@@ -108,7 +89,7 @@ defmodule M107 do
     matches_full = warm.verdicts == full.verdicts
     total = map_size(warm.verdicts)
     # When nothing is reused the report omits the incremental block entirely
-    # (M106), so derive from the absence: reused 0 -> everything executed.
+    # so derive from the absence: reused 0 -> everything executed.
     reused = warm.incremental["reused"] || 0
     executed = total - reused
 
@@ -134,7 +115,7 @@ defmodule M107 do
 
   # ---- run mix mut against a fixture copy, parse the report ----
   defp run(dir, flags) do
-    report = "stryker.m107.json"
+    report = "stryker.incremental.json"
     File.rm_rf!(Path.join(dir, report))
     started = System.monotonic_time(:millisecond)
 
@@ -175,7 +156,7 @@ defmodule M107 do
   end
 
   defp fresh_copy(name) do
-    dir = Path.join([@root, "tmp", "m107", name])
+    dir = Path.join([@root, "tmp", "incremental_validation", name])
     File.rm_rf!(dir)
     File.mkdir_p!(Path.dirname(dir))
     File.cp_r!(@fixture, dir)
@@ -190,4 +171,4 @@ defmodule M107 do
   defp verdict(false), do: "FAIL"
 end
 
-M107.main()
+IncrementalValidation.main()

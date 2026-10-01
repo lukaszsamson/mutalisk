@@ -5,12 +5,11 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET="plug_crypto"
 SELECTION="static"
 CONCURRENCY="1"
-WORKER_TYPE="mix"
 ENABLE_BODY_LITERAL="0"
 DEBUG_PLAN="0"
 
 usage() {
-  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban|absinthe|phoenix|phoenix_live_view|bandit] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--worker-type mix|persistent] [--enable-body-literal]\n' >&2
+  printf 'usage: bench/run.sh [--target decimal|plug_crypto|nimble_options|gettext|ecto|mox|jason|plug|phoenix_html|telemetry_metrics|mint|finch|ex_machina|nimble_pool|nimble_csv|phoenix_pubsub|credo|makeup|req|timex|oban|absinthe|phoenix|phoenix_live_view|bandit] [--selection static|coverage|coverage_with_static_fallback] [--concurrency N] [--enable-body-literal]\n' >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -28,11 +27,6 @@ while [ "$#" -gt 0 ]; do
     --concurrency)
       [ "$#" -ge 2 ] || { usage; exit 64; }
       CONCURRENCY="$2"
-      shift 2
-      ;;
-    --worker-type)
-      [ "$#" -ge 2 ] || { usage; exit 64; }
-      WORKER_TYPE="$2"
       shift 2
       ;;
     --enable-body-literal)
@@ -65,11 +59,11 @@ case "$TARGET" in
     REF="v2.1.1"
     SHA="70af9d89e6bcb6fa7c47d42ef608e5c76a50d7ff"
     ;;
-  # M25 v1.10 validation targets. SHAs pinned to latest stable tags
+  # validation targets. SHAs pinned to latest stable tags
   # (queried 2026-05-09). BENCH_SHA / BENCH_REF env vars override for
   # one-off runs against newer upstream state, but the default is the
-  # frozen v1.10 matrix anchor — do not bump without re-running the
-  # M25 byte-identity gates.
+  # pinned benchmark anchor — do not bump without re-running the
+  # byte-identity gates.
   nimble_options)
     REPO="https://github.com/dashbitco/nimble_options.git"
     REF="${BENCH_REF:-v1.1.1}"
@@ -100,12 +94,11 @@ case "$TARGET" in
     REF="${BENCH_REF:-v1.19.1}"
     SHA="${BENCH_SHA:-8723880aa55ec9aae26ec33bc2c107903ec16840}"
     ;;
-  # M27 v1.11 OSS validation harness expansion. SHAs pinned to latest
+  # OSS validation harness expansion. SHAs pinned to latest
   # stable tags queried 2026-05-10. The expansion targets ecosystem
-  # shapes the M25 set did not cover: Phoenix-class compile macros
+  # shapes the set did not cover: Phoenix-class compile macros
   # (phoenix_html), telemetry/metrics primitives (telemetry_metrics),
-  # process-tree-heavy HTTP clients (mint, finch), and ExUnit factory
-  # macros (ex_machina). See bench/M27_RUNBOOK.md for per-target prep.
+  # process-tree-heavy HTTP clients (mint, finch), and factory macros.
   phoenix_html)
     REPO="https://github.com/phoenixframework/phoenix_html.git"
     REF="${BENCH_REF:-v4.3.0}"
@@ -131,7 +124,7 @@ case "$TARGET" in
     REF="${BENCH_REF:-v2.8.0}"
     SHA="${BENCH_SHA:-d1ec5e4b5af19276e2f5c184a05aa849323ad9a3}"
     ;;
-  # M27 secondary expansion: smaller candidates added once the first
+  # secondary expansion: smaller candidates added once the first
   # round (phoenix_html, plug, finch, ex_machina) hit unrunnable
   # blockers. These cover process-tree primitives (nimble_pool,
   # phoenix_pubsub) and a CSV parser (nimble_csv) — none require
@@ -151,7 +144,7 @@ case "$TARGET" in
     REF="${BENCH_REF:-v2.2.0}"
     SHA="${BENCH_SHA:-086e0af0af9306580ee59025c85931936a849ab5}"
     ;;
-  # M27 tertiary expansion: pure-logic libraries selected to avoid
+  # tertiary expansion: pure-logic libraries selected to avoid
   # the HTML/escaped-quote SchemaPlacer crash that knocks out
   # phoenix_html / plug / phoenix_pubsub.
   castore)
@@ -174,9 +167,8 @@ case "$TARGET" in
     REF="${BENCH_REF:-v1.1.3}"
     SHA="${BENCH_SHA:-61fb7ecf68fb9a3dbf7aeb7669adc3d0f7360b33}"
     ;;
-  # M59 v1.18 matrix completion. credo + makeup run clean; req / timex / oban
-  # are environment-blocked (documented in docs/decisions/M59_*; the prep
-  # section below records the blocker for each).
+  # matrix completion. credo + makeup run clean; req / timex / oban
+  # The preparation section below records blockers.
   credo)
     REPO="https://github.com/rrrene/credo.git"
     REF="${BENCH_REF:-v1.7.13}"
@@ -203,7 +195,7 @@ case "$TARGET" in
     SHA="${BENCH_SHA:-23fa8176b3586ca84f5859793739fad798e69d2b}"
     ;;
   absinthe)
-    # M82: wired for Pin + FunctionReplace exercise (density: pins=17,
+    # wired for Pin + FunctionReplace exercise (density: pins=17,
     # fnrepl=54). Standalone — tests use plain ExUnit, deps = nimble_parsec,
     # telemetry, dataloader/decimal optional. Pinned at v1.7.10.
     REPO="https://github.com/absinthe-graphql/absinthe.git"
@@ -211,17 +203,17 @@ case "$TARGET" in
     SHA="${BENCH_SHA:-28aa30673a60a30cece982099f03e4d458a873ac}"
     ;;
   phoenix)
-    # M91: headline matrix addition — the framework. Density check on the
+    # headline matrix addition — the framework. Density check on the
     # corpus mirror: FunctionReplace=27, NegateConditional≈hundreds-of
     # if/unless branches, Case≈87 case sites — broad exercise of the
-    # v1.23/v1.24 opt-in surfaces. Tests start plug_cowboy + endpoints
+    # Opt-in mutation surfaces. Tests start plug_cowboy + endpoints
     # locally, no DB or external network required.
     REPO="https://github.com/phoenixframework/phoenix.git"
     REF="${BENCH_REF:-v1.8.1}"
     SHA="${BENCH_SHA:-c86dd55d242f2f9e49054d28af9745a58748c6b0}"
     ;;
   phoenix_live_view)
-    # M91: second headline addition. Densest by FunctionReplace measure
+    # second headline addition. Densest by FunctionReplace measure
     # (36 sites) of the untried set; large NegateConditional + Case
     # surface; macro-heavy DSL exercises codegen-context exclusion.
     # Tests spin up a local Phoenix.Endpoint, no DB.
@@ -230,7 +222,7 @@ case "$TARGET" in
     SHA="${BENCH_SHA:-f73eac3e388eda4677025f0cb374c7d804f53f74}"
     ;;
   bandit)
-    # M91: third addition picked from the corpus by clean-test-suite
+    # third addition picked from the corpus by clean-test-suite
     # heuristic (bandit's tests stay in-process, no DB / no external
     # services; ExUnit-native). Lighter mutation surface than Phoenix/LV
     # but adds independent breadth.
@@ -247,7 +239,7 @@ esac
 
 if [ -z "$SHA" ]; then
   printf 'BENCH_SHA must be set (export BENCH_SHA=<commit-sha>) for target %s\n' "$TARGET" >&2
-  printf 'M24: pin a commit before benchmarking; do not run against moving HEAD.\n' >&2
+  printf 'pin a commit before benchmarking; do not run against moving HEAD.\n' >&2
   exit 64
 fi
 
@@ -259,9 +251,6 @@ else
   RESULT_PREFIX="$TARGET.$SELECTION.c$CONCURRENCY"
 fi
 
-if [ "$WORKER_TYPE" != "mix" ]; then
-  RESULT_PREFIX="$RESULT_PREFIX.$WORKER_TYPE"
-fi
 if [ "$ENABLE_BODY_LITERAL" = "1" ]; then
   RESULT_PREFIX="$RESULT_PREFIX.body_literal"
   ENABLE_FLAGS=(--enable dispatch,guard,module_attribute,body_literal)
@@ -298,7 +287,7 @@ perl -0pi -e 's/((?:def|defp) deps(?:\(\))? do\s*\[)/$1\n      {:mutalisk, path:
 # fail against the current Elixir/Mix environment for reasons unrelated
 # to mutation testing (env-fragile stdout assertions, DB-dependent tests,
 # StreamData seed determinism). Document any exclusion here AND in
-# BENCHMARKS so downstream readers know the kill-rate basis.
+# the report so downstream readers know the kill-rate basis.
 case "$TARGET" in
   gettext)
     # v1.0.2's mix.tasks.gettext.extract tests assert Mix's own stdout
@@ -314,7 +303,7 @@ case "$TARGET" in
     # support file) rather than overwriting; preserves project setup.
     perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(exclude: [:integration, :postgres, :mysql, :elixir_19_regex_drift], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
 
-    # M25 follow-up: Elixir 1.19 changed Regex internals so ~r/x/ == ~r/x/
+    # Elixir 1.19 changed Regex internals so ~r/x/ == ~r/x/
     # is now false (the re_pattern field carries a unique reference per
     # compile). v3.13.6's changeset_test.exs has 9 tests that assert
     # `constraints(changeset) == [%{constraint: ~r/.../}]`; they fail on
@@ -324,8 +313,7 @@ case "$TARGET" in
     # cherry-pick. Instead, tag the 9 tests with :elixir_19_regex_drift
     # and exclude the tag in test_helper.exs above. Mutation surface
     # (lib/ecto/changeset.ex) is unchanged; the killing-test denominator
-    # shrinks by 9 of ~1500. Document any change to this list in
-    # BENCHMARKS.md.
+    # shrinks by 9 of ~1500. Record any changes to this exclusion list.
     perl -pi -e '
       BEGIN {
         @skip = (
@@ -345,7 +333,7 @@ case "$TARGET" in
     ' "$WORK_DIR/test/ecto/changeset_test.exs"
     ;;
   jason)
-    # Pin StreamData seed for reproducibility across mix/persistent diffs.
+    # Pin StreamData seed for reproducibility across repeat runs.
     perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
   mint)
@@ -353,8 +341,7 @@ case "$TARGET" in
     # / proxy listeners. The integration_test.exs files aren't tagged,
     # so excluding by tag is insufficient — drop the files entirely so
     # the deterministic test surface remains apples-to-apples for
-    # mix-vs-persistent comparison. Mutation surface (lib/) is
-    # unchanged; documented in BENCHMARKS.md.
+    # repeat runs. Mutation surface (lib/) is unchanged.
     rm -f "$WORK_DIR/test/mint/integration_test.exs"
     rm -f "$WORK_DIR/test/mint/http1/integration_test.exs"
     rm -f "$WORK_DIR/test/mint/http2/integration_test.exs"
@@ -363,10 +350,10 @@ case "$TARGET" in
   finch)
     # finch transitively depends on :x509 which fails to compile under
     # Erlang/OTP 28 (`no record AttributePKCS-10 found in PKCS-FRAME.hrl`).
-    # Document as unrunnable for M27; revisit when x509 ships a 28-
+    # Treat as unrunnable; revisit when x509 ships a 28-
     # compatible release. The harness still pins finch for future
     # operators on older OTP.
-    printf 'finch is unrunnable on this OTP (x509 dep incompatibility); see BENCHMARKS.md\n' >&2
+    printf 'finch is unrunnable on this OTP (x509 dep incompatibility)\n' >&2
     exit 65
     ;;
   plug)
@@ -402,7 +389,7 @@ case "$TARGET" in
     # v2.8.0 has no path to drop credo without forking; classify as
     # unrunnable on Elixir 1.19+. Pin remains for future operators on
     # 1.18 or with patched credo.
-    printf 'ex_machina is unrunnable on Elixir 1.19+ (credo dep); see BENCHMARKS.md\n' >&2
+    printf 'ex_machina is unrunnable on Elixir 1.19+ (credo dep)\n' >&2
     exit 65
     ;;
   credo)
@@ -413,16 +400,15 @@ case "$TARGET" in
     ;;
   makeup)
     # Clean target, no prep. (Weak test suite -> low kill rate across the
-    # board; documented in BENCHMARKS.)
+    # board; recorded in the report.)
     :
     ;;
   req)
     # BLOCKED (environment): the optional native dep :ezstd fails to build
     # (zstd toolchain). Removing it (it is `optional: true`) cascades to ~13
     # accept-encoding/zstd baseline failures because req's default
-    # accept-encoding header changes. Not a mutalisk defect; see
-    # docs/decisions/M59_oss_matrix_equivalent_rate.md.
-    printf 'req is environment-blocked (ezstd native build); see M59 decision doc\n' >&2
+    # accept-encoding header changes.
+    printf 'req is environment-blocked (ezstd native build); inspect the target preparation above\n' >&2
     exit 65
     ;;
   timex)
@@ -431,7 +417,6 @@ case "$TARGET" in
     # — a project test incompatibility, not a mutalisk defect. Tag those 6
     # specific tests :env_drift and exclude them so the baseline is green; the
     # mutation surface (lib/) is unaffected. (Analogous to ecto's regex-drift
-    # exclusion.) Documented in docs/decisions/M59_oss_matrix_equivalent_rate.md.
     perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if $. == 137' "$WORK_DIR/test/duration_test.exs"
     perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if $. == 175' "$WORK_DIR/test/shift_test.exs"
     perl -i -pe 's/^(\s*)(test )/$1\@tag :env_drift\n$1$2/ if $. == 338' "$WORK_DIR/test/format_default_test.exs"
@@ -443,18 +428,18 @@ case "$TARGET" in
     # (Dolphin) + SQLite repos and runs migrations before ExUnit; MySQL is
     # absent here, so the suite cannot start. Heavy multi-DB infra, not a
     # mutalisk defect.
-    printf 'oban is environment-blocked (Postgres+MySQL+SQLite infra; MySQL absent); see M59 decision doc\n' >&2
+    printf 'oban is environment-blocked (Postgres+MySQL+SQLite infra; MySQL absent); inspect the target preparation above\n' >&2
     exit 65
     ;;
   phoenix)
-    # M91: phoenix ships a `.tool-versions` (like credo) — strip so the
+    # phoenix ships a `.tool-versions` (like credo) — strip so the
     # session toolchain runs. test_helper starts plug_cowboy (a dep, OK).
     # Pin seed for repro across runs.
     rm -f "$WORK_DIR/.tool-versions"
     perl -pi -e 's/ExUnit\.start\(([^)]*)\)/ExUnit.start($1, seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
   phoenix_live_view)
-    # M91: LV pins its own toolchain; strip. Tests start a local Endpoint.
+    # LV pins its own toolchain; strip. Tests start a local Endpoint.
     # Three baseline-failing tests are env-drift on Elixir 1.19 (HTML
     # formatter output drift; struct-update typing violations in
     # LiveView setup helpers; calendar form serialisation drift). Tag
@@ -467,7 +452,7 @@ case "$TARGET" in
     perl -pi -e 's/ExUnit\.start\(\)/ExUnit.start(exclude: [:env_drift], seed: 42)/' "$WORK_DIR/test/test_helper.exs"
     ;;
   bandit)
-    # M91: bandit's in-process tests run cleanly; the `:slow` exclusion
+    # bandit's in-process tests run cleanly; the `:slow` exclusion
     # bandit ships with (h2spec via docker, websocket autobahn) MUST be
     # preserved — those need infra we don't host. Keep :slow, add
     # :otp_ssl_cipher_drift for the one TLS cipher-reporting test that

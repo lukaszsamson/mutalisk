@@ -1,5 +1,5 @@
 #!/usr/bin/env elixir
-# M59 — per-mutator equivalent-rate estimate from a Stryker JSON report.
+# per-mutator equivalent-rate estimate from a Stryker JSON report.
 #
 # Equivalence is undecidable; this is a documented HEURISTIC, an OVER-estimate:
 #
@@ -15,7 +15,7 @@
 #   equivalent-rate := covered-survivors / (Killed + Survived)
 #
 # (Denominator = behavioural verdicts; CompileError/RuntimeError/Timeout and
-# uncovered survivors are excluded.) Requires a coverage-selection run so
+# NoCoverage is excluded; uncovered Survived mutants remain in the denominator.) Requires a coverage-selection run so
 # `coveredBy` is real. Usage: elixir bench/equivalent_rate.exs <stryker.json> ...
 
 defmodule EquivRate do
@@ -48,7 +48,7 @@ defmodule EquivRate do
     denom = killed + survived
     rate = if denom > 0, do: Float.round(cov_surv / denom * 100, 1), else: 0.0
 
-    # M72: per-mutator non-productive instrumentation. invalid = the mutation
+    # Per-mutator non-productive instrumentation. invalid = the mutation
     # could not compile (CompileError); err = it crashed/aborted at runtime
     # (RuntimeError); tmo = Timeout. nonprod% = these over ALL mutants — the
     # noise an operator's hazard rules must drive down.

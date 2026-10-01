@@ -2,7 +2,7 @@ defmodule Mut.AstWalkCodegenRefusalTest do
   use ExUnit.Case, async: true
 
   @moduledoc """
-  T14 (BUGS.txt 19): every candidate collector applies the SAME
+  Every candidate collector applies the SAME
   code-generation refusal policy — `quote`/`unquote` subtrees are pruned and
   `defmacro`/`defmacrop` bodies are skipped — so no walker mutates
   expansion-time code. Each fixture below places the construct the walker
