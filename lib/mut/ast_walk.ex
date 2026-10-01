@@ -1978,7 +1978,8 @@ defmodule Mut.AstWalk do
          # A multi-line value ends on `end_of_expression[:line]`, not on the
          # attribute's own line; pairing the end column with the start line gave
          # an inverted/truncated byte range (B12/D3).
-         end_line when is_integer(end_line) <- Keyword.get(end_meta, :line, line),
+         end_line
+         when is_integer(end_line) <- Keyword.get(end_meta, :line, line),
          true <- Map.has_key?(acc.line_offsets, end_line),
          line_text when is_binary(line_text) <- source_line(acc.source, line),
          {:ok, start_column} <- attribute_value_column(line_text, column, name),
