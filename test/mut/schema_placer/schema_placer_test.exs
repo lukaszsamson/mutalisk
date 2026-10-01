@@ -1,5 +1,5 @@
 defmodule Mut.SchemaPlacerTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Mut.Mutant
   alias Mut.SchemaPlacer
