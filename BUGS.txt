@@ -181,15 +181,16 @@ A02 [OPEN, P1] Umbrella fallback recompilation uses the wrong working directory.
     Cross-app dependents also need their own project/config/compiler context.
 A03 [FIXED] Exact-line selection discarded killing tests for clause-head mutants.
     Clause heads use enclosing-function or broader coverage selection.
-A04 [FIXED] Static selection omitted transitive callers and degraded coverage.
-    A reverse source-reference graph widens selection; degraded tests are included.
+A04 [OPEN, P1] Static selection omits transitive callers in custom source layouts.
+    The graph and degraded-coverage handling are fixed for conventional lib/apps
+    layouts. Sources under custom apps_path or elixirc_paths are still omitted,
+    allowing a facade test that kills a mutant to be discarded.
 A05 [FIXED] Reset left patched fallback sources outside lib in place.
     Every planned fallback source file is tracked and restored.
-A06 [OPEN] Incremental history omits inputs of local path dependencies.
-    Direct dependencies and target custom roots are covered, but dependency
-    custom source roots and transitive path dependencies were reproduced as missing.
-    Recursive discovery and dependency source-root scanning are implemented;
-    regression tests pass, with full quality gates pending.
+A06 [FIXED] Incremental history omitted transitive dependency and custom-root inputs.
+    Dependency projects are scanned recursively, including explicitly compiled
+    custom roots (also test/). Unresolved transitive paths disable reuse.
+    Regressions and the full bin/verify gate pass.
 A07 [FIXED] Hoisted schema variable overwrote a user variable after rendering.
     The emitted name avoids user names; scrutinee matching is exact.
 A08 [FIXED] Version-valid malformed history JSON crashed consumers.
