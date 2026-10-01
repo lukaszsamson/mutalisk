@@ -1,7 +1,7 @@
 Mutalisk consolidated bug triage
 ================================
 
-Updated 2026-10-01 against HEAD 6f20798 and the current working tree.
+Updated 2026-10-01; checked against the current code.
 Sources: BUGS_CLAUDE.txt, BUGS_GPT.txt, BUGS_GROK.txt, BUGS_OX.txt,
 BUGS_DEEP.txt, BUGS_KIMI.txt, BUGS_ASTRA.txt. BUGS_TRIAGED.txt is the
 historical implementation log; this file is the current consolidated queue.
@@ -12,6 +12,9 @@ reported claim is invalid. Repeated reports share one entry; original B1-B42
 numbers are retained. 
 
 The full quality gate is bash bin/verify. Each new bug fix gets its own commit.
+
+Current queue: 63 fixed findings, 4 rejected claims, 24 cleared suspicions.
+No confirmed report findings remain open.
 
 Original consolidated findings
 ------------------------------
@@ -182,10 +185,11 @@ A02 [FIXED] Umbrella fallback recompilation used the wrong app context.
     the full bin/verify gate passes.
 A03 [FIXED] Exact-line selection discarded killing tests for clause-head mutants.
     Clause heads use enclosing-function or broader coverage selection.
-A04 [OPEN, P1] Static selection omits transitive callers in custom source layouts.
-    The graph and degraded-coverage handling are fixed for conventional lib/apps
-    layouts. Sources under custom apps_path or elixirc_paths are still omitted,
-    allowing a facade test that kills a mutant to be discarded.
+A04 [FIXED] Static selection omitted transitive callers in custom source layouts.
+    The source graph discovers project .ex files across custom source roots and
+    umbrella layouts, retaining file/directory links and pruning build/dependency
+    trees. Facade-test and source-link regressions pass; the full bin/verify gate
+    passes. Degraded tests continue to be included conservatively.
 A05 [FIXED] Reset left patched fallback sources outside lib in place.
     Every planned fallback source file is tracked and restored.
 A06 [FIXED] Incremental history omitted transitive dependency and custom-root inputs.
@@ -219,8 +223,8 @@ C1. Empty cross-app test-file lists under custom apps_path do not drop tests
 C2. Mutation-score arithmetic matches the documented status model
 
     Metrics and terminal percentage divisions are zero-guarded. Killed and Timeout
-    are detected; Survived and NoCoverage are undetected. A Worker comment claiming
-    NoCoverage is excluded is stale, but the implemented score is consistent.
+    are detected; Survived and NoCoverage are undetected. The misleading Worker
+    comment was corrected (N11).
 
 C3. operator_token_span uses character-compatible splitting
 
@@ -254,11 +258,12 @@ C8. History garbage collection honors its retention bound
 C9. Digest truncation, normalization fallback, and tie-breaking fail safely
 
     The investigated paths over-invalidate history rather than unsafely reusing a
-    stale result. This does not clear the two specific digest findings above.
+    stale result. The specific digest defects have separate fixed entries.
 
 C10. Output truncation arithmetic and marker accounting are consistent
 
-     bounded_output/trim_output preserve their intended byte budget. The separate invalid-output bug is fixed (B1).
+     bounded_output/trim_output preserve their intended byte budget.
+     The separate invalid-output bug is fixed (B01).
 
 C11. Stryker JSON temporary-file replacement is safe on its intended path
 
@@ -277,8 +282,8 @@ C13. !== and === operator spans round-trip correctly
 
 C14. mix test --timeout is passed in the correct unit
 
-     ExUnit expects milliseconds and receives milliseconds. This does not clear
-     finding 3, which concerns applying the per-test value to the entire host suite.
+     ExUnit expects milliseconds and receives milliseconds.
+     The separate suite-deadline defect is fixed (B03).
 
 C15. Exclude polarity and regex flags are preserved
 
@@ -299,3 +304,17 @@ C18. Unreadable covering tests in history need a concrete failure scenario
 
      The suspected omission would require the file to be missing or unreadable both
      when history is written and when it is reused; no supported scenario was shown.
+
+C19. Umbrella oracle tracing records sites for every child app.
+     The real pipeline canonicalizes the project root before recording paths.
+C20. defguard/defguardp bodies already receive guard candidates.
+     Their when nodes are handled by the guard walker.
+C21. Schema dependency arguments do not omit required dependencies.
+     The subsequent forced compile builds remaining dependencies.
+C22. The SandboxQueue monitor window is not the claimed exploitable race.
+     Dead-caller replies are harmless and the pool has unconditional cleanup.
+C23. Source baselines remain available throughout sandbox use.
+     Schema work copies are retained until after the sandbox pool is destroyed.
+C24. Dependent compilation fixpoints and the inspected overlay-dependency forms
+     already behave correctly; the reported glob/race scenarios were not
+     established within supported usage.

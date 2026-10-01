@@ -208,8 +208,8 @@ Two rules deliberately widen that ladder:
 
 Static selection is **conservative and may select more tests than strictly
 necessary**. It indexes the modules each test file names, and then follows a
-module reference graph built over `lib/` and `test/support/` (plus `apps/*` for
-umbrellas): a test is selected for a target module when it references that
+module reference graph built over project source files, including custom source
+roots, umbrella layouts, and test support (build and dependency trees are pruned): a test is selected for a target module when it references that
 module *or any module that transitively references it*. This is what makes a
 test that reaches the target only through a facade module still run. When the
 closure spans the whole project, selecting every test is the correct answer.
