@@ -175,10 +175,11 @@ N14 [FIXED] EnvWalker omitted two-tuple elements, map values, and for options.
     These expression surfaces are traversed (T55).
 A01 [FIXED] Reset followed newly created symlinked priv roots.
     Root inspection and sweeping do not traverse symlink targets.
-A02 [OPEN, P1] Umbrella fallback recompilation uses the wrong working directory.
-    Project/config loading is fixed, but compilation restores the umbrella-root
-    cwd. A child's File.read!("priv/data.txt") fails on unmodified source.
-    Cross-app dependents also need their own project/config/compiler context.
+A02 [FIXED] Umbrella fallback recompilation used the wrong app context.
+    Affected apps compile in separate children, ordered by the combined manifest.
+    Each child keeps its own cwd, project/config/compiler options, and absolute
+    source/beam paths. Cold/warm macro and per-app-context regressions pass;
+    the full bin/verify gate passes.
 A03 [FIXED] Exact-line selection discarded killing tests for clause-head mutants.
     Clause heads use enclosing-function or broader coverage selection.
 A04 [OPEN, P1] Static selection omits transitive callers in custom source layouts.

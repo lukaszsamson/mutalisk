@@ -119,13 +119,14 @@ defmodule Mut.RecompileTest do
     # Evaluate the generated `ebin_of` the way the child BEAM would.
     ebin_of = extract_ebin_of(eval)
 
-    assert ebin_of.("apps/web-ui/lib/web_ui.ex") == "_build/mut_schema/lib/web_ui/ebin"
+    assert ebin_of.("apps/web-ui/lib/web_ui.ex") ==
+             Path.join(root, "_build/mut_schema/lib/web_ui/ebin")
 
     assert ebin_of.(Path.join(root, "apps/web-ui/lib/web_ui.ex")) ==
-             "_build/mut_schema/lib/web_ui/ebin"
+             Path.join(root, "_build/mut_schema/lib/web_ui/ebin")
 
     # Unknown child / non-umbrella path falls back to the default app.
-    assert ebin_of.("lib/other.ex") == "_build/mut_schema/lib/web_ui/ebin"
+    assert ebin_of.("lib/other.ex") == Path.join(root, "_build/mut_schema/lib/web_ui/ebin")
   end
 
   test "eval keeps the single-app ebin target on the default app" do
@@ -134,8 +135,10 @@ defmodule Mut.RecompileTest do
 
     ebin_of = extract_ebin_of(eval)
 
-    assert ebin_of.("lib/foo.ex") == "_build/mut_schema/lib/demo_app/ebin"
-    assert ebin_of.("apps/anything/lib/foo.ex") == "_build/mut_schema/lib/demo_app/ebin"
+    assert ebin_of.("lib/foo.ex") == "/tmp/sandbox/_build/mut_schema/lib/demo_app/ebin"
+
+    assert ebin_of.("apps/anything/lib/foo.ex") ==
+             "/tmp/sandbox/_build/mut_schema/lib/demo_app/ebin"
   end
 
   # Runs just the `app_map = ...` and `ebin_of = ...` prelude of the generated
@@ -339,6 +342,101 @@ defmodule Mut.RecompileTest do
 
     assert eval_in_ebin(dir, "mut_compile_env_probe", "Probe.value()") ==
              "{:configured, :mut_compile_env_probe}"
+  end
+
+  test "umbrella fallback preserves each app's cwd and project context" do
+    root = Path.join(System.tmp_dir!(), "mut_app_context_#{System.unique_integer([:positive])}")
+    on_exit(fn -> File.rm_rf!(root) end)
+    File.mkdir_p!(root)
+
+    File.write!(Path.join(root, "mix.exs"), """
+    defmodule ContextRoot.MixProject do
+      use Mix.Project
+      def project, do: [apps_path: "packages"]
+    end
+    """)
+
+    for {dir, app, value} <- [
+          {"z-provider", :context_provider, "provider"},
+          {"a-consumer", :context_consumer, "consumer"}
+        ] do
+      child = Path.join([root, "packages", dir])
+      File.mkdir_p!(Path.join(child, "lib"))
+      File.mkdir_p!(Path.join(child, "priv"))
+      File.write!(Path.join(child, "priv/data.txt"), value)
+
+      File.write!(Path.join(child, "mix.exs"), """
+      defmodule #{Macro.camelize(Atom.to_string(app))}.MixProject do
+        use Mix.Project
+        def project, do: [app: :#{app}, version: "0.1.0"]
+      end
+      """)
+    end
+
+    provider = "packages/z-provider/lib/provider.ex"
+    consumer = "packages/a-consumer/lib/consumer.ex"
+
+    File.write!(Path.join(root, provider), """
+    defmodule ContextProvider do
+      @data File.read!("priv/data.txt")
+      @app Mix.Project.config()[:app]
+      def value, do: {@data, @app}
+      defmacro number, do: 42
+    end
+    """)
+
+    File.write!(Path.join(root, consumer), """
+    defmodule ContextConsumer do
+      require ContextProvider
+      @data File.read!("priv/data.txt")
+      @app Mix.Project.config()[:app]
+      @number ContextProvider.number()
+      def value, do: {@data, @app, @number}
+    end
+    """)
+
+    deps = %{compile_deps: [], export_deps: [], struct_deps: [], runtime_deps: []}
+
+    manifest = %Mut.MixManifest{
+      modules: %{ContextProvider => provider, ContextConsumer => consumer},
+      sources: %{provider => deps, consumer => %{deps | compile_deps: [ContextProvider]}}
+    }
+
+    sandbox = %Sandbox{path: root}
+
+    assert {:error, :missing_cross_app_compile_manifest} =
+             Recompile.recompile(sandbox, [provider], [consumer], app: "context_provider")
+
+    for {file, number} <- [{provider, 42}, {Path.join(root, provider), 43}] do
+      source = File.read!(Path.join(root, provider))
+      File.write!(Path.join(root, provider), String.replace(source, "do: 42", "do: #{number}"))
+
+      assert :ok =
+               Recompile.recompile(sandbox, [file], [consumer],
+                 app: "context_provider",
+                 manifest: manifest
+               )
+
+      assert eval_in_ebin(root, "context_provider", "ContextProvider.value()") ==
+               ~s({"provider", :context_provider})
+
+      assert eval_in_ebin(root, "context_consumer", "ContextConsumer.value()") ==
+               ~s({"consumer", :context_consumer, #{number}})
+    end
+
+    cyclic = %{
+      manifest
+      | sources: Map.put(manifest.sources, provider, %{deps | compile_deps: [ContextConsumer]})
+    }
+
+    assert {:error, {:cyclic_app_compile_dependencies, _dirs}} =
+             Recompile.recompile(sandbox, [provider], [consumer],
+               app: "context_provider",
+               manifest: cyclic
+             )
+
+    refute File.exists?(Path.join(root, "packages/z-provider/_build"))
+    refute File.exists?(Path.join(root, "packages/a-consumer/_build"))
   end
 
   # A bootstrap failure (a config file that raises) degrades to the old
