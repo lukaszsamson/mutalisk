@@ -6,7 +6,7 @@ releases.
 
 ## 0.1.0
 
-Initial release candidate: mutation testing for Elixir 1.19 and newer.
+Initial release: mutation testing for Elixir 1.19 and newer.
 
 - `MIX_ENV=test mix mut` plans mutations and runs selected tests in isolated
   subprocesses, using schema instrumentation or fallback recompilation.

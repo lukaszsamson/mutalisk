@@ -36,6 +36,10 @@ environment — always run it with `MIX_ENV=test`. `runtime: false` keeps Mutali
 graph; mutation workers enable the runtime dependency in their own overlay.
 Plain `mix mut` in the default env fails with "task could not be found".
 
+`mix mut` exits 1 when the mutation score is below **80%**, so CI fails by
+default. Change the threshold with `--fail-at` or `fail_at:` in config;
+`--fail-at 0` turns the gate off.
+
 Useful flags (see `MIX_ENV=test mix help mut` or `MIX_ENV=test mix mut --help` for the full
 list):
 
