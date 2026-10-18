@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
-# Layered verification harness. See PLAN.md §"The verification harness".
-#
-# Usage:
-#   bin/verify              # run every enabled layer in order
-#   bin/verify <layer>      # run one layer; non-zero exit if not yet enabled
-#
-# Edit ENABLED_LAYERS as milestones complete.
+# Run all quality gates, or one named layer: bash bin/verify [layer].
 
 set -euo pipefail
 
@@ -13,21 +7,6 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 rm -rf tmp
-
-# Enable layers as their milestone is completed. Order in this list is the
-# execution order for `bin/verify` (no args).
-ENABLED_LAYERS=(
-  lint
-  unit
-  dialyzer
-  golden_oracle
-  golden_instrument
-  integration_schema
-  integration_fallback
-  e2e_mut
-  docs
-  package
-)
 
 ALL_LAYERS=(
   lint
@@ -42,28 +21,6 @@ ALL_LAYERS=(
   package
 )
 
-# layer -> milestone that enables it (for skipped messages)
-declare -A LAYER_MILESTONE=(
-  [lint]=M0
-  [unit]=M0
-  [dialyzer]=M1
-  [golden_oracle]=M2
-  [golden_instrument]=M6
-  [integration_schema]=M8
-  [integration_fallback]=M10
-  [e2e_mut]=M13
-  [docs]=M112
-  [package]=M112
-)
-
-is_enabled() {
-  local layer="$1"
-  for l in "${ENABLED_LAYERS[@]}"; do
-    [ "$l" = "$layer" ] && return 0
-  done
-  return 1
-}
-
 is_known() {
   local layer="$1"
   for l in "${ALL_LAYERS[@]}"; do
@@ -73,7 +30,6 @@ is_known() {
 }
 
 step() { printf '\n==> %s\n' "$1"; }
-skip() { printf '\n--  %s  (skipped: enabled by %s)\n' "$1" "${LAYER_MILESTONE[$1]}"; }
 
 run_lint() {
   step lint
@@ -128,15 +84,6 @@ run_package() {
   mix hex.build
 }
 
-run_layer() {
-  local layer="$1"
-  if is_enabled "$layer"; then
-    "run_${layer}"
-  else
-    skip "$layer"
-  fi
-}
-
 main() {
   if [ "$#" -gt 0 ]; then
     local layer="$1"
@@ -145,15 +92,10 @@ main() {
       echo "Known: ${ALL_LAYERS[*]}" >&2
       exit 2
     fi
-    if ! is_enabled "$layer"; then
-      echo "Layer '$layer' is not yet enabled (milestone ${LAYER_MILESTONE[$layer]})." >&2
-      echo "Add it to ENABLED_LAYERS in bin/verify when its milestone is done." >&2
-      exit 3
-    fi
     "run_${layer}"
   else
     for layer in "${ALL_LAYERS[@]}"; do
-      run_layer "$layer"
+      "run_${layer}"
     done
   fi
   printf '\nOK\n'

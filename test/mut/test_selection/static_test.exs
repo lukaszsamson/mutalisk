@@ -344,18 +344,91 @@ defmodule Mut.TestSelection.StaticTest do
       assert Static.covering_tests(transitive, AstraFacade, all) == [indirect]
     end
 
-    test "default_source_paths finds lib and test/support, including umbrellas" do
-      root = fixture_root("source_paths")
+    test "default source discovery retains facade tests in custom layouts" do
+      for {layout, source_dir, project_config} <- [
+            {"umbrella", "packages/child/lib", ~s(apps_path: "packages")},
+            {"source_root", "src", ~s(elixirc_paths: ["src"])}
+          ] do
+        root = fixture_root("custom_#{layout}")
+
+        File.write!(Path.join(root, "mix.exs"), """
+        defmodule Selection.MixProject do
+          use Mix.Project
+          def project, do: [#{project_config}]
+        end
+        """)
+
+        sources = Path.join(root, source_dir)
+        tests = Path.join(root, "test")
+        File.mkdir_p!(sources)
+        File.mkdir_p!(tests)
+
+        File.write!(Path.join(sources, "helper.ex"), """
+        defmodule LayoutHelper do
+          def value(x), do: x * 1
+        end
+        """)
+
+        File.write!(Path.join(sources, "facade.ex"), """
+        defmodule LayoutFacade do
+          def value(x), do: LayoutHelper.value(x)
+        end
+        """)
+
+        direct = Path.join(tests, "direct_test.exs")
+        indirect = Path.join(tests, "indirect_test.exs")
+        File.write!(direct, "assert LayoutHelper.value(0) == 0")
+        File.write!(indirect, "assert LayoutFacade.value(2) == 2")
+
+        analysis = Static.analyze([tests], source_paths: Static.default_source_paths(root))
+
+        assert Static.covering_tests(analysis, LayoutHelper, [direct, indirect]) ==
+                 Enum.sort([direct, indirect])
+      end
+    end
+
+    test "source discovery follows source links without looping through ancestor links" do
+      root = fixture_root("source_links")
+      target = fixture_root("source_link_target")
       File.mkdir_p!(Path.join(root, "lib"))
-      File.mkdir_p!(Path.join(root, "test/support"))
-      File.mkdir_p!(Path.join(root, "apps/child/lib"))
+      File.mkdir_p!(Path.join(target, "dir"))
 
-      assert Enum.sort(Static.default_source_paths(root)) == [
-               Path.join(root, "apps/child/lib"),
-               Path.join(root, "lib"),
-               Path.join(root, "test/support")
-             ]
+      File.write!(
+        Path.join(target, "file.ex"),
+        "defmodule FileFacade do def value, do: LayoutHelper.value(1) end"
+      )
 
+      File.write!(
+        Path.join(target, "dir/source.ex"),
+        "defmodule DirectoryFacade do def value, do: LayoutHelper.value(2) end"
+      )
+
+      File.ln_s!(Path.join(target, "file.ex"), Path.join(root, "lib/file.ex"))
+      File.ln_s!(Path.join(target, "dir"), Path.join(root, "linked_sources"))
+      File.ln_s!(root, Path.join(target, "dir/back"))
+
+      analysis = Static.analyze([], source_paths: Static.default_source_paths(root))
+      assert analysis.source_graph[LayoutHelper] == MapSet.new([FileFacade, DirectoryFacade])
+    end
+
+    test "source discovery prunes build and dependency trees but keeps lib/deps" do
+      root = fixture_root("source_paths")
+      File.write!(Path.join(root, "mix.exs"), "def project, do: [app: :sample]")
+
+      for {file, module} <- [
+            {"lib/real.ex", "RealSource"},
+            {"lib/deps/local.ex", "LocalSource"},
+            {"deps/vendor.ex", "VendorSource"},
+            {"_build/cached.ex", "CachedSource"},
+            {"apps/child/_build/cached.ex", "ChildCachedSource"}
+          ] do
+        path = Path.join(root, file)
+        File.mkdir_p!(Path.dirname(path))
+        File.write!(path, "defmodule #{module} do def value, do: LayoutHelper.value(1) end")
+      end
+
+      analysis = Static.analyze([], source_paths: Static.default_source_paths(root))
+      assert analysis.source_graph[LayoutHelper] == MapSet.new([RealSource, LocalSource])
       assert Static.default_source_paths(nil) == []
     end
   end

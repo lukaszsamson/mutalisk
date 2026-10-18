@@ -53,18 +53,13 @@ defmodule Mut.TestSelection.Static do
   end
 
   @doc """
-  Conventional source roots under `root`: `lib/` and `test/support/`, plus the
-  same directories under `apps/*` for umbrellas.
+  The project root, including custom source and umbrella layouts. Source
+  discovery prunes build artefacts and dependency directories before descent.
   """
   @spec default_source_paths(Path.t() | nil) :: [Path.t()]
   def default_source_paths(nil), do: []
 
-  def default_source_paths(root) when is_binary(root) do
-    ["lib", "test/support", "apps/*/lib", "apps/*/test/support"]
-    |> Enum.flat_map(&Path.wildcard(Path.join(root, &1)))
-    |> Enum.filter(&File.dir?/1)
-    |> Enum.uniq()
-  end
+  def default_source_paths(root) when is_binary(root), do: [root]
 
   @spec covering_tests(analysis(), module() | nil, [Path.t()]) :: [Path.t()]
   def covering_tests(
@@ -185,11 +180,57 @@ defmodule Mut.TestSelection.Static do
 
   defp discover_source_files(source_paths) do
     source_paths
-    |> Enum.flat_map(fn path ->
-      if File.regular?(path), do: [path], else: Path.wildcard(Path.join(path, "**/*.ex"))
-    end)
+    |> Enum.flat_map(&source_files/1)
     |> Enum.uniq()
     |> Enum.sort()
+  end
+
+  defp source_files(path), do: source_files(Path.expand(path), [])
+
+  defp source_files(path, ancestors) do
+    if path in ancestors, do: [], else: source_entry_files(path, [path | ancestors])
+  end
+
+  defp source_entry_files(path, ancestors) do
+    case File.lstat(path) do
+      {:ok, %File.Stat{type: :directory}} -> source_directory_files(path, ancestors)
+      {:ok, %File.Stat{type: :regular}} -> elixir_source_file(path)
+      {:ok, %File.Stat{type: :symlink}} -> linked_source_files(path, ancestors)
+      _other -> []
+    end
+  end
+
+  defp elixir_source_file(path),
+    do: if(String.ends_with?(path, ".ex"), do: [path], else: [])
+
+  defp linked_source_files(path, ancestors) do
+    if File.regular?(path) do
+      elixir_source_file(path)
+    else
+      case File.read_link(path) do
+        {:ok, target} -> source_files(Path.expand(target, Path.dirname(path)), ancestors)
+        {:error, _reason} -> []
+      end
+    end
+  end
+
+  defp source_directory_files(dir, ancestors) do
+    case File.ls(dir) do
+      {:ok, entries} ->
+        entries
+        |> Enum.reject(&pruned_source_entry?(dir, &1))
+        |> Enum.flat_map(&source_files(Path.join(dir, &1), ancestors))
+
+      {:error, _reason} ->
+        []
+    end
+  end
+
+  defp pruned_source_entry?(dir, entry) do
+    entry in ["_build", ".git"] or
+      (entry == "deps" and
+         (File.regular?(Path.join(dir, "mix.exs")) or
+            File.regular?(Path.join(dir, "mix_user.exs"))))
   end
 
   defp traverse(node, analysis, _file) when is_atom(node) or is_number(node) or is_binary(node),

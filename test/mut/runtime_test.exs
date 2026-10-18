@@ -1,10 +1,11 @@
 defmodule Mut.RuntimeTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   @moduledoc false
 
   setup do
     Mut.Runtime.clear()
+    on_exit(fn -> Mut.Runtime.clear() end)
     :ok
   end
 

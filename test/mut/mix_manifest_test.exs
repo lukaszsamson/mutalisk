@@ -24,7 +24,10 @@ defmodule Mut.MixManifestTest do
 
   test "version_assertion raises clearly on unknown shape" do
     assert_raise ArgumentError, ~r/supports manifest versions \[29, 34, 35, 36, 37\]/, fn ->
-      MixManifest.version_assertion({33, %{}, %{}})
+      # Built at runtime: a literal bad tuple is a type error the compiler reports.
+      MixManifest.version_assertion(
+        :erlang.binary_to_term(:erlang.term_to_binary({33, %{}, %{}}))
+      )
     end
   end
 

@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
-# M97 sharding harness — the strategy that lets the matrix run actually
-# complete (M93/M95 deferred it twice on session-envelope grounds).
-#
-# Insight: the expensive part is clone + deps.get + compile PER TARGET.
-# A focused `mix mut --enable <flag> --mutators <name> --max-mutants N`
-# against an already-compiled work_copy is cheap (only that surface's
-# candidates are generated, run is bounded). So: shard = one target,
-# clone/compile ONCE, loop all surfaces against the persistent work_copy.
+# Compare focused mutation surfaces on a pinned external project.
+# Clone, fetch dependencies, and compile once, then run each selected surface.
 #
 # Usage:
 #   bench/shard_matrix.sh --target decimal [--surfaces nc,sd,cd,...] \

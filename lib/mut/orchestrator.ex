@@ -369,7 +369,7 @@ defmodule Mut.Orchestrator do
   # M77: conditional candidates via a syntactic AST walk. When the target is
   # off, no walk happens.
   #
-  # Tier-3 trust cross-check (ENV_WALKER.md): the syntactic walk finds every
+  # Syntactic cross-check: the syntactic walk finds every
   # `if`/`unless`-shaped node, but a shadowed special form (`import Kernel,
   # except: [if: 2]` + a custom `if` macro) would be mutated as if it were the
   # Kernel form. So — exactly as the env-walker path does — gate each candidate

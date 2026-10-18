@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Mut do
       multiple path tokens after it, or use comma-separated patterns to mutate
       several paths.
     - `--test-paths "PATH"` — Restrict test discovery to these paths (default:
-      `test/` for a single app, every child app's `apps/<app>/test/` for an
+      `test/` for a single app, every child app's `<apps_path>/<child>/test/` for an
       umbrella). Repeat the flag, pass multiple path tokens after it, or use
       comma-separated paths, exactly like `--files`. Paths must be
       project-relative.
@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Mut do
       `statement_delete`, `clause_delete`,
       `guard_boolean`, `pipeline_drop`,
       `map_update_drop`, `receive_timeout`. Passing
-      --enable selects the default selectable mutator
+      --enable replaces the default enabled targets and selects the default selectable mutator
       set gated by the listed targets. Note: an opt-in
       mutator selected via `--mutators` ALSO needs its
       target enabled, and a few experimental mutators
@@ -45,15 +45,14 @@ defmodule Mix.Tasks.Mut do
       values are bounded to avoid pathological sandbox
       startup/teardown costs.
     - `--max-mutants N` — Cap total mutants (stable-id sorted sample if
-      exceeded). Caps EXECUTION only — it is applied
-      after planning and coverage collection, so it
-      does not reduce analysis time.
+      exceeded). Limits planned mutant executions before coverage collection. Oracle
+      construction and planning still run in full; coverage still collects
+      the selected test files.
     - `--debug-plan` — Dump plan JSON to plan.debug.json and exit before
       any mutant runs. It still builds the oracle and baseline plan; it is not
       a zero-cost parser-only mode.
     - `--selection MODE` — Test selection mode: `static`, `coverage`,
-      `coverage_with_static_fallback` (default, since
-      v1.19/M65). `static` is the fully-portable
+      `coverage_with_static_fallback` (default). `static` is the fully-portable
       escape hatch — also the fast choice on
       macro-heavy/generated apps (e.g. Phoenix) where
       coverage collection is slow before it falls back.
@@ -63,9 +62,9 @@ defmodule Mix.Tasks.Mut do
       Default 10000. Range 1000..600000.
     - `--suite-timeout-ms N` — Whole-suite host budget, in milliseconds, for one
       mutant's selected tests (range 1000..3600000). The host kills the mutant's
-      test port after this budget plus a 10000 ms drain buffer. Unset (the
-      default) it is derived from the measured baseline run:
-      `max(test_timeout_ms, baseline_wall_ms * 2) + 10000`. Deriving it matters
+      test port after `max(test_timeout_ms, suite_timeout_ms)` plus a 10000 ms
+      drain buffer. Unset (the default) it is derived from the measured baseline run:
+      `max(test_timeout_ms, min(baseline_wall_ms * 2, 600000)) + 10000`. Deriving it matters
       because several individually valid slow tests can otherwise exceed a budget
       sized for a single test, and the resulting host timeout counts as a
       detection and inflates the score.
@@ -79,9 +78,10 @@ defmodule Mix.Tasks.Mut do
       unchanged mutants instead of re-executing them
       (opt-in; see `history_path` config). Materially
       changes execution and report interpretation.
-    - `--since REF` — With `--incremental`, restrict reuse to mutants
+    - `--since REF` — With `--incremental`, force execution of mutants
       whose file changed since git `REF` (e.g. `HEAD~1`,
-      `main`). Outside a git repo or with an unknown ref,
+      `main`). Other mutants remain eligible only if all digest checks pass.
+      Outside a git repo or with an unknown ref,
       reuse falls back to digest checks with a warning.
 
   ## Configuration
@@ -101,12 +101,12 @@ defmodule Mix.Tasks.Mut do
   flag that overrides config. `history_path` controls where every run writes
   reusable verdict history for future `--incremental` runs. `coverage_timeout_ms`
   is a positive integer in milliseconds for each per-test-file coverage
-  collection attempt; in `coverage_with_static_fallback`, timed-out files degrade
-  to static selection. Run-scoped switches `debug_plan` and `keep_work_copy` are
-  CLI-only.
+  collection attempt. Timed-out or failed files have unknown coverage and are
+  included conservatively in every mutant's selection. Run-scoped switches
+  `debug_plan` and `keep_work_copy` are CLI-only.
 
   When `test_paths` is unset it defaults to `test/` for a single app and to
-  every child app's `apps/<app>/test/` for an umbrella. Set it explicitly only
+  every child app's `<apps_path>/<child>/test/` for an umbrella. Set it explicitly only
   to override that — note a bare `["test"]` finds no tests in an umbrella.
 
   `.mutalisk.exs` (in the project root, loaded if present) is a plain
@@ -1103,6 +1103,7 @@ defmodule Mix.Tasks.Mut do
     {nil, :downgraded_to_static}
   end
 
+  @doc false
   @spec pathological_coverage_collection?(non_neg_integer(), non_neg_integer()) :: boolean()
   def pathological_coverage_collection?(coverage_wall_ms, baseline_tests_ms)
       when is_integer(coverage_wall_ms) and is_integer(baseline_tests_ms) do
@@ -1113,6 +1114,7 @@ defmodule Mix.Tasks.Mut do
   # `max(baseline * 2, 10_000)`ms, NOT `baseline` — shared so the abort
   # message (`handle_pathological_coverage/6`) reports the real threshold and
   # the real ratio against it instead of quietly comparing to `baseline` alone.
+  @doc false
   @spec pathological_threshold_ms(non_neg_integer()) :: pos_integer()
   def pathological_threshold_ms(baseline_tests_ms) when is_integer(baseline_tests_ms) do
     max(baseline_tests_ms * 2, @coverage_pathology_floor_ms)
@@ -1205,6 +1207,7 @@ defmodule Mix.Tasks.Mut do
   # baseline has an effective 10s floor threshold, not a 6s one). Report the
   # real threshold and the ratio against it. Public + a plain non-negative-int
   # spec so the message text is independently testable.
+  @doc false
   @spec pathological_coverage_abort_message(non_neg_integer(), non_neg_integer()) :: String.t()
   def pathological_coverage_abort_message(wall_ms, baseline_ms) do
     threshold_ms = pathological_threshold_ms(baseline_ms)
@@ -1848,7 +1851,7 @@ defmodule Mix.Tasks.Mut do
 
   # Resolve the project-relative test directories. An explicit config/CLI
   # `test_paths` is honoured verbatim; the default (`nil`) is umbrella-aware
-  # (single app -> `test/`; umbrella -> each child app's `apps/<app>/test/`).
+  # (single app -> `test/`; umbrella -> each child app's `<apps_path>/<child>/test/`).
   # Without this an umbrella discovers zero test files, so test-selection metrics
   # record 0 tests/mutant even though the worker still runs the full suite via
   # the empty-selection sentinel. (Exploratory issue #3.)

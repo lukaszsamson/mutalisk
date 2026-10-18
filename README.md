@@ -17,7 +17,11 @@ Add to your `mix.exs`:
       ]
     end
 
-Run `mix deps.get`.
+Run `MIX_ENV=test mix deps.get`.
+
+Requires Elixir 1.19 or newer. Mutalisk is validated on Linux and macOS;
+child-process cleanup uses Unix tools (`ps`, `pgrep`, and `kill`). Windows
+is not currently tested.
 
 ## Usage
 
@@ -28,12 +32,15 @@ writes `stryker.report.json` (viewable in the
 [Stryker mutation testing elements](https://stryker-mutator.io/) HTML viewer).
 
 Because the dependency is `only: [:test]`, the task only exists under the test
-environment — always run it with `MIX_ENV=test` (or add a `preferred_cli_env`
-alias). `runtime: false` keeps Mutalisk out of your app's normal test start
+environment — always run it with `MIX_ENV=test`. `runtime: false` keeps Mutalisk out of your app's normal test start
 graph; mutation workers enable the runtime dependency in their own overlay.
 Plain `mix mut` in the default env fails with "task could not be found".
 
-Useful flags (see `MIX_ENV=test mix help mut` or `mix mut --help` for the full
+`mix mut` exits 1 when the mutation score is below **80%**, so CI fails by
+default. Change the threshold with `--fail-at` or `fail_at:` in config;
+`--fail-at 0` turns the gate off.
+
+Useful flags (see `MIX_ENV=test mix help mut` or `MIX_ENV=test mix mut --help` for the full
 list):
 
     MIX_ENV=test mix mut --files "lib/my_app/core/**/*.ex"   # only mutate some files
@@ -121,7 +128,7 @@ Settings layer, lowest to highest precedence:
     ]
 
 Or `config :mutalisk, ...` in `config/test.exs`. CLI flags override both. Run
-`MIX_ENV=test mix help mut` or `mix mut --help` for every key and flag.
+`MIX_ENV=test mix help mut` or `MIX_ENV=test mix mut --help` for every key and flag.
 
 ## Mutators
 
@@ -159,12 +166,13 @@ several individually valid slow tests can exceed a budget sized for one test —
 and the resulting host timeout would be scored as a detection, inflating the
 score — the host deadline is derived from the measured baseline run:
 
-    max(test_timeout_ms, baseline_wall_ms * 2) + 10 000 ms
+    max(test_timeout_ms, min(baseline_wall_ms * 2, 600 000)) + 10 000 ms
 
 Set `--suite-timeout-ms N` (or `config :mutalisk, suite_timeout_ms: N`, range
-1 000..3 600 000) to pin it explicitly; the same 10 000 ms drain buffer is added
-so ExUnit can report its own timeout first. Each run prints the deadline it
-derived and why.
+1 000..3 600 000) to pin it explicitly. The host uses
+`max(test_timeout_ms, suite_timeout_ms) + 10 000 ms`, keeping the per-test
+timeout as a floor and adding time for ExUnit to report its own timeout first.
+Each run prints the deadline it derived and why.
 
 ### Sandbox `priv/` reset
 
@@ -181,18 +189,18 @@ per worker.
 
 Test selection decides which test files run for each mutant. It defaults to
 `coverage_with_static_fallback`; `--selection static` is the fully-portable
-escape hatch and `--selection coverage` is the strict (no-fallback) coverage
-mode. Selection only ever affects *which* tests run — it never enters a mutant's
-stable id — and every rule below errs towards running more tests, because
+escape hatch. `--selection coverage` prevents a whole-run downgrade to static
+selection when coverage collection becomes too slow; the per-mutant fallback
+ladder below still applies. Selection only ever affects *which* tests run — it
+never enters a mutant's stable id — and every rule below errs towards running more tests, because
 under-selecting a killing test would report a false survivor.
 
 In the coverage modes each mutant takes the first non-empty scope from:
 
 1. **exact line** — tests whose coverage includes the mutated line.
 2. **enclosing function** — tests covering any line of the mutated function.
-3. **enclosing file** — tests covering any line of the mutated file.
-4. **static fallback** — tests statically referencing the mutant's module.
-5. **all tests**.
+3. **static fallback** — tests statically referencing the mutant's module.
+4. **all tests**.
 
 Two rules deliberately widen that ladder:
 
@@ -200,16 +208,16 @@ Two rules deliberately widen that ladder:
   or a guard can make its clause accept inputs that originally routed to a
   *different* clause, so the killing test need never have executed the mutated
   line. Those mutants start at enclosing-function scope (every clause of the
-  function) and fall back to whole-file scope when function metadata is
-  unavailable.
+  function), then try enclosing-file coverage before static selection.
 - **Degraded coverage is unknown coverage.** Any test file whose coverage
   collection timed out or failed is added to *every* mutant's selection. An
   absent measurement is not evidence that the test is irrelevant.
 
 Static selection is **conservative and may select more tests than strictly
 necessary**. It indexes the modules each test file names, and then follows a
-module reference graph built over `lib/` and `test/support/` (plus `apps/*` for
-umbrellas): a test is selected for a target module when it references that
+module reference graph built over project source files, including custom source
+roots, umbrella layouts, and test support (build and dependency trees are
+pruned): a test is selected for a target module when it references that
 module *or any module that transitively references it*. This is what makes a
 test that reaches the target only through a facade module still run. When the
 closure spans the whole project, selecting every test is the correct answer.
@@ -225,10 +233,16 @@ every mutant).
 - Mutants run via a fresh `mix test` worker each (one mutant per VM), in an
   isolated sandbox subprocess.
 
-## Project documents
+## Public API
 
-- [docs/MUTATORS.md](docs/MUTATORS.md) — the mutator catalogue
-- [HLD](https://github.com/lukaszsamson/mutalisk/blob/main/ELIXIR_MUTATION_TESTING_HLD_V1_5_V2.md) — latest design / spec on `main`
-- [PLAN.md](https://github.com/lukaszsamson/mutalisk/blob/main/PLAN.md) — latest milestone history on `main`
-- [BENCHMARKS.md](https://github.com/lukaszsamson/mutalisk/blob/main/BENCHMARKS.md) — latest OSS validation runs on `main`
-- [docs/BOOTSTRAP.md](https://github.com/lukaszsamson/mutalisk/blob/main/docs/BOOTSTRAP.md) — latest child-process bootstrap design on `main`
+The supported interfaces are `MIX_ENV=test mix mut`, its documented configuration
+and reports, and the runtime helpers in `Mutalisk`: `active_key/0`,
+`set_active/1`, `get_active/0`, and `clear/0`. The active mutant is VM-global;
+use `try`/`after` to clear it when using these helpers directly. Modules under
+`Mut.*` and the compiler integration are implementation details.
+
+## Maintaining Mutalisk
+
+The source repository includes the [release guide](https://github.com/lukaszsamson/mutalisk/blob/main/docs/RELEASE.md),
+[architecture overview](https://github.com/lukaszsamson/mutalisk/blob/main/docs/ARCHITECTURE.md),
+and [benchmark tools](https://github.com/lukaszsamson/mutalisk/blob/main/bench/README.md).

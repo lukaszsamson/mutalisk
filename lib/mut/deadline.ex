@@ -4,26 +4,25 @@ defmodule Mut.Deadline do
 
   The per-test `--test-timeout-ms` is handed to ExUnit as a *per test* timeout,
   but the host watchdog has to bound the *whole selected suite* for one mutant.
-  Using the per-test value for both (mutalisk <= v1.29) meant a handful of
-  individually valid slow tests could blow the host budget; the resulting
-  `:timeout` was counted as a detection and inflated the score.
+  Using the per-test value for both would let a handful of
+  individually valid slow tests exceed the host budget; the resulting
+  `:timeout` would be counted as a detection and inflate the score.
 
   The rule (see `host_deadline_ms/3`):
 
     * `suite_timeout_ms` set (config key or `--suite-timeout-ms`) —
-      `suite_timeout_ms + buffer`.
-    * otherwise — `max(test_timeout_ms, baseline_wall_ms * 2) + buffer`, where
+      `max(test_timeout_ms, suite_timeout_ms) + buffer`.
+    * otherwise — `max(test_timeout_ms, min(baseline_wall_ms * 2, 600000)) + buffer`, where
       `baseline_wall_ms` is the measured wall time of the baseline test run. A
       mutant runs a *subset* of the suite, so twice the full baseline is a
       generous ceiling that still catches a genuine infinite loop.
-    * with no baseline measurement available, the pre-v1.30 behaviour —
-      `test_timeout_ms + buffer` — is kept.
+    * with no baseline measurement available,
+      `test_timeout_ms + buffer`.
 
   The buffer exists because ExUnit fires its per-test timeout first and emits a
   `MUT_RESULT` line; the host then needs time to drain the port and classify.
   """
 
-  # 10s matches v1.8 (the old 70_000 = 60_000 + 10_000).
   @buffer_ms 10_000
 
   # Upper bound on the baseline-derived budget (before the buffer).

@@ -40,10 +40,8 @@ defmodule Mutalisk.MixProject do
     ]
   end
 
-  # Hex package metadata. `priv/` is intentionally excluded — it holds only the
-  # dev Dialyzer PLT and an unused schema reference; mutalisk reads no priv at
-  # runtime. Implementer docs (PLAN.md, the HLD, docs/decisions, docs/spikes,
-  # bench/) are excluded; only user-facing docs ship.
+  # Ship runtime code and user documentation. Development tasks, tests,
+  # benchmarks, generated artifacts, and maintainer docs stay in the repository.
   @spec package() :: keyword
   defp package do
     [

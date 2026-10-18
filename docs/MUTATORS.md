@@ -5,11 +5,11 @@ version. A mutant that your tests catch is **killed**; one they don't is
 **survived** — a gap in your test suite.
 
 Mutators are split into two tiers. **Default-on** mutators run with a bare
-`mix mut`. **Opt-in** mutators run only when you ask for them; they are either
+`MIX_ENV=test mix mut`. **Opt-in** mutators run only when you ask for them; they are either
 noisier (more equivalent/false-positive mutants) or niche.
 
 > **Targets and mutator names are independent gates.** `--mutators` picks which
-> mutators to consider; `--enable` unlocks target families. If a mutator's target
+> mutators to consider; `--enable` replaces the enabled target families. If a mutator's target
 > is not enabled by default, pass both, for example
 > `--enable module_attribute --mutators attribute_literal`. If the target is
 > already enabled by default (`dispatch`, `guard`, `env_walker`,
@@ -19,9 +19,7 @@ noisier (more equivalent/false-positive mutants) or niche.
 
 ## Default-on
 
-These are low-noise, high-signal, and have graduated past the project's
-quality gate (kill ≥60%, equivalent <20%, invalid <10% across the OSS
-validation matrix).
+These focus on common faults while limiting equivalent or invalid mutants.
 
 | Mutator | What it does |
 |---|---|
@@ -29,7 +27,7 @@ validation matrix).
 | `ComparisonBoundary` | off-by-one on comparisons (`<` → `<=`, `>` → `>=`, …) |
 | `ComparisonNegation` | negates comparisons (`==` → `!=`, `<` → `>=`, …) |
 | `Boolean` | swaps boolean operators (`and` ↔ `or`, `&&` ↔ `\|\|`) |
-| `UnaryNot` | drops/adds `!` / `not` on boolean expressions |
+| `UnaryNot` | drops `!` / `not` on boolean expressions |
 | `GuardComparisonBoundary` | comparison-boundary, inside `when` guards |
 | `GuardComparisonNegation` | comparison-negation, inside `when` guards |
 | `GuardTypeTest` | swaps guard type tests (`is_integer` → `is_float`, …) |
@@ -60,7 +58,7 @@ comma-separated and use the snake_case module name, e.g.
 | `VariableReplace` | `variable` | swap a variable reference for another in scope |
 | `VariableToLiteral` | `variable` | replace a typed variable reference with a boundary literal; requires explicit `--mutators variable_to_literal` |
 | `BitwiseOperator` | `dispatch` | bitwise op swaps (`band`/`bor`/`bsl`/…) |
-| `Membership` | `dispatch` | `in` ↔ `not in` |
+| `Membership` | `dispatch` | `in` → `not in` |
 | `NegateConditional` | `conditional` | `if`/`unless` condition: negate (`!cond`) / force true / force false |
 | `StatementDelete` | `statement_delete` | delete a non-last statement from a function body |
 | `ClauseDelete` | `clause_delete` | delete a clause from `case` / `cond` / `with` / `receive` / `try` |
@@ -71,18 +69,16 @@ comma-separated and use the snake_case module name, e.g.
 
 Examples:
 
-    # add the body-literal mutators
+    # run the body-literal target only
     MIX_ENV=test mix mut --enable body_literal
 
     # run only NegateConditional + ClauseDelete
     MIX_ENV=test mix mut --enable conditional,clause_delete \
       --mutators negate_conditional,clause_delete
 
-## What "default-on" graduation means
+## Why some mutators are opt-in
 
-A mutator graduates from opt-in to default-on only after it clears the
-M62 gate on every target in the OSS validation matrix. The opt-in tier is
-not "lower quality" — several opt-in mutators are valuable but produce
-enough equivalent mutants (changes the tests *can't* distinguish) that
-running them by default would muddy the headline score. The source repository
-keeps the detailed per-mutator graduation records.
+Literal, deletion, and structural mutations can produce more equivalent mutants:
+changes that no test can distinguish because the program behaves the same.
+Enable them when their extra depth is useful, then assess survivors against the
+intended behaviour of your code.

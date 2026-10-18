@@ -382,6 +382,58 @@ defmodule Mut.History.DigestTest do
              "editing local_dep/lib/local_dep.ex must invalidate reuse"
     end
 
+    test "transitive path dependencies invalidate history", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do end")
+      shared = write_dep!(root, "shared", "defmodule Shared do def value(x), do: x end")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+      write_mix!(dep, ~s([{:shared, path: "../shared"}]))
+
+      assert {:ok, before} = Digest.project_fingerprint(root)
+
+      File.write!(
+        Path.join(shared, "lib/shared.ex"),
+        "defmodule Shared do def value(_), do: 0 end"
+      )
+
+      assert {:ok, changed} = Digest.project_fingerprint(root)
+      refute changed == before
+    end
+
+    test "a dependency's custom source roots invalidate history", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do end")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+
+      for source_root <- ["custom", "test"] do
+        write_mix!(dep, "[]", ~s(, elixirc_paths: ["#{source_root}"]))
+        File.mkdir_p!(Path.join(dep, source_root))
+        source = Path.join([dep, source_root, "local.ex"])
+        File.write!(source, "defmodule Custom do def value(x), do: x end")
+
+        assert {:ok, before} = Digest.project_fingerprint(root)
+        File.write!(source, "defmodule Custom do def value(_), do: 0 end")
+        assert {:ok, changed} = Digest.project_fingerprint(root)
+        refute changed == before
+      end
+    end
+
+    test "an unresolved transitive dependency disables reuse", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do end")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+      write_mix!(dep, ~s|[{:missing, path: unknown_path()}]|)
+
+      assert {:disable, reasons} = Digest.project_fingerprint(root)
+      assert Enum.any?(reasons, &String.contains?(&1, ":missing"))
+    end
+
+    test "shared and cyclic dependency paths are visited once", %{root: root} do
+      dep = write_dep!(root, "local_dep", "defmodule LocalDep do end")
+      write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))
+      write_mix!(dep, ~s([{:sample, path: ".."}]))
+
+      assert {:ok, before} = Digest.project_fingerprint(root)
+      assert Digest.project_fingerprint(root) == {:ok, before}
+    end
+
     test "editing a path dependency's priv/config/mix.exs changes the digest", %{root: root} do
       dep = write_dep!(root, "local_dep", "defmodule LocalDep do\n  def value(x), do: x\nend\n")
       write_mix!(root, ~s([{:local_dep, path: "local_dep"}]))

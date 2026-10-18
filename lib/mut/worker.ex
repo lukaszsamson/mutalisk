@@ -121,7 +121,8 @@ defmodule Mut.Worker do
            :ok <-
              Mut.Recompile.recompile(sandbox, [patch.file], dependents,
                app: app(opts),
-               app_context: Keyword.get(opts, :app_context)
+               app_context: Keyword.get(opts, :app_context),
+               manifest: manifest
              ) do
         sandbox |> spawn_fallback_mix(test_files, opts, started) |> relativize_killer(sandbox)
       else

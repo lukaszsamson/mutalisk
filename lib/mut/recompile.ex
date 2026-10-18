@@ -132,6 +132,21 @@ defmodule Mut.Recompile do
     default_app = Keyword.fetch!(opts, :app)
     files = Enum.uniq(mutated_files ++ dependent_files)
 
+    with {:ok, batches} <- compile_batches(sandbox.path, files, opts) do
+      run_batches(batches, sandbox, default_app, opts)
+    end
+  end
+
+  defp run_batches(batches, sandbox, default_app, opts) do
+    Enum.reduce_while(batches, :ok, fn batch, :ok ->
+      case recompile_batch(sandbox, batch, default_app, opts) do
+        :ok -> {:cont, :ok}
+        error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp recompile_batch(sandbox, files, default_app, opts) do
     case Mut.ChildProcess.run(
            "elixir",
            elixir_args(sandbox.path, files, default_app, Keyword.take(opts, [:app_context])),
@@ -155,6 +170,65 @@ defmodule Mut.Recompile do
 
       {:error, reason} ->
         {:error, reason}
+    end
+  end
+
+  # Keep a ParallelCompiler pass within each app, and compile app groups in
+  # manifest dependency order. Each child then owns its cwd, Mix project,
+  # application environment, and compiler options without shared-state resets.
+  defp compile_batches(root, files, opts) do
+    {apps_path, _map} = Keyword.get(opts, :app_context) || Mut.Umbrella.app_context(root)
+    groups = Enum.group_by(files, &project_dir(root, [&1], apps_path))
+
+    with {:ok, manifest} <- batch_manifest(groups, opts) do
+      dependencies =
+        Map.new(groups, fn {dir, sources} ->
+          {dir, required_projects(sources, manifest, root, apps_path, groups, dir)}
+        end)
+
+      order_batches(groups, dependencies, [])
+    end
+  end
+
+  defp required_projects(sources, manifest, root, apps_path, groups, dir) do
+    sources
+    |> Enum.flat_map(&compile_refs(manifest, relative_to_sandbox(&1, root)))
+    |> Enum.map(&Map.get(manifest.modules, &1))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&project_dir(root, [&1], apps_path))
+    |> Enum.filter(&(&1 != dir and Map.has_key?(groups, &1)))
+    |> Enum.uniq()
+  end
+
+  defp compile_refs(manifest, file) do
+    case Map.get(manifest.sources, file) do
+      nil -> []
+      refs -> refs.compile_deps ++ refs.export_deps ++ refs.struct_deps
+    end
+  end
+
+  defp batch_manifest(groups, opts) do
+    case Keyword.fetch(opts, :manifest) do
+      {:ok, manifest} -> {:ok, manifest}
+      :error when map_size(groups) <= 1 -> {:ok, %Mut.MixManifest{}}
+      :error -> {:error, :missing_cross_app_compile_manifest}
+    end
+  end
+
+  defp order_batches(groups, _dependencies, batches) when map_size(groups) == 0,
+    do: {:ok, Enum.reverse(batches)}
+
+  defp order_batches(groups, dependencies, batches) do
+    ready =
+      groups
+      |> Enum.sort()
+      |> Enum.find(fn {dir, _files} ->
+        Enum.all?(dependencies[dir], &(not Map.has_key?(groups, &1)))
+      end)
+
+    case ready do
+      nil -> {:error, {:cyclic_app_compile_dependencies, Map.keys(groups) |> Enum.sort()}}
+      {dir, files} -> order_batches(Map.delete(groups, dir), dependencies, [files | batches])
     end
   end
 
@@ -236,10 +310,9 @@ defmodule Mut.Recompile do
   @doc false
   # Exposed for testing (asserts the eval bootstraps Mix; see recompile_test).
   #
-  # All affected files compile in ONE Kernel.ParallelCompiler.compile pass so
-  # the full compile-dependency DAG (across files AND across umbrella apps) is
-  # ordered correctly in-process — compiling per-app groups separately loses
-  # that ordering and breaks macro/import resolution between dependents (M68).
+  # Affected files within one app compile in one ParallelCompiler pass.
+  # recompile/4 orders cross-app groups using the combined manifest before
+  # invoking a child with the correct app-specific compilation context.
   # The `:each_module` callback then routes every module's beam to its own
   # app's ebin (`_build/mut_schema/lib/<otp_app>/ebin`), derived from the source
   # path: `<apps_path>/<dir>/...` mapped through `Mut.Umbrella.app_map/1` for
@@ -252,8 +325,7 @@ defmodule Mut.Recompile do
       |> Path.join("_build/mut_schema/lib/*/ebin")
       |> Path.wildcard()
       |> Enum.flat_map(fn ebin_path ->
-        relative = Path.relative_to(ebin_path, sandbox_path)
-        ["-pa", relative]
+        ["-pa", ebin_path]
       end)
 
     # `file` may arrive absolute, so locate the `<apps_path>/<dir>` segment
@@ -273,6 +345,7 @@ defmodule Mut.Recompile do
       Keyword.get(opts, :app_context) || Mut.Umbrella.app_context(sandbox_path)
 
     project_dir = project_dir(sandbox_path, files, apps_path)
+    files = Enum.map(files, &Path.expand(&1, sandbox_path))
 
     eval = ~s"""
     app_map = #{inspect(app_map)}
@@ -290,7 +363,7 @@ defmodule Mut.Recompile do
           _ -> #{inspect(default_app)}
         end
 
-      Path.join(["_build/mut_schema/lib", app, "ebin"])
+      Path.join([#{inspect(sandbox_path)}, "_build/mut_schema/lib", app, "ebin"])
     end
 
     #{@bootstrap_marker}
@@ -308,14 +381,13 @@ defmodule Mut.Recompile do
     Mix.env(:test)
 
     project_dir = #{inspect(project_dir)}
+    File.cd!(project_dir)
 
     bootstrap =
       try do
         if File.regular?(Path.join(project_dir, "mix.exs")) do
-          File.cd!(project_dir, fn ->
-            Code.require_file("mix.exs", project_dir)
-            Mix.Task.run("loadconfig")
-          end)
+          Code.require_file("mix.exs", project_dir)
+          Mix.Task.run("loadconfig")
 
           :ok
         else

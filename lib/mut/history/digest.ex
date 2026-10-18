@@ -279,6 +279,31 @@ defmodule Mut.History.Digest do
         reasons: acc.reasons ++ scanned.reasons
       }
     end)
+    |> scan_path_dependencies()
+  end
+
+  # A local dependency can itself depend on another local checkout. Scan the
+  # whole reachable graph, using each dependency's directory to resolve its
+  # relative paths. Keep direct entry keys unchanged for existing histories.
+  defp scan_path_dependencies(scan),
+    do: scan_path_dependencies(scan.deps, scan, %{})
+
+  defp scan_path_dependencies([], scan, _seen), do: scan
+
+  defp scan_path_dependencies([{{owner, name}, dir} | rest], scan, seen) do
+    if Map.has_key?(seen, dir) do
+      scan_path_dependencies(rest, scan, seen)
+    else
+      child = scan_mix(dir, dir, nil)
+
+      deps =
+        Enum.map(child.deps, fn {{child_owner, child_name}, path} ->
+          {{owner ++ [name] ++ child_owner, child_name}, path}
+        end)
+
+      next = %{scan | deps: scan.deps ++ deps, reasons: scan.reasons ++ child.reasons}
+      scan_path_dependencies(rest ++ deps, next, Map.put(seen, dir, true))
+    end
   end
 
   # `Mut.Umbrella.app_dirs/1` parses the root mix.exs with
@@ -291,13 +316,13 @@ defmodule Mut.History.Digest do
     _ -> []
   end
 
-  defp scan_mix(dir, root, user_root) do
+  defp scan_mix(dir, root, user_root, fingerprinted_roots \\ @fingerprinted_roots) do
     empty = %{deps: [], globs: [], reasons: []}
     mix_path = user_mix_path(dir)
 
     if File.regular?(mix_path) do
       case Code.string_to_quoted(File.read!(mix_path), emit_warnings: false) do
-        {:ok, ast} -> scan_ast(ast, dir, root, mix_path, user_root)
+        {:ok, ast} -> scan_ast(ast, dir, root, mix_path, user_root, fingerprinted_roots)
         _ -> %{empty | reasons: ["#{Path.relative_to(mix_path, root)} could not be parsed"]}
       end
     else
@@ -305,7 +330,7 @@ defmodule Mut.History.Digest do
     end
   end
 
-  defp scan_ast(ast, dir, root, mix_path, user_root) do
+  defp scan_ast(ast, dir, root, mix_path, user_root, fingerprinted_roots) do
     attrs = attr_literals(ast)
     owner = owner_prefix(dir, root)
     rel_mix = Path.relative_to(mix_path, root)
@@ -328,7 +353,7 @@ defmodule Mut.History.Digest do
       end)
 
     globs =
-      for source_root <- source_roots(ast),
+      for source_root <- source_roots(ast, fingerprinted_roots),
           do: Path.join(owner ++ [source_root, "**/*"])
 
     %{deps: Enum.reverse(deps), globs: globs, reasons: Enum.reverse(reasons)}
@@ -515,9 +540,15 @@ defmodule Mut.History.Digest do
         Path.wildcard(Path.join([dep_root, sub, "**/*"]), match_dot: true)
       end)
 
+    custom_sources =
+      dep_root
+      |> scan_mix(dep_root, nil, @path_dep_subtrees)
+      |> Map.fetch!(:globs)
+      |> Enum.flat_map(&Path.wildcard(Path.join(dep_root, &1), match_dot: true))
+
     root_files = Enum.map(@path_dep_root_files, &Path.join(dep_root, &1))
 
-    (subtrees ++ root_files)
+    (subtrees ++ custom_sources ++ root_files)
     |> Enum.reject(&pruned_dep_path?(&1, dep_root))
     |> Enum.filter(&File.regular?/1)
     |> Enum.uniq()
@@ -536,10 +567,10 @@ defmodule Mut.History.Digest do
   # the `elixirc_paths(Mix.env())` function form, where the UNION of every
   # literal directory across all clauses is taken (over-approximating is safe —
   # a root that does not exist contributes no files).
-  defp source_roots(ast) do
+  defp source_roots(ast, fingerprinted_roots) do
     (keyword_source_roots(ast) ++ function_source_roots(ast))
     |> Enum.uniq()
-    |> Enum.reject(&(&1 in @fingerprinted_roots))
+    |> Enum.reject(&(&1 in fingerprinted_roots))
     |> Enum.filter(&relative_dir?/1)
     |> Enum.sort()
   end
